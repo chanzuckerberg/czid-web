@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import React from "react";
 import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";

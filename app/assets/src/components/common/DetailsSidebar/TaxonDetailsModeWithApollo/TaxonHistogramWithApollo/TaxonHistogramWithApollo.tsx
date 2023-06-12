@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Histogram, {

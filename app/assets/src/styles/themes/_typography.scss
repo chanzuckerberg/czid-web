@@ -1,7 +1,7 @@
 @use "sass:math";
 
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i,800");
-@import "~czifui/dist/variables";
+@import "~@czi-sds/components/dist/variables";
 
 $font-family-sans-serif: $sds-font-font-family, "Helvetica Neue", Arial,
   Helvetica, sans-serif !default;

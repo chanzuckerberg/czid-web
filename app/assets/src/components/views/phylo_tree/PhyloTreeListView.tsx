@@ -1,5 +1,5 @@
+import { ButtonIcon, Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { ButtonIcon, Icon, Tooltip } from "czifui";
 import { find, isUndefined, set } from "lodash/fp";
 import React from "react";
 import {

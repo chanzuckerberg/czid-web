@@ -1,7 +1,7 @@
 @use "sass:math";
 
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
+@import "~@czi-sds/components/dist/variables";
 
 // Box-shadows depreciated! Using czifui shadows as of 12/2021
 $box-shadow-s: 0 2px 4px 0 rgba(0, 0, 0, 0.25);

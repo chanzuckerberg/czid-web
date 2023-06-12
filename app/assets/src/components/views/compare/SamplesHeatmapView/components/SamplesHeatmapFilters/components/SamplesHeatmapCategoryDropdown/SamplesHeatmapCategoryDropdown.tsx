@@ -1,4 +1,4 @@
-import { Dropdown } from "czifui";
+import { Dropdown } from "@czi-sds/components";
 import { filter } from "lodash/fp";
 import React, { useMemo } from "react";
 import { SelectedOptions, Subcategories } from "~/interface/shared";

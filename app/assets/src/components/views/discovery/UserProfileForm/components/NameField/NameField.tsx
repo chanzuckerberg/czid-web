@@ -1,4 +1,4 @@
-import { InputText } from "czifui";
+import { InputText } from "@czi-sds/components";
 import React from "react";
 import cs from "./name_field.scss";
 

@@ -1,5 +1,5 @@
+import { Button } from "@czi-sds/components";
 import cx from "classnames";
-import { Button } from "czifui";
 import {
   difference,
   find,

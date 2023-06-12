@@ -1,10 +1,10 @@
-import { Column, Table } from "@tanstack/react-table";
 import {
   ButtonIcon,
   DefaultDropdownMenuOption,
   DropdownMenu,
   Tooltip,
-} from "czifui";
+} from "@czi-sds/components";
+import { Column, Table } from "@tanstack/react-table";
 import { difference } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { setState } from "~/helpers/storage";

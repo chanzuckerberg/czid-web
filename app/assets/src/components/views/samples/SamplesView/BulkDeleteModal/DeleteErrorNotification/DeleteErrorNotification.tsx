@@ -1,4 +1,4 @@
-import { Link, Notification } from "czifui";
+import { Link, Notification } from "@czi-sds/components";
 import React from "react";
 import { pluralize } from "~/components/utils/stringUtil";
 import { WORKFLOW_LABELS } from "~/components/utils/workflows";

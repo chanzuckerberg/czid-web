@@ -1,6 +1,6 @@
 import Aioli from "@biowasm/aioli";
+import { Tab, Tabs, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { Tab, Tabs, Tooltip } from "czifui";
 import {
   compact,
   concat,

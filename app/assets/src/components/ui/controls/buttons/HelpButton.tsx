@@ -1,5 +1,5 @@
+import { Button, Icon } from "@czi-sds/components";
 import { cx } from "@emotion/css";
-import { Button, Icon } from "czifui";
 import React from "react";
 import cs from "./help_button.scss";
 

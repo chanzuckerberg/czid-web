@@ -1,4 +1,4 @@
-import { Callout } from "czifui";
+import { Callout } from "@czi-sds/components";
 import React from "react";
 import { Sticky, StickyContainer } from "react-sticky";
 import { getAMRCounts } from "~/api/amr";

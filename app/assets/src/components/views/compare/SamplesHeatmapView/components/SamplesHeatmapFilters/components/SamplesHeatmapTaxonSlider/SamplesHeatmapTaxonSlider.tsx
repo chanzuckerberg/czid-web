@@ -1,5 +1,5 @@
+import { InputDropdown, InputSlider } from "@czi-sds/components";
 import Popover from "@mui/material/Popover";
-import { InputDropdown, InputSlider } from "czifui";
 import React, { useState } from "react";
 import cs from "./samples_heatmap_taxon_slider.scss";
 

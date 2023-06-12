@@ -1,4 +1,4 @@
-import { TagFilter } from "czifui";
+import { TagFilter } from "@czi-sds/components";
 import React from "react";
 import cs from "./uploaded_file_name.scss";
 

@@ -1,6 +1,6 @@
+import { CellBasic } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import { Cell, Getter } from "@tanstack/react-table";
-import { CellBasic } from "czifui";
 import React from "react";
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";

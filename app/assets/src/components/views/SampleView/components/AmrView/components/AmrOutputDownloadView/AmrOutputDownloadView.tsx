@@ -1,5 +1,11 @@
 /* eslint-disable import/order */
-import { Button, Icon, List, ListItem, ListSubheader } from "czifui";
+import {
+  Button,
+  Icon,
+  List,
+  ListItem,
+  ListSubheader,
+} from "@czi-sds/components";
 import React from "react";
 import { trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";

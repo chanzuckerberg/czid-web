@@ -1,6 +1,6 @@
+import { Icon } from "@czi-sds/components";
 import axios from "axios";
 import cx from "classnames";
-import { Icon } from "czifui";
 import React, { useContext, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";

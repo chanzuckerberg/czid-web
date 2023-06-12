@@ -1,6 +1,6 @@
+import { defaultTheme } from "@czi-sds/components";
 import Drawer, { DrawerProps } from "@mui/material/Drawer";
 import { styled } from "@mui/material/styles";
-import { defaultTheme } from "czifui";
 import React from "react";
 
 interface FilterPanelPropsType {

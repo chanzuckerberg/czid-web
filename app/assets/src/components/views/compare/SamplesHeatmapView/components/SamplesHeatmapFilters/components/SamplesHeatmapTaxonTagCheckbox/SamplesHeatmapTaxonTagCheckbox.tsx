@@ -1,5 +1,5 @@
+import { Icon, Tooltip } from "@czi-sds/components";
 import Checkbox from "@mui/material/Checkbox";
-import { Icon, Tooltip } from "czifui";
 import React from "react";
 import { SelectedOptions } from "~/interface/shared";
 import cs from "../../samples_heatmap_filters.scss";

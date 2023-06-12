@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from "czifui";
+} from "@czi-sds/components";
 import React, { useEffect, useState } from "react";
 import { bulkDeleteObjects, validateUserCanDeleteObjects } from "~/api";
 import { ErrorButton } from "~/components/ui/controls/buttons";

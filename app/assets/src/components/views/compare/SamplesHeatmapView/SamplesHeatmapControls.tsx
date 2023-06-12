@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import {
   flatten,
   isEmpty,

@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import { assign, find } from "lodash/fp";
 import React from "react";
 import { saveProjectName, validateProjectName } from "~/api";

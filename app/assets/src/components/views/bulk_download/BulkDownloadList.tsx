@@ -1,5 +1,5 @@
+import { InputText } from "@czi-sds/components";
 import cx from "classnames";
-import { InputText } from "czifui";
 import { some } from "lodash/fp";
 import React from "react";
 import { SortDirection } from "react-virtualized";

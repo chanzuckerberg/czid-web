@@ -33,7 +33,7 @@ const config: CodegenConfig = {
       ],
       hooks: { afterAllFileWrite: ["eslint --fix"] },
     },
-},
+  },
 };
 
 export default config;

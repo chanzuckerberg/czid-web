@@ -1,4 +1,4 @@
-import { ButtonIcon, Icon } from "czifui";
+import { ButtonIcon, Icon } from "@czi-sds/components";
 import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
 import {

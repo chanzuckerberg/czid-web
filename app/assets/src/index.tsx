@@ -1,8 +1,8 @@
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { defaultTheme } from "@czi-sds/components";
 import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import * as Sentry from "@sentry/react";
-import { defaultTheme } from "czifui";
 import "font-awesome/scss/font-awesome.scss";
 import React from "react";
 import { createRoot } from "react-dom/client";

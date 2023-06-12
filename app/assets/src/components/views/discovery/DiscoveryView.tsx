@@ -1,4 +1,4 @@
-import { Tab, Tabs, Tag } from "czifui";
+import { Tab, Tabs, Tag } from "@czi-sds/components";
 import {
   capitalize,
   clone,

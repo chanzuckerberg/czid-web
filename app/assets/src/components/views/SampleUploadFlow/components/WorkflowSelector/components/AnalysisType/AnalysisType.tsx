@@ -1,11 +1,11 @@
-import cx from "classnames";
 import {
   Icon,
   IconNameToSizes,
   InputCheckbox,
   InputRadio,
   Tooltip,
-} from "czifui";
+} from "@czi-sds/components";
+import cx from "classnames";
 import React, { ReactNode, useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import StatusLabel from "~/components/ui/labels/StatusLabel";

@@ -1,4 +1,4 @@
-import { Button, Icon } from "czifui";
+import { Button, Icon } from "@czi-sds/components";
 import React, { useRef } from "react";
 import cs from "./upload_button.scss";
 

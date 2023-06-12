@@ -1,4 +1,4 @@
-import { Link } from "czifui";
+import { Link } from "@czi-sds/components";
 import PropTypes from "prop-types";
 import React from "react";
 import IconBiohubSFLogoColor from "~/components/ui/icons/IconBiohubSFLogoColor";

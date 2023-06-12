@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
+import { Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { Icon } from "czifui";
 import d3 from "d3";
 import {
   ceil,

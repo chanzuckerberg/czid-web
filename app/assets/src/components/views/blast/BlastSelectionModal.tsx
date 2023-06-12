@@ -1,5 +1,5 @@
+import { Button, List, ListItem, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { Button, List, ListItem, Tooltip } from "czifui";
 import { compact, getOr, isEmpty } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React, { useState } from "react";

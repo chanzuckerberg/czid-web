@@ -1,5 +1,5 @@
+import { ButtonIcon } from "@czi-sds/components";
 import cx from "classnames";
-import { ButtonIcon } from "czifui";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import Label from "~ui/labels/Label";

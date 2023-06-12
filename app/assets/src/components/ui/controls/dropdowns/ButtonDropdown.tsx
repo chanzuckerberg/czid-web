@@ -1,5 +1,5 @@
+import { ButtonDropdown as SDSButtonDropdown } from "@czi-sds/components";
 import cx from "classnames";
-import { ButtonDropdown as SDSButtonDropdown } from "czifui";
 import React from "react";
 import { DropdownProps } from "semantic-ui-react";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";

@@ -1,3 +1,4 @@
+import { TableRow, TableRowProps } from "@czi-sds/components";
 import {
   ColumnDef,
   flexRender,
@@ -10,7 +11,6 @@ import {
   useReactTable,
   VisibilityTableState,
 } from "@tanstack/react-table";
-import { TableRow, TableRowProps } from "czifui";
 import { isEqual, map } from "lodash";
 import React, { useEffect, useState } from "react";
 import { TableVirtuoso } from "react-virtuoso";

@@ -1,5 +1,10 @@
+import {
+  Button,
+  ButtonProps,
+  Icon,
+  IconNameToSizes,
+} from "@czi-sds/components";
 import cx from "classnames";
-import { Button, ButtonProps, Icon, IconNameToSizes } from "czifui";
 import React from "react";
 import cs from "./error_button.scss";
 

@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";

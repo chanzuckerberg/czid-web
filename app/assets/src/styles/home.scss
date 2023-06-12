@@ -2,7 +2,7 @@
 // They will automatically be included in application.scss.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 @import "themes/colors";
-@import "~czifui/dist/variables";
+@import "~@czi-sds/components/dist/variables";
 
 body {
   color: $sds-color-gray-black;

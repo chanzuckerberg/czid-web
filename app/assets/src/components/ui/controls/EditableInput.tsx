@@ -1,5 +1,5 @@
+import { ButtonIcon } from "@czi-sds/components";
 import cx from "classnames";
-import { ButtonIcon } from "czifui";
 import { isEmpty } from "lodash/fp";
 import React, { useEffect, useRef, useState } from "react";
 import Input from "~ui/controls/Input";

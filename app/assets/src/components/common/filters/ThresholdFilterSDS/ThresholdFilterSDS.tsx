@@ -1,7 +1,7 @@
 /* N.B. TODO -- this component is a modified subset of the existing TaxonThresholdFilter component. Because the button styles / handlers and state management for the TaxonThresholdFilter component are pretty tailored for the unique combination of the taxon search based filter + the threshold filters, we can't just pop this in as a subcomponent. In the future, we might want to consider how we can improve this component to be more reusable.
  */
 
-import { Button, DropdownPopper, InputDropdown } from "czifui";
+import { Button, DropdownPopper, InputDropdown } from "@czi-sds/components";
 import { find, isEmpty, some } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";

@@ -1,5 +1,5 @@
+import { Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { Icon } from "czifui";
 import { at, get, isNil } from "lodash/fp";
 import moment from "moment";
 import React from "react";

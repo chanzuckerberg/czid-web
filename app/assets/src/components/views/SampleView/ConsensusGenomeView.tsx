@@ -1,5 +1,5 @@
+import { Button, Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { Button, Icon } from "czifui";
 import { camelCase, find, get, getOr, isEmpty, isNil, size } from "lodash/fp";
 import memoize from "memoize-one";
 import React, { useContext, useEffect, useRef, useState } from "react";

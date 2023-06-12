@@ -1,5 +1,5 @@
+import { Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { Icon } from "czifui";
 import _fp, {
   filter,
   find,

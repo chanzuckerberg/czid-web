@@ -1,4 +1,4 @@
-import { Table, TableProps } from "czifui";
+import { Table, TableProps } from "@czi-sds/components";
 import React from "react";
 import cs from "./styled_sds_table.scss";
 

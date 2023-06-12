@@ -1,4 +1,4 @@
-import { Button } from "czifui";
+import { Button } from "@czi-sds/components";
 import React, { useState } from "react";
 import { ErrorButton } from "~/components/ui/controls/buttons";
 import Modal from "~ui/containers/Modal";

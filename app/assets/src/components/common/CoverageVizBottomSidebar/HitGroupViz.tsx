@@ -1,6 +1,6 @@
+import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import copy from "copy-to-clipboard";
-import { Icon } from "czifui";
 import { get, map, size, sum } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";

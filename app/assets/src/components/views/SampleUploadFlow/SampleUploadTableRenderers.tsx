@@ -1,5 +1,5 @@
+import { Icon } from "@czi-sds/components";
 import { cx } from "@emotion/css";
-import { Icon } from "czifui";
 import { get, isEmpty } from "lodash/fp";
 import React from "react";
 import { CellMeasurer, CellMeasurerCache } from "react-virtualized";

@@ -1,5 +1,5 @@
+import { Button, ButtonIcon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { Button, ButtonIcon, Tooltip } from "czifui";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { BareDropdown } from "~/components/ui/controls/dropdowns";

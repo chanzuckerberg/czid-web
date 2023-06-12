@@ -1,6 +1,6 @@
+import { CellBasic, Tag } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import { ColumnDef } from "@tanstack/react-table";
-import { CellBasic, Tag } from "czifui";
 import React from "react";
 import { SortableHeader } from "~/components/ui/Table/components/SortableHeader";
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";

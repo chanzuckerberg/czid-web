@@ -1,5 +1,5 @@
+import { InputRadio } from "@czi-sds/components";
 import { RadioGroup } from "@mui/material";
-import { InputRadio } from "czifui";
 import React from "react";
 import { EXPERT, HIGH, LOW, MEDIUM, NONE_OF_THE_ABOVE } from "./constants";
 import cs from "./sequencing_expertise_form_field.scss";

@@ -1,5 +1,5 @@
+import { Button, Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { Button, Icon, Tooltip } from "czifui";
 import React, { useEffect, useState } from "react";
 import { createProject } from "~/api";
 import { trackEvent } from "~/api/analytics";

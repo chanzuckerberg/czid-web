@@ -1,5 +1,5 @@
+import { Button } from "@czi-sds/components";
 import cx from "classnames";
-import { Button } from "czifui";
 import React, { useEffect, useState } from "react";
 import Accordion from "~/components/layout/Accordion";
 import cs from "./metadata_section.scss";

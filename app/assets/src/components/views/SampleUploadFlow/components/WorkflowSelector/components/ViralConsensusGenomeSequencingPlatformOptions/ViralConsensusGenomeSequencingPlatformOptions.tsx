@@ -1,5 +1,5 @@
+import { Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { Tooltip } from "czifui";
 import React from "react";
 import { TaxonOption } from "~/components/common/filters/types";
 import ExternalLink from "~/components/ui/controls/ExternalLink";

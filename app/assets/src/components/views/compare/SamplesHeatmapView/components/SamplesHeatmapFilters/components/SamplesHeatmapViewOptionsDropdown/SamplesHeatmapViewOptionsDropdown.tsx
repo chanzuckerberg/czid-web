@@ -1,4 +1,4 @@
-import { Dropdown } from "czifui";
+import { Dropdown } from "@czi-sds/components";
 import React from "react";
 import { SDSFormattedOption } from "../../SamplesHeatmapFilters";
 import {

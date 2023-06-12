@@ -1,4 +1,4 @@
-import { Button, DropdownMenu } from "czifui";
+import { Button, DropdownMenu } from "@czi-sds/components";
 import React from "react";
 import cs from "./pin_sample_selector.scss";
 

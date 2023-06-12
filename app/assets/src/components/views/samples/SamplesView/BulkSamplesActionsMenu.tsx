@@ -1,6 +1,6 @@
+import { Icon, Menu, MenuItem, Tooltip } from "@czi-sds/components";
 import { PopoverProps } from "@mui/material";
 import cx from "classnames";
-import { Icon, Menu, MenuItem, Tooltip } from "czifui";
 import React, { useContext, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";

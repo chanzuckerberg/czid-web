@@ -1,4 +1,4 @@
-import { Icon, Tooltip, TooltipProps } from "czifui";
+import { Icon, Tooltip, TooltipProps } from "@czi-sds/components";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";

@@ -1,4 +1,4 @@
-import { Link } from "czifui";
+import { Link } from "@czi-sds/components";
 import React from "react";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";

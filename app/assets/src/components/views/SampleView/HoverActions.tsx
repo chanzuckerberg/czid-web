@@ -1,6 +1,6 @@
 // These are the buttons that appear on a Report table row when hovered.
+import { ButtonIcon, IconNameToSizes } from "@czi-sds/components";
 import cx from "classnames";
-import { ButtonIcon, IconNameToSizes } from "czifui";
 import { filter, kebabCase, pick, size } from "lodash/fp";
 import React, { useContext, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";

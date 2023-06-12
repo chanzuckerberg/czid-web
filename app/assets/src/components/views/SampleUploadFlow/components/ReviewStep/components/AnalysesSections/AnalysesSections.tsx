@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import { compact, map } from "lodash/fp";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";

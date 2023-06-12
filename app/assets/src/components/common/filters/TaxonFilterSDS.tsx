@@ -1,4 +1,8 @@
-import { Dropdown, DropdownPopper, LoadingIndicator } from "czifui";
+import {
+  Dropdown,
+  DropdownPopper,
+  LoadingIndicator,
+} from "@czi-sds/components";
 import { debounce, get, size, unionBy } from "lodash/fp";
 import React, { useEffect, useMemo, useState } from "react";
 import { getSearchSuggestions } from "~/api";

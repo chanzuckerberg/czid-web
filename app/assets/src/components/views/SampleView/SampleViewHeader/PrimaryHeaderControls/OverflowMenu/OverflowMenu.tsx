@@ -1,6 +1,6 @@
+import { Button, Icon, Menu, MenuItem, Tooltip } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import { PopoverProps } from "@mui/material";
-import { Button, Icon, Menu, MenuItem, Tooltip } from "czifui";
 import React, { useState } from "react";
 import {
   getShorthandFromWorkflow,

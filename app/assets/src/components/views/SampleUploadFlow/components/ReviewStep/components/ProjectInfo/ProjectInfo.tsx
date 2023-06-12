@@ -1,5 +1,5 @@
+import { Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { Icon } from "czifui";
 import React, { useState } from "react";
 import { trackEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";

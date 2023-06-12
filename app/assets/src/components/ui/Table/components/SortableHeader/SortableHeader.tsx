@@ -1,6 +1,6 @@
+import { CellHeader } from "@czi-sds/components";
 import { Header } from "@tanstack/react-table";
 import cx from "classnames";
-import { CellHeader } from "czifui";
 import React, { CSSProperties, ReactNode } from "react";
 import { TooltipText } from "./components/TooltipText";
 import { TooltipTextType } from "./components/TooltipText/types";

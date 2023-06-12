@@ -1,4 +1,4 @@
-import { Link } from "czifui";
+import { Link } from "@czi-sds/components";
 import { isEmpty } from "lodash/fp";
 import React from "react";
 import cs from "./confirmation_message.scss";

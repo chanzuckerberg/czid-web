@@ -1,5 +1,5 @@
+import { ButtonIcon, Tabs } from "@czi-sds/components";
 import cx from "classnames";
-import { ButtonIcon, Tabs } from "czifui";
 import { findIndex, startCase } from "lodash/fp";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";

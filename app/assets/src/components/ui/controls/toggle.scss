@@ -1,7 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
+@import "~@czi-sds/components/dist/variables";
 
 // NOTE: Classname .toggle is repeated here as .toggle.toggle.toggle to increase
 // specificity and always override semantic-ui.

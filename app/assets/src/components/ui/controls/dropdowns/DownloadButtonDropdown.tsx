@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import React from "react";
 import ButtonDropdown from "./ButtonDropdown";
 

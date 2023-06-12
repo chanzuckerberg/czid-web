@@ -1,4 +1,4 @@
-import { Button, Icon } from "czifui";
+import { Button, Icon } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import moment from "moment";
 import React from "react";

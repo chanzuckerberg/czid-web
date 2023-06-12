@@ -1,4 +1,4 @@
-import { Button, DropdownPopper } from "czifui";
+import { Button, DropdownPopper } from "@czi-sds/components";
 import { find, isEmpty, isEqual, map, some } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";

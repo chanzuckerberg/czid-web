@@ -1,5 +1,5 @@
+import { ButtonIcon } from "@czi-sds/components";
 import cx from "classnames";
-import { ButtonIcon } from "czifui";
 import React from "react";
 import cs from "./plus_minus_control.scss";
 

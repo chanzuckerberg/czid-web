@@ -1,6 +1,6 @@
 @import "../../themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
+@import "~@czi-sds/components/dist/variables";
 
 // Override semaantic ui error styling
 :global(.ui.input.error > input) {

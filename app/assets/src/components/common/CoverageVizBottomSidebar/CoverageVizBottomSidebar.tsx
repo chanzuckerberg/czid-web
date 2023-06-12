@@ -1,6 +1,6 @@
 /* eslint-disable import/order */
+import { ButtonIcon } from "@czi-sds/components";
 import cx from "classnames";
-import { ButtonIcon } from "czifui";
 import { find, get, isEmpty, sum } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";

@@ -1,4 +1,4 @@
-import { Menu, MenuItem } from "czifui";
+import { Menu, MenuItem } from "@czi-sds/components";
 import React, { useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,

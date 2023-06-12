@@ -1,5 +1,5 @@
+import { Tab, Tabs, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { Tab, Tabs, Tooltip } from "czifui";
 import { size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";

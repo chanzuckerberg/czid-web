@@ -2,7 +2,7 @@
 to: <%= path %>/<%= name %>/<%= h.inflection.underscore(name, false)%>.scss
 ---
 // Uncomment or remove
-// @import "~czifui/dist/variables";
+// @import "~@czi-sds/components/dist/variables";
 
 .wrapper {
   background-color: pink;

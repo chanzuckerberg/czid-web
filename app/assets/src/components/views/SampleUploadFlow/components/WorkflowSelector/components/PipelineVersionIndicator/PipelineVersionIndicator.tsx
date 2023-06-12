@@ -1,5 +1,5 @@
+import { Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { Icon, Tooltip } from "czifui";
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import commonStyles from "../../workflow_selector.scss";

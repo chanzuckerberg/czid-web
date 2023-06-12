@@ -1,5 +1,5 @@
 import { useReactiveVar } from "@apollo/client";
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import React, { useEffect, useRef, useState } from "react";
 import { getBulkDownload } from "~/api/bulk_downloads";

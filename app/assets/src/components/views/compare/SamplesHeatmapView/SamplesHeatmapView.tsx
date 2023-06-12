@@ -1,5 +1,5 @@
+import { Notification } from "@czi-sds/components";
 import axios from "axios";
-import { Notification } from "czifui";
 import DeepEqual from "fast-deep-equal";
 import {
   assign,

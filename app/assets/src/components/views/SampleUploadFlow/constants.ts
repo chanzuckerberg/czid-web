@@ -1,4 +1,4 @@
-import { IconNameToSizes } from "czifui";
+import { IconNameToSizes } from "@czi-sds/components";
 import { IconCovidVirusXLarge } from "~/components/ui/icons";
 import {
   AMR_PIPELINE_HELP_LINK,

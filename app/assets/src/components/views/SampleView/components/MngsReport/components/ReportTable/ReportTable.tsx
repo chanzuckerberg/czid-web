@@ -1,5 +1,5 @@
+import { Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { Icon, Tooltip } from "czifui";
 import { compact, filter, get, getOr, map, orderBy, reduce } from "lodash/fp";
 import React from "react";
 import {

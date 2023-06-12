@@ -1,4 +1,4 @@
-import { Button } from "czifui";
+import { Button } from "@czi-sds/components";
 import PropTypes from "prop-types";
 import React, { useEffect } from "react";
 import { ImpactCountryData } from "./ImpactCountryData";
@@ -217,7 +217,7 @@ const ImpactCountryShowcase = props => {
               <div className={cs.countryScrollItemCycle}>
                 <div
                   className={`
-                    ${cs.countryScrollItemCycleDot} 
+                    ${cs.countryScrollItemCycleDot}
                     ${country.cycle === 1 ? cs.cycle1 : cs.cycle2}
                   `}
                 ></div>
@@ -236,7 +236,7 @@ const ImpactCountryShowcase = props => {
               {props.selectedCountry.countryName}&nbsp;
               <span
                 className={`
-                  ${cs.countryShowcaseWindowCountryCycleDot} 
+                  ${cs.countryShowcaseWindowCountryCycleDot}
                   ${props.selectedCountry.cycle === 1 ? cs.cycle1 : cs.cycle2}
                 `}
               ></span>

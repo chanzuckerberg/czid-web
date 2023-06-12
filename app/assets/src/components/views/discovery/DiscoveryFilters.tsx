@@ -1,5 +1,9 @@
+import {
+  DefaultDropdownMenuOption,
+  Dropdown,
+  Tooltip,
+} from "@czi-sds/components";
 import cx from "classnames";
-import { DefaultDropdownMenuOption, Dropdown, Tooltip } from "czifui";
 import { find, forEach, isEmpty, isEqual, pick, reject } from "lodash/fp";
 import React from "react";
 import {

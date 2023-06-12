@@ -1,4 +1,4 @@
-import { Button } from "czifui";
+import { Button } from "@czi-sds/components";
 import React, { useState } from "react";
 import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";

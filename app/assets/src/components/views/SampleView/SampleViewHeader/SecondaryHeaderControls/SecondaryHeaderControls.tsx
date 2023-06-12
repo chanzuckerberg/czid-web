@@ -1,4 +1,4 @@
-import { Button } from "czifui";
+import { Button } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import React from "react";
 import { withAnalytics } from "~/api/analytics";

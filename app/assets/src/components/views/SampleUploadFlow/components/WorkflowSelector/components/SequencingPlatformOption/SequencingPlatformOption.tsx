@@ -1,5 +1,5 @@
+import { InputRadio, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import { InputRadio, Tooltip } from "czifui";
 import React, { ReactNode } from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import StatusLabel from "~/components/ui/labels/StatusLabel";

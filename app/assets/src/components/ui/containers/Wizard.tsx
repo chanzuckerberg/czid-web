@@ -1,5 +1,5 @@
+import { Button } from "@czi-sds/components";
 import cx from "classnames";
-import { Button } from "czifui";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 

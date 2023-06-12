@@ -1,4 +1,4 @@
-import { ComplexFilter, DefaultDropdownMenuOption } from "czifui";
+import { ComplexFilter, DefaultDropdownMenuOption } from "@czi-sds/components";
 import React from "react";
 import { activeAmrFiltersVar } from "~/cache/initialCache";
 import { ColumnId } from "../../../../constants";

@@ -1,5 +1,5 @@
+import { Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { Icon } from "czifui";
 import { difference } from "lodash/fp";
 import React from "react";
 import { PopupProps } from "semantic-ui-react";

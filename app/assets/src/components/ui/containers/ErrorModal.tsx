@@ -1,4 +1,4 @@
-import { Button } from "czifui";
+import { Button } from "@czi-sds/components";
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Modal from "~ui/containers/Modal";

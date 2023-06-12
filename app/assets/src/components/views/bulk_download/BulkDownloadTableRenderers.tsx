@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import { find, get } from "lodash/fp";
 import React from "react";
 import { WORKFLOWS } from "~/components/utils/workflows";

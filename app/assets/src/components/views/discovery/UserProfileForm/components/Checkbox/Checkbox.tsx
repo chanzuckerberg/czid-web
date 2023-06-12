@@ -1,4 +1,4 @@
-import { InputCheckbox, Tooltip } from "czifui";
+import { InputCheckbox, Tooltip } from "@czi-sds/components";
 import React from "react";
 import { CHECKBOX_SELECTION_DISABLED_TOOLTIP_TEXT } from "../../constants";
 import cs from "./checkbox.scss";

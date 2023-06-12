@@ -1,7 +1,7 @@
 /* Note: this is a minor variant of the BackgroundModelFilter component, specifically for the Taxon Heatmap using the new SDS dropdown. Once we're ready to update the filters on other pages in the app we can make a switch so we don't have two versions. - SMB 2023-03 */
 
 /* eslint-disable react/prop-types */
-import { Dropdown } from "czifui";
+import { Dropdown } from "@czi-sds/components";
 import React from "react";
 import { SDSFormattedOption } from "../../SamplesHeatmapFilters";
 import { valueToName } from "../../samplesHeatmapFilterUtils";

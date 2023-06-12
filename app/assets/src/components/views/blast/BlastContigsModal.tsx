@@ -1,5 +1,5 @@
 // BlastContigsModal.jsx is only used for Blast V0
-import { Tooltip } from "czifui";
+import { Tooltip } from "@czi-sds/components";
 import { filter, map, reduce, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import {

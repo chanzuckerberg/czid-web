@@ -1,3 +1,4 @@
+import { CellComponent, CellHeader, InputCheckbox } from "@czi-sds/components";
 import {
   Column,
   ColumnDef,
@@ -6,7 +7,6 @@ import {
   RowSelectionRow,
   Table,
 } from "@tanstack/react-table";
-import { CellComponent, CellHeader, InputCheckbox } from "czifui";
 import React from "react";
 import { generateWidthStyles } from "../../tableUtils";
 import cs from "./row_selection_column.scss";

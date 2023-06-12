@@ -1,4 +1,4 @@
-import { List, ListItem } from "czifui";
+import { List, ListItem } from "@czi-sds/components";
 import React from "react";
 import { WORKFLOWS, WORKFLOW_VALUES } from "~/components/utils/workflows";
 import cs from "./delete_sample_modal_text.scss";

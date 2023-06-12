@@ -1,6 +1,6 @@
+import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import copy from "copy-to-clipboard";
-import { Icon } from "czifui";
 import moment from "moment";
 import React, { useState } from "react";
 import { withAnalytics } from "~/api/analytics";

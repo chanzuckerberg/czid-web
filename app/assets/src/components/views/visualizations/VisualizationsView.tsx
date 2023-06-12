@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";

@@ -1,5 +1,5 @@
+import { TableRow, TableRowProps } from "@czi-sds/components";
 import { flexRender, Table } from "@tanstack/react-table";
-import { TableRow, TableRowProps } from "czifui";
 import React from "react";
 
 interface HeaderContentProps {
@@ -42,6 +42,7 @@ export const HeaderContent = ({
       <TableRowComponent
         key={`header-depth-${childHeaders.depth}`}
         style={{ background: "white", width: "100%" }}
+        rev={null}
       >
         {childHeaders.headers.map(header =>
           flexRender(header.column.columnDef.header, header.getContext()),

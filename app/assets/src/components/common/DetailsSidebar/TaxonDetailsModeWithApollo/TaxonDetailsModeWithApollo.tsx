@@ -1,4 +1,4 @@
-import { LoadingIndicator } from "czifui";
+import { LoadingIndicator } from "@czi-sds/components";
 import React, { useState } from "react";
 import { Background } from "~/interface/shared/specific";
 import { DESCRIPTION_PREFIX, HISTOGRAM_PREFIX } from "./constants";

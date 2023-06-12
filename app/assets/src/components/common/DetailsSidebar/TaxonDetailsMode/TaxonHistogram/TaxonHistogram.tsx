@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { Icon } from "@czi-sds/components";
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { getTaxonDistributionForBackground } from "~/api";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";

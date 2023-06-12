@@ -1,5 +1,5 @@
+import { Button, Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { Button, Icon } from "czifui";
 import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";

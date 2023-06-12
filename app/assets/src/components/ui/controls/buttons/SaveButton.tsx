@@ -1,4 +1,4 @@
-import { Button, Icon } from "czifui";
+import { Button, Icon } from "@czi-sds/components";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 

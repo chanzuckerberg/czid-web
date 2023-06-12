@@ -1,6 +1,6 @@
 // ToolbarButtonIcons are used at the top of the Samples View table.
 
-import { ButtonIcon } from "czifui";
+import { ButtonIcon } from "@czi-sds/components";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import cs from "./toolbar_button_icon.scss";

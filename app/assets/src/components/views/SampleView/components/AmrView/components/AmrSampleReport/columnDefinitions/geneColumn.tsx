@@ -1,4 +1,4 @@
-import { CellComponent } from "czifui";
+import { CellComponent } from "@czi-sds/components";
 import React from "react";
 import { SortableHeader } from "~/components/ui/Table/components/SortableHeader";
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";

@@ -1,4 +1,4 @@
-import { Button, Link, Tooltip } from "czifui";
+import { Button, Link, Tooltip } from "@czi-sds/components";
 import { isEmpty } from "lodash";
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
