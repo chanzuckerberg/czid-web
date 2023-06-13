@@ -1,4 +1,4 @@
-import { Button, Link, Tooltip } from "@czi-sds/components";
+import { Button, Icon, Link, Tooltip } from "@czi-sds/components";
 import { isEmpty } from "lodash";
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
@@ -41,6 +41,7 @@ export function UserProfileForm() {
   const [country, setCountry] = useState<string>("");
   const [worldBankIncome, setWorldBankIncome] = useState<string>("");
   const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const areRequiredFieldsFilled = () => {
     return (
@@ -104,6 +105,8 @@ export function UserProfileForm() {
   }
 
   async function handleFormSubmit() {
+    setIsSubmitDisabled(true);
+    setIsSubmitting(true);
     await Promise.all([updateUser(), postToAirtable()])
       .then(() => {
         history.push(
@@ -113,6 +116,8 @@ export function UserProfileForm() {
       })
       .catch(err => {
         alert("post failed: " + err.message);
+        setIsSubmitDisabled(false);
+        setIsSubmitting(false);
       });
   }
 
@@ -130,8 +135,13 @@ export function UserProfileForm() {
         )}
         disabled={isSubmitDisabled}
         data-testid="complete-setup-btn"
+        startIcon={
+          isSubmitting && (
+            <Icon sdsIcon={"loading"} sdsSize="l" sdsType="button" />
+          )
+        }
       >
-        Complete Setup
+        {isSubmitting ? "Submitting" : "Complete Setup"}
       </Button>
     );
 
