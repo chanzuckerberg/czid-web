@@ -708,11 +708,13 @@ class SamplesController < ApplicationController
         samples_to_upload[sample_idx][:input_files_attributes][input_file_idx][:upload_client] = client_type
       end
     end
+
     version_number = client.sub(/-.*$/, "")
     # Check if the client is up-to-date. "web" is always valid whereas the
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
     min_version = Gem::Version.new(MIN_CLI_VERSION)
+
     version_obj = client && client != "web" && Gem::Version.new(version_number)
     unless client && (client == "web" || version_obj >= min_version)
       render json: {
@@ -840,6 +842,7 @@ class SamplesController < ApplicationController
           version: client, # web if web version number if cli
           client: client_type, # here we map version number to CLI for easier queries
           sample_id: sample.id,
+          workflows: sample.workflow_runs.map(&:workflow).compact.to_json, # specify the workflows that were kicked off
         }
       )
     end

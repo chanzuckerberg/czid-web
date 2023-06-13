@@ -38,6 +38,7 @@ class EventDictionary
   #  @param version The version of the client the user is bulk uploading from, 'web' if web client
   #  @param client The client the user is bulk uploading from 'CLI' or 'web'
   #  @param sample_id The ID of the uploaded sample
+  # @param workflows The workflows the user requested be run (e.g. consensus-genome)
   SAMPLE_UPLOAD_STARTED = "SAMPLE_UPLOAD_STARTED".freeze
 
   # A sample upload has finished successfully
