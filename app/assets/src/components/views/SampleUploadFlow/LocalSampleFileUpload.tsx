@@ -1,6 +1,5 @@
 import cx from "classnames";
 import _fp, {
-  compact,
   flow,
   get,
   groupBy,
@@ -20,7 +19,6 @@ import List from "~/components/ui/List";
 import { CONCAT_FILES_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
   ONT_AUTO_CONCAT,
-  ONT_V1_FEATURE,
   PRE_UPLOAD_CHECK_FEATURE,
 } from "~/components/utils/features";
 import { Project, SampleFromApi } from "~/interface/shared";
@@ -31,6 +29,8 @@ import cs from "./sample_upload_flow.scss";
 
 // @ts-expect-error working with Lodash types
 const map = _fp.map.convert({ cap: false });
+const LABEL_ACCEPTED_FILE_FORMATS =
+  "Accepted file formats: .fastq, .fastq.gz, .fq, .fq.gz";
 
 interface LocalSampleFileUploadProps {
   project?: Project;
@@ -96,7 +96,7 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
 
     if (invalidFiles.length > 0) {
       msg += `- Files with invalid formats: ${mapNames(invalidFiles)}
-      Accepted file formats include: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz)`;
+      ${LABEL_ACCEPTED_FILE_FORMATS}`;
     }
     window.alert(msg);
   };
@@ -166,17 +166,7 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
             <div className={cs.title}>File Instructions</div>
             <List
               listItems={[
-                <>
-                  Accepted file formats:
-                  <List
-                    listItems={compact([
-                      `Metagenomics Illumina: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).`,
-                      allowedFeatures.includes(ONT_V1_FEATURE) &&
-                        `Metagenomics Nanopore: fastq (.fq), fastq.gz (.fq.gz).`,
-                      `Consensus Genome: fastq (.fq).`,
-                    ])}
-                  />
-                </>,
+                LABEL_ACCEPTED_FILE_FORMATS,
                 `Paired files must be labeled with "_R1" or
                 "_R2" at the end of the basename.`,
                 <>
@@ -206,8 +196,11 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
             />
           </div>
         )}
+        {/* Specifying ".fastq, .fastq.gz" doesn't work, and could be a limitation of the MacOS file
+        picker. Therefore, we rely on the backend `validate_sample_files` API to validate file names.
+        For details, see https://bugs.chromium.org/p/chromium/issues/detail?id=521781 */}
         <FilePicker
-          accept=".fastq, .fq, .fasta, .fa, .gz"
+          accept=".fastq, .fq, .gz"
           className={cx(cs.localFilePicker, !filePickerTitle && cs.short)}
           title={filePickerTitle}
           onChange={this.onDrop}
