@@ -217,10 +217,9 @@ class SfnCgPipelineDispatchService
   end
 
   def generate_wdl_input
-    # TODO: Replace this with InputFile scopes (ie. fastq), once the CLI is updated to store file_type
     ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
     primer_bed_name = @workflow_run.inputs&.[]("primer_bed")
-    input_fastqs = @sample.input_files.filter { |i| i.name != ref_fasta_name && i.name != primer_bed_name }
+    input_fastqs = @sample.input_files.fastq
 
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
     additional_inputs = if creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
