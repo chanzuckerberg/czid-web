@@ -30,7 +30,7 @@ export const HEATMAP_DOWNLOAD_OPTIONS = [
   {
     category: "reports",
     description:
-      "User-uploaded metadata, including sample collection location, collection date, sample type",
+      "User-uploaded metadata, including sample collection location, collection date, sample type.",
     display_name: "All Heatmap Metrics",
     file_type_display: ".csv",
     type: "all_metrics",
@@ -38,7 +38,7 @@ export const HEATMAP_DOWNLOAD_OPTIONS = [
   {
     category: "reports",
     description:
-      "User-uploaded metadata, including sample collection location, collection date, sample type",
+      "Contains the current selected metric. Existing filters on the heatmap will apply.",
     display_name: "Current Heatmap Metrics",
     file_type_display: ".csv",
     type: "current_metrics",
