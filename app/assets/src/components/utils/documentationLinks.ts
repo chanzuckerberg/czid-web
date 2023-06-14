@@ -58,6 +58,8 @@ export const GUPPY_BASECALLER_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13830756964372-Upload-Nanopore-Data-#guppy-basecaller";
 export const CONCAT_FILES_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360051806072-How-to-concatenate-files";
+export const CONCAT_FILES_HELP_LINK_ONT =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360051806072-Concatenate-Sequence-Files#automatic-concatenation-nanopore";
 export const PROJECT_SHARING_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-Data-through-the-Web-App#Project-Sharing";
 export const ILLUMINA_MNGS_PIPELINE_HELP_LINK =

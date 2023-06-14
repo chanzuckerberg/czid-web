@@ -3,7 +3,7 @@ import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import {
-  CONCAT_FILES_HELP_LINK,
+  CONCAT_FILES_HELP_LINK_ONT,
   MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
 import {
@@ -69,7 +69,7 @@ const MetagenomicsWithNanopore = ({
           )}
         </React.Fragment>
       }
-      githubLink={CONCAT_FILES_HELP_LINK}
+      githubLink={CONCAT_FILES_HELP_LINK_ONT}
       isBeta={!allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE)}
       isDisabled={isDisabled}
       isSelected={isSelected}
