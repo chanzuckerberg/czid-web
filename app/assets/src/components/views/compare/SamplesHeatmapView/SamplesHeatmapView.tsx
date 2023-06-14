@@ -1953,10 +1953,17 @@ class SamplesHeatmapView extends React.Component<
           taxonDetails={this.state.allTaxonDetails} // send allTaxonDetails in case of added taxa
           // @ts-expect-error Index signature for type 'string' is missing in type 'any[]'
           taxonFilterState={this.state.taxonFilterState}
-          thresholdFilters={this.state.selectedOptions.thresholdFilters}
           sampleSortType={this.state.selectedOptions.sampleSortType}
           fullScreen={this.state.hideFilters}
           taxaSortType={this.state.selectedOptions.taxaSortType}
+          // appliedFilters and background are for the heatmap image caption
+          appliedFilters={this.getAppliedFilters()}
+          backgroundName={
+            find(
+              { value: this.state.selectedOptions.background },
+              this.props.backgrounds,
+            ).name
+          }
         />
       </ErrorBoundary>
     );

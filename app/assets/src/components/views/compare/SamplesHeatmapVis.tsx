@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { isEmpty, isEqual, keyBy, map, orderBy, size } from "lodash/fp";
+import { find, isEmpty, isEqual, keyBy, orderBy } from "lodash/fp";
 import React from "react";
 import {
   ANALYTICS_EVENT_NAMES,
@@ -14,15 +14,17 @@ import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import TaxonSelector from "~/components/common/TaxonSelector";
 import { UserContext } from "~/components/common/UserContext";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
-import { HEATMAP_FILTERS_LEFT_FEATURE } from "~/components/utils/features";
+import { logError } from "~/components/utils/logUtil";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { splitIntoMultipleLines } from "~/helpers/strings";
+import { SelectedOptions } from "~/interface/shared";
 import { TooltipVizTable } from "~ui/containers";
 import { IconAlertSmall, IconCloseSmall } from "~ui/icons";
 import { openUrlInNewTab } from "~utils/links";
 import cs from "./samples_heatmap_vis.scss";
+import { SPECIFICITY_OPTIONS } from "./SamplesHeatmapView/constants";
 
 const CAPTION_LINE_WIDTH = 180;
 
@@ -50,6 +52,7 @@ interface SamplesHeatmapVisProps {
   onTaxonLabelClick?: $TSFixMeFunction;
   sampleDetails?: object;
   sampleIds?: $TSFixMe[];
+  selectedOptions: SelectedOptions;
   scale?: string;
   taxLevel?: string;
   taxonCategories?: $TSFixMe[];
@@ -58,10 +61,11 @@ interface SamplesHeatmapVisProps {
   allTaxonIds?: $TSFixMe[];
   taxonIds?: $TSFixMe[];
   selectedTaxa?: object;
-  thresholdFilters?: $TSFixMe;
+  appliedFilters?: SelectedOptions;
   sampleSortType?: string;
   fullScreen?: boolean;
   taxaSortType?: string;
+  backgroundName?: string;
 }
 
 interface SamplesHeatmapVisState {
@@ -218,7 +222,7 @@ class SamplesHeatmapVis extends React.Component<
         columnLabels: this.extractSampleLabels(), // Also includes column pinned state.
       });
     }
-    if (!isEqual(this.props.thresholdFilters, prevProps.thresholdFilters)) {
+    if (!isEqual(this.props.appliedFilters, prevProps.appliedFilters)) {
       this.heatmap.updatePrintCaption(this.generateHeatmapCaptions());
     }
     if (this.props.sampleSortType !== prevProps.sampleSortType) {
@@ -276,25 +280,123 @@ class SamplesHeatmapVis extends React.Component<
     });
   }
 
-  generateHeatmapCaptions = () => {
-    const { thresholdFilters } = this.props;
+  formatFilterString = (name, val) => {
+    let stringToReturn = "";
+    let numberOfFilters = 0;
+    switch (name) {
+      case "thresholdFilters": {
+        const thresholdFilters = val.reduce(
+          (result: string[], threshold: $TSFixMe) => {
+            result.push(
+              `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
+            );
+            return result;
+          },
+          [],
+        );
 
-    let caption =
-      "Non-conforming cells have been hidden or grayed out. Taxa that are not present in the sample are represented by white cells.";
+        if (!isEmpty(thresholdFilters)) {
+          numberOfFilters += thresholdFilters.length;
+          stringToReturn = `Thresholds: ${thresholdFilters.join()}`;
+        }
+        break;
+      }
+      case "categories": {
+        stringToReturn = `Categories: ${val}`;
+        numberOfFilters += val.length;
+        break;
+      }
+      case "subcategories": {
+        const subcategories = [];
+        for (const [subcategoryName, subcategoryVal] of Object.entries(val)) {
+          if (!isEmpty(subcategoryVal)) {
+            subcategories.push(
+              // @ts-expect-error Property 'join' does not exist on type 'unknown'
+              `${subcategoryName} - ${subcategoryVal.join()}`,
+            );
+          }
+        }
 
-    const numFilters = size(thresholdFilters);
-    if (numFilters > 0) {
-      const filterStrings = map(
-        filter => `${filter.metricDisplay} ${filter.operator} ${filter.value}`,
-        thresholdFilters,
-      );
-      caption =
-        `${numFilters} filter${
-          numFilters > 1 ? "s were" : " was"
-        } applied to the above heatmap: ${filterStrings.join(", ")}.` + caption;
+        stringToReturn = `Subcategories: ${subcategories}`;
+        numberOfFilters += subcategories.length;
+        break;
+      }
+      case "readSpecificity": {
+        stringToReturn = `Read Specificity: ${
+          find({ value: val }, SPECIFICITY_OPTIONS).text
+        }`;
+        ++numberOfFilters;
+        break;
+      }
+      case "taxonTags": {
+        stringToReturn = `Pathogen Tags: ${val}`;
+        numberOfFilters += val.length;
+        break;
+      }
+
+      default: {
+        logError({
+          message:
+            "SamplesHeatmapVis: Invalid filter passed to formatFilterString()",
+          details: { name, val },
+        });
+        break;
+      }
     }
+    return { string: stringToReturn, numberOfFilters };
+  };
 
-    return splitIntoMultipleLines(caption, CAPTION_LINE_WIDTH);
+  generateHeatmapCaptions = () => {
+    const { appliedFilters, selectedOptions, backgroundName, scale } =
+      this.props;
+
+    // first, note the metric, scale and background used
+    const selectedOptionsString = splitIntoMultipleLines(
+      `Showing ${selectedOptions.metric} for ${selectedOptions.taxonsPerSample} taxa per sample on a ${scale} scale; Background: ${backgroundName}.`,
+      CAPTION_LINE_WIDTH,
+    );
+
+    // next, figure out how many filters are applied and describe them
+    const filtersStrings = [];
+    let nFilters = 0;
+
+    const filterListOrder = [
+      "categories",
+      "readSpecificity",
+      "taxonTags",
+      "subcategories",
+      "thresholdFilters",
+    ];
+
+    filterListOrder.forEach(name => {
+      let val = appliedFilters[name];
+      if (val === undefined || name === "subcategories") return;
+
+      if (name === "categories") {
+        val = [...val, ...(appliedFilters.subcategories?.Viruses || [])];
+      }
+
+      const { string, numberOfFilters } = this.formatFilterString(name, val);
+      filtersStrings.push(string);
+      nFilters += numberOfFilters;
+    });
+
+    // if there are any filters applied, describe what filtered vs null data look like.
+    const missingDataString =
+      nFilters > 0
+        ? splitIntoMultipleLines(
+            `Taxa which are not present in the sample are represented by white cells. Taxa filtered out in this view have been hidden or grayed out.  ${nFilters} filter(s) applied:`,
+            CAPTION_LINE_WIDTH,
+          )
+        : ["No filters applied."];
+
+    // finally, describe the filters
+    const filtersString = splitIntoMultipleLines(
+      filtersStrings.join("; "),
+      CAPTION_LINE_WIDTH,
+    );
+
+    return [...selectedOptionsString, ...missingDataString, ...filtersString];
   };
 
   // Update tooltip contents and location when hover over a data/metadata node
@@ -650,11 +752,6 @@ class SamplesHeatmapVis extends React.Component<
       pinSampleOptions,
     );
 
-    const { allowedFeatures = [] } = this.context || {};
-    const useNewFilters = allowedFeatures.includes(
-      HEATMAP_FILTERS_LEFT_FEATURE,
-    );
-
     return (
       <div className={cs.samplesHeatmapVis}>
         <PlusMinusControl
@@ -669,28 +766,12 @@ class SamplesHeatmapVis extends React.Component<
           className={cs.plusMinusControl}
         />
 
-        {useNewFilters && (
-          <div
-            className={cs.newHeatmapContainer}
-            ref={container => {
-              this.heatmapContainer = container;
-            }}
-          />
-        )}
-        {!useNewFilters && (
-          <div
-            className={cx(
-              cs.heatmapContainer,
-              (!isEmpty(this.props.thresholdFilters) ||
-                !isEmpty(this.props.taxonCategories)) &&
-                cs.filtersApplied,
-              this.props.fullScreen && cs.fullScreen,
-            )}
-            ref={container => {
-              this.heatmapContainer = container;
-            }}
-          />
-        )}
+        <div
+          className={cs.newHeatmapContainer}
+          ref={container => {
+            this.heatmapContainer = container;
+          }}
+        />
 
         {nodeHoverInfo && tooltipLocation && (
           <div

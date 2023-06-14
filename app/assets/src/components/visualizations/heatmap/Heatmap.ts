@@ -1202,7 +1202,7 @@ export default class Heatmap {
 
   showPrintCaption = () => {
     const totalCaptionHeight = this.options.printCaption
-      ? this.options.printCaption.length * this.options.captionLineHeight
+      ? this.options.printCaption.length * (this.options.captionLineHeight + 1)
       : 0;
 
     // This assumes that this.height contains the "normal" height of the heatmap.

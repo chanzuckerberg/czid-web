@@ -44,9 +44,7 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
         const disabledOption =
           !enableMassNormalizedBackgrounds && background.mass_normalized;
         return {
-          name:
-            background.name.replace(/_/g, " ") ||
-            background.text.replace(/_/g, " "),
+          name: background.name || background.text,
           text: background.name || background.text,
           subtext: background.mass_normalized
             ? "Normalized by input mass"
