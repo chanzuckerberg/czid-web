@@ -560,13 +560,14 @@ module ElasticsearchQueryHelper
     threshold_filters_clause = build_threshold_filters_clause(filter_param[:threshold_filters]) # includes the mandatory count > 5 filter
     categories_filter_clause = build_categories_filter_clause(filter_param[:categories], filter_param[:include_phage])
     read_specificity_filter_clause = build_read_specificity_filter_clause(filter_param[:read_specificity])
+    taxon_tags_filter_clause = build_taxon_tags_filter_clause(filter_param[:taxon_tags])
 
     search_body = {
       "_source": false,
       "size": 0, # all results are pulled from aggregations so no top-level results required
       "query": {
         "bool": {
-          "filter": base_query_filter_clause + threshold_filters_clause + categories_filter_clause + read_specificity_filter_clause,
+          "filter": base_query_filter_clause + threshold_filters_clause + categories_filter_clause + read_specificity_filter_clause + taxon_tags_filter_clause,
           "must_not": base_query_must_not_clause,
         },
       },
@@ -885,7 +886,7 @@ module ElasticsearchQueryHelper
     read_specificity_filter_clause
   end
 
-  # clause for the threshold filters provided by the user (and the mandatory count > 5)
+  # clause for the threshold filters provided by the user (and the mandatory count > 1)
   def self.build_threshold_filters_clause(
     threshold_filters
   )
@@ -896,6 +897,23 @@ module ElasticsearchQueryHelper
     threshold_filters_clause << nt_nested_clause
     threshold_filters_clause << nr_nested_clause
     return threshold_filters_clause.compact
+  end
+
+  def self.build_taxon_tags_filter_clause(
+    taxon_tags
+  )
+    if taxon_tags&.include?("known_pathogen")
+      pathogen_tax_ids = PathogenList.find_by(is_global: true).fetch_list_version().fetch_pathogens_info().pluck(:tax_id)
+      return [
+        {
+          "terms": {
+            "tax_id": pathogen_tax_ids,
+          },
+        },
+      ]
+    else
+      return []
+    end
   end
 
   # Build nested query clause to apply threshold filters
