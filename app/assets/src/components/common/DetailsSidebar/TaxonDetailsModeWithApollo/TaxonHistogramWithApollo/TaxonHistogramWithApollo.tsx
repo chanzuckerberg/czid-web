@@ -14,7 +14,7 @@ import { TaxonValuesType } from "../TaxonDetailsModeWithApollo";
 import cs from "./taxon_histogram.scss";
 
 interface TaxonHistogramProps {
-  background: Background;
+  background?: Background;
   taxonId: number;
   taxonValues: TaxonValuesType;
   reportLoadingStatus: (isLoading: boolean, id: string) => void;
@@ -36,9 +36,10 @@ export const TaxonHistogramWithApollo = ({
 
   const { loading, error, data } = useQuery(GET_TAXON_DISTRIBUTION, {
     variables: {
-      backgroundId: background.id,
+      backgroundId: background?.id,
       taxId: taxonId,
     },
+    skip: !background,
     // TODO: (smccanny): delete this once rails and graphql are integrated under a single client
     client: federationClient,
   });

@@ -1519,6 +1519,7 @@ export default class Heatmap {
       nodes.select("rect").attr("width", this.rowLabelsWidth);
       nodes
         .select("text")
+        .attr("data-testid", "row-label")
         .attr(
           "transform",
           `translate(${this.rowLabelsWidth - this.options.spacing}, ${

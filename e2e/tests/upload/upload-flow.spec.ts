@@ -98,7 +98,7 @@ test.describe("upload flow tests", () => {
   }
 });
 
-test.only("WGS workflow option happy path", async ({ page }) => {
+test("WGS workflow option happy path", async ({ page }) => {
   await page.goto(`${process.env.BASEURL}/samples/upload`);
   // choose project and upload sample files
   const sampleType = WORKFLOWS.WGS;
