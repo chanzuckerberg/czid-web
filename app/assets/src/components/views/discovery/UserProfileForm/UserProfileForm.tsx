@@ -17,8 +17,10 @@ import InstitutionFormField from "./components/InstitutionFormField";
 import NameField from "./components/NameField";
 import SequencingExpertiseFormField from "./components/SequencingExpertiseFormField";
 import {
-  REGEX_NAME_FAILED_TOOLTIP_TEXT,
-  SUBMIT_BUTTON_DISABLED_TOOLTIP_TEXT,
+  INVALID_USERNAME_CHARACTER_TOOLTIP_TEXT,
+  INVALID_USERNAME_LENGTH_TOOLTIP_TEXT,
+  MAX_USERNAME_LENGTH,
+  MISSING_REQUIRED_FIELDS_TOOLTIP_TEXT,
   USER_PROFILE_FORM_VERSION,
 } from "./constants";
 import cs from "./user_profile_form.scss";
@@ -50,26 +52,28 @@ export function UserProfileForm() {
       !isEmpty(selectedUsecaseCheckboxes) &&
       !isEmpty(selectedSequencingExpertise) &&
       !isEmpty(rorInstitution) && // rorId is not required if user enters institution not found in ROR
-      !isEmpty(country) // worldBankIncome is not required if user enters country not found in World Bank
+      !isEmpty(country)
     );
   };
 
-  // check that firstName and lastName only contain letters, apostrophes, dashes, or spaces
+  // Check that Full Name only contain letters, apostrophes, dashes, or spaces
   const nameRegex = /^[- 'a-zA-ZÀ-ÖØ-öø-ÿ]+$/;
-  const checkRegexNameCheckIsFailing = () => {
-    // check that firstName and lastName are not empty and that they match the name regex
-    if (firstName && lastName) {
-      const matchingFirstName = Boolean(firstName.match(nameRegex));
-      const matchingLastName = Boolean(lastName.match(nameRegex));
-      if (!matchingFirstName || !matchingLastName) {
-        return true;
-      }
-    }
+  const areFullNameCharactersValid = () => {
+    const fullName = `${firstName} ${lastName}`;
+    return Boolean(fullName.match(nameRegex));
+  };
+
+  // Check that Full Name does not exceed max characters
+  const isFullNameLengthValid = () => {
+    const fullName = `${firstName} ${lastName}`;
+    return fullName.length <= MAX_USERNAME_LENGTH;
   };
 
   useEffect(() => {
     setIsSubmitDisabled(
-      checkRegexNameCheckIsFailing() || !areRequiredFieldsFilled(),
+      !areFullNameCharactersValid() ||
+        !isFullNameLengthValid() ||
+        !areRequiredFieldsFilled(),
     );
   }, [
     firstName,
@@ -146,16 +150,17 @@ export function UserProfileForm() {
     );
 
     if (isSubmitDisabled) {
+      let tooltipText;
+      if (!areRequiredFieldsFilled()) {
+        tooltipText = MISSING_REQUIRED_FIELDS_TOOLTIP_TEXT;
+      } else if (!areFullNameCharactersValid()) {
+        tooltipText = INVALID_USERNAME_CHARACTER_TOOLTIP_TEXT;
+      } else if (!isFullNameLengthValid()) {
+        tooltipText = INVALID_USERNAME_LENGTH_TOOLTIP_TEXT;
+      }
+
       return (
-        <Tooltip
-          arrow
-          placement="top"
-          title={
-            !areRequiredFieldsFilled()
-              ? SUBMIT_BUTTON_DISABLED_TOOLTIP_TEXT
-              : REGEX_NAME_FAILED_TOOLTIP_TEXT
-          }
-        >
+        <Tooltip arrow placement="top" title={tooltipText}>
           <span>{button}</span>
         </Tooltip>
       );

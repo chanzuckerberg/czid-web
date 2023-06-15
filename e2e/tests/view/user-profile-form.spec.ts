@@ -4,6 +4,7 @@ import path from "path";
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 const COMPLETE_SETUP_BTN = "complete-setup-btn";
+const MAX_USERNAME_LENGTH = 128; // 127 characters for First and Last Name + 1 space
 
 test.describe("User Profile Form tests", () => {
   test.beforeEach(async ({ page }) => {
@@ -103,6 +104,23 @@ test.describe("User Profile Form tests", () => {
     await completeFullName(page, "First M.", "Last");
 
     await expect(page.getByTestId(COMPLETE_SETUP_BTN)).toBeDisabled();
+  });
+
+  test("Should disable submit button if name exceeds character limit", async ({
+    page,
+  }) => {
+    // Complete all required questions except Full Name
+    await selectCountry(page);
+    await selectInstitution(page);
+    await selectUseCases(page);
+    await selectExpertise(page);
+
+    // Full Name should not exceed max character limit
+    await completeFullName(page, "X".repeat(MAX_USERNAME_LENGTH - 1), "Y"); // 129 characters
+    await expect(page.getByTestId(COMPLETE_SETUP_BTN)).toBeDisabled();
+
+    await completeFullName(page, "X".repeat(MAX_USERNAME_LENGTH - 2), "Y"); // 128 characters
+    await expect(page.getByTestId(COMPLETE_SETUP_BTN)).toBeEnabled();
   });
 
   test("Should disable submit button if country is missing", async ({
