@@ -902,7 +902,7 @@ module ElasticsearchQueryHelper
   def self.build_taxon_tags_filter_clause(
     taxon_tags
   )
-    if taxon_tags&.include?("known_pathogen")
+    if taxon_tags&.include?("known_pathogens")
       pathogen_tax_ids = PathogenList.find_by(is_global: true).fetch_list_version().fetch_pathogens_info().pluck(:tax_id)
       return [
         {

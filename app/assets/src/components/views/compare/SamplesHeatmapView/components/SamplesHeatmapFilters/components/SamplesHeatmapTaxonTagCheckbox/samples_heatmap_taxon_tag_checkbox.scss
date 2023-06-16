@@ -1,0 +1,19 @@
+@import "~@czi-sds/components/dist/variables";
+
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+}
+
+.label {
+  letter-spacing: 0.3px;
+  padding-top: 0px;
+}
+
+.labelDisabled {
+  color: $sds-color-gray-300;
+}
+
+.checkbox {
+  padding: 2px 9px;
+}

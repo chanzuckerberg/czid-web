@@ -95,6 +95,7 @@ class TopTaxonsElasticsearchService
     end
     filter_params[:sort_by] = @params[:sortBy] || DEFAULT_TAXON_SORT_PARAM
     filter_params[:taxons_per_sample] = @params[:taxonsPerSample] || DEFAULT_MAX_NUM_TAXONS
+    filter_params[:taxon_tags] = @params[:taxonTags] || []
 
     # add the mandatory counts > 5 threshold filter to the `threshold_filters` to be later parsed by `elasticsearch_query_helper#parse_custom_filters`
     metric_count_type = filter_params[:sort_by].split("_")[1].upcase # TODO: I am extracting the metric details out of sort_by when they should probably be passed directly from the frontend

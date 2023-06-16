@@ -1,8 +1,9 @@
-import { Icon, Tooltip } from "@czi-sds/components";
-import Checkbox from "@mui/material/Checkbox";
+import { Icon, InputCheckbox, Tooltip } from "@czi-sds/components";
+import { cx } from "@emotion/css";
 import React from "react";
 import { SelectedOptions } from "~/interface/shared";
-import cs from "../../samples_heatmap_filters.scss";
+import heatmap_filters_cs from "../../samples_heatmap_filters.scss";
+import cs from "./samples_heatmap_taxon_tag_checkbox.scss";
 
 interface SamplesHeatmapTaxonTagCheckboxProps {
   label: string;
@@ -36,13 +37,16 @@ export const SamplesHeatmapTaxonTagCheckbox = ({
   };
 
   return (
-    <div>
-      <Checkbox
+    <div className={cs.checkboxContainer}>
+      <InputCheckbox
         disabled={disabled}
         checked={selectedOptions.taxonTags.includes(value)}
         onChange={() => onTaxonTagChange(value)}
+        className={cs.checkbox}
       />
-      <span>{label}</span>
+      <span className={disabled ? cx(cs.label, cs.labelDisabled) : cs.label}>
+        {label}
+      </span>
       {showInfoIcon && infoIconTooltipContent && (
         <Tooltip title={infoIconTooltipContent} placement="top" arrow>
           <span>
@@ -52,7 +56,7 @@ export const SamplesHeatmapTaxonTagCheckbox = ({
               sdsType="static"
               color="gray"
               shade={500}
-              className={cs.infoIcon}
+              className={heatmap_filters_cs.infoIcon}
             />
           </span>
         </Tooltip>
