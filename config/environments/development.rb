@@ -75,6 +75,10 @@ Rails.application.configure do
     "http://127.0.0.1:3000",
   ]
 
+  # web is the container name for the rails server in our docker config
+  # Rails > 6 requires hosts to be explicitly allow listed
+  config.hosts << "web"
+
   # Development logging configuration
   logger           = ActiveSupport::Logger.new(STDOUT)
   logger.formatter = config.log_formatter

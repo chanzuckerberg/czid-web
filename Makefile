@@ -95,6 +95,10 @@ local-start: .env.localdev ## Start localdev containers or refresh credentials
 local-stop: .env.localdev ## Stop localdev containers
 	$(docker_compose_simple) stop
 
+.PHONY: local-down
+local-down: .env.localdev ## Tear down localdev containers (will lose data in containers that are not stored in docker volume)
+	$(docker_compose_simple) down
+
 .PHONY: local-console
 local-console: .env.localdev ## Get a bash shell on local host
 	$(docker_compose) exec web bash
