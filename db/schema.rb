@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_06_01_224433) do
+ActiveRecord::Schema.define(version: 2023_06_16_172501) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -504,6 +504,7 @@ ActiveRecord::Schema.define(version: 2023_06_01_224433) do
     t.float "fraction_subsampled_bases"
     t.bigint "truncated_bases"
     t.datetime "deleted_at", comment: "When the user triggered deletion of the pipeline run"
+    t.integer "mapped_reads"
     t.index ["adjusted_remaining_reads"], name: "index_pipeline_runs_on_adjusted_remaining_reads"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["compression_ratio"], name: "index_pipeline_runs_on_compression_ratio"
