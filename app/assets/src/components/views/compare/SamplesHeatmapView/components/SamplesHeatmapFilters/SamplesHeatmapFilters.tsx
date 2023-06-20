@@ -400,7 +400,7 @@ const SamplesHeatmapFilters = ({
         </div>
         {allowedFeatures.includes(HEATMAP_PATHOGEN_FLAGGING_FEATURE) && (
           <div className={cs.taxonTagsContainer}>
-            <span className={cs.filterTitle}>Pathogen Tags</span>
+            <span className={cs.filterTitle}>Pathogen Tag</span>
             <SamplesHeatmapTaxonTagCheckbox
               label={"Known Pathogens"}
               value={"known_pathogens"}
@@ -410,7 +410,7 @@ const SamplesHeatmapFilters = ({
               infoIconTooltipContent={
                 <span>
                   Organism with known human pathogenicity. See the{" "}
-                  <Link external href="https://czid.org/pathogen_list">
+                  <Link external href="/pathogen_list">
                     full list
                   </Link>{" "}
                   of pathogens.
