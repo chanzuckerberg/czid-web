@@ -227,20 +227,22 @@ RSpec.describe BulkDeletionService, type: :service do
       )
     end
 
-    it "allows deletion of failed uploads" do
+    it "allows deletion of failed uploads along with successful uploads" do
       expect(Resque).to receive(:enqueue).with(
-        HardDeleteObjects, [], [@sample_no_prs.id], short_read_mngs, @joe.id
+        HardDeleteObjects, [@pr1.id], [@sample_no_prs.id, @sample1.id], short_read_mngs, @joe.id
       )
       response = BulkDeletionService.call(
-        object_ids: [@sample_no_prs.id],
+        object_ids: [@sample_no_prs.id, @sample1.id],
         user: @joe,
         workflow: "short-read-mngs"
       )
       expect(response[:error]).to be_nil
-      expect(response[:deleted_run_ids]).to be_empty
-      expect(response[:deleted_sample_ids]).to contain_exactly(@sample_no_prs.id)
+      expect(response[:deleted_run_ids]).to contain_exactly(@pr1.id)
+      expect(response[:deleted_sample_ids]).to contain_exactly(@sample_no_prs.id, @sample1.id)
       @sample_no_prs.reload
       expect(@sample_no_prs.deleted_at).to be_within(1.minute).of(Time.now.utc)
+      @sample1.reload
+      expect(@sample1.deleted_at).to be_within(1.minute).of(Time.now.utc)
     end
 
     context "when the initial workflow is short read mNGS" do
@@ -263,9 +265,9 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to be_empty
         end
 
-        it "does not send the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
-            HardDeleteObjects, [@pr1.id, @pr2.id], [@sample2.id], short_read_mngs, @joe.id
+            HardDeleteObjects, [@pr1.id, @pr2.id], [@sample1.id, @sample2.id], short_read_mngs, @joe.id
           )
           BulkDeletionService.call(
             object_ids: [@sample1.id, @sample2.id],
@@ -293,9 +295,9 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to be_empty
         end
 
-        it "does not send the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
-            HardDeleteObjects, [@pr1.id, @pr2.id], [@sample2.id], short_read_mngs, @joe.id
+            HardDeleteObjects, [@pr1.id, @pr2.id], [@sample1.id, @sample2.id], short_read_mngs, @joe.id
           )
           BulkDeletionService.call(
             object_ids: [@sample1.id, @sample2.id],
@@ -319,7 +321,7 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to include(@sample1.id)
         end
 
-        it "sends the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@pr1.id], [@sample1.id], short_read_mngs, @joe.id
           )
@@ -362,9 +364,9 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to be_empty
         end
 
-        it "does not send the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
-            HardDeleteObjects, [@pr1.id], [], long_read_mngs, @joe.id
+            HardDeleteObjects, [@pr1.id], [@sample1.id], long_read_mngs, @joe.id
           )
           BulkDeletionService.call(
             object_ids: [@sample1.id],
@@ -392,9 +394,9 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to be_empty
         end
 
-        it "does not send the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample id to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
-            HardDeleteObjects, [@pr1.id], [], long_read_mngs, @joe.id
+            HardDeleteObjects, [@pr1.id], [@sample1.id], long_read_mngs, @joe.id
           )
           BulkDeletionService.call(
             object_ids: [@sample1.id],
@@ -418,7 +420,7 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to include(@sample1.id)
         end
 
-        it "sends the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@pr1.id], [@sample1.id], long_read_mngs, @joe.id
           )
@@ -520,9 +522,9 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to be_empty
         end
 
-        it "sends only samples that are soft-deleted to the async hard-delete job" do
+        it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
-            HardDeleteObjects, [@completed_wr.id], [], consensus_genome, @joe.id
+            HardDeleteObjects, [@completed_wr.id], [@completed_wr.sample.id], consensus_genome, @joe.id
           )
           BulkDeletionService.call(
             object_ids: [@completed_wr.id],
@@ -550,9 +552,9 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to be_empty
         end
 
-        it "does not send the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample ids to async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
-            HardDeleteObjects, [@completed_wr.id], [], consensus_genome, @joe.id
+            HardDeleteObjects, [@completed_wr.id], [@completed_wr.sample.id], consensus_genome, @joe.id
           )
           BulkDeletionService.call(
             object_ids: [@completed_wr.id],
@@ -576,7 +578,7 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to contain_exactly(@sample1.id)
         end
 
-        it "sends the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@completed_wr.id], [@sample1.id], consensus_genome, @joe.id
           )
@@ -604,7 +606,7 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to contain_exactly(@sample3.id)
         end
 
-        it "sends the soft-deleted sample id to the async hard-delete job" do
+        it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@completed_amr_wr.id], [@sample3.id], amr, @joe.id
           )

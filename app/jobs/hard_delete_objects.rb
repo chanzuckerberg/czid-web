@@ -1,3 +1,4 @@
+# Deletes pipeline/workflow runs and samples in the background.
 class HardDeleteObjects
   extend InstrumentedJob
   # TODO: consider setting a max batch size to avoid having a super long job clogging up the queue
@@ -10,7 +11,6 @@ class HardDeleteObjects
   def self.perform(object_ids, sample_ids, workflow, user_id)
     Rails.logger.info("Starting to hard delete runs with ids #{object_ids} and workflow #{workflow}")
     hard_delete(object_ids, sample_ids, workflow, user_id)
-    Rails.logger.info("Successfully deleted runs with ids #{object_ids} and workflow #{workflow}")
   rescue StandardError => e
     LogUtil.log_error(
       "Bulk Deletion Failed: #{e}.",
@@ -33,16 +33,11 @@ class HardDeleteObjects
                 current_power.deletable_workflow_runs.where(id: object_ids)
               end
 
-    samples_to_delete = current_power.destroyable_samples.where(id: sample_ids).where.not(deleted_at: nil).includes(:pipeline_runs, :workflow_runs)
-
-    if (objects.count != object_ids.length) || (samples_to_delete.count != sample_ids.length)
-      raise "Not all ids correspond to deletable objects"
-    end
-
     # note: we have a scheduled lambda that cleans up taxa from ES for
     # pipeline runs no longer in the database
     hard_delete_runs(objects, user, workflow) if objects.present?
 
+    samples_to_delete = current_power.destroyable_samples.where(id: sample_ids).where.not(deleted_at: nil).includes(:pipeline_runs, :workflow_runs)
     hard_delete_samples(samples_to_delete, user, workflow) if samples_to_delete.present?
   end
 
@@ -81,6 +76,7 @@ class HardDeleteObjects
         }
       )
     end
+    Rails.logger.info("Successfully deleted runs with ids #{deleted_object_ids} and workflow #{workflow}")
   end
 
   def self.hard_delete_samples(samples_to_delete, user, workflow)
@@ -117,6 +113,7 @@ class HardDeleteObjects
         }
       )
     end
+    Rails.logger.info("Successfully deleted samples with ids #{deleted_sample_ids}")
   end
 
   def self.delete_object_with_retries(object, workflow)

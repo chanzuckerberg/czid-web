@@ -39,25 +39,9 @@ RSpec.describe HardDeleteObjects, type: :job do
         @phylo_tree_ng = create(:phylo_tree_ng, user_id: @joe.id, name: "Test Phylo Tree Ng", pipeline_runs: [@pr1, @pr2], s3_output_prefix: "s3://fake_bucket/fake/path")
       end
 
-      it "raises error if no deletable runs or samples are found" do
-        object_ids = [-1]
-        sample_ids = [-1]
-        expect do
-          HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
-        end.to raise_error("Not all ids correspond to deletable objects")
-      end
-
-      it "raises error if not all ids correspond to deletable objects" do
-        object_ids = [@pr1.id, -1]
-        sample_ids = [@sample1.id, -1]
-        expect do
-          HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
-        end.to raise_error("Not all ids correspond to deletable objects")
-      end
-
       it "successfully destroys valid pipeline runs" do
         object_ids = [@pr1.id, @pr2.id]
-        sample_ids = [@sample1.id]
+        sample_ids = [@sample1.id, @sample2.id]
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
 
         expect { @pr1.reload }.to raise_error(ActiveRecord::RecordNotFound)
@@ -78,7 +62,7 @@ RSpec.describe HardDeleteObjects, type: :job do
 
       it "destroys the samples only if deleted_at is not nil" do
         object_ids = [@pr1.id, @pr2.id]
-        sample_ids = [@sample1.id]
+        sample_ids = [@sample1.id, @sample2.id]
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
 
         # should destroy sample 1 but not sample 2
@@ -224,25 +208,9 @@ RSpec.describe HardDeleteObjects, type: :job do
         @wr3 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
       end
 
-      it "raises error if no deletable objects are found" do
-        object_ids = [-1]
-        sample_ids = [-1]
-        expect do
-          HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
-        end.to raise_error("Not all ids correspond to deletable objects")
-      end
-
-      it "raises error if not all ids correspond to deletable objects" do
-        object_ids = [@wr1.id, -1]
-        sample_ids = [-1]
-        expect do
-          HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
-        end.to raise_error("Not all ids correspond to deletable objects")
-      end
-
       it "successfully destroys workflow runs" do
         object_ids = [@wr1.id, @wr2.id]
-        sample_ids = [@sample1.id]
+        sample_ids = [@sample1.id, @sample2.id]
         HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
 
         expect { @wr1.reload }.to raise_error(ActiveRecord::RecordNotFound)
@@ -251,7 +219,7 @@ RSpec.describe HardDeleteObjects, type: :job do
 
       it "triggers S3 file deletion for workflow runs and samples if applicable" do
         object_ids = [@wr1.id, @wr2.id]
-        sample_ids = [@sample1.id]
+        sample_ids = [@sample1.id, @sample2.id]
         expect(S3Util).to receive(:delete_s3_prefix).with(@wr1.sfn_output_path)
         expect(S3Util).to receive(:delete_s3_prefix).with(@wr2.sfn_output_path)
         expect(S3Util).to receive(:delete_s3_prefix).with("s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample1.sample_path}/")
@@ -261,7 +229,7 @@ RSpec.describe HardDeleteObjects, type: :job do
 
       it "destroys the samples only if there are no remaining pipeline or workflow runs" do
         object_ids = [@wr1.id, @wr2.id]
-        sample_ids = [@sample1.id]
+        sample_ids = [@sample1.id, @sample2.id]
         HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
 
         # should destroy sample 1 but not sample 2

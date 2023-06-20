@@ -130,18 +130,20 @@ class BulkDeletionService
       )
     end
 
-    ids_to_hard_delete = deletable_objects.pluck(:id)
-    if ids_to_hard_delete.empty? && soft_deleted_sample_ids.empty?
+    # Warn if nothing to hard delete. This can happen when a user deletes failed
+    # mNGS uploads but there are also failed AMR runs on the samples.
+    run_ids_to_hard_delete = deletable_objects.pluck(:id)
+    if deletable_objects.empty? && sample_ids_failed_upload.empty?
       LogUtil.log_message("No runs or samples to hard delete.",
                           sample_count_by_workflow: count_by_workflow,
                           object_ids: object_ids,
                           workflow_deleted: workflow)
     else
-      Resque.enqueue(HardDeleteObjects, ids_to_hard_delete, soft_deleted_sample_ids, workflow, user.id)
+      Resque.enqueue(HardDeleteObjects, run_ids_to_hard_delete, sample_ids, workflow, user.id)
     end
 
     return {
-      deleted_run_ids: ids_to_hard_delete,
+      deleted_run_ids: run_ids_to_hard_delete,
       deleted_sample_ids: soft_deleted_sample_ids,
     }
   end
