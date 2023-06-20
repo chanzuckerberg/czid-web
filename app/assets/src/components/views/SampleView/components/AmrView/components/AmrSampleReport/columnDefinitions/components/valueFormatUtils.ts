@@ -91,8 +91,8 @@ export const getFormattedCompoundString = (
 };
 
 export const sortStringOrFallback = (aRow, bRow, columnId) => {
-  const a = aRow.getValue(columnId);
-  const b = bRow.getValue(columnId);
+  const a = aRow.getValue(columnId).toLowerCase();
+  const b = bRow.getValue(columnId).toLowerCase();
 
   // sort a real value before a fallback value
   if (b === null) {
