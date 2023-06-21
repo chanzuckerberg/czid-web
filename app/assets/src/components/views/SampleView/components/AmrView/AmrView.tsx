@@ -18,6 +18,7 @@ import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V2_FEATURE } from "~/components/utils/features";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
+import { SUCCEEDED_STATE } from "../../constants";
 import SampleReportContent from "../../SampleReportContent";
 import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
@@ -54,7 +55,12 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   }, [dataFilterFunc, reportTableData]);
 
   useEffect(() => {
-    if (!allowedFeatures.includes(AMR_V2_FEATURE)) return;
+    if (
+      !allowedFeatures.includes(AMR_V2_FEATURE) ||
+      workflowRun.status !== SUCCEEDED_STATE
+    ) {
+      return;
+    }
     setLoadingResults(true);
     const fetchResults = async () => {
       const reportDataRaw = await getWorkflowRunResults(workflowRun.id);
