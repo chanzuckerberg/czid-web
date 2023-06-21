@@ -45,6 +45,7 @@ const config: PlaywrightTestConfig = {
     storageState: "/tmp/state.json",
     trace: "on-first-retry",
     video: "on",
+    permissions: ["clipboard-read"],
   },
 };
 export default config;

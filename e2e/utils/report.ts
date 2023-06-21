@@ -11,6 +11,8 @@ import {
   DELETE_RUN_MENUITEM,
   DOWNLOADS,
   ERCC,
+  FILE_DOWLOAD_TYPES_AMR,
+  FILE_DOWLOAD_TYPES_MNGS,
   HOST_INFO,
   INFECTION_INFO,
   OVERFLOW_BUTTON,
@@ -18,6 +20,7 @@ import {
   READS_REMAINING,
   SAMPLE_INFO,
   SEQUENCING_INFO,
+  URL_DOWLOAD_TYPES,
 } from "../constants/sample.const";
 
 export const sectionIndices: Record<string, number> = {
@@ -239,12 +242,72 @@ export async function verifyDeleteDisabled(
   await expect(page.getByTestId(DELETE_DISABLED_TOOLTIP)).toBeVisible();
 }
 
-export async function chooseBackgroundModel(page: Page) {
-  // choose Background
-  await page.getByTestId("background-filter").click();
+export async function verifyDownload(
+  page: Page,
+  workflowName: "Metagenomic" | "Antimicrobial Resistance" | "Consensus Genome" | "Nanopore",
+  sampleId: number,
+){
+  switch (workflowName) {
+    case "Metagenomic":
+    case "Nanopore":
+      await verifyDownloadFiles(page, FILE_DOWLOAD_TYPES_MNGS);
+      await verifyDownloadUrls(page, sampleId);
+      break;
+    case "Antimicrobial Resistance":
+      await verifyDownloadFiles(page, FILE_DOWLOAD_TYPES_AMR);
+      break;
+    case "Consensus Genome":
+      await verifyDownloadAll(page);
+      break;
+  }
+};
 
+
+async function verifyDownloadFiles(page: Page, downloadList: string[][]){
+  for (const downloadType of downloadList) {
+    const [download] = await Promise.all([
+        page.waitForEvent("download"),
+        await page.getByRole("button", { name: "Download" }).click(),
+        await page.getByRole("option", { name: downloadType[0] }).click(),
+    ]);
+    expect(download.suggestedFilename()).toContain(downloadType[1]);
+  }
+}
+
+async function verifyDownloadUrls(page: Page, sampleId: number){
+  for (const downloadType of URL_DOWLOAD_TYPES) {
+    const [newTab] = await Promise.all([
+      page.waitForEvent("popup"),
+      await page.getByRole("button", { name: "Download" }).click(),
+      await page.getByRole("option", { name: downloadType[0] }).click(),
+    ]);
+    await newTab.waitForLoadState();
+    const newTabUrl = await newTab.url();
+    expect(newTabUrl).toContain(`${process.env.BASEURL}/samples/${sampleId}${downloadType[1]}`);
+  }
+};
+
+
+async function verifyDownloadAll(page: Page){
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download All" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toContain(".zip");
+};
+
+export async function chooseBackgroundModel(page: Page) {
+    // choose Background
+    await page.getByTestId("background-filter").click();
+
+    await page
+      .getByRole("option", { name: "Test Background Model Standard" })
+      .getByText("Test Background Model")
+      .click();
+}
+
+export async function applyFilter(page: Page) {
+  await page.getByTestId("category-filter").click();
   await page
-    .getByRole("option", { name: "Test Background Model Standard" })
-    .getByText("Test Background Model")
-    .click();
+      .getByTestId("dropdown-viruses")
+      .click();
 }

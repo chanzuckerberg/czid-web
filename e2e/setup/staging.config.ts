@@ -48,6 +48,7 @@ const config: PlaywrightTestConfig = {
     storageState: "/tmp/state.json",
     trace: "on",
     viewport: { width: 800, height: 7200 },
+    permissions: ["clipboard-read"],
   },
   workers: 2,
 };

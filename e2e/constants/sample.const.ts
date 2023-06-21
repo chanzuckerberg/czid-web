@@ -194,3 +194,26 @@ export const OVERFLOW_BUTTON = "overflow-btn";
 export const BULK_DELETE_MODAL = "bulk-delete-modal";
 export const DELETE_RUN_MENUITEM = "delete-run-menuitem";
 export const DELETE_DISABLED_TOOLTIP = "delete-disabled-tooltip";
+export const FILE_DOWLOAD_TYPES_MNGS = [
+  ["Download Report Table (.csv)", ".csv"],
+  // todo: uncomment when data-testid is on staging (smccanny)
+  // [Download Report Table with Applied Filters (.csv), ".csv"],
+  ["Download Non-Host Reads (.fasta)", ".fasta"],
+  ["Download Non-Host Contigs (.fasta)", ".fasta"],
+  ["Download Non-Host Contigs Summary (.csv)", ".csv"],
+  ["Download Unmapped Reads (.fasta)", ".fasta"],
+];
+export const FILE_DOWLOAD_TYPES_AMR = [
+  ["Download Report Table (.csv)", ".csv"],
+  // todo: uncomment when data-testid is on staging (smccanny)
+  // [Download Report Table with Applied Filters (.csv), ".csv"],
+  ["Download Non-Host Reads (.fasta)", ".fasta"],
+  ["Download Non-Host Contigs (.fasta)", ".fasta"],
+  ["Download Comprehensive AMR Metrics File (.tsv)", ".tsv"],
+  ["Download Intermediate Files (.zip)", ".zip"],
+];
+export const URL_DOWLOAD_TYPES = [
+  ["View Results Folder", "/results_folder?pipeline_version="],
+  ["View Pipeline Visualization", "/pipeline_viz/"],
+];
+

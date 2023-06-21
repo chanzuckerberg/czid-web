@@ -10,6 +10,7 @@ const HelpButton = ({ className, onClick }: HelpButtonProps) => (
     sdsStyle="rounded"
     startIcon={<Icon sdsIcon="questionMark" sdsSize="l" sdsType="button" />}
     onClick={onClick}
+    data-testid="help-button"
   />
 );
 

@@ -93,6 +93,7 @@ class Title extends React.Component<TitleProps> {
           className={cs.sampleDropdown}
           floating
           items={items}
+          data-testid="view-header-dropdown"
         />
       );
     } else {

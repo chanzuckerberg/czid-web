@@ -337,7 +337,7 @@ export const ReportFilters = ({
           </div>
         )}
         {/* from server */}
-        <div className={cs.filterListElement}>
+        <div className={cs.filterListElement} data-testid="category-filter">
           <CategoryFilter
             allCategories={CATEGORIES}
             categoryParentChild={transform((result, category) => {
