@@ -654,7 +654,7 @@ class SamplesHeatmapVis extends React.Component<
   scrollToRow() {
     if (this.props.newTaxon) {
       this.heatmap.scrollToRow(
-        this.props.taxonDetails[this.props.newTaxon].name,
+        this.props.taxonDetails[this.props.newTaxon]?.name,
       );
     }
   }
