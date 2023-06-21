@@ -106,7 +106,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
   }
 
   getDataForAccession = async (accessionId: string) => {
-    const { sampleId, snapshotShareId } = this.props;
+    const { sampleId, snapshotShareId, pipelineVersion } = this.props;
 
     if (this._accessionDataCache[accessionId]) {
       return this._accessionDataCache[accessionId];
@@ -115,6 +115,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
         sampleId,
         accessionId,
         snapshotShareId,
+        pipelineVersion,
       });
       this._accessionDataCache[accessionId] = data;
       return data;

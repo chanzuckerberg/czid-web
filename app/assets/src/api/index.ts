@@ -401,23 +401,42 @@ const getBackgrounds = ({
 const getCoverageVizSummary = ({
   sampleId,
   snapshotShareId,
+  pipelineVersion,
 }: {
   sampleId?: number;
   snapshotShareId?: string;
+  pipelineVersion?: string;
 } = {}): Promise<CoverageVizParams["accessionData"]> =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}/coverage_viz_summary`,
+    {
+      params: {
+        pipeline_version: pipelineVersion,
+      },
+    },
   );
 
 const getCoverageVizData = ({
   sampleId,
   accessionId,
   snapshotShareId,
-}: $TSFixMe = {}) =>
+  pipelineVersion,
+}: {
+  sampleId?: number;
+  accessionId?: string;
+  snapshotShareId?: string;
+  pipelineVersion?: string;
+} = {}) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
-      `/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`,
+      `/samples/${sampleId}/coverage_viz_data?`,
+    {
+      params: {
+        accession_id: accessionId,
+        pipeline_version: pipelineVersion,
+      },
+    },
   );
 
 const getWorkflowRunsInfo = (workflowRunIds: $TSFixMe) =>

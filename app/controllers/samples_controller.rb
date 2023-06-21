@@ -1593,7 +1593,7 @@ class SamplesController < ApplicationController
 
   def coverage_viz_data
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    coverage_viz_data_s3_path = pr.coverage_viz_data_s3_path(params[:accessionId])
+    coverage_viz_data_s3_path = pr.coverage_viz_data_s3_path(params[:accession_id])
 
     if coverage_viz_data_s3_path
       @coverage_viz_data = S3Util.get_s3_file(coverage_viz_data_s3_path)

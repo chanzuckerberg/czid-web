@@ -651,7 +651,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
   fetchCoverageVizData = async () => {
     const { snapshotShareId } = this.props;
-    const { sample, pipelineRun, currentTab } = this.state;
+    const { sample, pipelineRun, pipelineVersion, currentTab } = this.state;
 
     if (
       isPipelineFeatureAvailable(
@@ -663,6 +663,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       const coverageVizSummary = await getCoverageVizSummary({
         sampleId: sample.id,
         snapshotShareId,
+        pipelineVersion,
       });
       this.setState({
         coverageVizDataByTaxon: coverageVizSummary,

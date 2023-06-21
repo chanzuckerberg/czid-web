@@ -40,7 +40,7 @@ RSpec.describe StringUtil do
     end
 
     it "should not include params in canonicalized URL" do
-      url = "/samples/123/coverage_viz_data?accessionId=456"
+      url = "/samples/123/coverage_viz_data?accession_id=456"
       expect(StringUtil.canonicalize_url(url, :get)).to eq("/samples/X/coverage_viz_data")
     end
 
