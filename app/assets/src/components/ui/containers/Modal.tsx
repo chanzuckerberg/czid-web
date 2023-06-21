@@ -63,6 +63,7 @@ class Modal extends React.Component<ModalProps> {
               sCloseIcon && cs.s,
             )}
             onClick={this.props.onClose}
+            data-testid="modal-close-icon"
           />
         )}
         <SemanticModal.Content>{this.props.children}</SemanticModal.Content>

@@ -28,7 +28,7 @@ test.describe("Taxon Sidebar on Phylotree Page", () => {
     await testHistogramAppears(page, false);
   });
 
-  test.only(`Should verify links on taxon sidebar`, async ({ page }) => {
+  test(`Should verify links on taxon sidebar`, async ({ page }) => {
     await testTaxonLinks(page);
   });
 });

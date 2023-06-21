@@ -85,6 +85,7 @@ export default function ConsensusGenomePreviousModal({
         onClose,
         ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED,
       )}
+      data-testid="previous-consensus-genome-modal"
     >
       <div className={cs.title}>Consensus Genome</div>
       <div className={cs.label}>

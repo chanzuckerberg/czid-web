@@ -745,7 +745,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
   renderExpandIconHeader = () => {
     const { expandAllOpened } = this.state;
     return (
-      <div className={cs.expandIcon}>
+      <div className={cs.expandIcon} data-testid="expand-taxon-parent-all">
         <i
           className={cx(
             "fa",

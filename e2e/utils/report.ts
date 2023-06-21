@@ -238,3 +238,13 @@ export async function verifyDeleteDisabled(
   await dropdownItem.hover({ force: true }); // use force because tooltip intercepts focus
   await expect(page.getByTestId(DELETE_DISABLED_TOOLTIP)).toBeVisible();
 }
+
+export async function chooseBackgroundModel(page: Page) {
+  // choose Background
+  await page.getByTestId("background-filter").click();
+
+  await page
+    .getByRole("option", { name: "Test Background Model Standard" })
+    .getByText("Test Background Model")
+    .click();
+}
