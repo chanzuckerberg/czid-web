@@ -402,18 +402,21 @@ const SamplesHeatmapFilters = ({
           <div className={cs.taxonTagsContainer}>
             <span className={cs.filterTitle}>Pathogen Tag</span>
             <SamplesHeatmapTaxonTagCheckbox
-              label={"Known Pathogens"}
+              label={"Known Pathogens Only"}
               value={"known_pathogens"}
               selectedOptions={selectedOptions}
               onSelectedOptionsChange={onSelectedOptionsChange}
               showInfoIcon={true}
               infoIconTooltipContent={
                 <span>
-                  Organism with known human pathogenicity. See the{" "}
+                  Organisms with known human pathogenicity based on{" "}
                   <Link external href="/pathogen_list">
-                    full list
+                    CZID&#39;s current pathogen list.
                   </Link>{" "}
-                  of pathogens.
+                  <br />
+                  <br />
+                  Please cross-reference the literature to verify tagged
+                  pathogens.
                 </span>
               }
               disabled={loading || !data}
