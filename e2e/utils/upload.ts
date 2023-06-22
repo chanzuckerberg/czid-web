@@ -1,6 +1,6 @@
+import path from "path";
 import { expect, Page } from "@playwright/test";
 import { kebabCase } from "lodash/fp";
-import path from "path";
 import {
   ACCEPT_ALL_COOKIES,
   ANALYSIS_TYPE,
@@ -22,7 +22,7 @@ import {
   START_UPLOAD,
   UPLOAD_METADATA,
   WORKFLOWS,
-} from "../constants/common.const";
+} from "../constants/common";
 import { Metadata } from "../types/metadata";
 import { findByTextRole, pressKey } from "../utils/page";
 import { getFixture } from "./common";

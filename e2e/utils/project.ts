@@ -7,6 +7,8 @@ import { getByPlaceholder } from "./selectors";
 const trueOrFalse = [true, false];
 const zeroOrOne = [0, 1];
 const metadataFixture = getFixture("metadata");
+const ACCOUNT_NAME = "CZID Test Account";
+
 /**
  * Function generates data for mocking project response data
  * @param projectName
@@ -34,13 +36,13 @@ export function generateProjectData(projectName: string): Project {
     editable: sample(trueOrFalse) as boolean,
     users: [
       {
-        name: "CZID Test Account",
+        name: ACCOUNT_NAME,
         email: "czid-e2e@chanzuckerberg.com",
       },
     ],
-    creator: "CZID Test Account",
+    creator: ACCOUNT_NAME,
     creator_id: getRandomNumber(0, 10),
-    owner: "CZID Test Account",
+    owner: ACCOUNT_NAME,
     tissues: ["Mixed Tissue"],
     sample_counts: {
       number_of_samples: getRandomNumber(0, 10),

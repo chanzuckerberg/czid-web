@@ -12,7 +12,7 @@ import {
   TAXON_FILTERS,
   UPLOAD,
   VISUALIZATIONS,
-} from "../../constants/common.const";
+} from "../../constants/common";
 import { BasePage } from "../../pages/basePage";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });

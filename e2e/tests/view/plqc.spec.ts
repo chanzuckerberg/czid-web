@@ -18,7 +18,7 @@ import {
   BAR_POPUP,
   LEARN_MORE_TEXT,
   PIPELINE_CHART_HEADER,
-} from "../../constants/map.const";
+} from "../../constants/map";
 import { openSamplePage } from "../../utils/report";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
@@ -91,16 +91,14 @@ async function verifyBarChartContent(
       .nth(index)
       .getAttribute("height");
     // if the height of the chart is zero do not hover over it
-    if (graphHeight !== "0") {
-      if (await page.locator(`.rect-${i}`).nth(index).isVisible()) {
+    if (graphHeight !== "0" && await page.locator(`.rect-${i}`).nth(index).isVisible()) {
         await page.locator(HEADER_READS).nth(index).hover();
         await page.locator(`.rect-${i}`).nth(index).hover();
         await expect(page.locator(BAR_POPUP).nth(0)).toBeVisible();
         await expect(page.locator(BAR_POPUP).nth(1)).toBeVisible();
       }
     }
-  }
-}
+  };
 // These tests verifies Ui elements displayed on the plqc view like header, side bars, bar charts and graphs
 test.describe("PLQC view tests", () => {
   test(`Should verify TOTAL_READ bar chart content`, async ({

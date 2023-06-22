@@ -1,6 +1,6 @@
+import path from "path";
 import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
-import path from "path";
 import {
   ENTER,
   METADATA_COUNT_SELECTOR,
@@ -10,8 +10,8 @@ import {
   RESULT_COUNT_SELECTOR,
   SAMPLES,
   SEARCH_PUBLIC,
-} from "../../constants/common.const";
-import { SAMPLE_NAME_SELECTOR } from "../../constants/filter.const";
+} from "../../constants/common";
+import { SAMPLE_NAME_SELECTOR } from "../../constants/filter";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 

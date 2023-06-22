@@ -29,7 +29,7 @@ import {
   VIROIDS_FILTER,
   VIRUSES_FILTER,
   UNCATEGORIZED_FILTER,
-} from "../../constants/sample.const";
+} from "../../constants/sample";
 
 const sampleId = 25307;
 // These tests validate the user's proficiency in utilizing various filter functions on the sample report page, such as Nametype, Annotation, Category, Threshold filter, and Read specificity.

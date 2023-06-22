@@ -1,7 +1,7 @@
 import path from "path";
 import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
-import { OVERALL, TEST_PROJECTS } from "../../constants/common.const";
+import { OVERALL, TEST_PROJECTS } from "../../constants/common";
 import {
   VISIBLE,
   OVERALL_AREA,
@@ -21,7 +21,7 @@ import {
   HELP_OUT,
   SIDE_BAR,
   HOVER_TEXT,
-} from "../../constants/map.const";
+} from "../../constants/map";
 import { BasePage } from "../../pages/basePage";
 import { openSamplePage } from "../../utils/report";
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
@@ -225,7 +225,7 @@ test.describe("Map view tests", () => {
             .hover();
           await expect(page.locator(HOVER_TEXT).nth(0)).toBeVisible();
           await expect(page.locator(HOVER_TEXT).nth(1)).toBeVisible();
-          //make sure the hover is no longer present
+          // make sure the hover is no longer present
           await page.locator(".label-153WY").click();
         }
       }

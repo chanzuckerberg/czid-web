@@ -87,7 +87,7 @@ export function getAlphaNumericString(
   return randomString;
 }
 /*
-  This helper method generates a date in the past. 
+  This helper method generates a date in the past.
   @param {number} howRecent: how recent the date should be, defaults to 10, meaning the date can be 1 - 10 days in the past
   @param {string} refDate: reference date to use, especially useful for sequencing date that needs to be older that collection date
   */

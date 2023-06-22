@@ -1,6 +1,6 @@
+import path from "path";
 import { expect, Page, test } from "@playwright/test";
 import dotenv from "dotenv";
-import path from "path";
 import {
   ANTIMICROBIAL_RESISTANCE,
   AVG_READS_FILTER_PER_SAMPLE,
@@ -35,14 +35,14 @@ import {
   TEST_PROJECTS,
   VIEW_ICON,
   VISIBLE,
-} from "../../constants/common.const";
+} from "../../constants/common";
 import {
   ANNOTATION,
   HOST,
   LOCATION,
   TIMEFRAME,
   VISIBILITY,
-} from "../../constants/filter.const";
+} from "../../constants/filter";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
@@ -61,6 +61,9 @@ async function verifyElement(page: Page, n: number, locator: string) {
     await expect.soft(page.locator(locator).nth(i)).toBeVisible();
   }
 }
+
+const PLUS_ICON = ".plusIcon-1OBta";
+
 
 // These tests verifies Ui elements displayed on the discovery view like header, side bars, bar charts and graphs
 test.describe("Discovery view tests", () => {
@@ -130,7 +133,7 @@ test.describe("Discovery view tests", () => {
     test(`Should display right side content for ${sampleType}`, async ({
       page,
     }) => {
-      await expect(page.locator(".plusIcon-1OBta")).toBeVisible();
+      await expect(page.locator(PLUS_ICON)).toBeVisible();
       await expect(page.locator(".title-3Oy38")).toContainText(DESCRIPTION);
 
       // user cannot edit public description
@@ -162,7 +165,7 @@ test.describe("Discovery view tests", () => {
       page,
     }) => {
       // Open column
-      await page.locator(".plusIcon-1OBta").click();
+      await page.locator(PLUS_ICON).click();
 
       // Get the number of elements on the column
       const column_dropdown = await page
@@ -203,7 +206,7 @@ test.describe("Discovery view tests", () => {
         await page.locator('[id="onetrust-button-group"]').click();
       }
       // info icon used to hide and unhide  columns on the page
-      await page.locator(".plusIcon-1OBta").click();
+      await page.locator(PLUS_ICON).click();
 
       await page.locator(BAR_LABEL).nth(1).waitFor({
         state: VISIBLE,

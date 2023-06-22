@@ -109,4 +109,4 @@ export const WORKFLOWS = {
   WGS: "viral-consensus-genome",
   AMR: "amr",
   SC2: "covid-consensus-genome",
-};
+} as const;

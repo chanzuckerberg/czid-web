@@ -2,7 +2,6 @@ import { expect, test } from "@playwright/test";
 import { stubRequest } from "../../utils/api";
 
 const samplesPage = `${process.env.BASEURL}/my_data?currentTab=samples`;
-const publicPage = `${process.env.BASEURL}/public?currentTab=samples`;
 
 const triggerTestId = "bulk-delete-trigger";
 const bulkDeleteApi = "samples/bulk_delete";

@@ -1,7 +1,7 @@
+import path from "path";
 import { expect, Page, test } from "@playwright/test";
 import dotenv from "dotenv";
-import path from "path";
-import { TEST_PROJECTS } from "../../constants/common.const";
+import { TEST_PROJECTS } from "../../constants/common";
 import {
   ADD_THRESHOLD,
   ANNOTATION,
@@ -26,7 +26,7 @@ import {
   TAXON,
   TIMEFRAME,
   VISIBILITY,
-} from "../../constants/filter.const";
+} from "../../constants/filter";
 import { goToProjectSamples } from "../../utils/project";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });

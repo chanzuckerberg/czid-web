@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   ALL_COLUMN_HEADERS,
   FILTER_HEADERS,
-} from "../../constants/sample.const";
+} from "../../constants/sample";
 import {
   metadataSectionTitles,
   pipelineSectionTitlesLongReads,

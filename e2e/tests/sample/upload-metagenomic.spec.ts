@@ -1,12 +1,12 @@
+import path from "path";
 import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
-import path from "path";
 import {
   CONTINUE,
   GO_TO_PROJECT,
   LOADED,
   WORKFLOWS,
-} from "../../constants/common.const";
+} from "../../constants/common";
 import { Metadata } from "../../types/metadata";
 import { generateMetadataFile, getMetadata } from "../../utils/mockData";
 import { fileChooser } from "../../utils/page";

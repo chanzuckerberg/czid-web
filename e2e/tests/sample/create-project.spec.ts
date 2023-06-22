@@ -2,11 +2,15 @@ import { expect, test } from "@playwright/test";
 import {
   HELP_CENTER_PROJECT_URL,
   PROJECT_NAME_NOT_AVAILABLE_ERROR,
-} from "../../constants/upload.const";
+} from "../../constants/upload";
 import { stubRequest } from "../../utils/api";
 
 const baseUrl = process.env.BASEURL;
 const projectApi = "projects.json";
+const CREATE_PROJECT_BTN = "create-project-btn";
+const UI_INPUT = ".idseq-ui input[type='text']";
+const PUBLIC_PROJECT = "public-project";
+const PROJECT_DESCRIPTION = "project-description";
 
 type Project = {
   id: number;
@@ -44,7 +48,7 @@ test.describe("Create project test", () => {
     // Create Project modal should be visible
     await expect(page.getByText("New Project")).toBeVisible();
     // Create Project button should be disabled
-    await expect(page.getByTestId("create-project-btn")).toBeDisabled();
+    await expect(page.getByTestId(CREATE_PROJECT_BTN)).toBeDisabled();
   });
 
   test("Creating Project is successful for happy path", async ({ page }) => {
@@ -62,18 +66,18 @@ test.describe("Create project test", () => {
     await stubRequest(page, projectApi, 200, response);
 
     // Fill in project name
-    await page.locator('.idseq-ui input[type="text"]').fill(data.name);
+    await page.locator(UI_INPUT).fill(data.name);
 
     // Select public project
-    await page.getByTestId("public-project").click();
+    await page.getByTestId(PUBLIC_PROJECT).click();
 
     // Fill in project description
-    await page.getByTestId("project-description").fill(data.description);
+    await page.getByTestId(PROJECT_DESCRIPTION).fill(data.description);
 
-    await expect(page.getByTestId("create-project-btn")).toBeEnabled();
+    await expect(page.getByTestId(CREATE_PROJECT_BTN)).toBeEnabled();
 
     // Submit
-    await page.getByTestId("create-project-btn").click();
+    await page.getByTestId(CREATE_PROJECT_BTN).click();
 
     // expand the dropdown
     await page.locator(".labelContainer-3Rr0F").click();
@@ -86,12 +90,12 @@ test.describe("Create project test", () => {
   }) => {
     // Fill in project name that already exists in test db
 
-    await page.locator('.idseq-ui input[type="text"]').fill(`Test project`);
-    await page.getByTestId("public-project").click();
+    await page.locator(UI_INPUT).fill(`Test project`);
+    await page.getByTestId(PUBLIC_PROJECT).click();
     await page
-      .getByTestId("project-description")
+      .getByTestId(PROJECT_DESCRIPTION)
       .fill("test project description");
-    await page.getByTestId("create-project-btn").click();
+    await page.getByTestId(CREATE_PROJECT_BTN).click();
 
     // Modal should display error that project name is not available
     await expect(
@@ -102,16 +106,16 @@ test.describe("Create project test", () => {
   test("Create project button should be disabled if any of the fields are not filled in", async ({
     page,
   }) => {
-    await page.locator('.idseq-ui input[type="text"]').fill(`Test project`);
-    await expect(page.getByTestId("create-project-btn")).toBeDisabled();
-    await page.getByTestId("public-project").click();
-    await expect(page.getByTestId("create-project-btn")).toBeDisabled();
+    await page.locator(UI_INPUT).fill(`Test project`);
+    await expect(page.getByTestId(CREATE_PROJECT_BTN)).toBeDisabled();
+    await page.getByTestId(PUBLIC_PROJECT).click();
+    await expect(page.getByTestId(CREATE_PROJECT_BTN)).toBeDisabled();
     await page
-      .getByTestId("project-description")
+      .getByTestId(PROJECT_DESCRIPTION)
       .fill("test project description");
 
     // Create project button is only enabled after all fields are filled out
-    await expect(page.getByTestId("create-project-btn")).toBeEnabled();
+    await expect(page.getByTestId(CREATE_PROJECT_BTN)).toBeEnabled();
   });
 
   test("Clicking Cancel button closes modal", async ({ page }) => {

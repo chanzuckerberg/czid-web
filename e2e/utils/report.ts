@@ -3,7 +3,7 @@ import {
   MENU_ITEM_PUBLIC,
   METAGENOMICS,
   SEARCH_PUBLIC,
-} from "../constants/common.const";
+} from "../constants/common";
 import {
   BASES_REMAINING,
   BULK_DELETE_MODAL,
@@ -21,7 +21,7 @@ import {
   SAMPLE_INFO,
   SEQUENCING_INFO,
   URL_DOWLOAD_TYPES,
-} from "../constants/sample.const";
+} from "../constants/sample";
 
 export const sectionIndices: Record<string, number> = {
   sampleInfo: 0,

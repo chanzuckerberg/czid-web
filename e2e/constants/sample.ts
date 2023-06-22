@@ -52,13 +52,6 @@ export const ALL_READS_REMAINING = [
   "GSNAP",
 ];
 export const NO_DATA = ".noData-2AfzS";
-export const ALL_DOWNLOAD = [
-  "Download Non-Host Reads (.fasta)",
-  "Download Unmapped Reads (.fasta)",
-  "View Results Folder",
-  "View Pipeline Visualization",
-];
-
 export const PIPELINE_LINK = ".pipelineInfo-Yfrsi";
 export const PIPELINE_LINK_PATH = "pipeline_viz/7.1?";
 export const SAMPLE_HEADER = ".sampleName-1xb-q";

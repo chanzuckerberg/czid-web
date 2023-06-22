@@ -1,7 +1,7 @@
+import path from "path";
 import { expect, Locator, Page, test } from "@playwright/test";
 import dotenv from "dotenv";
-import path from "path";
-import { FIXTURE_DIR, WORKFLOWS } from "../../constants/common.const";
+import { FIXTURE_DIR, WORKFLOWS } from "../../constants/common";
 import { Metadata } from "../../types/metadata";
 import { getMetadata } from "../../utils/mockData";
 import {
@@ -28,12 +28,15 @@ const defaults: Metadata = {
   "Ct Value": 97,
 };
 
+type WORKFLOW_KEYS = keyof typeof WORKFLOWS;
+type WORKFLOW_VALUES = typeof WORKFLOWS[WORKFLOW_KEYS];
+
 const getCheckboxForWorkflow = async ({
   page,
   workflow,
 }: {
   page: Page;
-  workflow: WORKFLOWS;
+  workflow: WORKFLOW_VALUES;
 }): Promise<Locator> => {
   return page.getByTestId(`analysis-type-${workflow}`).locator("input");
 };

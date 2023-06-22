@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { FILTER_RESULT, TREE_NODES } from "../../constants/sample.const";
+import { FILTER_RESULT, TREE_NODES } from "../../constants/sample";
 
 const sampleId = 25307;
 // These tests verify the ui displayed on the treeview for the sample report page
