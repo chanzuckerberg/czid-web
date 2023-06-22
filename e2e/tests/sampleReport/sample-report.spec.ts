@@ -120,22 +120,21 @@ test.describe("Test Sample Report Pipeline Version dropdown", () => {
     await expect(page.getByText("685 rows")).toBeVisible();
   });
 
-  // TODO(ihan): patch this test after [CZID-2157] reaches staging
-  test(`verify coverage viz on the sample report bottom bar`, async ({
-    page,
-  }) => {
+  test(`verify coverage viz on the sample report`, async ({ page }) => {
     async function viewKlebsiellaCoverageViz(page) {
+      await expect(page.getByText("Klebsiella")).toBeVisible();
       await page.getByText("Klebsiella").hover();
       await page.getByTestId("hover-action-coverage-viz-570").click();
     }
 
-    // pipeline version v8.0
+    // pipeline version v8.0 has 80 Loose NT reads
     await viewKlebsiellaCoverageViz(page);
-    // await expect(page.getByText("")).toBeVisible();
+    await expect(page.getByText("Loose NT Reads (80)")).toBeVisible();
 
-    // pipeline version v7.1
+    // pipeline version v7.1 has 72 Loose NT reads
+    await page.reload();
     await selectPipelineVersionV7(page);
     await viewKlebsiellaCoverageViz(page);
-    // await expect(page.getByText("")).toBeVisible();
+    await expect(page.getByText("Loose NT Reads (78)")).toBeVisible();
   });
 });
