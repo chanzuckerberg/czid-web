@@ -227,9 +227,12 @@ RSpec.describe BulkDeletionService, type: :service do
       )
     end
 
-    it "allows deletion of failed uploads along with successful uploads" do
+    it "allows deletion of failed uploads in the same request as successful uploads" do
       expect(Resque).to receive(:enqueue).with(
-        HardDeleteObjects, [@pr1.id], [@sample_no_prs.id, @sample1.id], short_read_mngs, @joe.id
+        HardDeleteObjects, [], [@sample_no_prs.id], short_read_mngs, @joe.id
+      )
+      expect(Resque).to receive(:enqueue).with(
+        HardDeleteObjects, [@pr1.id], [@sample1.id], short_read_mngs, @joe.id
       )
       response = BulkDeletionService.call(
         object_ids: [@sample_no_prs.id, @sample1.id],
@@ -243,6 +246,52 @@ RSpec.describe BulkDeletionService, type: :service do
       expect(@sample_no_prs.deleted_at).to be_within(1.minute).of(Time.now.utc)
       @sample1.reload
       expect(@sample1.deleted_at).to be_within(1.minute).of(Time.now.utc)
+    end
+
+    context "when a user submits a large bulk deletion" do
+      before do
+        @sample_ids = []
+        @pipeline_run_ids = []
+        11.times do |n|
+          sample = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "sample #{n}",
+                                   initial_workflow: short_read_mngs)
+          pr = create(:pipeline_run, sample: sample, technology: illumina, finalized: 1)
+          @sample_ids << sample.id
+          @pipeline_run_ids << pr.id
+        end
+        @sample_ids << @sample_no_prs.id
+      end
+
+      it "batches the hard deletion jobs" do
+        expect(Resque).to receive(:enqueue).with(
+          HardDeleteObjects,
+          [],
+          [@sample_no_prs.id],
+          short_read_mngs,
+          @joe.id
+        )
+        expect(Resque).to receive(:enqueue).with(
+          HardDeleteObjects,
+          @pipeline_run_ids.slice(0, 10),
+          @sample_ids.slice(0, 10),
+          short_read_mngs,
+          @joe.id
+        )
+        expect(Resque).to receive(:enqueue).with(
+          HardDeleteObjects,
+          [@pipeline_run_ids[10]],
+          [@sample_ids[10]],
+          short_read_mngs,
+          @joe.id
+        )
+        BulkDeletionService.call(
+          object_ids: @sample_ids,
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+      end
     end
 
     context "when the initial workflow is short read mNGS" do

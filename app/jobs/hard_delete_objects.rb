@@ -1,7 +1,8 @@
 # Deletes pipeline/workflow runs and samples in the background.
+# If batching this job, make sure it is a low priority for the workers
+# so that the other web app Resque jobs are not stalled when large deletions occur.
 class HardDeleteObjects
   extend InstrumentedJob
-  # TODO: consider setting a max batch size to avoid having a super long job clogging up the queue
 
   @queue = :hard_delete_objects
   DELETION_ATTEMPTS = 2 # retry deletion of object in case we hit a random deadlock

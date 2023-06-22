@@ -6,6 +6,7 @@
 # an array of deleted sample ids.
 class BulkDeletionService
   include Callable
+  HARD_DELETION_BATCH_SIZE = 10
 
   def initialize(object_ids:, user:, workflow:)
     if object_ids.blank?
@@ -61,10 +62,12 @@ class BulkDeletionService
 
     # If mngs, get pipeline runs from sample ids and clean up visualizations.
     # If workflow runs, get workflow run objects from workflow run ids.
+    sample_ids_failed_upload = []
     if WorkflowRun::MNGS_WORKFLOWS.include?(workflow)
       technology = WorkflowRun::MNGS_WORKFLOW_TO_TECHNOLOGY[workflow]
       deletable_objects = current_power.deletable_pipeline_runs.where(sample_id: object_ids, technology: technology)
       sample_ids = object_ids # allows us to delete samples with failed uploads but no pipeline runs
+      sample_ids_failed_upload = sample_ids - deletable_objects.pluck(:sample_id)
       handle_visualizations(sample_ids, delete_timestamp)
     else
       deletable_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
@@ -130,20 +133,31 @@ class BulkDeletionService
       )
     end
 
+    # first enqueue sample upload failures
+    unless sample_ids_failed_upload.empty?
+      Resque.enqueue(HardDeleteObjects, [], sample_ids_failed_upload, workflow, user.id)
+    end
+
+    # then enqueue runs in batches, since deleting pipeline runs can take a long time
+    unless deletable_objects.empty?
+      deletable_objects.in_batches(of: HARD_DELETION_BATCH_SIZE) do |batch|
+        # .transpose turns array [["run1", "sample1"], ["run2", "sample2"]] into [["run1", "run2"], ["sample1", "sample2"]]
+        ids = batch.pluck(:id, :sample_id).transpose
+        Resque.enqueue(HardDeleteObjects, ids[0], ids[1], workflow, user.id)
+      end
+    end
+
     # Warn if nothing to hard delete. This can happen when a user deletes failed
     # mNGS uploads but there are also failed AMR runs on the samples.
-    run_ids_to_hard_delete = deletable_objects.pluck(:id)
     if deletable_objects.empty? && sample_ids_failed_upload.empty?
       LogUtil.log_message("No runs or samples to hard delete.",
                           sample_count_by_workflow: count_by_workflow,
                           object_ids: object_ids,
                           workflow_deleted: workflow)
-    else
-      Resque.enqueue(HardDeleteObjects, run_ids_to_hard_delete, sample_ids, workflow, user.id)
     end
 
     return {
-      deleted_run_ids: run_ids_to_hard_delete,
+      deleted_run_ids: deletable_objects.pluck(:id),
       deleted_sample_ids: soft_deleted_sample_ids,
     }
   end
