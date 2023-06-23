@@ -1,6 +1,7 @@
 import React from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import Link from "~/components/ui/controls/Link";
 import Label from "~/components/ui/labels/Label";
 import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
 
@@ -34,7 +35,17 @@ const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
           onMouseEnter: () =>
             trackEvent(ANALYTICS_EVENT_NAMES.PATHOGEN_PREVIEW_HOVERED),
         })}
-        content="Contains flagged pathogen species."
+        content={
+          <span>
+            Contains species with known human pathogenicity based on{" "}
+            <Link external href="/pathogen_list">
+              CZ ID&#39;s current pathogen list.
+            </Link>{" "}
+            <br />
+            <br />
+            Please cross-reference the literature to verify tagged pathogens.
+          </span>
+        }
         basic={false}
         inverted={false}
         position="top center"

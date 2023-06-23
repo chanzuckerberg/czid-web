@@ -1,6 +1,5 @@
-import { Icon } from "@czi-sds/components";
+import { Icon, Tooltip } from "@czi-sds/components";
 import React, { useContext } from "react";
-import { Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
 import { UserContext } from "~/components/common/UserContext";
@@ -362,24 +361,22 @@ const SamplesHeatmapFilters = ({
       <div className={cs.topFilterSection}>
         <div className={cs.sectionTitle}>
           Filters
-          <Popup
-            content={
-              "Affects the underlying data that is shown in the heatmap."
-            }
-            position="top right"
-            trigger={
-              <span>
-                <Icon
-                  sdsIcon="infoCircle"
-                  sdsSize="xs"
-                  sdsType="static"
-                  color="gray"
-                  shade={500}
-                  className={cs.infoIcon}
-                />
-              </span>
-            }
-          />
+          <Tooltip
+            title={"Affects the underlying data that is shown in the heatmap."}
+            placement="top-start"
+            arrow
+          >
+            <span>
+              <Icon
+                sdsIcon="infoCircle"
+                sdsSize="xs"
+                sdsType="static"
+                color="gray"
+                shade={500}
+                className={cs.infoIcon}
+              />
+            </span>
+          </Tooltip>
         </div>
         <div className={cs.categoryDropdownContainer}>
           {renderCategoryFilter()}
@@ -411,7 +408,7 @@ const SamplesHeatmapFilters = ({
                 <span>
                   Organisms with known human pathogenicity based on{" "}
                   <Link external href="/pathogen_list">
-                    CZID&#39;s current pathogen list.
+                    CZ ID&#39;s current pathogen list.
                   </Link>{" "}
                   <br />
                   <br />
@@ -428,22 +425,22 @@ const SamplesHeatmapFilters = ({
       <div className={cs.lowerFilterSection}>
         <div className={cs.sectionTitle}>
           View Options
-          <Popup
-            content={"Affects how data is presented in the heatmap."}
-            position="top right"
-            trigger={
-              <span>
-                <Icon
-                  sdsIcon="infoCircle"
-                  sdsSize="xs"
-                  sdsType="static"
-                  color="gray"
-                  shade={500}
-                  className={cs.infoIcon}
-                />
-              </span>
-            }
-          />
+          <Tooltip
+            title={"Affects how data is presented in the heatmap."}
+            placement="top-start"
+            arrow
+          >
+            <span>
+              <Icon
+                sdsIcon="infoCircle"
+                sdsSize="xs"
+                sdsType="static"
+                color="gray"
+                shade={500}
+                className={cs.infoIcon}
+              />
+            </span>
+          </Tooltip>
         </div>
         <div className={cs.viewOptionsDropdownContainer}>
           {renderTaxonLevelSelect()}
