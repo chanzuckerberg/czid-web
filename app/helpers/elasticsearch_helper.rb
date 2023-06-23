@@ -74,6 +74,7 @@ module ElasticsearchHelper
       # MySQL 5.7 ONLY_FULL_GROUP_BY behavior. If you include `id` in the
       # `pluck`/`select`, that counts as deduping with the record ID, which is
       # not what we want because the record ID is already unique.
+
       taxon_data = TaxonLineage
                    .where("#{level}_taxid" => search_taxon_ids)
                    .order(id: :desc)
@@ -91,9 +92,9 @@ module ElasticsearchHelper
       matching_taxa += taxon_data
       taxon_ids += search_taxon_ids
     end
-
     taxon_ids = filter_by_samples(taxon_ids, filters[:samples]) if filters[:samples]
     taxon_ids = filter_by_project(taxon_ids, filters[:project_id]) if filters[:project_id]
+    taxon_ids = filter_by_superkingdom(taxon_ids, filters[:superkingdom]) if filters[:superkingdom]
     taxon_ids = Set.new(taxon_ids)
 
     # Always remove homo sapiens from search, same as reports, because all homo sapiens
@@ -117,6 +118,14 @@ module ElasticsearchHelper
 
   def filter_by_project(taxon_ids, project_id)
     return filter_by_samples(taxon_ids, Sample.joins(:project).where(project: Project.where(id: project_id)))
+  end
+
+  def filter_by_superkingdom(taxon_ids, superkingdom)
+    # filter TaxonLineage by superkingdom (ex: viruses, Bacteria) where taxid is in taxon_ids
+    return TaxonLineage
+           .where(taxid: taxon_ids)
+           .where(superkingdom_name: superkingdom)
+           .pluck(:taxid)
   end
 
   def sanitize(text)

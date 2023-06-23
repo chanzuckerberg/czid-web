@@ -361,12 +361,18 @@ const validateSampleFiles = (sampleFiles: $TSFixMe) => {
   });
 };
 
-const getSearchSuggestions = ({ categories, query, domain }: $TSFixMe) =>
+const getSearchSuggestions = ({
+  categories,
+  query,
+  domain,
+  superkingdom = undefined,
+}: $TSFixMe) =>
   get("/search_suggestions", {
     params: {
       categories,
       query,
       domain,
+      superkingdom,
     },
   });
 

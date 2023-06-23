@@ -64,6 +64,7 @@ const UploadTaxonFilter = ({
     const searchResults = await getSearchSuggestions({
       query,
       categories: ["taxon"],
+      superkingdom: "Viruses",
     });
 
     // elasticsearch returns an empty object if there are no results
