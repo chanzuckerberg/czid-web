@@ -29,8 +29,10 @@ export const HEATMAP_ELASTICSEARCH_FEATURE = "heatmap_elasticsearch";
 export const MULTITAG_PATHOGENS_FEATURE = "multitag_pathogens";
 // pathogen flag filter on sample report
 export const PATHOGEN_FLAG_FILTER_FEATURE = "pathogen_filter";
-// prototype of fetching taxon flag data including known pathogen and lcrp for the heatmap
+// prototype of fetching taxon flag data including divergent viruses and lcrp for the heatmap
 export const HEATMAP_PATHOGEN_FLAGGING_FEATURE = "heatmap_pathogens";
+// add a new filter to the heatmap to filter to taxa with known pathogen flags
+export const HEATMAP_KNOWN_PATHOGEN_FILTER = "heatmap_pathogen_filter";
 export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const HEATMAP_FILTERS_LEFT_FEATURE = "left_heatmap_filters";
 export const WGS_CG_UPLOAD_FEATURE = "wgs_cg_upload";

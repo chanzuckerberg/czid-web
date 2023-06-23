@@ -152,6 +152,7 @@ interface SamplesHeatmapViewState {
   newestTaxonId?: $TSFixMe;
   metadataTypes?: $TSFixMe;
   enableMassNormalizedBackgrounds?: $TSFixMe;
+  includePathogens?: boolean;
 }
 
 interface TaxonDetails {
@@ -277,6 +278,7 @@ class SamplesHeatmapView extends React.Component<
       taxonFilterState: [],
       pendingPinnedSampleIds: new Set(),
       pinnedSampleIds: new Set(),
+      includePathogens: false, // this will be togglable by the user in the future
     };
 
     this.removedTaxonIds = new Set(
@@ -339,14 +341,28 @@ class SamplesHeatmapView extends React.Component<
   componentDidMount() {
     const { projectIds, updateDiscoveryProjectIds } = this.props;
 
-    this.fetchViewData();
-    updateDiscoveryProjectIds(uniq(projectIds));
+    // temporarily set includePathogens to true for all users with the
+    // heatmap_pathogens feature flag. Later this will be togglable by the user.
+    const { allowedFeatures = [] } = this.context || {};
+    const usePathogenFlagging = allowedFeatures.includes(
+      HEATMAP_PATHOGEN_FLAGGING_FEATURE,
+    );
+    if (usePathogenFlagging) {
+      this.setState({ includePathogens: true }, () => {
+        this.fetchViewData();
+        updateDiscoveryProjectIds(uniq(projectIds));
+      });
+    } else {
+      this.fetchViewData();
+      updateDiscoveryProjectIds(uniq(projectIds));
+    }
   }
 
   parseUrlParams = () => {
     const urlParams = queryString.parse(location.search, {
       arrayFormat: "bracket",
     });
+
     // consider the cases where variables can be passed as array string
     if (typeof urlParams.sampleIds === "string") {
       urlParams.sampleIds = urlParams.sampleIds.split(",");
@@ -448,6 +464,7 @@ class SamplesHeatmapView extends React.Component<
         addedTaxonIds: Array.from(this.state.addedTaxonIds),
         removedTaxonIds: Array.from(this.removedTaxonIds),
         sampleIds: this.state.sampleIds,
+        includePathogens: this.state.includePathogens,
       },
       this.state.selectedOptions,
     );
@@ -455,6 +472,7 @@ class SamplesHeatmapView extends React.Component<
 
   prepareParams = () => {
     const params = this.getUrlParams();
+
     // Parameters stored as objects
     // @ts-expect-error Type 'string' is not assignable to type 'any[]'.ts(2322)
     params.thresholdFilters = JSON.stringify(params.thresholdFilters);

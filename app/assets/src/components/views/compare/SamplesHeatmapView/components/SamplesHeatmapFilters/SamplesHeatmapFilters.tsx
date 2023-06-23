@@ -5,7 +5,7 @@ import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import Link from "~/components/ui/controls/Link";
-import { HEATMAP_PATHOGEN_FLAGGING_FEATURE } from "~/components/utils/features";
+import { HEATMAP_KNOWN_PATHOGEN_FILTER } from "~/components/utils/features";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import SamplesHeatmapBackgroundDropdown from "./components/SamplesHeatmapBackgroundDropdown";
 import SamplesHeatmapCategoryDropdown from "./components/SamplesHeatmapCategoryDropdown";
@@ -395,7 +395,7 @@ const SamplesHeatmapFilters = ({
         <div className={cs.viewOptionsDropdownContainer}>
           {renderSpecificityFilter()}
         </div>
-        {allowedFeatures.includes(HEATMAP_PATHOGEN_FLAGGING_FEATURE) && (
+        {allowedFeatures.includes(HEATMAP_KNOWN_PATHOGEN_FILTER) && (
           <div className={cs.taxonTagsContainer}>
             <span className={cs.filterTitle}>Pathogen Tag</span>
             <SamplesHeatmapTaxonTagCheckbox
