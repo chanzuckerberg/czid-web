@@ -158,7 +158,10 @@ const BlastSelectionModal = ({
 
   return (
     <Modal narrow open={open} tall onClose={onClose} xlCloseIcon>
-      <div className={cs.blastSelectionModal}>
+      <div
+        className={cs.blastSelectionModal}
+        data-testid="blast-selection-modal"
+      >
         <div className={cs.header}>Select a BLAST Type</div>
         <div className={cs.taxonName}>{taxonName}</div>
         <div className={cs.selectableOptions}>

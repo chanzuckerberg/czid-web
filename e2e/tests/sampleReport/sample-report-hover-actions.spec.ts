@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { ACCEPT_ALL_COOKIES } from "../../constants/common";
+import { SEARCH_BAR } from "../../constants/sample";
 import { stubRequest } from "../../utils/api";
 import { chooseBackgroundModel } from "../../utils/report";
 const sampleId = 25745;
@@ -12,10 +14,13 @@ const successResponse = [{
   }];
 const createConsensusGenomeModal = "create-consensus-genome-modal";
 
-test.describe("Hover Actions on Sample Report", () => {
+test.describe("Consensus Genome Hover Actions on Sample Report", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
+
+    const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
+    await cookieBanner.click();
     await chooseBackgroundModel(page);
 
     // expand taxon parent
@@ -84,3 +89,92 @@ test.describe("Hover Actions on Sample Report", () => {
     expect(page.getByText("Is my consensus genome complete?"));
   });
 });
+
+test.describe("Blast Hover Actions on Sample Report", () => {
+  test.beforeEach(async ({ page }) => {
+    // go to sample page
+    await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
+
+    const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
+    await cookieBanner.click();
+
+    // hover on taxon name
+    await page.getByText("Klebsiella").hover();
+
+  });
+
+  test("Should verify BlastN modal flow on click of hover action", async ({ page, context }) => {
+    // click on that taxon's Blast icon
+    await page.getByTestId("hover-action-blast-570-v-1").click();
+    // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
+
+    // for the BlastN flow
+    await page.getByText("blastn", { exact: true }).click();
+    await page.getByText("Continue").click();
+
+    // selet contig
+    await page.getByText("NODE_25_length_597_cov_0.916974").click();
+    await page.getByText("Continue").click();
+
+    // expect(page.getByTestId("blast-redirection-modal")).toBeVisible();
+
+    const pagePromise = context.waitForEvent("page");
+    await page.getByText("Continue", { exact: true }).nth(1).click();
+    const newPage = await pagePromise;
+    await newPage.waitForLoadState();
+    expect(await newPage.url()).toContain("https://blast.ncbi.nlm.nih.gov/");
+    await newPage.close();
+
+    // toast is visible
+    expect(await page.getByRole("alert"));
+  });
+
+  test("Should verify BlastX modal flow on click of hover action", async ({ page, context }) => {
+    // click on that taxon's Blast icon
+    await page.getByTestId("hover-action-blast-570-v-1").click();
+    // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
+
+    // for the BlastX flow
+    await page.getByText("blastx", { exact: true }).click();
+    await page.getByText("Continue").click();
+
+    // selet contig
+    await page.getByText("NODE_25_length_597_cov_0.916974").click();
+    await page.getByText("NR Hits").click();
+    await page.getByText("NODE_35_length_534_cov_1.135699").click();
+    await page.getByText("Continue").click();
+
+    // expect(page.getByTestId("blast-redirection-modal")).toBeVisible();
+
+    // Start waiting for new page before clicking.
+    const pagePromise = context.waitForEvent("page");
+    await page.getByText("Continue", { exact: true }).nth(1).click();
+    const newPage = await pagePromise;
+    await newPage.waitForLoadState();
+    expect(newPage.url()).toContain("https://blast.ncbi.nlm.nih.gov/");
+    await newPage.close();
+
+    // toast is visible
+    expect(await page.getByText("Dismiss"));
+  });
+
+  test("BlastN is disabled and 5 longest reads have been identified", async ({ page }) => {
+      // search for Salmonella
+      await page.locator(SEARCH_BAR).fill("Salmonella");
+      await page.getByText("Salmonella (genus)").click();
+
+      // hover and click on blast icon
+      await page.getByText("Salmonella", { exact: true }).hover();
+      await page.getByTestId("hover-action-blast-590-v-1").click();
+
+      // verify blast selection modal functionality
+      // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
+      await page.getByText("blastx", { exact: true }).click();
+      await page.getByText("Continue").click();
+
+      // verify contig selection modal functionality
+      expect(page.getByText("NT hits", { exact: true })).toBeDisabled();
+      expect(page.getByText("Up to 5 of the longest NR reads have been identified.")).toBeVisible();
+  });
+});
+
