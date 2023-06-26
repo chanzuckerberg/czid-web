@@ -619,6 +619,15 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                  sample: sample,
                  inputs_json: { technology: illumina_technology, ref_fasta: "ref.fasta", primer_bed: "primer.bed", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
         end
+        let(:sample) do
+          sample = create(:sample, project: project, alignment_config_name: alignment_config.name)
+          local_web_reference_sequence_input_file = create(:local_web_reference_sequence_input_file, name: "ref.fasta", sample: sample)
+          sample.input_files += [local_web_reference_sequence_input_file]
+
+          local_web_primer_bed_input_file = create(:local_web_primer_bed_input_file, name: "primer.bed", sample: sample)
+          sample.input_files += [local_web_primer_bed_input_file]
+          return sample
+        end
 
         it "correctly stores the creation source" do
           subject

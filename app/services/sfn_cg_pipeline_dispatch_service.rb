@@ -117,7 +117,7 @@ class SfnCgPipelineDispatchService
     if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
       # CG kickoff is not available through mNGS nanopore report
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
-    elsif ref_fasta_input || @workflow_run.inputs&.[]("reference_accession")
+    elsif ref_fasta_input.presence || @workflow_run.inputs&.[]("reference_accession")
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload]
     elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
@@ -147,12 +147,8 @@ class SfnCgPipelineDispatchService
     end
   end
 
-  # TODO: Replace this with InputFile scopes (ie. reference_sequence), once the CLI is updated to store file_type
   def ref_fasta_input
-    ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
-    if ref_fasta_name
-      @sample.input_files.find { |i| i.name != ref_fasta_name }
-    end
+    @sample.input_files.reference_sequence
   end
 
   def apply_length_filter
@@ -217,8 +213,8 @@ class SfnCgPipelineDispatchService
   end
 
   def generate_wdl_input
-    ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
-    primer_bed_name = @workflow_run.inputs&.[]("primer_bed")
+    ref_fasta_name = @sample.input_files.reference_sequence.first.name if @sample.input_files.reference_sequence.present?
+    primer_bed_name = @sample.input_files.primer_bed.first.name if @sample.input_files.primer_bed.present?
     input_fastqs = @sample.input_files.fastq
 
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
