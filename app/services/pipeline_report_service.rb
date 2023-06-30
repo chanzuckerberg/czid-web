@@ -717,6 +717,11 @@ class PipelineReportService
   end
 
   def compute_z_scores(taxa_counts)
+    # ************************************************************
+    # This computation is also performed in the taxon-indexing lambda:
+    # https://github.com/chanzuckerberg/idseq/blob/main/lambdas/taxon-indexing/chalicelib/queries.py
+    # Please ensure that any updates made here are also done there.
+    # ************************************************************
     taxa_counts.each_value do |taxon_counts|
       if @background
         if @background.mass_normalized?
