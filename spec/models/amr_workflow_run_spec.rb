@@ -51,4 +51,21 @@ RSpec.describe AmrWorkflowRun, type: :model do
       expect(amr_workflow_run.dpm(read_coverage_depth)).to eq(expected_dpm)
     end
   end
+
+  describe "#results" do
+    context "when there are no cached quality metrics available" do
+      it "calculates QC metrics using AmrMetricsService" do
+        amr_workflow_run.update(cached_results: nil)
+        expect_any_instance_of(AmrWorkflowRun).to receive(:amr_metrics)
+        amr_workflow_run.results
+      end
+    end
+
+    context "when quality metrics have already been loaded into cached_results" do
+      it "reads QC metrics from cached_results" do
+        expect_any_instance_of(AmrWorkflowRun).not_to receive(:amr_metrics)
+        expect(amr_workflow_run.results["quality_metrics"]).to eq(amr_workflow_run.parsed_cached_results["quality_metrics"])
+      end
+    end
+  end
 end

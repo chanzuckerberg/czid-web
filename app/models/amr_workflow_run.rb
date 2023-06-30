@@ -29,7 +29,8 @@
   # Full results will fetch from S3 (a superset of cached results).
   def results(cacheable_only: false)
     results = {}
-    results["quality_metrics"] = amr_metrics
+    results["quality_metrics"] = parsed_cached_results&.[]("quality_metrics") || amr_metrics
+
     unless cacheable_only
       results["report_table_data"] = amr_report
     end
