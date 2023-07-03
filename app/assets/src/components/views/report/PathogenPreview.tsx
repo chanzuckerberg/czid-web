@@ -48,6 +48,7 @@ const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
         }
         basic={false}
         inverted={false}
+        hoverable={true}
         position="top center"
       />
     );
