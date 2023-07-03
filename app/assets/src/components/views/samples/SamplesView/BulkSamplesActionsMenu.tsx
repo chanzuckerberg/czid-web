@@ -96,7 +96,7 @@ const BulkSamplesActionsMenu = ({
           handleClickPhyloTree();
         }, "SamplesView_phylo-tree-modal-open_clicked")}
       >
-        <div className={cs.itemWrapper}>
+        <div data-testid="create-phylogenetic-tree" className={cs.itemWrapper}>
           <div className={cs.bulkActionsIcon}>
             <Icon sdsIcon={"treeHorizontal"} sdsSize="xs" sdsType="static" />
           </div>
@@ -109,6 +109,7 @@ const BulkSamplesActionsMenu = ({
   return (
     <>
       <ToolbarButtonIcon
+        testId="dots-horizontal"
         className={cs.action}
         icon="dotsHorizontal"
         popupText={hasBulkDeletion ? "More Actions" : runAmrPipelineLabel}

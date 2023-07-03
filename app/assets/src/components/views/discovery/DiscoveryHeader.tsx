@@ -163,6 +163,7 @@ const DiscoveryHeader = ({
           trigger={
             <div>
               <ButtonIcon
+                data-testid="info-icon"
                 sdsSize="large"
                 sdsType="primary"
                 sdsIcon="infoSpeechBubble"

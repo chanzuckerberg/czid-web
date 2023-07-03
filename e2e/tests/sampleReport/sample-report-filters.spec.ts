@@ -1,34 +1,34 @@
 import { expect, test } from "@playwright/test";
 import {
-  CANCEL_ICON,
-  FILTER_TAG,
-  COLUMNS_LABEL,
-  TOTAL_READ_POPOUP_CONTENT,
-  SEARCH_BAR,
-  FILTER_HEADERS,
-  NUMBER_INPUT,
-  CATEGORIES_FILTER,
-  COLUMN_HEADER_PROP,
-  APPLY_BUTTON,
-  THRESHOLD_FILTER,
-  SCORE,
-  FILTERS_DROPDOWN,
-  APPLY,
-  LEARN_MORE_LINK,
-  KLEBSIELLA,
-  THRESHOLD_FILTERS,
   ANNOTATION_FILTERS,
-  KLEBSIELLA_GENUS,
-  READ_SPECIFICITY,
   ANNOTATION_TEXT,
-  READ_SPECIFICITY_FILTERS,
-  FILTER_RESULT,
+  APPLY,
+  APPLY_BUTTON,
   ARCHAEA_FILTER,
   BACTERIA_FILTER,
+  CANCEL_ICON,
+  CATEGORIES_FILTER,
+  COLUMNS_LABEL,
+  COLUMN_HEADER_PROP,
   EUKARYOTA_FILTER,
+  FILTERS_DROPDOWN,
+  FILTER_HEADERS,
+  FILTER_RESULT,
+  FILTER_TAG,
+  KLEBSIELLA,
+  KLEBSIELLA_GENUS,
+  LEARN_MORE_LINK,
+  NUMBER_INPUT,
+  READ_SPECIFICITY,
+  READ_SPECIFICITY_FILTERS,
+  SCORE,
+  SEARCH_BAR,
+  THRESHOLD_FILTER,
+  THRESHOLD_FILTERS,
+  TOTAL_READ_POPOUP_CONTENT,
+  UNCATEGORIZED_FILTER,
   VIROIDS_FILTER,
   VIRUSES_FILTER,
-  UNCATEGORIZED_FILTER,
 } from "../../constants/sample";
 
 const sampleId = 25307;
@@ -43,10 +43,7 @@ test.describe("Sample report filter test", () => {
     await expect(page.locator(COLUMNS_LABEL).nth(1)).toBeVisible();
     const n = await page.locator(COLUMNS_LABEL).allInnerTexts();
     for (let i = 1; i < n.length; i++) {
-      await page
-        .locator(COLUMNS_LABEL)
-        .nth(i)
-        .hover();
+      await page.locator(COLUMNS_LABEL).nth(i).hover();
       await expect(page.locator(TOTAL_READ_POPOUP_CONTENT)).toHaveText(
         COLUMN_HEADER_PROP[n[i]]["description"],
       );
@@ -59,10 +56,7 @@ test.describe("Sample report filter test", () => {
       const link = COLUMN_HEADER_PROP[n[i]]["url"];
       expect(newPage.url().includes(link)).toBeTruthy();
       await newPage.close();
-      await page
-        .locator(COLUMNS_LABEL)
-        .nth(i)
-        .click();
+      await page.locator(COLUMNS_LABEL).nth(i).click();
     }
   });
 
@@ -77,10 +71,7 @@ test.describe("Sample report filter test", () => {
   });
 
   test(`Should be able to filter by Category name`, async ({ page }) => {
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(CATEGORIES_FILTER)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(CATEGORIES_FILTER).click();
     const drop_down = [
       ARCHAEA_FILTER,
       BACTERIA_FILTER,
@@ -106,7 +97,11 @@ test.describe("Sample report filter test", () => {
       ).toBeVisible();
 
       // test Remove filter x button
-      await page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`).getByTestId("x-close-icon").click();
+      await page
+        .locator(FILTER_TAG)
+        .locator(`text="${filter_tag[i]}"`)
+        .getByTestId("x-close-icon")
+        .click();
       await expect(
         page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`),
       ).not.toBeVisible();
@@ -125,44 +120,23 @@ test.describe("Sample report filter test", () => {
   });
 
   test(`Should be able to filter by Threshold`, async ({ page }) => {
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(THRESHOLD_FILTER)
-      .click();
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(SCORE)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(THRESHOLD_FILTER).click();
+    await page.locator(FILTER_HEADERS).locator(SCORE).click();
 
     // Verify drop down contains required elements
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
       expect(THRESHOLD_FILTERS.includes(drop_down[i])).toBeTruthy();
     }
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(THRESHOLD_FILTER)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(THRESHOLD_FILTER).click();
 
     // Verify Threshold filter are applied
     for (let i = 0; i < drop_down.length; i++) {
-      await page
-        .locator(FILTER_HEADERS)
-        .locator(THRESHOLD_FILTER)
-        .click();
-      await page
-        .locator(FILTER_HEADERS)
-        .locator(SCORE)
-        .click();
-      await page
-        .locator(FILTERS_DROPDOWN)
-        .nth(i)
-        .click();
+      await page.locator(FILTER_HEADERS).locator(THRESHOLD_FILTER).click();
+      await page.locator(FILTER_HEADERS).locator(SCORE).click();
+      await page.locator(FILTERS_DROPDOWN).nth(i).click();
       await page.locator(NUMBER_INPUT).fill("10");
-      await page
-        .locator(APPLY_BUTTON)
-        .locator(APPLY)
-        .click();
+      await page.locator(APPLY_BUTTON).locator(APPLY).click();
       await expect(page.locator(FILTER_TAG)).toHaveText(
         drop_down[i] + " >= 10",
       );
@@ -171,10 +145,7 @@ test.describe("Sample report filter test", () => {
   });
 
   test(`Should be able to filter by Read Specificity`, async ({ page }) => {
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(READ_SPECIFICITY)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(READ_SPECIFICITY).click();
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
       expect(READ_SPECIFICITY_FILTERS.includes(drop_down[i])).toBeTruthy();
@@ -182,36 +153,21 @@ test.describe("Sample report filter test", () => {
   });
 
   test(`Should be able to filter by Annotation`, async ({ page }) => {
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(ANNOTATION_TEXT)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(ANNOTATION_TEXT).click();
 
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
       expect(ANNOTATION_FILTERS.includes(drop_down[i])).toBeTruthy();
     }
 
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(ANNOTATION_TEXT)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(ANNOTATION_TEXT).click();
 
     // Verify Threshold filter are applied
     for (let i = 0; i < drop_down.length; i++) {
-      await page
-        .locator(FILTER_HEADERS)
-        .locator(ANNOTATION_TEXT)
-        .click();
-      await page
-        .locator(FILTERS_DROPDOWN)
-        .nth(i)
-        .click();
+      await page.locator(FILTER_HEADERS).locator(ANNOTATION_TEXT).click();
+      await page.locator(FILTERS_DROPDOWN).nth(i).click();
       await expect(page.locator(FILTER_TAG)).toHaveText(drop_down[i]);
-      await page
-        .locator(COLUMNS_LABEL)
-        .nth(0)
-        .click();
+      await page.locator(COLUMNS_LABEL).nth(0).click();
       await page.locator(CANCEL_ICON).click();
     }
   });

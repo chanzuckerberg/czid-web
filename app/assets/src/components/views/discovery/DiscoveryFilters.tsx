@@ -406,6 +406,7 @@ class DiscoveryFilters extends React.Component<
         className={cs.styledMinimal}
         label={
           <div
+            data-testid="annotation"
             className={cx(cs.filterLabel, disabled && cs.disabledFilterLabel)}
           >
             Annotation

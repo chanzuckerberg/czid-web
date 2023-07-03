@@ -209,4 +209,3 @@ export const URL_DOWLOAD_TYPES = [
   ["View Results Folder", "/results_folder?pipeline_version="],
   ["View Pipeline Visualization", "/pipeline_viz/"],
 ];
-

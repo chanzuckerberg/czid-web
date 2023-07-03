@@ -141,11 +141,12 @@ export default class DiscoverySidebar extends React.Component<
     if (realBars.length < 3) dates = realBars;
     return (
       <div className={cs.histogramContainer}>
-        <div className={cs.dateHistogram}>
+        <div data-testid="date-histogram" className={cs.dateHistogram}>
           {dates.map(entry => {
             const percent = Math.round((100 * entry.count) / total);
             const element = (
               <div
+                data-testid="date-histogram-bar"
                 className={cs.bar}
                 key={entry.value}
                 style={{ height: percent + "px" }}
@@ -185,10 +186,17 @@ export default class DiscoverySidebar extends React.Component<
             );
           })}
         </div>
-        <div className={cx(cs.histogramLabels, dates.length < 3 && cs.evenly)}>
-          <div className={cs.label}>{formattedFirstDate}</div>
+        <div
+          data-testid="date-histogram-date"
+          className={cx(cs.histogramLabels, dates.length < 3 && cs.evenly)}
+        >
+          <div data-testid="date-histogram-first-date" className={cs.label}>
+            {formattedFirstDate}
+          </div>
           {firstDate !== lastDate && (
-            <div className={cs.label}>{formattedLastDate}</div>
+            <div data-testid="date-histogram-last-date" className={cs.label}>
+              {formattedLastDate}
+            </div>
           )}
         </div>
       </div>
@@ -210,12 +218,13 @@ export default class DiscoverySidebar extends React.Component<
       ? "Show Less"
       : "Show More";
     return (
-      <dl className={cs.dataList}>
+      <dl data-testid="data-list" className={cs.dataList}>
         {this.renderMetadataRowBlock(defaultRows, total, field)}
         {expandedMetadataGroups.has(field) &&
           this.renderMetadataRowBlock(extraRows, total, field)}
         {extraRows.length > 0 && (
           <div
+            data-testid="show-more"
             className={cs.showHide}
             onClick={() => {
               this.toggleExpandedMetadataGroup(field);
@@ -322,7 +331,10 @@ export default class DiscoverySidebar extends React.Component<
     return (
       <div className={cx(className, cs.sidebar)}>
         {project && (
-          <div className={cs.descriptionContainer}>
+          <div
+            data-testid="project-description-section"
+            className={cs.descriptionContainer}
+          >
             <ProjectDescription
               project={project}
               onProjectDescriptionSave={onProjectDescriptionSave}
@@ -341,20 +353,31 @@ export default class DiscoverySidebar extends React.Component<
               </div>
             }
           >
-            <div className={cx(cs.hasBackground, cs.statsRow)}>
+            <div
+              data-testid="overall-content"
+              className={cx(cs.hasBackground, cs.statsRow)}
+            >
               <dl className={cs.dataList}>
                 <dt className={cs.statsDt}>
-                  <span className={cs.rowLabel}>Samples</span>
+                  <span data-testid="samples" className={cs.rowLabel}>
+                    Samples
+                  </span>
                 </dt>
-                <dd className={cs.statsDd}>{this.state.stats.numSamples}</dd>
+                <dd data-testid="samples-value" className={cs.statsDd}>
+                  {this.state.stats.numSamples}
+                </dd>
               </dl>
             </div>
             <div className={cx(cs.hasBackground, cs.statsRow)}>
               <dl className={cs.dataList}>
                 <dt className={cs.statsDt}>
-                  <span className={cs.rowLabel}>Projects</span>
+                  <span data-testid="projects" className={cs.rowLabel}>
+                    Projects
+                  </span>
                 </dt>
-                <dd className={cs.statsDd}>{this.state.stats.numProjects}</dd>
+                <dd data-testid="project-value" className={cs.statsDd}>
+                  {this.state.stats.numProjects}
+                </dd>
               </dl>
             </div>
             {currentTab === "samples" && (
@@ -362,9 +385,17 @@ export default class DiscoverySidebar extends React.Component<
                 <div className={cx(cs.hasBackground, cs.statsRow)}>
                   <dl className={cs.dataList}>
                     <dt className={cs.statsDt}>
-                      <span className={cs.rowLabel}>Avg. reads per sample</span>
+                      <span
+                        data-testid="avg-reads-per-sample"
+                        className={cs.rowLabel}
+                      >
+                        Avg. reads per sample
+                      </span>
                     </dt>
-                    <dd className={cs.statsDd}>
+                    <dd
+                      data-testid="avg-reads-per-sample-value"
+                      className={cs.statsDd}
+                    >
                       {this.state.stats.avgTotalReads}
                     </dd>
                   </dl>
@@ -372,11 +403,17 @@ export default class DiscoverySidebar extends React.Component<
                 <div className={cx(cs.hasBackground, cs.statsRow)}>
                   <dl className={cs.dataList}>
                     <dt className={cs.statsDt}>
-                      <span className={cs.rowLabel}>
+                      <span
+                        data-testid="avg-reads-passing-filters-per-sample"
+                        className={cs.rowLabel}
+                      >
                         Avg. reads passing filters per sample
                       </span>
                     </dt>
-                    <dd className={cs.statsDd}>
+                    <dd
+                      data-testid="avg-reads-passing-filters-per-sample-value"
+                      className={cs.statsDd}
+                    >
                       {this.state.stats.avgAdjustedRemainingReads}
                     </dd>
                   </dl>
@@ -397,10 +434,12 @@ export default class DiscoverySidebar extends React.Component<
               </div>
             }
           >
-            <div>{this.buildDateHistogram("time")}</div>
+            <div data-testid="date-histogram-chart">
+              {this.buildDateHistogram("time")}
+            </div>
           </Accordion>
         </div>
-        <div className={cs.metadataContainer}>
+        <div className={cs.metadataContainer} data-testid="metadata-section">
           <Accordion
             key={dataKey}
             className={cs.metadataSection}
@@ -412,16 +451,31 @@ export default class DiscoverySidebar extends React.Component<
               </div>
             }
           >
-            <div className={cs.hasBackground}>
-              <span className={cs.rowLabel}>Host</span>
+            <div
+              data-testid="metadata-host-section"
+              className={cs.hasBackground}
+            >
+              <span data-testid="metadata-host" className={cs.rowLabel}>
+                Host
+              </span>
               {this.buildMetadataRows("host")}
             </div>
-            <div className={cs.hasBackground}>
-              <span className={cs.rowLabel}>Sample Type</span>
+            <div
+              data-testid="metadata-tissue-section"
+              className={cs.hasBackground}
+            >
+              <span data-testid="metadata-sample-type" className={cs.rowLabel}>
+                Sample Type
+              </span>
               {this.buildMetadataRows("tissue")}
             </div>
-            <div className={cs.hasBackground}>
-              <span className={cs.rowLabel}>Location</span>
+            <div
+              data-testid="metadata-location-section"
+              className={cs.hasBackground}
+            >
+              <span data-testid="metadata-location" className={cs.rowLabel}>
+                Location
+              </span>
               {this.buildMetadataRows("locationV2")}
             </div>
           </Accordion>

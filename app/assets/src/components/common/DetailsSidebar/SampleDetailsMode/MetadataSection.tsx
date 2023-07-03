@@ -1,5 +1,6 @@
 import { Button } from "@czi-sds/components";
 import cx from "classnames";
+import { kebabCase } from "lodash";
 import React, { useEffect, useState } from "react";
 import Accordion from "~/components/layout/Accordion";
 import cs from "./metadata_section.scss";
@@ -56,7 +57,9 @@ const MetadataSection = ({
 
   const header = (
     <React.Fragment>
-      <div className={cs.title}>{title}</div>
+      <div data-testid={`${kebabCase(title)}-header`} className={cs.title}>
+        {title}
+      </div>
       {editable &&
         (editing ? (
           renderStatus()

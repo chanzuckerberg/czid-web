@@ -332,14 +332,24 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
     const count = tab === "samples" ? sampleStats.count : projectStats.count;
     return [
       {
-        label: <span className={cs.tabLabel}>Summary</span>,
+        label: (
+          <span data-testid="summary-tablabel" className={cs.tabLabel}>
+            Summary
+          </span>
+        ),
         value: "summary",
       },
       {
         label: (
           <div>
-            <span className={cs.tabLabel}>{upperFirst(tab)}</span>
-            {count > 0 && <span className={cs.tabCounter}>{count}</span>}
+            <span data-testid="sample-tablabel" className={cs.tabLabel}>
+              {upperFirst(tab)}
+            </span>
+            {count > 0 && (
+              <span data-testid="sample-count" className={cs.tabCounter}>
+                {count}
+              </span>
+            )}
           </div>
         ),
         value: tab,

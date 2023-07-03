@@ -89,10 +89,7 @@ test.describe("Sample report tests", () => {
       currentNucleotideType,
     );
 
-    await page
-      .locator(DROPDOWN_TRIGGER)
-      .first()
-      .click();
+    await page.locator(DROPDOWN_TRIGGER).first().click();
 
     await page
       .getByRole("option")
@@ -150,10 +147,7 @@ test.describe("Sample report tests", () => {
       .textContent();
     const newHostGenus = pickListElement(hostGenuses, currentHostGenus);
 
-    await page
-      .locator(DROPDOWN_TRIGGER)
-      .first()
-      .click();
+    await page.locator(DROPDOWN_TRIGGER).first().click();
 
     await page.getByRole("option", { name: newHostGenus }).click();
 
@@ -206,10 +200,7 @@ test.describe("Sample report tests", () => {
       currentInfectionClass,
     );
 
-    await page
-      .locator(DROPDOWN_TRIGGER)
-      .first()
-      .click();
+    await page.locator(DROPDOWN_TRIGGER).first().click();
     await page.getByRole("option", { name: newInfectionClass }).click();
   });
 
@@ -234,10 +225,7 @@ test.describe("Sample report tests", () => {
       .textContent();
     const newLibraryPrep = pickListElement(libraryPrep, currentlibraryPrep);
 
-    await page
-      .locator(DROPDOWN_TRIGGER)
-      .first()
-      .click();
+    await page.locator(DROPDOWN_TRIGGER).first().click();
     await page.getByRole("option", { name: newLibraryPrep }).click();
 
     // edit Sequencer first get current value, then choose a new value differnt than current and then click select
@@ -249,10 +237,7 @@ test.describe("Sample report tests", () => {
       .textContent();
     const newSequencer = pickListElement(sequencer, currentSequencer);
 
-    await page
-      .locator(DROPDOWN_TRIGGER)
-      .nth(1)
-      .click();
+    await page.locator(DROPDOWN_TRIGGER).nth(1).click();
     await page
       .locator(".dropdownMenu-1gUyq:visible")
       .getByRole("option", { name: newSequencer })

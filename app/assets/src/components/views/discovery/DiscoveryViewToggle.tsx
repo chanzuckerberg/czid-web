@@ -26,11 +26,11 @@ const DiscoveryViewToggle = ({
 }: DiscoveryViewToggleProps) => {
   const displays = includePLQC ? PROJECT_DISPLAYS : MAP_DISPLAYS;
   return (
-    <div className={cs.displaySwitcher}>
+    <div data-testid="menu-icons" className={cs.displaySwitcher}>
       <Menu compact className={cs.switcherMenu}>
         {displays.map(display => (
           <MenuItem
-            data-testid={`${kebabCase(display)}-view}`}
+            data-testid={`${kebabCase(display)}-view`}
             className={cs.menuItem}
             active={currentDisplay === display}
             onClick={() => onDisplaySwitch(display)}

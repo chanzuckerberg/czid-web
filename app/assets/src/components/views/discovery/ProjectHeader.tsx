@@ -79,7 +79,7 @@ const ProjectHeader = ({
   };
 
   return (
-    <div className={cs.projectHeader}>
+    <div data-testid="project-header" className={cs.projectHeader}>
       {project.editable ? (
         <EditableInput
           value={project.name || snapshotProjectName}

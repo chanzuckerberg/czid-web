@@ -78,6 +78,7 @@ const Accordion = ({
       </div>
       {(open || !toggleable) && (
         <div
+          data-testid="content"
           className={cx(cs.content, bottomContentPadding && cs.bottomPadding)}
         >
           {children}

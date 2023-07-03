@@ -1,23 +1,23 @@
 import path from "path";
-import { Page, expect, test, BrowserContext } from "@playwright/test";
+import { BrowserContext, expect, Page, test } from "@playwright/test";
 import dotenv from "dotenv";
 import {
-  TOTAL_READ_HELP_LINK,
-  READS_POPUP_HELP,
-  QUALITY_READ_HELP_LINK,
   DUPLICATE_READ_HELP_LINK,
   INSERT_LENGTH_HELP_LINK,
+  QUALITY_READ_HELP_LINK,
+  READS_POPUP_HELP,
   READ_URL_HELP_LINK,
+  TOTAL_READ_HELP_LINK,
 } from "../../../app/assets/src/components/utils/documentationLinks";
 import {
-  MENU_ICON,
+  BAR_POPUP,
   HEADER_READS,
   LEARN_MORE,
+  LEARN_MORE_TEXT,
+  MENU_ICON,
+  PIPELINE_CHART_HEADER,
   TOTAL_READ_INFO_ICON,
   TOTAL_READ_POPUP_CONTENT,
-  BAR_POPUP,
-  LEARN_MORE_TEXT,
-  PIPELINE_CHART_HEADER,
 } from "../../constants/map";
 import { openSamplePage } from "../../utils/report";
 
@@ -91,14 +91,17 @@ async function verifyBarChartContent(
       .nth(index)
       .getAttribute("height");
     // if the height of the chart is zero do not hover over it
-    if (graphHeight !== "0" && await page.locator(`.rect-${i}`).nth(index).isVisible()) {
-        await page.locator(HEADER_READS).nth(index).hover();
-        await page.locator(`.rect-${i}`).nth(index).hover();
-        await expect(page.locator(BAR_POPUP).nth(0)).toBeVisible();
-        await expect(page.locator(BAR_POPUP).nth(1)).toBeVisible();
-      }
+    if (
+      graphHeight !== "0" &&
+      (await page.locator(`.rect-${i}`).nth(index).isVisible())
+    ) {
+      await page.locator(HEADER_READS).nth(index).hover();
+      await page.locator(`.rect-${i}`).nth(index).hover();
+      await expect(page.locator(BAR_POPUP).nth(0)).toBeVisible();
+      await expect(page.locator(BAR_POPUP).nth(1)).toBeVisible();
     }
-  };
+  }
+}
 // These tests verifies Ui elements displayed on the plqc view like header, side bars, bar charts and graphs
 test.describe("PLQC view tests", () => {
   test(`Should verify TOTAL_READ bar chart content`, async ({

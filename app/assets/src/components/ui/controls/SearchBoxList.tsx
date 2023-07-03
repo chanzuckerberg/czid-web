@@ -145,7 +145,10 @@ class SearchBoxList extends React.Component<
               key={`option-${option.value}`}
               onClick={() => this.handleOptionClick(option.value)}
             >
-              <div className={cs.listCheckmark}>
+              <div
+                data-testid="item-selector-checkmark"
+                className={cs.listCheckmark}
+              >
                 {this.state.selected.has(option.value) && <IconCheckSmall />}
               </div>
               <div

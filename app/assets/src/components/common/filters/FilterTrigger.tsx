@@ -17,6 +17,7 @@ const FilterTrigger = ({
   onClick,
 }: FilterTriggerProps) => (
   <div
+    data-testid="taxon-filter"
     className={cx(cs.taxonFilterLabel, disabled && cs.disabled, extraStyling)}
     onClick={onClick}
   >

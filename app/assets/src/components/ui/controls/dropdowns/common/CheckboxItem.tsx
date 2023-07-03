@@ -27,6 +27,7 @@ const CheckboxItem = ({
   >
     <div className={cs.listElement}>
       <div
+        data-testid="checked"
         className={cx(
           checked && cs.checked,
           cs.listCheckmark,

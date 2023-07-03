@@ -20,7 +20,6 @@ import {
   FILTER_TAG,
   HIDDEN,
   METADATA,
-  METADATA_FILTER,
   METAGENOMICS,
   MYDATA,
   NUMBER_OF_COLUMN,
@@ -31,7 +30,6 @@ import {
   SAMPLES_COLUMN,
   SAMPLE_TYPE,
   SIDE_HEADERS,
-  SIDE_LABELS,
   TEST_PROJECTS,
   VIEW_ICON,
   VISIBLE,
@@ -47,7 +45,7 @@ import {
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 const sampleTypes = [METAGENOMICS];
-
+const PLUS_CIRCLE = "plus-circle";
 const ENV = (process.env.NODE_ENV as string) || "";
 const baseUrl = (process.env.BASEURL as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
@@ -62,9 +60,6 @@ async function verifyElement(page: Page, n: number, locator: string) {
   }
 }
 
-const PLUS_ICON = ".plusIcon-1OBta";
-
-
 // These tests verifies Ui elements displayed on the discovery view like header, side bars, bar charts and graphs
 test.describe("Discovery view tests", () => {
   test.beforeEach(async ({ page }) => {
@@ -77,21 +72,23 @@ test.describe("Discovery view tests", () => {
       page,
     }) => {
       // verify left side content
-      await expect(page.locator(".name-2XtnE")).toContainText(projectName);
-      await expect(page.locator(".filterLabel-1PFBn")).toContainText(
+      await expect(
+        page.locator('[data-testid="project-header"]'),
+      ).toContainText(projectName);
+      await expect(page.locator('[data-testid="annotation"]')).toContainText(
         ANNOTATION,
       );
-      await expect(page.locator(METADATA_FILTER).nth(0)).toContainText(
+      await expect(page.locator('[data-testid="location"]')).toContainText(
         LOCATION,
       );
-      await expect(page.locator(METADATA_FILTER).nth(1)).toContainText(
-        TIMEFRAME,
-      );
-      await expect(page.locator(METADATA_FILTER).nth(2)).toContainText(
+      await expect(
+        page.locator('[data-testid="timeframe"]').nth(1),
+      ).toContainText(TIMEFRAME);
+      await expect(page.locator('[data-testid="visibility"]')).toContainText(
         VISIBILITY,
       );
-      await expect(page.locator(METADATA_FILTER).nth(3)).toContainText(HOST);
-      await expect(page.locator(METADATA_FILTER).nth(4)).toContainText(
+      await expect(page.locator('[data-testid="host"]')).toContainText(HOST);
+      await expect(page.locator('[data-testid="sample-type"]')).toContainText(
         SAMPLE_TYPE,
       );
     });
@@ -133,8 +130,10 @@ test.describe("Discovery view tests", () => {
     test(`Should display right side content for ${sampleType}`, async ({
       page,
     }) => {
-      await expect(page.locator(PLUS_ICON)).toBeVisible();
-      await expect(page.locator(".title-3Oy38")).toContainText(DESCRIPTION);
+      await expect(page.getByTestId(PLUS_CIRCLE)).toBeVisible();
+      await expect(page.getByTestId("description-header")).toContainText(
+        DESCRIPTION,
+      );
 
       // user cannot edit public description
       if (page.url().includes(MYDATA)) {
@@ -149,23 +148,27 @@ test.describe("Discovery view tests", () => {
       await expect(page.locator(SIDE_HEADERS).nth(2)).toContainText(METADATA);
 
       // verify  side -role labels
-      await expect(page.locator(SIDE_LABELS).nth(0)).toContainText(SAMPLES);
-      await expect(page.locator(SIDE_LABELS).nth(1)).toContainText(PROJECTS);
-      await expect(page.locator(SIDE_LABELS).nth(2)).toContainText(
+      await expect(page.getByTestId("samples")).toContainText(SAMPLES);
+      await expect(page.getByTestId("projects")).toContainText(PROJECTS);
+      await expect(page.getByTestId("avg-reads-per-sample")).toContainText(
         AVG_READS_PER_SAMPLE,
       );
-      await expect(page.locator(SIDE_LABELS).nth(3)).toContainText(
-        AVG_READS_FILTER_PER_SAMPLE,
+      await expect(
+        page.getByTestId("avg-reads-passing-filters-per-sample"),
+      ).toContainText(AVG_READS_FILTER_PER_SAMPLE);
+      await expect(page.getByTestId("metadata-host")).toContainText(HOST);
+      await expect(page.getByTestId("metadata-sample-type")).toContainText(
+        SAMPLE_TYPE,
       );
-      await expect(page.locator(SIDE_LABELS).nth(4)).toContainText(HOST);
-      await expect(page.locator(SIDE_LABELS).nth(5)).toContainText(SAMPLE_TYPE);
-      await expect(page.locator(SIDE_LABELS).nth(6)).toContainText(LOCATION);
+      await expect(page.getByTestId("metadata-location")).toContainText(
+        LOCATION,
+      );
     });
     test(`Should add/delete columns of discovery view  ${sampleType}`, async ({
       page,
     }) => {
       // Open column
-      await page.locator(PLUS_ICON).click();
+      await page.getByTestId(PLUS_CIRCLE).click();
 
       // Get the number of elements on the column
       const column_dropdown = await page
@@ -206,7 +209,7 @@ test.describe("Discovery view tests", () => {
         await page.locator('[id="onetrust-button-group"]').click();
       }
       // info icon used to hide and unhide  columns on the page
-      await page.locator(PLUS_ICON).click();
+      await page.getByTestId(PLUS_CIRCLE).click();
 
       await page.locator(BAR_LABEL).nth(1).waitFor({
         state: VISIBLE,

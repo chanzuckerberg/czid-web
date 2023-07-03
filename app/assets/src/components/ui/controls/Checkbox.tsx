@@ -63,7 +63,7 @@ class Checkbox extends React.Component<CheckboxProps, CheckboxState> {
           readOnly={true}
           disabled={disabled}
         />
-        <span className={cs.checkmark} />
+        <span data-testid="check-box" className={cs.checkmark} />
         {label && <span className={cs.label}>{label}</span>}
       </div>
     );

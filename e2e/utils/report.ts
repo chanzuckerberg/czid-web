@@ -244,9 +244,13 @@ export async function verifyDeleteDisabled(
 
 export async function verifyDownload(
   page: Page,
-  workflowName: "Metagenomic" | "Antimicrobial Resistance" | "Consensus Genome" | "Nanopore",
+  workflowName:
+    | "Metagenomic"
+    | "Antimicrobial Resistance"
+    | "Consensus Genome"
+    | "Nanopore",
   sampleId: number,
-){
+) {
   switch (workflowName) {
     case "Metagenomic":
     case "Nanopore":
@@ -260,21 +264,20 @@ export async function verifyDownload(
       await verifyDownloadAll(page);
       break;
   }
-};
+}
 
-
-async function verifyDownloadFiles(page: Page, downloadList: string[][]){
+async function verifyDownloadFiles(page: Page, downloadList: string[][]) {
   for (const downloadType of downloadList) {
     const [download] = await Promise.all([
-        page.waitForEvent("download"),
-        await page.getByRole("button", { name: "Download" }).click(),
-        await page.getByRole("option", { name: downloadType[0] }).click(),
+      page.waitForEvent("download"),
+      await page.getByRole("button", { name: "Download" }).click(),
+      await page.getByRole("option", { name: downloadType[0] }).click(),
     ]);
     expect(download.suggestedFilename()).toContain(downloadType[1]);
   }
 }
 
-async function verifyDownloadUrls(page: Page, sampleId: number){
+async function verifyDownloadUrls(page: Page, sampleId: number) {
   for (const downloadType of URL_DOWLOAD_TYPES) {
     const [newTab] = await Promise.all([
       page.waitForEvent("popup"),
@@ -283,31 +286,30 @@ async function verifyDownloadUrls(page: Page, sampleId: number){
     ]);
     await newTab.waitForLoadState();
     const newTabUrl = await newTab.url();
-    expect(newTabUrl).toContain(`${process.env.BASEURL}/samples/${sampleId}${downloadType[1]}`);
+    expect(newTabUrl).toContain(
+      `${process.env.BASEURL}/samples/${sampleId}${downloadType[1]}`,
+    );
   }
-};
+}
 
-
-async function verifyDownloadAll(page: Page){
+async function verifyDownloadAll(page: Page) {
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download All" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toContain(".zip");
-};
+}
 
 export async function chooseBackgroundModel(page: Page) {
-    // choose Background
-    await page.getByTestId("background-filter").click();
+  // choose Background
+  await page.getByTestId("background-filter").click();
 
-    await page
-      .getByRole("option", { name: "Test Background Model Standard" })
-      .getByText("Test Background Model")
-      .click();
+  await page
+    .getByRole("option", { name: "Test Background Model Standard" })
+    .getByText("Test Background Model")
+    .click();
 }
 
 export async function applyFilter(page: Page) {
   await page.getByTestId("category-filter").click();
-  await page
-      .getByTestId("dropdown-viruses")
-      .click();
+  await page.getByTestId("dropdown-viruses").click();
 }

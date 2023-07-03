@@ -74,10 +74,7 @@ export async function goToProjectSamples(
   await page.waitForTimeout(2000);
   await page.locator(getByPlaceholder(placeholderText)).fill(projectName);
   await page.keyboard.press("Enter");
-  await page
-    .getByText(projectName)
-    .nth(0)
-    .click();
+  await page.getByText(projectName).nth(0).click();
   if (index === 0) {
     await page.locator('[data-testid="metagenomics"]').click();
   }

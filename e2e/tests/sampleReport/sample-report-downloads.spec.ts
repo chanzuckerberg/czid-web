@@ -29,7 +29,6 @@ test.describe("Sample report downloand tests - Illumina", () => {
     await page.getByTestId("consensus-genome").click();
     await verifyDownload(page, "Consensus Genome", stagingSampleId);
   });
-
 });
 
 test.describe("Sample Report Download Tests - Nanopore", () => {
@@ -46,4 +45,3 @@ test.describe("Sample Report Download Tests - Nanopore", () => {
     await verifyDownload(page, "Nanopore", stagingSampleId);
   });
 });
-

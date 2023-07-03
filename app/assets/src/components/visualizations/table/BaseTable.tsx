@@ -1,6 +1,6 @@
 import { Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { concat, difference, find, includes, map } from "lodash/fp";
+import { concat, difference, find, includes, kebabCase, map } from "lodash/fp";
 import React from "react";
 import Draggable from "react-draggable";
 import {
@@ -311,7 +311,10 @@ class BaseTable extends React.Component<
         {columnData ? (
           <ColumnHeaderTooltip
             trigger={
-              <span className={cx(cs.label, headerLabelClassName)}>
+              <span
+                data-testid={`${kebabCase(label)}-column-header`}
+                className={cx(cs.label, headerLabelClassName)}
+              >
                 {label}
               </span>
             }
@@ -368,6 +371,7 @@ class BaseTable extends React.Component<
       <BasicPopup
         trigger={
           <MultipleDropdown
+            data-testid="plus-circle"
             direction="left"
             hideArrow
             hideCounter

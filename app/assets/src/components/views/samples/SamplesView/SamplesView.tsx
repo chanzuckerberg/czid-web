@@ -338,6 +338,7 @@ const SamplesView = forwardRef(function SamplesView(
 
     const disabledToolbarIcon = (subtitle: string) => (
       <ToolbarButtonIcon
+        testId="heatmap-icon"
         className={cs.action}
         icon="grid"
         popupText="Heatmap"
@@ -432,6 +433,7 @@ const SamplesView = forwardRef(function SamplesView(
   const renderBulkDownloadTrigger = () => {
     return (
       <ToolbarButtonIcon
+        testId="download-icon"
         className={cs.action}
         icon="download"
         popperDependencies={[bulkDownloadButtonTempTooltip]}
@@ -452,6 +454,7 @@ const SamplesView = forwardRef(function SamplesView(
 
     return selectedIds.size < 2 ? (
       <ToolbarButtonIcon
+        testId="background-model-icon"
         className={cs.action}
         icon="squareOnDashedSquare"
         popupText="Background Model"

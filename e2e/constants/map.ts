@@ -1,28 +1,28 @@
-export const BUTTONS = ".action-2Pccm button";
-export const SIDE_HEADERS = ".title-JNudy";
+export const BUTTONS = '[data-testid="sample-view-actions"]';
+export const SIDE_HEADERS = '[data-testid*="sidebar"]';
 export const SIDE_LABELS = ".rowLabel-3_lq2";
-export const OVERALL_AREA = ".statsDt-1b-F6";
+export const OVERALL_AREA = '[data-testid="overall-content"]';
 export const MENU_ITEM_PUBLIC = "menu-item-public";
 export const SEARCH_PUBLIC = "Search Public...";
 
-export const BAR_LABEL = ".barLabel-1JhFz a";
-export const DATE_CREATED = ".dateHistogram-2Eix-";
-export const DATE_LABEL = ".label-zMCsY";
+export const BAR_LABEL = '[data-testid="date-histogram"]';
+export const DATE_CREATED = '[data-testid="date-histogram"]';
+export const DATE_LABEL = '[data-testid="date-histogram-first-date"]';
 export const METAGENOMICS = "Metagenomics";
 
 export const AVG_READS_FILTER_PER_SAMPLE =
   "Avg. reads passing filters per sample";
 export const VISIBLE = "visible";
 
-export const MENU_ICON = ".menuItem-25eT6";
+export const MENU_ICON = '[data-testid="menu-icons"]';
 
-export const SIDE_LABEL_VALUE = ".statsDd-24NuT";
+export const SIDE_LABEL_VALUE = '[[data-testid*="value"]]';
 
 export const CHECK_ALL =
   "div[role='columnheader'] span[class='checkmark-11_FV']";
 
-export const MAP_HEADERS = ".tabLabel-VhGh0";
-export const MAP_CHECKBOX = ".checkmark-11_FV";
+export const MAP_HEADERS = '[data-testid*="tablabel"]';
+export const MAP_CHECKBOX = '[data-testid="check-box" ]';
 
 export const HELP_OUT =
   "text='Help out by adding more location data to your samples.'";

@@ -29,7 +29,7 @@ const defaults: Metadata = {
 };
 
 type WORKFLOW_KEYS = keyof typeof WORKFLOWS;
-type WORKFLOW_VALUES = typeof WORKFLOWS[WORKFLOW_KEYS];
+type WORKFLOW_VALUES = (typeof WORKFLOWS)[WORKFLOW_KEYS];
 
 const getCheckboxForWorkflow = async ({
   page,

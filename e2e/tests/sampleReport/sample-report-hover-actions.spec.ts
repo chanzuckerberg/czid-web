@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { ACCEPT_ALL_COOKIES } from "../../constants/common";
 import { SEARCH_BAR } from "../../constants/sample";
 import { stubRequest } from "../../utils/api";
@@ -6,12 +6,14 @@ import { chooseBackgroundModel } from "../../utils/report";
 const sampleId = 25745;
 
 const createConsensusGenomeApi = `/samples/${sampleId}/kickoff_workflow`;
-const successResponse = [{
+const successResponse = [
+  {
     id: 1,
     workflow: "consensus-genome",
     status: "RUNNING",
     executed_at: "2021-08-05T18:00:00.000Z",
-  }];
+  },
+];
 const createConsensusGenomeModal = "create-consensus-genome-modal";
 
 test.describe("Consensus Genome Hover Actions on Sample Report", () => {
@@ -33,7 +35,9 @@ test.describe("Consensus Genome Hover Actions on Sample Report", () => {
     expect(page.getByText("Chikungunya virus")).toBeVisible();
   });
 
-  test("Should verify Create CG modal flow on click of hover action", async ({ page }) => {
+  test("Should verify Create CG modal flow on click of hover action", async ({
+    page,
+  }) => {
     // hover on taxon name
     await page.getByText("Rhinovirus C").hover();
 
@@ -49,7 +53,11 @@ test.describe("Consensus Genome Hover Actions on Sample Report", () => {
 
     // choose accession
     await page.getByText("Select a reference accession").click();
-    await page.getByTestId("dropdown-rhinovirus-c-isolate-co-03302015-polyprotein-m-rna-complete-cds").click();
+    await page
+      .getByTestId(
+        "dropdown-rhinovirus-c-isolate-co-03302015-polyprotein-m-rna-complete-cds",
+      )
+      .click();
     await expect(createButton).toBeEnabled();
 
     // Stub out the API response so we don't actually create a new CG run
@@ -64,7 +72,9 @@ test.describe("Consensus Genome Hover Actions on Sample Report", () => {
     expect(page.getByText("View Consensus Genome")).toBeVisible();
   });
 
-  test("Should verify Previous CG modal flow on click of hover action", async ({ page }) => {
+  test("Should verify Previous CG modal flow on click of hover action", async ({
+    page,
+  }) => {
     // expand taxon parent
     await page.getByTestId("expand-taxon-parent").nth(2).click();
     // hover on taxon name
@@ -85,7 +95,11 @@ test.describe("Consensus Genome Hover Actions on Sample Report", () => {
       .click();
 
     // from Previous CG modal, click on CG to take you to that CG tab
-    await page.getByText("L31963.1 - Human immunodeficiency virus type 1 (individual isolate: TH4-7-5) gene").click();
+    await page
+      .getByText(
+        "L31963.1 - Human immunodeficiency virus type 1 (individual isolate: TH4-7-5) gene",
+      )
+      .click();
     expect(page.getByText("Is my consensus genome complete?"));
   });
 });
@@ -100,10 +114,12 @@ test.describe("Blast Hover Actions on Sample Report", () => {
 
     // hover on taxon name
     await page.getByText("Klebsiella").hover();
-
   });
 
-  test("Should verify BlastN modal flow on click of hover action", async ({ page, context }) => {
+  test("Should verify BlastN modal flow on click of hover action", async ({
+    page,
+    context,
+  }) => {
     // click on that taxon's Blast icon
     await page.getByTestId("hover-action-blast-570-v-1").click();
     // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
@@ -129,7 +145,10 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     expect(await page.getByRole("alert"));
   });
 
-  test("Should verify BlastX modal flow on click of hover action", async ({ page, context }) => {
+  test("Should verify BlastX modal flow on click of hover action", async ({
+    page,
+    context,
+  }) => {
     // click on that taxon's Blast icon
     await page.getByTestId("hover-action-blast-570-v-1").click();
     // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
@@ -158,23 +177,26 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     expect(await page.getByText("Dismiss"));
   });
 
-  test("BlastN is disabled and 5 longest reads have been identified", async ({ page }) => {
-      // search for Salmonella
-      await page.locator(SEARCH_BAR).fill("Salmonella");
-      await page.getByText("Salmonella (genus)").click();
+  test("BlastN is disabled and 5 longest reads have been identified", async ({
+    page,
+  }) => {
+    // search for Salmonella
+    await page.locator(SEARCH_BAR).fill("Salmonella");
+    await page.getByText("Salmonella (genus)").click();
 
-      // hover and click on blast icon
-      await page.getByText("Salmonella", { exact: true }).hover();
-      await page.getByTestId("hover-action-blast-590-v-1").click();
+    // hover and click on blast icon
+    await page.getByText("Salmonella", { exact: true }).hover();
+    await page.getByTestId("hover-action-blast-590-v-1").click();
 
-      // verify blast selection modal functionality
-      // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
-      await page.getByText("blastx", { exact: true }).click();
-      await page.getByText("Continue").click();
+    // verify blast selection modal functionality
+    // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
+    await page.getByText("blastx", { exact: true }).click();
+    await page.getByText("Continue").click();
 
-      // verify contig selection modal functionality
-      expect(page.getByText("NT hits", { exact: true })).toBeDisabled();
-      expect(page.getByText("Up to 5 of the longest NR reads have been identified.")).toBeVisible();
+    // verify contig selection modal functionality
+    expect(page.getByText("NT hits", { exact: true })).toBeDisabled();
+    expect(
+      page.getByText("Up to 5 of the longest NR reads have been identified."),
+    ).toBeVisible();
   });
 });
-

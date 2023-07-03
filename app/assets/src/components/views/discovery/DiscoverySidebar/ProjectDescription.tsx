@@ -142,6 +142,7 @@ class ProjectDescription extends React.Component<
             {description ? (
               <div>
                 <div
+                  data-testid="project-description"
                   className={cx(
                     shouldTruncateDescription && showLess && cs.truncated,
                   )}

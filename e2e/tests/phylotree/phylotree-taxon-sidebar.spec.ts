@@ -1,5 +1,9 @@
 import { test } from "@playwright/test";
-import { testHistogramAppears, testTaxonInfo, testTaxonLinks } from "../../utils/taxon-sidebar";
+import {
+  testHistogramAppears,
+  testTaxonInfo,
+  testTaxonLinks,
+} from "../../utils/taxon-sidebar";
 
 const phyloTreeId = 244;
 
@@ -17,7 +21,8 @@ test.describe("Taxon Sidebar on Phylotree Page", () => {
     await testTaxonInfo(page, {
       taxonName: "Betacoronavirus 1",
       taxonId: "694003",
-      taxonDescription: "Human coronavirus OC43 is an enveloped, positive-stranded",
+      taxonDescription:
+        "Human coronavirus OC43 is an enveloped, positive-stranded",
       parentDescription:
         "Betacoronaviruses are one of four genera of coronaviruses of the subfamily Coronavirinae",
     });

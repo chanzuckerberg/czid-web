@@ -11,15 +11,9 @@ test.describe("Sample report view test", () => {
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     // navigate to table view
-    await page
-      .getByTestId("report-view-selector")
-      .nth(0)
-      .click();
+    await page.getByTestId("report-view-selector").nth(0).click();
     await expect(page.locator(FILTER_RESULT).nth(0)).toBeVisible();
-    await page
-      .getByTestId("report-view-selector")
-      .nth(1)
-      .click();
+    await page.getByTestId("report-view-selector").nth(1).click();
     await expect(page.locator(TREE_NODES).nth(0)).toBeVisible();
 
     // Would remove the comment as soon as test id is ready
@@ -35,10 +29,7 @@ test.describe("Sample report view test", () => {
     // newPage.url().includes(PATHOGEN_LIST_URL);
     // await expect(newPage.locator(TREE_VIEW_TITLE)).toBeVisible();
     // await newPage.close();
-    await page
-      .locator(TREE_NODES)
-      .nth(0)
-      .click();
+    await page.locator(TREE_NODES).nth(0).click();
     await expect(page.locator(TREE_NODES).nth(1)).not.toBeVisible();
   });
 });

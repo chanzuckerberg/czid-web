@@ -3,24 +3,24 @@ import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
 import { OVERALL, TEST_PROJECTS } from "../../constants/common";
 import {
-  VISIBLE,
-  OVERALL_AREA,
   AVG_READS_FILTER_PER_SAMPLE,
-  SIDE_LABELS,
-  SIDE_HEADERS,
-  BUTTONS,
   BAR_LABEL,
+  BUTTONS,
+  CHECK_ALL,
   DATE_CREATED,
   DATE_LABEL,
-  MENU_ICON,
-  SIDE_LABEL_VALUE,
-  CHECK_ALL,
-  MAP_HEADERS,
-  MAP_CHECKBOX,
-  MAP_VIEW_STRING,
   HELP_OUT,
-  SIDE_BAR,
   HOVER_TEXT,
+  MAP_CHECKBOX,
+  MAP_HEADERS,
+  MAP_VIEW_STRING,
+  MENU_ICON,
+  OVERALL_AREA,
+  SIDE_BAR,
+  SIDE_HEADERS,
+  SIDE_LABELS,
+  SIDE_LABEL_VALUE,
+  VISIBLE,
 } from "../../constants/map";
 import { BasePage } from "../../pages/basePage";
 import { openSamplePage } from "../../utils/report";
@@ -54,24 +54,15 @@ test.describe("Map view tests", () => {
           .click();
       }
 
-      await page
-        .locator(MAP_HEADERS)
-        .first()
-        .click();
-      await page
-        .locator(BAR_LABEL)
-        .nth(1)
-        .waitFor({
-          state: VISIBLE,
-        });
+      await page.locator(MAP_HEADERS).first().click();
+      await page.locator(BAR_LABEL).nth(1).waitFor({
+        state: VISIBLE,
+      });
 
       await page.waitForTimeout(2000);
       // collapse side tabs
       for (let index = 0; index <= 2; index++) {
-        await page
-          .locator(SIDE_HEADERS)
-          .nth(index)
-          .click();
+        await page.locator(SIDE_HEADERS).nth(index).click();
       }
 
       // ensure all the sides are collapsed
@@ -88,18 +79,12 @@ test.describe("Map view tests", () => {
 
       // expand side tabs
       for (let index = 0; index <= 2; index++) {
-        await page
-          .locator(SIDE_HEADERS)
-          .nth(index)
-          .click();
+        await page.locator(SIDE_HEADERS).nth(index).click();
       }
 
-      await page
-        .locator(BAR_LABEL)
-        .nth(1)
-        .waitFor({
-          state: VISIBLE,
-        });
+      await page.locator(BAR_LABEL).nth(1).waitFor({
+        state: VISIBLE,
+      });
 
       // ensure all the sides are expanded
       expect(
@@ -139,10 +124,7 @@ test.describe("Map view tests", () => {
           .click();
       }
 
-      await page
-        .locator(MAP_HEADERS)
-        .nth(0)
-        .click();
+      await page.locator(MAP_HEADERS).nth(0).click();
 
       /// overall area
       await expect(await basePage.findByLocator(SIDE_HEADERS, 0)).toContainText(
@@ -154,10 +136,7 @@ test.describe("Map view tests", () => {
       await page.waitForTimeout(2000);
       // collapse side tabs
       for (let index = 0; index <= 2; index++) {
-        await page
-          .locator(SIDE_HEADERS)
-          .nth(index)
-          .click();
+        await page.locator(SIDE_HEADERS).nth(index).click();
       }
       // ensure all the sides are collaspsed
       expect((await page.locator(OVERALL_AREA).allInnerTexts()).length).toEqual(
@@ -195,12 +174,7 @@ test.describe("Map view tests", () => {
       await expect(page.locator(SIDE_LABEL_VALUE).nth(2)).toBeVisible();
       await expect(page.locator(SIDE_LABEL_VALUE).nth(3)).toBeVisible();
 
-      if (
-        await page
-          .locator(SIDE_BAR)
-          .nth(0)
-          .isVisible()
-      ) {
+      if (await page.locator(SIDE_BAR).nth(0).isVisible()) {
         await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
         await (await basePage.findByLocator(SIDE_HEADERS, 2)).click();
       }
@@ -214,15 +188,9 @@ test.describe("Map view tests", () => {
       // verify information when user hovers over bar charts on date created section
       const length = (await page.locator(SIDE_BAR).allInnerTexts()).length;
       for (let i = 0; i < length; i++) {
-        const ans = await page
-          .locator(SIDE_BAR)
-          .nth(i)
-          .getAttribute("style");
+        const ans = await page.locator(SIDE_BAR).nth(i).getAttribute("style");
         if (ans !== "height: 0px;") {
-          await page
-            .locator(SIDE_BAR)
-            .nth(i)
-            .hover();
+          await page.locator(SIDE_BAR).nth(i).hover();
           await expect(page.locator(HOVER_TEXT).nth(0)).toBeVisible();
           await expect(page.locator(HOVER_TEXT).nth(1)).toBeVisible();
           // make sure the hover is no longer present
@@ -252,10 +220,7 @@ test.describe("Map view tests", () => {
           .click();
       }
 
-      await page
-        .locator(MAP_HEADERS)
-        .nth(1)
-        .click();
+      await page.locator(MAP_HEADERS).nth(1).click();
 
       // ensure the header are visible
       await expect(page.locator(CHECK_ALL)).toBeVisible();
@@ -263,24 +228,15 @@ test.describe("Map view tests", () => {
       await expect(page.locator(MAP_ADD_ICON)).toBeVisible();
 
       // assert icons are active after selecting some checkbox
-      await page
-        .locator(MAP_HEADERS)
-        .nth(1)
-        .click();
+      await page.locator(MAP_HEADERS).nth(1).click();
       expect(page.locator(BUTTONS).nth(3)).not.toBeEnabled();
 
-      await page
-        .locator(MAP_CHECKBOX)
-        .nth(1)
-        .click();
+      await page.locator(MAP_CHECKBOX).nth(1).click();
       await expect(page.locator(BUTTONS).nth(3)).toBeEnabled();
       await expect(page.locator(BUTTONS).nth(0)).not.toBeEnabled();
       await expect(page.locator(BUTTONS).nth(1)).not.toBeEnabled();
 
-      await page
-        .locator(MAP_CHECKBOX)
-        .nth(2)
-        .click();
+      await page.locator(MAP_CHECKBOX).nth(2).click();
       await expect(page.locator(BUTTONS).nth(0)).toBeEnabled();
       await expect(page.locator(BUTTONS).nth(1)).toBeEnabled();
     });
