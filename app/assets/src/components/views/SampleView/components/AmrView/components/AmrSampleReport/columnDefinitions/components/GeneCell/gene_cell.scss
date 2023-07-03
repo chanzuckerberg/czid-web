@@ -5,18 +5,25 @@
   align-items: center;
 
   &:hover .downloadIcon {
-    display: inline-block;
+    color: $sds-color-primary-400;
+    &:disabled {
+      color: $sds-color-gray-300;
+    }
   }
 
   .downloadIcon {
-    display: none;
+    color: transparent;
+    display: inline-block;
     margin-left: $sds-spaces-xs;
+    &:focus {
+      color: $sds-color-primary-400;
+    }
   }
 
   // when a user opens the dropdown and then mouses away,
   // this keeps the dropdown open even when the user is no longer hovering
   .showHoverActions {
-    display: inline-block;
+    color: $sds-color-primary-400;
   }
 }
 

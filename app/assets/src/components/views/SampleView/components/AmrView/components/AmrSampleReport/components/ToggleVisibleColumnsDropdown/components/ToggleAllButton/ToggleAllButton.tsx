@@ -1,17 +1,17 @@
 import { Button } from "@czi-sds/components";
 import React from "react";
+import { SDSFormattedDropdownOption } from "~/interface/dropdown";
 import {
   ColumnSection,
   COLUMN_ID_TO_NAME,
   SECTION_TO_COLUMN_IDS,
 } from "../../../../../../constants";
-import { FormattedDropdownOption } from "../../ToggleVisibleColumnsDropdown";
 
 interface ToggleAllButtonProps {
-  dropdownOptions: FormattedDropdownOption[];
-  dropdownValue: FormattedDropdownOption[];
+  dropdownOptions: SDSFormattedDropdownOption[];
+  dropdownValue: SDSFormattedDropdownOption[];
   section: ColumnSection;
-  setPendingOptions: (options: FormattedDropdownOption[]) => void;
+  setPendingOptions: (options: SDSFormattedDropdownOption[]) => void;
 }
 
 export const ToggleAllButton = ({

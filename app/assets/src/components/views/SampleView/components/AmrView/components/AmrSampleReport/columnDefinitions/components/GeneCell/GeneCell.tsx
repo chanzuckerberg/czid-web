@@ -1,30 +1,36 @@
-import { Button, ButtonIcon, Tooltip } from "@czi-sds/components";
+import { Button, ButtonIcon, DropdownMenu, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { UserContext } from "~/components/common/UserContext";
-import { BareDropdown } from "~/components/ui/controls/dropdowns";
 import { AMR_V3_FEATURE } from "~/components/utils/features";
+import { isAmrGeneLevelDownloadAvailable } from "~/components/utils/pipeline_versions";
 import {
-  DOWNLOAD_CONTIGS,
-  DOWNLOAD_READS,
-} from "~/components/views/SampleView/constants";
-import { downloadAmrGeneLevelData } from "~/components/views/SampleView/SampleViewHeader/PrimaryHeaderControls/AmrDownloadDropdown/amrDownloadUtils";
+  geneLevelDownloadOptions,
+  RenderedGeneLevelDownloadOption,
+} from "./components/RenderedGeneLevelDownloadOption";
 import cs from "./gene_cell.scss";
 
 interface GeneCellProps {
+  contigs: string | null;
   geneName: string;
   setDetailsSidebarGeneName: (geneName: string | null) => void;
   geneId: string;
+  reads: string | null;
   workflowRunId: number;
+  workflowWdlVersion: string;
 }
 
 export const GeneCell = ({
+  contigs,
   geneName,
   setDetailsSidebarGeneName,
   geneId,
+  reads,
   workflowRunId,
+  workflowWdlVersion,
 }: GeneCellProps) => {
-  const [showHoverActions, setShowHoverActions] = React.useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -32,25 +38,49 @@ export const GeneCell = ({
     setDetailsSidebarGeneName(geneName);
   };
 
-  const downloadOptions = [
-    {
-      text: "Contigs (.fasta)",
-      value: DOWNLOAD_CONTIGS,
-    },
-    {
-      text: "Reads (.fasta)",
-      value: DOWNLOAD_READS,
-    },
-  ];
+  const handleAnchorClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (isOpen) {
+      setIsOpen(false);
+      if (anchorEl) {
+        anchorEl.focus();
+      }
+    } else {
+      setAnchorEl(event.currentTarget);
+      setIsOpen(true);
+    }
+  };
 
-  const downloadButton = (
-    <ButtonIcon
-      className={cx(cs.downloadIcon, showHoverActions && cs.showHoverActions)}
-      sdsSize="small"
-      sdsType="primary"
-      sdsIcon={"download"}
-    />
-  );
+  const handleClickAway = () => {
+    // Close the DropdownMenu
+    setIsOpen(false);
+  };
+
+  const handleKeyEscape = (event: React.KeyboardEvent) => {
+    if (event.key === "Escape") {
+      // Close the DropdownMenu and return focus to the anchor element
+      setIsOpen(false);
+      if (anchorEl) {
+        anchorEl.focus();
+      }
+    }
+  };
+
+  // This render function is not defined inline for performance reasons.
+  // The DropdownMenu prop "renderOption" takes a function in this format and not a React component.
+  // Leaving the lambda function inline can cause hundreds of instances of the same function to be created
+  // because there can be hundreds of dropdown options on an AmrSampleReport.
+  const renderDownloadOption = (_, option) => {
+    return (
+      <RenderedGeneLevelDownloadOption
+        contigs={contigs}
+        geneId={geneId}
+        geneName={geneName}
+        option={option}
+        reads={reads}
+        workflowRunId={workflowRunId}
+      />
+    );
+  };
 
   return (
     <span className={cs.geneCell}>
@@ -68,19 +98,37 @@ export const GeneCell = ({
         </span>
       </Tooltip>
       {allowedFeatures.includes(AMR_V3_FEATURE) && (
-        <BareDropdown
-          className={cs.hoverAction}
-          hideArrow
-          fluid
-          trigger={downloadButton}
-          options={downloadOptions}
-          onChange={(value: string) =>
-            downloadAmrGeneLevelData(value, geneId, geneName, workflowRunId)
-          }
-          onOpen={() => setShowHoverActions(true)}
-          onClose={() => setShowHoverActions(false)}
-          usePortal
-        />
+        <>
+          <Tooltip
+            title={
+              isAmrGeneLevelDownloadAvailable(workflowWdlVersion)
+                ? ""
+                : "Downloads are not available for pipeline runs before v1.1"
+            }
+            placement="top"
+            sdsStyle="light"
+          >
+            <span>
+              <ButtonIcon
+                disabled={!isAmrGeneLevelDownloadAvailable(workflowWdlVersion)}
+                onClick={handleAnchorClick}
+                className={cx(cs.downloadIcon, isOpen && cs.showHoverActions)}
+                sdsSize="small"
+                sdsType="primary"
+                sdsIcon={"download"}
+              />
+            </span>
+          </Tooltip>
+          <DropdownMenu
+            className={cs.hoverAction}
+            open={isOpen}
+            anchorEl={anchorEl}
+            onClickAway={handleClickAway}
+            onKeyDown={handleKeyEscape}
+            options={geneLevelDownloadOptions}
+            renderOption={renderDownloadOption}
+          />
+        </>
       )}
     </span>
   );

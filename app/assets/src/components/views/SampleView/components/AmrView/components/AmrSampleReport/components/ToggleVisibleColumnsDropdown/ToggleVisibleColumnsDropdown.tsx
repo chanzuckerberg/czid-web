@@ -8,6 +8,7 @@ import { Column, Table } from "@tanstack/react-table";
 import { difference } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { setState } from "~/helpers/storage";
+import { SDSFormattedDropdownOption } from "~/interface/dropdown";
 import {
   ColumnId,
   ColumnSection,
@@ -22,14 +23,10 @@ import cs from "./toggle_visible_columns_dropdown.scss";
 interface ToggleVisibleColumnsDropdownProps {
   table: Table<any>;
 }
-export interface FormattedDropdownOption {
-  name: string;
-  section?: string;
-}
 
 export const formatDropdownOption = (
   column: Column<AmrResult, any>,
-): FormattedDropdownOption => {
+): SDSFormattedDropdownOption => {
   return {
     name: COLUMN_ID_TO_NAME.get(column.id),
     section: SECTION_TO_COLUMN_IDS.revGet(column.id),
@@ -42,7 +39,7 @@ export const ToggleVisibleColumnsDropdown = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownValue, setDropdownValue] =
-    useState<FormattedDropdownOption[]>();
+    useState<SDSFormattedDropdownOption[]>();
 
   const handleAnchorClick = (event: React.MouseEvent<HTMLElement>) => {
     if (isOpen) {
@@ -58,7 +55,7 @@ export const ToggleVisibleColumnsDropdown = ({
 
   // Use all leaf columns to generate the dropdown options.
   const allColumns = table.getAllLeafColumns();
-  const dropdownOptions: FormattedDropdownOption[] = [];
+  const dropdownOptions: SDSFormattedDropdownOption[] = [];
   allColumns.forEach(column => {
     if (column.id === "gene") {
       return;
@@ -70,7 +67,7 @@ export const ToggleVisibleColumnsDropdown = ({
   // This returns a new object every time.
   const visibleColumns = table.getVisibleLeafColumns();
   useEffect(() => {
-    // Convert visibleColumns to a list of FormattedDropdownOptions to pass to the DropdownMenu
+    // Convert visibleColumns to a list of SDSFormattedDropdownOptions to pass to the DropdownMenu
     const dropdownValue = [];
     [...visibleColumns].slice(1).forEach((column: Column<any, unknown>) => {
       dropdownValue.push(formatDropdownOption(column));
@@ -80,7 +77,7 @@ export const ToggleVisibleColumnsDropdown = ({
 
   const onChange = (
     _: React.ChangeEvent<unknown>,
-    options: FormattedDropdownOption[],
+    options: SDSFormattedDropdownOption[],
   ) => {
     handleApply(options);
   };
@@ -102,7 +99,7 @@ export const ToggleVisibleColumnsDropdown = ({
     });
   };
 
-  const handleApply = (options: FormattedDropdownOption[]) => {
+  const handleApply = (options: SDSFormattedDropdownOption[]) => {
     // Apply the changes by updating the visibility of the react-table columns
     const selectedColumnIds = options.map(option => {
       return COLUMN_ID_TO_NAME.revGet(option.name);
@@ -135,6 +132,7 @@ export const ToggleVisibleColumnsDropdown = ({
 
   const handleKeyEscape = (event: React.KeyboardEvent) => {
     if (event.key === "Escape") {
+      // Close the DropdownMenu and return focus to the anchor element
       setIsOpen(false);
       if (anchorEl) {
         anchorEl.focus();

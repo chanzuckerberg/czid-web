@@ -62,12 +62,15 @@ export const AmrSampleReport = ({
 }: AmrSampleReportProps) => {
   // Keep the react-table instance in state to pass between the table component and the dropdown component
   const [table, setTable] = React.useState<TableType<AmrResult> | null>(null);
-
   const columns: ColumnDef<AmrResult, any>[] = useMemo<ColumnDef<AmrResult>[]>(
     () => [
       getGeneInfoColumnGroup(
         [
-          getGeneColumn(setDetailsSidebarGeneName, workflowRun.id),
+          getGeneColumn(
+            setDetailsSidebarGeneName,
+            workflowRun.id,
+            workflowRun.wdl_version,
+          ),
           geneFamilyColumn,
           drugClassColumn,
           mechanismColumn,

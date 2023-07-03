@@ -8,6 +8,7 @@ import { GENE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export function getGeneColumn(
   setDetailsSidebarGeneName: (setDetailsSidebarGeneName: string | null) => void,
   workflowRunId: number,
+  workflowWdlVersion: string,
 ) {
   return {
     id: "gene",
@@ -29,10 +30,13 @@ export function getGeneColumn(
       return (
         <CellComponent key={cell.id}>
           <GeneCell
-            setDetailsSidebarGeneName={setDetailsSidebarGeneName}
+            contigs={row?.original?.contigs}
             geneName={getValue()}
             geneId={row?.original?.geneId}
+            reads={row?.original?.reads}
+            setDetailsSidebarGeneName={setDetailsSidebarGeneName}
             workflowRunId={workflowRunId}
+            workflowWdlVersion={workflowWdlVersion}
           />
         </CellComponent>
       );
