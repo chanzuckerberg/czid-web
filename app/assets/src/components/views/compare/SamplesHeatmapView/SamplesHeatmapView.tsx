@@ -39,14 +39,12 @@ import { getSampleMetadataFields } from "~/api/metadata";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
 import ErrorBoundary from "~/components/ErrorBoundary";
-import { NarrowContainer } from "~/components/layout";
 import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
   HEATMAP_ELASTICSEARCH_FEATURE,
-  HEATMAP_FILTERS_LEFT_FEATURE,
   HEATMAP_PATHOGEN_FLAGGING_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
@@ -69,11 +67,12 @@ import { URL_FIELDS } from "~/components/views/SampleView/constants";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
-import { IconAlert, SortIcon } from "~ui/icons";
+import { IconAlert } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
 import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
 import SamplesHeatmapFilters from "./components/SamplesHeatmapFilters";
+import { OptionsType } from "./components/SamplesHeatmapFilters/SamplesHeatmapFilters";
 import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
 import SamplesHeatmapLegend from "./components/SamplesHeatmapLegend";
 import {
@@ -90,9 +89,6 @@ import {
   TAXON_LEVEL_SELECTED,
 } from "./constants";
 import cs from "./samples_heatmap_view.scss";
-import SamplesHeatmapControls, {
-  SamplesHeatmapControlsProps,
-} from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
 
 const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
@@ -1728,7 +1724,7 @@ class SamplesHeatmapView extends React.Component<
     return {};
   };
 
-  getControlOptions = (): SamplesHeatmapControlsProps["options"] => ({
+  getControlOptions = (): OptionsType => ({
     // Server side options
     metrics: this.props.metrics.filter(metric =>
       METRIC_OPTIONS.includes(metric.value),
@@ -1825,57 +1821,6 @@ class SamplesHeatmapView extends React.Component<
     } else {
       this.filterTaxa();
     }
-  }
-
-  renderVisualization(shownTaxa, useNewFilters) {
-    // TODO (smb): remove this once new filters are fully rolled out
-
-    const { data, loading, selectedOptions, allSpeciesIds, allGeneraIds } =
-      this.state;
-
-    const drawerWidth = 200;
-
-    return (
-      <div className="visualization-content">
-        {useNewFilters && (
-          <SamplesHeatmapLegend
-            loading={loading}
-            data={data}
-            selectedOptions={selectedOptions}
-            options={this.getControlOptions()}
-          />
-        )}
-        <div className={cs.filtersAndHeatmapContainer}>
-          {useNewFilters && (
-            <FilterPanel
-              hideFilters={this.state.hideFilters}
-              content={
-                <SamplesHeatmapFilters
-                  options={this.getControlOptions()}
-                  selectedOptions={selectedOptions}
-                  onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                  loading={loading}
-                  data={data}
-                  filteredTaxaCount={shownTaxa.size}
-                  totalTaxaCount={
-                    selectedOptions.species
-                      ? allSpeciesIds.length
-                      : allGeneraIds.length
-                  }
-                  prefilterConstants={this.props.prefilterConstants}
-                  enableMassNormalizedBackgrounds={
-                    this.state.enableMassNormalizedBackgrounds
-                  }
-                />
-              }
-              anchorPosition={"left"}
-              customDrawerWidth={drawerWidth}
-            />
-          )}
-          {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
-        </div>
-      </div>
-    );
   }
 
   renderLoading() {
@@ -2121,89 +2066,6 @@ class SamplesHeatmapView extends React.Component<
     }
   }
 
-  renderHeader = (sampleIds: number[], loading: boolean) => {
-    return (
-      <SamplesHeatmapHeader
-        sampleIds={sampleIds}
-        heatmapId={
-          this.props.savedParamValues && this.props.savedParamValues.id
-        }
-        loading={loading}
-        heatmapName={this.props.name}
-        presets={this.state.selectedOptions["presets"]}
-        onDownloadClick={this.handleDownloadModalOpen}
-        onDownloadSvg={this.handleDownloadSvg}
-        onDownloadPng={this.handleDownloadPng}
-        onDownloadCurrentHeatmapViewCsv={
-          this.getDownloadCurrentViewHeatmapCSVLink
-        }
-        onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
-        onNewPresetsClick={this.handleHeatmapCreationModalOpen}
-        onShareClick={this.handleShareClick}
-        onSaveClick={this.handleSaveClick}
-        onFilterToggleClick={this.toggleDisplayFilters}
-        filterPanelOpen={!this.state.hideFilters}
-      />
-    );
-  };
-
-  // TODO (smb): remove this once new filters are fully rolled out
-  renderOriginalFilters = shownTaxa => {
-    const {
-      allGeneraIds,
-      allSpeciesIds,
-      data,
-      enableMassNormalizedBackgrounds,
-      hideFilters,
-      loading,
-      sampleIds,
-      selectedOptions,
-    } = this.state;
-
-    return (
-      <>
-        {!hideFilters && (
-          <div>
-            {this.renderHeader(sampleIds, loading)}
-            <NarrowContainer>
-              <SamplesHeatmapControls
-                options={this.getControlOptions()}
-                selectedOptions={selectedOptions}
-                onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                loading={loading}
-                data={data}
-                filteredTaxaCount={shownTaxa.size}
-                totalTaxaCount={
-                  selectedOptions.species
-                    ? allSpeciesIds.length
-                    : allGeneraIds.length
-                }
-                prefilterConstants={this.props.prefilterConstants}
-                enableMassNormalizedBackgrounds={
-                  enableMassNormalizedBackgrounds
-                }
-              />
-            </NarrowContainer>
-          </div>
-        )}
-        <div className={cs.filterToggleContainer}>
-          {hideFilters && <div className={cs.filterLine} />}
-          <div
-            className={cs.arrowIcon}
-            onClick={withAnalytics(
-              this.toggleDisplayFilters,
-              "SamplesHeatmapFilters_toggle_clicked",
-            )}
-          >
-            <SortIcon
-              sortDirection={hideFilters ? "descending" : "ascending"}
-            />
-          </div>
-        </div>
-      </>
-    );
-  };
-
   render() {
     const {
       addedTaxonIds,
@@ -2223,11 +2085,6 @@ class SamplesHeatmapView extends React.Component<
       taxonIds,
     } = this.state;
 
-    const { allowedFeatures = [] } = this.context || {};
-    const useNewFilters = allowedFeatures.includes(
-      HEATMAP_FILTERS_LEFT_FEATURE,
-    );
-
     // @ts-expect-error ts-migrate(2554) FIXME: Expected 0-1 arguments, but got 2.
     let shownTaxa = new Set(taxonIds, addedTaxonIds);
     shownTaxa = new Set(
@@ -2236,10 +2093,66 @@ class SamplesHeatmapView extends React.Component<
 
     return (
       <div className={cs.heatmap}>
-        {useNewFilters && this.renderHeader(sampleIds, loading)}
-        {/* TODO (smb): switch this to the new component once filters are rolled out */}
-        {!useNewFilters && this.renderOriginalFilters(shownTaxa)}
-        {this.renderVisualization(shownTaxa, useNewFilters)}
+        {/* render header */}
+        <SamplesHeatmapHeader
+          sampleIds={sampleIds}
+          heatmapId={
+            this.props.savedParamValues && this.props.savedParamValues.id
+          }
+          loading={loading}
+          heatmapName={this.props.name}
+          presets={this.state.selectedOptions["presets"]}
+          onDownloadClick={this.handleDownloadModalOpen}
+          onDownloadSvg={this.handleDownloadSvg}
+          onDownloadPng={this.handleDownloadPng}
+          onDownloadCurrentHeatmapViewCsv={
+            this.getDownloadCurrentViewHeatmapCSVLink
+          }
+          onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
+          onNewPresetsClick={this.handleHeatmapCreationModalOpen}
+          onShareClick={this.handleShareClick}
+          onSaveClick={this.handleSaveClick}
+          onFilterToggleClick={this.toggleDisplayFilters}
+          filterPanelOpen={!this.state.hideFilters}
+        />
+        {/* render visualization */}
+        <div className="visualization-content">
+          <SamplesHeatmapLegend
+            loading={loading}
+            data={this.state.data}
+            selectedOptions={selectedOptions}
+            options={this.getControlOptions()}
+          />
+          {/* render filters */}
+          <div className={cs.filtersAndHeatmapContainer}>
+            <FilterPanel
+              hideFilters={this.state.hideFilters}
+              content={
+                <SamplesHeatmapFilters
+                  options={this.getControlOptions()}
+                  selectedOptions={selectedOptions}
+                  onSelectedOptionsChange={this.handleSelectedOptionsChange}
+                  loading={loading}
+                  data={this.state.data}
+                  filteredTaxaCount={shownTaxa.size}
+                  totalTaxaCount={
+                    selectedOptions.species
+                      ? this.state.allSpeciesIds.length
+                      : this.state.allGeneraIds.length
+                  }
+                  prefilterConstants={this.props.prefilterConstants}
+                  enableMassNormalizedBackgrounds={
+                    this.state.enableMassNormalizedBackgrounds
+                  }
+                />
+              }
+              anchorPosition={"left"}
+              customDrawerWidth={200}
+            />
+            {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
+          </div>
+        </div>
+
         <DetailsSidebar
           visible={sidebarVisible}
           mode={sidebarMode}

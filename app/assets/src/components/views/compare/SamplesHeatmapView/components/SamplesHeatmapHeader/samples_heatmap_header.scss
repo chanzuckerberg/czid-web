@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 @import "~@czi-sds/components/dist/variables";
 
-.newViewHeader {
+.viewHeader {
   padding: $sds-spaces-l;
   border-bottom: 1px solid $sds-color-gray-200;
   position: relative;
@@ -27,19 +27,6 @@
   .contentSpacer {
     height: $sds-spaces-m;
   }
-
-  .controls {
-    display: flex;
-
-    .controlElement {
-      margin-left: $sds-spaces-m;
-    }
-  }
-}
-
-.oldViewHeader {
-  margin-top: 40px;
-  margin-bottom: 40px;
 
   .controls {
     display: flex;

@@ -26,7 +26,7 @@ IMPORTANT note for this to work properly, you'll need to set a few other css sty
 3 - the main page content should have `width: 100%` and a `min-width` set
 */
 
-// TODO - smb - move this component to czifui and replace this with an instance so we don't have any `styled()` components in the app
+// TODO - once SDS implements the new Panel component, we can use that instead of this custom Drawer
 const StyledFilterPanel = styled(Drawer)<DrawerProps>(() => ({
   flexShrink: 0,
   zIndex: 2,

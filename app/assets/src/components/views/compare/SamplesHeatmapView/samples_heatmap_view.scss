@@ -10,20 +10,6 @@
 .heatmap {
   margin-top: -$header-margin-bottom;
 
-  // TODO - smb - remove this once new filter panel lands
-  .viewHeader {
-    margin-top: 40px;
-    margin-bottom: 40px;
-
-    .controls {
-      display: flex;
-
-      .controlElement {
-        margin-left: $sds-spaces-m;
-      }
-    }
-  }
-
   .menu {
     background-color: $sds-color-gray-white;
 

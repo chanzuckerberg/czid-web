@@ -772,7 +772,7 @@ class SamplesHeatmapVis extends React.Component<
         />
 
         <div
-          className={cs.newHeatmapContainer}
+          className={cs.heatmapContainer}
           ref={container => {
             this.heatmapContainer = container;
           }}

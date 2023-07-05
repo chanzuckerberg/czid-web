@@ -21,7 +21,7 @@
     }
   }
 
-  .newHeatmapContainer {
+  .heatmapContainer {
     position: relative;
     // the legend and 'showing x our of x taxa' text are 45px tall
     top: 45px;
@@ -30,30 +30,6 @@
     margin-top: $sds-spaces-l;
     width: calc(100% - 14px);
     min-width: 500px;
-
-    svg {
-      display: block;
-      margin: 0 auto;
-    }
-  }
-
-  // TODO - smb - remove this old scss class once we're ready to remove the feature flag
-  .heatmapContainer {
-    // overflow: hidden;
-    // Set the height so the heatmap takes up the rest of the screen.
-    // 358px is the height of the elements above the heatmapContainer.
-    // We set it to less that the height of the elements so that the
-    // heatmap doesn't completely disappear when scrolled up.
-    // It *will* need to change if the height of the elements above ever change.
-    height: calc(100vh - #{$header-height});
-
-    &.filtersApplied {
-      height: calc(100vh - #{$header-height});
-    }
-
-    &.fullScreen {
-      height: calc(100vh - #{$header-height});
-    }
 
     svg {
       display: block;
