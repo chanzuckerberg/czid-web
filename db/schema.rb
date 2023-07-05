@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_06_20_221611) do
+ActiveRecord::Schema.define(version: 2023_07_05_183948) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -173,6 +173,18 @@ ActiveRecord::Schema.define(version: 2023_06_20_221611) do
   end
 
   create_table "data_migrations", primary_key: "version", id: :string, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  end
+
+  create_table "deletion_logs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "object_id", null: false, comment: "The id of the object that was deleted"
+    t.bigint "user_id", null: false, comment: "The user id of the user who deleted the object"
+    t.string "user_email", comment: "The email of the user who deleted the object"
+    t.string "object_type", null: false, comment: "The type of object deleted, e.g. PipelineRun"
+    t.datetime "soft_deleted_at", comment: "When the object was marked as soft deleted"
+    t.datetime "hard_deleted_at", comment: "When the object was successfully hard deleted"
+    t.string "metadata_json", comment: "Generic JSON-string format for recording additional information about the object"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "ercc_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
