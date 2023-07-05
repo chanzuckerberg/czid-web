@@ -1,10 +1,15 @@
 # Deletes pipeline/workflow runs and samples in the background.
 # If batching this job, make sure it is a low priority for the workers
 # so that the other web app Resque jobs are not stalled when large deletions occur.
+require 'resque-retry'
+
 class HardDeleteObjects
   extend InstrumentedJob
+  extend Resque::Plugins::Retry # automatically retries job once on failure (e.g. deploy cancels job)
 
   @queue = :hard_delete_objects
+  @retry_delay = 120 # wait 120 seconds before re-enqueuing job in the event of a random failure
+
   DELETION_ATTEMPTS = 2 # retry deletion of object in case we hit a random deadlock
   RETRY_DELAY_SECONDS = 20
 

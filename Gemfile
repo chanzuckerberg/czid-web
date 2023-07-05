@@ -63,6 +63,7 @@ gem 'rake'
 # Worker/Scheduler management
 gem 'resque', '~> 2.3'
 gem 'resque-lock'
+gem 'resque-retry', '~>1.8'
 gem 'resque-scheduler', '~> 4.6'
 gem 'thread'
 # SentryIO
