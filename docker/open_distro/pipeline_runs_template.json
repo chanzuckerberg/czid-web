@@ -12,9 +12,6 @@
             "number_of_shards": 4,
             "number_of_replicas": 1
         },
-        "aliases": {
-            "pipeline_runs": {}
-        },
         "mappings": {
             "properties": {
                 "pipeline_run_id": {
@@ -26,6 +23,9 @@
                 "is_complete": {
                     "type": "boolean",
                     "null_value": false
+                },
+                "deletion_task": {
+                    "type": "keyword"
                 },
                 "created_at": {
                     "type": "date"

@@ -1,0 +1,18 @@
+{
+ "actions" : [
+    {
+      "add": {
+        "index": "scored_taxon_counts-v1",
+        "alias": "scored_taxon_counts",
+        "is_write_index": true
+      }
+    },
+    {
+      "add": {
+        "index": "pipeline_runs-v1",
+        "alias": "pipeline_runs",
+        "is_write_index": true
+      }
+    }
+ ]
+}
