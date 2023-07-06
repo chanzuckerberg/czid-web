@@ -24,6 +24,12 @@ const publicationsData = [
 
 const newsData = [
   {
+    publicationLink: `https://www.genomeweb.com/sequencing/chan-zuckerberg-id-makes-strides-enabling-pathogen-identification-metagenomic-data#.ZGvEzOzMKWA`,
+    publicationDate: `05.08.23`,
+    publicationTitle: `Chan Zuckerberg ID Makes Strides in Enabling Pathogen Identification From Metagenomic Data`,
+    publicationCompany: `GenomeWeb`,
+  },
+  {
     publicationLink: `https://www.nytimes.com/2021/06/03/magazine/metagenomic-sequencing.html`,
     publicationDate: `06.03.21`,
     publicationTitle: `The Disease Detective`,
