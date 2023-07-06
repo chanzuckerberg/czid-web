@@ -1,7 +1,7 @@
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { IconAlert, IconLoading } from "~/components/ui/icons";
-import { sampleErrorInfo } from "~/components/utils/sample";
+import { sampleErrorInfo, UPLOAD_URL } from "~/components/utils/sample";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
 import { IconAlertType } from "~/interface/icon";
@@ -14,6 +14,7 @@ import { ONT_PIPELINE_RUNNING_STATUS_MESSAGE, TABS } from "../../constants";
 interface SampleViewMessageProps {
   currentTab: CurrentTabSample;
   loadingReport: boolean;
+  hasZeroTaxons: boolean;
   pipelineRun: PipelineRun;
   reportMetadata: ReportMetadata;
   sample: Sample;
@@ -22,6 +23,7 @@ interface SampleViewMessageProps {
 
 export const SampleViewMessage = ({
   currentTab,
+  hasZeroTaxons,
   loadingReport,
   pipelineRun,
   reportMetadata,
@@ -50,6 +52,14 @@ export const SampleViewMessage = ({
     message = "Loading report data.";
     icon = <IconLoading className={csSampleMessage.icon} />;
     type = "inProgress";
+  } else if (hasZeroTaxons) {
+    // If the data has loaded from the backend, but there are no taxons to display
+    status = SampleStatus.COMPLETE_ISSUE;
+    message =
+      "No data to display because the sample reads did not match the database.";
+    type = "warning";
+    link = UPLOAD_URL;
+    linkText = "Upload new sample";
   } else if (
     // Else if the data has loaded from the backend, but the pipeline is still running,
     // let the user know that the pipeline is in progress.

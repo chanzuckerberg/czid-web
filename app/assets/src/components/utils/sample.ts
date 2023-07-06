@@ -74,7 +74,7 @@ function subtextError(message: string) {
 }
 
 // String constants
-const UPLOAD_URL = "/samples/upload";
+export const UPLOAD_URL = "/samples/upload";
 const MAILTO_LINK = "mailto:help@czid.org";
 const CONTACT_US = "Contact us for help.";
 
