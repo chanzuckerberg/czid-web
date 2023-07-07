@@ -78,21 +78,27 @@ export const AmrSampleReport = ({
         ],
         !!reportTableData && Object.keys(reportTableData).length,
       ),
-      getContigsColumnGroup([
-        contigsColumn,
-        cutoffColumn,
-        contigPercentCoverageColumn,
-        contigPercentIdColumn,
-        contigSpeciesColumn,
-      ]),
-      getReadsColumnGroup([
-        readsColumn,
-        readsPerMillionColumn,
-        readCoverageBreadthColumn,
-        readCoverageDepthColumn,
-        readDepthPerMillionColumn,
-        readSpeciesColumn,
-      ]),
+      getContigsColumnGroup(
+        [
+          contigsColumn,
+          cutoffColumn,
+          contigPercentCoverageColumn,
+          contigPercentIdColumn,
+          contigSpeciesColumn,
+        ],
+        table,
+      ),
+      getReadsColumnGroup(
+        [
+          readsColumn,
+          readsPerMillionColumn,
+          readCoverageBreadthColumn,
+          readCoverageDepthColumn,
+          readDepthPerMillionColumn,
+          readSpeciesColumn,
+        ],
+        table,
+      ),
     ],
     [reportTableData],
   );

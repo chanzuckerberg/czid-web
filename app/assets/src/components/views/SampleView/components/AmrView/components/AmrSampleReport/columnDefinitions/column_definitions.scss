@@ -45,6 +45,20 @@
   margin: $sds-spaces-s;
 }
 
+.groupedHeaderButton {
+  width: 100%;
+  &:hover {
+    background-color: $sds-color-primary-200;
+  }
+  svg {
+    position: absolute;
+    left: $sds-spaces-s;
+  }
+  span {
+    margin-left: $sds-spaces-s;
+  }
+}
+
 .groupedHeaderPlaceholder {
   background-color: $sds-color-gray-100;
   height: 26px;

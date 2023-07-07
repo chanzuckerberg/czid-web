@@ -56,8 +56,8 @@ export const SECTION_TO_COLUMN_IDS = new TwoWayKeyListMap({
     ColumnId.MODEL,
   ],
   [ColumnSection.CONTIGS]: [
-    ColumnId.CUTOFF,
     ColumnId.CONTIGS,
+    ColumnId.CUTOFF,
     ColumnId.CONTIG_COVERAGE_BREADTH,
     ColumnId.CONTIG_PERCENT_ID,
     ColumnId.CONTIG_SPECIES,
@@ -73,3 +73,4 @@ export const SECTION_TO_COLUMN_IDS = new TwoWayKeyListMap({
 });
 
 export const LOCAL_STORAGE_AMR_COLUMN_VISIBILITY_KEY = "amrColumnVisibility";
+export const COLUMNS_ALWAYS_PRESENT = [ColumnId.GENE];

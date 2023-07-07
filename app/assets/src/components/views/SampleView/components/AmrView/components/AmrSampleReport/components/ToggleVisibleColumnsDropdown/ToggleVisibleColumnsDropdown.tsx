@@ -5,17 +5,16 @@ import {
   Tooltip,
 } from "@czi-sds/components";
 import { Column, Table } from "@tanstack/react-table";
-import { difference } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import { setState } from "~/helpers/storage";
-import { SDSFormattedDropdownOption } from "~/interface/dropdown";
 import {
   ColumnId,
   ColumnSection,
+  COLUMNS_ALWAYS_PRESENT,
   COLUMN_ID_TO_NAME,
-  LOCAL_STORAGE_AMR_COLUMN_VISIBILITY_KEY,
   SECTION_TO_COLUMN_IDS,
-} from "../../../../constants";
+} from "~/components/views/SampleView/components/AmrView/constants";
+import { SDSFormattedDropdownOption } from "~/interface/dropdown";
+import { persistColumnVisibilityToLocalStorage } from "../../columnDefinitions/columnDefUtils";
 import { AmrResult } from "../../types";
 import { ToggleAllButton } from "./components/ToggleAllButton";
 import cs from "./toggle_visible_columns_dropdown.scss";
@@ -82,23 +81,6 @@ export const ToggleVisibleColumnsDropdown = ({
     handleApply(options);
   };
 
-  const persistColumnVisibilityToLocalStorage = (
-    selectedColumnIds: string[],
-  ) => {
-    const allColumns = Object.values(ColumnId);
-    const columnsAlwaysPresent = [ColumnId.GENE];
-
-    setState(localStorage, LOCAL_STORAGE_AMR_COLUMN_VISIBILITY_KEY, {
-      columnVisibility: difference(allColumns, columnsAlwaysPresent).reduce(
-        (obj, columnId) => ({
-          ...obj,
-          [columnId]: selectedColumnIds.includes(columnId),
-        }),
-        {},
-      ),
-    });
-  };
-
   const handleApply = (options: SDSFormattedDropdownOption[]) => {
     // Apply the changes by updating the visibility of the react-table columns
     const selectedColumnIds = options.map(option => {
@@ -122,7 +104,9 @@ export const ToggleVisibleColumnsDropdown = ({
     // TODO: This is an anti-pattern updating local state manually. Can we remove this
     // and use the react-table state instead?
     setDropdownValue(options);
-    persistColumnVisibilityToLocalStorage(selectedColumnIds);
+    persistColumnVisibilityToLocalStorage(
+      COLUMNS_ALWAYS_PRESENT.concat(selectedColumnIds as ColumnId[]),
+    );
   };
 
   const handleClickAway = () => {

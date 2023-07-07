@@ -1,4 +1,5 @@
 import { CellBasic } from "@czi-sds/components";
+import { cx } from "@emotion/css";
 import { ColumnDef } from "@tanstack/react-table";
 import React from "react";
 import { SortableHeader } from "~/components/ui/Table/components/SortableHeader";
@@ -34,7 +35,7 @@ export const cutoffColumn: ColumnDef<AmrResult, any> = {
     const formattedValue = getFormattedCutoffStringValue(getValue());
     return (
       <CellBasic
-        className={cs.leftAlignedCell}
+        className={cx(cs.leftAlignedCell, rowStyles.contigsColumnGroup)}
         style={generateWidthStyles(cell.column)}
         key={cell.id}
         primaryText={formattedValue}

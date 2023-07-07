@@ -1,11 +1,13 @@
 import { Button } from "@czi-sds/components";
 import React from "react";
-import { SDSFormattedDropdownOption } from "~/interface/dropdown";
 import {
+  ColumnId,
   ColumnSection,
+  COLUMNS_ALWAYS_PRESENT,
   COLUMN_ID_TO_NAME,
   SECTION_TO_COLUMN_IDS,
-} from "../../../../../../constants";
+} from "~/components/views/SampleView/components/AmrView/constants";
+import { SDSFormattedDropdownOption } from "~/interface/dropdown";
 
 interface ToggleAllButtonProps {
   dropdownOptions: SDSFormattedDropdownOption[];
@@ -22,6 +24,9 @@ export const ToggleAllButton = ({
 }: ToggleAllButtonProps) => {
   const sectionColumnIds = SECTION_TO_COLUMN_IDS.get(section);
   const isAllVisible = sectionColumnIds.every(columnId => {
+    if (COLUMNS_ALWAYS_PRESENT.includes(columnId as ColumnId)) {
+      return true;
+    }
     const columnName = COLUMN_ID_TO_NAME.get(columnId);
     return !!dropdownValue.find(option => option.name === columnName);
   });
