@@ -243,7 +243,7 @@ const PreUploadQCCheck = ({
       );
       for (let i = 0; i < count; i++) {
         const isPaired =
-          findDiff(fastqReadNamesR1[i], fastqReadNamesR2[i]) === "2";
+          findDiff(fastqReadNamesR1[i], fastqReadNamesR2[i]) === "";
         if (!isPaired) {
           setMismatchedFiles(arr => new Set([...arr, fileR1, fileR2]));
           trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
@@ -297,9 +297,15 @@ const PreUploadQCCheck = ({
 
   // Find difference between string, returns characters that are in str2 that are not in str1
   const findDiff = (str1: string, str2: string) => {
+    // Remove /1 and /2 from read names to support other naming conventions besides illumina (e.g. SRA)
+    // for new illumina file format also remove " 1" and " 2" source: https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm
+    // str1 and str2 have already been validated to be illumina via REGEX_READ_ILLUMINA so stripping out the regex is safe
+    const str1Stripped = str1.replace(/(\/1|\s1)/g, "");
+    const str2Stripped = str2.replace(/(\/2|\s2)/g, "");
+
     let diff = "";
-    str2.split("").forEach((val, i) => {
-      if (val !== str1.charAt(i)) diff += val;
+    str2Stripped.split("").forEach((val, i) => {
+      if (val !== str1Stripped.charAt(i)) diff += val;
     });
     return diff;
   };
