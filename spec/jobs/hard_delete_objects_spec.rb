@@ -17,12 +17,24 @@ RSpec.describe HardDeleteObjects, type: :job do
                                    user: @joe,
                                    name: "completed Illumina mNGs sample 1",
                                    deleted_at: 5.minutes.ago)
+        create(:deletion_log,
+               object_id: @sample1.id,
+               user_id: @joe.id,
+               user_email: @joe.email,
+               object_type: Sample.name,
+               soft_deleted_at: 5.minutes.ago)
         @pr1 = create(:pipeline_run,
                       sample: @sample1,
                       technology: illumina,
                       finalized: 1,
                       sfn_execution_arn: fake_sfn_execution_arn,
                       deleted_at: 5.minutes.ago)
+        create(:deletion_log,
+               object_id: @pr1.id,
+               user_id: @joe.id,
+               user_email: @joe.email,
+               object_type: PipelineRun.name,
+               soft_deleted_at: 5.minutes.ago)
 
         @sample2 = create(:sample, project: @project,
                                    user: @joe,
@@ -33,6 +45,12 @@ RSpec.describe HardDeleteObjects, type: :job do
                       finalized: 1,
                       sfn_execution_arn: fake_sfn_execution_arn,
                       deleted_at: 5.minutes.ago)
+        create(:deletion_log,
+               object_id: @pr2.id,
+               user_id: @joe.id,
+               user_email: @joe.email,
+               object_type: PipelineRun.name,
+               soft_deleted_at: 5.minutes.ago)
         @wr2 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
 
         @phylo_tree = create(:phylo_tree, user_id: @joe.id, name: "Test Phylo Tree", pipeline_runs: [@pr1, @pr2])
@@ -84,7 +102,7 @@ RSpec.describe HardDeleteObjects, type: :job do
         expect { @pr1.reload }.not_to raise_error
       end
 
-      it "logs error to cloudwatch if error occurs when destroying sample" do
+      it "logs to cloudwatch twice if error occurs when destroying sample" do
         object_ids = [@pr1.id]
         sample_ids = [@sample1.id]
         allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
@@ -98,68 +116,52 @@ RSpec.describe HardDeleteObjects, type: :job do
         expect { @sample1.reload }.not_to raise_error
       end
 
-      it "logs deletion to Segment for GDPR compliance" do
+      it "updates the hard_deleted_at field on the DeletionLog for the pipeline run if deletion was successful" do
         object_ids = [@pr1.id]
         sample_ids = [@sample1.id]
-
-        run_log_data = {
-          user_email: @joe.email,
-          run_id: @pr1.id,
-          sample_id: @sample1.id,
-          sample_name: @sample1.name,
-          sample_user_id: @sample1.user.id,
-          project_name: @sample1.project.name,
-          project_id: @sample1.project.id,
-          workflow: short_read_mngs,
-        }
-        # stub out destroy operations so we don't get more logs
-        allow_any_instance_of(PipelineRun).to receive(:destroy!).and_return(@pr1)
-
-        expect(MetricUtil).to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_RUN_HARD_DELETED,
-          @joe,
-          run_log_data
-        )
 
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
+        deletion_log = DeletionLog.find_by(object_id: @pr1.id, object_type: PipelineRun.name, user_id: @joe.id)
+        expect(deletion_log.hard_deleted_at).to be_within(1.minute).of(Time.now.utc)
       end
 
-      it "logs only successfully deleted runs to Segment for GDPR compliance" do
+      it "does not update the hard_deleted_at field on the DeletionLog for the pipeline run if deletion failed" do
         object_ids = [@pr1.id]
         sample_ids = [@sample1.id]
 
-        # stub out destroy operations so we don't get more logs
         allow_any_instance_of(PipelineRun).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
-
-        expect(MetricUtil).not_to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_RUN_HARD_DELETED,
-          anything,
-          anything
-        )
-
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
+        deletion_log = DeletionLog.find_by(object_id: @pr1.id, object_type: PipelineRun.name, user_id: @joe.id)
+        expect(deletion_log.hard_deleted_at).to be_nil
       end
 
-      it "logs only successfully deleted samples to Segment for GDPR compliance" do
+      it "raises an error if no DeletionLog is found for the run" do
         object_ids = [@pr1.id]
         sample_ids = [@sample1.id]
-        # stub out destroy operations so we don't get more logs
-        allow_any_instance_of(PipelineRun).to receive(:destroy!).and_return(@pr1)
-        allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
 
-        expect(MetricUtil).to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_RUN_HARD_DELETED,
-          anything,
-          anything
-        ).exactly(1).times
+        allow(DeletionLog).to receive(:find_by).and_return(nil)
+        expect do
+          HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
+        end.to raise_error("GDPR soft deletion log not found for PipelineRun with id #{@pr1.id} and user #{@joe.id}")
+      end
 
-        expect(MetricUtil).not_to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_SAMPLE_HARD_DELETED,
-          anything,
-          anything
-        )
+      it "updates the hard_deleted_at field on the DeletionLog for the sample if deletion was successful" do
+        object_ids = [@pr1.id]
+        sample_ids = [@sample1.id]
 
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
+        deletion_log = DeletionLog.find_by(object_id: @sample1.id, object_type: Sample.name, user_id: @joe.id)
+        expect(deletion_log.hard_deleted_at).to be_within(1.minute).of(Time.now.utc)
+      end
+
+      it "does not update the hard_deleted_at field on the DeletionLog for the sample if deletion failed" do
+        object_ids = [@pr1.id]
+        sample_ids = [@sample1.id]
+
+        allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
+        HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
+        deletion_log = DeletionLog.find_by(object_id: @sample1.id, object_type: Sample.name, user_id: @joe.id)
+        expect(deletion_log.hard_deleted_at).to be_nil
       end
     end
 
@@ -170,30 +172,24 @@ RSpec.describe HardDeleteObjects, type: :job do
                                    user: @joe,
                                    name: "Illumina sample with no pipeline runs",
                                    deleted_at: 5.minutes.ago)
-      end
-
-      it "successfully destroys the samples and logs to Segment for GDPR" do
+        create(:deletion_log,
+               object_id: @sample1.id,
+               user_id: @joe.id,
+               user_email: @joe.email,
+               object_type: Sample.name,
+               soft_deleted_at: 5.minutes.ago)
         object_ids = []
         sample_ids = [@sample1.id]
-
-        sample_log_data = {
-          user_email: @joe.email,
-          sample_id: @sample1.id,
-          sample_name: @sample1.name,
-          sample_user_id: @sample1.user.id,
-          project_name: @sample1.project.name,
-          project_id: @sample1.project.id,
-        }
-        # stub out destroy operations so we don't get more logs
-        allow_any_instance_of(Sample).to receive(:destroy!).and_return(@sample1)
-
-        expect(MetricUtil).to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_SAMPLE_HARD_DELETED,
-          @joe,
-          sample_log_data
-        )
-
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
+      end
+
+      it "successfully destroys the samples" do
+        expect { @sample1.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+
+      it "updates the hard_deleted_at field on the DeletionLog for the sample" do
+        log = DeletionLog.find_by(object_id: @sample1.id, object_type: Sample.name, user_id: @joe.id)
+        expect(log.hard_deleted_at).to be_within(1.minute).of(Time.now.utc)
       end
     end
 
@@ -201,10 +197,27 @@ RSpec.describe HardDeleteObjects, type: :job do
       before do
         @project = create(:project, users: [@joe])
         @sample1 = create(:sample, project: @project, user: @joe, name: "Joe sample 1", deleted_at: 5.minutes.ago)
+        create(:deletion_log,
+               object_id: @sample1.id,
+               user_id: @joe.id,
+               user_email: @joe.email,
+               object_type: Sample.name,
+               soft_deleted_at: 5.minutes.ago)
         @wr1 = create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
-
+        create(:deletion_log,
+               object_id: @wr1.id,
+               user_id: @joe.id,
+               user_email: @joe.email,
+               object_type: WorkflowRun.name,
+               soft_deleted_at: 5.minutes.ago)
         @sample2 = create(:sample, project: @project, user: @joe, name: "Joe sample 2")
         @wr2 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
+        create(:deletion_log,
+               object_id: @wr2.id,
+               user_id: @joe.id,
+               user_email: @joe.email,
+               object_type: WorkflowRun.name,
+               soft_deleted_at: 5.minutes.ago)
         @wr3 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
       end
 
@@ -265,67 +278,52 @@ RSpec.describe HardDeleteObjects, type: :job do
         expect { @sample1.reload }.not_to raise_error
       end
 
-      it "logs deletion to Segment for GDPR compliance" do
+      it "updates the hard_deleted_at field on the DeletionLog for the workflow run if deletion was successful" do
         object_ids = [@wr1.id]
         sample_ids = [@sample1.id]
-        run_log_data = {
-          user_email: @joe.email,
-          run_id: @wr1.id,
-          sample_id: @sample1.id,
-          sample_name: @sample1.name,
-          sample_user_id: @sample1.user.id,
-          project_name: @sample1.project.name,
-          project_id: @sample1.project.id,
-          workflow: consensus_genome,
-        }
-        # stub out destroy operations so we don't get more logs
-        allow_any_instance_of(WorkflowRun).to receive(:destroy!).and_return(@wr1)
-
-        expect(MetricUtil).to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_RUN_HARD_DELETED,
-          @joe,
-          run_log_data
-        )
 
         HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
+        deletion_log = DeletionLog.find_by(object_id: @wr1.id, object_type: WorkflowRun.name, user_id: @joe.id)
+        expect(deletion_log.hard_deleted_at).to be_within(1.minute).of(Time.now.utc)
       end
 
-      it "logs only successfully deleted runs to Segment for GDPR compliance" do
+      it "does not update the hard_deleted_at field on the DeletionLog for the workflow run if deletion failed" do
         object_ids = [@wr1.id]
         sample_ids = [@sample1.id]
 
-        # stub out destroy operations so we don't get more logs
         allow_any_instance_of(WorkflowRun).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
-
-        expect(MetricUtil).not_to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_RUN_HARD_DELETED,
-          anything,
-          anything
-        )
-
         HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
+        deletion_log = DeletionLog.find_by(object_id: @wr1.id, object_type: WorkflowRun.name, user_id: @joe.id)
+        expect(deletion_log.hard_deleted_at).to be_nil
       end
 
-      it "logs only successfully deleted samples to Segment for GDPR compliance" do
+      it "raises an error if no DeletionLog is found for the run" do
         object_ids = [@wr1.id]
         sample_ids = [@sample1.id]
-        # stub out destroy operations so we don't get more logs
-        allow_any_instance_of(WorkflowRun).to receive(:destroy!).and_return(@wr1)
-        allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
 
-        expect(MetricUtil).to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_RUN_HARD_DELETED,
-          anything,
-          anything
-        ).exactly(1).times
+        allow(DeletionLog).to receive(:find_by).and_return(nil)
+        expect do
+          HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
+        end.to raise_error("GDPR soft deletion log not found for WorkflowRun with id #{@wr1.id} and user #{@joe.id}")
+      end
 
-        expect(MetricUtil).not_to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_SAMPLE_HARD_DELETED,
-          anything,
-          anything
-        )
+      it "updates the hard_deleted_at field on the DeletionLog for the sample if deletion was successful" do
+        object_ids = [@wr1.id]
+        sample_ids = [@sample1.id]
 
         HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
+        deletion_log = DeletionLog.find_by(object_id: @sample1.id, object_type: Sample.name, user_id: @joe.id)
+        expect(deletion_log.hard_deleted_at).to be_within(1.minute).of(Time.now.utc)
+      end
+
+      it "does not update the hard_deleted_at field on the DeletionLog for the sample if deletion failed" do
+        object_ids = [@wr1.id]
+        sample_ids = [@sample1.id]
+
+        allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
+        HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
+        deletion_log = DeletionLog.find_by(object_id: @sample1.id, object_type: Sample.name, user_id: @joe.id)
+        expect(deletion_log.hard_deleted_at).to be_nil
       end
     end
 

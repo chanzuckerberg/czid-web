@@ -194,58 +194,84 @@ RSpec.describe BulkDeletionService, type: :service do
       expect(@active_pr.deleted_at).to be_within(1.minute).of(Time.now.utc)
     end
 
-    it "logs to Segment for GDPR compliance" do
-      run_log_data = {
-        user_email: @joe.email,
-        run_id: @pr1.id,
+    it "creates a DeletionLog entry for the pipeline run for GDPR compliance" do
+      run_deletion_metadata = {
+        project_id: @sample1.project.id,
+        project_name: @sample1.project.name,
         sample_id: @sample1.id,
         sample_name: @sample1.name,
-        sample_user_id: @sample1.user.id,
-        project_name: @sample1.project.name,
-        project_id: @sample1.project.id,
         workflow: short_read_mngs,
-      }
-      # stub out updates so we don't get other logs
-      allow_any_instance_of(Sample).to receive(:update_attribute)
-      expect(MetricUtil).to receive(:log_analytics_event).with(
-        EventDictionary::GDPR_RUN_SOFT_DELETED,
-        @joe,
-        run_log_data
-      )
+      }.to_json
 
-      sample_log_data = run_log_data.except(:run_id, :workflow)
-
-      expect(MetricUtil).to receive(:log_analytics_event).with(
-        EventDictionary::GDPR_SAMPLE_SOFT_DELETED,
-        @joe,
-        sample_log_data
-      )
       BulkDeletionService.call(
         object_ids: [@sample1.id],
         user: @joe,
         workflow: short_read_mngs
       )
+      log = DeletionLog.find_by(object_id: @pr1.id, object_type: "PipelineRun", user_id: @joe.id)
+      expect(log).not_to be(nil)
+      expect(log.user_email).to eq(@joe.email)
+      expect(log.soft_deleted_at).to be_within(1.minute).of(Time.now.utc)
+      expect(log.metadata_json).to eq(run_deletion_metadata)
     end
 
-    it "allows deletion of failed uploads in the same request as successful uploads" do
-      expect(Resque).to receive(:enqueue).with(
-        HardDeleteObjects, [], [@sample_no_prs.id], short_read_mngs, @joe.id
-      )
-      expect(Resque).to receive(:enqueue).with(
-        HardDeleteObjects, [@pr1.id], [@sample1.id], short_read_mngs, @joe.id
-      )
-      response = BulkDeletionService.call(
-        object_ids: [@sample_no_prs.id, @sample1.id],
-        user: @joe,
-        workflow: "short-read-mngs"
-      )
-      expect(response[:error]).to be_nil
-      expect(response[:deleted_run_ids]).to contain_exactly(@pr1.id)
-      expect(response[:deleted_sample_ids]).to contain_exactly(@sample_no_prs.id, @sample1.id)
-      @sample_no_prs.reload
-      expect(@sample_no_prs.deleted_at).to be_within(1.minute).of(Time.now.utc)
-      @sample1.reload
-      expect(@sample1.deleted_at).to be_within(1.minute).of(Time.now.utc)
+    context "when the sample failed to upload" do
+      it "allows deletion of failed uploads with no successful uploads" do
+        expect(Resque).to receive(:enqueue).with(
+          HardDeleteObjects, [], [@sample_no_prs.id], short_read_mngs, @joe.id
+        )
+        response = BulkDeletionService.call(
+          object_ids: [@sample_no_prs.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        expect(response[:error]).to be_nil
+        expect(response[:deleted_run_ids]).to be_empty
+        expect(response[:deleted_sample_ids]).to contain_exactly(@sample_no_prs.id)
+        @sample_no_prs.reload
+        expect(@sample_no_prs.deleted_at).to be_within(1.minute).of(Time.now.utc)
+      end
+
+      it "allows deletion of failed uploads in the same request as successful uploads" do
+        expect(Resque).to receive(:enqueue).with(
+          HardDeleteObjects, [], [@sample_no_prs.id], short_read_mngs, @joe.id
+        )
+        expect(Resque).to receive(:enqueue).with(
+          HardDeleteObjects, [@pr1.id], [@sample1.id], short_read_mngs, @joe.id
+        )
+        response = BulkDeletionService.call(
+          object_ids: [@sample_no_prs.id, @sample1.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        expect(response[:error]).to be_nil
+        expect(response[:deleted_run_ids]).to contain_exactly(@pr1.id)
+        expect(response[:deleted_sample_ids]).to contain_exactly(@sample_no_prs.id, @sample1.id)
+        @sample_no_prs.reload
+        expect(@sample_no_prs.deleted_at).to be_within(1.minute).of(Time.now.utc)
+        @sample1.reload
+        expect(@sample1.deleted_at).to be_within(1.minute).of(Time.now.utc)
+      end
+
+      it "creates a DeletionLog entry for the sample" do
+        sample_deletion_metadata = {
+          project_id: @sample_no_prs.project.id,
+          project_name: @sample_no_prs.project.name,
+          sample_id: @sample_no_prs.id,
+          sample_name: @sample_no_prs.name,
+        }.to_json
+
+        BulkDeletionService.call(
+          object_ids: [@sample_no_prs.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        log = DeletionLog.find_by(object_id: @sample_no_prs.id, object_type: Sample.name, user_id: @joe.id)
+        expect(log).not_to be(nil)
+        expect(log.user_email).to eq(@joe.email)
+        expect(log.soft_deleted_at).to be_within(1.minute).of(Time.now.utc)
+        expect(log.metadata_json).to eq(sample_deletion_metadata)
+      end
     end
 
     context "when a user submits a large bulk deletion" do
@@ -370,6 +396,26 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to include(@sample1.id)
         end
 
+        it "creates a DeletionLog entry for the sample for GDPR compliance" do
+          sample_deletion_metadata = {
+            project_id: @sample1.project.id,
+            project_name: @sample1.project.name,
+            sample_id: @sample1.id,
+            sample_name: @sample1.name,
+          }.to_json
+
+          BulkDeletionService.call(
+            object_ids: [@sample1.id],
+            user: @joe,
+            workflow: short_read_mngs
+          )
+          log = DeletionLog.find_by(object_id: @sample1.id, object_type: "Sample", user_id: @joe.id)
+          expect(log).not_to be(nil)
+          expect(log.user_email).to eq(@joe.email)
+          expect(log.soft_deleted_at).to be_within(1.minute).of(Time.now.utc)
+          expect(log.metadata_json).to eq(sample_deletion_metadata)
+        end
+
         it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@pr1.id], [@sample1.id], short_read_mngs, @joe.id
@@ -469,6 +515,26 @@ RSpec.describe BulkDeletionService, type: :service do
           expect(response[:deleted_sample_ids]).to include(@sample1.id)
         end
 
+        it "creates a DeletionLog entry for the sample for GDPR compliance" do
+          sample_deletion_metadata = {
+            project_id: @sample1.project.id,
+            project_name: @sample1.project.name,
+            sample_id: @sample1.id,
+            sample_name: @sample1.name,
+          }.to_json
+
+          BulkDeletionService.call(
+            object_ids: [@sample1.id],
+            user: @joe,
+            workflow: long_read_mngs
+          )
+          log = DeletionLog.find_by(object_id: @sample1.id, object_type: "Sample", user_id: @joe.id)
+          expect(log).not_to be(nil)
+          expect(log.user_email).to eq(@joe.email)
+          expect(log.soft_deleted_at).to be_within(1.minute).of(Time.now.utc)
+          expect(log.metadata_json).to eq(sample_deletion_metadata)
+        end
+
         it "sends all sample ids to the async hard-delete job" do
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@pr1.id], [@sample1.id], long_read_mngs, @joe.id
@@ -520,36 +586,25 @@ RSpec.describe BulkDeletionService, type: :service do
       expect(@failed_wr.deleted_at).to be_within(1.minute).of(Time.now.utc)
     end
 
-    it "logs to segment for GDPR compliance" do
-      run_log_data = {
-        user_email: @joe.email,
-        run_id: @completed_wr.id,
+    it "creates a DeletionLog entry for the workflow run for GDPR compliance" do
+      run_deletion_metadata = {
+        project_id: @sample1.project.id,
+        project_name: @sample1.project.name,
         sample_id: @sample1.id,
         sample_name: @sample1.name,
-        sample_user_id: @sample1.user.id,
-        project_name: @sample1.project.name,
-        project_id: @sample1.project.id,
         workflow: consensus_genome,
-      }
-      # stub out updates so we don't get other logs
-      allow_any_instance_of(Sample).to receive(:update_attribute)
-      expect(MetricUtil).to receive(:log_analytics_event).with(
-        EventDictionary::GDPR_RUN_SOFT_DELETED,
-        @joe,
-        run_log_data
-      )
-      sample_log_data = run_log_data.except(:run_id, :workflow)
+      }.to_json
 
-      expect(MetricUtil).to receive(:log_analytics_event).with(
-        EventDictionary::GDPR_SAMPLE_SOFT_DELETED,
-        @joe,
-        sample_log_data
-      )
       BulkDeletionService.call(
         object_ids: [@completed_wr.id],
         user: @joe,
         workflow: consensus_genome
       )
+      log = DeletionLog.find_by(object_id: @completed_wr.id, object_type: "WorkflowRun", user_id: @joe.id)
+      expect(log).not_to be(nil)
+      expect(log.user_email).to eq(@joe.email)
+      expect(log.soft_deleted_at).to be_within(1.minute).of(Time.now.utc)
+      expect(log.metadata_json).to eq(run_deletion_metadata)
     end
 
     context "when CG runs are deleted and the initial workflow is CG" do
@@ -637,6 +692,26 @@ RSpec.describe BulkDeletionService, type: :service do
             workflow: consensus_genome
           )
         end
+
+        it "creates a DeletionLog entry for the sample for GDPR compliance" do
+          sample_deletion_metadata = {
+            project_id: @sample1.project.id,
+            project_name: @sample1.project.name,
+            sample_id: @sample1.id,
+            sample_name: @sample1.name,
+          }.to_json
+
+          BulkDeletionService.call(
+            object_ids: [@completed_wr.id],
+            user: @joe,
+            workflow: consensus_genome
+          )
+          log = DeletionLog.find_by(object_id: @sample1.id, object_type: "Sample", user_id: @joe.id)
+          expect(log).not_to be(nil)
+          expect(log.user_email).to eq(@joe.email)
+          expect(log.soft_deleted_at).to be_within(1.minute).of(Time.now.utc)
+          expect(log.metadata_json).to eq(sample_deletion_metadata)
+        end
       end
     end
 
@@ -664,6 +739,26 @@ RSpec.describe BulkDeletionService, type: :service do
             user: @joe,
             workflow: amr
           )
+        end
+
+        it "creates a DeletionLog entry for the sample for GDPR compliance" do
+          sample_deletion_metadata = {
+            project_id: @sample3.project.id,
+            project_name: @sample3.project.name,
+            sample_id: @sample3.id,
+            sample_name: @sample3.name,
+          }.to_json
+
+          BulkDeletionService.call(
+            object_ids: [@completed_amr_wr.id],
+            user: @joe,
+            workflow: amr
+          )
+          log = DeletionLog.find_by(object_id: @sample3.id, object_type: "Sample", user_id: @joe.id)
+          expect(log).not_to be(nil)
+          expect(log.user_email).to eq(@joe.email)
+          expect(log.soft_deleted_at).to be_within(1.minute).of(Time.now.utc)
+          expect(log.metadata_json).to eq(sample_deletion_metadata)
         end
       end
     end

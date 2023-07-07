@@ -93,43 +93,49 @@ class BulkDeletionService
                              :id,
                              "sample_id",
                              "samples.name AS sample_name",
-                             "samples.user_id AS sample_user_id",
                              "projects.name AS project_name",
                              "projects.id AS project_id"
                            ).as_json
+    object_type = deletable_objects.first.class.name
 
     deleted_objects_info.each do |object|
-      MetricUtil.log_analytics_event(
-        EventDictionary::GDPR_RUN_SOFT_DELETED,
-        user,
-        {
-          user_email: user.email,
-          run_id: object["id"],
+      DeletionLog.create!(
+        object_id: object["id"],
+        user_id: user.id,
+        user_email: user.email,
+        object_type: object_type,
+        soft_deleted_at: delete_timestamp,
+        metadata_json: {
+          project_id: object["project_id"],
+          project_name: object["project_name"],
           sample_id: object["sample_id"],
           sample_name: object["sample_name"],
-          sample_user_id: object["sample_user_id"],
-          project_name: object["project_name"],
-          project_id: object["project_id"],
           workflow: workflow,
-        }
+        }.to_json
       )
     end
 
-    deleted_samples_info = deleted_objects_info
-                           .select { |object_hash| soft_deleted_sample_ids.include?(object_hash["sample_id"]) }
-                           .map { |object_hash| object_hash.except("id") }
+    deleted_samples_info = Sample.where(id: soft_deleted_sample_ids)
+                                 .joins(:project)
+                                 .select(
+                                   "samples.id AS sample_id",
+                                   "samples.name AS sample_name",
+                                   "projects.id AS project_id",
+                                   "projects.name AS project_name"
+                                 ).as_json({ methods: [] })
     deleted_samples_info.each do |sample_info|
-      MetricUtil.log_analytics_event(
-        EventDictionary::GDPR_SAMPLE_SOFT_DELETED,
-        user,
-        {
-          user_email: user.email,
+      DeletionLog.create!(
+        object_id: sample_info["sample_id"],
+        user_id: user.id,
+        user_email: user.email,
+        object_type: Sample.name,
+        soft_deleted_at: delete_timestamp,
+        metadata_json: {
+          project_id: sample_info["project_id"],
+          project_name: sample_info["project_name"],
           sample_id: sample_info["sample_id"],
           sample_name: sample_info["sample_name"],
-          sample_user_id: sample_info["sample_user_id"],
-          project_name: sample_info["project_name"],
-          project_id: sample_info["project_id"],
-        }
+        }.to_json
       )
     end
 

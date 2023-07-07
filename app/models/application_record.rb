@@ -39,6 +39,8 @@ class ApplicationRecord < ActiveRecord::Base
 
   # See also EventDictionary
   def log_analytics(record, action)
+    return if record.class.name == DeletionLog.name
+
     # example: "visualization_updated"
     event = "#{record.class.name.underscore}_#{action}"
 
@@ -47,7 +49,7 @@ class ApplicationRecord < ActiveRecord::Base
       id: record.respond_to?(:id) ? record.id : nil,
       # Add string name for convenience if available, except for people's names,
       # which are PII and thus prohibited from Google Analytics.
-      name: record.respond_to?(:name) && record.class.name != :User ? record.name : nil,
+      name: record.respond_to?(:name) && record.class.name != User.name ? record.name : nil,
       # Set common belongs_to IDs if available
       user_id: record.respond_to?(:user_id) ? record.user_id : nil,
       project_id: record.respond_to?(:project_id) ? record.project_id : nil,
