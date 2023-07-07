@@ -37,10 +37,16 @@ FactoryBot.define do
 
     after :create do |project, options|
       options.samples_data.each do |sample_data|
-        number_of_pipeline_runs, number_of_cg_workflow_runs, number_of_amr_workflow_runs = sample_data.values_at(:number_of_pipeline_runs, :number_of_cg_workflow_runs, :number_of_amr_workflow_runs)
+        number_of_pipeline_runs, number_of_cg_workflow_runs, number_of_amr_workflow_runs, workflow_runs_data = sample_data.values_at(:number_of_pipeline_runs, :number_of_cg_workflow_runs, :number_of_amr_workflow_runs, :workflow_runs_data)
 
-        sample_data = sample_data.except(:number_of_pipeline_runs, :number_of_cg_workflow_runs, :number_of_amr_workflow_runs)
+        sample_data = sample_data.except(:number_of_pipeline_runs, :number_of_cg_workflow_runs, :number_of_amr_workflow_runs, :workflow_runs_data)
         s = create(:sample, project: project, **sample_data)
+
+        if workflow_runs_data.present?
+          workflow_runs_data.each do |workflow_run_data|
+            create(:workflow_run, sample_id: s.id, **workflow_run_data)
+          end
+        end
 
         if number_of_pipeline_runs.present?
           number_of_pipeline_runs.times do

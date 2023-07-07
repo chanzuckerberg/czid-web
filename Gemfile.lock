@@ -1757,6 +1757,7 @@ GEM
     rubyzip (2.3.2)
     rufus-scheduler (3.8.2)
       fugit (~> 1.1, >= 1.1.6)
+    seed_migration (1.2.3)
     selenium-webdriver (4.7.1)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
@@ -1910,6 +1911,7 @@ DEPENDENCIES
   rubocop-graphql (~> 0.14.5)
   rubocop-performance
   rubocop-rails
+  seed_migration
   selenium-webdriver
   sentry-raven
   shortener

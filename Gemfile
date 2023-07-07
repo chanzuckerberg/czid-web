@@ -137,6 +137,7 @@ group :development, :test do
   gem "rubocop-graphql", "~> 0.14.5"
   gem 'rubocop-performance'
   gem 'rubocop-rails'
+  gem 'seed_migration'
   gem 'selenium-webdriver'
   gem 'simplecov', require: false
 end

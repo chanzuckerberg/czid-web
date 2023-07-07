@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_07_05_183948) do
+ActiveRecord::Schema.define(version: 2023_07_06_191003) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -612,6 +612,12 @@ ActiveRecord::Schema.define(version: 2023_07_05_183948) do
     t.bigint "sample_id", null: false
     t.index ["sample_id"], name: "index_samples_visualizations_on_sample_id"
     t.index ["visualization_id"], name: "index_samples_visualizations_on_visualization_id"
+  end
+
+  create_table "seed_migrations", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.string "version"
+    t.integer "runtime"
+    t.datetime "migrated_on"
   end
 
   create_table "shortened_urls", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
