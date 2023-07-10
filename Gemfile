@@ -137,7 +137,6 @@ group :development, :test do
   gem "rubocop-graphql", "~> 0.14.5"
   gem 'rubocop-performance'
   gem 'rubocop-rails'
-  gem 'seed_migration'
   gem 'selenium-webdriver'
   gem 'simplecov', require: false
 end
@@ -181,3 +180,5 @@ gem 'net-smtp', require: false
 
 # need version >= 1.2.3 for M1 macs - https://github.com/cotag/http-parser/issues/12
 gem 'http-parser', '~> 1.2.3'
+
+gem 'seed_migration'
