@@ -7,7 +7,7 @@ import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
-import cs from "./blast_v1_reads_modal.scss";
+import cs from "./blast_reads_modal.scss";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
 import {
@@ -19,7 +19,7 @@ import {
 } from "./constants";
 import { prepareBlastQuery } from "./utils";
 
-interface BlastV1ReadsModalProps {
+interface BlastReadsModalProps {
   blastModalInfo: BlastModalInfo;
   context: object;
   onClose: () => void;
@@ -31,7 +31,7 @@ interface BlastV1ReadsModalProps {
   taxonId: number;
 }
 
-const BlastV1ReadsModal = ({
+export const BlastReadsModal = ({
   blastModalInfo,
   context,
   onClose,
@@ -41,7 +41,7 @@ const BlastV1ReadsModal = ({
   taxonName,
   taxonLevel,
   taxonId,
-}: BlastV1ReadsModalProps) => {
+}: BlastReadsModalProps) => {
   const [shortestAlignmentLength, setShortestAlignmentLength] = useState();
   const [longestAlignmentLength, setLongestAlignmentLength] = useState();
   const [reads, setReads] = useState([]);
@@ -252,5 +252,3 @@ const BlastV1ReadsModal = ({
     </Modal>
   );
 };
-
-export default BlastV1ReadsModal;

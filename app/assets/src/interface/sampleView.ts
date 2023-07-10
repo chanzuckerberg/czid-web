@@ -19,7 +19,7 @@ import {
   PipelineRun,
   Taxon,
 } from "~/interface/shared";
-import { BlastModalInfo } from "../components/views/blast/constants";
+import { BlastModalInfo } from "../components/views/SampleView/components/ModalManager/components/BlastModals/constants";
 import { ThresholdFilterData } from "./dropdown";
 
 export interface SampleViewProps {
@@ -74,7 +74,7 @@ export interface BlastData {
 }
 
 export interface ConsensusGenomeParams {
-  accessionId: number;
+  accessionId: string;
   accessionName: string;
   taxonId: number;
   taxonName: string;
@@ -85,17 +85,9 @@ export interface SampleViewState {
   backgrounds: Background[];
   blastData: BlastData | Record<string, never>;
   blastModalInfo: BlastModalInfo;
-  blastSelectionModalVisible: boolean;
-  blastContigsModalVisible?: boolean;
-  blastReadsModalVisible?: boolean;
-  blastV1ContigsModalVisible?: boolean;
-  blastV1ReadsModalVisible?: boolean;
   consensusGenomeData: ConsensusGenomeData;
   consensusGenomeCreationParams: ConsensusGenomeParams | Record<string, never>;
   consensusGenomePreviousParams: ConsensusGenomeData | Record<string, never>;
-  consensusGenomeCreationModalVisible: boolean;
-  consensusGenomeErrorModalVisible: boolean;
-  consensusGenomePreviousModalVisible: boolean;
   coverageVizDataByTaxon: {
     [taxonId: number]: {
       best_accessions: AccessionsSummary[];
@@ -113,6 +105,14 @@ export interface SampleViewState {
   lineageData?: { [key: string]: Lineage };
   loadingReport: boolean;
   loadingWorkflowRunResults: boolean;
+  modalsVisible: {
+    consensusGenomeError: boolean;
+    consensusGenomeCreation: boolean;
+    consensusGenomePrevious: boolean;
+    blastSelection: boolean;
+    blastContigs: boolean;
+    blastReads: boolean;
+  };
   ownedBackgrounds?: Background[];
   otherBackgrounds?: Background[];
   pipelineRun?: PipelineRun;

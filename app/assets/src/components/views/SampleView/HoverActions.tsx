@@ -10,7 +10,7 @@ import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSideb
 import { UserContext } from "~/components/common/UserContext";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
-import { AMR_V3_FEATURE, BLAST_V1_FEATURE } from "~/components/utils/features";
+import { AMR_V3_FEATURE } from "~/components/utils/features";
 import {
   CONSENSUS_GENOME_FEATURE,
   COVERAGE_VIZ_FEATURE,
@@ -92,7 +92,7 @@ const HoverActions = ({
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const [showHoverActions, setShowHoverActions] = useState(false);
-  const { ntContigs, ntReads } = taxonStatsByCountType;
+  const { ntContigs } = taxonStatsByCountType;
 
   const handlePhyloModalOpen = () => {
     onPhyloTreeModalOpened &&
@@ -143,7 +143,6 @@ const HoverActions = ({
     const hasCoverageViz =
       isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) ||
       onlyShowLongReadMNGSOptions;
-    const hasBlastv1Feature = allowedFeatures.includes(BLAST_V1_FEATURE);
     const params = {
       pipelineVersion,
       taxCommonName: taxCommonName,
@@ -179,22 +178,12 @@ const HoverActions = ({
           params,
         };
 
-    const HOVER_ACTIONS_BLAST_V1 = {
+    const HOVER_ACTIONS_BLAST = {
       key: `blast_${params.taxId}_v1`,
       message: "BLAST",
       iconName: "searchLinesHorizontal",
       handleClick: handleBlastClick,
       enabled: true,
-    };
-
-    const HOVER_ACTIONS_BLAST = {
-      key: `blast_${params.taxId}`,
-      message: "BLASTN",
-      iconName: "searchLinesHorizontal",
-      handleClick: handleBlastClick,
-      enabled: !!ntContigs || !!ntReads,
-      disabledMessage:
-        "BLAST is not available - requires at least 1 contig or read in NT.",
     };
 
     const HOVER_ACTIONS_PHYLO = {
@@ -269,25 +258,14 @@ const HoverActions = ({
     if (onlyShowLongReadMNGSOptions) {
       hoverActions = [HOVER_ACTIONS_VIZ, HOVER_ACTIONS_DOWNLOAD];
     } else {
-      if (hasBlastv1Feature) {
-        hoverActions = [
-          HOVER_ACTIONS_VIZ,
-          HOVER_ACTIONS_BLAST_V1,
-          { divider: true },
-          HOVER_ACTIONS_PHYLO,
-          HOVER_ACTIONS_CONSENSUS,
-          HOVER_ACTIONS_DOWNLOAD,
-        ];
-      } else {
-        hoverActions = [
-          HOVER_ACTIONS_VIZ,
-          HOVER_ACTIONS_BLAST,
-          { divider: true },
-          HOVER_ACTIONS_PHYLO,
-          HOVER_ACTIONS_CONSENSUS,
-          HOVER_ACTIONS_DOWNLOAD,
-        ];
-      }
+      hoverActions = [
+        HOVER_ACTIONS_VIZ,
+        HOVER_ACTIONS_BLAST,
+        { divider: true },
+        HOVER_ACTIONS_PHYLO,
+        HOVER_ACTIONS_CONSENSUS,
+        HOVER_ACTIONS_DOWNLOAD,
+      ];
     }
     // Remove null actions (could happen with HOVER_ACTIONS_CONSENSUS)
     hoverActions = hoverActions.filter(d => d !== null);

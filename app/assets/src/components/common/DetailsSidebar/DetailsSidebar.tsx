@@ -19,33 +19,20 @@ interface SidebarBase {
   onClose: () => void;
 }
 
-interface SampleDetailsSidebar extends SidebarBase {
-  mode: "sampleDetails";
-  params: SampleDetailsModeProps;
+interface DetailsSidebarProps extends SidebarBase {
+  mode:
+    | "sampleDetails"
+    | "taxonDetails"
+    | "pipelineStepDetails"
+    | "geneDetails"
+    | "bulkDownloadDetails";
+  params:
+    | BDDProps
+    | GDMProps
+    | PSDProps
+    | SampleDetailsModeProps
+    | TaxonDetailsModeProps;
 }
-interface TaxonDetailsSidebar extends SidebarBase {
-  mode: "taxonDetails";
-  params: TaxonDetailsModeProps;
-}
-interface PipelineDetailsSidebar extends SidebarBase {
-  mode: "pipelineStepDetails";
-  params: PSDProps;
-}
-interface GeneDetailsSidebar extends SidebarBase {
-  mode: "geneDetails";
-  params: GDMProps;
-}
-interface BulkDownloadsDetailsSidebar extends SidebarBase {
-  mode: "bulkDownloadDetails";
-  params: BDDProps;
-}
-
-type DetailsSidebarProps =
-  | SampleDetailsSidebar
-  | TaxonDetailsSidebar
-  | PipelineDetailsSidebar
-  | GeneDetailsSidebar
-  | BulkDownloadsDetailsSidebar;
 
 const DetailsSidebar = ({
   mode,
@@ -64,25 +51,30 @@ const DetailsSidebar = ({
 
     switch (mode) {
       case "sampleDetails":
-        return <SampleDetailsMode {...params} />;
+        return <SampleDetailsMode {...(params as SampleDetailsModeProps)} />;
       case "taxonDetails":
         if (apolloClientEnabled) {
-          return <TaxonDetailsModeWithApollo {...params} />;
+          return (
+            <TaxonDetailsModeWithApollo
+              {...(params as TaxonDetailsModeProps)}
+            />
+          );
         }
-        return <TaxonDetailsMode {...params} />;
+        return <TaxonDetailsMode {...(params as TaxonDetailsModeProps)} />;
       case "pipelineStepDetails":
         if (apolloClientEnabled) {
-          return <PipelineStepDetailsModeWithApollo {...params} />;
+          return (
+            <PipelineStepDetailsModeWithApollo {...(params as PSDProps)} />
+          );
         }
-
-        return <PipelineStepDetailsMode {...params} />;
+        return <PipelineStepDetailsMode {...(params as PSDProps)} />;
       case "geneDetails":
-        return <GeneDetailsMode {...params} />;
+        return <GeneDetailsMode {...(params as GDMProps)} />;
       case "bulkDownloadDetails":
         if (apolloClientEnabled) {
           return <BulkDownloadDetailsModeWithApollo />;
         }
-        return <BulkDownloadDetailsMode {...params} />;
+        return <BulkDownloadDetailsMode {...(params as BDDProps)} />;
       default:
         return null;
     }

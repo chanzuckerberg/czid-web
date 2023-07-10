@@ -3,6 +3,10 @@
 @import "~styles/themes/elements";
 @import "~@czi-sds/components/dist/variables";
 
+.sampleViewHeader {
+  flex: 0 0 auto;
+}
+
 .viewHeader {
   margin-bottom: 5px;
   z-index: 3;

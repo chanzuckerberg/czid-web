@@ -19,13 +19,13 @@ interface ConsensusGenomePreviousModalProps {
   onRowClick: $TSFixMeFunction;
 }
 
-export default function ConsensusGenomePreviousModal({
+export const ConsensusGenomePreviousModal = ({
   consensusGenomeData,
   onClose,
   onNew,
   onRowClick,
   open,
-}: ConsensusGenomePreviousModalProps) {
+}: ConsensusGenomePreviousModalProps) => {
   const renderPrimaryCell = (cellData: {
     inputs: { accession_id: $TSFixMeUnknown; accession_name: $TSFixMeUnknown };
     parsed_cached_results: any;
@@ -121,4 +121,4 @@ export default function ConsensusGenomePreviousModal({
       </Button>
     </Modal>
   );
-}
+};

@@ -49,7 +49,6 @@ import {
   createCSVObjectURL,
 } from "~/components/utils/csv";
 import {
-  BLAST_V1_FEATURE,
   MERGED_NT_NR_FEATURE,
   MULTITAG_PATHOGENS_FEATURE,
 } from "~/components/utils/features";
@@ -88,8 +87,11 @@ import {
 import { Background, Taxon } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { WORKFLOW_VALUES } from "../../utils/workflows";
-import { BlastModalInfo } from "../blast/constants";
+import { DetailsSidebarSwitcher } from "./components/DetailsSidebarSwitcher";
+import { ModalManager } from "./components/ModalManager";
+import { BlastModalInfo } from "./components/ModalManager/components/BlastModals/constants";
 import { ReportPanel } from "./components/ReportPanel";
+import { SampleViewHeader } from "./components/SampleViewHeader";
 import { TabSwitcher } from "./components/TabSwitcher";
 import {
   GENUS_LEVEL_INDEX,
@@ -106,7 +108,6 @@ import {
   TREE_METRICS,
   URL_FIELDS,
 } from "./constants";
-import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import {
   adjustMetricPrecision,
   filterReportData,
@@ -114,8 +115,6 @@ import {
 } from "./filters";
 import { showNotification } from "./notifications";
 import cs from "./sample_view.scss";
-import { SampleViewHeader } from "./SampleViewHeader";
-import SampleViewModals from "./SampleViewModals";
 import {
   determineInitialTab,
   getDefaultSelectedOptions,
@@ -187,17 +186,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       backgrounds: [],
       blastData: {},
       blastModalInfo: {},
-      blastSelectionModalVisible: false,
-      blastContigsModalVisible: false,
-      blastReadsModalVisible: false,
-      blastV1ContigsModalVisible: false,
-      blastV1ReadsModalVisible: false,
       consensusGenomeData: {},
       consensusGenomeCreationParams: {},
       consensusGenomePreviousParams: {},
-      consensusGenomeCreationModalVisible: false,
-      consensusGenomeErrorModalVisible: false,
-      consensusGenomePreviousModalVisible: false,
       coverageVizDataByTaxon: {},
       coverageVizParams: {},
       coverageVizVisible: false,
@@ -206,6 +197,14 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       filteredReportData: [],
       loadingReport: false,
       loadingWorkflowRunResults: false,
+      modalsVisible: {
+        consensusGenomeError: false,
+        consensusGenomeCreation: false,
+        consensusGenomePrevious: false,
+        blastSelection: false,
+        blastContigs: false,
+        blastReads: false,
+      },
       ownedBackgrounds: null,
       otherBackgrounds: null,
       pipelineRun: null,
@@ -1061,39 +1060,34 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     });
   };
 
-  handleConsensusGenomeKickoff = async ({
-    accessionId,
-    accessionName,
-    taxonId,
-    taxonName,
-  }: ConsensusGenomeParams) => {
+  handleConsensusGenomeKickoff = async (
+    consensusGenomeParams: ConsensusGenomeParams,
+  ) => {
     const { sample } = this.state;
     const workflowRuns = await kickoffConsensusGenome({
       sampleId: sample.id,
       workflow: WORKFLOWS.CONSENSUS_GENOME.value,
       alignment_config_name: sample?.pipeline_runs[0]?.alignment_config_name,
-      accessionId,
-      accessionName,
-      taxonId,
-      taxonName,
+      ...consensusGenomeParams,
       technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
     });
 
     this.setState({
-      consensusGenomeErrorModalVisible: false,
       // Update the sample's workflow runs to include the newly created CG run and ensure the CG tab is displayed.
       sample: {
         ...sample,
         workflow_runs: workflowRuns,
       },
     });
+    // Close both modals in case they came via the previous runs modal + error modal
+    this.handleModalAction("close", [
+      "consensusGenomeCreation",
+      "consensusGenomePrevious",
+      "consensusGenomeError",
+    ]);
     showNotification(NOTIFICATION_TYPES.consensusGenomeCreated, {
       handleTabChange: this.handleTabChange,
     });
-    this.handleModalClose("consensusGenomeCreationModalVisible");
-
-    // Close both modals in case they came via the previous runs modal
-    this.handleModalClose("consensusGenomePreviousModalVisible");
   };
 
   // Clicking the HoverAction to open the CG creation modal
@@ -1108,6 +1102,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const usedAccessions = uniq(
       map("inputs.accession_id", get(taxId, getConsensusGenomeData(sample))),
     );
+    this.handleModalAction("open", ["consensusGenomeCreation"]);
+    this.handleModalAction("close", ["consensusGenomePrevious"]);
     this.setState({
       consensusGenomeData: {
         accessionData,
@@ -1116,7 +1112,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         taxName,
         usedAccessions,
       },
-      consensusGenomeCreationModalVisible: true,
     });
   };
 
@@ -1127,6 +1122,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     taxName,
   }: ConsensusGenomeClick) => {
     const previousRuns = get(taxId, getConsensusGenomeData(this.state.sample));
+    this.handleModalAction("open", ["consensusGenomePrevious"]);
     this.setState({
       consensusGenomePreviousParams: {
         percentIdentity,
@@ -1134,85 +1130,27 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         taxId,
         taxName,
       },
-      consensusGenomePreviousModalVisible: true,
     });
   };
 
-  handleBlastClick = ({
-    context,
-    pipelineVersion,
-    sampleId,
-    shouldBlastContigs,
-    taxonStatsByCountType,
-    taxName,
-    taxLevel,
-    taxId,
-  }: BlastData) => {
-    const { allowedFeatures = [] } = this.context || {};
-    const blastSelectionModalVisible =
-      allowedFeatures.includes(BLAST_V1_FEATURE);
-
-    this.setState({
-      blastSelectionModalVisible,
-      ...(!blastSelectionModalVisible &&
-        (shouldBlastContigs
-          ? { blastContigsModalVisible: true }
-          : { blastReadsModalVisible: true })),
-      blastData: {
-        context,
-        pipelineVersion,
-        sampleId,
-        taxName,
-        taxLevel,
-        taxId,
-        taxonStatsByCountType,
-      },
-    });
-  };
-
-  onConsensusGenomeCreation = async ({
-    accessionId,
-    accessionName,
-    taxonId,
-    taxonName,
-  }: ConsensusGenomeParams) => {
-    const { sample } = this.state;
+  onConsensusGenomeCreation = async (
+    consensusGenomeCreationParams: ConsensusGenomeParams,
+  ) => {
     try {
       // Save the creation parameters if kickoff fails and we need to retry.
-      this.setState({
-        consensusGenomeCreationParams: {
-          accessionId,
-          accessionName,
-          taxonId,
-          taxonName,
-        },
-      });
-      await this.handleConsensusGenomeKickoff({
-        accessionId,
-        accessionName,
-        taxonId,
-        taxonName,
-      });
+      this.setState({ consensusGenomeCreationParams });
+      await this.handleConsensusGenomeKickoff(consensusGenomeCreationParams);
     } catch (error) {
-      this.setState(
+      console.error(error);
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_KICKOFF_FAILED,
         {
-          consensusGenomeErrorModalVisible: true,
-        },
-        () => {
-          console.error(error);
-          trackEvent(
-            ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_KICKOFF_FAILED,
-            {
-              error,
-              sampleId: sample.id,
-              accessionId,
-              accessionName,
-              taxonId,
-              taxonName,
-            },
-          );
+          error,
+          sampleId: this.state.sample.id,
+          ...consensusGenomeCreationParams,
         },
       );
+      this.handleModalAction("open", ["consensusGenomeError"]);
     }
   };
 
@@ -1261,13 +1199,34 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   }: {
     rowData: WorkflowRun;
   }) => {
+    this.handleModalAction("close", ["consensusGenomePrevious"]);
     this.setState(
       {
         workflowRun: rowData,
-        consensusGenomePreviousModalVisible: false,
       },
       () => this.handleTabChange(TABS.CONSENSUS_GENOME),
     );
+  };
+
+  handleBlastClick = (blastData: BlastData) => {
+    this.handleModalAction("open", ["blastSelection"]);
+    this.setState({ blastData });
+  };
+
+  handleBlastSelectionModalContinue = (blastModalInfo: BlastModalInfo) => {
+    const { shouldBlastContigs } = blastModalInfo;
+    const modalToOpen = shouldBlastContigs ? "blastContigs" : "blastReads";
+    this.handleModalAction("close", ["blastSelection"]);
+    this.handleModalAction("open", [modalToOpen]);
+    this.setState({ blastModalInfo });
+  };
+
+  handleModalAction = (openOrClose: "open" | "close", modals: string[]) => {
+    const modalsVisible = this.state.modalsVisible;
+    modals.forEach(modal => {
+      modalsVisible[modal] = openOrClose === "open";
+    });
+    this.setState({ modalsVisible });
   };
 
   handleMetadataUpdate = (key: string, value: string) => {
@@ -1402,47 +1361,19 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     });
   };
 
-  handleModalClose = (name: string) => {
-    const newState = { [name]: false } as unknown as Pick<
-      SampleViewState,
-      keyof SampleViewState
-    >;
-
-    this.setState(newState);
-  };
-
-  handleBlastSelectionModalContinue = (blastModalInfo: BlastModalInfo) => {
-    const { shouldBlastContigs } = blastModalInfo;
-
-    this.setState({
-      blastSelectionModalVisible: false,
-      blastModalInfo,
-      ...(shouldBlastContigs
-        ? { blastV1ContigsModalVisible: true }
-        : { blastV1ReadsModalVisible: true }),
-    });
-  };
-
   render() {
     const {
       amrDeprecatedData,
       backgrounds,
       blastData,
       blastModalInfo,
-      blastContigsModalVisible,
-      blastReadsModalVisible,
-      blastV1ContigsModalVisible,
-      blastV1ReadsModalVisible,
-      blastSelectionModalVisible,
       consensusGenomeData,
       consensusGenomePreviousParams,
-      consensusGenomeCreationModalVisible,
-      consensusGenomeErrorModalVisible,
-      consensusGenomePreviousModalVisible,
       coverageVizVisible,
       coverageVizParams,
       coverageVizDataByTaxon,
       currentTab,
+      modalsVisible,
       pipelineRun,
       project,
       projectSamples,
@@ -1456,37 +1387,33 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     } = this.state;
     const { snapshotShareId } = this.props;
 
-    const currentRun = this.getCurrentRun();
-
     return (
       <React.Fragment>
         <NarrowContainer className={cs.sampleViewContainer}>
-          <div className={cs.sampleViewHeader}>
-            <SampleViewHeader
-              backgroundId={
-                isNaN(selectedOptions.background)
-                  ? null
-                  : selectedOptions.background
-              }
-              currentRun={currentRun}
-              currentTab={currentTab}
-              editable={sample ? sample.editable : false}
-              getDownloadReportTableWithAppliedFiltersLink={
-                this.getDownloadReportTableWithAppliedFiltersLink
-              }
-              hasAppliedFilters={hasAppliedFilters(currentTab, selectedOptions)}
-              onDetailsClick={this.toggleSampleDetailsSidebar}
-              onPipelineVersionChange={this.handlePipelineVersionSelect}
-              onShareClick={this.handleShareClick}
-              project={project}
-              projectSamples={projectSamples}
-              reportMetadata={reportMetadata}
-              sample={sample}
-              snapshotShareId={snapshotShareId}
-              view={view}
-              onDeleteRunSuccess={this.handleDeleteCurrentRun}
-            />
-          </div>
+          <SampleViewHeader
+            backgroundId={
+              isNaN(selectedOptions.background)
+                ? null
+                : selectedOptions.background
+            }
+            currentRun={this.getCurrentRun()}
+            currentTab={currentTab}
+            editable={sample ? sample.editable : false}
+            getDownloadReportTableWithAppliedFiltersLink={
+              this.getDownloadReportTableWithAppliedFiltersLink
+            }
+            hasAppliedFilters={hasAppliedFilters(currentTab, selectedOptions)}
+            onDetailsClick={this.toggleSampleDetailsSidebar}
+            onPipelineVersionChange={this.handlePipelineVersionSelect}
+            onShareClick={this.handleShareClick}
+            project={project}
+            projectSamples={projectSamples}
+            reportMetadata={reportMetadata}
+            sample={sample}
+            snapshotShareId={snapshotShareId}
+            view={view}
+            onDeleteRunSuccess={this.handleDeleteCurrentRun}
+          />
           <TabSwitcher
             currentTab={currentTab}
             handleTabChange={this.handleTabChange}
@@ -1530,23 +1457,21 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             workflowRunResults={this.state.workflowRunResults}
           />
         </NarrowContainer>
-        {sample && (
-          <DetailsSidebarSwitcher
-            handleMetadataUpdate={this.handleMetadataUpdate}
-            handleWorkflowRunSelect={this.handleWorkflowRunSelect}
-            handleTabChange={this.handleTabChange}
-            getCurrentRun={this.getCurrentRun}
-            closeSidebar={this.closeSidebar}
-            currentTab={currentTab}
-            snapshotShareId={snapshotShareId}
-            sidebarVisible={sidebarVisible}
-            sidebarMode={sidebarMode}
-            sample={sample}
-            backgrounds={backgrounds}
-            selectedOptions={selectedOptions}
-            sidebarTaxonData={sidebarTaxonData}
-          />
-        )}
+        <DetailsSidebarSwitcher
+          handleMetadataUpdate={this.handleMetadataUpdate}
+          handleWorkflowRunSelect={this.handleWorkflowRunSelect}
+          handleTabChange={this.handleTabChange}
+          getCurrentRun={this.getCurrentRun}
+          closeSidebar={this.closeSidebar}
+          currentTab={currentTab}
+          snapshotShareId={snapshotShareId}
+          sidebarVisible={sidebarVisible}
+          sidebarMode={sidebarMode}
+          sample={sample}
+          backgrounds={backgrounds}
+          selectedOptions={selectedOptions}
+          sidebarTaxonData={sidebarTaxonData}
+        />
         {sample &&
           (isPipelineFeatureAvailable(
             COVERAGE_VIZ_FEATURE,
@@ -1575,23 +1500,11 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               workflow={sample.initial_workflow}
             />
           )}
-        <SampleViewModals
+        <ModalManager
           blastData={blastData}
           blastModalInfo={blastModalInfo}
-          blastSelectionModalVisible={blastSelectionModalVisible}
-          blastContigsModalVisible={blastContigsModalVisible}
-          blastReadsModalVisible={blastReadsModalVisible}
-          blastV1ContigsModalVisible={blastV1ContigsModalVisible}
-          blastV1ReadsModalVisible={blastV1ReadsModalVisible}
           consensusGenomeData={consensusGenomeData}
-          consensusGenomeCreationModalVisible={
-            consensusGenomeCreationModalVisible
-          }
-          consensusGenomeErrorModalVisible={consensusGenomeErrorModalVisible}
           consensusGenomePreviousParams={consensusGenomePreviousParams}
-          consensusGenomePreviousModalVisible={
-            consensusGenomePreviousModalVisible
-          }
           handleBlastSelectionModalContinue={
             this.handleBlastSelectionModalContinue
           }
@@ -1599,11 +1512,12 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
           handleConsensusGenomeErrorModalRetry={
             this.handleConsensusGenomeErrorModalRetry
           }
-          handleModalClose={this.handleModalClose}
+          handleModalAction={this.handleModalAction}
           handlePreviousConsensusGenomeReportClick={
             this.handlePreviousConsensusGenomeReportClick
           }
           onConsensusGenomeCreation={this.onConsensusGenomeCreation}
+          modalsVisible={modalsVisible}
           sample={sample}
         />
       </React.Fragment>

@@ -9,10 +9,6 @@
   height: calc(100vh - #{$header-total-height});
 }
 
-.sampleViewHeader {
-  flex: 0 0 auto;
-}
-
 .highlight {
   @include font-header-xs;
 }

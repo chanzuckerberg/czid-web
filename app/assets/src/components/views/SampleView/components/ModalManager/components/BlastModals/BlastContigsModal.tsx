@@ -12,7 +12,7 @@ import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
-import cs from "./blast_v1_contigs_modal.scss";
+import cs from "./blast_contigs_modal.scss";
 import BlastContigsTable from "./BlastContigsTable";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
@@ -29,7 +29,7 @@ import {
 } from "./constants";
 import { prepareBlastQuery } from "./utils";
 
-interface BlastV1ContigsModalProps {
+interface BlastContigsModalProps {
   blastModalInfo: BlastModalInfo;
   context: object;
   onClose: () => void;
@@ -40,7 +40,7 @@ interface BlastV1ContigsModalProps {
   taxonId: number;
 }
 
-const BlastV1ContigsModal = ({
+export const BlastContigsModal = ({
   blastModalInfo,
   context,
   onClose,
@@ -49,7 +49,7 @@ const BlastV1ContigsModal = ({
   pipelineVersion,
   taxonName,
   taxonId,
-}: BlastV1ContigsModalProps) => {
+}: BlastContigsModalProps) => {
   const [contigs, setContigs] = useState<Contig[]>([]);
   const [selectedContigIds, setSelectedContigIds] = useState<Set<number>>(
     new Set(),
@@ -383,5 +383,3 @@ const BlastV1ContigsModal = ({
     </Modal>
   );
 };
-
-export default BlastV1ContigsModal;

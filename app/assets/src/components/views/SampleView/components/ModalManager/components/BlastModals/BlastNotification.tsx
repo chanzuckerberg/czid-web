@@ -6,11 +6,11 @@ import Notification from "~ui/notifications/Notification";
 import cs from "./blast_notification.scss";
 import { NCBI_SUPPORT_CENTER_LINK } from "./constants";
 
-interface BlastNotificationProps {
-  onClose?: $TSFixMeFunction;
-}
+export const showBlastNotification = () => {
+  showToast(({ closeToast }) => <BlastNotification onClose={closeToast} />);
+};
 
-const BlastNotification = ({ onClose }: BlastNotificationProps) => {
+export const BlastNotification = ({ onClose }: { onClose?: () => void }) => {
   const label = (
     <div className={cs.label}>
       <div className={cs.message}>
@@ -35,10 +35,4 @@ const BlastNotification = ({ onClose }: BlastNotificationProps) => {
       {label}
     </Notification>
   );
-};
-
-export default BlastNotification;
-
-export const showBlastNotification = () => {
-  showToast(({ closeToast }) => <BlastNotification onClose={closeToast} />);
 };

@@ -17,9 +17,9 @@ import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
 import { openUrl } from "~utils/links";
-import { NOTIFICATION_TYPES } from "../constants";
-import { showNotification } from "../notifications";
-import { addSampleDeleteFlagToSessionStorage } from "../utils";
+import { NOTIFICATION_TYPES } from "../../constants";
+import { showNotification } from "../../notifications";
+import { addSampleDeleteFlagToSessionStorage } from "../../utils";
 import { PrimaryHeaderControls } from "./PrimaryHeaderControls";
 import cs from "./sample_view_header.scss";
 import { SampleDeletionConfirmationModal } from "./SampleDeletionConfirmationModal";
@@ -101,7 +101,7 @@ export const SampleViewHeader = ({
   };
 
   return (
-    <>
+    <div className={cs.sampleViewHeader}>
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
           <ViewHeader.Pretitle breadcrumbLink={getBreadcrumbLink()}>
@@ -167,6 +167,6 @@ export const SampleViewHeader = ({
           onConfirm={handleDeleteSample}
         />
       )}
-    </>
+    </div>
   );
 };

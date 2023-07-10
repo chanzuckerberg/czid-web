@@ -1,4 +1,4 @@
-import { CountTypes } from "~/components/views/blast/constants";
+import { CountTypes } from "~/components/views/SampleView/components/ModalManager/components/BlastModals/constants";
 import { get, postWithCSRF } from "./core";
 
 export const fetchLongestContigsForTaxonId = ({

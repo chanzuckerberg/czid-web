@@ -15,7 +15,6 @@ import {
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import { BLAST_V1_FEATURE } from "~/components/utils/features";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
@@ -358,15 +357,12 @@ export default class CoverageVizBottomSidebar extends React.Component<
   renderBlastAction = () => {
     const { onBlastClick, params, pipelineVersion, sampleId } = this.props;
     const { taxonId, taxonName, taxonStatsByCountType } = params;
-    const { allowedFeatures = [] } = this.context || {};
-
-    const hasBlastv1Feature = allowedFeatures.includes(BLAST_V1_FEATURE);
 
     return (
       <BasicPopup
         className={cs.actionIconPopup}
         basic={false}
-        content={hasBlastv1Feature ? "BLAST" : "BLASTN"}
+        content={"BLAST"}
         position="top center"
         inverted
         trigger={

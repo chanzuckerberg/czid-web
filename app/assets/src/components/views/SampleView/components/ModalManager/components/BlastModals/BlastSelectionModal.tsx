@@ -27,7 +27,7 @@ interface BlastSelectionModalProps {
   };
 }
 
-const BlastSelectionModal = ({
+export const BlastSelectionModal = ({
   open,
   onContinue,
   onClose,
@@ -188,5 +188,3 @@ const BlastSelectionModal = ({
     </Modal>
   );
 };
-
-export default BlastSelectionModal;

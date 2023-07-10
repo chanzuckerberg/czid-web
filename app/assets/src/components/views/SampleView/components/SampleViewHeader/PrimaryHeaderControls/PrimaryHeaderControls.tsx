@@ -39,7 +39,7 @@ import {
   SaveButton,
 } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
-import { TABS } from "../../constants";
+import { TABS } from "../../../constants";
 import { AmrDownloadDropdown } from "./AmrDownloadDropdown";
 import { MngsDownloadDropdown } from "./MngsDownloadDropdown";
 import { OverflowMenu } from "./OverflowMenu";

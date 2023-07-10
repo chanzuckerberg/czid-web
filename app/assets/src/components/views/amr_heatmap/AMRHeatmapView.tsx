@@ -501,7 +501,6 @@ export default class AMRHeatmapView extends React.Component<
   renderSidebar() {
     const { sidebarMode, sidebarVisible } = this.state;
     return (
-      // @ts-expect-error Types of property 'params' are incompatible.
       <DetailsSidebar
         visible={sidebarVisible}
         mode={sidebarMode}

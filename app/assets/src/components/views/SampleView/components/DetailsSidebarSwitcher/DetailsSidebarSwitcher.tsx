@@ -25,7 +25,7 @@ interface DetailsSidebarSwitcherProps {
   sidebarTaxonData: Taxon;
 }
 
-const DetailsSidebarSwitcher = ({
+export const DetailsSidebarSwitcher = ({
   handleMetadataUpdate,
   handleWorkflowRunSelect,
   handleTabChange,
@@ -63,7 +63,6 @@ const DetailsSidebarSwitcher = ({
       find({ workflow: WORKFLOWS.AMR.value }, sample.workflow_runs) &&
         WORKFLOWS.AMR.label,
     ]);
-
     return {
       currentRun: getCurrentRun(),
       currentWorkflowTab: currentTab,
@@ -76,43 +75,24 @@ const DetailsSidebarSwitcher = ({
       onMetadataUpdate: handleMetadataUpdate,
     };
   };
-  // The following is not DRY but it does set up type narrowing.
-  // ex. if the sidebarMode is "taxonDetails", typescript expects that DetailsSidebar
-  // will be rendered with taxonSideBarParams rather that the possibilty of either
-  // taxonSideBarParams OR sampleSideBarParams which do not overlap at all.
-  if (sidebarMode === "taxonDetails") {
-    return (
-      <DetailsSidebar
-        visible={sidebarVisible}
-        mode={sidebarMode}
-        onClose={withAnalytics(
-          closeSidebar,
-          "SampleView_details-sidebar_closed",
-          {
-            sampleId: sample.id,
-            sampleName: sample.name,
-          },
-        )}
-        params={getTaxonSideBarParams()}
-      />
-    );
-  } else if (sidebarMode === "sampleDetails") {
-    return (
-      <DetailsSidebar
-        visible={sidebarVisible}
-        mode={sidebarMode}
-        onClose={withAnalytics(
-          closeSidebar,
-          "SampleView_details-sidebar_closed",
-          {
-            sampleId: sample.id,
-            sampleName: sample.name,
-          },
-        )}
-        params={getSampleSideBarParams()}
-      />
-    );
-  }
+  if (!sample) return null;
+  return (
+    <DetailsSidebar
+      visible={sidebarVisible}
+      mode={sidebarMode}
+      onClose={withAnalytics(
+        closeSidebar,
+        "SampleView_details-sidebar_closed",
+        {
+          sampleId: sample.id,
+          sampleName: sample.name,
+        },
+      )}
+      params={
+        sidebarMode === "taxonDetails"
+          ? getTaxonSideBarParams()
+          : getSampleSideBarParams()
+      }
+    />
+  );
 };
-
-export default DetailsSidebarSwitcher;

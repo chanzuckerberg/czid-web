@@ -1,11 +1,11 @@
 import { MenuItem, Tooltip } from "@czi-sds/components";
 import React from "react";
 import { TwoWayKeyStringMap } from "~/components/utils/objectUtil";
+import { downloadAmrGeneLevelData } from "~/components/views/SampleView/components/SampleViewHeader/PrimaryHeaderControls/AmrDownloadDropdown/amrDownloadUtils";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,
 } from "~/components/views/SampleView/constants";
-import { downloadAmrGeneLevelData } from "~/components/views/SampleView/SampleViewHeader/PrimaryHeaderControls/AmrDownloadDropdown/amrDownloadUtils";
 import { SDSFormattedDropdownOption } from "~/interface/dropdown";
 
 const DOWNLOAD_TYPE_TO_NAME = new TwoWayKeyStringMap({
