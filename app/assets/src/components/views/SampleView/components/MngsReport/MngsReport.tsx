@@ -41,7 +41,7 @@ export const MngsReport = ({
   view,
 }: MngsReportProps) => {
   const displayMergedNtNrValue = currentTab === TABS.MERGED_NT_NR;
-  if (reportMetadata.reportReady && reportData?.length > 0) {
+  if (reportMetadata.reportReady) {
     return (
       <div className={cs.reportViewContainer}>
         <ReportFilters
@@ -116,11 +116,10 @@ export const MngsReport = ({
       </div>
     );
   } else {
-    // The report is either in progress, found 0 taxons, or encountered an error.
+    // The report is either in progress or encountered an error.
     return (
       <SampleViewMessage
         currentTab={currentTab}
-        hasZeroTaxons={!loadingReport && reportData?.length === 0}
         loadingReport={loadingReport}
         pipelineRun={pipelineRun}
         reportMetadata={reportMetadata}
