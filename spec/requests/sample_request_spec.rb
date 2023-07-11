@@ -636,258 +636,233 @@ RSpec.describe "Sample request", type: :request do
         @nanopore = PipelineRun::TECHNOLOGY_INPUT[:nanopore]
       end
 
-      context "when user does not have bulk_deletion feature flag" do
+      context "when sample ids are passed in for mNGS workflows" do
         before do
           @sample1 = create(:sample, project: @project,
                                      user: @joe,
                                      name: "completed Illumina mNGs sample 1")
           @pr1 = create(:pipeline_run, sample: @sample1, technology: @illumina, finalized: 1)
+
+          @sample2 = create(:sample, project: @project,
+                                     user: @joe,
+                                     name: "completed Illumina mNGs sample 2")
+          @pr2 = create(:pipeline_run, sample: @sample2, technology: @illumina, finalized: 1)
+
+          @sample3 = create(:sample, project: @project,
+                                     user: @joe,
+                                     name: "in-progress Illumina mNGS sample")
+          @pr3 = create(:pipeline_run, sample: @sample3, technology: @illumina, finalized: 0)
+
+          @sample4 = create(:sample, project: @project,
+                                     user: @joe,
+                                     name: "completed nanopore mNGs sample")
+          @pr4 = create(:pipeline_run, sample: @sample4, technology: @nanopore, finalized: 1)
         end
 
-        it "returns redirect response" do
+        it "returns empty array with error if error is raised in DeletionValidationService" do
           params = {
             workflow: "short-read-mngs",
-            selectedIds: [@sample1.id],
+            selectedIds: [@sample1.id, @sample3.id],
           }
+
+          unexpected_error_response = {
+            valid_ids: [],
+            invalid_sample_ids: [],
+            error: DeletionValidationService::DELETION_VALIDATION_ERROR,
+          }
+
+          allow(DeletionValidationService).to receive(:call).with(anything).and_return(unexpected_error_response)
+
+          post "/samples/bulk_delete", params: params
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to eq(DeletionValidationService::DELETION_VALIDATION_ERROR)
+          expect(json_response[:deletedIds]).to be_empty
+        end
+
+        it "returns empty array with error when some samples are illumina and some are nanopore" do
+          params = {
+            workflow: "short-read-mngs",
+            selectedIds: [@sample1.id, @sample2.id, @sample4.id],
+          }
+
+          validation_response = {
+            error: nil,
+            valid_ids: [@sample1.id, @sample2.id],
+            invalid_sample_ids: [@sample4.id],
+          }
+
+          expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
 
           post "/samples/bulk_delete", params: params
 
-          expect(response).to have_http_status(:found)
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
+          expect(json_response[:deletedIds]).to be_empty
+        end
+
+        it "returns empty array with error if not all ids are valid for deletion" do
+          params = {
+            workflow: "short-read-mngs",
+            selectedIds: [@sample1.id, @sample2.id, @sample3.id],
+          }
+
+          validation_response = {
+            error: nil,
+            valid_ids: [@sample1.id, @sample2.id],
+            invalid_sample_ids: [@sample3.id],
+          }
+
+          expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
+
+          post "/samples/bulk_delete", params: params
+
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
+          expect(json_response[:deletedIds]).to be_empty
+        end
+
+        it "calls services with valid sample ids and returns deleted pipeline run ids" do
+          params = {
+            workflow: "short-read-mngs",
+            selectedIds: [@sample1.id, @sample2.id],
+          }
+
+          validation_service_response = {
+            error: nil,
+            valid_ids: [@sample1.id, @sample2.id],
+            invalid_sample_ids: [],
+          }
+
+          deletion_service_response = {
+            error: nil,
+            deleted_run_ids: [@pr1.id, @pr2.id],
+          }
+          expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_service_response)
+
+          expect(BulkDeletionService).to receive(:call).with(anything).and_return(deletion_service_response)
+
+          post "/samples/bulk_delete", params: params
+
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to be_nil
+          expect(json_response[:deletedIds]).to contain_exactly(@pr1.id, @pr2.id)
         end
       end
 
-      context "when user has bulk_deletion feature flag" do
+      context "when workflow run ids are passed in for CG/AMR workflows" do
+        let(:consensus_genome) { WorkflowRun::WORKFLOW[:consensus_genome] }
+        let(:amr) { WorkflowRun::WORKFLOW[:amr] }
+
         before do
-          @joe.add_allowed_feature("bulk_deletion")
+          @sample1 = create(:sample, project: @project, user: @joe, name: "Joe sample 1")
+          @completed_wr = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+
+          @sample2 = create(:sample, project: @project, user: @joe, name: "Joe sample 2")
+          @failed_wr = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
+
+          @sample3 = create(:sample, project: @project, user: @joe, name: "Joe sample 3")
+          @in_prog_wr = create(:workflow_run, sample: @sample3, workflow: consensus_genome, status: WorkflowRun::STATUS[:running])
+
+          @sample4 = create(:sample, project: @project, user: @joe, name: "Joe sample 4")
+          @completed_amr_wr = create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
         end
 
-        context "when sample ids are passed in for mNGS workflows" do
-          before do
-            @sample1 = create(:sample, project: @project,
-                                       user: @joe,
-                                       name: "completed Illumina mNGs sample 1")
-            @pr1 = create(:pipeline_run, sample: @sample1, technology: @illumina, finalized: 1)
+        it "returns empty array with error if error is raised in DeletionValidationService" do
+          params = {
+            workflow: "consensus-genome",
+            selectedIds: [@completed_wr.id, @failed_wr.id],
+          }
 
-            @sample2 = create(:sample, project: @project,
-                                       user: @joe,
-                                       name: "completed Illumina mNGs sample 2")
-            @pr2 = create(:pipeline_run, sample: @sample2, technology: @illumina, finalized: 1)
+          unexpected_error_response = {
+            valid_ids: [],
+            invalid_sample_ids: [],
+            error: DeletionValidationService::DELETION_VALIDATION_ERROR,
+          }
 
-            @sample3 = create(:sample, project: @project,
-                                       user: @joe,
-                                       name: "in-progress Illumina mNGS sample")
-            @pr3 = create(:pipeline_run, sample: @sample3, technology: @illumina, finalized: 0)
+          allow(DeletionValidationService).to receive(:call).with(anything).and_return(unexpected_error_response)
 
-            @sample4 = create(:sample, project: @project,
-                                       user: @joe,
-                                       name: "completed nanopore mNGs sample")
-            @pr4 = create(:pipeline_run, sample: @sample4, technology: @nanopore, finalized: 1)
-          end
-
-          it "returns empty array with error if error is raised in DeletionValidationService" do
-            params = {
-              workflow: "short-read-mngs",
-              selectedIds: [@sample1.id, @sample3.id],
-            }
-
-            unexpected_error_response = {
-              valid_ids: [],
-              invalid_sample_ids: [],
-              error: DeletionValidationService::DELETION_VALIDATION_ERROR,
-            }
-
-            allow(DeletionValidationService).to receive(:call).with(anything).and_return(unexpected_error_response)
-
-            post "/samples/bulk_delete", params: params
-            expect(response).to have_http_status(:ok)
-            json_response = JSON.parse(response.body, symbolize_names: true)
-            expect(json_response[:error]).to eq(DeletionValidationService::DELETION_VALIDATION_ERROR)
-            expect(json_response[:deletedIds]).to be_empty
-          end
-
-          it "returns empty array with error when some samples are illumina and some are nanopore" do
-            params = {
-              workflow: "short-read-mngs",
-              selectedIds: [@sample1.id, @sample2.id, @sample4.id],
-            }
-
-            validation_response = {
-              error: nil,
-              valid_ids: [@sample1.id, @sample2.id],
-              invalid_sample_ids: [@sample4.id],
-            }
-
-            expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
-
-            post "/samples/bulk_delete", params: params
-
-            expect(response).to have_http_status(:ok)
-            json_response = JSON.parse(response.body, symbolize_names: true)
-            expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
-            expect(json_response[:deletedIds]).to be_empty
-          end
-
-          it "returns empty array with error if not all ids are valid for deletion" do
-            params = {
-              workflow: "short-read-mngs",
-              selectedIds: [@sample1.id, @sample2.id, @sample3.id],
-            }
-
-            validation_response = {
-              error: nil,
-              valid_ids: [@sample1.id, @sample2.id],
-              invalid_sample_ids: [@sample3.id],
-            }
-
-            expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
-
-            post "/samples/bulk_delete", params: params
-
-            expect(response).to have_http_status(:ok)
-            json_response = JSON.parse(response.body, symbolize_names: true)
-            expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
-            expect(json_response[:deletedIds]).to be_empty
-          end
-
-          it "calls services with valid sample ids and returns deleted pipeline run ids" do
-            params = {
-              workflow: "short-read-mngs",
-              selectedIds: [@sample1.id, @sample2.id],
-            }
-
-            validation_service_response = {
-              error: nil,
-              valid_ids: [@sample1.id, @sample2.id],
-              invalid_sample_ids: [],
-            }
-
-            deletion_service_response = {
-              error: nil,
-              deleted_run_ids: [@pr1.id, @pr2.id],
-            }
-            expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_service_response)
-
-            expect(BulkDeletionService).to receive(:call).with(anything).and_return(deletion_service_response)
-
-            post "/samples/bulk_delete", params: params
-
-            expect(response).to have_http_status(:ok)
-            json_response = JSON.parse(response.body, symbolize_names: true)
-            expect(json_response[:error]).to be_nil
-            expect(json_response[:deletedIds]).to contain_exactly(@pr1.id, @pr2.id)
-          end
+          post "/samples/bulk_delete", params: params
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to eq(DeletionValidationService::DELETION_VALIDATION_ERROR)
+          expect(json_response[:deletedIds]).to be_empty
         end
-        context "when workflow run ids are passed in for CG/AMR workflows" do
-          let(:consensus_genome) { WorkflowRun::WORKFLOW[:consensus_genome] }
-          let(:amr) { WorkflowRun::WORKFLOW[:amr] }
 
-          before do
-            @sample1 = create(:sample, project: @project, user: @joe, name: "Joe sample 1")
-            @completed_wr = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+        it "returns empty array with error if not all workflow run ids are valid for deletion" do
+          params = {
+            workflow: "consensus-genome",
+            selectedIds: [@completed_wr.id, @in_prog_wr.id],
+          }
 
-            @sample2 = create(:sample, project: @project, user: @joe, name: "Joe sample 2")
-            @failed_wr = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
+          validation_response = {
+            error: nil,
+            valid_ids: [@completed_wr.id],
+            invalid_sample_ids: [@in_prog_wr.sample_id],
+          }
 
-            @sample3 = create(:sample, project: @project, user: @joe, name: "Joe sample 3")
-            @in_prog_wr = create(:workflow_run, sample: @sample3, workflow: consensus_genome, status: WorkflowRun::STATUS[:running])
+          expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
 
-            @sample4 = create(:sample, project: @project, user: @joe, name: "Joe sample 4")
-            @completed_amr_wr = create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
-          end
+          post "/samples/bulk_delete", params: params
 
-          it "returns empty array with error if error is raised in DeletionValidationService" do
-            params = {
-              workflow: "consensus-genome",
-              selectedIds: [@completed_wr.id, @failed_wr.id],
-            }
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
+          expect(json_response[:deletedIds]).to be_empty
+        end
 
-            unexpected_error_response = {
-              valid_ids: [],
-              invalid_sample_ids: [],
-              error: DeletionValidationService::DELETION_VALIDATION_ERROR,
-            }
+        it "returns empty array with error when some runs are CG and some are AMR" do
+          params = {
+            workflow: "consensus-genome",
+            selectedIds: [@completed_wr.id, @completed_amr_wr.id],
+          }
 
-            allow(DeletionValidationService).to receive(:call).with(anything).and_return(unexpected_error_response)
+          validation_response = {
+            error: nil,
+            valid_ids: [@completed_wr.id],
+            invalid_sample_ids: [@completed_amr_wr.sample_id],
+          }
 
-            post "/samples/bulk_delete", params: params
-            expect(response).to have_http_status(:ok)
-            json_response = JSON.parse(response.body, symbolize_names: true)
-            expect(json_response[:error]).to eq(DeletionValidationService::DELETION_VALIDATION_ERROR)
-            expect(json_response[:deletedIds]).to be_empty
-          end
+          expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
 
-          it "returns empty array with error if not all workflow run ids are valid for deletion" do
-            params = {
-              workflow: "consensus-genome",
-              selectedIds: [@completed_wr.id, @in_prog_wr.id],
-            }
+          post "/samples/bulk_delete", params: params
 
-            validation_response = {
-              error: nil,
-              valid_ids: [@completed_wr.id],
-              invalid_sample_ids: [@in_prog_wr.sample_id],
-            }
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
+          expect(json_response[:deletedIds]).to be_empty
+        end
 
-            expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
+        it "calls services with valid workflow run ids and returns deleted workflow run ids" do
+          params = {
+            workflow: "consensus-genome",
+            selectedIds: [@completed_wr.id, @failed_wr.id],
+          }
 
-            post "/samples/bulk_delete", params: params
+          validation_service_response = {
+            error: nil,
+            valid_ids: [@completed_wr.id, @failed_wr.id],
+            invalid_sample_ids: [],
+          }
 
-            expect(response).to have_http_status(:ok)
-            json_response = JSON.parse(response.body, symbolize_names: true)
-            expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
-            expect(json_response[:deletedIds]).to be_empty
-          end
+          deletion_service_response = {
+            error: nil,
+            deleted_run_ids: [@completed_wr.id, @failed_wr.id],
+          }
 
-          it "returns empty array with error when some runs are CG and some are AMR" do
-            params = {
-              workflow: "consensus-genome",
-              selectedIds: [@completed_wr.id, @completed_amr_wr.id],
-            }
+          expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_service_response)
 
-            validation_response = {
-              error: nil,
-              valid_ids: [@completed_wr.id],
-              invalid_sample_ids: [@completed_amr_wr.sample_id],
-            }
+          expect(BulkDeletionService).to receive(:call).with(anything).and_return(deletion_service_response)
 
-            expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
+          post "/samples/bulk_delete", params: params
 
-            post "/samples/bulk_delete", params: params
-
-            expect(response).to have_http_status(:ok)
-            json_response = JSON.parse(response.body, symbolize_names: true)
-            expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
-            expect(json_response[:deletedIds]).to be_empty
-          end
-
-          it "calls services with valid workflow run ids and returns deleted workflow run ids" do
-            params = {
-              workflow: "consensus-genome",
-              selectedIds: [@completed_wr.id, @failed_wr.id],
-            }
-
-            validation_service_response = {
-              error: nil,
-              valid_ids: [@completed_wr.id, @failed_wr.id],
-              invalid_sample_ids: [],
-            }
-
-            deletion_service_response = {
-              error: nil,
-              deleted_run_ids: [@completed_wr.id, @failed_wr.id],
-            }
-
-            expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_service_response)
-
-            expect(BulkDeletionService).to receive(:call).with(anything).and_return(deletion_service_response)
-
-            post "/samples/bulk_delete", params: params
-
-            expect(response).to have_http_status(:ok)
-            json_response = JSON.parse(response.body, symbolize_names: true)
-            expect(json_response[:error]).to be_nil
-            expect(json_response[:deletedIds]).to contain_exactly(@completed_wr.id, @failed_wr.id)
-          end
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to be_nil
+          expect(json_response[:deletedIds]).to contain_exactly(@completed_wr.id, @failed_wr.id)
         end
       end
     end

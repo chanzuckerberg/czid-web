@@ -1,14 +1,8 @@
 import { Icon, Menu, MenuItem, Tooltip } from "@czi-sds/components";
 import { PopoverProps } from "@mui/material";
 import cx from "classnames";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { withAnalytics } from "~/api/analytics";
-import { UserContext } from "~/components/common/UserContext";
-import {
-  AMR_V1_FEATURE,
-  AMR_V2_FEATURE,
-  BULK_DELETION_FEATURE,
-} from "~/components/utils/features";
 import cs from "./samples_view.scss";
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
 
@@ -25,15 +19,6 @@ const BulkSamplesActionsMenu = ({
 }: BulkSamplesActionsMenuProps) => {
   const [menuAnchorEl, setMenuAnchorEl] =
     useState<PopoverProps["anchorEl"]>(null);
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
-
-  const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
-  const hasAmr =
-    handleBulkKickoffAmr &&
-    allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE);
-
-  const disableMenu = !hasBulkDeletion && noObjectsSelected;
 
   const openActionsMenu = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchorEl(event.currentTarget);
@@ -42,10 +27,6 @@ const BulkSamplesActionsMenu = ({
   const closeActionsMenu = () => {
     setMenuAnchorEl(null);
   };
-
-  const runAmrPipelineLabel = allowedFeatures.includes(AMR_V2_FEATURE)
-    ? "Run Antimicrobial Resistance Pipeline"
-    : "Run Antimicrobial Resistance Pipeline (Beta)";
 
   const renderBulkKickoffAmr = () => {
     let bulkKickoffAmrMenuItem = (
@@ -58,22 +39,20 @@ const BulkSamplesActionsMenu = ({
         }}
       >
         <div className={cs.itemWrapper}>
-          {hasBulkDeletion && (
-            <div
-              className={cx(
-                cs.bulkActionsIcon,
-                noObjectsSelected && cs.iconDisabled,
-              )}
-            >
-              <Icon sdsIcon={"bacteria"} sdsSize="xs" sdsType="static" />
-            </div>
-          )}
-          <span>{runAmrPipelineLabel}</span>
+          <div
+            className={cx(
+              cs.bulkActionsIcon,
+              noObjectsSelected && cs.iconDisabled,
+            )}
+          >
+            <Icon sdsIcon={"bacteria"} sdsSize="xs" sdsType="static" />
+          </div>
+          {"Run Antimicrobial Resistance Pipeline"}
         </div>
       </MenuItem>
     );
 
-    if (noObjectsSelected && hasBulkDeletion) {
+    if (noObjectsSelected) {
       bulkKickoffAmrMenuItem = (
         <Tooltip
           arrow
@@ -112,9 +91,9 @@ const BulkSamplesActionsMenu = ({
         testId="dots-horizontal"
         className={cs.action}
         icon="dotsHorizontal"
-        popupText={hasBulkDeletion ? "More Actions" : runAmrPipelineLabel}
-        popupSubtitle={disableMenu ? "Select at least 1 sample" : ""}
-        disabled={disableMenu}
+        popupText={"More Actions"}
+        popupSubtitle={noObjectsSelected ? "Select at least 1 sample" : ""}
+        disabled={noObjectsSelected}
         onClick={openActionsMenu}
       />
       <Menu
@@ -131,8 +110,8 @@ const BulkSamplesActionsMenu = ({
         open={Boolean(menuAnchorEl)}
         onClose={closeActionsMenu}
       >
-        {hasBulkDeletion && renderKickoffPhyloTree()}
-        {hasAmr && renderBulkKickoffAmr()}
+        {renderKickoffPhyloTree()}
+        {renderBulkKickoffAmr()}
       </Menu>
     </>
   );

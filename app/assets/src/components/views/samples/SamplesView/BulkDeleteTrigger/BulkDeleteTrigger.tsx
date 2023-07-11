@@ -1,7 +1,6 @@
 import { compact, filter, get, isEmpty, pullAll } from "lodash/fp";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
-import { BULK_DELETION_FEATURE } from "~/components/utils/features";
 import {
   getShorthandFromWorkflow,
   WORKFLOW_ENTITIES,
@@ -24,12 +23,7 @@ const BulkDeleteTrigger = ({
   workflow,
   workflowEntity,
 }: BulkDeleteTriggerProps) => {
-  const { allowedFeatures, userId } = useContext(UserContext) ?? {};
-
-  // if feature flag off, show nothing
-  if (!allowedFeatures.includes(BULK_DELETION_FEATURE)) {
-    return null;
-  }
+  const { userId } = useContext(UserContext) ?? {};
 
   const isAtLeastOneObjectValidForDeletion = () => {
     // selected samples uploaded by current user

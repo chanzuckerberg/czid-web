@@ -56,10 +56,6 @@ class SamplesController < ApplicationController
     allowed_feature_required("AMR")
   end
 
-  before_action only: :bulk_delete do
-    allowed_feature_required("bulk_deletion")
-  end
-
   around_action :instrument_with_timer
 
   MAX_PAGE_SIZE_V2 = 100

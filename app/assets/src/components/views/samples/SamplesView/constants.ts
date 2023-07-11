@@ -4,10 +4,9 @@ export const TRIGGERS = {
   backgroundModel: "backgroundModel",
   genepi: "genepi",
   heatmap: "heatmap",
-  phylogeneticTree: "phylogeneticTree",
   download: "download",
   nextclade: "nextclade",
-  bulk_kickoff_amr: "bulk_kickoff_amr",
+  more_actions: "more_actions",
   bulk_delete: "bulk_delete",
 };
 
@@ -21,10 +20,9 @@ export const WORKFLOW_TRIGGERS = {
   [WORKFLOWS.SHORT_READ_MNGS.value]: [
     TRIGGERS.backgroundModel,
     TRIGGERS.heatmap,
-    TRIGGERS.phylogeneticTree,
     TRIGGERS.download,
     TRIGGERS.bulk_delete,
-    TRIGGERS.bulk_kickoff_amr,
+    TRIGGERS.more_actions,
   ],
   [WORKFLOWS.AMR.value]: [TRIGGERS.download, TRIGGERS.bulk_delete],
   [WORKFLOWS.LONG_READ_MNGS.value]: [TRIGGERS.download, TRIGGERS.bulk_delete],

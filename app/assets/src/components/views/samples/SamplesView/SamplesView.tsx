@@ -37,7 +37,6 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
   AMR_V1_FEATURE,
   AMR_V2_FEATURE,
-  BULK_DELETION_FEATURE,
   HEATMAP_ELASTICSEARCH_FEATURE,
 } from "~/components/utils/features";
 import { showToast } from "~/components/utils/toast";
@@ -412,24 +411,6 @@ const SamplesView = forwardRef(function SamplesView(
     setPhyloCreationModalOpen(true);
   };
 
-  const renderPhyloTreeTrigger = () => {
-    if (allowedFeatures.includes(BULK_DELETION_FEATURE)) {
-      return;
-    }
-
-    return (
-      <ToolbarButtonIcon
-        className={cs.action}
-        icon="treeHorizontal"
-        popupText="Phylogenetic Tree"
-        onClick={withAnalytics(
-          handleClickPhyloTree,
-          "SamplesView_phylo-tree-modal-open_clicked",
-        )}
-      />
-    );
-  };
-
   const renderBulkDownloadTrigger = () => {
     return (
       <ToolbarButtonIcon
@@ -704,37 +685,25 @@ const SamplesView = forwardRef(function SamplesView(
     />
   );
 
-  const renderBulkSamplesActionsMenu = () => {
-    if (
-      !(
-        allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE) ||
-        allowedFeatures.includes(BULK_DELETION_FEATURE)
-      )
-    ) {
-      return;
-    }
-
-    return (
-      <BulkSamplesActionsMenu
-        noObjectsSelected={size(selectedObjects) === 0}
-        handleBulkKickoffAmr={
-          domain !== DISCOVERY_DOMAIN_PUBLIC ? handleBulkKickoffAmr : null
-        }
-        handleClickPhyloTree={handleClickPhyloTree}
-      />
-    );
-  };
+  const renderBulkSamplesActionsMenu = () => (
+    <BulkSamplesActionsMenu
+      noObjectsSelected={size(selectedObjects) === 0}
+      handleBulkKickoffAmr={
+        domain !== DISCOVERY_DOMAIN_PUBLIC ? handleBulkKickoffAmr : null
+      }
+      handleClickPhyloTree={handleClickPhyloTree}
+    />
+  );
 
   const renderTriggers = () => {
     const triggers = {
       [TRIGGERS.backgroundModel]: renderCollectionTrigger,
       [TRIGGERS.heatmap]: renderHeatmapTrigger,
-      [TRIGGERS.phylogeneticTree]: renderPhyloTreeTrigger,
       [TRIGGERS.download]: renderBulkDownloadTrigger,
       [TRIGGERS.nextclade]: renderNextcladeTrigger,
       [TRIGGERS.genepi]: renderGenEpiTrigger,
       [TRIGGERS.bulk_delete]: renderBulkDeleteTrigger,
-      [TRIGGERS.bulk_kickoff_amr]: renderBulkSamplesActionsMenu,
+      [TRIGGERS.more_actions]: renderBulkSamplesActionsMenu,
     };
     // Get workflows triggers available in the current workflow tab
     const triggersAvailable = intersection(
