@@ -36,7 +36,7 @@ export const DRUG_CLASS_COLUMN_TOOLTIP_STRINGS = {
 export const HIGH_LEVEL_DRUG_CLASS_COLUMN_TOOLTIP_STRINGS = {
   regularText:
     "Antibiotic family classified based on mechanism of action, chemical structure or spectrum of activity.",
-  boldText: "High Level Drug Class",
+  boldText: "High-level Drug Class",
   link: {
     href: GENES_COLUMN_GROUP_TOOLTIP_LINK_HREF,
     linkText: TOOLTIP_LINK_TEXT,

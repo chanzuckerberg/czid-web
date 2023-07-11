@@ -7,6 +7,7 @@ export { cutoffColumn } from "./cutoff";
 export { drugClassColumn } from "./drugClass";
 export { geneFamilyColumn } from "./geneFamily";
 export { getGeneInfoColumnGroup } from "./geneInfoColumnGroup";
+export { highLevelDrugClassColumn } from "./highLevelDrugClass";
 export { mechanismColumn } from "./mechanism";
 export { modelColumn } from "./model";
 export { readCoverageBreadthColumn } from "./readCoverageBreadth";

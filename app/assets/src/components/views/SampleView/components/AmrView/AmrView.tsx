@@ -57,7 +57,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   useEffect(() => {
     if (
       !allowedFeatures.includes(AMR_V2_FEATURE) ||
-      workflowRun.status !== SUCCEEDED_STATE
+      workflowRun?.status !== SUCCEEDED_STATE
     ) {
       return;
     }

@@ -18,6 +18,7 @@ export enum ColumnId {
   DRUG_CLASS = "drugClass",
   GENE = "gene",
   GENE_FAMILY = "geneFamily",
+  HIGH_LEVEL_DRUG_CLASS = "highLevelDrugClass",
   MECHANISM = "mechanism",
   MODEL = "model",
   READ_COVERAGE_DEPTH = "readCoverageDepth",
@@ -37,6 +38,7 @@ export const COLUMN_ID_TO_NAME = new TwoWayKeyStringMap({
   [ColumnId.GENE]: "Gene",
   [ColumnId.DRUG_CLASS]: "Drug Class",
   [ColumnId.GENE_FAMILY]: "Gene Family",
+  [ColumnId.HIGH_LEVEL_DRUG_CLASS]: "High-level Drug Class",
   [ColumnId.MECHANISM]: "Mechanism",
   [ColumnId.MODEL]: "Model",
   [ColumnId.READ_COVERAGE_DEPTH]: "Reads Coverage Depth",
@@ -51,6 +53,7 @@ export const SECTION_TO_COLUMN_IDS = new TwoWayKeyListMap({
   [ColumnSection.GENE_INFO]: [
     ColumnId.GENE,
     ColumnId.DRUG_CLASS,
+    ColumnId.HIGH_LEVEL_DRUG_CLASS,
     ColumnId.GENE_FAMILY,
     ColumnId.MECHANISM,
     ColumnId.MODEL,
