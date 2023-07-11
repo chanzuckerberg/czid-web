@@ -111,7 +111,7 @@ const BulkSamplesActionsMenu = ({
         onClose={closeActionsMenu}
       >
         {renderKickoffPhyloTree()}
-        {renderBulkKickoffAmr()}
+        {handleBulkKickoffAmr && renderBulkKickoffAmr()}
       </Menu>
     </>
   );
