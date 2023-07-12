@@ -182,6 +182,8 @@ class SfnCgPipelineDispatchService
       "easyseq.bed"
     when protocols[:midnight]
       "midnight_primers.bed"
+    when protocols[:artic_v5]
+      "SARs-CoV-2_v5.3.2_400.primer.bed"
     else
       raise WetlabProtocolMissingError
     end

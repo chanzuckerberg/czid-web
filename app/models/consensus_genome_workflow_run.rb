@@ -42,6 +42,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     varskip: "varskip",
     # See: https://www.nimagen.com/gfx/Covid19/SARS_CoV_2_kit_V4.txt
     easyseq: "easyseq",
+    # See: https://github.com/quick-lab/SARS-CoV-2/tree/main/400/v5.3.2_400
+    artic_v5: "artic_v5",
   }.freeze
 
   DEFAULT_MEDAKA_MODEL = "r941_min_high_g360".freeze

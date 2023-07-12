@@ -168,6 +168,7 @@ export const CG_WETLAB_DISPLAY_NAMES = {
   snap: "SNAP",
   varskip: "VarSkip",
   easyseq: "Easyseq",
+  artic_v5: "ARTIC v5.3.2",
 };
 
 // WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/czid-cli
@@ -175,6 +176,10 @@ export const CG_WETLAB_OPTIONS = [
   {
     text: CG_WETLAB_DISPLAY_NAMES.artic_v4,
     value: "artic_v4",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.artic_v5,
+    value: "artic_v5",
   },
   {
     text: CG_WETLAB_DISPLAY_NAMES.artic,
