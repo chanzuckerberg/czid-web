@@ -3670,20 +3670,6 @@
               "deprecationReason": null
             },
             {
-              "name": "sampleDeletable",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "sampleNotes",
               "description": null,
               "args": [

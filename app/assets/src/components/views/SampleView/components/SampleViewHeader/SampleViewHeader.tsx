@@ -1,6 +1,5 @@
 import { get } from "lodash/fp";
-import React, { useContext, useState } from "react";
-import { deleteSample } from "~/api";
+import React, { useContext } from "react";
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ViewHeader from "~/components/layout/ViewHeader";
@@ -17,19 +16,14 @@ import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
 import { openUrl } from "~utils/links";
-import { NOTIFICATION_TYPES } from "../../constants";
-import { showNotification } from "../../notifications";
-import { addSampleDeleteFlagToSessionStorage } from "../../utils";
 import { PrimaryHeaderControls } from "./PrimaryHeaderControls";
 import cs from "./sample_view_header.scss";
-import { SampleDeletionConfirmationModal } from "./SampleDeletionConfirmationModal";
 import { SecondaryHeaderControls } from "./SecondaryHeaderControls";
 
 interface SampleViewHeaderProps {
   backgroundId?: number;
   currentRun: WorkflowRun | PipelineRun;
   currentTab: CurrentTabSample;
-  editable: boolean;
   getDownloadReportTableWithAppliedFiltersLink?: () => string;
   hasAppliedFilters: boolean;
   onDetailsClick: () => void;
@@ -48,7 +42,6 @@ interface SampleViewHeaderProps {
 export const SampleViewHeader = ({
   backgroundId,
   currentTab,
-  editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
   onDetailsClick,
@@ -65,22 +58,6 @@ export const SampleViewHeader = ({
 }: SampleViewHeaderProps) => {
   const userContext = useContext(UserContext);
   const { admin: userIsAdmin } = userContext || {};
-  const [
-    sampleDeletionConfirmationModalOpen,
-    setSampleDeletionConfirmationModalOpen,
-  ] = useState(false);
-
-  const handleDeleteSample = async () => {
-    const sampleName = sample?.name;
-    try {
-      await deleteSample(sample?.id);
-      addSampleDeleteFlagToSessionStorage(sampleName);
-      location.href = `/home?project_id=${project.id}`;
-    } catch (error) {
-      console.error("error deleting sample", error);
-      showNotification(NOTIFICATION_TYPES.sampleDeleteError);
-    }
-  };
 
   const getBreadcrumbLink = () => {
     if (!project) return;
@@ -142,14 +119,10 @@ export const SampleViewHeader = ({
               backgroundId={backgroundId}
               currentRun={currentRun}
               currentTab={currentTab}
-              editable={editable}
               getDownloadReportTableWithAppliedFiltersLink={
                 getDownloadReportTableWithAppliedFiltersLink
               }
               hasAppliedFilters={hasAppliedFilters}
-              onDeleteSample={() =>
-                setSampleDeletionConfirmationModalOpen(true)
-              }
               onShareClick={onShareClick}
               onDeleteRunSuccess={onDeleteRunSuccess}
               reportMetadata={reportMetadata}
@@ -160,13 +133,6 @@ export const SampleViewHeader = ({
           </ViewHeader.Controls>
         )}
       </ViewHeader>
-      {sampleDeletionConfirmationModalOpen && (
-        <SampleDeletionConfirmationModal
-          open
-          onCancel={() => setSampleDeletionConfirmationModalOpen(false)}
-          onConfirm={handleDeleteSample}
-        />
-      )}
     </div>
   );
 };

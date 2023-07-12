@@ -9,7 +9,6 @@ import Sample from "~/interface/sample";
 import { WorkflowRunResults } from "~/interface/sampleView";
 import { ProjectPipelineVersions } from "~/interface/shared";
 import {
-  deleteWithCSRF,
   get,
   MAX_SAMPLES_FOR_GET_REQUEST,
   postWithCSRF,
@@ -37,8 +36,6 @@ const getAlignmentData = (
   get(
     `/samples/${sampleId}/alignment_viz/${alignmentQuery}.json?pipeline_version=${pipelineVersion}`,
   );
-
-const deleteSample = (id: $TSFixMe) => deleteWithCSRF(`/samples/${id}.json`);
 
 const getSampleReportData = ({
   snapshotShareId = null,
@@ -769,7 +766,6 @@ export {
   createConsensusGenomeCladeExport,
   createPhyloTree,
   createProject,
-  deleteSample,
   getAlignmentData,
   getAllHostGenomes,
   getAllHostGenomesPublic,

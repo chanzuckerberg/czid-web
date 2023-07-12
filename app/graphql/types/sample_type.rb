@@ -59,13 +59,6 @@ module Types
       sample.first_pipeline_run.present? ? sample.first_pipeline_run.id : nil
     end
 
-    field :sample_deletable, Boolean, null: true, resolver_method: :sample_type_deletable
-    def sample_type_deletable
-      sample = Sample.find(object["id"])
-      current_user = context[:current_user]
-      sample.deletable?(current_user)
-    end
-
     field :editable, Boolean, null: true, resolver_method: :sample_type_editable
     def sample_type_editable
       sample = Sample.find(object["id"])

@@ -14,10 +14,6 @@ import {
   showAppcue,
 } from "~/components/utils/appcues";
 import {
-  AMR_V2_FEATURE,
-  BULK_DELETION_FEATURE,
-} from "~/components/utils/features";
-import {
   isMngsWorkflow,
   WORKFLOWS,
   WORKFLOW_VALUES,
@@ -32,12 +28,7 @@ import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
-import {
-  DownloadButton,
-  ErrorButton,
-  HelpButton,
-  SaveButton,
-} from "~ui/controls/buttons";
+import { DownloadButton, HelpButton, SaveButton } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import { TABS } from "../../../constants";
 import { AmrDownloadDropdown } from "./AmrDownloadDropdown";
@@ -50,10 +41,8 @@ interface PrimaryHeaderControlsProps {
   backgroundId?: number;
   currentRun: WorkflowRun | PipelineRun;
   currentTab: CurrentTabSample;
-  editable: boolean;
   getDownloadReportTableWithAppliedFiltersLink?: () => string;
   hasAppliedFilters: boolean;
-  onDeleteSample: () => void;
   onShareClick: () => void;
   onDeleteRunSuccess: () => void;
   reportMetadata: ReportMetadata;
@@ -66,10 +55,8 @@ export const PrimaryHeaderControls = ({
   backgroundId,
   currentRun,
   currentTab,
-  editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
-  onDeleteSample,
   onShareClick,
   reportMetadata,
   sample,
@@ -82,9 +69,6 @@ export const PrimaryHeaderControls = ({
     admin: userIsAdmin,
     userId,
   } = useContext(UserContext) || {};
-
-  const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
-  const sampleDeletable = sample?.sample_deletable;
 
   // We can't delete samples if they are pipeline runs with no metadata
   let currentRunLoaded = !!currentRun;
@@ -118,16 +102,6 @@ export const PrimaryHeaderControls = ({
     }
   };
 
-  const renderDeleteSampleButton = () => {
-    return (
-      <ErrorButton
-        text="Delete Sample"
-        onClick={onDeleteSample}
-        className={cs.controlElement}
-      />
-    );
-  };
-
   const renderDownloadAll = (workflow: "amr" | "consensus-genome") => {
     return (
       readyToDownload && (
@@ -142,37 +116,6 @@ export const PrimaryHeaderControls = ({
   };
 
   const renderDownloadButton = () => {
-    switch (workflow) {
-      case WORKFLOWS.LONG_READ_MNGS.value:
-      case WORKFLOWS.SHORT_READ_MNGS.value:
-        if (readyToDownload && reportMetadata.reportReady) {
-          return renderDownloadDropdown();
-        } else if (!isEmpty(reportMetadata) && editable && sampleDeletable) {
-          return renderDeleteSampleButton();
-        }
-        break;
-      case WORKFLOWS.CONSENSUS_GENOME.value:
-        if (readyToDownload) {
-          return renderDownloadAll(workflow);
-        } else if (
-          editable &&
-          sampleDeletable &&
-          isEmpty(sample?.pipeline_runs) // if there are no mNGS runs
-        ) {
-          return renderDeleteSampleButton();
-        }
-        break;
-      case WORKFLOWS.AMR.value:
-        if (readyToDownload) {
-          return renderDownloadAll(workflow);
-        }
-        break;
-    }
-  };
-
-  const renderDownloadButtonUpdated = () => {
-    // created `renderDownloadButtonUpdated` to change the logic of the delete sample button behind the feature flag
-    // this will eventually replace renderDownloadButton for all users
     if (!readyToDownload) {
       return;
     }
@@ -185,11 +128,7 @@ export const PrimaryHeaderControls = ({
         return renderDownloadAll(workflow);
         break;
       case WORKFLOWS.AMR.value:
-        if (allowedFeatures.includes(AMR_V2_FEATURE)) {
-          return renderDownloadDropdown();
-        } else {
-          return renderDownloadAll(workflow);
-        }
+        return renderDownloadDropdown();
         break;
     }
   };
@@ -296,30 +235,11 @@ export const PrimaryHeaderControls = ({
     }
   };
 
-  const renderShareButton = () => {
-    switch (workflow) {
-      case WORKFLOWS.LONG_READ_MNGS.value:
-      case WORKFLOWS.SHORT_READ_MNGS.value:
-        return <ShareButtonPopUp onShareClick={onShareClick} />;
-      case WORKFLOWS.CONSENSUS_GENOME.value:
-        return <ShareButtonPopUp onShareClick={onShareClick} />;
-      case WORKFLOWS.AMR.value:
-        return (
-          allowedFeatures.includes(AMR_V2_FEATURE) && (
-            <ShareButtonPopUp onShareClick={onShareClick} />
-          )
-        );
-      default:
-        return null;
-    }
-  };
-
   const renderOverflowMenu = () => {
     const redirectOnSuccess =
       sample && [...sample.pipeline_runs, ...sample.workflow_runs].length === 1;
     const readyToDelete = currentRunLoaded || sample?.upload_error;
     return (
-      hasBulkDeletion &&
       readyToDelete &&
       currentTab !== TABS.AMR_DEPRECATED && (
         <OverflowMenu
@@ -343,11 +263,9 @@ export const PrimaryHeaderControls = ({
   return (
     <>
       <div className={cs.controlsBottomRowContainer}>
-        {renderShareButton()}
+        <ShareButtonPopUp onShareClick={onShareClick} />
         {renderSaveButton()}
-        {!hasBulkDeletion
-          ? renderDownloadButton()
-          : renderDownloadButtonUpdated()}
+        {renderDownloadButton()}
         {renderHelpButton()}
         {renderOverflowMenu()}
       </div>

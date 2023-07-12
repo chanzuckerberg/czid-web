@@ -10,7 +10,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     @metadata_validation_sample_human_existing_metadata = samples(:metadata_validation_sample_human_existing_metadata)
     @sample_human_existing_metadata_joe_project = samples(:sample_human_existing_metadata_joe_project)
     @sample_human_existing_metadata_expired = samples(:sample_human_existing_metadata_expired)
-    @deletable_sample = samples(:deletable_sample)
     @project = projects(:one)
     @user = users(:admin_one)
     @user.salt = SecureRandom.base58(24)
@@ -94,14 +93,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert @sample.valid?
     patch sample_url(@sample, format: "json"), params: { sample: { name: @sample.name + ' asdf' } }
     assert_response :success
-  end
-
-  test 'should destroy sample' do
-    sign_in @user
-    assert_difference('Sample.count', -1) do
-      delete sample_url(@deletable_sample)
-    end
-    assert_redirected_to @project
   end
 
   test 'joe can fetch metadata for a public sample' do

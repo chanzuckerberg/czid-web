@@ -968,7 +968,6 @@ class SamplesController < ApplicationController
           ).merge(
             default_background_id: @sample.default_background_id,
             default_pipeline_run_id: @sample.first_pipeline_run.present? ? @sample.first_pipeline_run.id : nil,
-            sample_deletable: @sample.deletable?(current_user),
             editable: current_power.updatable_sample?(@sample),
             pipeline_runs: @sample.pipeline_runs_info,
             workflow_runs: @sample.workflow_runs_info

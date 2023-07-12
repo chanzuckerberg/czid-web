@@ -66,7 +66,6 @@ export default interface Sample {
   updated_at: DateString;
   default_background_id: number;
   default_pipeline_run_id: number;
-  sample_deletable: boolean;
   editable: boolean;
   initial_workflow: string;
   upload_error: string;

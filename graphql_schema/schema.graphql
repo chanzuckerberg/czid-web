@@ -240,7 +240,6 @@ type Sample {
   s3Bowtie2IndexPath: String
   s3PreloadResultPath: String
   s3StarIndexPath: String
-  sampleDeletable: Boolean
   sampleNotes: String
   status: String
   subsample: Int
