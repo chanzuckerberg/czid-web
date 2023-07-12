@@ -12,6 +12,9 @@ import { READS_DPM_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const readDepthPerMillionColumn: ColumnDef<AmrResult, any> = {
   id: "dpm",
   accessorKey: "dpm",
+  accessorFn: function dpmAccessor(row) {
+    return row.dpm === null ? -1 : row.dpm;
+  },
   size: 92,
   header: function readDepthPerMillionHeader({ header, column }) {
     return (

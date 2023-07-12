@@ -11,7 +11,9 @@ import { READS_RPM_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const readsPerMillionColumn: ColumnDef<AmrResult, any> = {
   id: "rpm",
-  accessorKey: "rpm",
+  accessorFn: function rpmAccessor(row) {
+    return row.rpm === null ? -1 : row.rpm;
+  },
   size: 84,
   header: function readsPerMillionHeader({ header, column }) {
     return (

@@ -1,3 +1,4 @@
+import { isNil } from "lodash/fp";
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";
 
 // some of the numerical values in the table come in already cast as strings
@@ -91,13 +92,14 @@ export const getFormattedCompoundString = (
 };
 
 export const sortStringOrFallback = (aRow, bRow, columnId) => {
-  const a = aRow.getValue(columnId).toLowerCase();
-  const b = bRow.getValue(columnId).toLowerCase();
+  const a = aRow.getValue(columnId);
+  const b = bRow.getValue(columnId);
 
   // sort a real value before a fallback value
-  if (b === null) {
+  // We aren't using !a or !b because we want to sort 0 before a fallback value
+  if (isNil(b)) {
     return -1;
-  } else if (a === null) {
+  } else if (isNil(a)) {
     return 1;
   }
   // if neither are a fallback value, sort them alphabetically (ignore case)

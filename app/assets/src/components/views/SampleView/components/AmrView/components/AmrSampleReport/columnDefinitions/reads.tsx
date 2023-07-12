@@ -13,7 +13,18 @@ import { READS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const readsColumn: ColumnDef<AmrResult, any> = {
   id: "reads",
-  accessorKey: "reads",
+  accessorFn: function readsAccessor(row) {
+    const rawValue = row.reads;
+    let value: number;
+
+    if (rawValue === null) {
+      value = -1;
+    } else {
+      // Parse the string to a number, round it to the hundredths place and convert it back to a string.
+      value = parseFloat(rawValue);
+    }
+    return value;
+  },
   size: 82,
   header: function readsHeader({ header, column }) {
     return (
@@ -28,23 +39,13 @@ export const readsColumn: ColumnDef<AmrResult, any> = {
     );
   },
   cell: memo(({ getValue, cell }) => {
-    const rawValue = getValue();
-    let value: string;
-
-    if (rawValue === null) {
-      value = NO_CONTENT_FALLBACK;
-    } else {
-      // Parse the string to an int, we won't have partial reads
-      value = `${parseInt(rawValue)}`;
-    }
-
     return (
       <CellBasic
         className={cx(cs.rightAlignedCell, rowStyles.readsColumnGroup)}
         key={cell.id}
         style={generateWidthStyles(cell.column)}
         shouldTextWrap
-        primaryText={value}
+        primaryText={getValue() === -1 ? NO_CONTENT_FALLBACK : getValue()}
         primaryTextWrapLineCount={2}
         shouldShowTooltipOnHover={false}
       />

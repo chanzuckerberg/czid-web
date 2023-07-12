@@ -6,6 +6,7 @@ import { SortableHeader } from "~/components/ui/Table/components/SortableHeader"
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { memo } from "~/components/utils/memo";
+import { convertStringAndRoundToHundredths } from "~/components/utils/numberUtil";
 import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
 import cs from "./column_definitions.scss";
@@ -13,7 +14,17 @@ import { CONTIGS_PERCENT_IDENTITY_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const contigPercentIdColumn: ColumnDef<AmrResult, any> = {
   id: "contigPercentId",
-  accessorKey: "contigPercentId",
+  accessorFn: function contigPercentIdAccessor(row) {
+    const rawValue = row.contigPercentId;
+    let value: number;
+
+    if (rawValue === null) {
+      value = -1;
+    } else {
+      value = convertStringAndRoundToHundredths(rawValue);
+    }
+    return value;
+  },
   size: 76,
   header: function contigPercentIdHeader({ header, column }) {
     return (
@@ -28,23 +39,13 @@ export const contigPercentIdColumn: ColumnDef<AmrResult, any> = {
     );
   },
   cell: memo(({ getValue, cell }) => {
-    const rawValue = getValue();
-    let value: string;
-
-    if (rawValue === null) {
-      value = NO_CONTENT_FALLBACK;
-    } else {
-      // Parse the string to a number, round it to the hundredths place and convert it back to a string.
-      value = `${Math.round(parseFloat(rawValue) * 100) / 100}`;
-    }
-
     return (
       <CellBasic
         className={cx(cs.rightAlignedCell, rowStyles.contigsColumnGroup)}
         key={cell.id}
         style={generateWidthStyles(cell.column)}
         shouldTextWrap
-        primaryText={value}
+        primaryText={getValue() === -1 ? NO_CONTENT_FALLBACK : getValue()}
         primaryTextWrapLineCount={2}
         shouldShowTooltipOnHover={false}
       />

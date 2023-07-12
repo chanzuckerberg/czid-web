@@ -11,7 +11,18 @@ import { CONTIGS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const contigsColumn: ColumnDef<AmrResult, any> = {
   id: "contigs",
-  accessorKey: "contigs",
+  accessorFn: function contigsAccessor(row) {
+    const rawValue = row.contigs;
+    let value: number;
+
+    if (rawValue === null) {
+      value = -1;
+    } else {
+      // Parse the string to a number, round it to the hundredths place and convert it back to a string.
+      value = parseFloat(rawValue);
+    }
+    return value;
+  },
   size: 91,
   header: function contigsHeader({ header, column }) {
     return (
