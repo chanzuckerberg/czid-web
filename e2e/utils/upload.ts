@@ -133,9 +133,9 @@ export async function fillMetadata(
     .fill(metaData[COLLECTION_DATE] as string);
 
   // nucleotide type
-  await page.locator(".dropdownTrigger-1fB9V").nth(1).click();
+  await page.getByTestId("dropdown-menu").nth(1).click();
   await page
-    .getByRole("option", { name: metaData["Nucleotide Type"] as string })
+    .getByTestId(metaData["Nucleotide Type"] as string)
     .click();
 
   // await page.getByText(metaData["Nucleotide Type"] as string).click();
@@ -182,7 +182,7 @@ export async function fillMetadata(
   // infection class
   const infectionClass = "infection_class";
   await page.locator(getMetadataField(infectionClass)).click();
-  await page.getByRole("option", { name: "Unknown" }).click();
+  await page.getByTestId("Unknown").click();
 
   // host age
   await page

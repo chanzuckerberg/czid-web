@@ -79,7 +79,7 @@ interface PathogenLabelProps {
 
 const PathogenLabel = ({ type, isDimmed }: PathogenLabelProps) => {
   const label = (
-    <span>
+    <span data-testid="pathogen-label">
       <Label
         text={CATEGORIES[type]["text"]}
         color={CATEGORIES[type][isDimmed ? "dimmedColor" : "color"]}

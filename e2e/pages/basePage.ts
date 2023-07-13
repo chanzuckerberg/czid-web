@@ -1,6 +1,5 @@
 import * as path from "path";
-import { Page, expect } from "@playwright/test";
-
+import { Page } from "@playwright/test";
 /**
  * Base class with convenience wrappers for interactions
  * with page elements
@@ -17,100 +16,12 @@ export class BasePage {
     }
   }
 
-  async getUrl() {
-    return this.page.url();
-  }
-
-  async waitForNavigation() {
-    await this.page.waitForNavigation();
-  }
-  /**
-   * Convenience method to press the enter key
-   */
-  async pressEnter() {
-    await this.page.keyboard.press("Enter");
-  }
-
-  /**
-   * Convenience method to press the escape key.
-   */
-  async pressEsc() {
-    await this.page.keyboard.press("Escape");
-  }
-
-  /**
-   * Convenience method to press key.
-   */
-  async pressKey(key: string) {
-    await this.page.keyboard.press(key, { delay: 100 });
-  }
-  /**
-   * Convenience method to press the tab key.
-   */
-  async pressTab() {
-    await this.page.keyboard.press("Tab");
-  }
-
-  async clickElement(selector: string) {
-    await this.page.click(selector);
-  }
-
-  /**
-   * Convenience method to click by text
-   * @param value text value
-   */
-  async clickByText(value: string) {
-    await this.page.click(`text=${value}`);
-  }
-
-  /**
-   * Convenience method to click by id. not to be confused with data-testid or data-test-id
-   * @param value id attribute of an element
-   */
-  async clickById(value: string) {
-    await this.page.click(`[id="${value}"]`);
-  }
-
-  /**
-   * Convenience method to click by data-test-id
-   * @param value test ids added specifically for testing
-   */
-  async clickByTestId(value: string) {
-    await this.page.click(`[data-testid="${value}"]`);
-  }
-
-  async clickCheckBox(index: number) {
-    await this.page.locator('input[type="checkbox"]').nth(index).click();
-  }
-
-  /**
-   * Convenince method to click by name
-   * @param value name attribute of the element
-   */
-  async clickByName(value: string) {
-    await this.page.click(`[name="${value}"]`);
-  }
-
   async clickByTypeName(type: string, name: string) {
     await this.page.click(`${type}[name="${name}"]`);
   }
 
   async clickByTypeAndLabel(type: string, label: string) {
     await this.page.click(`${type}[label="${label}"]`);
-  }
-
-  async fillByPlaceHolder(placeholder: string | undefined, value: string) {
-    await expect(this.page.locator(".itemName-1WWBD").nth(1)).toBeVisible();
-    await this.page.locator('[placeholder="Search Public..."]').click();
-    await this.page.fill(`[placeholder="${placeholder}"]`, value);
-    await this.page.waitForTimeout(1000);
-    while (
-      (await this.page
-        .locator('[placeholder="Search Public..."]')
-        .getAttribute("value")) !== value
-    ) {
-      await this.page.fill(`[placeholder="${placeholder}"]`, value);
-    }
   }
 
   async typeByPlaceHolder(placeholder: string, value: string) {
@@ -205,16 +116,6 @@ export class BasePage {
 
   async selectFile(filePath: string) {
     this.page.setInputFiles("input[type='file']", path.resolve(filePath));
-  }
-
-  async fileChooser(filePath: string) {
-    const [fileChooser] = await Promise.all([
-      // It is important to call waitForEvent before click to set up waiting.
-      this.page.waitForEvent("filechooser"),
-      // Opens the file chooser.
-      this.page.locator(".csvUpload-1c9NS").click(),
-    ]);
-    await fileChooser.setFiles([path.resolve(filePath)]);
   }
 
   async queryElement(selector: string) {

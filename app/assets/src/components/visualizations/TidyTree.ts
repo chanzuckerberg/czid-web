@@ -428,7 +428,10 @@ export default class TidyTree {
         return `translate(${y},${x})`;
       });
 
-    const clickableNode = nodeEnter.append("g").attr("class", "clickable");
+    const clickableNode = nodeEnter
+      .append("g")
+      .attr("class", "clickable")
+      .attr("testid", "clickable");
 
     clickableNode.append("circle").attr("r", 0);
 

@@ -234,11 +234,13 @@ class ThresholdFilterDropdown extends React.Component<
           />
           <div className={cs.thresholdButtons}>
             <SecondaryButton
+              data-testid="cancel"
               text="Cancel"
               onClick={this.cancelFilterUpdates}
               className={cs.button}
             />
             <PrimaryButton
+              data-testid="apply"
               text="Apply"
               onClick={this.applyFilterUpdates}
               className={cs.button}

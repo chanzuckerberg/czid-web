@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { isEmpty, isNil } from "lodash/fp";
+import { isEmpty, isNil, kebabCase } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React from "react";
 import { DropdownProps } from "semantic-ui-react";
@@ -65,6 +65,7 @@ const SectionsDropdown = ({
         }}
       >
         <div
+          data-testid={`${kebabCase(option.text)}-dropdown`}
           className={cx(
             cs.optionText,
             option.value === selectedValue && cs.selectedOption,

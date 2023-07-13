@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { isNil } from "lodash/fp";
+import { isNil, kebabCase } from "lodash/fp";
 import React from "react";
 import cs from "./dropdown_trigger.scss";
 
@@ -32,6 +32,7 @@ const DropdownTrigger = ({
 }: DropdownTriggerProps) => {
   return (
     <div
+      data-testid="filters"
       className={cx(
         className,
         cs.dropdownTrigger,
@@ -45,6 +46,7 @@ const DropdownTrigger = ({
       <div className={cs.labelContainer}>
         {label && (
           <span
+            data-testid={`${kebabCase(label)}-filter`}
             className={cx(
               cs.label,
               disableMarginRight && cs.disableMarginRight,
@@ -53,7 +55,10 @@ const DropdownTrigger = ({
             {label}
           </span>
         )}
-        <span className={cx(isNil(value) && cs.placeholder)}>
+        <span
+          data-testid="filter-value"
+          className={cx(isNil(value) && cs.placeholder)}
+        >
           {value || placeholder}
         </span>
         {itemSubtext && <span className={cs.itemSubtext}>{itemSubtext}</span>}

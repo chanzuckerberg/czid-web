@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { kebabCase } from "lodash";
 import React from "react";
 import { Button as BaseButton, StrictButtonProps } from "semantic-ui-react";
 import { IconArrowDownSmall } from "~ui/icons";
@@ -17,7 +18,10 @@ const Button = ({
   let content: JSX.Element | string = text;
   if (icon || label) {
     content = (
-      <div className={cx(labelClassName, "icon-label")}>
+      <div
+        data-testid={`${kebabCase(text)}-button`}
+        className={cx(labelClassName, "icon-label")}
+      >
         {icon}
         {text}
         {label}

@@ -307,7 +307,10 @@ class BaseTable extends React.Component<
   }) => {
     const { headerLabelClassName } = this.props;
     return (
-      <div className={cx(cs.sortableHeader, sortBy === dataKey && cs.active)}>
+      <div
+        data-testid={`${kebabCase(label)}-column-header`}
+        className={cx(cs.sortableHeader, sortBy === dataKey && cs.active)}
+      >
         {columnData ? (
           <ColumnHeaderTooltip
             trigger={

@@ -20,7 +20,7 @@ const ColumnHeaderTooltip = ({
     <BasicPopup
       {...popUpProps}
       content={
-        <div className={cs.tooltip}>
+        <div data-testid="column-tooltip" className={cs.tooltip}>
           {title && <span className={cs.title}>{title}:</span>}
           {content}
           {link && (

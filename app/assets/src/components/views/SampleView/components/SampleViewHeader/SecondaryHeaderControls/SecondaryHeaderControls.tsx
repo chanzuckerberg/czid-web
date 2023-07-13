@@ -63,6 +63,7 @@ export const SecondaryHeaderControls = ({
         </>
       )}
       <Button
+        data-testid="sample-details"
         sdsType="primary"
         sdsStyle="minimal"
         isAllCaps={true}

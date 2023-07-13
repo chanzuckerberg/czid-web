@@ -1,6 +1,9 @@
 import { test } from "@playwright/test";
-import { testHistogramAppears, testTaxonLinks , testTaxonInfo } from "../../utils/taxon-sidebar";
-
+import {
+  testHistogramAppears,
+  testTaxonInfo,
+  testTaxonLinks,
+} from "../../utils/taxon-sidebar";
 
 const sampleId = 25307;
 
@@ -14,10 +17,7 @@ test.describe("Taxon Sidebar on Sample Report", () => {
     // choose Background
     await page.getByTestId("background-filter").click();
 
-    await page
-      .getByRole("option", { name: "Test Background Model Standard" })
-      .getByText("Test Background Model")
-      .click();
+    await page.getByTestId("test-background-model-standard-dropdown").click();
     await page.getByTestId("expand-taxon-parent").nth(0).click();
 
     // click Taxon Name

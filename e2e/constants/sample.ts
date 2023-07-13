@@ -1,61 +1,9 @@
-export const VIEWS = ".reportViewSelector-1i1wY a";
-export const TREE_NODES = ".clickable";
-export const KNOWN_PATHOGEN =
-  "div[class='node-overlay node-overlay__573'] div[class='ui red medium label pathogenLabel-10iFi label-c76vR']";
+export const TREE_NODES = '[data-testid="clickable"]';
+
 export const NUMBER_INPUT = 'input[type="number"]';
-export const PATHOGEN_POPUP = ".pathogenLabelPopup-drI1l";
-export const PATHOGEN_POPUP_TEXT =
-  "Organism with known human pathogenicity. See the full list of pathogens.";
-export const PATHOGEN_LINk = 'a[class="linkDefault-34rbs"]';
-export const TREE_VIEW_TITLE = ".title-1oZTJ";
-export const SAMPLE_NUMBER = ".sampleName-1zqqT";
-export const FILTER_RESULT = ".taxonName-2Ct87";
-export const MENU_ITEM_PUBLIC = "menu-item-public";
-export const SEARCH_PUBLIC = "Search Public...";
-export const METAGENOMICS = "Metagenomics";
-export const MENU_ICON = ".menuItem-25eT6";
-export const PIPELINE_LABELS_VALUE = ".metadataValue-2cDlV";
-export const ILLUMINA = "Illumina";
-export const HUMAN = "Human";
-export const METAGENOMIC = "Metagenomic";
-export const PIPELINE_READS_LABEL = ".narrowMetadataValueContainer-2CnKh";
-export const VIEW_PIPELINE_VISUALIZATION = ".metadataValue-2cDlV a";
-export const READS_REMAINING_LABELS = ".label--gcey";
-export const DOWNLOADS_LABELS = ".downloadLink-14o8v";
-export const SIDEBAR_PIPELINE_AMR_SELECTOR =
-  ".tabLabels-3dR_d[data-testid='antimicrobial-resistance']";
-export const ANTIMICROBIAL_RESISTANCE = "Antimicrobial Resistance";
-export const AMR_LABEL_SELECTOR = ".label-9CR8O";
-export const ALL_PIPELINE_INFO = [
-  "Analysis Type",
-  "Sequencing Platform",
-  "Pipeline Version",
-  "Host Subtracted",
-  "Total Reads",
-  "ERCC Reads",
-  "Passed Filters",
-  "Unmapped Reads",
-  "Passed Quality Control",
-  "Compression Ratio",
-  "Mean Insert Size",
-  "Date Processed",
-];
-export const ALL_READS_REMAINING = [
-  "Host Filtering Step",
-  "Validate Input",
-  "Trimmomatic",
-  "Price Seq",
-  "CZID-dedup",
-  "LZW",
-  "Bowtie2",
-  "Subsample",
-  "GSNAP",
-];
-export const NO_DATA = ".noData-2AfzS";
-export const PIPELINE_LINK = ".pipelineInfo-Yfrsi";
-export const PIPELINE_LINK_PATH = "pipeline_viz/7.1?";
-export const SAMPLE_HEADER = ".sampleName-1xb-q";
-export const SAMPLE_DETAILS = "text='Sample Details'";
+
+
+export const FILTER_RESULT = '[data-testid="filter-tag"]';
 export const SEARCH_BAR = '[placeholder="Taxon name"]';
 export const ALL_COLUMN_HEADERS = [
   "Taxon",
@@ -70,7 +18,7 @@ export const ALL_COLUMN_HEADERS = [
   "E value",
 ];
 
-export const FILTER_HEADERS = ".labelContainer-3Rr0F";
+export const FILTER_HEADERS = '[data-testid="filters"]';
 
 export const SAMPLE_INFO = "Sample Info";
 export const HOST_INFO = "Host Info";
@@ -83,13 +31,10 @@ export const BASES_REMAINING = "Bases Remaining";
 export const ERCC = "ERCC Spike-In Counts";
 export const DOWNLOADS = "Downloads";
 
-export const SAMPLE_LANDING = ".link-NGF5S";
-
-export const COLUMNS_LABEL = ".label-33v00:visible";
-export const FILTER_TAG = ".labelText-2faxp";
-export const CANCEL_ICON = ".closeIcon-yEIIr";
-export const ACCEPT_ALL_COOKIES = "Accept All Cookies";
-export const TOTAL_READ_POPOUP_CONTENT = ".tooltip-1Y1xx";
+export const COLUMNS_LABEL = 'data-testid=*"-column-header"';
+export const FILTER_TAG = '[data-testid="filter-tag"]';
+export const CANCEL_ICON = '[data-testid="x-close-icon"]';
+export const TOTAL_READ_POPOUP_CONTENT = '[data-testid="column-tooltip"]';
 export const COLUMN_HEADER_PROP = {
   Score: {
     description:
@@ -140,7 +85,7 @@ export const COLUMN_HEADER_PROP = {
     url: "Single-Sample-Report-Table#e-value",
   },
 };
-export const LEARN_MORE_LINK = ".tooltip-1Y1xx .linkDefault-34rbs";
+export const LEARN_MORE_LINK = '[data-testid="column-tooltip"] a';
 export const KLEBSIELLA = "Klebsiella";
 export const KLEBSIELLA_GENUS = "Klebsiella (genus)";
 export const ARCHAEA_FILTER = '[data-testid="dropdown-archaea"]';
@@ -149,9 +94,9 @@ export const EUKARYOTA_FILTER = '[data-testid="dropdown-eukaryota"]';
 export const VIROIDS_FILTER = '[data-testid="dropdown-viroids"]';
 export const VIRUSES_FILTER = '[data-testid="dropdown-viruses"]';
 export const UNCATEGORIZED_FILTER = '[data-testid="dropdown-uncategorized"]';
-export const CATEGORIES_FILTER = 'text="Categories"';
+export const CATEGORIES_FILTER = '[data-testid="categories-filter"]';
 export const FILTERS_DROPDOWN =
-  '[class="menu transition visible menu-3h-2s dropdownMenu-1gUyq"]    [role="option"]';
+  '[data-testid="dropdown-menu"]';
 export const THRESHOLD_FILTERS = [
   "Score",
   "NT Z Score",
@@ -174,14 +119,13 @@ export const THRESHOLD_FILTERS = [
 export const READ_SPECIFICITY_FILTERS = ["All", "Specific Only"];
 export const ANNOTATION_FILTERS = ["Hit", "Not a hit", "Inconclusive"];
 
-export const APPLY_BUTTON = ".button-PwU7o";
+export const APPLY_BUTTON = '[data-testid="apply"]';
 export const APPLY = 'text="Apply"';
-export const THRESHOLD_FILTER = 'text="Threshold filters"';
-export const SCORE = 'text="Score"';
-export const READ_SPECIFICITY = 'text="Read Specificity:"';
-export const ANNOTATION_TEXT = 'text="Annotation"';
-export const FULL_LIST = 'text="full list"';
-export const PATHOGEN_LIST_URL = "/pathogen_list";
+export const THRESHOLD_FILTER = '[data-testid="threshold-filters-filter"]';
+export const SCORE = '[data-testid="score"]';
+export const READ_SPECIFICITY = '[data-testid="read-specificity-filter"]';
+export const ANNOTATION_TEXT = '[data-testid="annotation-filter"]';
+
 
 export const OVERFLOW_BUTTON = "overflow-btn";
 export const BULK_DELETE_MODAL = "bulk-delete-modal";

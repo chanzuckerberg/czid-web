@@ -167,7 +167,7 @@ const TaxonThresholdFilter = ({
             />
           )}
           <div className={cs.actions}>
-            <div className={cs.action}>
+            <div data-testid="apply" className={cs.action}>
               <Button
                 sdsStyle="square"
                 sdsType="primary"
@@ -177,7 +177,7 @@ const TaxonThresholdFilter = ({
                 Apply
               </Button>
             </div>
-            <div className={cs.action}>
+            <div data-testid="cancel" className={cs.action}>
               <Button
                 sdsStyle="square"
                 sdsType="secondary"

@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { get } from "lodash/fp";
+import { get, kebabCase } from "lodash/fp";
 import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import cs from "./field_list.scss";
@@ -16,8 +16,13 @@ const FieldList = ({ className, fields }: FieldListProps) => {
   return (
     <div className={cx(cs.fieldList, className)}>
       {fields.map(field => {
+        const testId = kebabCase(field.label);
         const fieldMetadata = get("fieldMetadata", field);
-        const fieldLabel = <div className={cs.label}>{field.label}</div>;
+        const fieldLabel = (
+          <div data-testid={`${testId}-field-label`} className={cs.label}>
+            {field.label}
+          </div>
+        );
         const labelWithTooltip = fieldMetadata && (
           <ColumnHeaderTooltip
             trigger={fieldLabel}
@@ -28,9 +33,13 @@ const FieldList = ({ className, fields }: FieldListProps) => {
         );
 
         return (
-          <div className={cs.field} key={field.label}>
+          <div
+            data-testid={`${testId}-fieldlist`}
+            className={cs.field}
+            key={field.label}
+          >
             {labelWithTooltip || fieldLabel}
-            {field.value}
+            <div data-testid={`${testId}-value`}>{field.value}</div>
           </div>
         );
       })}

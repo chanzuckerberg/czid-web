@@ -139,6 +139,7 @@ class BareDropdown extends React.Component<
         </div>
       ) : (
         <BaseDropdown.Item
+          data-testid={`${kebabCase(option.text)}`}
           key={option.value}
           onClick={() => this.props.onChange(option.value)}
           active={this.props.value === option.value}
@@ -387,6 +388,7 @@ class BareDropdown extends React.Component<
         {menuLabel && <div className={cs.menuLabel}>{menuLabel}</div>}
         {search && (
           <div
+            data-testid="filter-search-bar"
             onClick={e => e.stopPropagation()}
             className={cs.searchContainer}
           >
@@ -405,7 +407,11 @@ class BareDropdown extends React.Component<
         {optionsHeader && (
           <div className={cs.optionsHeader}>{optionsHeader}</div>
         )}
-        <BaseDropdown.Menu scrolling className={cs.innerMenu}>
+        <BaseDropdown.Menu
+          data-testid="dropdown-menu"
+          scrolling
+          className={cs.innerMenu}
+        >
           {filteredItems}
         </BaseDropdown.Menu>
         {filteredItems.length === 0 &&

@@ -65,6 +65,7 @@ const MetadataSection = ({
           renderStatus()
         ) : (
           <div
+            data-testid={`${kebabCase(title)}-edit`}
             className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
             onClick={e => {
               onEditToggle();

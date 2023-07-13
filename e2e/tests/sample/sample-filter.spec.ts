@@ -121,11 +121,11 @@ test.describe("Sample filtering tests", () => {
 
       // select two locations
       await page
-        .locator(".dropdownMenu-1gUyq")
+        .getByTestId("dropdown-menu")
         .getByText(CANADA)
         .nth(0)
         .click();
-      await page.locator(".dropdownMenu-1gUyq").getByText(BEXAR).nth(0).click();
+      await page.getByTestId("dropdown-menu").getByText(BEXAR).nth(0).click();
       await page.keyboard.press(ESCAPE);
 
       // check result

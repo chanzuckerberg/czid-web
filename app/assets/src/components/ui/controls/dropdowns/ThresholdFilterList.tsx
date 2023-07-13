@@ -53,6 +53,7 @@ const ThresholdFilterList = ({
         <Grid.Row className={cs.addThresholdRow}>
           <Grid.Column className={cs.addThresholdColumn}>
             <span
+              data-testid="add-threshold"
               className={cs.addThresholdLink}
               onClick={() => {
                 onAddThreshold();
