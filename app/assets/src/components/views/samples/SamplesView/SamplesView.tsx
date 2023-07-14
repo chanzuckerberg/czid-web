@@ -34,11 +34,7 @@ import {
 } from "~/api/metadata";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import {
-  AMR_V1_FEATURE,
-  AMR_V2_FEATURE,
-  HEATMAP_ELASTICSEARCH_FEATURE,
-} from "~/components/utils/features";
+import { HEATMAP_ELASTICSEARCH_FEATURE } from "~/components/utils/features";
 import { showToast } from "~/components/utils/toast";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
@@ -323,12 +319,7 @@ const SamplesView = forwardRef(function SamplesView(
   const renderHeatmapTrigger = () => {
     // Should still show deprecated after feature flag is removed
     // (until we've updated the heatmap)
-    const amrHeatmapDeprecatedText = allowedFeatures.includes(
-      AMR_V1_FEATURE || AMR_V2_FEATURE,
-    )
-      ? " (Deprecated)"
-      : "";
-    const amrHeatmapText = `AMR Heatmap${amrHeatmapDeprecatedText}`;
+    const amrHeatmapText = "AMR Heatmap (Deprecated)";
 
     const heatmapOptions = [
       { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
@@ -614,15 +605,11 @@ const SamplesView = forwardRef(function SamplesView(
     });
   };
 
-  const AMR_PIPELINE_LABEL = allowedFeatures.includes(AMR_V2_FEATURE)
-    ? " Antimicrobial Resistance "
-    : " Antimicrobial Resistance (Beta) ";
-
   const renderAmrPipelineBulkKickedOffNotification = () => {
     const renderAmrNotification = (onClose: () => void) => (
       <Notification displayStyle="elevated" type="info" onClose={onClose}>
         <div className={cs.amrNotification}>
-          {`We've started running your samples on the ${AMR_PIPELINE_LABEL} pipeline. To view your samples, visit the`}{" "}
+          {`We've started running your samples on the Antimicrobial Resistance pipeline. To view your samples, visit the`}{" "}
           {/* TODO: When the user clicks this AMR link, it should switch to the AMR tab */}
           <div className={cs.amrTab}>Antimicrobial Resistance</div> tab.
         </div>
@@ -643,7 +630,7 @@ const SamplesView = forwardRef(function SamplesView(
           {invalidSampleNames.length} sample
           {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be run
         </span>{" "}
-        on the {AMR_PIPELINE_LABEL} pipeline because they either failed, are
+        on the Antimicrobial Resistance pipeline because they either failed, are
         still processing, or were already run.
       </div>
     );

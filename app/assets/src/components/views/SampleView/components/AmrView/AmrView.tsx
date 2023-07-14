@@ -1,6 +1,6 @@
 import { useReactiveVar } from "@apollo/client";
 import { forEach, get, trim } from "lodash/fp";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
 import { withAnalytics } from "~/api/analytics";
 import {
@@ -9,13 +9,11 @@ import {
   amrReportTableDownloadWithAppliedFiltersLinkVar,
 } from "~/cache/initialCache";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
-import { UserContext } from "~/components/common/UserContext";
 import {
   computeAmrReportTableValuesForCSV,
   createCSVObjectURL,
 } from "~/components/utils/csv";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
-import { AMR_V2_FEATURE } from "~/components/utils/features";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { SUCCEEDED_STATE } from "../../constants";
@@ -24,7 +22,6 @@ import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";
 import AmrNullResult from "./components/AmrNullResult";
-import { AmrOutputDownloadView } from "./components/AmrOutputDownloadView";
 import { AmrSampleReport } from "./components/AmrSampleReport";
 import { AmrResult } from "./components/AmrSampleReport/types";
 
@@ -34,8 +31,6 @@ interface AmrViewProps {
 }
 
 export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
   const [loadingResults, setLoadingResults] = useState(false);
   const [hideFilters, setHideFilters] = useState(true);
   const [reportTableData, setReportTableData] =
@@ -55,10 +50,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   }, [dataFilterFunc, reportTableData]);
 
   useEffect(() => {
-    if (
-      !allowedFeatures.includes(AMR_V2_FEATURE) ||
-      workflowRun?.status !== SUCCEEDED_STATE
-    ) {
+    if (workflowRun.status !== SUCCEEDED_STATE) {
       return;
     }
     setLoadingResults(true);
@@ -116,31 +108,25 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   };
 
   const renderResults = () => {
-    if (allowedFeatures.includes(AMR_V2_FEATURE)) {
-      return (
-        <div className={cs.resultsContainer}>
-          <AmrFiltersContainer
-            setDataFilterFunc={setDataFilterFunc}
-            hideFilters={hideFilters}
-            setHideFilters={setHideFilters}
-          />
-          <AmrSampleReport
-            reportTableData={displayedRows}
-            sample={sample}
-            workflowRun={workflowRun}
-            setDetailsSidebarGeneName={setDetailsSidebarGeneName}
-            hideFilters={hideFilters}
-          />
-        </div>
-      );
-    } else {
-      return (
-        <AmrOutputDownloadView workflowRun={workflowRun} sample={sample} />
-      );
-    }
+    return (
+      <div className={cs.resultsContainer}>
+        <AmrFiltersContainer
+          setDataFilterFunc={setDataFilterFunc}
+          hideFilters={hideFilters}
+          setHideFilters={setHideFilters}
+        />
+        <AmrSampleReport
+          reportTableData={displayedRows}
+          sample={sample}
+          workflowRun={workflowRun}
+          setDetailsSidebarGeneName={setDetailsSidebarGeneName}
+          hideFilters={hideFilters}
+        />
+      </div>
+    );
   };
 
-  return allowedFeatures.includes(AMR_V2_FEATURE) && shouldShowNullResult ? (
+  return shouldShowNullResult ? (
     <AmrNullResult />
   ) : (
     <>
@@ -159,19 +145,17 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
           loading: "AmrView_amr-doc-link_clicked",
         }}
       />
-      {allowedFeatures.includes(AMR_V2_FEATURE) && (
-        <DetailsSidebar
-          visible={Boolean(detailsSidebarGeneName)}
-          mode="geneDetails"
-          onClose={() =>
-            withAnalytics(
-              setDetailsSidebarGeneName(null),
-              "AmrView_details-sidebar_closed",
-            )
-          }
-          params={{ geneName: detailsSidebarGeneName }}
-        />
-      )}
+      <DetailsSidebar
+        visible={Boolean(detailsSidebarGeneName)}
+        mode="geneDetails"
+        onClose={() =>
+          withAnalytics(
+            setDetailsSidebarGeneName(null),
+            "AmrView_details-sidebar_closed",
+          )
+        }
+        params={{ geneName: detailsSidebarGeneName }}
+      />
     </>
   );
 };

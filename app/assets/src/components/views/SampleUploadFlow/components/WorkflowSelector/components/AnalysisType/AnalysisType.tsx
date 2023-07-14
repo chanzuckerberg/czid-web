@@ -2,14 +2,11 @@ import {
   Icon,
   IconNameToSizes,
   InputCheckbox,
-  InputRadio,
   Tooltip,
 } from "@czi-sds/components";
 import cx from "classnames";
-import React, { ReactNode, useContext } from "react";
-import { UserContext } from "~/components/common/UserContext";
+import React, { ReactNode } from "react";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
-import { AMR_V1_FEATURE, AMR_V2_FEATURE } from "~/components/utils/features";
 import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { UploadWorkflows } from "~/components/views/SampleUploadFlow/constants";
 import cs from "./analysis_type.scss";
@@ -39,21 +36,11 @@ const AnalysisType = ({
   testKey,
   title,
 }: AnalysisTypeProps) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
-
-  const radioOption = allowedFeatures.includes(
-    AMR_V1_FEATURE || AMR_V2_FEATURE,
-  ) ? (
+  const radioOption = (
     <InputCheckbox
       disabled={isDisabled}
       className={commonStyles.checkbox}
       stage={isSelected ? "checked" : "unchecked"}
-    />
-  ) : (
-    <InputRadio
-      stage={isSelected ? "checked" : "unchecked"}
-      className={commonStyles.radioButton}
     />
   );
 
@@ -80,10 +67,7 @@ const AnalysisType = ({
         arrow
         placement="top-start"
         title={tooltipText}
-        disableHoverListener={
-          !allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE) ||
-          !isDisabled
-        }
+        disableHoverListener={!isDisabled}
       >
         <span>{radioOption}</span>
       </Tooltip>

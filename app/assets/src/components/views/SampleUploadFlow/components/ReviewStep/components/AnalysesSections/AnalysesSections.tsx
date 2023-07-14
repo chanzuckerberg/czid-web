@@ -3,10 +3,7 @@ import { compact, map } from "lodash/fp";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
-import {
-  AMR_V2_FEATURE,
-  ONT_V1_HARD_LAUNCH_FEATURE,
-} from "~/components/utils/features";
+import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
 import {
   NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
@@ -77,10 +74,6 @@ const AnalysesSections = ({
           label: workflowDisplayName,
         } = UPLOAD_WORKFLOWS[workflowKey];
 
-        const workflowIsBeta =
-          workflow === UPLOAD_WORKFLOWS.AMR.value &&
-          !allowedFeatures.includes(AMR_V2_FEATURE);
-
         const sequencingPlatformIsBeta =
           !allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE) &&
           workflow === UPLOAD_WORKFLOWS.MNGS.value &&
@@ -108,9 +101,6 @@ const AnalysesSections = ({
             <div className={cs.text}>
               <div className={cs.header}>
                 <div className={cs.name}>{workflowDisplayName}</div>
-                {workflowIsBeta && (
-                  <StatusLabel inline status="Beta" type="beta" />
-                )}
               </div>
               <div className={cs.analysisTypeContent}>
                 {workflow !== UPLOAD_WORKFLOWS.AMR.value && (

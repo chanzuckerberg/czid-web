@@ -5,8 +5,6 @@ import Tabs from "~/components/ui/controls/Tabs";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import {
   AMR_DEPRECATED_FEATURE,
-  AMR_V1_FEATURE,
-  AMR_V2_FEATURE,
   MERGED_NT_NR_FEATURE,
   ONT_V1_FEATURE,
 } from "~/components/utils/features";
@@ -58,7 +56,6 @@ export const TabSwitcher = ({
     });
 
     const mergedNtNrTab = customTab(TABS.MERGED_NT_NR, "Prototype");
-    const amrBetaTab = customTab(TABS.AMR, "Beta");
     const ontTab = customTab(
       TABS.LONG_READ_MNGS,
       "Beta",
@@ -72,16 +69,10 @@ export const TabSwitcher = ({
       [WORKFLOWS.AMR.value]: amr,
     } = getWorkflowCount(sample);
 
-    // only show deprecated label on old AMR tab to users who have the new AMR feature enabled
-    const deprecatedAmrLabel = allowedFeatures.includes(
-      AMR_V1_FEATURE || AMR_V2_FEATURE,
-    )
-      ? allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
-        reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
-        TABS.AMR_DEPRECATED
-      : allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
-        reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
-        TABS.AMR;
+    const deprecatedAmrLabel =
+      allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
+      reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
+      TABS.AMR_DEPRECATED;
 
     const workflowTabs = compact([
       shortReadMngs && TABS.SHORT_READ_MNGS,
@@ -90,11 +81,7 @@ export const TabSwitcher = ({
         allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
         mergedNtNrTab,
       shortReadMngs && deprecatedAmrLabel,
-      allowedFeatures.includes(AMR_V1_FEATURE) &&
-        !allowedFeatures.includes(AMR_V2_FEATURE) &&
-        amr &&
-        amrBetaTab,
-      allowedFeatures.includes(AMR_V2_FEATURE) && amr && TABS.AMR,
+      amr && TABS.AMR,
       cg && TABS.CONSENSUS_GENOME,
     ]);
     if (isEmpty(workflowTabs)) {

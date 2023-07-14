@@ -5,8 +5,6 @@ import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { AMR_PIPELINE_GITHUB_LINK } from "~/components/utils/documentationLinks";
 import {
-  AMR_V1_FEATURE,
-  AMR_V2_FEATURE,
   ONT_V1_FEATURE,
   WGS_CG_UPLOAD_FEATURE,
 } from "~/components/utils/features";
@@ -166,44 +164,41 @@ const WorkflowSelector = ({
         testKey={UPLOAD_WORKFLOWS.MNGS.value}
         title={UPLOAD_WORKFLOWS.MNGS.label}
       />
-      {allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE) && (
-        <AnalysisType
-          description={
-            <>
-              Run your samples through our antimicrobial resistance pipeline.
-              Our pipeline supports metagenomics or whole genome data. It only
-              supports Illumina. You can also run the AMR pipeline from within
-              an existing project by selecting previously uploaded mNGS samples.
-              You can check out the AMR pipeline on Github{" "}
-              {shouldDisableWorkflow(UPLOAD_WORKFLOWS.AMR.value) ? (
-                "here."
-              ) : (
-                <>
-                  <ExternalLink href={AMR_PIPELINE_GITHUB_LINK}>
-                    here
-                  </ExternalLink>
-                  .
-                </>
-              )}
-            </>
-          }
-          isBeta={!allowedFeatures.includes(AMR_V2_FEATURE)}
-          isDisabled={shouldDisableWorkflow(UPLOAD_WORKFLOWS.AMR.value)}
-          onClick={() => onWorkflowToggle(UPLOAD_WORKFLOWS.AMR.value)}
-          isSelected={selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value)}
-          sdsIcon={UPLOAD_WORKFLOWS.AMR.icon}
-          testKey={UPLOAD_WORKFLOWS.AMR.value}
-          title={UPLOAD_WORKFLOWS.AMR.label}
-          sequencingPlatformOptions={
-            <div className={cs.technologyContent}>
-              <PipelineVersionIndicator
-                pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.AMR.value]}
-                version={projectPipelineVersions?.[WORKFLOWS.AMR.value]}
-              />
-            </div>
-          }
-        />
-      )}
+      <AnalysisType
+        description={
+          <>
+            Run your samples through our antimicrobial resistance pipeline. Our
+            pipeline supports metagenomics or whole genome data. It only
+            supports Illumina. You can also run the AMR pipeline from within an
+            existing project by selecting previously uploaded mNGS samples. You
+            can check out the AMR pipeline on Github{" "}
+            {shouldDisableWorkflow(UPLOAD_WORKFLOWS.AMR.value) ? (
+              "here."
+            ) : (
+              <>
+                <ExternalLink href={AMR_PIPELINE_GITHUB_LINK}>
+                  here
+                </ExternalLink>
+                .
+              </>
+            )}
+          </>
+        }
+        isDisabled={shouldDisableWorkflow(UPLOAD_WORKFLOWS.AMR.value)}
+        onClick={() => onWorkflowToggle(UPLOAD_WORKFLOWS.AMR.value)}
+        isSelected={selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value)}
+        sdsIcon={UPLOAD_WORKFLOWS.AMR.icon}
+        testKey={UPLOAD_WORKFLOWS.AMR.value}
+        title={UPLOAD_WORKFLOWS.AMR.label}
+        sequencingPlatformOptions={
+          <div className={cs.technologyContent}>
+            <PipelineVersionIndicator
+              pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.AMR.value]}
+              version={projectPipelineVersions?.[WORKFLOWS.AMR.value]}
+            />
+          </div>
+        }
+      />
       {allowedFeatures.includes(WGS_CG_UPLOAD_FEATURE) && (
         <AnalysisType
           description="Run your samples through our Illumina supported pipeline to get viral consensus genomes using your own reference sequence. Pipeline report does not link to Nextclade."

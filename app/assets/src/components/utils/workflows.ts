@@ -1,4 +1,4 @@
-import { AMR_V2_FEATURE, ONT_V1_HARD_LAUNCH_FEATURE } from "./features";
+import { ONT_V1_HARD_LAUNCH_FEATURE } from "./features";
 
 // Pipeline workflow options
 export const WORKFLOW_ENTITIES = {
@@ -68,9 +68,6 @@ export const workflowIsBeta = (
   allowedFeatures: string[],
 ) => {
   const betaWorkflows = [];
-  if (!allowedFeatures.includes(AMR_V2_FEATURE)) {
-    betaWorkflows.push("AMR");
-  }
   if (!allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE)) {
     betaWorkflows.push("LONG_READ_MNGS");
   }

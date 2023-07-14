@@ -48,8 +48,6 @@ import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import {
-  AMR_V1_FEATURE,
-  AMR_V2_FEATURE,
   ONT_AUTO_CONCAT,
   ONT_V1_FEATURE,
   PRE_UPLOAD_CHECK_FEATURE,
@@ -448,41 +446,30 @@ class UploadSampleStep extends React.Component<
     technology?: SEQUENCING_TECHNOLOGY_OPTIONS,
   ) => {
     this.props.onDirty();
-    const { allowedFeatures } = this.context || {};
     const { selectedWorkflows } = this.state;
 
-    if (allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE)) {
-      // deselecting a workflow
-      if (this.isWorkflowSelected(workflow)) {
-        const newSelectedWorkflows = new Set(selectedWorkflows);
-        newSelectedWorkflows.delete(workflow);
+    // deselecting a workflow
+    if (this.isWorkflowSelected(workflow)) {
+      const newSelectedWorkflows = new Set(selectedWorkflows);
+      newSelectedWorkflows.delete(workflow);
 
-        this.setState(
-          {
-            selectedWorkflows: newSelectedWorkflows,
-          },
-          () => {
-            this.updateAllowedWorkflows();
-          },
-        );
-        // selecting a workflow
-      } else {
-        this.updateAllowedWorkflows(workflow, technology);
-      }
-
-      this.setState({
-        selectedWetlabProtocol: null,
-      });
+      this.setState(
+        {
+          selectedWorkflows: newSelectedWorkflows,
+        },
+        () => {
+          this.updateAllowedWorkflows();
+        },
+      );
+      // selecting a workflow
     } else {
-      // TODO: Remove this `else` branch once AMR v1 launches.
-      if (!selectedWorkflows.has(workflow)) {
-        this.setState({
-          selectedWorkflows: new Set([workflow]),
-          selectedWetlabProtocol: null,
-          selectedTechnology: null,
-        });
-      }
+      this.updateAllowedWorkflows(workflow, technology);
     }
+
+    this.setState({
+      selectedWetlabProtocol: null,
+    });
+
     trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
   };
 

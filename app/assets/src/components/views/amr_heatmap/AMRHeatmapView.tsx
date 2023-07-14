@@ -11,7 +11,6 @@ import ErrorBoundary from "~/components/ErrorBoundary";
 import { NarrowContainer, ViewHeader } from "~/components/layout";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { AMR_DEPRECATED_HELP_LINK } from "~/components/utils/documentationLinks";
-import { AMR_V1_FEATURE, AMR_V2_FEATURE } from "~/components/utils/features";
 import {
   processMetadata,
   processMetadataTypes,
@@ -511,8 +510,6 @@ export default class AMRHeatmapView extends React.Component<
   }
 
   render() {
-    const allowedFeatures = this.context?.allowedFeatures || [];
-
     return (
       <div className={cs.AMRHeatmapView}>
         <NarrowContainer>{this.renderHeader()}</NarrowContainer>
@@ -526,9 +523,8 @@ export default class AMRHeatmapView extends React.Component<
           </Sticky>
           <NarrowContainer>
             {
-              /* This should still be displayed even after feature flag is removed (until we've updated the heatmap) */
-              allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE) &&
-                this.renderDeprecationWarning()
+              /* This should be displayed until we've updated the heatmap) */
+              this.renderDeprecationWarning()
             }
           </NarrowContainer>
           {this.renderVisualization()}
