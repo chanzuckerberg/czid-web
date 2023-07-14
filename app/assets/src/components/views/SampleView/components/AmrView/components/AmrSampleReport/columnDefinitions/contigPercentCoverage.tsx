@@ -25,7 +25,7 @@ export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
     }
     return value;
   },
-  size: 77,
+  size: 90,
   header: function contigPercentCoverageHeader({ header, column }) {
     return (
       <SortableHeader

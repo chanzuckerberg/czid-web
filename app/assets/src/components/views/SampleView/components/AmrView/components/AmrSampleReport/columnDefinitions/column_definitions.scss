@@ -41,12 +41,13 @@
   border-left: $sds-borders-gray-300;
   color: $sds-font-color;
   font: $sds-font-header-xxs-600-font;
-  height: 26px;
+  height: 30px;
   margin: $sds-spaces-s;
 }
 
 .groupedHeaderButton {
   width: 100%;
+  border-radius: 0;
   &:hover {
     background-color: $sds-color-primary-200;
   }
@@ -61,12 +62,12 @@
 
 .groupedHeaderPlaceholder {
   background-color: $sds-color-gray-100;
-  height: 26px;
+  height: 30px;
   margin: $sds-spaces-s;
 }
 
 .rowCountHeader {
-  height: 26px;
+  height: 30px;
 }
 
 .rowCount {

@@ -23,7 +23,7 @@ export const readCoverageDepthColumn: ColumnDef<AmrResult, any> = {
     }
     return value;
   },
-  size: 85,
+  size: 115,
   header: function readCoverageDepthHeader({ header, column }) {
     return (
       <SortableHeader
