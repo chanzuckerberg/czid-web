@@ -14,7 +14,6 @@ export const SAMPLES_TABLE_METADATA_COLUMNS_FEATURE =
 // SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE enables metadata columns on all domains and will be enabled for admin testing purposes only
 export const SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE =
   "samples_table_metadata_columns_admin";
-export const MICROBIOME_DOWNLOAD_FEATURE = "microbiome";
 export const ANNOTATION_FILTER_FEATURE = "annotation_filter";
 export const BLAST_V1_FEATURE = "blast_v1";
 export const AMR_V1_FEATURE = "amr_v1";

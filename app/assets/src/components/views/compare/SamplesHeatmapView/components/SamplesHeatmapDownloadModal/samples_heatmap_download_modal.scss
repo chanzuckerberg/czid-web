@@ -1,0 +1,67 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~@czi-sds/components/dist/variables";
+
+.modal {
+  max-height: calc(85vh - 80px);
+  display: flex;
+  flex-direction: column;
+  letter-spacing: $sds_font-letter-spacing-default;
+
+  .header {
+    .title {
+      font: $sds-font-header-xl-600-font;
+      // Reduce the amount of margin at the top of the modal.
+      margin-top: -$sds-spaces-s;
+    }
+
+    .tagline {
+      font: $sds-font-body-s-400-font;
+      color: $sds-color-gray-500;
+    }
+  }
+
+  .options {
+    overflow: auto;
+  }
+
+  .downloadTypeContainer {
+    margin-top: $sds-spaces-l;
+    flex: 1 1 0;
+    min-height: 0;
+
+    .category {
+      &:not(:first-child) {
+        margin-top: $sds-spaces-xl;
+      }
+
+      .title {
+        font: $sds-font-header-m-600-font;
+        margin-bottom: $sds-spaces-s;
+      }
+    }
+  }
+
+  .optionList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer {
+    margin-top: $sds-spaces-l;
+
+    .subtext {
+      font: $sds-font-body-xs-400-font;
+      color: $sds-color-gray-500;
+      margin-top: $sds-spaces-s;
+    }
+  }
+}
+
+.imageDownloadTip {
+  color: $sds-color-gray-500;
+  font: $sds-font-body-xs-400-font;
+  margin-bottom: $sds-spaces-l;
+}

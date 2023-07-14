@@ -16,10 +16,6 @@ import {
   SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
   showAppcue,
 } from "~/components/utils/appcues";
-import { triggerFileDownload } from "~/components/utils/clientDownload";
-import { MICROBIOME_DOWNLOAD_FEATURE } from "~/components/utils/features";
-import { logError } from "~/components/utils/logUtil";
-import { logDownloadOption } from "~/components/views/report/utils/download";
 import {
   replaceSpecialCharacters,
   testForSpecialCharacters,
@@ -31,8 +27,6 @@ import {
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
-import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { DOWNLOAD_OPTIONS } from "../../constants";
 import cs from "./samples_heatmap_header.scss";
 
 interface SamplesHeatmapHeaderProps {
@@ -42,10 +36,6 @@ interface SamplesHeatmapHeaderProps {
   heatmapName?: string;
   presets?: $TSFixMeUnknown[];
   onDownloadClick?: $TSFixMeFunction;
-  onDownloadSvg: $TSFixMeFunction;
-  onDownloadPng: $TSFixMeFunction;
-  onDownloadAllHeatmapMetricsCsv: $TSFixMeFunction;
-  onDownloadCurrentHeatmapViewCsv: $TSFixMeFunction;
   onNewPresetsClick?: $TSFixMeFunction;
   onShareClick: $TSFixMeFunction;
   onSaveClick: $TSFixMeFunction;
@@ -60,10 +50,6 @@ export const SamplesHeatmapHeader = ({
   heatmapName,
   presets,
   onDownloadClick,
-  onDownloadAllHeatmapMetricsCsv,
-  onDownloadCurrentHeatmapViewCsv,
-  onDownloadSvg,
-  onDownloadPng,
   onNewPresetsClick,
   onShareClick,
   onSaveClick,
@@ -72,44 +58,6 @@ export const SamplesHeatmapHeader = ({
 }: SamplesHeatmapHeaderProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
-  const hasMicrobiomeFeature = allowedFeatures.includes(
-    MICROBIOME_DOWNLOAD_FEATURE,
-  );
-  const handleDownloadClick = (option: string) => {
-    switch (option) {
-      case "svg":
-        onDownloadSvg();
-        break;
-      case "png":
-        onDownloadPng();
-        break;
-      case "csv_metrics":
-        onDownloadAllHeatmapMetricsCsv();
-        break;
-      case "current_heatmap_view_csv":
-        triggerFileDownload({
-          downloadUrl: onDownloadCurrentHeatmapViewCsv(),
-          fileName: "current_heatmap_view.csv",
-        });
-        break;
-      default:
-        logError({
-          message:
-            "SamplesHeatmapHeader: Invalid option passed to handleDownloadClick",
-          details: { option },
-        });
-        break;
-    }
-
-    logDownloadOption({
-      component: "SamplesHeatmapHeader",
-      option,
-      details: {
-        sampleIds: sampleIds.length,
-        option,
-      },
-    });
-  };
 
   const handleHeatmapRename = async (name: string) => {
     if (name === "heatmap") return "";
@@ -237,20 +185,11 @@ export const SamplesHeatmapHeader = ({
             )}
             className={cs.controlElement}
           />
-          {hasMicrobiomeFeature ? (
-            <DownloadButton
-              className={cs.controlElement}
-              onClick={onDownloadClick}
-              disabled={loading}
-            />
-          ) : (
-            <DownloadButtonDropdown
-              className={cs.controlElement}
-              options={DOWNLOAD_OPTIONS}
-              onClick={handleDownloadClick}
-              disabled={loading}
-            />
-          )}
+          <DownloadButton
+            className={cs.controlElement}
+            onClick={onDownloadClick}
+            disabled={loading}
+          />
           <HelpButton
             className={cs.controlElement}
             onClick={showAppcue({

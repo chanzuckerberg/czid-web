@@ -1,0 +1,72 @@
+@import "~@czi-sds/components/dist/variables";
+
+.downloadType {
+  margin-bottom: $sds-spaces-xxs;
+  margin-right: $sds-spaces-m;
+  border-radius: $sds-corners-corner-m;
+  display: flex;
+  cursor: pointer;
+
+  &.disabled {
+    cursor: default;
+
+    &:hover {
+      background-color: white;
+    }
+
+    .name,
+    .description,
+    .fileType {
+      color: $sds-color-gray-300;
+    }
+  }
+
+  .content {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: left;
+  }
+
+  .name {
+    font: $sds-font-body-s-600-font;
+  }
+
+  .fileType {
+    font: $sds-font-body-s-400-font;
+    color: $sds-color-gray-500;
+  }
+
+  .description {
+    font: $sds-font-body-xs-400-font;
+    color: $sds-color-gray-500;
+  }
+}
+
+.itemButton {
+  display: flex;
+  border: none;
+  background: none;
+  padding: $sds-spaces-s $sds-spaces-m;
+  width: 100%;
+
+  &:hover,
+  &:focus {
+    background-color: $sds-color-gray-100;
+  }
+}
+
+.radioButton {
+  margin-right: $sds-spaces-m;
+  margin-top: $sds-spaces-xxs;
+}
+
+.isSelected {
+  background-color: $sds-color-gray-100;
+}
+
+.fields {
+  margin-top: $sds-spaces-m;
+  margin-bottom: $sds-spaces-xxs;
+  display: flex;
+  flex-wrap: wrap;
+}

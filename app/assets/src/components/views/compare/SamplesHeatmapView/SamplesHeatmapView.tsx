@@ -71,6 +71,7 @@ import { IconAlert } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
 import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
+import { SamplesHeatmapDownloadModal } from "./components/SamplesHeatmapDownloadModal/SamplesHeatmapDownloadModal";
 import SamplesHeatmapFilters from "./components/SamplesHeatmapFilters";
 import { OptionsType } from "./components/SamplesHeatmapFilters/SamplesHeatmapFilters";
 import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
@@ -89,7 +90,6 @@ import {
   TAXON_LEVEL_SELECTED,
 } from "./constants";
 import cs from "./samples_heatmap_view.scss";
-import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
 
 const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
   const parsed = parseInt(val);
@@ -2103,12 +2103,6 @@ class SamplesHeatmapView extends React.Component<
           heatmapName={this.props.name}
           presets={this.state.selectedOptions["presets"]}
           onDownloadClick={this.handleDownloadModalOpen}
-          onDownloadSvg={this.handleDownloadSvg}
-          onDownloadPng={this.handleDownloadPng}
-          onDownloadCurrentHeatmapViewCsv={
-            this.getDownloadCurrentViewHeatmapCSVLink
-          }
-          onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
           onNewPresetsClick={this.handleHeatmapCreationModalOpen}
           onShareClick={this.handleShareClick}
           onSaveClick={this.handleSaveClick}

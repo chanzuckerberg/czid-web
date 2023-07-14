@@ -1,17 +1,13 @@
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 
-// TODO: Remove DOWNLOAD_OPTIONS when microbiome feature is launched;
-// it will be replaced by HEATMAP_DOWNLOAD_OPTIONS.
-export const DOWNLOAD_OPTIONS = [
-  { text: "Download All Heatmap Metrics (.csv)", value: "csv_metrics" },
-  {
-    text: "Download Current Heatmap View (.csv)",
-    value: "current_heatmap_view_csv",
-  },
-  { text: "Download SVG", value: "svg" },
-  { text: "Download PNG", value: "png" },
-];
+export enum HeatmapDownloadType {
+  ALL_METRICS = "all_metrics",
+  CURRENT_METRICS = "current_metrics",
+  BIOM_FORMAT = "biom_format",
+  PNG = "png",
+  SVG = "svg",
+}
 
 export const HEATMAP_FILTERS = [
   "metric",
@@ -24,30 +20,42 @@ export const HEATMAP_FILTERS = [
   "taxonTags",
 ];
 
-export const HEATMAP_DOWNLOAD_CATEGORIES = ["reports", "images"];
+export const MICROBIOME_DOWNLOAD_METRIC_OPTIONS = [
+  { text: "NT rPM", value: "NT.rpm" },
+  { text: "NT r (total reads)", value: "NT.r" },
+  { text: "NR rPM", value: "NR.rpm" },
+  { text: "NR r (total reads)", value: "NR.r" },
+];
 
-export const HEATMAP_DOWNLOAD_OPTIONS = [
+export interface HeatmapDownloadOption {
+  category: string;
+  description?: string | JSX.Element;
+  displayName: string;
+  fileTypeDisplay: string;
+  metricOptions?: { text: string; value: string }[];
+  type: HeatmapDownloadType;
+}
+
+export const HEATMAP_DOWNLOAD_REPORT_OPTIONS: HeatmapDownloadOption[] = [
   {
     category: "reports",
     description:
       "User-uploaded metadata, including sample collection location, collection date, sample type.",
-    display_name: "All Heatmap Metrics",
-    file_type_display: ".csv",
-    type: "all_metrics",
+    displayName: "All Heatmap Metrics",
+    fileTypeDisplay: ".csv",
+    type: HeatmapDownloadType.ALL_METRICS,
   },
   {
     category: "reports",
     description:
       "Contains the current selected metric. Existing filters on the heatmap will apply.",
-    display_name: "Current Heatmap Metrics",
-    file_type_display: ".csv",
-    type: "current_metrics",
+    displayName: "Current Heatmap Metrics",
+    fileTypeDisplay: ".csv",
+    type: HeatmapDownloadType.CURRENT_METRICS,
   },
   {
-    admin_only: true,
     category: "reports",
     description: (
-      // TODO: Replace the hrefs with the actual links once they're available.
       <React.Fragment>
         Sample report data (samples x taxons) combined with all sample metadata
         and taxon metadata in{" "}
@@ -58,27 +66,25 @@ export const HEATMAP_DOWNLOAD_OPTIONS = [
         </ExternalLink>
       </React.Fragment>
     ),
-    display_name: "Combined Microbiome File",
-    fields: [
-      {
-        display_name: "Download Metric",
-        type: "metric",
-      },
-    ],
-    file_type_display: ".biom",
-    type: "biom_format",
+    displayName: "Combined Microbiome File",
+    metricOptions: MICROBIOME_DOWNLOAD_METRIC_OPTIONS,
+    fileTypeDisplay: ".biom",
+    type: HeatmapDownloadType.BIOM_FORMAT,
+  },
+];
+
+export const HEATMAP_DOWNLOAD_IMAGE_OPTIONS: HeatmapDownloadOption[] = [
+  {
+    category: "images",
+    displayName: "Heatmap Image",
+    fileTypeDisplay: ".png",
+    type: HeatmapDownloadType.PNG,
   },
   {
     category: "images",
-    display_name: "Heatmap Image",
-    file_type_display: ".png",
-    type: "png",
-  },
-  {
-    category: "images",
-    display_name: "Heatmap Image",
-    file_type_display: ".svg",
-    type: "svg",
+    displayName: "Heatmap Image",
+    fileTypeDisplay: ".svg",
+    type: HeatmapDownloadType.SVG,
   },
 ];
 
@@ -161,10 +167,3 @@ export const SPECIES_SELECTION_OPTIONS = {
   species: 1,
   genus: 0,
 };
-
-export const MICROBIOME_DOWNLOAD_METRIC_OPTIONS = [
-  { text: "NT rPM", value: "NT.rpm" },
-  { text: "NT r (total reads)", value: "NT.r" },
-  { text: "NR rPM", value: "NR.rpm" },
-  { text: "NR r (total reads)", value: "NR.r" },
-];
