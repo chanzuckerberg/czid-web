@@ -4,6 +4,7 @@ import React, { useContext, useState } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_V3_FEATURE } from "~/components/utils/features";
 import { isAmrGeneLevelDownloadAvailable } from "~/components/utils/pipeline_versions";
+import rowStyles from "~/components/views/SampleView/components/AmrView/components/AmrSampleReport/components/StyledTableRow/styled_table_row.scss";
 import {
   geneLevelDownloadOptions,
   RenderedGeneLevelDownloadOption,
@@ -112,7 +113,10 @@ export const GeneCell = ({
               <ButtonIcon
                 disabled={!isAmrGeneLevelDownloadAvailable(workflowWdlVersion)}
                 onClick={handleAnchorClick}
-                className={cx(cs.downloadIcon, isOpen && cs.showHoverActions)}
+                className={cx(
+                  rowStyles.downloadIcon,
+                  isOpen && rowStyles.showHoverActions,
+                )}
                 sdsSize="small"
                 sdsType="primary"
                 sdsIcon={"download"}

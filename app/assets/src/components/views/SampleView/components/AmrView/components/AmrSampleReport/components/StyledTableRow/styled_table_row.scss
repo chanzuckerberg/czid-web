@@ -29,7 +29,42 @@
 // Styles for all styleTableRow elements
 .styledTableRow {
   &:hover {
-    background-color: $sds-color-gray-100;
+    background-color: $sds-color-primary-100;
+
+    // download icon in GeneCell is styled based on hover behavior of its parent, the row
+    .downloadIcon {
+      color: $sds-color-primary-400;
+
+      &:focus,
+      &:active,
+      &:hover {
+        color: $sds-color-primary-600;
+      }
+
+      &:disabled {
+        color: $sds-color-gray-300;
+      }
+    }
+
+    .showHoverActions {
+      color: $sds-color-primary-600;
+    }
+  }
+
+  .downloadIcon {
+    color: transparent;
+    display: inline-block;
+    margin-left: $sds-spaces-xs;
+    &:focus,
+    &:active {
+      color: $sds-color-primary-600;
+    }
+  }
+
+  // when a user opens the dropdown and then mouses away,
+  // this keeps the dropdown open even when the user is no longer hovering
+  .showHoverActions {
+    color: $sds-color-primary-600;
   }
 
   th {

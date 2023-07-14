@@ -61,6 +61,7 @@ export const RenderedGeneLevelDownloadOption = ({
   }
   return (
     <Tooltip
+      arrow
       key={`download-${geneName}-${option.name}`}
       title={title}
       placement="right"
