@@ -10,6 +10,8 @@ import {
   isEmpty,
   isNumber,
   isString,
+  map,
+  snakeCase,
   tail,
 } from "lodash/fp";
 import Papa from "papaparse";
@@ -240,11 +242,11 @@ const _addPathogenFlagColumns = (datum, withMultiFlags) => {
 };
 
 // The order of these column headers is important for the CSV as this is the order that the columns will appear.
-const AMR_CSV_COLUMN_HEADERS = [
+const AMR_CSV_COLUMN_HEADERS = map(snakeCase, [
   ...SECTION_TO_COLUMN_IDS.get(ColumnSection.GENE_INFO),
   ...SECTION_TO_COLUMN_IDS.get(ColumnSection.CONTIGS),
   ...SECTION_TO_COLUMN_IDS.get(ColumnSection.READS),
-];
+]);
 
 export const computeAmrReportTableValuesForCSV = ({
   activeFilters,
