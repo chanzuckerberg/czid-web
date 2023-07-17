@@ -67,51 +67,47 @@ export const sortResultsByMatch = (result: { name: string }, query: string) => {
 };
 
 // Remove Illumina lanes from file names (whether the name includes an extension or not)
-export const removeLaneFromName = (name: string, hasLaneConcatONT: boolean) => {
-  if (hasLaneConcatONT) {
-    // ONT file name patterns. If you add more patterns, make sure regex group 1 = sample name
-    // and regex group 2 = file extension, if any. Note the use of `(?:)` to denote regex groups
-    // that don't show up in the output of `.match()`.
-    const patterns = [
-      // Example: ABC_pass_barcode_1.fastq, ABC_pass_barcode_2.fastq
-      // Diagram: https://jex.im/regulex/#!flags=i&re=(.*_pass_.*)_%5B0-9%5D%2B((%3F%3A%5C.fastq%7C%5C.fq)(%5C.gz)%3F)%3F%24
-      /(.*_pass_.*)_[0-9]+((?:\.fastq|\.fq)(\.gz)?)?$/i,
+export const removeLaneFromName = (name: string) => {
+  // ONT file name patterns. If you add more patterns, make sure regex group 1 = sample name
+  // and regex group 2 = file extension, if any. Note the use of `(?:)` to denote regex groups
+  // that don't show up in the output of `.match()`.
+  const patterns = [
+    // Example: ABC_pass_barcode_1.fastq, ABC_pass_barcode_2.fastq
+    // Diagram: https://jex.im/regulex/#!flags=i&re=(.*_pass_.*)_%5B0-9%5D%2B((%3F%3A%5C.fastq%7C%5C.fq)(%5C.gz)%3F)%3F%24
+    /(.*_pass_.*)_[0-9]+((?:\.fastq|\.fq)(\.gz)?)?$/i,
 
-      // Example 1: fastq_runid_b29e1e8d5b_1.fastq, fastq_runid_b29e1e8d5b_2.fastq
-      // Example 2: fastq_runid_b29e1e8d5b_1_1.fastq, fastq_runid_b29e1e8d5b_2_1.fastq
-      // Example 3: barcode01_fastq_runid_438c130_1_0-0005.fastq, barcode01_fastq_runid_438c130_2_0-00041.fastq
-      // Diagram: https://jex.im/regulex/#!flags=i&re=(.*fastq_runid_%5Ba-z0-9%5D%2B)_%5B0-9%5D%2B(%3F%3A%5B0-9a-z_-%5D%2B)%3F((%3F%3A%5C.fastq%7C%5C.fq)(%5C.gz)%3F)%3F%24
-      /(.*fastq_runid_[a-z0-9]+)_[0-9]+(?:[0-9a-z_-]+)?((?:\.fastq|\.fq)(\.gz)?)?$/i,
-    ];
+    // Example 1: fastq_runid_b29e1e8d5b_1.fastq, fastq_runid_b29e1e8d5b_2.fastq
+    // Example 2: fastq_runid_b29e1e8d5b_1_1.fastq, fastq_runid_b29e1e8d5b_2_1.fastq
+    // Example 3: barcode01_fastq_runid_438c130_1_0-0005.fastq, barcode01_fastq_runid_438c130_2_0-00041.fastq
+    // Diagram: https://jex.im/regulex/#!flags=i&re=(.*fastq_runid_%5Ba-z0-9%5D%2B)_%5B0-9%5D%2B(%3F%3A%5B0-9a-z_-%5D%2B)%3F((%3F%3A%5C.fastq%7C%5C.fq)(%5C.gz)%3F)%3F%24
+    /(.*fastq_runid_[a-z0-9]+)_[0-9]+(?:[0-9a-z_-]+)?((?:\.fastq|\.fq)(\.gz)?)?$/i,
+  ];
 
-    // If any pattern matches, return name + extension
-    for (const pattern of patterns) {
-      const match = name.match(pattern);
-      if (match) {
-        return `${match[1]}${match[2] || ""}`;
-      }
+  // If any pattern matches, return name + extension
+  for (const pattern of patterns) {
+    const match = name.match(pattern);
+    if (match) {
+      return `${match[1]}${match[2] || ""}`;
     }
   }
 
-  // Illumina file name pattern: ABC_L001, ABC_L001.fastq
+  // Otherwise, check for Illumina file name pattern: ABC_L001, ABC_L001.fastq
   return name.replace(/_L00[1-8]/, "");
 };
 
 export const groupSamplesByLane = ({
   samples,
   sampleType,
-  hasLaneConcatONT,
 }: {
   samples: SampleFromApi[];
   sampleType: SampleUploadType;
-  hasLaneConcatONT: boolean;
 }) => {
   // BaseSpace uploads can't use the same logic as local uploads because data format is different:
   // BaseSpace groups R1/R2 for us, and we need to track dataset IDs and send them to the backend,
   // where concatenation happens (with local uploads, concatenation happens in the browser).
   if (sampleType === "basespace") {
     const groups = groupBy(sample => {
-      const name = removeLaneFromName(sample.name, false);
+      const name = removeLaneFromName(sample.name);
       const fileType = sample.file_type;
       const bsProjectId = sample.basespace_project_id;
       return `${name}:${fileType}:${bsProjectId}`;
@@ -122,7 +118,7 @@ export const groupSamplesByLane = ({
       const files = groups[group];
       sampleInfo.push({
         ...files[0], // Most information is identical for all lanes
-        name: removeLaneFromName(files[0].name, false),
+        name: removeLaneFromName(files[0].name),
         basespace_dataset_id: files
           .map(file => file.basespace_dataset_id)
           .join(","), // Track dataset IDs of each lane
@@ -137,9 +133,9 @@ export const groupSamplesByLane = ({
   // Group samples by lanes *and* read pairs, e.g. if a user chooses the files
   // L1_R1, L1_R2, L2_R1, don't group them because we're missing L2_R2.
   const groups = groupBy(sample => {
-    const sampleID = removeLaneFromName(sample.name, hasLaneConcatONT);
+    const sampleID = removeLaneFromName(sample.name);
     const readPairs = sample.input_files_attributes.map((f: $TSFixMe) =>
-      removeLaneFromName(f.source, hasLaneConcatONT),
+      removeLaneFromName(f.source),
     );
     readPairs.sort();
     return `${sampleID}:${readPairs.join(",")}`;
@@ -166,10 +162,7 @@ export const groupSamplesByLane = ({
     for (const pairNb in readPairs) {
       const laneFiles = readPairs[pairNb];
       if (laneFiles.length > 0) {
-        const fileName = removeLaneFromName(
-          laneFiles[0].name,
-          hasLaneConcatONT,
-        );
+        const fileName = removeLaneFromName(laneFiles[0].name);
         readPairsConcat[fileName] = new File(laneFiles, fileName, {
           // Make sure we can still rely on timestamps for checking if files change
           lastModified: maxBy(f => f.lastModified, laneFiles).lastModified,
@@ -181,8 +174,8 @@ export const groupSamplesByLane = ({
     const filesAttributes = samples[0].input_files_attributes.map(
       (file, pairNb) => ({
         ...file,
-        parts: removeLaneFromName(file.parts, hasLaneConcatONT),
-        source: removeLaneFromName(file.source, hasLaneConcatONT),
+        parts: removeLaneFromName(file.parts),
+        source: removeLaneFromName(file.source),
         concatenated: readPairs[pairNb].map(file => file.name),
       }),
     );
@@ -190,7 +183,7 @@ export const groupSamplesByLane = ({
     // Generate modified sample object
     const sampleConcat = {
       ...samples[0],
-      name: removeLaneFromName(samples[0].name, hasLaneConcatONT),
+      name: removeLaneFromName(samples[0].name),
       files: readPairsConcat,
       input_files_attributes: filesAttributes,
     };

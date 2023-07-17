@@ -70,7 +70,6 @@ module SeedResource
         "amr_v2",
         "amr_v1",
         "wgs_cg_upload",
-        "ont_auto_concat",
       ]
 
       find_or_create(:app_config, key: AppConfig::LAUNCHED_FEATURES, value: features.to_json)

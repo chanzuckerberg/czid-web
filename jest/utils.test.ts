@@ -74,12 +74,8 @@ describe("Lane concatenation logic", () => {
         const filename = testCase.filename + extension;
         const expected = testCase.expect + extension;
 
-        const outputONTEnabled = removeLaneFromName(filename, true);
-        const outputONTDisabled = removeLaneFromName(filename, false);
-
-        // Illumina file names should return the same result whether ONT concat is enabled
-        expect(outputONTEnabled).toBe(expected);
-        expect(outputONTDisabled).toBe(expected);
+        const output = removeLaneFromName(filename);
+        expect(output).toBe(expected);
       }
     }
   });
@@ -90,12 +86,8 @@ describe("Lane concatenation logic", () => {
         const filename = testCase.filename + extension;
         const expected = testCase.expect + extension;
 
-        const outputONTEnabled = removeLaneFromName(filename, true);
-        const outputONTDisabled = removeLaneFromName(filename, false);
-
-        // If ONT concatenation is disabled, should return the original filename
-        expect(outputONTEnabled).toBe(expected);
-        expect(outputONTDisabled).toBe(filename);
+        const output = removeLaneFromName(filename);
+        expect(output).toBe(expected);
       }
     }
   });

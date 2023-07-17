@@ -17,10 +17,7 @@ import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { CONCAT_FILES_HELP_LINK } from "~/components/utils/documentationLinks";
-import {
-  ONT_AUTO_CONCAT,
-  PRE_UPLOAD_CHECK_FEATURE,
-} from "~/components/utils/features";
+import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { Project, SampleFromApi } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
@@ -147,7 +144,6 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
 
   render() {
     const { samples } = this.props;
-    const { allowedFeatures } = this.context || {};
     const finishedValidating = samples.every(
       element => element.finishedValidating,
     );
@@ -170,19 +166,8 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
                 `Paired files must be labeled with "_R1" or
                 "_R2" at the end of the basename.`,
                 <>
-                  {(allowedFeatures.includes(ONT_AUTO_CONCAT) && (
-                    <>
-                      Multiple FASTQ files for a single metagenomic sample will
-                      be automatically concatenated. To learn more about
-                      concatenation,{" "}
-                    </>
-                  )) || (
-                    <>
-                      Multiple lane FASTQ files (Illumina) for one sample will
-                      be automatically concatenated. To learn how to concatenate
-                      Nanopore FASTQ files before upload,{" "}
-                    </>
-                  )}
+                  Multiple FASTQ files for a single metagenomic sample will be
+                  automatically concatenated. To learn more about concatenation,{" "}
                   <ExternalLink href={CONCAT_FILES_HELP_LINK}>
                     click here
                   </ExternalLink>

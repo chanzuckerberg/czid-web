@@ -6,10 +6,7 @@ import {
   CONCAT_FILES_HELP_LINK_ONT,
   MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
-import {
-  ONT_AUTO_CONCAT,
-  ONT_V1_HARD_LAUNCH_FEATURE,
-} from "~/components/utils/features";
+import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import {
   PIPELINE_HELP_LINKS,
@@ -57,16 +54,9 @@ const MetagenomicsWithNanopore = ({
             here
           </ExternalLink>
           .{" "}
-          {(allowedFeatures.includes(ONT_AUTO_CONCAT) && (
-            <span>
-              Learn about the auto-concatenation of Nanopore FASTQ files{" "}
-            </span>
-          )) || (
-            <span>
-              Upload one fastq file per sample. To learn how to concatenate
-              Nanopore FASTQ files before upload, click{" "}
-            </span>
-          )}
+          <span>
+            Learn about the auto-concatenation of Nanopore FASTQ files{" "}
+          </span>
         </React.Fragment>
       }
       githubLink={CONCAT_FILES_HELP_LINK_ONT}
