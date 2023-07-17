@@ -26,7 +26,7 @@ class SamplesController < ApplicationController
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :taxid_contigs_for_blast, :taxid_contigs_download, :taxon_five_longest_reads, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials, :pipeline_logs,].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
+  EDIT_ACTIONS = [:edit, :update, :reupload_source, :kickoff_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow, :move_to_project, :cancel_pipeline_run,].freeze
 
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
@@ -1448,40 +1448,6 @@ class SamplesController < ApplicationController
       else
         format.html { render :edit }
         format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # DELETE /samples/1
-  # DELETE /samples/1.json
-  def destroy
-    # Will also delete from job_stats, ercc_counts, backgrounds_pipeline_runs, pipeline_runs, input_files
-    deletable = @sample.deletable?(current_user)
-    success = false
-    project = @sample.project
-    sample_info = {
-      user_email: current_user.email,
-      sample_id: @sample.id,
-      sample_name: @sample.name,
-      sample_user_id: @sample.user_id,
-      project_id: project.id,
-      project_name: project.name,
-    }
-    success = @sample.destroy if deletable
-    if success
-      MetricUtil.log_analytics_event(
-        EventDictionary::GDPR_SAMPLE_HARD_DELETED,
-        current_user,
-        sample_info
-      )
-    end
-    respond_to do |format|
-      if success
-        format.html { redirect_to project, notice: 'Sample was successfully destroyed.' }
-        format.json { head :no_content }
-      else
-        format.html { render :edit }
-        format.json { render json: { message: 'Cannot delete this sample. Something went wrong.' }, status: :unprocessable_entity }
       end
     end
   end

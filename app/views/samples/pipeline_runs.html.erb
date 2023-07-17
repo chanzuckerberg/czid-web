@@ -71,7 +71,6 @@ function showhide(id) {
 <% if pipeline_run && pipeline_run.completed? %>
   <%= button_to 'rerun from top', kickoff_pipeline_sample_path(@sample), method: :put, form: {target: '_blank'} %>
 <% end %>
-<%= button_to 'delete sample', sample_path(@sample), method: :delete %>
 <% ongoing_pipeline_run = @sample.pipeline_runs.where(finalized: 0, deprecated: false).first %>
 <% if ongoing_pipeline_run%>
   <%= button_to 'cancel pipeline run', cancel_pipeline_run_sample_path(@sample), method: :put, form: {target: '_blank'} %>

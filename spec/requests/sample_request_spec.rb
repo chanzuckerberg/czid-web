@@ -1064,42 +1064,6 @@ RSpec.describe "Sample request", type: :request do
         end
       end
     end
-
-    describe "samples/:id/destroy" do
-      before do
-        @project = create(:project, users: [@joe, @admin])
-        @joe_sample = create(:sample, project: @project,
-                                      user: @joe,
-                                      name: "joe sample")
-        @admin_sample = create(:sample, project: @project,
-                                        user: @admin,
-                                        name: "admin sample")
-      end
-
-      it "does not allow the user to delete other user's samples" do
-        delete "/samples/#{@admin_sample.id}", params: { format: :json }
-        expect(response).to have_http_status(:unprocessable_entity)
-      end
-
-      it "logs to Segment for GDPR compliance" do
-        sample_data = {
-          user_email: @joe.email,
-          sample_id: @joe_sample.id,
-          sample_name: @joe_sample.name,
-          sample_user_id: @joe_sample.user.id,
-          project_name: @joe_sample.project.name,
-          project_id: @joe_sample.project.id,
-        }
-        # stub out destroy operations so we don't get more logs
-        allow_any_instance_of(Sample).to receive(:destroy).and_return(@joe_sample)
-        expect(MetricUtil).to receive(:log_analytics_event).with(
-          EventDictionary::GDPR_SAMPLE_HARD_DELETED,
-          @joe,
-          sample_data
-        )
-        delete "/samples/#{@joe_sample.id}", params: { format: :json }
-      end
-    end
   end
 
   context 'admin' do

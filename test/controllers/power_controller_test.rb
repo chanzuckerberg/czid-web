@@ -90,30 +90,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test 'joe can delete his own sample' do
-    sign_in(:joe)
-    @joe_sample = samples(:joe_sample)
-    delete sample_url(@joe_sample)
-    # successful delete returns a 302 redirect
-    assert_response :redirect
-  end
-
-  test 'joe cannot delete public_sample' do
-    sign_in(:joe)
-    @public_sample = samples(:public_sample)
-
-    delete sample_url(@public_sample)
-    assert_response :not_found
-  end
-
-  test 'joe cannot delete expired_sample' do
-    sign_in(:joe)
-    @expired_sample = samples(:expired_sample)
-
-    delete sample_url(@expired_sample)
-    assert_response :not_found
-  end
-
   # search suggestions
   test 'joe sees public_sample in search suggestions' do
     sign_in(:joe)

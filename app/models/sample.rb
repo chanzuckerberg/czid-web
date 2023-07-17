@@ -872,26 +872,6 @@ class Sample < ApplicationRecord
     where("project_id in (?)", project_ids)
   end
 
-  def deletable?(user)
-    uploaded_sample = user_id == user.id
-    all_prs_failed = pipeline_runs.all?(&:report_failed?)
-    all_wrs_failed = workflow_runs.all? { |wr| wr.status == WorkflowRun::STATUS[:failed] }
-
-    if user.allowed_feature?("bulk_deletion")
-      return uploaded_sample && all_prs_failed && all_wrs_failed
-    # TODO: (nina): remove remaining logic once bulk deletion launches
-    elsif user.admin?
-      return pipeline_runs.all? { |pr| pr.report_failed? || pr.succeeded? }
-    elsif user_id == user.id
-      # Sample belongs to the user
-      # Allow deletion if no pipeline runs, or report failed.
-      # The following returns true for an empty array
-      return all_prs_failed
-    end
-
-    false
-  end
-
   def self.public_samples
     joins(:project)
       .where("(projects.public_access = 1 OR
