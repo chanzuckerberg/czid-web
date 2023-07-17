@@ -5,10 +5,11 @@ class AmrGeneLevelDownloadsService
   DOWNLOAD_TYPE_READS = "reads".freeze
   DOWNLOAD_TYPE_CONTIGS = "contigs".freeze
 
-  def initialize(workflow_run, download_type, gene_id)
+  # index id is gene id for reads and ARO accession for contigs
+  def initialize(workflow_run, download_type, index_id)
     @workflow_run = workflow_run
     @download_type = download_type
-    @gene_id = gene_id
+    @index_id = index_id
   end
 
   def call
@@ -42,7 +43,7 @@ class AmrGeneLevelDownloadsService
     path_output = Tempfile.new().path
     Syscall.pipe_with_output(
       # Fetch reads from the BAM file
-      ["samtools", "view", "-h", "-X", url_bam, path_bai, @gene_id],
+      ["samtools", "view", "-h", "-X", url_bam, path_bai, @index_id],
       # Convert to FASTA format
       "samtools fasta > #{path_output}"
     )

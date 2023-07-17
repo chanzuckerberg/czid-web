@@ -91,14 +91,14 @@
     return nil
   end
 
-  # Download the reads that map to a gene
+  # Download the reads that map to a gene via gene id
   def download_gene_level_reads(gene_id)
     AmrGeneLevelDownloadsService.call(self, AmrGeneLevelDownloadsService::DOWNLOAD_TYPE_READS, gene_id)
   end
 
-  # Download the contigs that map to a gene
-  def download_gene_level_contigs(gene_id)
-    AmrGeneLevelDownloadsService.call(self, AmrGeneLevelDownloadsService::DOWNLOAD_TYPE_CONTIGS, gene_id)
+  # Download the contigs that map to a gene via ARO accession
+  def download_gene_level_contigs(aro_accession)
+    AmrGeneLevelDownloadsService.call(self, AmrGeneLevelDownloadsService::DOWNLOAD_TYPE_CONTIGS, aro_accession)
   end
 
   def uses_modern_host_filtering?

@@ -302,15 +302,16 @@ class WorkflowRunsController < ApplicationController
   end
 
   def amr_gene_level_downloads
-    permitted_params = params.permit(:downloadType, :geneId, :geneName)
+    permitted_params = params.permit(:downloadType, :indexId, :geneName)
     download_type = permitted_params[:downloadType]
-    gene_id = permitted_params[:geneId]
+    # index_id is a gene id for reads and an ARO accession for contigs
+    index_id = permitted_params[:indexId]
     gene_name = permitted_params[:geneName]
     case download_type
     when "download-contigs"
-      file = @workflow_run.download_gene_level_contigs(gene_id)
+      file = @workflow_run.download_gene_level_contigs(index_id)
     when "download-reads"
-      file = @workflow_run.download_gene_level_reads(gene_id)
+      file = @workflow_run.download_gene_level_reads(index_id)
     else
       render(
         json: { status: "Output not found" },

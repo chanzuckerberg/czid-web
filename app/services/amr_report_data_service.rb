@@ -63,6 +63,7 @@ class AmrReportDataService
         "dpm" => @workflow_run.dpm(row["read_coverage_depth"].to_f),
         "read_species" => row["read_species"],
         "contig_species" => row["contig_species"],
+        "aro_accession" => row["aro_accession"],
       }
 
       report_data << report_row

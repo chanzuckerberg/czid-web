@@ -30,6 +30,7 @@ export function getGeneColumn(
       return (
         <CellComponent key={cell.id}>
           <GeneCell
+            aroAccession={row?.original?.aroAccession}
             contigs={row?.original?.contigs}
             geneName={getValue()}
             geneId={row?.original?.geneId}

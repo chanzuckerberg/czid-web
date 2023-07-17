@@ -77,13 +77,13 @@ export const logDownloadOption = ({
 
 export const downloadAmrGeneLevelData = (
   downloadType: string,
-  geneId: string,
+  indexId: string,
   geneName: string,
   workflowRunId: number,
 ) => {
   const params = getURLParamString({
     downloadType: downloadType,
-    geneId: geneId,
+    indexId: indexId,
     geneName: geneName,
   });
   location.href = `/workflow_runs/${workflowRunId}/amr_gene_level_downloads?${params}`;

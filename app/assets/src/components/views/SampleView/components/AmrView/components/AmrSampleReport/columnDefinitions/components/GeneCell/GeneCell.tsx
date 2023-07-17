@@ -12,6 +12,7 @@ import {
 import cs from "./gene_cell.scss";
 
 interface GeneCellProps {
+  aroAccession: string;
   contigs: string | null;
   geneName: string;
   setDetailsSidebarGeneName: (geneName: string | null) => void;
@@ -22,6 +23,7 @@ interface GeneCellProps {
 }
 
 export const GeneCell = ({
+  aroAccession,
   contigs,
   geneName,
   setDetailsSidebarGeneName,
@@ -73,6 +75,7 @@ export const GeneCell = ({
   const renderDownloadOption = (_, option) => {
     return (
       <RenderedGeneLevelDownloadOption
+        aroAccession={aroAccession}
         contigs={contigs}
         geneId={geneId}
         geneName={geneName}

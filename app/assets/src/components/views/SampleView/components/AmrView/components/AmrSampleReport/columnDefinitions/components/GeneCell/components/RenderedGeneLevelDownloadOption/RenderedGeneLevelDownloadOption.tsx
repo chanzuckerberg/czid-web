@@ -23,6 +23,7 @@ export const geneLevelDownloadOptions: SDSFormattedDropdownOption[] = [
 ];
 
 interface GeneLevelDownloadOptionProps {
+  aroAccession: string;
   contigs: string | null;
   geneId: string;
   geneName: string;
@@ -32,6 +33,7 @@ interface GeneLevelDownloadOptionProps {
 }
 
 export const RenderedGeneLevelDownloadOption = ({
+  aroAccession,
   contigs,
   geneId,
   geneName,
@@ -40,7 +42,8 @@ export const RenderedGeneLevelDownloadOption = ({
   workflowRunId,
 }: GeneLevelDownloadOptionProps) => {
   const onOptionClick = value => {
-    downloadAmrGeneLevelData(value, geneId, geneName, workflowRunId);
+    const indexId = value === DOWNLOAD_READS ? geneId : aroAccession;
+    downloadAmrGeneLevelData(value, indexId, geneName, workflowRunId);
   };
   const tooltipText = {
     [DOWNLOAD_CONTIGS]: "There are no contigs for this gene",
