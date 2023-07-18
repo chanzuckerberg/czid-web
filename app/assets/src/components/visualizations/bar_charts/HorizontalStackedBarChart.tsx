@@ -721,8 +721,12 @@ export default class HorizontalStackedBarChart extends React.Component<
                 onYAxisLabelExit={events.onChartElementExit}
               />
             </div>
-            <div className={cs.barCanvas}>
-              <svg width={width - yAxisWidth} height={barCanvasHeight}>
+            <div data-testid="read-lost-canvas" className={cs.barCanvas}>
+              <svg
+                data-testid="read-lost-bar"
+                width={width - yAxisWidth}
+                height={barCanvasHeight}
+              >
                 <g>
                   {options.x.gridVisible && this.renderXGrid()}
                   {this.renderVisibleStackedBars()}
@@ -739,6 +743,7 @@ export default class HorizontalStackedBarChart extends React.Component<
       // dimensions of the chart.
       return (
         <div
+          data-testid="read-lost-container"
           className={cx(className, cs.chart)}
           ref={ref => (this.references.container = ref)}
         >

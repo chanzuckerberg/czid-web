@@ -31,13 +31,13 @@ async function verifyBarChartContent(
   data: any,
   index: number,
 ) {
-  const BARS = "rect";
+  const BARS = '[data-testid*="histogram"]';
   const BAR_CHARTS = ".bar-0";
   await openSamplePage(page, projectName, false, false);
   await expect(page.getByTestId("samples")).toBeVisible();
 
   // click to switch display to bar chart
-  await page.locator(".menuItem-25eT6").nth(1).click();
+  await page.getByTestId("plqc-view").click();
 
   // 20 of 20 samples
   // todo: uncomment once testid gets to staging

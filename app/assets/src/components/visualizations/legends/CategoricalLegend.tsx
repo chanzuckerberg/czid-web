@@ -16,7 +16,11 @@ const CategoricalLegend = ({ data, className }: CategoricalLegendProps) => {
   const renderCategories = () => {
     return data.map(item => {
       return (
-        <div className={cs.category} key={`${item.color}+${item.label}`}>
+        <div
+          data-testid="category-legend"
+          className={cs.category}
+          key={`${item.color}+${item.label}`}
+        >
           <svg className={cs.colorCircle}>
             <circle
               // Circle in the center of the viewBox
@@ -25,7 +29,9 @@ const CategoricalLegend = ({ data, className }: CategoricalLegendProps) => {
               fill={item.color}
             />
           </svg>
-          <span className={cs.label}>{item.label}</span>
+          <span data-testid="category-label" className={cs.label}>
+            {item.label}
+          </span>
         </div>
       );
     });

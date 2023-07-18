@@ -127,13 +127,16 @@ export async function verifySectionDetails(
   sampleId?: number,
   expandSection = true,
 ) {
+  const label_value = '[data-testid*="value"]';
   // expand section; first section is expanded by default
   if (expandSection) {
     await (await getTabSection(page, section)).click();
   }
   // when section has no data
   if (attributes.length === 0) {
-    await expect(page.locator(".noData-2AfzS")).toBeVisible();
+    await expect(page.locator('[data-testid="content"]')).toContainText(
+      "No data",
+    );
   }
 
   // when section has download links
@@ -145,7 +148,10 @@ export async function verifySectionDetails(
         item.text,
       );
       expect(
-        await page.locator(".downloadLink-14o8v").nth(i).getAttribute("href"),
+        await page
+          .locator('[data-testid="download"]')
+          .nth(i)
+          .getAttribute("href"),
       ).toBe(item.href.replace("SAMPLEID", sampleId.toString()));
     }
   }
@@ -153,36 +159,36 @@ export async function verifySectionDetails(
   for (let i = 0; i < data.length; i++) {
     const item = getDataByIndex(data, i);
     if (attributes.includes("name")) {
-      expect(await page.locator(".label-9CR8O").nth(i).textContent()).toBe(
-        item.name,
-      );
+      expect(
+        await page.locator('[data-testid*="tablabel"]').nth(i).textContent(),
+      ).toBe(item.name);
       // todo: validate values but this only be done after testids added
     }
     if (attributes.includes("step")) {
       // get row data
-      const row = page.locator(".readsRemainingRow-2sd9r").nth(i + 1); // to ignore the header
+      const row = page.locator(label_value).nth(i + 1); // to ignore the header
 
       // verify label
-      expect(await row.locator(".labelText-2uB1q").textContent()).toBe(
+      expect(await row.locator('[data-testid*="tablabel"]').textContent()).toBe(
         item.step,
       );
 
       // verify reads remaining
-      expect(
-        await row.locator(".metadataValue-2cDlV").first().textContent(),
-      ).toBe(item.reads_remaining);
+      expect(await row.locator(label_value).first().textContent()).toBe(
+        item.reads_remaining,
+      );
 
       // verify reads remaining percentage
-      expect(
-        await row.locator(".metadataValue-2cDlV").nth(1).textContent(),
-      ).toBe(item.reads_remaining_percent);
+      expect(await row.locator(label_value).nth(1).textContent()).toBe(
+        item.reads_remaining_percent,
+      );
     }
   }
 }
 // selects a section of tab or just the tab in case there is no section, for example Notes
 export async function getTabSection(page: Page, section?: string) {
   let index = 0;
-  const SIDE_BAR_HEADER = ".title-3Oy38";
+  const SIDE_BAR_HEADER = '[data-testid*="-sidebar"]';
   if (section !== undefined) {
     index = sectionIndices[section];
   }

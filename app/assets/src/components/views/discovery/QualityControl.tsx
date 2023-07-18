@@ -799,15 +799,17 @@ function QualityControl({
         {renderSampleStatsInfo()}
         <div className={cs.chartsContainer}>
           <div className={cs.halfPageChart}>
-            <div className={cs.title}>
+            <div data-testid="total-read-check" className={cs.title}>
               Do my samples have enough total reads?
             </div>
             <div className={cs.histogramContainer}>
-              <div className={cs.subtitle}>
+              <div data-testid="total-read-title" className={cs.subtitle}>
                 Total Reads
                 <ColumnHeaderTooltip
+                  data-testid="total-read-tooltip"
                   trigger={
                     <span
+                      data-testid="total-read-info-icon"
                       onFocus={() => {
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
@@ -835,6 +837,7 @@ function QualityControl({
                 />
               </div>
               <div
+                data-testid="total-read-histogram"
                 className={cs.d3Container}
                 ref={histogramContainer => {
                   totalReadsHistogramContainer.current = histogramContainer;
@@ -843,15 +846,17 @@ function QualityControl({
             </div>
           </div>
           <div className={cs.halfPageChart}>
-            <div className={cs.title}>
+            <div data-testid="quality-read-check" className={cs.title}>
               Do my samples have enough quality reads?
             </div>
             <div className={cs.histogramContainer}>
-              <div className={cs.subtitle}>
+              <div data-testid="passed-qc-title" className={cs.subtitle}>
                 Passed QC
                 <ColumnHeaderTooltip
+                  data-testid="passed-qc-tooltip"
                   trigger={
                     <span
+                      data-testid="passed-qc-info-icon"
                       onFocus={() => {
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
@@ -879,6 +884,7 @@ function QualityControl({
                 />
               </div>
               <div
+                data-testid="passed-qc-histogram"
                 className={cs.d3Container}
                 ref={histogramContainer => {
                   qualityReadsHistogramContainer.current = histogramContainer;
@@ -887,15 +893,19 @@ function QualityControl({
             </div>
           </div>
           <div className={cs.halfPageChart}>
-            <div className={cs.title}>
+            <div data-testid="duplicate-read-check" className={cs.title}>
               Are there too many duplicate reads in my library?
             </div>
             <div className={cs.histogramContainer}>
-              <div className={cs.subtitle}>
+              <div
+                data-testid="duplicate-compression-ratio-title"
+                className={cs.subtitle}
+              >
                 Duplicate Compression Ratio
                 <ColumnHeaderTooltip
                   trigger={
                     <span
+                      data-testid="duplicate-compression-ratio-tooltip"
                       onFocus={() => {
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
@@ -927,6 +937,7 @@ function QualityControl({
                 />
               </div>
               <div
+                data-testid="duplicate-compression-histogram"
                 className={cs.d3Container}
                 ref={histogramContainer => {
                   dcrHistogramContainer.current = histogramContainer;
@@ -935,11 +946,12 @@ function QualityControl({
             </div>
           </div>
           <div className={cs.halfPageChart}>
-            <div className={cs.title}>
+            <div data-testid="sufficient-length-check" className={cs.title}>
               Do my samples have sufficient insert lengths?
             </div>
             <div className={cs.histogramContainer}>
               <div
+                data-testid="mean-insert-size-title"
                 className={cx(
                   cs.subtitle,
                   showMeanInsertSizeWarning && cs.messageIncluded,
@@ -947,6 +959,7 @@ function QualityControl({
               >
                 Mean Insert Size
                 <ColumnHeaderTooltip
+                  data-testid="mean-insert-size-tooltip"
                   trigger={
                     <span
                       onFocus={() => {
@@ -1014,6 +1027,7 @@ function QualityControl({
                 )}
               </div>
               <div
+                data-testid="mean-insert-size-histogram"
                 className={cs.d3Container}
                 ref={histogramContainer => {
                   meanInsertSizeHistogramContainer.current = histogramContainer;
@@ -1053,11 +1067,14 @@ function QualityControl({
       <div className={cs.readsLostSection}>
         <div className={cs.chartsContainer}>
           <div className={cs.fullPageChart}>
-            <div className={cs.title}>
+            <div data-testid="sample-processed-check" className={cs.title}>
               How were my samples processed through the pipeline?
             </div>
             <div className={cs.histogramContainer}>
-              <div className={cs.toggleContainer}>
+              <div
+                data-testid="bar-chart-toggle"
+                className={cs.toggleContainer}
+              >
                 <BarChartToggle
                   currentDisplay={normalize ? "percentage" : "count"}
                   onDisplaySwitch={display => {
@@ -1071,9 +1088,10 @@ function QualityControl({
                   }}
                 />
               </div>
-              <div className={cs.subtitle}>
+              <div data-testid="read-lost-title" className={cs.subtitle}>
                 Reads Lost
                 <ColumnHeaderTooltip
+                  data-testid="read-lost-tooltip"
                   trigger={
                     <span
                       onFocus={() => {
@@ -1236,6 +1254,7 @@ function QualityControl({
         />
         {tooltipLocation && histogramTooltipData && (
           <div
+            data-testid="hover-tooltip"
             style={getTooltipStyle(tooltipLocation)}
             className={cx(cs.hoverTooltip, tooltipClass)}
           >

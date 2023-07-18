@@ -18,21 +18,20 @@ export const MENU_ICON = '[data-testid="menu-icons"]';
 
 export const SIDE_LABEL_VALUE = '[[data-testid*="value"]]';
 
-export const CHECK_ALL =
-  "div[role='columnheader'] span[class='checkmark-11_FV']";
+export const CHECK_ALL ='[data-testid="check-all"]';
 
 export const MAP_HEADERS = '[data-testid*="tablabel"]';
 export const MAP_CHECKBOX = '[data-testid="check-box" ]';
 
 export const HELP_OUT =
   "text='Help out by adding more location data to your samples.'";
-export const HOVER_TEXT = ".boldText-32btR";
-export const SIDE_BAR = ".bar-3UrET";
+export const HOVER_TEXT = '[data-testid="hover-tooltip"] div';
+export const SIDE_BAR ='[data-testid*="sidebar"]';
 
 export const MAP_VIEW_STRING = "Map_view";
 
-export const HEADER_READS = ".title-1C3ZM";
-export const LEARN_MORE = "a[class='linkDefault-34rbs']";
+export const HEADER_READS = '[data-testid*="check"]';
+export const LEARN_MORE = '[data-testid*="tooltip"] a';
 
 // export const DATA = {
 //   Total_read: {
@@ -65,10 +64,10 @@ export const LEARN_MORE = "a[class='linkDefault-34rbs']";
 //   "Reads Lost:Reads filtered during each step of the pipeline. The full length of the bar represents the Total Reads. Passed Filters represent the reads that passed quality control and filtering steps. Learn more.";
 // export const READ_URL =
 //   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Reads-Lost";
-export const TOTAL_READ_INFO_ICON = ".infoIcon-pU_hl";
-export const TOTAL_READ_POPUP_CONTENT = ".tooltip-1Y1xx";
+export const TOTAL_READ_INFO_ICON = '[data-testid="total-read-info-icon"]';
+export const TOTAL_READ_POPUP_CONTENT = '[data-testid="total-read-tooltip"]';
 export const BARS = "rect";
-export const BAR_POPUP = ".label-3JH6J";
+export const BAR_POPUP = '[data-testid="hover-tooltip"]';
 export const LEARN_MORE_TEXT = 'text="Learn more."';
 export const PIPELINE_CHART_HEADER =
   "How were my samples processed through the pipeline?";
