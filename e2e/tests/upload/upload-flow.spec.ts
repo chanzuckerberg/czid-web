@@ -5,6 +5,7 @@ import { FIXTURE_DIR, WORKFLOWS } from "../../constants/common";
 import { Metadata } from "../../types/metadata";
 import { getMetadata } from "../../utils/mockData";
 import {
+  cookieBanner,
   fillMetadata,
   getGeneratedSampleName,
   submitUpload,
@@ -129,15 +130,15 @@ test("WGS workflow option happy path", async ({ page }) => {
 
 test("WGS allows uploads basespace, locally", async ({ page }) => {
   await page.goto(`${process.env.BASEURL}/samples/upload`);
-
+  await cookieBanner(page);
   const checkbox = await getCheckboxForWorkflow({
     page,
     workflow: WORKFLOWS.WGS,
   });
   await checkbox.click();
 
-  const local = await page.getByTestId("upload-from-your-computer");
-  const basespace = await page.getByTestId("upload-from-basespace");
+  const local = await page.getByTestId("your-computer");
+  const basespace = await page.getByTestId("basespace");
 
   expect(local).toBeEnabled();
   expect(basespace).toBeEnabled();
@@ -158,12 +159,12 @@ test("user cannot continue unless all required wgs fields completed", async ({
   const continueButton = await page
     .getByTestId("upload-continue-button")
     .locator("button");
-
+  await cookieBanner(page);
   // check text and button disabled status for various invalid conditions
   // no project chosen
-  await continueButton.hover({ force: true });
+  await continueButton.click({ force: true });
   let tooltip = await getUploadTooltip();
-  await expect(tooltip).toContainText("select a project");
+  await expect(tooltip).toContainText("Please select a project to continue");
   await expect(continueButton).toBeDisabled();
 
   // choose a project
@@ -171,9 +172,12 @@ test("user cannot continue unless all required wgs fields completed", async ({
   await page.getByTestId("dropdown-qa-project").click(); // the qa test project
 
   // no workflow selected
-  await continueButton.hover({ force: true });
+
+  await continueButton.click({ force: true });
   tooltip = await getUploadTooltip();
-  await expect(tooltip).toContainText("select an analysis type");
+  await expect(tooltip).toContainText(
+    "Please select an analysis type to continue",
+  );
   await expect(continueButton).toBeDisabled();
 
   // choose workflow
@@ -184,9 +188,9 @@ test("user cannot continue unless all required wgs fields completed", async ({
   await wgsWorkflowOption.click();
 
   // no taxon chosen
-  await continueButton.hover({ force: true });
+  await continueButton.click({ force: true });
   tooltip = await getUploadTooltip();
-  await expect(tooltip).toContainText("select a taxon");
+  await expect(tooltip).toContainText("Please select a taxon to continue");
   await expect(continueButton).toBeDisabled();
 
   // choose a taxon
@@ -195,7 +199,7 @@ test("user cannot continue unless all required wgs fields completed", async ({
   await page.getByText("Unknown").click();
 
   // no ref file uploaded
-  await continueButton.hover({ force: true });
+  await continueButton.click({ force: true });
   tooltip = await getUploadTooltip();
   await expect(tooltip).toContainText("upload a reference sequence");
   await expect(continueButton).toBeDisabled();
@@ -204,9 +208,9 @@ test("user cannot continue unless all required wgs fields completed", async ({
   await uploadRefSequence(page);
 
   // no samples uploaded
-  await continueButton.hover({ force: true });
+  await continueButton.click({ force: true });
   tooltip = await getUploadTooltip();
-  await expect(tooltip).toContainText("select a sample");
+  await expect(tooltip).toContainText("Please select a sample to continue");
   await expect(continueButton).toBeDisabled();
 
   // upload samples
@@ -217,7 +221,7 @@ test("user cannot continue unless all required wgs fields completed", async ({
     path.resolve(`${FIXTURE_DIR}/${SAMPLE_FILE}`),
   );
 
-  await continueButton.hover({ force: true });
+  await continueButton.click({ force: true });
   tooltip = await getUploadTooltip();
   await expect(await tooltip.count()).toEqual(0);
   await expect(continueButton).toBeEnabled();

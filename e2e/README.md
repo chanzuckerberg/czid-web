@@ -41,12 +41,22 @@ Where `environment` is `staging`, `local`, `sandbox`
 `npm run pw:report` opens test results report in the browser
 
 ## download screenshots from github
+
 https://docs.github.com/en/actions/managing-workflow-runs/downloading-workflow-artifacts
 
 # some useful commands
+
 ## stop services
-aws-oidc exec -- docker-compose  down
+
+aws-oidc exec -- docker-compose down
+
 ## run migration
+
 aws-oidc exec -- docker-compose run web rails db:drop db:migrate db:seed
+
 ## start service
-aws-oidc exec -- docker-compose  up
+
+aws-oidc exec -- docker-compose up
+
+npm install -g saucectl
+saucectl run -c ./setup/saucelabs.staging.yml

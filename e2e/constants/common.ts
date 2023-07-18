@@ -18,7 +18,6 @@ export const VISUALIZATIONS = "Visualizations";
 export const TAXON_FILTERS = "Taxon Filters";
 export const BUTTONS = '[data-testid="sample-view-actions"]';
 export const VIEW_ICON = 'data-testid="info-icon"';
-export const PLUS_ICON = '[data-testid="plus-circle"]';
 export const SIDE_HEADERS = '[data-testid*="-sidebar"]';
 export const SAMPLES_COLUMN = '[data-testid*="dropdown-"]';
 export const COLUMNS_LABEL = '[data-testid*="-column-header"]';
@@ -64,7 +63,7 @@ export const CONTINUE = "Continue";
 export const ANALYSIS_TYPE = "analysis-type";
 export const COLLECTION_DATE = "Collection Date";
 export const COLLECTION_LOCATION = "Collection Location";
-export const COLUMN_SELECTOR = '[data-testid="checked"]';
+export const COLUMN_SELECTOR = '[data-testid*="dropdown"]';
 export const UPLOAD_METADATA = "Upload Metadata";
 export const HOST_SEX = "Host Sex";
 export const KNOWN_ORGANISM = "Known Organism";
@@ -72,12 +71,10 @@ export const RNA_DNA = "RNA/DNA Input (ng)";
 export const HOST_GENUS_SPECIES = "Host Genus Species";
 export const ISOLATE = "Isolate";
 export const DISEASES_CONDITIONS = "Diseases and Conditions";
-export const CHECKBOX = 'input[type="checkbox"]';
 export const START_UPLOAD = "Start Upload";
 export const HOST_ORGANISM = "Host Organism";
 export const FIXTURE_DIR = "./fixtures/samples";
 export const SELECT_PROJECT = '[data-testid="select-project"]';
-export const SEARCH = "Search";
 export const TEST_PROJECTS: Record<string, string> = {
   DEV: "omar test",
   STAGING: "floo Neptunium",

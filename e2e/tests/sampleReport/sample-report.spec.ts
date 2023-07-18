@@ -73,6 +73,7 @@ test.describe("Test the Sample Report Sidebar Functionality", () => {
   });
 
   test(`verify side bar on the sample report page`, async ({ page }) => {
+    await page.getByText("Sample Details").click();
     await expect(page.getByTestId("metadata")).toBeVisible();
     await expect(page.getByTestId("pipelines")).toBeVisible();
     await expect(page.getByTestId("notes")).toBeVisible();
@@ -117,21 +118,28 @@ test.describe("Test Sample Report Pipeline Version dropdown", () => {
     await expect(page.getByText("685 rows")).toBeVisible();
   });
 
-  test(`verify coverage viz on the sample report`, async ({ page }) => {
-    async function viewKlebsiellaCoverageViz(page) {
-      await expect(page.getByText("Klebsiella")).toBeVisible();
-      await page.getByText("Klebsiella").hover();
-      await page.getByTestId("hover-action-coverage-viz-570").click();
-    }
+  // TODO(ihan): patch this test after [CZID-2157] reaches staging
+  test.fixme(
+    `verify coverage viz on the sample report bottom bar`,
+    async ({ page }) => {
+      async function viewKlebsiellaCoverageViz(page) {
+        await page.getByText("Klebsiella").nth(0).hover();
+        await page.getByTestId("hover-action-coverage-viz-570").click();
+      }
 
-    // pipeline version v8.0 has 80 Loose NT reads
-    await viewKlebsiellaCoverageViz(page);
-    await expect(page.getByText("Loose NT Reads (80)")).toBeVisible();
+      // pipeline version v8.0 has 80 Loose NT reads
+      await viewKlebsiellaCoverageViz(page);
+      await expect(page.getByText("Loose NT Reads (80)")).toBeVisible();
 
-    // pipeline version v7.1 has 72 Loose NT reads
-    await page.reload();
-    await selectPipelineVersionV7(page);
-    await viewKlebsiellaCoverageViz(page);
-    await expect(page.getByText("Loose NT Reads (78)")).toBeVisible();
-  });
+      // pipeline version v7.1 has 72 Loose NT reads
+      await page.reload();
+      await selectPipelineVersionV7(page);
+
+      // close dialogue
+      await page.locator(".closeIcon-2u7Md").click();
+
+      await viewKlebsiellaCoverageViz(page);
+      await expect(page.getByText("Loose NT Reads (78)")).toBeVisible();
+    },
+  );
 });

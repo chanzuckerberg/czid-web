@@ -74,7 +74,7 @@ export const TOTAL_READ_HELP_LINK = {
   url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
   header: "Do my samples have enough total reads?",
   pop_up:
-    "Total Reads:The total number of single-end reads uploaded. Each end of the paired-end reads count as one read. Learn more.",
+    "Total Reads:Total number of reads uploaded. For paired-end data, each R1 and R2 read counts as one read. Learn more.",
 };
 export const QUALITY_READ_HELP_LINK = {
   url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Passed-QC",

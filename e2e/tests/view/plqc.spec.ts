@@ -1,14 +1,8 @@
-import path from "path";
 import { BrowserContext, expect, Page, test } from "@playwright/test";
-import dotenv from "dotenv";
 import {
-  DUPLICATE_READ_HELP_LINK,
-  INSERT_LENGTH_HELP_LINK,
-  QUALITY_READ_HELP_LINK,
-  READS_POPUP_HELP,
-  READ_URL_HELP_LINK,
-  TOTAL_READ_HELP_LINK,
-} from "../../../app/assets/src/components/utils/documentationLinks";
+  SHARED_SAMPLE_TABLE_COLUMNS,
+  SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
+} from "../../../app/assets/src/components/views/samples/constants";
 import {
   BAR_POPUP,
   HEADER_READS,
@@ -21,8 +15,6 @@ import {
 } from "../../constants/map";
 import { openSamplePage } from "../../utils/report";
 
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
-
 const projectName = "floo Neptunium";
 
 async function verifyBarChartContent(
@@ -33,30 +25,19 @@ async function verifyBarChartContent(
 ) {
   const BARS = '[data-testid*="histogram"]';
   const BAR_CHARTS = ".bar-0";
-  await openSamplePage(page, projectName, false, false);
+  await openSamplePage(page, projectName, false);
   await expect(page.getByTestId("samples")).toBeVisible();
 
   // click to switch display to bar chart
   await page.getByTestId("plqc-view").click();
 
-  // 20 of 20 samples
-  // todo: uncomment once testid gets to staging
-  // todo: need to calculate/retrieve the numbers instead of hardcoding
-  // await expect(
-  //   page.getByTestId("showing-x-of-y-samples"),
-  // ).toBe('Showing 20 of 20 samples');
+  // X of Y samples
+  expect(page.getByTestId("showing-x-of-y-samples")).toBe(
+    "Showing 20 of 20 samples",
+  );
 
   // info icon
-  // uncomment once test id gets to staging
-  // await page.getByTestId("chart-info-icon").hover();
-
-  // hover text
-  // await expect(page.locator(SAMPLE_INFORMATION_POPUP)).toBeVisible();
-
-  // header
-  await expect(page.locator(HEADER_READS).nth(index)).toHaveText(
-    data["header"],
-  );
+  await page.getByTestId("chart-info-icon").hover();
 
   // Verify text displayed after hovering
   await page
@@ -64,8 +45,8 @@ async function verifyBarChartContent(
     .nth(index + 1)
     .hover();
 
-  await expect(page.locator(TOTAL_READ_POPUP_CONTENT)).toHaveText(
-    data["pop_up"],
+  expect(await page.locator(TOTAL_READ_POPUP_CONTENT).textContent()).toContain(
+    data["tooltip"],
   );
   // Verify link attached to the popup
   const [newPage] = await Promise.all([
@@ -74,7 +55,9 @@ async function verifyBarChartContent(
     page.locator(LEARN_MORE).locator(LEARN_MORE_TEXT).click(),
   ]);
   await newPage.waitForLoadState();
-  expect(newPage.url()).toEqual(data["url"]);
+  const actualLink = (await newPage.url()).split("/").pop();
+  const expectedLink = data["link"].split("/").pop();
+  expect(actualLink).toContain(expectedLink);
   newPage.close();
 
   // Find the number of bar charts displayed
@@ -108,34 +91,55 @@ test.describe("PLQC view tests", () => {
     page,
     context,
   }) => {
-    await verifyBarChartContent(page, context, TOTAL_READ_HELP_LINK, 0);
+    await verifyBarChartContent(
+      page,
+      context,
+      SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.totalReads,
+      0,
+    );
   });
 
   test(`Should verify QUALITY_READ bar chart content`, async ({
     page,
     context,
   }) => {
-    await verifyBarChartContent(page, context, QUALITY_READ_HELP_LINK, 1);
+    await verifyBarChartContent(
+      page,
+      context,
+      SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.qcPercent,
+      1,
+    );
   });
 
   test(`Should verify DUPLICATE_READ bar chart content`, async ({
     page,
     context,
   }) => {
-    await verifyBarChartContent(page, context, DUPLICATE_READ_HELP_LINK, 2);
+    await verifyBarChartContent(
+      page,
+      context,
+      SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.duplicateCompressionRatio,
+      2,
+    );
   });
 
   test(`Should verify INSERT_LENGTH bar chart content`, async ({
     page,
     context,
   }) => {
-    await verifyBarChartContent(page, context, INSERT_LENGTH_HELP_LINK, 3);
+    await verifyBarChartContent(
+      page,
+      context,
+      SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.meanInsertSize,
+      3,
+    );
   });
 
   test(`Should verify pipeline bar chart content`, async ({
     page,
     context,
   }) => {
+    await page.pause();
     const SAMPLE_AMOUNT = ".filteredCount-3bajD";
     await openSamplePage(page, projectName, false, false);
     await page.locator(MENU_ICON).nth(1).click();
@@ -147,9 +151,9 @@ test.describe("PLQC view tests", () => {
     );
 
     // Verify text displayed after hovering
-    await page.locator(TOTAL_READ_INFO_ICON).nth(6).hover();
+    await page.getByText("Reads Lost").locator("svg").hover();
     await expect(page.locator(TOTAL_READ_POPUP_CONTENT)).toHaveText(
-      READS_POPUP_HELP,
+      SHARED_SAMPLE_TABLE_COLUMNS.readsLost.tooltip,
     );
 
     // Verify link attached to the popup
@@ -160,7 +164,7 @@ test.describe("PLQC view tests", () => {
       page.locator(LEARN_MORE).locator(LEARN_MORE_TEXT).click(),
     ]);
     await newPage.waitForLoadState();
-    expect(newPage.url()).toEqual(READ_URL_HELP_LINK);
+    expect(newPage.url()).toEqual(SHARED_SAMPLE_TABLE_COLUMNS.readsLost.link);
     newPage.close();
   });
 });

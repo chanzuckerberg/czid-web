@@ -22,8 +22,7 @@ test.describe("Bulk Downloads View tests", () => {
     await expect(page.getByTestId("details-sidebar")).toBeVisible();
 
     // check that there are two sections in the first tab
-    await expect(page.getByTestId("bulk-download-details")).toBeVisible();
-    await expect(page.getByTestId("bulk-download-runs")).toBeVisible();
+    await expect(page.getByTestId("details")).toBeVisible();
 
     // select the second tab
     await page.getByTestId("advanced-download").click();
@@ -31,7 +30,7 @@ test.describe("Bulk Downloads View tests", () => {
     // check that the second tab has download information
     await expect(page.getByTestId("cloud-command-container")).toBeVisible();
     // check that the sidebar closes on click
-    await page.getByTestId("sidebar-close-icon").click();
+    await page.locator('[class*="closeIcon"]').click();
     await expect(page.getByTestId("details-sidebar")).not.toBeVisible();
   });
 

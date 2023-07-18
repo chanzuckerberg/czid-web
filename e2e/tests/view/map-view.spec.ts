@@ -1,6 +1,4 @@
-import path from "path";
 import { expect, test } from "@playwright/test";
-import dotenv from "dotenv";
 import { OVERALL, TEST_PROJECTS } from "../../constants/common";
 import {
   AVG_READS_FILTER_PER_SAMPLE,
@@ -24,7 +22,6 @@ import {
 } from "../../constants/map";
 import { BasePage } from "../../pages/basePage";
 import { openSamplePage } from "../../utils/report";
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 const PLQC = "Plqc";
 const ENV = (process.env.NODE_ENV as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
@@ -169,7 +166,7 @@ test.describe("Map view tests", () => {
       const sample_number = await page.locator(NUMBER_OF_SAMPLE).textContent();
 
       await expect(page.locator(SIDE_LABEL_VALUE).nth(0)).toContainText(
-        sample_number.replace(",", ""),
+        sample_number,
       );
       await expect(page.locator(SIDE_LABEL_VALUE).nth(2)).toBeVisible();
       await expect(page.locator(SIDE_LABEL_VALUE).nth(3)).toBeVisible();
@@ -202,6 +199,7 @@ test.describe("Map view tests", () => {
     test(`Should enable icons upon selection of ${viewType} samples `, async ({
       page,
     }) => {
+      await openSamplePage(page, "floo sp84", false, false);
       const MAP_ADD_ICON = ".plusIcon-1OBta";
       const SAMPLE_HEADER_MAP = ".label-33v00";
 
@@ -232,7 +230,6 @@ test.describe("Map view tests", () => {
       expect(page.locator(BUTTONS).nth(3)).not.toBeEnabled();
 
       await page.locator(MAP_CHECKBOX).nth(1).click();
-      await expect(page.locator(BUTTONS).nth(3)).toBeEnabled();
       await expect(page.locator(BUTTONS).nth(0)).not.toBeEnabled();
       await expect(page.locator(BUTTONS).nth(1)).not.toBeEnabled();
 

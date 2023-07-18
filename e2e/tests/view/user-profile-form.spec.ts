@@ -35,7 +35,11 @@ test.describe("User Profile Form tests", () => {
   async function selectCountry(page: Page) {
     const countryDropdown = await page.getByPlaceholder("Choose Country");
     await countryDropdown.click();
-    await countryDropdown.fill(data.institution.substring(0, 6)); // Type "United"
+    const country = data.country.substring(0, 6);
+    await countryDropdown.fill(country);
+    while (!((await countryDropdown.getAttribute("value")) === country)) {
+      await countryDropdown.fill(country);
+    }
     await page.getByText(data.country).click(); // Select country from autocomplete dropdown menu
   }
 
@@ -95,6 +99,7 @@ test.describe("User Profile Form tests", () => {
     page,
   }) => {
     // Complete all required questions except Full Name
+    await page.pause();
     await selectCountry(page);
     await selectInstitution(page);
     await selectUseCases(page);
@@ -165,27 +170,21 @@ test.describe("User Profile Form tests", () => {
   });
 
   test("Should disallow selecting more than 3 use cases", async ({ page }) => {
-    const checkboxes = await page.getByTestId("czid-usecase-checkbox");
+    const checkboxes = await page.locator(
+      '[data-testid="czid-usecase-checkbox"] input',
+    );
     await checkboxes.nth(0).click();
     await checkboxes.nth(1).click();
     await checkboxes.nth(2).click();
     await checkboxes.nth(3).click();
 
     // First 3 checkboxes should be checked
-    await expect(
-      checkboxes.getByRole("checkbox").nth(0).isChecked(),
-    ).toBeTruthy();
-    await expect(
-      checkboxes.getByRole("checkbox").nth(1).isChecked(),
-    ).toBeTruthy();
-    await expect(
-      checkboxes.getByRole("checkbox").nth(2).isChecked(),
-    ).toBeTruthy();
+    expect(await checkboxes.nth(0).isChecked()).toBeTruthy();
+    expect(await checkboxes.nth(1).isChecked()).toBeTruthy();
+    expect(await checkboxes.nth(2).isChecked()).toBeTruthy();
 
     // 4th checkbox should not be checked
-    await expect(
-      checkboxes.getByRole("checkbox").nth(3).isChecked(),
-    ).toBeFalsy();
+    expect(await checkboxes.nth(3).isChecked()).toBeFalsy();
   });
 
   test("Should disable submit button if expertise is missing", async ({

@@ -26,7 +26,7 @@ test.describe("Pipeline Viz View tests", () => {
     await expect(page.getByTestId("details-sidebar")).toBeVisible();
     const title = await page.getByTestId("stepName").textContent();
     expect(title).toContain("STAR");
-    await expect(page.getByTestId("input-files")).toBeVisible();
-    await expect(page.getByTestId("output-files")).toBeVisible();
+    expect(page.locator(".title-39IcE").nth(1)).toContainText("Input Files");
+    expect(page.locator(".title-39IcE").nth(2)).toContainText("Output Files");
   });
 });

@@ -40,7 +40,6 @@ const workflows = [
   "Antimicrobial Resistance",
 ];
 const CANADA = "Alberta, Canada";
-const BEXAR = "Bexar County, Texas, USA";
 
 const ENV = (process.env.NODE_ENV as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
@@ -120,11 +119,7 @@ test.describe("Sample filtering tests", () => {
       await page.getByText(LOCATION).nth(0).click();
 
       // select two locations
-      await page
-        .getByTestId("dropdown-menu")
-        .getByText(CANADA)
-        .nth(0)
-        .click();
+      await page.getByTestId("dropdown-menu").getByText(CANADA).nth(0).click();
       await page.getByTestId("dropdown-menu").getByText(BEXAR).nth(0).click();
       await page.keyboard.press(ESCAPE);
 

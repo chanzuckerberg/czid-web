@@ -80,18 +80,15 @@ export async function openSamplePage(
   await page.goto(`${process.env.BASEURL}/my_data`);
   await page.getByTestId(MENU_ITEM_PUBLIC).click();
   await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
-  await page.locator("text=Accept All Cookies").click();
-  if (await page.locator(".title").isVisible()) {
-    await page.locator(".title").click();
-  } else {
-    while (
-      (await page.getByPlaceholder(SEARCH_PUBLIC).getAttribute("value")) !==
-      projectName
-    ) {
-      await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
-    }
-    await page.locator(".title").click();
+  await page.waitForTimeout(300);
+  while (
+    (await page.getByPlaceholder(SEARCH_PUBLIC).getAttribute("value")) !==
+    projectName
+  ) {
+    await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
+    await page.waitForTimeout(300);
   }
+  await page.locator(".title").click();
   // select metagenonomics samples
   await page.getByTestId(METAGENOMICS.toLowerCase()).click();
 
@@ -100,17 +97,19 @@ export async function openSamplePage(
 
   // expand side bar
   if (openDetails) await page.getByText("Sample Details").click();
+  // await cookieBanner(page);
 }
 
 export async function verifySectionTitles(
   page: Page,
   sectionTitles: Record<string, string>,
 ) {
-  Object.keys(sectionTitles).forEach(async section => {
+  for (const section of Object.keys(sectionTitles)) {
     const sectionTitle = sectionTitles[section];
     await expect(await getTabSection(page, section)).toHaveText(sectionTitle);
-  });
+  }
 }
+
 /**
  *
  * @param page This function needs to be refactored once we have testid; at the moment we are doing a lot

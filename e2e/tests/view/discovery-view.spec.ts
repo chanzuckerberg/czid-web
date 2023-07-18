@@ -52,7 +52,7 @@ const projectName = TEST_PROJECTS[ENV.toUpperCase()];
 const url =
   "public?currentDisplay=table&currentTab=samples&mapSidebarTab=summary&projectId=875&showFilters=true&showStats=true&workflow=short-read-mngs";
 async function getTextOnly(page: Page, id: string) {
-  return (await page.getByTestId(id).textContent()).replace(/[-_\d]/g, "");
+  return (await page.getByTestId(id).textContent())?.replace(/[-_\d]/g, "");
 }
 async function verifyElement(page: Page, n: number, locator: string) {
   for (let i = 0; i < n; i++) {
@@ -103,7 +103,7 @@ test.describe("Discovery view tests", () => {
       );
 
       expect(await getTextOnly(page, "antimicrobial-resistance")).toBe(
-        "Antimicrobial ResistanceBETA",
+        "Antimicrobial Resistance",
       );
 
       if (sampleType === METAGENOMICS) {

@@ -17,14 +17,13 @@ import {
   KNOWN_ORGANISM,
   RNA_DNA,
   SAMPLE_TYPE,
-  SEARCH,
   SELECT_PROJECT,
   START_UPLOAD,
   UPLOAD_METADATA,
   WORKFLOWS,
 } from "../constants/common";
 import { Metadata } from "../types/metadata";
-import { findByTextRole, pressKey } from "../utils/page";
+import { pressKey } from "../utils/page";
 import { getFixture } from "./common";
 import { getMetadataField } from "./selectors";
 
@@ -51,11 +50,8 @@ export async function uploadSampleFiles(
 ): Promise<any> {
   // select project
   await page.locator(SELECT_PROJECT).click();
-  await (
-    await findByTextRole(page, SEARCH)
-  ).type(projectName, {
-    timeout: 1000,
-  });
+  // type in search box
+  await page.locator('input[placeholder="Search"]').type(projectName);
 
   await page.getByText(projectName).click();
 
@@ -83,23 +79,21 @@ export async function uploadSampleFiles(
     expect(wgsWorkflowOption).toContainText(REF_FILENAME);
 
     // test file can be removed
-    await wgsWorkflowOption.getByTestId("clear-uploaded-file-button").click();
+    await wgsWorkflowOption.getByTestId("ClearIcon").click();
     expect(wgsWorkflowOption).not.toContainText(REF_FILENAME);
 
     // upload a reference sequence again
     await uploadRefSequence(page);
   }
-
-  // select files
-  const fileInputSelector = "[data-testid='drop-sample-files'] input";
-  const filePath = path.resolve(`${FIXTURE_DIR}/${sampleFiles}`);
-  await page.setInputFiles(fileInputSelector, filePath);
-
   const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
   if ((await cookieBanner.count()) > 0) {
     await cookieBanner.click();
   }
-
+  // select files
+  const fileInputSelector = '[data-testid="drop-sample-files"] input';
+  const filePath = path.resolve(`${FIXTURE_DIR}/${sampleFiles}`);
+  await page.waitForTimeout(4000);
+  await page.setInputFiles(fileInputSelector, filePath);
   await page.getByText(CONTINUE).click();
 
   // wait for page and file data to be imported
@@ -134,9 +128,7 @@ export async function fillMetadata(
 
   // nucleotide type
   await page.getByTestId("dropdown-menu").nth(1).click();
-  await page
-    .getByTestId(metaData["Nucleotide Type"] as string)
-    .click();
+  await page.getByTestId(metaData["Nucleotide Type"] as string).click();
 
   // await page.getByText(metaData["Nucleotide Type"] as string).click();
 
@@ -153,7 +145,7 @@ export async function fillMetadata(
   const optionalFields: Array<string> =
     metadataFieldFixture["allOptionalFields"];
   // clicking the + icon
-  await page.getByTestId("select-columns").click();
+  await page.locator('[data-testid="select-columns"]:visible').click();
   const items = page.locator(COLUMN_SELECTOR);
   const indexOfFirstOptionalField = 5;
   for (let i = indexOfFirstOptionalField; i < (await items.count()); i++) {
@@ -245,4 +237,11 @@ export async function getGeneratedSampleName(
   page: Page,
 ): Promise<string | null> {
   return page.getByTestId("sample-name").textContent();
+}
+
+export async function cookieBanner(page: Page): Promise<void> {
+  const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
+  if ((await cookieBanner.count()) > 0) {
+    await cookieBanner.click();
+  }
 }

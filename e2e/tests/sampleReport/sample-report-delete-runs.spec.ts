@@ -32,7 +32,8 @@ test.describe("My Illumina sample report pipeline run deletion tests", () => {
   });
 });
 
-test.describe("Another user's Illumina sample report deletion tests", () => {
+test.fixme("Another user's Illumina sample report deletion tests", () => {
+  // seems like this sample id does not exist anymore
   const stagingSampleId = 26101;
 
   test.beforeEach(async ({ page }) => {

@@ -8,6 +8,7 @@ test.describe("Sample report view test", () => {
     page,
   }) => {
     // go to sample page
+
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     // navigate to table view

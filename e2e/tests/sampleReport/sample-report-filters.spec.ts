@@ -90,12 +90,12 @@ test.describe("Sample report filter test", () => {
       "Uncategorized",
     ];
     for (let i = 0; i < drop_down.length; i++) {
-      await expect(page.locator(drop_down[i])).toBeVisible();
+      await page.locator(CATEGORIES_FILTER).click();
       await page.locator(drop_down[i]).click();
       await expect(
         page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`),
       ).toBeVisible();
-
+      await page.keyboard.press("Escape");
       // test Remove filter x button
       await page
         .locator(FILTER_TAG)
@@ -108,8 +108,10 @@ test.describe("Sample report filter test", () => {
     }
 
     for (let i = 0; i < drop_down.length; i++) {
+      await page.locator(CATEGORIES_FILTER).click();
       await expect(page.locator(drop_down[i])).toBeVisible();
       await page.locator(drop_down[i]).click();
+      await page.keyboard.press("Escape");
     }
     // test Stats bar
     await expect(page.getByTestId("stats-info")).not.toBeEmpty();

@@ -2,6 +2,7 @@ export const TREE_NODES = '[data-testid="clickable"]';
 
 export const NUMBER_INPUT = 'input[type="number"]';
 
+export const PATHOGEN_LINk = 'a[class="linkDefault-34rbs"]';
 
 export const FILTER_RESULT = '[data-testid="filter-tag"]';
 export const SEARCH_BAR = '[placeholder="Taxon name"]';
@@ -94,7 +95,7 @@ export const EUKARYOTA_FILTER = '[data-testid="dropdown-eukaryota"]';
 export const VIROIDS_FILTER = '[data-testid="dropdown-viroids"]';
 export const VIRUSES_FILTER = '[data-testid="dropdown-viruses"]';
 export const UNCATEGORIZED_FILTER = '[data-testid="dropdown-uncategorized"]';
-export const CATEGORIES_FILTER = '[data-testid="categories-filter"]';
+export const CATEGORIES_FILTER = '[data-testid="category-filter"]';
 export const FILTERS_DROPDOWN =
   '[data-testid="dropdown-menu"]';
 export const THRESHOLD_FILTERS = [
