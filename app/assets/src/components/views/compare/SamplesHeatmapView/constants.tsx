@@ -59,8 +59,12 @@ export const HEATMAP_DOWNLOAD_REPORT_OPTIONS: HeatmapDownloadOption[] = [
       <React.Fragment>
         Sample report data (samples x taxons) combined with all sample metadata
         and taxon metadata in{" "}
-        <ExternalLink href="https://biom-format.org/">BIOM</ExternalLink>{" "}
-        format.{" "}
+        <ExternalLink href="https://biom-format.org/">BIOM</ExternalLink> format
+        compatible with{" "}
+        <ExternalLink href="https://microbiomedb.org/mbio/app">
+          MicrobiomeDB
+        </ExternalLink>
+        .{" "}
         <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360042575714-Initiate-a-Bulk-Download">
           Learn More
         </ExternalLink>

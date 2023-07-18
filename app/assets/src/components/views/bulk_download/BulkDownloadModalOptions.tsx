@@ -382,7 +382,11 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
                 <ExternalLink href="https://biom-format.org/">
                   BIOM
                 </ExternalLink>{" "}
-                format.{" "}
+                format compatible with{" "}
+                <ExternalLink href="https://microbiomedb.org/mbio/app">
+                  MicrobiomeDB
+                </ExternalLink>
+                .{" "}
               </>
             ) : (
               ""
