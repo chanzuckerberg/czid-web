@@ -1310,6 +1310,7 @@ class UploadSampleStep extends React.Component<
       selectedTechnology,
       selectedProject,
       selectedWetlabProtocol,
+      selectedWorkflows,
       validatingSamples,
       localSamples,
       refSeqFile,
@@ -1317,49 +1318,68 @@ class UploadSampleStep extends React.Component<
     } = this.state;
     const { allowedFeatures } = this.context || {};
 
-    let workflowsValid: boolean;
+    let isMNGSWorkflowValid = !this.isWorkflowSelected(
+      UPLOAD_WORKFLOWS.MNGS.value,
+    );
+    const isAMRWorkflowValid = true; // currently no conditions where an AMR upload would be invalid
+    let isCGWorkflowValid = !this.isWorkflowSelected(
+      UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
+    );
+    let isWGSWorkflowValid = !this.isWorkflowSelected(
+      UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
+    );
+
     if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value)) {
       // If ont_v1 is enabled, the user must select either Illumina or Nanopore before proceeding.
       // If they select Nanopore, they must additionally select their Guppy Basecaller Setting.
       if (allowedFeatures.includes(ONT_V1_FEATURE)) {
         switch (selectedTechnology) {
           case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
-            workflowsValid = true;
+            isMNGSWorkflowValid = true;
             break;
           case SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE:
-            workflowsValid = !!selectedGuppyBasecallerSetting;
+            isMNGSWorkflowValid = !!selectedGuppyBasecallerSetting;
             break;
           default:
-            workflowsValid = false;
+            isMNGSWorkflowValid = false;
             break;
         }
       } else {
         // If ont_v1 is not enabled, then metagenomics will automatically use Illumina as the sequencing platform,
         // so no additional selections are required.
-        workflowsValid = true;
+        isMNGSWorkflowValid = true;
       }
-    } else if (
+    }
+
+    if (
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value)
     ) {
       switch (selectedTechnology) {
         case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
         case SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE:
-          workflowsValid = !!selectedWetlabProtocol;
+          isCGWorkflowValid = !!selectedWetlabProtocol;
           break;
         default:
-          workflowsValid = false;
+          isCGWorkflowValid = false;
           break;
       }
-    } else if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.AMR.value)) {
-      workflowsValid = true;
-    } else if (
+    }
+
+    if (
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value)
     ) {
-      workflowsValid = !!refSeqFile && !!selectedTaxon;
+      isWGSWorkflowValid = !!refSeqFile && !!selectedTaxon;
       if (!this.isBedFileNameValid() || !this.isRefSeqFileNameValid()) {
-        workflowsValid = false;
+        isWGSWorkflowValid = false;
       }
     }
+
+    const areAllWorkflowsValid =
+      selectedWorkflows.size > 0 &&
+      isMNGSWorkflowValid &&
+      isAMRWorkflowValid &&
+      isCGWorkflowValid &&
+      isWGSWorkflowValid;
 
     // Note: we currently only run validation checks on locally uploaded samples
     return allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
@@ -1367,12 +1387,12 @@ class UploadSampleStep extends React.Component<
       ? selectedProject !== null &&
           size(this.getSelectedSamples(currentTab)) > 0 &&
           !validatingSamples &&
-          workflowsValid &&
+          areAllWorkflowsValid &&
           localSamples.every(element => element.finishedValidating)
       : selectedProject !== null &&
           size(this.getSelectedSamples(currentTab)) > 0 &&
           !validatingSamples &&
-          workflowsValid;
+          areAllWorkflowsValid;
   };
 
   getAnalyticsContext = () => {
