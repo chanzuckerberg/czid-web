@@ -191,6 +191,12 @@ module ElasticsearchQueryHelper
                 "background_id": background_id || Rails.configuration.x.constants.default_background,
               },
             },
+            # include only species level taxa
+            {
+              "term": {
+                "tax_level": 1,
+              },
+            },
             # no taxa with neither family nor genus classification
             {
               "range": {
@@ -327,6 +333,12 @@ module ElasticsearchQueryHelper
             {
               "terms": {
                 "tax_id": known_pathogens,
+              },
+            },
+            # only species level taxa
+            {
+              "term": {
+                "tax_level": 1,
               },
             },
             # no taxa with neither family nor genus classification
