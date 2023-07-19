@@ -201,6 +201,8 @@ class SfnCgPipelineDispatchService
       "nCoV-2019/V4"
     when protocols[:varskip]
       "NEB_VarSkip/V1a"
+    when protocols[:artic_v5]
+      "nCoV-2019/V5"
     else
       if @workflow_run.inputs&.[]("wetlab_protocol")
         raise InvalidWetlabProtocolError.new(@workflow_run.inputs&.[]("wetlab_protocol"), technology)
@@ -227,7 +229,7 @@ class SfnCgPipelineDispatchService
                             # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
                             primer_set: nanopore_primer_set,
-                            primer_schemes: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic-primer-schemes_v5.tar.gz",
+                            primer_schemes: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic-primer-schemes_v6.tar.gz",
                           }
                         elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina]
                           {

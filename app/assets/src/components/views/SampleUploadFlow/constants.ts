@@ -241,6 +241,10 @@ export const CG_NANOPORE_WETLAB_OPTIONS = [
     text: CG_WETLAB_DISPLAY_NAMES.varskip,
     value: "varskip",
   },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.artic_v5,
+    value: "artic_v5",
+  },
 ];
 
 export const DEFAULT_NANOPORE_WETLAB_OPTION = "artic";
