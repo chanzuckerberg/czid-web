@@ -82,6 +82,7 @@ export const GeneCell = ({
         option={option}
         reads={reads}
         workflowRunId={workflowRunId}
+        workflowWdlVersion={workflowWdlVersion}
       />
     );
   };

@@ -83,3 +83,7 @@ export const usesLatestCardDbVersion = pipelineVersion => {
 export const isAmrGeneLevelDownloadAvailable = pipelineVersion => {
   return isPipelineVersionAtLeast(pipelineVersion, "1.1.0");
 };
+
+export const isAmrGeneLevelContigDownloadAvailable = pipelineVersion => {
+  return isPipelineVersionAtLeast(pipelineVersion, "1.2.14");
+};

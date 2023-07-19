@@ -1,6 +1,7 @@
 import { MenuItem, Tooltip } from "@czi-sds/components";
 import React from "react";
 import { TwoWayKeyStringMap } from "~/components/utils/objectUtil";
+import { isAmrGeneLevelContigDownloadAvailable } from "~/components/utils/pipeline_versions";
 import { downloadAmrGeneLevelData } from "~/components/views/SampleView/components/SampleViewHeader/PrimaryHeaderControls/AmrDownloadDropdown/amrDownloadUtils";
 import {
   DOWNLOAD_CONTIGS,
@@ -30,6 +31,7 @@ interface GeneLevelDownloadOptionProps {
   option: SDSFormattedDropdownOption;
   reads: string | null;
   workflowRunId: number;
+  workflowWdlVersion: string;
 }
 
 export const RenderedGeneLevelDownloadOption = ({
@@ -40,18 +42,26 @@ export const RenderedGeneLevelDownloadOption = ({
   option,
   reads,
   workflowRunId,
+  workflowWdlVersion,
 }: GeneLevelDownloadOptionProps) => {
   const onOptionClick = value => {
     const indexId = value === DOWNLOAD_READS ? geneId : aroAccession;
     downloadAmrGeneLevelData(value, indexId, geneName, workflowRunId);
   };
+
   const tooltipText = {
-    [DOWNLOAD_CONTIGS]: "There are no contigs for this gene",
+    [DOWNLOAD_CONTIGS]: isAmrGeneLevelContigDownloadAvailable(
+      workflowWdlVersion,
+    )
+      ? "There are no contigs for this gene"
+      : "Gene-level contig download is not available for pipeline runs before v1.2.14",
     [DOWNLOAD_READS]: "There are no reads for this gene",
   };
   const isContigDownloadDisabled =
     option.name === DOWNLOAD_TYPE_TO_NAME.get(DOWNLOAD_CONTIGS) &&
-    (contigs === "0" || contigs === null);
+    (!isAmrGeneLevelContigDownloadAvailable(workflowWdlVersion) ||
+      contigs === "0" ||
+      contigs === null);
   const isReadDownloadDisabled =
     option.name === DOWNLOAD_TYPE_TO_NAME.get(DOWNLOAD_READS) &&
     (reads === "0" || reads === null);
