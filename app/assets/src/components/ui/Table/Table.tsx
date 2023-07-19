@@ -169,6 +169,7 @@ export const Table = <T,>({
 
   return (
     <TableVirtuoso
+      style={{ maxHeight: "calc(100% - 185px)" }}
       totalCount={rows.length}
       components={{
         Table: StyledSdsTable,
