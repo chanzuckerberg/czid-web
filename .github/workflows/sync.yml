@@ -1,9 +1,8 @@
-name: idseq-web sync tasks
+name: czid-web sync tasks
 
 on:
   push:
-    branches:
-      main
+    branches: main
 
 jobs:
   sync_repo:
@@ -16,5 +15,5 @@ jobs:
           git fetch --unshallow
           eval $(ssh-agent)
           echo "${{secrets.IDSEQ_WEB_SYNC}}" | ssh-add -
-          git remote add idseq-web git@github.com:chanzuckerberg/idseq-web.git
-          git push --force idseq-web $(basename $GITHUB_REF)
+          git remote add czid-web git@github.com:chanzuckerberg/czid-web.git
+          git push --force czid-web $(basename $GITHUB_REF)
