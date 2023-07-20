@@ -217,7 +217,9 @@ export const AmrFiltersContainer = ({
               <DrugClassFilter
                 hideFilters={hideFilters}
                 drugClassOptions={
-                  drugClassList?.map(drugClass => ({ name: drugClass })) ?? []
+                  drugClassList
+                    ?.sort()
+                    .map(drugClass => ({ name: drugClass })) ?? []
                 }
                 onDrugClassChange={updateDrugClassFilter}
               />

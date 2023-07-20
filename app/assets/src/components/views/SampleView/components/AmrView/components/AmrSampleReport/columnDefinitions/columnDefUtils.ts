@@ -48,7 +48,7 @@ export const persistColumnVisibilityToLocalStorage = (
         ...obj,
         [columnId]: visibleColumnIds?.includes(columnId),
       }),
-      currentLocalStorage,
+      currentLocalStorage?.columnVisibility,
     ),
   });
 };

@@ -39,7 +39,11 @@ export const getDefaultCell = (
         className={cx(alignClassName, headerGroupClassName)}
         style={generateWidthStyles(cell.column)}
         key={cell.id}
-        primaryText={value === "" || value === -1 ? NO_CONTENT_FALLBACK : value}
+        primaryText={
+          value === "" || value === null || value === -1
+            ? NO_CONTENT_FALLBACK
+            : value
+        }
         shouldTextWrap
         primaryTextWrapLineCount={2}
         shouldShowTooltipOnHover={shouldShowTooltip(value)}

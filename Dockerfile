@@ -4,12 +4,12 @@ FROM ruby:3.1.2-buster
 # well as RubyGems. As the Ruby image itself is based on a
 # Debian image, we use apt-get to install those.
 RUN apt-get update && \
-    apt-get install -y \
-      build-essential \
-      python3-dev \
-      python3-pip \
-      lsb-release \
-      apt-transport-https
+  apt-get install -y \
+  build-essential \
+  python3-dev \
+  python3-pip \
+  lsb-release \
+  apt-transport-https
 
 # Install samtools (note: `apt-get install samtools` installs samtools 1.9, which is missing features such as the "-X" flag)
 RUN curl -L https://github.com/samtools/samtools/releases/download/1.17/samtools-1.17.tar.bz2 | \
@@ -63,16 +63,8 @@ RUN npm ci --omit=optional
 # mariadb-client, and we found some incompatibility with virtual generated
 # columns when importing into non-MariaDB MySQL Community Server.
 # More info about mysql apt repository: https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
-ARG MYSQL_APT_DEB=mysql-apt-config_0.8.22-1_all.deb
-RUN wget https://dev.mysql.com/get/${MYSQL_APT_DEB}
-RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections && \
-  DEBIAN_FRONTEND=noninteractive apt install ./${MYSQL_APT_DEB}
-
-# mysql-client does not exist for M1 Macs / arm64, so force debian to install an amd64 version
-RUN DPKG_ARCH=$(dpkg --print-architecture ) && if [ $DPKG_ARCH = arm64 ]; then dpkg --add-architecture amd64; fi
-
-RUN apt-get update && \
-  apt-get install -y mysql-community-client mysql-client
+RUN apt-get install libaio1
+RUN wget http://repo.mysql.com/apt/debian/pool/mysql-5.7/m/mysql-community/mysql-community-client_5.7.42-1debian10_amd64.deb && dpkg -i mysql-community-client*.deb && rm mysql-community-client*.deb
 
 # Generate the app's static resources using npm/webpack
 # Increase memory available to node to 6GB (from default 1.5GB). At this time, our self-hosted Github runner has ~16GB.
