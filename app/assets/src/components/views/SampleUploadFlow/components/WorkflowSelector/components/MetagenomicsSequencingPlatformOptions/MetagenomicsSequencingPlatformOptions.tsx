@@ -1,5 +1,10 @@
 import cx from "classnames";
 import React from "react";
+import { ILLUMINA_MNGS_PINNED_PIPELINE_VERSION_HELP_LINK } from "~/components/utils/documentationLinks";
+import {
+  isPipelineFeatureAvailable,
+  SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE,
+} from "~/components/utils/pipeline_versions";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
@@ -50,6 +55,14 @@ const MetagenomicsSequencingPlatformOptions = ({
       <div className={cs.technologyOptions}>
         <IlluminaSequencingPlatformOption
           isCg={false}
+          pinnedVersionHelpLink={
+            projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value] &&
+            !isPipelineFeatureAvailable(
+              SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE,
+              projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value],
+            ) &&
+            ILLUMINA_MNGS_PINNED_PIPELINE_VERSION_HELP_LINK
+          }
           isSelected={selectedTechnology === ILLUMINA}
           onClick={() => onTechnologyToggle(MNGS, ILLUMINA)}
           selectedWetlabProtocol={selectedWetlabProtocol}

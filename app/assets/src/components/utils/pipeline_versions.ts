@@ -4,6 +4,10 @@ export const COVERAGE_VIZ_FEATURE = "COVERAGE_VIZ_PIPELINE_VERSION";
 export const CONSENSUS_GENOME_FEATURE = "CONSENSUS_GENOME_PIPELINE_VERSION";
 export const ACCESSION_COVERAGE_STATS_FEATURE =
   "ACCESSION_COVERAGE_STATS_FEATURE";
+export const SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE =
+  "SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE";
+export const AMR_MODERN_HOST_FILTERING_FEATURE =
+  "AMR_MODERN_HOST_FILTERING_FEATURE";
 
 export const MINIMUM_VERSIONS = {
   [MASS_NORMALIZED_FEATURE]: "4.0",
@@ -11,6 +15,9 @@ export const MINIMUM_VERSIONS = {
   [COVERAGE_VIZ_FEATURE]: "3.6",
   [CONSENSUS_GENOME_FEATURE]: "3.7",
   [ACCESSION_COVERAGE_STATS_FEATURE]: "6.0",
+  // Pipeline versions are pinned for projects not using modern host filtering
+  [SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE]: "8.0.0",
+  [AMR_MODERN_HOST_FILTERING_FEATURE]: "0.3.1",
 };
 
 /* Compares two strings with required major, minor, and patch versions and
@@ -84,6 +91,7 @@ export const isAmrGeneLevelDownloadAvailable = pipelineVersion => {
   return isPipelineVersionAtLeast(pipelineVersion, "1.1.0");
 };
 
+// Checks if gene-level contig downloads are available for the AMR workflow run
 export const isAmrGeneLevelContigDownloadAvailable = pipelineVersion => {
   return isPipelineVersionAtLeast(pipelineVersion, "1.2.14");
 };

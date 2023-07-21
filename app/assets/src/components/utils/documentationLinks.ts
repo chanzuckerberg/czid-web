@@ -70,6 +70,10 @@ export const AMR_PIPELINE_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15091031482644-AMR-Pipeline-Workflow";
 export const CG_PIPELINE_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13785499135124-SARS-CoV-2-Pipeline";
+export const ILLUMINA_MNGS_PINNED_PIPELINE_VERSION_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-mNGS-Data-through-the-Web-App#analysis-type";
+export const AMR_PINNED_PIPELINE_VERSION_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15312621892372#analysis-type";
 export const TOTAL_READ_HELP_LINK = {
   url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
   header: "Do my samples have enough total reads?",

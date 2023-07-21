@@ -18,6 +18,7 @@ interface IlluminaSequencingPlatformOptionProps {
   isSelected: boolean;
   onClick(): void;
   onWetlabProtocolChange?(value: string): void;
+  pinnedVersionHelpLink?: string;
   selectedWetlabProtocol?: string;
   pipelineVersion?: string;
 }
@@ -27,6 +28,7 @@ const IlluminaSequencingPlatformOption = ({
   isSelected,
   onClick,
   onWetlabProtocolChange,
+  pinnedVersionHelpLink,
   selectedWetlabProtocol,
   pipelineVersion,
 }: IlluminaSequencingPlatformOptionProps) => {
@@ -47,6 +49,7 @@ const IlluminaSequencingPlatformOption = ({
           ? MNGS_ILLUMINA_PIPELINE_GITHUB_LINK
           : CG_ILLUMINA_PIPELINE_GITHUB_LINK
       }
+      pinnedVersionHelpLink={pinnedVersionHelpLink}
       isSelected={isSelected}
       onClick={onClick}
       technologyName="Illumina"

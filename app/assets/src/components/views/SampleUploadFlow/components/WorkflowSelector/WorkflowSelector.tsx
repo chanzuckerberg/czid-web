@@ -3,11 +3,18 @@ import React, { useContext } from "react";
 import { TaxonOption } from "~/components/common/filters/types";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { AMR_PIPELINE_GITHUB_LINK } from "~/components/utils/documentationLinks";
+import {
+  AMR_PINNED_PIPELINE_VERSION_HELP_LINK,
+  AMR_PIPELINE_GITHUB_LINK,
+} from "~/components/utils/documentationLinks";
 import {
   ONT_V1_FEATURE,
   WGS_CG_UPLOAD_FEATURE,
 } from "~/components/utils/features";
+import {
+  AMR_MODERN_HOST_FILTERING_FEATURE,
+  isPipelineFeatureAvailable,
+} from "~/components/utils/pipeline_versions";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
 import { IconCovidVirusXLarge } from "~ui/icons";
@@ -193,6 +200,14 @@ const WorkflowSelector = ({
         sequencingPlatformOptions={
           <div className={cs.technologyContent}>
             <PipelineVersionIndicator
+              pinnedVersionHelpLink={
+                projectPipelineVersions?.[WORKFLOWS.AMR.value] &&
+                !isPipelineFeatureAvailable(
+                  AMR_MODERN_HOST_FILTERING_FEATURE,
+                  projectPipelineVersions?.[WORKFLOWS.AMR.value],
+                ) &&
+                AMR_PINNED_PIPELINE_VERSION_HELP_LINK
+              }
               pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.AMR.value]}
               version={projectPipelineVersions?.[WORKFLOWS.AMR.value]}
             />

@@ -15,6 +15,7 @@ interface SequencingPlatformOptionProps {
   isDisabled?: boolean;
   isSelected: boolean;
   onClick(): void;
+  pinnedVersionHelpLink?: string;
   pipelineVersion?: string;
   pipelineHelpLink: string;
   technologyName: string;
@@ -29,6 +30,7 @@ const SequencingPlatformOption = ({
   githubLink,
   isBeta = false,
   isDisabled = false,
+  pinnedVersionHelpLink,
   isSelected,
   onClick,
   pipelineVersion,
@@ -102,6 +104,7 @@ const SequencingPlatformOption = ({
             <div className={commonStyles.technologyContent}>
               {technologyDetails}
               <PipelineVersionIndicator
+                pinnedVersionHelpLink={pinnedVersionHelpLink}
                 pipelineHelpLink={pipelineHelpLink}
                 version={pipelineVersion}
               />
