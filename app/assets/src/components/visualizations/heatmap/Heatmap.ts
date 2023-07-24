@@ -45,6 +45,7 @@ export interface HeatmapData {
   }[];
   values: RowWithIndex[];
   pathogenFlags?: string[][][];
+  taxonFilterState?: Record<string, Record<string, boolean>>;
 }
 
 type RowWithIndex = number[] & { idx?: number };
@@ -105,6 +106,7 @@ export default class Heatmap {
   totalMetadataHeight: $TSFixMe;
   totalRowAddLinkHeight: $TSFixMe;
   width: $TSFixMe;
+
   constructor(
     container: HTMLElement,
     data: HeatmapData,
@@ -343,15 +345,23 @@ export default class Heatmap {
 
     this.cells = [];
     for (let i = 0; i < this.rowLabels.length; i++) {
+      const { taxonFilterState } = this.data;
       this.rowLabels[i].rowIndex = i;
+      const { filterStateRow } = this.rowLabels[i];
+
       for (let j = 0; j < this.columnLabels.length; j++) {
         this.columnLabels[j].columnIndex = j;
+        const { filterStateColumn } = this.columnLabels[j];
+        const meetsUserFilters =
+          taxonFilterState[filterStateRow][filterStateColumn];
+
         this.cells.push({
           id: `${i},${j}`,
           rowIndex: i,
           columnIndex: j,
           value: this.data.values[i][j],
           pathogenFlags: this.data.pathogenFlags?.[i]?.[j] ?? [],
+          meetsUserFilters,
         });
       }
     }
@@ -1190,11 +1200,23 @@ export default class Heatmap {
       csvHeaders.push(column.label);
 
       sortedRows.forEach(row => {
-        const cell = find(
-          { columnIndex: column.columnIndex, rowIndex: row.rowIndex },
-          this.filteredCells,
-        );
-        csvRows[row.pos].push(cell?.value || 0);
+        const { columnIndex } = column;
+        const { rowIndex } = row;
+        const cell = find({ columnIndex, rowIndex }, this.filteredCells);
+
+        // this.filteredCells contains cells where the row has not been hidden
+        // (i.e. rowLabels entry hidden = false).  Despite the naming, user applied
+        // filter on the heatmap are not taken into account
+        let cellVal;
+
+        // cells with a 0 value are not present in this.filteredCells
+        if (!cell) {
+          cellVal = 0;
+        } else {
+          cellVal = cell.meetsUserFilters ? cell.value : "NA";
+        }
+
+        csvRows[row.pos].push(cellVal);
       });
     });
 

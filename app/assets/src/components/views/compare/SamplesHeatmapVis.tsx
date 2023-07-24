@@ -125,8 +125,12 @@ class SamplesHeatmapVis extends React.Component<
   }
 
   componentDidMount() {
-    const { onMetadataSortChange, metadataSortField, metadataSortAsc } =
-      this.props;
+    const {
+      onMetadataSortChange,
+      metadataSortField,
+      metadataSortAsc,
+      taxonFilterState,
+    } = this.props;
     const { allowedFeatures = [] } = this.context || {};
 
     this.heatmap = new Heatmap(
@@ -136,6 +140,7 @@ class SamplesHeatmapVis extends React.Component<
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
         values: this.props.data[this.props.metric],
         pathogenFlags: this.props.pathogenFlagsData,
+        taxonFilterState: taxonFilterState,
       },
       {
         customColorCallback: this.colorScale,
@@ -240,12 +245,15 @@ class SamplesHeatmapVis extends React.Component<
 
   extractSampleLabels() {
     return this.props.sampleIds.map(id => {
+      const sampleDetail = this.props.sampleDetails[id];
+      const { name, metadata, duplicate } = sampleDetail;
       return {
-        label: this.props.sampleDetails[id].name,
-        metadata: this.props.sampleDetails[id].metadata,
+        label: name,
+        metadata: metadata,
         id,
-        duplicateLabel: this.props.sampleDetails[id].duplicate,
+        duplicateLabel: duplicate,
         pinned: this.props.pinnedSampleIds.includes(id),
+        filterStateColumn: sampleDetail["index"],
       };
     });
   }
@@ -281,6 +289,7 @@ class SamplesHeatmapVis extends React.Component<
         label: taxon.name,
         sortKey: sortKey,
         genusName: taxon.genusName,
+        filterStateRow: taxon["index"],
       };
     });
   }

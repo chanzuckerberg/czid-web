@@ -142,7 +142,7 @@ interface SamplesHeatmapViewState {
   sidebarMode: $TSFixMe;
   sidebarVisible: boolean;
   sidebarTaxonModeConfig: $TSFixMe;
-  taxonFilterState: $TSFixMe[];
+  taxonFilterState: Record<string, Record<string, boolean>>;
   pendingPinnedSampleIds: Set<$TSFixMe>;
   pinnedSampleIds: Set<$TSFixMe>;
   newestTaxonId?: $TSFixMe;
@@ -271,7 +271,7 @@ class SamplesHeatmapView extends React.Component<
       sidebarMode: null,
       sidebarVisible: false,
       sidebarTaxonModeConfig: null,
-      taxonFilterState: [],
+      taxonFilterState: {},
       pendingPinnedSampleIds: new Set(),
       pinnedSampleIds: new Set(),
       includePathogens: false, // this will be togglable by the user in the future
@@ -597,6 +597,8 @@ class SamplesHeatmapView extends React.Component<
     const { selectedOptions } = this.state;
     let csvHeaders = [];
     let csvRows = [];
+    const naExplanation =
+      "NA: Not Applicable; sample did not meet thresholds set";
 
     if (!this.heatmapVis) {
       csvHeaders = ['"Current heatmap view did not render any data"'];
@@ -609,6 +611,7 @@ class SamplesHeatmapView extends React.Component<
     }
 
     csvRows.push(this.createCSVRowForSelectedOptions());
+    csvRows.push([naExplanation]);
     return createCSVObjectURL(csvHeaders, csvRows);
   };
 
@@ -1914,7 +1917,6 @@ class SamplesHeatmapView extends React.Component<
           taxonIds={Array.from(shownTaxa)}
           taxonCategories={this.state.selectedOptions.categories}
           taxonDetails={this.state.allTaxonDetails} // send allTaxonDetails in case of added taxa
-          // @ts-expect-error Index signature for type 'string' is missing in type 'any[]'
           taxonFilterState={this.state.taxonFilterState}
           sampleSortType={this.state.selectedOptions.sampleSortType}
           fullScreen={this.state.hideFilters}
