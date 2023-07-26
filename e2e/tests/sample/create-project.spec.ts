@@ -125,18 +125,18 @@ test.describe("Create project test", () => {
   });
 
   // todo: there is a conditional popup that blocks; need a way to prevent this via cookies
-  test.fixme(
-    "Clicking Learn more button redirects to Help Center",
-    async ({ page, context }) => {
-      // Clicking Learn more opens a new tab, so get the new page
-      const [newPage] = await Promise.all([
-        context.waitForEvent("page"),
-        page.getByText("Learn more").first().click(),
-      ]);
-      // New page should be help center
-      expect(newPage.url()).toContain(HELP_CENTER_PROJECT_URL);
-    },
-  );
+  test("Clicking Learn more button redirects to Help Center", async ({
+    page,
+    context,
+  }) => {
+    // Clicking Learn more opens a new tab, so get the new page
+    const [newPage] = await Promise.all([
+      context.waitForEvent("page"),
+      page.locator("a").getByText("Learn more").first().click(),
+    ]);
+    // New page should be help center
+    expect(newPage.url()).toContain(HELP_CENTER_PROJECT_URL);
+  });
 
   // todo: needs testid to propagate to staging for test to work in staging
   test("Clicking more info and less info toggles visibility of project description guidelines", async ({

@@ -42,7 +42,6 @@ function pickListElement(list: Array<string>, currentValue: string) {
   return newValue;
 }
 
-
 test.describe("Sample report tests", () => {
   // This is a comprehensive test designed to confirm the user's capability to modify sample information, host information, infection details, and sequencing information for metadata.
   test.beforeEach(async ({ page }) => {
@@ -84,26 +83,25 @@ test.describe("Sample report tests", () => {
     await page.getByTestId(newNucleotideType).click();
   });
 
-  test.fixme(
-    `Should validate collection date of sample info section`,
-    async ({ page }) => {
-      // hover over the sample info section
-      await page.getByTestId(SAMPLE_INFO_HEADER).hover();
-      // Click the edit button which is visible after hovering
-      await page.getByTestId("sample-info-edit").click();
+  test(`Should validate collection date of sample info section`, async ({
+    page,
+  }) => {
+    // hover over the sample info section
+    await page.getByTestId(SAMPLE_INFO_HEADER).hover();
+    // Click the edit button which is visible after hovering
+    await page.getByTestId("sample-info-edit").click();
 
-      // verify validate date formats
-      for (let i = 0; i < VALID_DATES.length; i++) {
-        await page.getByPlaceholder("YYYY-MM-DD").fill(VALID_DATES[i]);
-        await page.getByTestId("metadata").click();
-      }
-      // verify invalid dates will throw error
-      for (let i = 0; i < INVALID_DATES.length; i++) {
-        await page.getByPlaceholder("YYYY-MM-DD").fill(INVALID_DATES[i]);
-        await page.getByTestId("metadata").click();
-      }
-    },
-  );
+    // verify validate date formats
+    for (let i = 0; i < VALID_DATES.length; i++) {
+      await page.getByPlaceholder("YYYY-MM-DD").fill(VALID_DATES[i]);
+      await page.getByTestId("metadata").click();
+    }
+    // verify invalid dates will throw error
+    for (let i = 0; i < INVALID_DATES.length; i++) {
+      await page.getByPlaceholder("YYYY-MM-DD").fill(INVALID_DATES[i]);
+      await page.getByTestId("metadata").click();
+    }
+  });
 
   test(`Should edit host info section`, async ({ page }) => {
     // collapse sample info section

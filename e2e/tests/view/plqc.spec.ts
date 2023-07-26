@@ -41,13 +41,13 @@ async function verifyBarChartContent(
 
   // Verify text displayed after hovering
   await page
-    .locator(TOTAL_READ_INFO_ICON)
+    .getByTestId(TOTAL_READ_INFO_ICON)
     .nth(index + 1)
     .hover();
 
-  expect(await page.locator(TOTAL_READ_POPUP_CONTENT).textContent()).toContain(
-    data["tooltip"],
-  );
+  expect(
+    await page.getByTestId(TOTAL_READ_POPUP_CONTENT).textContent(),
+  ).toContain(data["tooltip"]);
   // Verify link attached to the popup
   const [newPage] = await Promise.all([
     context.waitForEvent("page"),
@@ -80,8 +80,8 @@ async function verifyBarChartContent(
     ) {
       await page.locator(HEADER_READS).nth(index).hover();
       await page.locator(`.rect-${i}`).nth(index).hover();
-      await expect(page.locator(BAR_POPUP).nth(0)).toBeVisible();
-      await expect(page.locator(BAR_POPUP).nth(1)).toBeVisible();
+      await expect(page.getByTestId(BAR_POPUP).nth(0)).toBeVisible();
+      await expect(page.getByTestId(BAR_POPUP).nth(1)).toBeVisible();
     }
   }
 }
@@ -139,10 +139,9 @@ test.describe("PLQC view tests", () => {
     page,
     context,
   }) => {
-    await page.pause();
     const SAMPLE_AMOUNT = ".filteredCount-3bajD";
     await openSamplePage(page, projectName, false, false);
-    await page.locator(MENU_ICON).nth(1).click();
+    await page.getByTestId(MENU_ICON).nth(1).click();
     await expect(page.locator(SAMPLE_AMOUNT)).toBeVisible();
 
     // Verify text displayed after hovering
@@ -152,7 +151,7 @@ test.describe("PLQC view tests", () => {
 
     // Verify text displayed after hovering
     await page.getByText("Reads Lost").locator("svg").hover();
-    await expect(page.locator(TOTAL_READ_POPUP_CONTENT)).toHaveText(
+    await expect(page.getByTestId(TOTAL_READ_POPUP_CONTENT)).toHaveText(
       SHARED_SAMPLE_TABLE_COLUMNS.readsLost.tooltip,
     );
 

@@ -58,5 +58,7 @@ aws-oidc exec -- docker-compose run web rails db:drop db:migrate db:seed
 
 aws-oidc exec -- docker-compose up
 
+## 
+saucelabs
 npm install -g saucectl
 saucectl run -c ./setup/saucelabs.staging.yml

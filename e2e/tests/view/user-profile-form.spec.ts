@@ -99,7 +99,6 @@ test.describe("User Profile Form tests", () => {
     page,
   }) => {
     // Complete all required questions except Full Name
-    await page.pause();
     await selectCountry(page);
     await selectInstitution(page);
     await selectUseCases(page);

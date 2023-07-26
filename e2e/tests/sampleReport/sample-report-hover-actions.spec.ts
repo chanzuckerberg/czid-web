@@ -19,7 +19,6 @@ const createConsensusGenomeModal = "create-consensus-genome-modal";
 test.fixme("Hover Actions on Sample Report", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
-    await page.pause();
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
