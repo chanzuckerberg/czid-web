@@ -143,6 +143,13 @@ const WorkflowSelector = ({
       : shouldDisableWorkflowOption(workflow);
   };
 
+  const isPinnedVersion =
+    projectPipelineVersions?.[WORKFLOWS.AMR.value] &&
+    !isPipelineFeatureAvailable(
+      AMR_MODERN_HOST_FILTERING_FEATURE,
+      projectPipelineVersions?.[WORKFLOWS.AMR.value],
+    );
+
   return (
     <div className={cs.workflowSelector}>
       <div className={cs.header}>Analysis Type</div>
@@ -200,16 +207,10 @@ const WorkflowSelector = ({
         sequencingPlatformOptions={
           <div className={cs.technologyContent}>
             <PipelineVersionIndicator
-              pinnedVersionHelpLink={
-                projectPipelineVersions?.[WORKFLOWS.AMR.value] &&
-                !isPipelineFeatureAvailable(
-                  AMR_MODERN_HOST_FILTERING_FEATURE,
-                  projectPipelineVersions?.[WORKFLOWS.AMR.value],
-                ) &&
-                AMR_PINNED_PIPELINE_VERSION_HELP_LINK
-              }
+              isPinnedVersion={isPinnedVersion}
               pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.AMR.value]}
               version={projectPipelineVersions?.[WORKFLOWS.AMR.value]}
+              versionHelpLink={AMR_PINNED_PIPELINE_VERSION_HELP_LINK}
             />
           </div>
         }

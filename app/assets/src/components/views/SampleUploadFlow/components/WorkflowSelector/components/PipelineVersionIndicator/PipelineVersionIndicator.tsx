@@ -6,17 +6,17 @@ import commonStyles from "../../workflow_selector.scss";
 import cs from "./pipeline_version_indicator.scss";
 
 interface PipelineVersionIndicatorProps {
-  // If a version is pinned, this implementation requires a help link.
-  // Otherwise we would have 2 variables when 1 would suffice.
-  pinnedVersionHelpLink?: string;
+  isPinnedVersion: boolean;
   pipelineHelpLink: string;
   version?: string;
+  versionHelpLink?: string;
 }
 
 export const PipelineVersionIndicator = ({
-  pinnedVersionHelpLink,
+  isPinnedVersion,
   pipelineHelpLink,
   version,
+  versionHelpLink,
 }: PipelineVersionIndicatorProps) => {
   const pipelineVersionTooltipText = (
     <div>
@@ -26,18 +26,25 @@ export const PipelineVersionIndicator = ({
   );
 
   let versionSubtext: string | JSX.Element = "";
-  if (pinnedVersionHelpLink) {
+  if (isPinnedVersion && version) {
     versionSubtext = (
       <span>
         <span>
           This is the version available for the samples in your project.{" "}
         </span>
-        <ExternalLink href={pinnedVersionHelpLink}>Learn more.</ExternalLink>
+        <ExternalLink href={versionHelpLink}>Learn more.</ExternalLink>
       </span>
     );
   } else if (version) {
-    versionSubtext =
-      "This is the latest version, it might differ from other samples in your project.";
+    versionSubtext = (
+      <span>
+        <span>
+          This is the latest version, it might differ from other samples in your
+          project.{" "}
+        </span>
+        <ExternalLink href={versionHelpLink}>Learn more.</ExternalLink>
+      </span>
+    );
   } else {
     versionSubtext = "Choose a project to view.";
   }

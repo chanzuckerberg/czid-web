@@ -43,6 +43,12 @@ const MetagenomicsSequencingPlatformOptions = ({
 }: MetagenomicsSequencingPlatformOptionsProps) => {
   const { ILLUMINA, NANOPORE } = SEQUENCING_TECHNOLOGY_OPTIONS;
   const MNGS = UPLOAD_WORKFLOWS.MNGS.value;
+  const isPinnedVersion =
+    projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value] &&
+    !isPipelineFeatureAvailable(
+      SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE,
+      projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value],
+    );
 
   return (
     <button
@@ -55,14 +61,7 @@ const MetagenomicsSequencingPlatformOptions = ({
       <div className={cs.technologyOptions}>
         <IlluminaSequencingPlatformOption
           isCg={false}
-          pinnedVersionHelpLink={
-            projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value] &&
-            !isPipelineFeatureAvailable(
-              SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE,
-              projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value],
-            ) &&
-            ILLUMINA_MNGS_PINNED_PIPELINE_VERSION_HELP_LINK
-          }
+          isPinnedVersion={isPinnedVersion}
           isSelected={selectedTechnology === ILLUMINA}
           onClick={() => onTechnologyToggle(MNGS, ILLUMINA)}
           selectedWetlabProtocol={selectedWetlabProtocol}
@@ -70,6 +69,7 @@ const MetagenomicsSequencingPlatformOptions = ({
           pipelineVersion={
             projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value]
           }
+          versionHelpLink={ILLUMINA_MNGS_PINNED_PIPELINE_VERSION_HELP_LINK}
         />
         <MetagenomicsWithNanopore
           isDisabled={shouldDisableSequencingPlatformOption(

@@ -15,22 +15,24 @@ import { WetlabSelector } from "../WetlabSelector";
 
 interface IlluminaSequencingPlatformOptionProps {
   isCg: boolean;
+  isPinnedVersion?: boolean;
   isSelected: boolean;
   onClick(): void;
   onWetlabProtocolChange?(value: string): void;
-  pinnedVersionHelpLink?: string;
   selectedWetlabProtocol?: string;
   pipelineVersion?: string;
+  versionHelpLink?: string;
 }
 
 const IlluminaSequencingPlatformOption = ({
   isCg,
+  isPinnedVersion,
   isSelected,
   onClick,
   onWetlabProtocolChange,
-  pinnedVersionHelpLink,
   selectedWetlabProtocol,
   pipelineVersion,
+  versionHelpLink,
 }: IlluminaSequencingPlatformOptionProps) => {
   const {
     UPLOAD_SAMPLE_STEP_MNGS_ILLUMINA_PIPELINE_LINK_CLICKED,
@@ -49,7 +51,7 @@ const IlluminaSequencingPlatformOption = ({
           ? MNGS_ILLUMINA_PIPELINE_GITHUB_LINK
           : CG_ILLUMINA_PIPELINE_GITHUB_LINK
       }
-      pinnedVersionHelpLink={pinnedVersionHelpLink}
+      isPinnedVersion={isPinnedVersion}
       isSelected={isSelected}
       onClick={onClick}
       technologyName="Illumina"
@@ -73,6 +75,7 @@ const IlluminaSequencingPlatformOption = ({
           ? PIPELINE_HELP_LINKS[WORKFLOWS.SHORT_READ_MNGS.value]
           : PIPELINE_HELP_LINKS[WORKFLOWS.CONSENSUS_GENOME.value]
       }
+      versionHelpLink={versionHelpLink}
     />
   );
 };

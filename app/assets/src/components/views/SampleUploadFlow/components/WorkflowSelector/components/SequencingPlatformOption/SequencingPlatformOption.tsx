@@ -13,15 +13,16 @@ interface SequencingPlatformOptionProps {
   githubLink: string;
   isBeta?: boolean;
   isDisabled?: boolean;
+  isPinnedVersion?: boolean;
   isSelected: boolean;
   onClick(): void;
-  pinnedVersionHelpLink?: string;
   pipelineVersion?: string;
   pipelineHelpLink: string;
   technologyName: string;
   technologyDetails: ReactNode;
   testId: string;
   tooltipText?: string;
+  versionHelpLink?: string;
 }
 
 const SequencingPlatformOption = ({
@@ -30,7 +31,7 @@ const SequencingPlatformOption = ({
   githubLink,
   isBeta = false,
   isDisabled = false,
-  pinnedVersionHelpLink,
+  isPinnedVersion,
   isSelected,
   onClick,
   pipelineVersion,
@@ -39,6 +40,7 @@ const SequencingPlatformOption = ({
   technologyDetails,
   testId,
   tooltipText,
+  versionHelpLink,
 }: SequencingPlatformOptionProps) => {
   let radioButton = (
     <InputRadio
@@ -104,9 +106,10 @@ const SequencingPlatformOption = ({
             <div className={commonStyles.technologyContent}>
               {technologyDetails}
               <PipelineVersionIndicator
-                pinnedVersionHelpLink={pinnedVersionHelpLink}
+                isPinnedVersion={isPinnedVersion}
                 pipelineHelpLink={pipelineHelpLink}
                 version={pipelineVersion}
+                versionHelpLink={versionHelpLink}
               />
             </div>
           )}
