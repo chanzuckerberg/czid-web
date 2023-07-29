@@ -1,8 +1,8 @@
 # CZ ID E2E testing
 
-Our E2E tests are written in playright
+Our E2E tests are written in Playright
 
-## playwright setup
+## Playwright setup
 
 ### Installing packages
 
@@ -40,25 +40,17 @@ Where `environment` is `staging`, `local`, `sandbox`
 
 `npm run pw:report` opens test results report in the browser
 
-## download screenshots from github
+### Download screenshots from github
 
 https://docs.github.com/en/actions/managing-workflow-runs/downloading-workflow-artifacts
 
-# some useful commands
+## Useful commands
 
-## stop services
+Start services:
+* `aws-oidc exec -- docker-compose up`
 
-aws-oidc exec -- docker-compose down
+Install saucelabs:
+* `npm install -g saucectl`
 
-## run migration
-
-aws-oidc exec -- docker-compose run web rails db:drop db:migrate db:seed
-
-## start service
-
-aws-oidc exec -- docker-compose up
-
-## 
-saucelabs
-npm install -g saucectl
-saucectl run -c ./setup/saucelabs.staging.yml
+Execute tests in suacelabs:
+* `saucectl run -c ./setup/saucelabs.staging.yml`
