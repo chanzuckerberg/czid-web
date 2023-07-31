@@ -87,6 +87,22 @@ local-import-staging-data: .env.localdev ## Import staging data into the local m
 	$(docker_compose) run --rm web bin/rails create_elasticsearch_indices
 	touch .database_imported
 
+.PHONY: local-import-staging-data-all
+local-import-staging-data-all: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
+	@if [ -e .database_imported ]; then echo "The database is already populated - please run 'rm .database_imported' and try again if you really want to replace it."; exit 1; fi
+	if [ ! -e idseq_development.sql.gz ]; then \
+	    $(docker_compose_simple) exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz; \
+	fi
+	export $$(cat .env.localdev); bin/clam staging 'mysqldump --no-data -h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging | gzip -c' > idseq_staging_tables.sql.gz
+	export $$(cat .env.localdev); bin/clam staging 'mysqldump --no-create-info '\
+	    '-h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging '\
+	    '| gzip -c' > idseq_staging_data.sql.gz
+	$(docker_compose) run --rm web "gzip -dc idseq_staging_tables.sql.gz | mysql -vvv -h db -u root --database idseq_development"
+	$(docker_compose) run --rm web "gzip -dc idseq_staging_data.sql.gz | mysql -vvv -h db -u root --database idseq_development"
+	$(docker_compose) run --rm web bin/rails db:environment:set RAILS_ENV=development
+	$(docker_compose) run --rm web bin/rails create_elasticsearch_indices
+	touch .database_imported
+
 .PHONY: local-start
 local-start: .env.localdev ## Start localdev containers or refresh credentials
 	$(docker_compose_long) up -d

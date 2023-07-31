@@ -30,50 +30,5 @@
     &.visible {
       display: block;
     }
-
-    .taxon_tooltip {
-      font-size: 9pt;
-
-      &__row {
-        margin-bottom: 0;
-
-        &__label {
-          float: left;
-          padding: 0;
-        }
-
-        &__value {
-          float: right;
-          padding: 0;
-        }
-
-        &--active {
-          font-weight: 600;
-        }
-
-        &:after {
-          content: "";
-          display: table;
-          clear: both;
-        }
-      }
-
-      &__title {
-        text-transform: uppercase;
-        color: $sds-color-gray-500;
-        border-bottom: 1px solid $gray-lightest;
-        margin-bottom: 0.5em;
-      }
-
-      &__name {
-        margin-bottom: 1em;
-      }
-
-      &__data {
-        ul {
-          margin: 0;
-        }
-      }
-    }
   }
 }

@@ -3,7 +3,7 @@ import { scaleLinear } from "d3-scale";
 import { event as currentEvent, select } from "d3-selection";
 import { FILL_OPACITY, TRANSFORM, TRANSLATE } from "~/helpers/cssConstants";
 
-export default class TidyTree {
+export class TidyTree {
   container: $TSFixMe;
   margins: $TSFixMe;
   nodeContainer: $TSFixMe;

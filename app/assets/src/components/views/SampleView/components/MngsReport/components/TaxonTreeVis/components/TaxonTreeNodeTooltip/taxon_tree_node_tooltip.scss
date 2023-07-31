@@ -1,0 +1,45 @@
+@import "~@czi-sds/components/dist/variables";
+
+.taxonTooltip {
+  font-size: 9pt;
+}
+
+.taxonTooltipRow {
+  margin-bottom: 0;
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+.taxonTooltipRowLabel {
+  float: left;
+  padding: 0;
+}
+
+.taxonTooltipRowValue {
+  float: right;
+  padding: 0;
+}
+
+.taxonTooltipRowActive {
+  font-weight: 600;
+}
+
+.taxonTooltipTitle {
+  text-transform: uppercase;
+  color: $sds-color-gray-500;
+  border-bottom: $sds-borders-gray-200;
+  margin-bottom: 0.5em;
+}
+
+.taxonTooltipName {
+  margin-bottom: 1em;
+}
+
+.taxonTooltipData {
+  ul {
+    margin: 0;
+  }
+}

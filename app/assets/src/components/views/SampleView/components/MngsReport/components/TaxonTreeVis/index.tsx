@@ -1,4 +1,5 @@
-import TaxonTreeVis from "./TaxonTreeVis";
+import { TaxonTreeVis } from "./TaxonTreeVis";
+
 export { TaxonTreeVis };
 
 /*

@@ -1,15 +1,14 @@
 import { get, getOr, map } from "lodash/fp";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { trackEvent, withAnalytics } from "~/api/analytics";
-import { UserContext } from "~/components/common/UserContext";
-import PathogenLabel from "~/components/ui/labels/PathogenLabel";
-import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
-import TidyTree from "~/components/visualizations/TidyTree";
+import {
+  TABS,
+  TREE_VIZ_TOOLTIP_METRICS,
+} from "~/components/views/SampleView/constants";
+import { TidyTree } from "~/components/visualizations/TidyTree";
 import { Taxon } from "~/interface/shared";
-import { TABS, TREE_VIZ_TOOLTIP_METRICS } from "../../../../constants";
-
-// @ts-expect-error working with Lodash Types
-const mapWithKeys = map.convert({ cap: false });
+import { TaxonTreeNodeTooltip } from "./components/TaxonTreeNodeTooltip";
+import { TaxonTreePathogenLabels } from "./components/TaxonTreePathogenLabels";
 
 interface TaxonTreeVisProps {
   // hash of lineage parental realtionships per taxid
@@ -21,65 +20,55 @@ interface TaxonTreeVisProps {
   onTaxonClick: $TSFixMeFunction;
 }
 
-interface TaxonTreeVisState {
-  nodeHover: {
-    data: { commonName: string; lineageRank; values; scientificName: string };
-    isAggregated: boolean;
-    parent: { collapsedChildren: $TSFixMeUnknown[] };
-  };
-  taxonSidebarData: $TSFixMeUnknown;
+export interface TaxonNode {
+  data: { commonName: string; lineageRank; values; scientificName: string };
+  isAggregated: boolean;
+  parent: { collapsedChildren: $TSFixMeUnknown[] };
 }
 
-class TaxonTreeVis extends React.Component<
-  TaxonTreeVisProps,
-  TaxonTreeVisState
-> {
-  metric: $TSFixMe;
-  metrics: $TSFixMe;
-  nameType: $TSFixMe;
-  taxa: $TSFixMe;
-  tree: $TSFixMe;
-  treeContainer: $TSFixMe;
-  treeTooltip: $TSFixMe;
-  treeVis: $TSFixMe;
-  constructor(props: TaxonTreeVisProps) {
-    super(props);
+// @ts-expect-error working with Lodash Types
+const mapWithKeys = map.convert({ cap: false });
 
-    this.state = {
-      nodeHover: null,
-      taxonSidebarData: null,
-    };
+export const TaxonTreeVis = ({
+  currentTab,
+  lineage,
+  metric,
+  nameType,
+  onTaxonClick,
+  taxa,
+}: TaxonTreeVisProps) => {
+  const metrics = TREE_VIZ_TOOLTIP_METRICS[currentTab];
 
-    this.nameType = this.props.nameType;
-    this.metric = this.props.metric;
-    this.taxa = this.props.taxa;
+  const [activeNode, setActiveNode] = useState(null);
+  const [treeVis, setTreeVis] = useState(null);
 
-    this.tree = null;
-    this.treeVis = null;
+  const treeTooltipRef = useRef(null);
+  const treeContainerRef = useRef(null);
 
-    this.metrics = TREE_VIZ_TOOLTIP_METRICS[this.props.currentTab];
-  }
+  useEffect(() => {
+    if (!treeContainerRef || !treeTooltipRef) return;
 
-  componentDidMount() {
-    // @ts-expect-error ts-migrate(2554) FIXME: Expected 0 arguments, but got 1.
-    const tree = this.createTree(this.taxa);
-    this.treeVis = new TidyTree(this.treeContainer, tree, {
-      attribute: this.metric,
-      useCommonName: this.isCommonNameActive(),
-      onNodeHover: this.handleNodeHover,
-      onNodeLabelClick: this.handleNodeLabelClick,
-      onCreatedTree: this.fillNodeValues,
-      tooltipContainer: this.treeTooltip,
+    const tree = createTree();
+    const treeVis = new TidyTree(treeContainerRef.current, tree, {
+      attribute: metric,
+      useCommonName: isCommonNameActive,
+      onNodeHover: handleNodeHover,
+      onNodeLabelClick: handleNodeLabelClick,
+      onCreatedTree: fillNodeValues,
+      tooltipContainer: treeTooltipRef.current,
       onCollapsedStateChange: withAnalytics(
-        this.persistCollapsedInUrl,
+        persistCollapsedInUrl,
         "TaxonTreeVis_node-collapsed-state_changed",
       ),
-      collapsed: this.getCollapsedInUrl() || new Set(),
+      collapsed: getCollapsedInUrl() || new Set(),
     });
-    this.treeVis.update();
-  }
+    treeVis.update();
+    setTreeVis(treeVis);
+  }, [treeTooltipRef, treeContainerRef]);
 
-  persistCollapsedInUrl(node: $TSFixMe) {
+  const isCommonNameActive = nameType.toLowerCase() === "common name";
+
+  const persistCollapsedInUrl = (node: $TSFixMe) => {
     function hasAllChildrenCollapsed(node: $TSFixMe) {
       return !!(!node.children && node.collapsedChildren);
     }
@@ -95,9 +84,9 @@ class TaxonTreeVis extends React.Component<
       // eslint-disable-next-line no-console
       console.error(e);
     }
-  }
+  };
 
-  getCollapsedInUrl = () => {
+  const getCollapsedInUrl = () => {
     try {
       const href = new URL(window.location.href);
       const collapsed: $TSFixMe = [];
@@ -113,34 +102,20 @@ class TaxonTreeVis extends React.Component<
     }
   };
 
-  componentDidUpdate() {
-    const options: {
-      useCommonName?: boolean;
-      attribute?: $TSFixMeUnknown;
-    } = {};
-    if (this.nameType !== this.props.nameType) {
-      this.nameType = this.props.nameType;
-      options.useCommonName = this.isCommonNameActive();
-    }
+  useEffect(() => {
+    const options = {
+      useCommonName: isCommonNameActive,
+      attribute: metric,
+    };
+    if (treeVis) treeVis.setOptions(options);
+  }, [metric, nameType]);
 
-    if (this.metric !== this.props.metric) {
-      this.metric = this.props.metric;
-      options.attribute = this.props.metric;
-    }
+  useEffect(() => {
+    if (treeVis) treeVis.setTree(createTree());
+  }, [taxa]);
 
-    if (Object.keys(options).length) {
-      this.treeVis.setOptions(options);
-    }
-
-    if (this.taxa !== this.props.taxa) {
-      this.taxa = this.props.taxa;
-      // @ts-expect-error ts-migrate(2554) FIXME: Expected 0 arguments, but got 1.
-      this.treeVis.setTree(this.createTree(this.props.taxa));
-    }
-  }
-
-  handleNodeHover = (node: $TSFixMe) => {
-    this.setState({ nodeHover: node });
+  const handleNodeHover = (node: $TSFixMe) => {
+    setActiveNode(node);
     trackEvent("TaxonTreeVis_node_hovered", {
       id: node.id,
       scientificName: node.data.scientificName,
@@ -148,8 +123,7 @@ class TaxonTreeVis extends React.Component<
     });
   };
 
-  handleNodeLabelClick = (node: { data: Taxon }) => {
-    const { onTaxonClick } = this.props;
+  const handleNodeLabelClick = (node: { data: Taxon }) => {
     if (["genus", "species"].includes(node.data.lineageRank)) {
       onTaxonClick(node.data);
     }
@@ -160,11 +134,28 @@ class TaxonTreeVis extends React.Component<
     });
   };
 
-  isCommonNameActive = () => {
-    return this.nameType.toLowerCase() === "common name";
+  const getNodeValues = nodeData => {
+    if (currentTab === TABS.SHORT_READ_MNGS) {
+      return {
+        aggregatescore: nodeData.agg_score,
+        nt_r: get("nt.count", nodeData) || 0,
+        nt_rpm: get("nt.rpm", nodeData) || 0,
+        nt_zscore: get("nt.z_score", nodeData) || 0,
+        nr_r: get("nr.count", nodeData) || 0,
+        nr_rpm: get("nr.rpm", nodeData) || 0,
+        nr_zscore: get("nr.z_score", nodeData) || 0,
+      };
+    } else if (currentTab === TABS.LONG_READ_MNGS) {
+      return {
+        nt_b: get("nt.base_count", nodeData) || 0,
+        nt_bpm: get("nt.bpm", nodeData) || 0,
+        nr_b: get("nr.base_count", nodeData) || 0,
+        nr_bpm: get("nr.bpm", nodeData) || 0,
+      };
+    }
   };
 
-  fillNodeValues = (root: $TSFixMe) => {
+  const fillNodeValues = (root: $TSFixMe) => {
     // this function computes the aggregated metric values
     // for higher levels of the tree (than species and genus)
 
@@ -194,10 +185,10 @@ class TaxonTreeVis extends React.Component<
         });
       }
 
-      for (const metric in this.metrics) {
+      for (const metric in metrics) {
         node.data.values || (node.data.values = {});
         if (!(metric in node.data.values)) {
-          node.data.values[metric] = this.metrics[metric].agg(
+          node.data.values[metric] = metrics[metric].agg(
             node.children
               .filter((child: $TSFixMe) => child.data.values[metric])
               .map((child: $TSFixMe) => child.data.values[metric]),
@@ -207,8 +198,7 @@ class TaxonTreeVis extends React.Component<
     });
   };
 
-  createTree = () => {
-    const { taxa, lineage } = this.props;
+  const createTree = () => {
     const ROOT_ID = "_";
     const nodes = [{ id: ROOT_ID }];
     const addedNodesIds = new Set();
@@ -223,7 +213,7 @@ class TaxonTreeVis extends React.Component<
         lineageRank: nodeData.taxLevel,
         commonName: nodeData.common_name,
         highlight: nodeData.highlighted,
-        values: this.getNodeValues(nodeData),
+        values: getNodeValues(nodeData),
       };
       addedNodesIds.add(formattedNode.id);
       nodes.push(formattedNode);
@@ -289,156 +279,19 @@ class TaxonTreeVis extends React.Component<
     return nodes;
   };
 
-  getNodeValues = nodeData => {
-    const { currentTab } = this.props;
-
-    if (currentTab === TABS.SHORT_READ_MNGS) {
-      return {
-        aggregatescore: nodeData.agg_score,
-        nt_r: get("nt.count", nodeData) || 0,
-        nt_rpm: get("nt.rpm", nodeData) || 0,
-        nt_zscore: get("nt.z_score", nodeData) || 0,
-        nr_r: get("nr.count", nodeData) || 0,
-        nr_rpm: get("nr.rpm", nodeData) || 0,
-        nr_zscore: get("nr.z_score", nodeData) || 0,
-      };
-    } else if (currentTab === TABS.LONG_READ_MNGS) {
-      return {
-        nt_b: get("nt.base_count", nodeData) || 0,
-        nt_bpm: get("nt.bpm", nodeData) || 0,
-        nr_b: get("nr.base_count", nodeData) || 0,
-        nr_bpm: get("nr.bpm", nodeData) || 0,
-      };
-    }
-  };
-
-  renderTooltip = () => {
-    const node = this.state.nodeHover;
-    if (!node) {
-      return null;
-    }
-    const rows = [];
-    for (const metric in this.metrics) {
-      rows.push(
-        <span
-          key={`tt_${metric}`}
-          className={`taxon_tooltip__row ${
-            this.props.metric === metric ? "taxon_tooltip__row--active" : ""
-          }`}
-        >
-          <div className="taxon_tooltip__row__label">
-            {this.metrics[metric].label}:
-          </div>
-          <div className="taxon_tooltip__row__value">
-            {Math.round(node.data.values[metric]).toLocaleString()}
-          </div>
-        </span>,
-      );
-    }
-
-    let name =
-      (this.isCommonNameActive() && node.data.commonName) ||
-      node.data.scientificName;
-    if (node.isAggregated) {
-      // TODO: fix bug (not able to consistently reproduce) - currently just avoid crash
-      name = `${(node.parent.collapsedChildren || []).length} Taxa`;
-    }
-
-    return (
-      <div className="taxon_tooltip">
-        <div className="taxon_tooltip__title">{node.data.lineageRank}</div>
-        <div className="taxon_tooltip__name">{name}</div>
-        <div className="taxon_tooltip__title">Data</div>
-        <div className="taxon_tooltip__data">
-          <div>{rows}</div>
-        </div>
+  return (
+    <div className="taxon-tree-vis">
+      <div className={"taxon-tree-vis__container"} ref={treeContainerRef}>
+        <TaxonTreePathogenLabels taxa={taxa} />
       </div>
-    );
-  };
-
-  capitalize(str: string) {
-    if (!str) return str;
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  renderPathogenLabel = (taxId: number, tagType: string) => {
-    return (
-      <div
-        className={`node-overlay node-overlay__${taxId}`}
-        key={`label-${taxId}`}
-      >
-        <PathogenLabel type={tagType} />
+      <div className={"taxon-tree-vis__tooltip"} ref={treeTooltipRef}>
+        <TaxonTreeNodeTooltip
+          activeMetric={metric}
+          isCommonNameActive={isCommonNameActive}
+          metrics={metrics}
+          node={activeNode}
+        />
       </div>
-    );
-  };
-
-  renderPathogenLabels = () => {
-    const { allowedFeatures = [] } = this.context || {};
-    const { taxa } = this.props;
-    const labels: JSX.Element[] = [];
-    taxa.forEach(genusData => {
-      if (allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE)) {
-        if (genusData.pathogenFlags) {
-          genusData.pathogenFlags.forEach(pathogenFlag => {
-            labels.push(
-              this.renderPathogenLabel(genusData.taxId, pathogenFlag),
-            );
-          });
-        }
-        genusData.filteredSpecies.forEach(speciesData => {
-          if (speciesData.pathogenFlags) {
-            speciesData.pathogenFlags.forEach(pathogenFlag => {
-              labels.push(
-                this.renderPathogenLabel(speciesData.taxId, pathogenFlag),
-              );
-            });
-          }
-        });
-      } else {
-        if (genusData.pathogenFlag) {
-          labels.push(
-            this.renderPathogenLabel(genusData.taxId, genusData.pathogenFlag),
-          );
-        }
-        genusData.filteredSpecies.forEach(speciesData => {
-          if (speciesData.pathogenFlag) {
-            labels.push(
-              this.renderPathogenLabel(
-                speciesData.taxId,
-                speciesData.pathogenFlag,
-              ),
-            );
-          }
-        });
-      }
-    });
-    return labels;
-  };
-
-  render() {
-    return (
-      <div className="taxon-tree-vis">
-        <div
-          className="taxon-tree-vis__container"
-          ref={container => {
-            this.treeContainer = container;
-          }}
-        >
-          <div className="pathogen-labels">{this.renderPathogenLabels()}</div>
-        </div>
-        <div
-          className="taxon-tree-vis__tooltip"
-          ref={tooltip => {
-            this.treeTooltip = tooltip;
-          }}
-        >
-          {this.renderTooltip()}
-        </div>
-      </div>
-    );
-  }
-}
-
-TaxonTreeVis.contextType = UserContext;
-
-export default TaxonTreeVis;
+    </div>
+  );
+};
