@@ -11,6 +11,7 @@ When in doubt, follow the [Airbnb JS Style Guide](https://github.com/airbnb/java
 
 The following norms are particularly relevant to `czid-web`.
 - Use named exports rather than default exports
+  - The reason is because if you use named exports, you can always find all instances of a component's use by searching for that component's name. With default exports, the importing file can rename that component to anything, making it much harder to find where components are used. This matters when modifying code so that future developers can understand the impact changes to a component has throughout the application, or when a developer intends to remove old components.
   - yes: export const SomeComponent…
   - no: const SomeComponent…
           export default SomeComponent
@@ -96,6 +97,7 @@ There is also a vscode extension that will run the generator:
 ### Component Design
 
 - One component per file
+  - Please avoid using `renderChildComopnent` type functions to create building blocks of code within a component. If you need one, choose to create a new child component instead. When you have multiple components in one file where most are rendered using anonymous functions, the subcomponents are not named independently from the parent, and all the state lives together at the parent level. This removes the ability to efficiently troubleshoot React components using React dev tools.
 - Each component gets its own scss file. Style reuse should be limited to avoid bugs when updating or deleting styles.
 - Prefer stateless functional components over class-based components for new components. Try `useEffect`, `useState`, and other [React Hooks](https://reactjs.org/docs/hooks-reference.html) if you need lifecycle methods.
 - Avoid monolithic components. Break complex components up into smaller units.
