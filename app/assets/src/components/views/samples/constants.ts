@@ -22,7 +22,7 @@ export const SHARED_SAMPLE_TABLE_COLUMNS = {
   },
   readsLost: {
     tooltip:
-      "Reads Lost:Reads filtered during each step of the pipeline. The full length of the bar represents the Total Reads. Passed Filters represent the reads that passed quality control and filtering steps. Learn more.",
+      "Reads filtered during each step of the pipeline. The full length of the bar represents the Total Reads. Passed Filters represent the reads that passed quality control and filtering steps.",
     link: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Reads-Lost",
   },
   sample_type: {

@@ -101,6 +101,3 @@ export const INSERT_LENGTH_HELP_LINK = {
 
 export const READ_URL_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Reads-Lost";
-
-export const READS_POPUP_HELP =
-  "Reads Lost:Reads filtered during each step of the pipeline. The full length of the bar represents the Total Reads. Passed Filters represent the reads that passed quality control and filtering steps. Learn more.";
