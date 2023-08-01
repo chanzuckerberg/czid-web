@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { EMAIL_TAKEN_ERROR, useCreateUser } from "~/api/user";
 import ArrowSubmit from "~/components/ui/icons/IconSubmitArrow";
 import cs from "./HeroEmailForm.scss";
@@ -53,11 +52,6 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
           RouterHistory.push("/users/register?error=unknown");
         }
       }
-      // Log lowercase emails, since emails are lowercased in the database
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.LANDING_PAGE_REGISTER_NOW_BUTTON_CLICKED,
-        { email: enteredEmail.toLowerCase() },
-      );
       location.reload();
     } else {
       alert("Please enter a valid email address.");
