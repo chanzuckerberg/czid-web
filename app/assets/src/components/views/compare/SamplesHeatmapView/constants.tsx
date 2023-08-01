@@ -40,7 +40,7 @@ export const HEATMAP_DOWNLOAD_REPORT_OPTIONS: HeatmapDownloadOption[] = [
   {
     category: "reports",
     description:
-      "User-uploaded metadata, including sample collection location, collection date, sample type.",
+      "Contains all metrics in all taxa for all samples. Existing filters on the heatmap will not apply.",
     displayName: "All Heatmap Metrics",
     fileTypeDisplay: ".csv",
     type: HeatmapDownloadType.ALL_METRICS,
