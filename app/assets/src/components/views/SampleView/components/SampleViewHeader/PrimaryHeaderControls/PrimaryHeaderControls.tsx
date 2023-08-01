@@ -31,11 +31,11 @@ import { PipelineRun } from "~/interface/shared";
 import { DownloadButton, HelpButton, SaveButton } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import { TABS } from "../../../constants";
-import { AmrDownloadDropdown } from "./AmrDownloadDropdown";
-import { MngsDownloadDropdown } from "./MngsDownloadDropdown";
-import { OverflowMenu } from "./OverflowMenu";
+import { AmrDownloadDropdown } from "./components/AmrDownloadDropdown";
+import { MngsDownloadDropdown } from "./components/MngsDownloadDropdown";
+import { OverflowMenu } from "./components/OverflowMenu";
+import { ShareButtonPopUp } from "./components/ShareButtonPopUp";
 import cs from "./primary_header_controls.scss";
-import { ShareButtonPopUp } from "./ShareButtonPopUp";
 
 interface PrimaryHeaderControlsProps {
   backgroundId?: number;
@@ -177,8 +177,10 @@ export const PrimaryHeaderControls = ({
         isEmpty(sample?.pipeline_runs) &&
         size(sample?.workflow_runs) === 1);
 
+    // Show help button only for SHORT_READ_MNGS and AMR workflows or when shouldHideConsensusGenomeHelpButton is false
     if (
       workflow === WORKFLOWS.LONG_READ_MNGS.value ||
+      currentTab === TABS.AMR_DEPRECATED ||
       (workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
         shouldHideConsensusGenomeHelpButton)
     ) {
