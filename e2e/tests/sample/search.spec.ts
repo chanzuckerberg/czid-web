@@ -7,8 +7,8 @@ import {
   PROJECT_COUNT,
   PROJECT_NAME_SELECTOR,
   PUBLIC_MENU_ITEM,
-  RESULT_COUNT_SELECTOR,
   SAMPLES,
+  SAMPLE_COUNT,
   SEARCH_PUBLIC,
 } from "../../constants/common";
 import { SAMPLE_NAME_SELECTOR } from "../../constants/filter";
@@ -19,6 +19,7 @@ const projectName = "AMR beta test";
 const sampleName = "RNAEnr_10e4_viralcopies_RVOPv2_iSeq";
 test.describe("Search data tests", () => {
   test("Should search projects", async ({ page }) => {
+
     await page.goto(`${process.env.BASEURL}`);
     await page.getByTestId(PUBLIC_MENU_ITEM).click();
     await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
@@ -38,7 +39,7 @@ test.describe("Search data tests", () => {
 
     // metadata project count
     const metadataProjectCount = String(
-      await page.locator(METADATA_COUNT_SELECTOR).nth(1).textContent(),
+      await page.locator(METADATA_COUNT_SELECTOR).nth(0).textContent(),
     ).replace(/\D/g, "");
     expect(Number(metadataProjectCount)).toBeGreaterThanOrEqual(1);
   });
@@ -53,7 +54,7 @@ test.describe("Search data tests", () => {
 
     // sample count
     const sampleCount = String(
-      await page.locator(RESULT_COUNT_SELECTOR).nth(0).textContent(),
+      await page.locator(SAMPLE_COUNT).nth(0).textContent(),
     ).replace(/\D/g, "");
     expect(Number(sampleCount)).toBeGreaterThanOrEqual(1);
 

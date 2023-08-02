@@ -15,9 +15,9 @@ test.describe("Taxon Sidebar on Sample Report", () => {
 
     await page.getByText("Sample Details").click();
     // choose Background
-    await page.getByTestId("background-filter").click();
+    await page.getByTestId("background-filter").first().click();
 
-    await page.getByTestId("test-background-model-standard-dropdown").click();
+    await page.getByTestId("test-background-model-dropdown").click();
     await page.getByTestId("expand-taxon-parent").nth(0).click();
 
     // click Taxon Name

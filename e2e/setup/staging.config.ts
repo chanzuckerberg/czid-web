@@ -48,6 +48,7 @@ const config: PlaywrightTestConfig = {
     viewport: { width: 800, height: 7200 },
     permissions: ["clipboard-read"],
   },
+  workers: 4,
 };
 
 export default config;

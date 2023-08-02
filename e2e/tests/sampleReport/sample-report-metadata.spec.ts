@@ -20,7 +20,6 @@ test.describe("Sample report metadata test", () => {
   test(`Should verify sample info on metadata tab`, async ({ page }) => {
     // get test data
     const data = fixtures["SAMPLE_INFO_DATA"];
-
     // verify sample info tab
     await verifySectionDetails(
       page,
@@ -34,7 +33,6 @@ test.describe("Sample report metadata test", () => {
   test(`Should verify host info on metadata tab`, async ({ page }) => {
     // get test data
     const data = fixtures["HOST_INFO_DATA"];
-
     // collapse sample info section
     await (await getTabSection(page, "sampleInfo")).click();
 

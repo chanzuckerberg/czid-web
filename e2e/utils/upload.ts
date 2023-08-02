@@ -17,7 +17,6 @@ import {
   KNOWN_ORGANISM,
   RNA_DNA,
   SAMPLE_TYPE,
-  SELECT_PROJECT,
   START_UPLOAD,
   UPLOAD_METADATA,
   WORKFLOWS,
@@ -49,7 +48,7 @@ export async function uploadSampleFiles(
   sampleFiles: Array<string>,
 ): Promise<any> {
   // select project
-  await page.locator(SELECT_PROJECT).click();
+  await page.getByTestId("select-project").click();
   // type in search box
   await page.locator('input[placeholder="Search"]').type(projectName);
 
@@ -58,7 +57,7 @@ export async function uploadSampleFiles(
   // select analysis type
   const analysisTypeId = `${ANALYSIS_TYPE}-${kebabCase(analysisType)}`;
   const wgsWorkflowOption = await page.getByTestId(analysisTypeId);
-  wgsWorkflowOption.click();
+ await wgsWorkflowOption.click();
 
   if (analysisType === WORKFLOWS.MNGS) {
     await page
@@ -76,11 +75,11 @@ export async function uploadSampleFiles(
     await uploadRefSequence(page);
 
     // ensure filename displayed
-    expect(wgsWorkflowOption).toContainText(REF_FILENAME);
+    await expect(wgsWorkflowOption).toContainText(REF_FILENAME);
 
     // test file can be removed
     await wgsWorkflowOption.getByTestId("ClearIcon").click();
-    expect(wgsWorkflowOption).not.toContainText(REF_FILENAME);
+    await expect(wgsWorkflowOption).not.toContainText(REF_FILENAME);
 
     // upload a reference sequence again
     await uploadRefSequence(page);
@@ -127,8 +126,8 @@ export async function fillMetadata(
     .fill(metaData[COLLECTION_DATE] as string);
 
   // nucleotide type
-  await page.getByTestId("dropdown-menu").nth(1).click();
-  await page.getByTestId(metaData["Nucleotide Type"] as string).click();
+  await page.getByTestId("filters").nth(1).click();
+  await page.getByTestId(kebabCase(metaData["Nucleotide Type"] as string)).click();
 
   // await page.getByText(metaData["Nucleotide Type"] as string).click();
 
@@ -174,7 +173,7 @@ export async function fillMetadata(
   // infection class
   const infectionClass = "infection_class";
   await page.locator(getMetadataField(infectionClass)).click();
-  await page.getByTestId("Unknown").click();
+  await page.getByTestId("unknown").click();
 
   // host age
   await page

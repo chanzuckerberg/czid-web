@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { FILTER_RESULT, TREE_NODES } from "../../constants/sample";
+import { TREE_NODES } from "../../constants/sample";
 
 const sampleId = 25307;
 // These tests verify the ui displayed on the treeview for the sample report page
@@ -12,9 +12,11 @@ test.describe("Sample report view test", () => {
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     // navigate to table view
-    await page.getByTestId("report-view-selector").nth(0).click();
-    await expect(page.locator(FILTER_RESULT).nth(0)).toBeVisible();
-    await page.getByTestId("report-view-selector").nth(1).click();
+    await page.getByTestId("report-view-selector").locator("a").nth(0).click();
+    // verify the taxon names are visible
+    await expect(page.locator("[class*='taxonName']").nth(0)).toBeVisible();
+    // navigate to table view
+    await page.getByTestId("report-view-selector").locator("a").nth(1).click();
     await expect(page.locator(TREE_NODES).nth(0)).toBeVisible();
 
     // Would remove the comment as soon as test id is ready

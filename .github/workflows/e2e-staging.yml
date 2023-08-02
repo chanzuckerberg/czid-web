@@ -1,7 +1,7 @@
 name: e2e-staging-tests
 
 on:
-  workflow_call:
+  workflow_dispatch:
 env:
   AWS_DEFAULT_OUTPUT: json
   AWS_REGION: us-west-2
@@ -41,12 +41,12 @@ jobs:
           AWS_ACCOUNT_ID=${{ steps.configure_aws_credentials.outputs.aws-account-id }}
           echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> $GITHUB_ENV
       
-      - name: Configure CZID Login Credentials
+      - name: Configure secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v1.0.0
         with:
           secret-ids: |
             LOGIN, czid-login
-            SMTP, czid-smtp 
+            SAUCE, czid-sauce
             SLACK, czid-slack 
           parse-json-secrets: true
 
@@ -61,7 +61,7 @@ jobs:
         env: 
           CZID_USERNAME: ${{ env.LOGIN_USERNAME}}      
           CZID_PASSWORD: ${{ env.LOGIN_PASSWORD }}
-      
+
       # upload screenshots and videos
       - name: Upload artifacts
         if: ${{ failure() }}
@@ -69,21 +69,6 @@ jobs:
         with: 
           name: e2e-artifacts
           path: ./e2e/reports
-            # send email
-      # - name: Send mail
-      #   if: success() || failure()
-      #   uses: dawidd6/action-send-mail@v3
-      #   with:
-      #     server_address: smtp.gmail.com
-      #     server_port: 465
-      #     secure: true
-      #     username: ${{ env.SMTP_USERNAME }}
-      #     password: ${{ env.SMTP_PASSWORD }}
-      #     subject: E2E Test Results - CI
-      #     to: ${{ env.SMTP_RECIPIENTS }}
-      #     from: E2E Test Runner
-      #     html_body: file://./e2e/result-summary.txt
-      #     attachments: ./e2e/html-reports/index.html
 
       - name: Read Summary Report
         if: always()
@@ -100,7 +85,6 @@ jobs:
       - name: Pull Request URL
         if: always()
         uses: ammaratef45/pr-url-action@v1
-
 
       - name: Post to Slack channel
         if: failure() || success()

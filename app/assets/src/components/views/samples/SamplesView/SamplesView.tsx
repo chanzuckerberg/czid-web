@@ -755,7 +755,7 @@ const SamplesView = forwardRef(function SamplesView(
         : `${selectableIds?.length} ${workflowDisplayText}`;
 
       return (
-        <div className={cs.filteredCount}>
+        <div className={cs.filteredCount} data-testid="sample-count">
           {description}
           {hasAtLeastOneFilterApplied && (
             <Button

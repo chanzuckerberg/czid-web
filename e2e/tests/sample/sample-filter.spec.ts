@@ -1,6 +1,7 @@
 import path from "path";
 import { expect, Page, test } from "@playwright/test";
 import dotenv from "dotenv";
+import { kebabCase } from "lodash";
 import { TEST_PROJECTS } from "../../constants/common";
 import {
   ADD_THRESHOLD,
@@ -15,15 +16,12 @@ import {
   LAST_SIX_MONTHS,
   LAST_THREE_MONTHS,
   LAST_WEEK,
-  LOCATION,
   NUMBERINPUT,
-  OPTION,
   PRIVATE,
   PUBLIC,
   SAMPLE_NAME_SELECTOR,
   SAMPLE_TYPE,
   SEARCH,
-  TAXON,
   TIMEFRAME,
   VISIBILITY,
 } from "../../constants/filter";
@@ -40,7 +38,7 @@ const workflows = [
   "Antimicrobial Resistance",
 ];
 const CANADA = "Alberta, Canada";
-
+const DALLAS = "Dallas County, Texas, USA";
 const ENV = (process.env.NODE_ENV as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
 
@@ -55,8 +53,7 @@ test.describe("Sample filtering tests", () => {
     test(`Should filter ${workflow} by taxons`, async ({ page }) => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
-
-      await page.getByText(TAXON).nth(1).click();
+      await page.getByTestId("taxon-filter").click();
       await page.getByText(CHOOSE_TAXON).click();
       await page.getByRole(COMBOBOX, { name: SEARCH }).click();
       await page.getByRole(COMBOBOX, { name: SEARCH }).fill(KLEBSIELLA);
@@ -64,17 +61,17 @@ test.describe("Sample filtering tests", () => {
       await page.getByText("Taxon filter").first().click(); // close the popup window so we can fill other fields
 
       // todo: sometimes the add threshold is not available
-      if ((await page.getByText(ADD_THRESHOLD).count()) > 0) {
-        await page.getByText(ADD_THRESHOLD).click();
+      if ((await page.getByTestId("add-threshold").count()) > 0) {
+        await page.getByTestId("add-threshold").click();
         await page.locator(NUMBERINPUT).click();
         await page.locator(NUMBERINPUT).fill(".5");
       }
 
-      await page.getByText("Apply").nth(1).click();
+      await page.getByTestId("apply").click();
 
       // check result
       expect(
-        await page.locator(SAMPLE_NAME_SELECTOR).count(),
+        await page.getByTestId("sample-name").count(),
       ).toBeGreaterThanOrEqual(0);
 
       // clear filter
@@ -116,11 +113,11 @@ test.describe("Sample filtering tests", () => {
       await goToProjectSamples(page, projectName, index);
 
       // click location dropdown
-      await page.getByText(LOCATION).nth(0).click();
+      await page.getByTestId("location").nth(0).click();
 
       // select two locations
       await page.getByTestId("dropdown-menu").getByText(CANADA).nth(0).click();
-      await page.getByTestId("dropdown-menu").getByText(BEXAR).nth(0).click();
+      await page.getByTestId("dropdown-menu").getByText(DALLAS).nth(0).click();
       await page.keyboard.press(ESCAPE);
 
       // check result
@@ -143,8 +140,8 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.getByText(TIMEFRAME).first().click();
-      await page.getByText(LAST_WEEK).click();
+      await page.getByTestId("timeframe").first().click();
+      await page.getByTestId(kebabCase(LAST_WEEK)).click();
 
       // check result
       expect(
@@ -235,8 +232,8 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.getByText(TIMEFRAME).first().click();
-      await page.getByText(LAST_WEEK).click();
+      await page.getByTestId(kebabCase(TIMEFRAME)).first().click();
+      await page.getByTestId(kebabCase(LAST_WEEK)).click();
 
       // check result
       expect(
@@ -258,8 +255,8 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.getByText(VISIBILITY).first().click();
-      await page.getByText(PRIVATE).first().click();
+      await page.getByTestId(kebabCase(VISIBILITY)).first().click();
+      await page.getByTestId(kebabCase(PRIVATE)).first().click();
 
       // check result
       expect(
@@ -281,8 +278,8 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.getByText(VISIBILITY).first().click();
-      await page.getByText(PUBLIC).nth(1).click();
+      await page.getByTestId(kebabCase(VISIBILITY)).first().click();
+      await page.getByTestId(kebabCase(PUBLIC)).click();
 
       // check result
       expect(
@@ -300,14 +297,11 @@ test.describe("Sample filtering tests", () => {
     test(`Should filter ${workflow} samples by host`, async ({ page }) => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
-      await page.getByText(HOST).nth(0).click();
+      await page.getByTestId(kebabCase(HOST)).nth(0).click();
 
       for (let i = 0; i < chosenHosts.length; i++) {
         await page.getByPlaceholder(SEARCH).first().fill(chosenHosts[i]);
-        await page
-          .getByRole(OPTION, { name: chosenHosts[i] })
-          .getByText(chosenHosts[i])
-          .click();
+        await page.getByTestId(`dropdown-${kebabCase(chosenHosts[i])}`).click();
       }
       // close popup
       await page.keyboard.press(ESCAPE);
@@ -332,13 +326,10 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.getByText(SAMPLE_TYPE).nth(0).click();
+      await page.getByTestId(kebabCase(SAMPLE_TYPE)).nth(0).click();
       for (let i = 0; i < sampleTypes.length; i++) {
         await page.getByPlaceholder(SEARCH).first().fill(sampleTypes[i]);
-        await page
-          .getByRole(OPTION, { name: sampleTypes[i] })
-          .getByText(sampleTypes[i])
-          .click();
+        await page.getByTestId(`dropdown-${kebabCase(sampleTypes[i])}`).click();
       }
       // close popup
       await page.keyboard.press(ESCAPE);

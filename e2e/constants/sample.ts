@@ -1,4 +1,4 @@
-export const TREE_NODES = '[data-testid="clickable"]';
+export const TREE_NODES = ".clickable";
 
 export const NUMBER_INPUT = 'input[type="number"]';
 
@@ -32,9 +32,10 @@ export const BASES_REMAINING = "Bases Remaining";
 export const ERCC = "ERCC Spike-In Counts";
 export const DOWNLOADS = "Downloads";
 
-export const COLUMNS_LABEL = 'data-testid=*"-column-header"';
+export const COLUMNS_LABEL = 'div[data-testid*="column-header"]';
 export const FILTER_TAG = '[data-testid="filter-tag"]';
-export const CANCEL_ICON = '[data-testid="x-close-icon"]';
+export const CANCEL_ICON =
+  '[data-testid="filter-tag"] [data-testid="x-close-icon"]';
 export const TOTAL_READ_POPOUP_CONTENT = '[data-testid="column-tooltip"]';
 export const COLUMN_HEADER_PROP = {
   Score: {
@@ -96,8 +97,7 @@ export const VIROIDS_FILTER = '[data-testid="dropdown-viroids"]';
 export const VIRUSES_FILTER = '[data-testid="dropdown-viruses"]';
 export const UNCATEGORIZED_FILTER = '[data-testid="dropdown-uncategorized"]';
 export const CATEGORIES_FILTER = '[data-testid="category-filter"]';
-export const FILTERS_DROPDOWN =
-  '[data-testid="dropdown-menu"]';
+export const FILTERS_DROPDOWN = '[data-testid="dropdown-menu"]';
 export const THRESHOLD_FILTERS = [
   "Score",
   "NT Z Score",
@@ -123,10 +123,9 @@ export const ANNOTATION_FILTERS = ["Hit", "Not a hit", "Inconclusive"];
 export const APPLY_BUTTON = '[data-testid="apply"]';
 export const APPLY = 'text="Apply"';
 export const THRESHOLD_FILTER = '[data-testid="threshold-filters-filter"]';
-export const SCORE = '[data-testid="score"]';
+export const SCORE = "Score";
 export const READ_SPECIFICITY = '[data-testid="read-specificity-filter"]';
 export const ANNOTATION_TEXT = '[data-testid="annotation-filter"]';
-
 
 export const OVERFLOW_BUTTON = "overflow-btn";
 export const BULK_DELETE_MODAL = "bulk-delete-modal";
@@ -154,3 +153,5 @@ export const URL_DOWLOAD_TYPES = [
   ["View Results Folder", "/results_folder?pipeline_version="],
   ["View Pipeline Visualization", "/pipeline_viz/"],
 ];
+
+export const FILTER_VALUE = "filter-value";

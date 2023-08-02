@@ -2,26 +2,24 @@ import { expect, test } from "@playwright/test";
 import { OVERALL, TEST_PROJECTS } from "../../constants/common";
 import {
   AVG_READS_FILTER_PER_SAMPLE,
+  DATE_CREATED_SIDEBAR,
   HELP_OUT,
-  HOVER_TEXT,
   MAP_HEADERS,
   MAP_VIEW_STRING,
   MENU_ICON,
-  SIDE_BAR,
-  SIDE_HEADERS,
+  META_DATA_SIDEBAR,
+  OVERALL_SIDEBAR,
   SIDE_LABELS,
   SIDE_LABEL_VALUE,
   VISIBLE,
 } from "../../constants/map";
 import { BasePage } from "../../pages/basePage";
 import { openSamplePage } from "../../utils/report";
+import { cookieBanner } from "../../utils/upload";
 const BAR_LABEL_ID = "date-histogram";
 const DATE_CREATED_ID = "date-histogram";
-const MAP_CHECKBOX_ID = "check-box";
-const BUTTONS_ID = "sample-view-actions";
 const OVERALL_AREA_ID = "overall-content";
 const DATE_LABEL_ID = "date-histogram-first-date";
-
 const PLQC = "Plqc";
 const ENV = (process.env.NODE_ENV as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
@@ -30,6 +28,7 @@ const viewTypes = [MAP_VIEW_STRING, PLQC];
 test.describe("Map view tests", () => {
   test.beforeEach(async ({ page }) => {
     await openSamplePage(page, projectName, false, false);
+    await cookieBanner(page);
   });
   viewTypes.forEach(viewType => {
     test(`Should collapse and expand right side areas for ${viewType}`, async ({
@@ -52,15 +51,15 @@ test.describe("Map view tests", () => {
       }
 
       await page.locator(MAP_HEADERS).first().click();
-      await page.getByTestId(BAR_LABEL_ID).nth(1).waitFor({
+      await page.getByTestId(BAR_LABEL_ID).waitFor({
         state: VISIBLE,
       });
 
       await page.waitForTimeout(2000);
       // collapse side tabs
-      for (let index = 0; index <= 2; index++) {
-        await page.locator(SIDE_HEADERS).nth(index).click();
-      }
+      await page.getByTestId(OVERALL_SIDEBAR).click();
+      await page.getByTestId(DATE_CREATED_SIDEBAR).click();
+      await page.getByTestId(META_DATA_SIDEBAR).click();
 
       // ensure all the sides are collapsed
       expect(
@@ -77,11 +76,11 @@ test.describe("Map view tests", () => {
       ).toEqual(0);
 
       // expand side tabs
-      for (let index = 0; index <= 2; index++) {
-        await page.locator(SIDE_HEADERS).nth(index).click();
-      }
+      await page.getByTestId(OVERALL_SIDEBAR).click();
+      await page.getByTestId(DATE_CREATED_SIDEBAR).click();
+      await page.getByTestId(META_DATA_SIDEBAR).click();
 
-      await page.getByTestId(BAR_LABEL_ID).nth(1).waitFor({
+      await page.getByTestId(BAR_LABEL_ID).waitFor({
         state: VISIBLE,
       });
 
@@ -109,35 +108,22 @@ test.describe("Map view tests", () => {
       const DATE_CREATED_S = "Date created";
       const AVG_READS_PER_SAMPLE = "Avg. reads per sample";
       const NUMBER_OF_SAMPLE = ".tabCounter-LfG85";
-      const menu_icon = await page.getByTestId(MENU_ICON).allInnerTexts();
-      const menu_size = menu_icon.length;
-      if (viewType === MAP_VIEW_STRING) {
-        await page
-          .getByTestId(MENU_ICON)
-          .nth(menu_size - 1)
-          .click();
-      } else {
-        await page
-          .getByTestId(MENU_ICON)
-          .nth(menu_size - 2)
-          .click();
-      }
 
-      await page.locator(MAP_HEADERS).nth(0).click();
+      await page.getByTestId(MENU_ICON).click();
+      await page.locator(MAP_HEADERS).first().click();
 
-      /// overall area
-      await expect(await basePage.findByLocator(SIDE_HEADERS, 0)).toContainText(
-        OVERALL,
-      );
-      // ensure all the sides are expanded afer loading
-      await expect(page.getByTestId(OVERALL_AREA_ID).nth(1)).toBeVisible();
+      // overall area
+      await expect(page.getByTestId(OVERALL_SIDEBAR)).toContainText(OVERALL);
+      // ensure all the sides are expanded after loading
+      await expect(page.getByTestId(OVERALL_AREA_ID)).toBeVisible();
 
       await page.waitForTimeout(2000);
       // collapse side tabs
-      for (let index = 0; index <= 2; index++) {
-        await page.locator(SIDE_HEADERS).nth(index).click();
-      }
-      // ensure all the sides are collaspsed
+      await page.getByTestId(OVERALL_SIDEBAR).click();
+      await page.getByTestId(DATE_CREATED_SIDEBAR).click();
+      await page.getByTestId(META_DATA_SIDEBAR).click();
+
+      // ensure all the sides are collapsed
       expect(
         (await page.getByTestId(OVERALL_AREA_ID).allInnerTexts()).length,
       ).toEqual(0);
@@ -151,7 +137,7 @@ test.describe("Map view tests", () => {
         (await page.getByTestId(DATE_LABEL_ID).allInnerTexts()).length,
       ).toEqual(0);
 
-      await (await basePage.findByLocator(SIDE_HEADERS, 0)).click();
+      await page.getByTestId(OVERALL_SIDEBAR).click();
 
       // verify  Overall area label
       await expect(await basePage.findByLocator(SIDE_LABELS, 0)).toContainText(
@@ -176,31 +162,29 @@ test.describe("Map view tests", () => {
       await expect(page.locator(SIDE_LABEL_VALUE).nth(2)).toBeVisible();
       await expect(page.locator(SIDE_LABEL_VALUE).nth(3)).toBeVisible();
 
-      if (await page.locator(SIDE_BAR).nth(0).isVisible()) {
-        await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
-        await (await basePage.findByLocator(SIDE_HEADERS, 2)).click();
-      }
-
       // Date created area
-      await expect(await basePage.findByLocator(SIDE_HEADERS, 1)).toContainText(
+      await expect(page.getByTestId(DATE_CREATED_SIDEBAR)).toContainText(
         DATE_CREATED_S,
       );
-      await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
+      await page.getByTestId(DATE_CREATED_SIDEBAR).click();
 
-      // verify information when user hovers over bar charts on date created section
-      const length = (await page.locator(SIDE_BAR).allInnerTexts()).length;
-      for (let i = 0; i < length; i++) {
-        const ans = await page.locator(SIDE_BAR).nth(i).getAttribute("style");
-        if (ans !== "height: 0px;") {
-          await page.locator(SIDE_BAR).nth(i).hover();
-          await expect(
-            page.getByTestId(HOVER_TEXT).locator("div").nth(0),
-          ).toBeVisible();
-          await expect(
-            page.getByTestId(HOVER_TEXT).locator("div").nth(1),
-          ).toBeVisible();
+      // verify tooltip on non-zero bar charts
+      const DATE_HISTOGRAM_BAR = "date-histogram-bar";
+      const TOOLTIP_SELECTOR = "[class*='boldText']";
+      const chartCount = await page.getByTestId(DATE_HISTOGRAM_BAR).count();
+
+      for (let i = 0; i < chartCount; i++) {
+        const chartStyle = await page
+          .getByTestId(DATE_HISTOGRAM_BAR)
+          .nth(i)
+          .getAttribute("style");
+        if (chartStyle !== "height: 0px;") {
+          // height zero bars have no tooltips
+          await page.getByTestId(DATE_HISTOGRAM_BAR).nth(i).hover();
+          await expect(page.locator(TOOLTIP_SELECTOR).nth(0)).toBeVisible();
+          await expect(page.locator(TOOLTIP_SELECTOR).nth(1)).toBeVisible();
           // make sure the hover is no longer present
-          await page.locator(".label-153WY").click();
+          await page.getByTestId("date-histogram-first-date").click();
         }
       }
     });
@@ -208,55 +192,76 @@ test.describe("Map view tests", () => {
     test(`Should enable icons upon selection of ${viewType} samples `, async ({
       page,
     }) => {
-      await openSamplePage(page, "floo sp84", false, false);
-      const MAP_ADD_ICON = ".plusIcon-1OBta";
-      const SAMPLE_HEADER_MAP = ".label-33v00";
+      const SAMPLE_URL =
+        "/public?currentDisplay=plqc&currentTab=samples&mapSidebarTab=summary&projectId=1015&showFilters=true&showStats=true&workflow=short-read-mngs";
+      await page.goto(SAMPLE_URL);
+      await page.getByTestId("sample-tablabel").click();
+      const BACKGROUND_MODEL_ICON = "background-model-icon";
+      const HEATMAP_ICON = "heatmap-icon";
+      const DOWNLOAD_ICON = "download-icon";
+      const BULK_DELETE_ICON = "bulk-delete-trigger";
+      const THREE_DOTS_ICON = "dots-horizontal";
+      const CHECKBOX = "check-box";
+      const BUTTON = "button";
 
-      const menu_icon = await page.getByTestId(MENU_ICON).allInnerTexts();
-      const menu_size = menu_icon.length;
+      // check various action icons are disabled by default
+      await expect(
+        page.getByTestId(BACKGROUND_MODEL_ICON).locator(BUTTON),
+      ).toBeDisabled();
+      await expect(
+        page.getByTestId(HEATMAP_ICON).locator(BUTTON),
+      ).toBeDisabled();
+      await expect(
+        page.getByTestId(DOWNLOAD_ICON).locator(BUTTON),
+      ).toBeDisabled();
+      await expect(
+        page.getByTestId(BULK_DELETE_ICON).locator(BUTTON),
+      ).toBeDisabled();
+      await expect(
+        page.getByTestId(THREE_DOTS_ICON).locator(BUTTON),
+      ).toBeDisabled();
 
-      if (viewType === MAP_VIEW_STRING) {
-        await page
-          .getByTestId(MENU_ICON)
-          .nth(menu_size - 1)
-          .click();
-      } else {
-        await page
-          .getByTestId(MENU_ICON)
-          .nth(menu_size - 2)
-          .click();
-      }
+      // select all samples and check icons
+      await page.getByTestId(CHECKBOX).first().click();
+      await expect(
+        page.getByTestId("sample-view-actions").locator(BUTTON).locator(BUTTON),
+      ).toBeEnabled();
+      await expect(page.locator('[role="listbox"]').first()).toBeEnabled();
+      await expect(
+        page.getByTestId(DOWNLOAD_ICON).locator(BUTTON),
+      ).toBeEnabled();
+      await expect(
+        page.getByTestId(BULK_DELETE_ICON).locator(BUTTON),
+      ).toBeDisabled();
+      await expect(
+        page.getByTestId(THREE_DOTS_ICON).locator(BUTTON),
+      ).toBeEnabled();
 
-      await page.locator(MAP_HEADERS).nth(1).click();
-
-      // ensure the header are visible
-      await expect(page.getByTestId("check-all")).toBeVisible();
-      await expect(page.locator(SAMPLE_HEADER_MAP)).toBeVisible();
-      await expect(page.locator(MAP_ADD_ICON)).toBeVisible();
-
-      // assert icons are active after selecting some checkbox
-      await page.locator(MAP_HEADERS).nth(1).click();
-      expect(page.locator(BUTTONS_ID).nth(3)).not.toBeEnabled();
-
-      await page.getByTestId(MAP_CHECKBOX_ID).nth(1).click();
-      await expect(page.getByTestId(BUTTONS_ID).nth(0)).not.toBeEnabled();
-      await expect(page.locator(BUTTONS_ID).nth(1)).not.toBeEnabled();
-
-      await page.getByTestId(MAP_CHECKBOX_ID).nth(2).click();
-      await expect(page.getByTestId(BUTTONS_ID).nth(0)).toBeEnabled();
-      await expect(page.getByTestId(BUTTONS_ID).nth(1)).toBeEnabled();
+      // select a single sample and check icons
+      await page.getByTestId(CHECKBOX).first().click();
+      await page.getByTestId(CHECKBOX).nth(1).click();
+      await expect(
+        page.getByTestId(BACKGROUND_MODEL_ICON).locator(BUTTON),
+      ).toBeDisabled();
+      await expect(
+        page.getByTestId(HEATMAP_ICON).locator(BUTTON),
+      ).toBeDisabled();
+      await expect(
+        page.getByTestId(DOWNLOAD_ICON).locator(BUTTON),
+      ).toBeEnabled();
+      await expect(
+        page.getByTestId(BULK_DELETE_ICON).locator(BUTTON),
+      ).toBeDisabled();
+      await expect(
+        page.getByTestId(THREE_DOTS_ICON).locator(BUTTON),
+      ).toBeEnabled();
     });
   });
 
   test(`Should display content when hovered `, async ({ page }) => {
     const MAP_VIEW = ".overlays";
-    const MAP_INFO_ICON = ".infoIcon-3BQyQ";
-    const menu_icon = await page.getByTestId(MENU_ICON).allInnerTexts();
-    const menu_size = menu_icon.length;
-    await page
-      .getByTestId(MENU_ICON)
-      .nth(menu_size - 1)
-      .click();
+    const MAP_INFO_ICON = '[class*="infoIcon"]';
+    await page.getByTestId("map-view").click();
     await expect(page.locator(MAP_VIEW)).toBeVisible();
     // hover over map info
     await page.locator(MAP_INFO_ICON).hover();

@@ -74,10 +74,14 @@ export function getDataByIndex(data: Array<DataModel>, index: number) {
 export async function openSamplePage(
   page: Page,
   projectName: string,
-  openDetails = true,
   selectSample = true,
+  openDetails = true,
 ) {
-  await page.goto(`${process.env.BASEURL}/my_data`);
+  if (projectName === "floo Neptunium") {
+    await page.goto(`${process.env.BASEURL}/public?currentDisplay=table&currentTab=samples&mapSidebarTab=summary&projectId=875`);
+  } else {
+    await page.goto(`${process.env.BASEURL}/my_data`);
+    await page.goto(`${process.env.BASEURL}/my_data`);
   await page.getByTestId(MENU_ITEM_PUBLIC).click();
   await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
   await page.waitForTimeout(300);
@@ -88,7 +92,8 @@ export async function openSamplePage(
     await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
     await page.waitForTimeout(300);
   }
-  await page.locator(".title").click();
+  await page.locator(".title").nth(0).click();
+  }
   // select metagenonomics samples
   await page.getByTestId(METAGENOMICS.toLowerCase()).click();
 
@@ -126,7 +131,6 @@ export async function verifySectionDetails(
   sampleId?: number,
   expandSection = true,
 ) {
-  const label_value = '[data-testid*="value"]';
   // expand section; first section is expanded by default
   if (expandSection) {
     await (await getTabSection(page, section)).click();
@@ -148,7 +152,7 @@ export async function verifySectionDetails(
       );
       expect(
         await page
-          .locator('[data-testid="download"]')
+          .locator('[class*="downloadLink"]')
           .nth(i)
           .getAttribute("href"),
       ).toBe(item.href.replace("SAMPLEID", sampleId.toString()));
@@ -159,35 +163,36 @@ export async function verifySectionDetails(
     const item = getDataByIndex(data, i);
     if (attributes.includes("name")) {
       expect(
-        await page.locator('[data-testid*="tablabel"]').nth(i).textContent(),
+        await page.locator('[data-testid*="field-label"]').nth(i).textContent(),
       ).toBe(item.name);
       // todo: validate values but this only be done after testids added
     }
     if (attributes.includes("step")) {
       // get row data
-      const row = page.locator(label_value).nth(i + 1); // to ignore the header
+      const row = page.locator('[class*="readsRemainingRow"]').nth(i + 1); // to ignore the header
 
       // verify label
-      expect(await row.locator('[data-testid*="tablabel"]').textContent()).toBe(
+      expect(await row.locator('[class*="labelText"]').textContent()).toBe(
         item.step,
       );
 
       // verify reads remaining
-      expect(await row.locator(label_value).first().textContent()).toBe(
-        item.reads_remaining,
-      );
+      expect(
+        await row.locator('[class*="metadataValue"]').first().textContent(),
+      ).toBe(item.reads_remaining);
 
       // verify reads remaining percentage
-      expect(await row.locator(label_value).nth(1).textContent()).toBe(
-        item.reads_remaining_percent,
-      );
+      expect(
+        await row.locator('[class*="metadataValue"]').nth(1).textContent(),
+      ).toBe(item.reads_remaining_percent);
     }
   }
 }
 // selects a section of tab or just the tab in case there is no section, for example Notes
 export async function getTabSection(page: Page, section?: string) {
   let index = 0;
-  const SIDE_BAR_HEADER = '[data-testid*="-sidebar"]';
+  const SIDE_BAR_HEADER =
+    '[data-testid="details-sidebar"]  [data-testid*="header"]';
   if (section !== undefined) {
     index = sectionIndices[section];
   }
@@ -306,7 +311,7 @@ async function verifyDownloadAll(page: Page) {
 
 export async function chooseBackgroundModel(page: Page) {
   // choose Background
-  await page.getByTestId("background-filter").click();
+  await page.getByTestId("background-filter").nth(0).click();
 
   await page
     .getByRole("option", { name: "Test Background Model Standard" })

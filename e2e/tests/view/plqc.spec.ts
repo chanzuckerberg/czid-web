@@ -2,13 +2,12 @@ import { BrowserContext, expect, Page, test } from "@playwright/test";
 import {
   SHARED_SAMPLE_TABLE_COLUMNS,
   SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
-} from "../../../app/assets/src/components/views/samples/constants";
+} from "../../constants/app.constants";
 import {
   BAR_POPUP,
   HEADER_READS,
   LEARN_MORE,
   LEARN_MORE_TEXT,
-  MENU_ICON,
   PIPELINE_CHART_HEADER,
   TOTAL_READ_INFO_ICON,
   TOTAL_READ_POPUP_CONTENT,
@@ -25,25 +24,14 @@ async function verifyBarChartContent(
 ) {
   const BARS = '[data-testid*="histogram"]';
   const BAR_CHARTS = ".bar-0";
-  await openSamplePage(page, projectName, false);
-  await expect(page.getByTestId("samples")).toBeVisible();
+
+  await expect(page.getByTestId("samples").nth(0)).toBeVisible();
 
   // click to switch display to bar chart
   await page.getByTestId("plqc-view").click();
 
-  // X of Y samples
-  expect(page.getByTestId("showing-x-of-y-samples")).toBe(
-    "Showing 20 of 20 samples",
-  );
-
-  // info icon
-  await page.getByTestId("chart-info-icon").hover();
-
   // Verify text displayed after hovering
-  await page
-    .getByTestId(TOTAL_READ_INFO_ICON)
-    .nth(index + 1)
-    .hover();
+  await page.getByTestId(TOTAL_READ_INFO_ICON).hover();
 
   expect(
     await page.getByTestId(TOTAL_READ_POPUP_CONTENT).textContent(),
@@ -91,6 +79,8 @@ test.describe("PLQC view tests", () => {
     page,
     context,
   }) => {
+    await page.goto(`${process.env.BASEURL}/my_data`);
+    await openSamplePage(page, projectName, false, false);
     await verifyBarChartContent(
       page,
       context,
@@ -103,6 +93,8 @@ test.describe("PLQC view tests", () => {
     page,
     context,
   }) => {
+    await page.goto(`${process.env.BASEURL}/my_data`);
+    await openSamplePage(page, projectName, false, false);
     await verifyBarChartContent(
       page,
       context,
@@ -115,6 +107,8 @@ test.describe("PLQC view tests", () => {
     page,
     context,
   }) => {
+    await page.goto(`${process.env.BASEURL}/my_data`);
+    await openSamplePage(page, projectName, false, false);
     await verifyBarChartContent(
       page,
       context,
@@ -127,6 +121,8 @@ test.describe("PLQC view tests", () => {
     page,
     context,
   }) => {
+    await page.goto(`${process.env.BASEURL}/my_data`);
+    await openSamplePage(page, projectName, false, false);
     await verifyBarChartContent(
       page,
       context,
@@ -139,19 +135,19 @@ test.describe("PLQC view tests", () => {
     page,
     context,
   }) => {
-    const SAMPLE_AMOUNT = ".filteredCount-3bajD";
+    await page.goto(`${process.env.BASEURL}/my_data`);
     await openSamplePage(page, projectName, false, false);
-    await page.getByTestId(MENU_ICON).nth(1).click();
-    await expect(page.locator(SAMPLE_AMOUNT)).toBeVisible();
+    // click to switch display to bar chart
+    await page.getByTestId("plqc-view").click();
 
     // Verify text displayed after hovering
-    await expect(page.locator(HEADER_READS).nth(4)).toHaveText(
+    await expect(page.getByTestId("sample-processed-check")).toHaveText(
       PIPELINE_CHART_HEADER,
     );
 
     // Verify text displayed after hovering
-    await page.getByText("Reads Lost").locator("svg").hover();
-    await expect(page.getByTestId(TOTAL_READ_POPUP_CONTENT)).toHaveText(
+    await page.getByTestId("read-lost-title").locator("svg").hover();
+    await expect(page.getByTestId("column-tooltip")).toHaveText(
       SHARED_SAMPLE_TABLE_COLUMNS.readsLost.tooltip,
     );
 

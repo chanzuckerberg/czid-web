@@ -28,7 +28,10 @@ test.describe("Bulk Downloads View tests", () => {
     await page.getByTestId("advanced-download").click();
 
     // check that the second tab has download information
-    await expect(page.getByTestId("cloud-command-container")).toBeVisible();
+    // This will be changed when the pr is merged
+    await expect(
+      page.getByTestId("cloud-command-container"),
+    ).toBeVisible();
     // check that the sidebar closes on click
     await page.locator('[class*="closeIcon"]').click();
     await expect(page.getByTestId("details-sidebar")).not.toBeVisible();

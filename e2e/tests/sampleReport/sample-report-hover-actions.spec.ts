@@ -108,18 +108,16 @@ test.describe("Blast Hover Actions on Sample Report", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
-
     const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
     await cookieBanner.click();
-
-    // hover on taxon name
-    await page.getByText("Klebsiella").hover();
   });
 
   test("Should verify BlastN modal flow on click of hover action", async ({
     page,
     context,
   }) => {
+    // hover on taxon name
+    await page.locator('[class*="taxonName"]').getByText("Klebsiella").click();
     // click on that taxon's Blast icon
     await page.getByTestId("hover-action-blast-570-v-1").click();
     // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
@@ -149,6 +147,8 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     page,
     context,
   }) => {
+    // hover on taxon name
+    await page.locator('[class*="taxonName"]').getByText("Klebsiella").click();
     // click on that taxon's Blast icon
     await page.getByTestId("hover-action-blast-570-v-1").click();
     // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
@@ -157,7 +157,7 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     await page.getByText("blastx", { exact: true }).click();
     await page.getByText("Continue").click();
 
-    // selet contig
+    // selet continue
     await page.getByText("NODE_25_length_597_cov_0.916974").click();
     await page.getByText("NR Hits").click();
     await page.getByText("NODE_35_length_534_cov_1.135699").click();
@@ -174,7 +174,7 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     await newPage.close();
 
     // toast is visible
-    expect(await page.getByText("Dismiss"));
+    expect(page.getByText("Dismiss")).toBeVisible();
   });
 
   test("BlastN is disabled and 5 longest reads have been identified", async ({

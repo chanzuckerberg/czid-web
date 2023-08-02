@@ -16,11 +16,11 @@ export const tag =
   "Chan Zuckerberg ID: The free, cloud-based metagenomics platform for researchers";
 export const VISUALIZATIONS = "Visualizations";
 export const TAXON_FILTERS = "Taxon Filters";
-export const BUTTONS = '[data-testid="sample-view-actions"]';
-export const VIEW_ICON = 'data-testid="info-icon"';
+
 export const SIDE_HEADERS = '[data-testid*="-sidebar"]';
-export const SAMPLES_COLUMN = '[data-testid*="dropdown-"]';
-export const COLUMNS_LABEL = '[data-testid*="-column-header"]';
+export const SAMPLES_COLUMN =
+  '[data-testid="dropdown-menu"] [data-testid*="checked"]:visible';
+export const COLUMNS_LABEL = '[class*="headerColumn"]';
 export const OVERALL_AREA = '[ data-testid="overall-content"]';
 export const MENU_ITEM_PUBLIC = "menu-item-public";
 export const SEARCH_PUBLIC = "Search Public...";
@@ -55,8 +55,8 @@ export const ENTER = "Enter";
 export const PUBLIC_MENU_ITEM = "menu-item-public";
 export const PROJECT_NAME_SELECTOR = '[data-testid="project-name"]';
 export const PROJECT_COUNT = "project-count";
+export const SAMPLE_COUNT='[class*="filteredCount"]';
 export const METADATA_COUNT_SELECTOR = '[data-testid="project-value"]';
-export const RESULT_COUNT_SELECTOR = '[data-testid="project-count"]';
 export const GO_TO_PROJECT = "Go to Project";
 export const LOADED = "loaded";
 export const CONTINUE = "Continue";
@@ -86,3 +86,13 @@ export const WORKFLOWS = {
   AMR: "amr",
   SC2: "covid-consensus-genome",
 } as const;
+
+export const TABLE_VIEW = "table-view";
+export const PLQC_VIEW = "plqc-view";
+export const MAP_VIEW = "map-view";
+
+export const BACKGROUND_MODEL_ICON = "background-model-icon";
+export const HEAT_MAP_ICON = "heatmap-icon";
+export const DOWNLOAD_ICON = "download-icon";
+export const BULK_DELETE_TRIGGER = "bulk-delete-trigger";
+export const DOT_HORIZONTAL = "dots-horizontal";

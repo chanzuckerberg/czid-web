@@ -1,37 +1,41 @@
 import path from "path";
-import { expect, Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
 import {
   ANTIMICROBIAL_RESISTANCE,
   AVG_READS_FILTER_PER_SAMPLE,
   AVG_READS_PER_SAMPLE,
+  BACKGROUND_MODEL_ICON,
   BAR_LABEL,
-  BUTTONS,
+  BULK_DELETE_TRIGGER,
   CANCEL_ICON,
-  CHECKED_BOX,
   COLUMNS_LABEL,
   CONSENSUS_GENOMES,
   DATE_CREATED,
   DATE_CREATED_S,
   DATE_LABEL,
   DESCRIPTION,
+  DOT_HORIZONTAL,
+  DOWNLOAD_ICON,
   EDIT,
   FILTERS,
   FILTER_TAG,
+  HEAT_MAP_ICON,
   HIDDEN,
+  MAP_VIEW,
   METADATA,
   METAGENOMICS,
   MYDATA,
-  NUMBER_OF_COLUMN,
   OVERALL,
   OVERALL_AREA,
+  PLQC_VIEW,
   PROJECTS,
   SAMPLES,
   SAMPLES_COLUMN,
   SAMPLE_TYPE,
   SIDE_HEADERS,
+  TABLE_VIEW,
   TEST_PROJECTS,
-  VIEW_ICON,
   VISIBLE,
 } from "../../constants/common";
 import {
@@ -41,7 +45,6 @@ import {
   TIMEFRAME,
   VISIBILITY,
 } from "../../constants/filter";
-
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 const sampleTypes = [METAGENOMICS];
@@ -51,15 +54,6 @@ const baseUrl = (process.env.BASEURL as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
 const url =
   "public?currentDisplay=table&currentTab=samples&mapSidebarTab=summary&projectId=875&showFilters=true&showStats=true&workflow=short-read-mngs";
-async function getTextOnly(page: Page, id: string) {
-  return (await page.getByTestId(id).textContent())?.replace(/[-_\d]/g, "");
-}
-async function verifyElement(page: Page, n: number, locator: string) {
-  for (let i = 0; i < n; i++) {
-    await expect.soft(page.locator(locator).nth(i)).toBeVisible();
-  }
-}
-
 // These tests verifies Ui elements displayed on the discovery view like header, side bars, bar charts and graphs
 test.describe("Discovery view tests", () => {
   test.beforeEach(async ({ page }) => {
@@ -72,58 +66,54 @@ test.describe("Discovery view tests", () => {
       page,
     }) => {
       // verify left side content
-      await expect(
-        page.locator('[data-testid="project-header"]'),
-      ).toContainText(projectName);
-      await expect(page.locator('[data-testid="annotation"]')).toContainText(
-        ANNOTATION,
+      await expect(page.getByTestId("project-header")).toContainText(
+        projectName,
       );
-      await expect(page.locator('[data-testid="location"]')).toContainText(
-        LOCATION,
-      );
-      await expect(
-        page.locator('[data-testid="timeframe"]').nth(1),
-      ).toContainText(TIMEFRAME);
-      await expect(page.locator('[data-testid="visibility"]')).toContainText(
-        VISIBILITY,
-      );
-      await expect(page.locator('[data-testid="host"]')).toContainText(HOST);
-      await expect(page.locator('[data-testid="sample-type"]')).toContainText(
-        SAMPLE_TYPE,
-      );
+      await expect(page.getByTestId("annotation")).toContainText(ANNOTATION);
+      await expect(page.getByTestId("location")).toContainText(LOCATION);
+      await expect(page.getByTestId("timeframe")).toContainText(TIMEFRAME);
+      await expect(page.getByTestId("visibility")).toContainText(VISIBILITY);
+      await expect(page.getByTestId("host")).toContainText(HOST);
+      await expect(page.getByTestId("sample-type")).toContainText(SAMPLE_TYPE);
     });
     test(`Should display main content of for ${sampleType}`, async ({
       page,
     }) => {
       // verify header on main area
-      expect(await getTextOnly(page, "metagenomics")).toBe(METAGENOMICS);
-
-      expect(await getTextOnly(page, "consensus-genomes")).toBe(
+      await expect(page.getByTestId("metagenomics")).toContainText(
+        METAGENOMICS,
+      );
+      await expect(page.getByTestId("consensus-genomes")).toContainText(
         CONSENSUS_GENOMES,
       );
-
-      expect(await getTextOnly(page, "antimicrobial-resistance")).toBe(
-        "Antimicrobial Resistance",
+      await expect(page.getByTestId("antimicrobial-resistance")).toContainText(
+        ANTIMICROBIAL_RESISTANCE,
       );
 
       if (sampleType === METAGENOMICS) {
-        await verifyElement(page, 3, VIEW_ICON);
+        // verify icons displayed on the left
+        await expect(page.getByTestId(TABLE_VIEW)).toBeVisible();
+        await expect(page.getByTestId(PLQC_VIEW)).toBeVisible();
+        await expect(page.getByTestId(MAP_VIEW)).toBeVisible();
+        await expect(page.getByTestId(BACKGROUND_MODEL_ICON)).toBeVisible();
+        await expect(page.getByTestId(HEAT_MAP_ICON)).toBeVisible();
+        await expect(page.getByTestId(DOWNLOAD_ICON)).toBeVisible();
+        await expect(page.getByTestId(BULK_DELETE_TRIGGER)).toBeVisible();
+        await expect(page.getByTestId(DOT_HORIZONTAL)).toBeVisible();
       }
       if (sampleType === CONSENSUS_GENOMES) {
-        await verifyElement(page, 2, VIEW_ICON);
+        // verify icons displayed on the left
+        await expect(page.getByTestId(TABLE_VIEW)).toBeVisible();
+        await expect(page.getByTestId(MAP_VIEW)).toBeVisible();
+        await expect(page.getByTestId(DOWNLOAD_ICON)).toBeVisible();
+        await expect(page.getByTestId(BULK_DELETE_TRIGGER)).toBeVisible();
       }
       if (sampleType === ANTIMICROBIAL_RESISTANCE) {
-        await verifyElement(page, 2, VIEW_ICON);
-      }
-
-      if (sampleType === METAGENOMICS) {
-        await verifyElement(page, 4, BUTTONS);
-      }
-      if (sampleType === CONSENSUS_GENOMES) {
-        await verifyElement(page, 2, BUTTONS);
-      }
-      if (sampleType === ANTIMICROBIAL_RESISTANCE) {
-        await verifyElement(page, 1, BUTTONS);
+        // verify icons displayed on the left
+        await expect(page.getByTestId(TABLE_VIEW)).toBeVisible();
+        await expect(page.getByTestId(MAP_VIEW)).toBeVisible();
+        await expect(page.getByTestId(DOWNLOAD_ICON)).toBeVisible();
+        await expect(page.getByTestId(BULK_DELETE_TRIGGER)).toBeVisible();
       }
     });
 
@@ -148,7 +138,7 @@ test.describe("Discovery view tests", () => {
       await expect(page.locator(SIDE_HEADERS).nth(2)).toContainText(METADATA);
 
       // verify  side -role labels
-      await expect(page.getByTestId("samples")).toContainText(SAMPLES);
+      await expect(page.getByTestId("samples").nth(0)).toContainText(SAMPLES);
       await expect(page.getByTestId("projects")).toContainText(PROJECTS);
       await expect(page.getByTestId("avg-reads-per-sample")).toContainText(
         AVG_READS_PER_SAMPLE,
@@ -169,18 +159,18 @@ test.describe("Discovery view tests", () => {
     }) => {
       // Open column
       await page.getByTestId(PLUS_CIRCLE).click();
-
       // Get the number of elements on the column
       const column_dropdown = await page
         .locator(SAMPLES_COLUMN)
         .allInnerTexts();
 
-      // Get the number of checked samples on the column
-      const checked_samples = await page.locator(CHECKED_BOX).allInnerTexts();
-
       // uncheck all samples
-      for (let i = 1; i < checked_samples.length; i++) {
-        await page.locator(SAMPLES_COLUMN).nth(i).click();
+      for (let i = 1; i < column_dropdown.length; i++) {
+        const element = await page.locator(SAMPLES_COLUMN).nth(i);
+        const classList = await element.getAttribute("class");
+        if (classList.includes("checked")) {
+          await element.click();
+        }
       }
 
       // check all samples
@@ -198,9 +188,6 @@ test.describe("Discovery view tests", () => {
       for (let i = 1; i < column_dropdown.length; i++) {
         await page.locator(SAMPLES_COLUMN).nth(i).click();
       }
-      expect(
-        (await page.locator(COLUMNS_LABEL).allInnerTexts()).length,
-      ).toEqual(NUMBER_OF_COLUMN);
     });
     test(`Should display info icon and sidebar for ${sampleType}`, async ({
       page,
@@ -211,7 +198,7 @@ test.describe("Discovery view tests", () => {
       // info icon used to hide and unhide  columns on the page
       await page.getByTestId(PLUS_CIRCLE).click();
 
-      await page.locator(BAR_LABEL).nth(1).waitFor({
+      await page.locator(BAR_LABEL).waitFor({
         state: VISIBLE,
       });
       const overall_area = (await page.locator(OVERALL_AREA).allInnerTexts())

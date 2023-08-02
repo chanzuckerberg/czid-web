@@ -1,4 +1,5 @@
 import { test } from "@playwright/test";
+import { kebabCase } from "lodash";
 const sampleId = 25307;
 const INVALID_DATES = ["date"];
 const VALID_DATES = ["2023-12-31", "2023-12", "12/2023"];
@@ -79,8 +80,8 @@ test.describe("Sample report tests", () => {
       nucleotideType,
       currentNucleotideType,
     );
-
-    await page.getByTestId(newNucleotideType).click();
+    await page.getByTestId("nucleotide-type-value").click();
+    await page.getByTestId(kebabCase(newNucleotideType)).click();
   });
 
   test(`Should validate collection date of sample info section`, async ({
@@ -104,8 +105,12 @@ test.describe("Sample report tests", () => {
   });
 
   test(`Should edit host info section`, async ({ page }) => {
+    const HOST_SEX_VALUE = "host-sex-value";
     // collapse sample info section
     await page.getByTestId(SAMPLE_INFO_HEADER).click();
+
+    // expand host info section
+    await page.getByTestId("host-info-header").click();
 
     // expand host info section and click edit
     await page.getByTestId("host-info-edit").click();
@@ -113,28 +118,30 @@ test.describe("Sample report tests", () => {
     // edit diseases & conditions
     await page
       .getByTestId("diseases-and-conditions-value")
-      .locator('input[type="text"]')
+      .locator("input")
       .fill(`New disease-${randomNumber}`);
 
     // edit host age
-    await page.getByTestId("host-age-value").fill(`${randomNumber}`);
+    await page
+      .getByTestId("host-age-value")
+      .locator("input")
+      .fill(`${randomNumber}`);
 
     // edit host genius; first get current value, then choose a new value different than current and then click select
     // get current host
     const currentHostGenus = await page
-      .getByTestId("host-sex-value")
+      .getByTestId(HOST_SEX_VALUE)
       .textContent();
     const newHostGenus = pickListElement(hostGenuses, currentHostGenus);
 
     await page.getByTestId("host-genus-species-value").click();
 
-    await page.getByTestId(newHostGenus).click();
+    await page.getByTestId(kebabCase(newHostGenus)).click();
 
-    const currentHostSex = await page
-      .getByTestId("host-sex-value")
-      .textContent();
+    const currentHostSex = await page.getByTestId(HOST_SEX_VALUE).textContent();
     const newHostSex = pickListElement(["Male", "Female"], currentHostSex);
-    await page.getByText(newHostSex, { exact: true }).click();
+    await page.getByTestId(HOST_SEX_VALUE).click();
+    await page.getByTestId(kebabCase(newHostSex)).click();
   });
 
   test(`Should edit infection info section`, async ({ page }) => {
@@ -147,16 +154,21 @@ test.describe("Sample report tests", () => {
     await page.getByTestId("infection-info-edit").click();
 
     // edit Ct Value
-    await page.getByTestId("ct-value-value").fill(String(ct_value));
+    await page
+      .getByTestId("ct-value-value")
+      .locator("input")
+      .fill(String(ct_value));
 
     // edit Known Organism
     await page
       .getByTestId("known-organism-value")
+      .locator("input")
       .fill(`Known Organism-${ct_value}`);
 
     // edit  Detection Method
     await page
       .getByTestId("detection-method-value")
+      .locator("input")
       .fill(`Detection method-${ct_value}`);
 
     // edit Infection Class first get current value, then choose a new value different than current and then click select
@@ -169,7 +181,7 @@ test.describe("Sample report tests", () => {
       currentInfectionClass,
     );
     await page.getByTestId("infection-class-value").click();
-    await page.getByTestId(newInfectionClass).click();
+    await page.getByTestId(kebabCase(newInfectionClass)).click();
   });
 
   test(`Should edit sequencing info section`, async ({ page }) => {
@@ -179,9 +191,13 @@ test.describe("Sample report tests", () => {
 
     // expand sequencing info  section and click edit
     await page.getByTestId("sequencing-info-header").click();
+    await page.getByTestId("sequencing-info-edit").click();
 
     // edit RNA/DNA Input (ng)
-    await page.getByTestId("rna-dna-input-ng-value").fill(`${rnaDnaInputng}`);
+    await page
+      .getByTestId("rna-dna-input-ng-value")
+      .locator("input")
+      .fill(`${rnaDnaInputng}`);
 
     // edit Library Prep first get current value, then choose a new value differnt than current and then click select
     // get current Library Prep
@@ -191,7 +207,7 @@ test.describe("Sample report tests", () => {
     const newLibraryPrep = pickListElement(libraryPrep, currentlibraryPrep);
 
     await page.getByTestId("library-prep-value").click();
-    await page.getByTestId(newLibraryPrep).click();
+    await page.getByTestId(kebabCase(newLibraryPrep)).click();
 
     // edit Sequencer first get current value, then choose a new value differnt than current and then click select
     // get current Sequencer
@@ -201,6 +217,9 @@ test.describe("Sample report tests", () => {
     const newSequencer = pickListElement(sequencer, currentSequencer);
 
     await page.getByTestId("sequencer-value").click();
-    await page.getByTestId("dropdown-menu").getByTestId(newSequencer).click();
+    await page
+      .getByTestId("dropdown-menu")
+      .getByTestId(kebabCase(newSequencer))
+      .click();
   });
 });

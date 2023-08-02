@@ -12,7 +12,7 @@ export const COMBOBOX = "combobox";
 export const ADD_THRESHOLD = "+ ADD THRESHOLD";
 export const NUMBERINPUT = 'input[type="number"]';
 export const CHOOSE_TAXON = "Choose Taxon";
-export const SAMPLE_NAME_SELECTOR = ".sampleName-1zqqT";
+export const SAMPLE_NAME_SELECTOR = '[data-testid="sample-name"]';
 export const ESCAPE = "Escape";
 export const CLOSE_ICON = ".closeIcon-yEIIr";
 export const LAST_MONTH = "Last Month";
