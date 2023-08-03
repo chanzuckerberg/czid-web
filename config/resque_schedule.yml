@@ -12,3 +12,9 @@ CheckSoftDeletedData:
   class: CheckSoftDeletedData
   queue: check_soft_deleted_data
   description: "This job checks the database for any pipeline or workflow runs that were soft deleted but never hard deleted."
+
+DeleteUnclaimedUserAccounts:
+  cron: "30 0 * * *" # 12:30am PT daily (spaced out from other hourly/daily jobs)
+  class: DeleteUnclaimedUserAccounts
+  queue: delete_unclaimed_user_accounts
+  description: "This job queries the Auth0 client for unclaimed user accounts that are 21+ days old and deletes them."

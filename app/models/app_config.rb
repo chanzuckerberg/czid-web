@@ -65,6 +65,9 @@ class AppConfig < ApplicationRecord
   MODERN_AMR_VERSION = "modern_amr_version".freeze
   # When this is "1", automatic account creation will be enabled.
   AUTO_ACCOUNT_CREATION_V1 = "auto_account_creation_v1".freeze
+  # When this is "0", old unclaimed accounts will be logged in Sentry, but not deleted. (Monitor mode.)
+  # When this is "1", old unclaimed accounts will be deleted. (Deletion mode.)
+  ENABLE_DELETE_UNCLAIMED_USER_ACCOUNTS = "auto_delete_unclaimed_accounts".freeze
 
   after_save :clear_cached_record
 
