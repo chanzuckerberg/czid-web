@@ -352,8 +352,16 @@ export default class Heatmap {
       for (let j = 0; j < this.columnLabels.length; j++) {
         this.columnLabels[j].columnIndex = j;
         const { filterStateColumn } = this.columnLabels[j];
-        const meetsUserFilters =
-          taxonFilterState[filterStateRow][filterStateColumn];
+
+        // Filter info is not always present (as indicated by the type definition)
+        // The deprecated AMR heatmap instantiates this object, but does not have filter info
+        const filterInfoPresent =
+          taxonFilterState !== undefined &&
+          filterStateRow !== undefined &&
+          filterStateColumn !== undefined;
+        const meetsUserFilters = filterInfoPresent
+          ? taxonFilterState[filterStateRow][filterStateColumn]
+          : true;
 
         this.cells.push({
           id: `${i},${j}`,
