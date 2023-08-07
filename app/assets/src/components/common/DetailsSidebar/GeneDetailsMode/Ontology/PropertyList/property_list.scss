@@ -1,0 +1,10 @@
+@import "~@czi-sds/components/dist/variables";
+@import "~styles/themes/typography";
+
+.property {
+  padding-top: $sds-spaces-xs;
+}
+
+.geneFamilyName {
+  font-weight: $font-weight-semibold;
+}

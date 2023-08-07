@@ -11,7 +11,8 @@
 }
 
 .textSynonym {
-  @include font-header-xxs;
+  @include font-header-xs;
+  color: $sds-color-gray-500;
 }
 
 .text {

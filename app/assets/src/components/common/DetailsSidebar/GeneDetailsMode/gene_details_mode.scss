@@ -19,9 +19,9 @@
   padding: 0 $sds-spaces-m;
 
   .subtitle {
-    @include font-header-s;
-    padding-top: 25px;
-    padding-bottom: $sds-spaces-m;
+    @include font-header-m;
+    padding-top: $sds-spaces-xl;
+    padding-bottom: $sds-spaces-s;
   }
 
   .linksSection {
@@ -36,6 +36,10 @@
     min-width: 200px;
     float: left;
     list-style: none;
+    padding-inline-start: 0px;
+    list-style: none;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
   }
 
   .link {
@@ -44,9 +48,9 @@
   }
 }
 
-.cardLicense {
+.cardFooter {
   @include font-body-xxs;
-  padding-top: $sds-spaces-m;
+  padding-top: $sds-spaces-l;
   color: $sds-color-gray-500;
 
   .cardLink {
@@ -56,5 +60,9 @@
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  .disclaimer {
+    padding-top: $sds-spaces-xs;
   }
 }

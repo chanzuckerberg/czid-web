@@ -118,7 +118,7 @@ RSpec.describe AmrOntologyController, type: :controller do
 
           json_response = JSON.parse(response.body)
           expect(json_response).to include_json(
-            error: "No data for ImNotInCard."
+            error: "No data for imNotInCard." # will try the downcased version if the uppercased version is not found
           )
         end
       end

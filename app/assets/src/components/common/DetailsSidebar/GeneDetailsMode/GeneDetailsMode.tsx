@@ -17,19 +17,16 @@ export interface DescriptionLabel {
 export interface OntologyType {
   accession: string;
   description: string;
-  drugClass: DescriptionLabel;
+  dnaAccession?: string;
   error: string;
   geneFamily: DescriptionLabel[];
-  genbankAccession?: string;
   label: string;
-  publications: string[];
+  proteinAccession?: string;
   synonyms: string[];
 }
 
 const GeneDetailsMode = ({ geneName }: GDMProps) => {
-  const safeGeneName = geneName.replace(/[^a-zA-Z0-9-]/g, "").toLowerCase();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [wasCardEntryFound, setWasCardEntryFound] = useState<boolean>(false);
   const [wasOntologyInfoFound, setWasOntologyInfoFound] =
     useState<boolean>(false);
   const [ontology, setOntology] = useState<OntologyType>({
@@ -38,31 +35,22 @@ const GeneDetailsMode = ({ geneName }: GDMProps) => {
     synonyms: [],
     description: "",
     geneFamily: [],
-    drugClass: {
-      description: "",
-      label: "",
-    },
-    publications: [],
     error: "Placeholder",
   });
 
   useEffect(() => {
     setIsLoading(true);
-    setWasCardEntryFound(false);
 
-    getGeneInfo(safeGeneName);
-  }, [safeGeneName]);
+    getGeneInfo(geneName);
+  }, [geneName]);
 
-  const getGeneInfo = async (safeGeneName: string) => {
-    const newOntology = await getOntology(safeGeneName);
+  const getGeneInfo = async (geneName: string) => {
+    const newOntology = await getOntology(geneName);
     const ontologyInfoFound = newOntology.error === "";
-    // all the CARD accessions we are interested in ar 7 in length.
-    const cardEntryFound = newOntology.accession.length === 7;
 
     setOntology(newOntology);
     setIsLoading(false);
     setWasOntologyInfoFound(ontologyInfoFound);
-    setWasCardEntryFound(cardEntryFound);
   };
 
   if (isLoading) {
@@ -73,11 +61,9 @@ const GeneDetailsMode = ({ geneName }: GDMProps) => {
     );
   }
 
-  const { label } = ontology;
-
   return (
     <div className={cs.content}>
-      <div className={cs.title}>{label !== "" ? label : geneName}</div>
+      <div className={cs.title}>{geneName}</div>
       <div className={cs.geneContents}>
         {wasOntologyInfoFound ? (
           <Ontology geneName={geneName} ontology={ontology} />
@@ -90,16 +76,8 @@ const GeneDetailsMode = ({ geneName }: GDMProps) => {
             .
           </div>
         )}
-        <div className={cs.subtitle}>Links</div>
-        <div className={cs.linksSection}>
-          <ul className={cs.linksList}>
-            <FooterLinks
-              geneName={geneName}
-              ontology={ontology}
-              wasCardEntryFound={wasCardEntryFound}
-            />
-          </ul>
-        </div>
+        <div className={cs.subtitle}>Quick Links</div>
+        <FooterLinks geneName={geneName} ontology={ontology} />
       </div>
     </div>
   );

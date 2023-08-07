@@ -1,58 +1,53 @@
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import cs from "../gene_details_mode.scss";
 import { OntologyType } from "../GeneDetailsMode";
-import { generateLinkTo, Sources } from "../utils";
+import { Sources } from "../utils";
+import { FooterLink } from "./FooterLink";
 
 interface FooterLinkProps {
   geneName: string;
   ontology: OntologyType;
-  wasCardEntryFound: boolean;
 }
 
-const FooterLinks = ({
-  geneName,
-  ontology,
-  wasCardEntryFound,
-}: FooterLinkProps) => {
+const FooterLinks = ({ geneName, ontology }: FooterLinkProps) => {
   const sources = [
+    Sources.CARD,
     Sources.GENBANK_NUCCORE,
-    Sources.NCBI_REF_GENE,
+    Sources.GENBANK_PROTEIN,
     Sources.PUBMED,
     Sources.GOOGLE_SCHOLAR,
   ];
 
-  if (wasCardEntryFound) {
-    sources.unshift(Sources.CARD);
-  }
+  // Splits up links so we have 2 per row
+  const numRows = Math.ceil(sources.length / 2);
 
   return (
-    <>
-      {sources.map(source => {
-        const href = generateLinkTo({ geneName, ontology, source });
-        if (!href) {
-          return null;
-        } else {
+    <div className={cs.linksSection}>
+      <ul className={cs.linksList}>
+        {sources.slice(0, numRows).map(source => {
           return (
-            <li className={cs.link} key={source}>
-              <a
-                href={generateLinkTo({ geneName, ontology, source })}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  trackEvent("GeneDetailsMode_footer-link_clicked", {
-                    destination: source,
-                    geneName,
-                  })
-                }
-              >
-                {source}
-              </a>
-            </li>
+            <FooterLink
+              key={source}
+              geneName={geneName}
+              ontology={ontology}
+              source={source}
+            />
           );
-        }
-      })}
-    </>
+        })}
+      </ul>
+      <ul className={cs.linksList}>
+        {sources.slice(numRows).map(source => {
+          return (
+            <FooterLink
+              key={source}
+              geneName={geneName}
+              ontology={ontology}
+              source={source}
+            />
+          );
+        })}
+      </ul>
+    </div>
   );
 };
 

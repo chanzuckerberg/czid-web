@@ -599,6 +599,14 @@ function EventDictionary() {
 
   /** The welcome modal was shown to a first time user on the DiscoveryView */
   this.MODAL_FIRST_TIME_USER_SHOWN = "MODAL_FIRST_TIME_USER_SHOWN";
+
+  /** The user has clicked the link out to CARD in the license on the gene details sidebar */
+  this.GENE_DETAILS_MODE_CARD_ONTOLOGY_ATTRIBUTION_CLICKED =
+    "GENE_DETAILS_MODE_CARD_ONTOLOGY_ATTRIBUTION_CLICKED";
+
+  /** The user clicked one of the links at the bottom of the gene details sidebar */
+  this.GENE_DETAILS_MODE_FOOTER_LINK_CLICKED =
+    "GENE_DETAILS_MODE_FOOTER_LINK_CLICKED";
 }
 
 const eventNames = new EventDictionary();

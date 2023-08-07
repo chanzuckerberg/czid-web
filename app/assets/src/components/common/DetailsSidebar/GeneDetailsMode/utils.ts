@@ -1,12 +1,12 @@
 import { OntologyType } from "./GeneDetailsMode";
 
 export enum Sources {
-  CARD = "CARD Ontology",
-  PUBMED = "PubMed Search",
-  GOOGLE_SCHOLAR = "Google Scholar Search",
-  NCBI_REF_GENE = "NCBI AMR Reference Gene Catalog",
+  CARD = "CARD",
+  PUBMED = "PubMed",
+  GOOGLE_SCHOLAR = "Google Scholar",
   OWL = "CARD Ontology OWL",
-  GENBANK_NUCCORE = "NCBI Genbank / Nucleotide Database",
+  GENBANK_NUCCORE = "NCBI Nucleotide",
+  GENBANK_PROTEIN = "NCBI Protein",
 }
 
 export enum Urls {
@@ -16,6 +16,7 @@ export enum Urls {
   GOOGLE_SCHOLAR = "https://scholar.google.com/scholar?q=",
   NCBI_REF_GENE = "https://www.ncbi.nlm.nih.gov/pathogens/isolates#/refgene/",
   GENBANK_NUCCORE = "https://www.ncbi.nlm.nih.gov/nuccore/",
+  GENBANK_PROTEIN = "https://www.ncbi.nlm.nih.gov/protein/",
 }
 
 interface GenerateLinkParams {
@@ -29,7 +30,7 @@ export const generateLinkTo = ({
   ontology,
   source,
 }: GenerateLinkParams) => {
-  const { accession, genbankAccession } = ontology;
+  const { accession, dnaAccession, proteinAccession } = ontology;
 
   switch (source) {
     case Sources.CARD: {
@@ -44,12 +45,12 @@ export const generateLinkTo = ({
     case Sources.GOOGLE_SCHOLAR: {
       return `${Urls.GOOGLE_SCHOLAR}${geneName}`;
     }
-    case Sources.NCBI_REF_GENE: {
-      return `${Urls.NCBI_REF_GENE}${geneName}`;
-    }
     case Sources.GENBANK_NUCCORE: {
-      return genbankAccession
-        ? `${Urls.GENBANK_NUCCORE}${genbankAccession}`
+      return dnaAccession ? `${Urls.GENBANK_NUCCORE}${dnaAccession}` : null;
+    }
+    case Sources.GENBANK_PROTEIN: {
+      return proteinAccession
+        ? `${Urls.GENBANK_PROTEIN}${proteinAccession}`
         : null;
     }
     default: {

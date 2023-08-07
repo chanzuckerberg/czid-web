@@ -1,2 +1,2 @@
-import CARDLicense from "./CARDLicense";
-export { CARDLicense };
+import CARDFooter from "./CARDFooter";
+export { CARDFooter };

@@ -1,24 +1,30 @@
-URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/".freeze
-S3_JSON_PREFIX = "amr/card-ontology/".freeze
-
 class AmrOntologyController < ApplicationController
   include S3Util
+
+  S3_JSON_PREFIX = "card".freeze
+  DEFAULT_CARD_VERSION = "2023-05-22".freeze
 
   def fetch_ontology
     gene_name = params[:geneName]
     ontology = {
       "accession" => "",
-      "label" => "",
       "synonyms" => [],
       "description" => "",
       "geneFamily" => [],
-      "drugClass" => {},
-      "publications" => [],
+      "dnaAccession" => nil,
+      "proteinAccession" => nil,
       "error" => "",
     }
     ontology_json_key = fetch_current_ontology_file_key()
     card_entry = fetch_ontology_entry(ontology_json_key, gene_name)
-    if card_entry.key?("drugClass") # present in every ontology entry
+
+    # For deprecated AMR pipeline, the first letter of the gene name may have been uppercased
+    if card_entry.blank?
+      gene_name = gene_name[0].downcase + gene_name[1..-1]
+      card_entry = fetch_ontology_entry(ontology_json_key, gene_name)
+    end
+
+    if card_entry.key?("label") # present in every ontology entry
       card_entry.each do |property, description|
         ontology[property] = description
       end
@@ -34,13 +40,8 @@ class AmrOntologyController < ApplicationController
   private
 
   def fetch_current_ontology_file_key
-    ontology_folder = S3_CLIENT.list_objects_v2(bucket: S3_DATABASE_BUCKET,
-                                                prefix: S3_JSON_PREFIX).to_h
-    # each time the rake task is run the json file is put in a folder
-    # amr/ontology/YYYY-MM-DD/aro.json, so the latest run of the rake task
-    # will be the last key listed here.
-    target_key = ontology_folder[:contents][-1][:key] # contents already sorted by key
-    return target_key
+    latest_ontology_version = get_app_config(AppConfig::CARD_VERSION_FOLDER, DEFAULT_CARD_VERSION)
+    "#{S3_JSON_PREFIX}/#{latest_ontology_version}/ontology.json"
   end
 
   def fetch_ontology_entry(s3_key, gene_name)
