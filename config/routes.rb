@@ -90,6 +90,7 @@ Rails.application.routes.draw do
       post :user_is_collaborator
       post :validate_user_can_delete_objects
       post :bulk_delete
+      post :benchmark
     end
   end
 

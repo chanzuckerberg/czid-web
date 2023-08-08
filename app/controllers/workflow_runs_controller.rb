@@ -405,11 +405,11 @@ class WorkflowRunsController < ApplicationController
         formatted_wr[:cached_results] = wr.parsed_cached_results
 
         formatted_wr[:inputs] = {}.tap do |wr_info|
-          # Since the only workflow we currently have is CG, we can skip checking if this WR is a CG WR.
-          # TODO: Check if WR.workflow == CG if another workflow is introduced
-          wr_inputs = ["accession_id", "accession_name", "medaka_model", "taxon_name", "technology", "wetlab_protocol", "ref_fasta", "primer_bed", "creation_source"].index_with { |i| wr.get_input(i) }
-          wr_info.merge!(wr_inputs)
-          wr_info[:technology] = ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[wr_inputs["technology"]]&.capitalize
+          if wr.workflow == WorkflowRun::WORKFLOW[:consensus_genome]
+            wr_inputs = ["accession_id", "accession_name", "medaka_model", "taxon_name", "technology", "wetlab_protocol", "ref_fasta", "primer_bed", "creation_source"].index_with { |i| wr.get_input(i) }
+            wr_info.merge!(wr_inputs)
+            wr_info[:technology] = ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[wr_inputs["technology"]]&.capitalize
+          end
         end
 
         if should_include_sample_info

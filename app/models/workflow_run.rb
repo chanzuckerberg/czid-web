@@ -51,10 +51,13 @@ class WorkflowRun < ApplicationRecord
   before_destroy :cleanup_relations
   before_destroy :cleanup_s3
 
+  DEFAULT_WDL_FILE_NAME = "run".freeze
+
   WORKFLOW = {
     # NOTE: 'main' is not yet supported in WorkflowRuns.
     main: "main",
     amr: "amr",
+    benchmark: "benchmark",
     consensus_genome: "consensus-genome",
     short_read_mngs: "short-read-mngs",
     long_read_mngs: "long-read-mngs",
@@ -63,6 +66,7 @@ class WorkflowRun < ApplicationRecord
   WORKFLOW_CLASS = {
     WORKFLOW[:consensus_genome] => ConsensusGenomeWorkflowRun,
     WORKFLOW[:amr] => AmrWorkflowRun,
+    WORKFLOW[:benchmark] => BenchmarkWorkflowRun,
   }.freeze
 
   MNGS_WORKFLOWS = [
@@ -276,6 +280,8 @@ class WorkflowRun < ApplicationRecord
       SfnCgPipelineDispatchService.call(self)
     elsif workflow == WORKFLOW[:amr]
       SfnAmrPipelineDispatchService.call(self)
+    elsif workflow == WORKFLOW[:benchmark]
+      SfnBenchmarkPipelineDispatchService.call(self)
     end
   end
 

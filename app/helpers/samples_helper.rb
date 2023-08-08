@@ -645,6 +645,14 @@ module SamplesHelper
     errors
   end
 
+  def generate_benchmark_sample_name(run_ids, ground_truth_file = nil)
+    separator = "_vs_"
+    comparison = run_ids.join(separator)
+    comparison += "#{separator}ground_truth_file" if ground_truth_file.present?
+
+    "benchmark_#{comparison}"
+  end
+
   def upload_samples_with_metadata(samples_to_upload, metadata, user)
     samples = []
     errors = []

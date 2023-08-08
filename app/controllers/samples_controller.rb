@@ -33,7 +33,7 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
                    :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,
-                   :bulk_kickoff_workflow_runs, :user_is_collaborator, :validate_user_can_delete_objects, :bulk_delete,].freeze
+                   :bulk_kickoff_workflow_runs, :user_is_collaborator, :validate_user_can_delete_objects, :bulk_delete, :benchmark,].freeze
   OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :upload_credentials].freeze
   ACTIONS_TO_REDIRECT = [:show].freeze
@@ -42,7 +42,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
-  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project, :pipeline_logs, :cancel_pipeline_run]
+  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project, :pipeline_logs, :cancel_pipeline_run, :benchmark]
   before_action :login_required, only: [:bulk_import]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
@@ -1530,6 +1530,47 @@ class SamplesController < ApplicationController
                                                                     start_from_mngs: "true",
                                                                   }.to_json)
     render json: { newWorkflowRunIds: new_workflow_run_ids }
+  end
+
+  def benchmark
+    permitted_params = params.permit(:groundTruthFile, :workflowBenchmarked, :project_id, runIds: [])
+    run_ids = permitted_params[:runIds]
+    ground_truth_file = permitted_params[:groundTruthFile] || nil
+    workflow_benchmarked = permitted_params[:workflowBenchmarked]
+    project_id = permitted_params[:project_id] || Project.find_by(name: "CZID Benchmarks").id
+
+    sample_name = generate_benchmark_sample_name(run_ids, ground_truth_file)
+    # Skip callbacks and validations. A benchmark sample has no input files or host genomes.
+    # rubocop:disable Rails/SkipsModelValidations
+    Sample.insert({
+                    name: sample_name,
+                    status: Sample::STATUS_CHECKED,
+                    user_id: current_user.id,
+                    initial_workflow: WorkflowRun::WORKFLOW[:benchmark],
+                    project_id: project_id,
+                    created_at: Time.current,
+                    updated_at: Time.current,
+                  })
+
+    benchmark_sample_id = Sample.where(name: sample_name).last.id
+    WorkflowRun.insert({
+                         sample_id: benchmark_sample_id,
+                         user_id: current_user.id,
+                         workflow: WorkflowRun::WORKFLOW[:benchmark],
+                         created_at: Time.current,
+                         updated_at: Time.current,
+                         inputs_json: {
+                           run_ids: run_ids,
+                           workflow_benchmarked: workflow_benchmarked,
+                           ground_truth_file: ground_truth_file,
+                         }.to_json,
+                       })
+
+    benchmark_wr = WorkflowRun.where(sample_id: benchmark_sample_id, workflow: WorkflowRun::WORKFLOW[:benchmark]).last
+    # rubocop:enable Rails/SkipsModelValidations
+    benchmark_wr.dispatch
+
+    render json: { benchmarkWorkflowRunId: benchmark_wr.id }, status: :ok
   end
 
   def cli_user_instructions

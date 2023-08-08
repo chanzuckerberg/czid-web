@@ -1177,6 +1177,36 @@ RSpec.describe SamplesController, type: :controller do
       end
     end
 
+    describe "POST #benchmark" do
+      before do
+        project = create(:project, users: [@admin])
+        @benchmarking_project = create(:project, users: [@admin], name: "CZID Benchmarks")
+
+        sample_one = create(:sample, project: project, name: "Test Sample One")
+        @pipeline_run_one = create(:pipeline_run, sample: sample_one)
+
+        sample_two = create(:sample, project: project, name: "Test Sample Two")
+        @pipeline_run_two = create(:pipeline_run, sample: sample_two)
+      end
+
+      context "when user is an admin" do
+        it "should create a new sample with a benchmark workflow run" do
+          pipeline_run_ids = [@pipeline_run_one.id, @pipeline_run_two.id]
+          allow(SfnBenchmarkPipelineDispatchService).to receive(:call).and_return(true)
+          post :benchmark, params: { runIds: pipeline_run_ids, workflowBenchmarked: WorkflowRun::WORKFLOW[:short_read_mngs], project: @benchmarking_project }
+
+          benchmark_sample = Sample.where(project: @benchmarking_project).last
+          benchmark_workflow_run = WorkflowRun.where(sample: benchmark_sample).last
+
+          expect(response).to have_http_status(:ok)
+          expect(benchmark_workflow_run.workflow).to eq(WorkflowRun::WORKFLOW[:benchmark])
+          expect(benchmark_workflow_run.get_input("run_ids").map(&:to_i)).to eq(pipeline_run_ids)
+          expect(benchmark_workflow_run.get_input("workflow_benchmarked")).to eq(WorkflowRun::WORKFLOW[:short_read_mngs])
+          expect(benchmark_workflow_run.get_input("ground_truth_file")).to eq(nil)
+        end
+      end
+    end
+
     describe "PUT #cancel_pipeline_run" do
       before do
         @project = create(:project, users: [@joe])
