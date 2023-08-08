@@ -100,26 +100,6 @@ RSpec.describe UserFactoryService do
   context "#record_new_user_in_airtable" do
     let(:airtable_accounts_table) { "CZ ID Accounts" }
 
-    context "when signup is through admin-settings" do
-      let(:signup_path) { User::SIGNUP_PATH[:general] }
-
-      it "make API call to add info to airtable with General signupPath" do
-        user_factory_instance.call
-        created_user = User.last
-        airtable_data = {
-          fields: {
-            name: created_user.name,
-            email: created_user.email,
-            signupPath: User::SIGNUP_PATH[:general],
-            userId: created_user.id,
-          },
-        }
-
-        expect(MetricUtil).to have_received(:post_to_airtable)
-          .with(airtable_accounts_table, airtable_data.to_json)
-      end
-    end
-
     context "when signup is through a project" do
       let(:new_user_name) { nil }
       let(:project_id) { create(:project).id }

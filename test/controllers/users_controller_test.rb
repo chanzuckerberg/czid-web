@@ -13,11 +13,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
   end
 
-  test 'non admin shouldnt get new' do
-    get new_user_url
-    assert_redirected_to root_url
-  end
-
   test 'non admin shouldnt should get edit' do
     get edit_user_url(@user)
     assert_redirected_to root_url

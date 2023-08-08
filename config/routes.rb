@@ -229,7 +229,7 @@ Rails.application.routes.draw do
   resources :persisted_backgrounds, only: [:index, :create]
   resources :persisted_backgrounds, only: [:update, :show], param: :projectId
 
-  resources :users, only: [:create, :new, :edit, :update, :destroy, :index] do
+  resources :users, only: [:create, :edit, :update, :destroy, :index] do
     collection do
       get :feature_flags
       post :feature_flag
@@ -240,8 +240,6 @@ Rails.application.routes.draw do
       post :post_user_data_to_airtable
     end
   end
-
-  get 'users/:id', to: 'users#edit'
 
   resources :benchmarks, only: [:index]
 

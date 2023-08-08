@@ -6,29 +6,12 @@ RSpec.describe GraphqlController, type: :request do
   query =
     <<~GQL
       mutation CreateUser(
-        $name: String
         $email: String!
-        $institution: String
-        $role: Int
-        $sendActivation: Boolean
-        $archetypes: String
-        $segments: String
       ) {
         createUser(
-          name: $name
           email: $email
-          institution: $institution
-          role: $role
-          sendActivation: $sendActivation
-          archetypes: $archetypes
-          segments: $segments
         ) {
-          name
           email
-          institution
-          role
-          archetypes
-          segments
         }
       }
     GQL
@@ -55,48 +38,6 @@ RSpec.describe GraphqlController, type: :request do
     context "when automatic account creation is disabled" do
       before do
         AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "")
-      end
-
-      # Account created via admin-settings
-      context "and the current user is an admin" do
-        before do
-          sign_in @admin
-        end
-
-        subject do
-          post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-            query: query,
-            context: { current_user: @admin },
-            variables: { name: fake_user_name, email: fake_email, institution: fake_institution, role: 0, sendActivation: true, archetypes: mock_archetypes, segments: mock_segments },
-          }.to_json
-        end
-
-        it "should call UserFactoryService to create a new user" do
-          expect(UserFactoryService).to receive(:call).with(a_collection_including(
-                                                              name: fake_user_name,
-                                                              email: fake_email,
-                                                              role: 0,
-                                                              institution: fake_institution,
-                                                              archetypes: mock_archetypes,
-                                                              segments: mock_segments,
-                                                              profile_form_version: 1,
-                                                              send_activation: true,
-                                                              signup_path: User::SIGNUP_PATH[:general]
-                                                            ))
-
-          subject
-        end
-
-        it "should return the new user" do
-          subject
-          expect(response).to have_http_status :success
-
-          result = JSON.parse response.body
-          result = result["data"]["createUser"]
-          expect(result).to include_json(
-            { name: fake_user_name, email: fake_email, institution: fake_institution, role: 0, archetypes: mock_archetypes, segments: mock_segments }
-          )
-        end
       end
 
       context "and the current user is a non-admin" do
@@ -162,48 +103,6 @@ RSpec.describe GraphqlController, type: :request do
         AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
       end
 
-      # Account created via admin-settings
-      context "and the current user is an admin" do
-        before do
-          sign_in @admin
-        end
-
-        subject do
-          post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-            query: query,
-            context: { current_user: @admin },
-            variables: { name: fake_user_name, email: fake_email, institution: fake_institution, role: 0, sendActivation: true, archetypes: mock_archetypes, segments: mock_segments },
-          }.to_json
-        end
-
-        it "should call UserFactoryService to create a new user" do
-          expect(UserFactoryService).to receive(:call).with(a_collection_including(
-                                                              name: fake_user_name,
-                                                              email: fake_email,
-                                                              role: 0,
-                                                              institution: fake_institution,
-                                                              archetypes: mock_archetypes,
-                                                              segments: mock_segments,
-                                                              profile_form_version: 1,
-                                                              send_activation: true,
-                                                              signup_path: User::SIGNUP_PATH[:general]
-                                                            ))
-
-          subject
-        end
-
-        it "should return the new user" do
-          subject
-          expect(response).to have_http_status :success
-
-          result = JSON.parse response.body
-          result = result["data"]["createUser"]
-          expect(result).to include_json(
-            { name: fake_user_name, email: fake_email, institution: fake_institution, role: 0, archetypes: mock_archetypes, segments: mock_segments }
-          )
-        end
-      end
-
       context "and the current user is a non-admin" do
         before do
           sign_in @joe
@@ -264,7 +163,7 @@ RSpec.describe GraphqlController, type: :request do
             result = JSON.parse response.body
             result = result["data"]["createUser"]
             expect(result).to include_json(
-              { name: nil, email: fake_email, institution: nil, role: 0, archetypes: nil, segments: nil }
+              { email: fake_email }
             )
           end
         end

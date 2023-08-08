@@ -10,7 +10,6 @@ const UserForm = ({
   archetypes,
   email,
   errorMessage,
-  funcName,
   segments,
   institution,
   isAdmin,
@@ -28,9 +27,6 @@ const UserForm = ({
   onMicrobiomeInvestigatorChange,
   onNameChange,
   onOutbreakSurveyorChange,
-  onSendActivationChange,
-  selectedUser,
-  sendActivation,
   serverErrors,
   showFailed,
   submitFunc,
@@ -52,9 +48,7 @@ const UserForm = ({
         ) : (
           <span>{formattedError}</span>
         );
-      const form = selectedUser ? "update" : "create";
-      trackEvent(`CreateUser_${form}-errors_displayed`, {
-        form,
+      trackEvent(`UpdateUser_update-errors_displayed`, {
         serverErrors,
         formattedError,
       });
@@ -69,7 +63,7 @@ const UserForm = ({
       <div className="row">
         <form className="new_user" id="new_user" onSubmit={submitFunc}>
           <div className="row title">
-            <p className="col s8 signup"> {funcName} User</p>
+            <p className="col s8 signup"> Update User</p>
           </div>
           {success ? (
             <div className="success-info">
@@ -196,19 +190,6 @@ const UserForm = ({
                 />
               </div>
             </div>
-            {!selectedUser && (
-              <div className="section">
-                <div className="header">Activation Email</div>
-                <div>
-                  <Checkbox
-                    className="checkbox"
-                    checked={sendActivation}
-                    onChange={onSendActivationChange}
-                    label="Send activation email"
-                  />
-                </div>
-              </div>
-            )}
           </div>
           <input className="hidden" type="submit" />
           {submitting ? (
@@ -233,7 +214,6 @@ interface UserFormProps {
   clearError: $TSFixMeFunction;
   email: string;
   errorMessage: string;
-  funcName: string;
   segments: Segments;
   institution: string;
   isAdmin: boolean;
@@ -251,9 +231,6 @@ interface UserFormProps {
   onMicrobiomeInvestigatorChange: $TSFixMeFunction;
   onNameChange: $TSFixMeFunction;
   onOutbreakSurveyorChange: $TSFixMeFunction;
-  onSendActivationChange: $TSFixMeFunction;
-  selectedUser: object;
-  sendActivation: boolean;
   serverErrors: $TSFixMe[];
   showFailed: boolean;
   submitFunc: $TSFixMeFunction;

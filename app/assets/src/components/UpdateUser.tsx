@@ -1,7 +1,7 @@
 import { includes } from "lodash/fp";
 import React, { useState } from "react";
 import { withAnalytics } from "~/api/analytics";
-import { updateUser as userUpdater, useCreateUser } from "~/api/user";
+import { updateUser as userUpdater } from "~/api/user";
 import UserForm from "~/components/views/users/UserForm";
 import { openUrl } from "~utils/links";
 
@@ -16,7 +16,7 @@ const LANDSCAPE_EXPLORER = "Landscape Explorer";
 const OUTBREAK_SURVEYOR = "Outbreak Surveyor";
 const MICROBIOME_INVESTIGATOR = "Microbiome Investigator";
 
-interface CreateUserProps {
+interface UpdateUserProps {
   selectedUser?: {
     admin?: boolean;
     archetypes?: string;
@@ -28,8 +28,8 @@ interface CreateUserProps {
   };
 }
 
-function CreateUser(props: CreateUserProps = {}) {
-  const user = props.selectedUser || null;
+function UpdateUser(props: UpdateUserProps = {}) {
+  const user = props.selectedUser;
   const selectedUser = {
     email: user ? user.email : "",
     name: user ? user.name : "",
@@ -39,17 +39,19 @@ function CreateUser(props: CreateUserProps = {}) {
     archetypes: user ? user.archetypes : [],
     segments: user ? user.segments : null,
   };
+  // submission state and error handling
   const [submitting, setSubmitting] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(!!selectedUser.adminStatus);
   const [success, setSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [serverErrors, setServerErrors] = useState([]);
+
+  // user form state
+  const [isAdmin, setIsAdmin] = useState(!!selectedUser.adminStatus);
   const [email, setEmail] = useState(selectedUser.email || "");
   const [name, setName] = useState(selectedUser.name || "");
   const [id] = useState(selectedUser.id);
-  const [sendActivation, setSendActivation] = useState(true);
   const [institution, setInstitution] = useState(
     selectedUser.institution || "",
   );
@@ -75,16 +77,6 @@ function CreateUser(props: CreateUserProps = {}) {
   const [isGCE, setIsGCE] = useState(includes(GCE, selectedUser.segments));
   const [isLMIC, setIsLMIC] = useState(includes(LMIC, selectedUser.segments));
 
-  const userCreator = useCreateUser();
-
-  const isCreateFormInvalid = () => {
-    if (email === "") {
-      setShowFailed(true);
-      setErrorMessage("Please fill all fields");
-      return true;
-    }
-  };
-
   function isUpdateFormValid() {
     if (email === "") {
       setShowFailed(true);
@@ -92,13 +84,6 @@ function CreateUser(props: CreateUserProps = {}) {
       return true;
     }
   }
-
-  const handleCreate = () => {
-    if (!isCreateFormInvalid()) {
-      setSubmitting(true);
-      createUser();
-    }
-  };
 
   const handleUpdate = () => {
     if (!isUpdateFormValid()) {
@@ -155,36 +140,6 @@ function CreateUser(props: CreateUserProps = {}) {
     return JSON.stringify(segments);
   };
 
-  const createUser = async () => {
-    const archetypes = getArchetypes();
-    const segments = getSegments();
-    try {
-      // @ts-expect-error This expression is not callable.
-      await userCreator({
-        variables: {
-          name,
-          email,
-          institution,
-          role: isAdmin ? 1 : 0,
-          sendActivation,
-          archetypes,
-          segments,
-        },
-      });
-
-      setSubmitting(false);
-      setSuccess(true);
-      setSuccessMessage("User created successfully");
-      openUrl("/users");
-    } catch (err) {
-      setSubmitting(false);
-      setShowFailed(true);
-      // create user graphQL endpoint returns a single error string instead of array of errors
-      // but there are other contexts where the UserForm still expects an array
-      setServerErrors([err.message]);
-    }
-  };
-
   async function updateUser() {
     const archetypes = getArchetypes();
     const segments = getSegments();
@@ -209,16 +164,10 @@ function CreateUser(props: CreateUserProps = {}) {
     }
   }
 
-  const submitFunc = props.selectedUser
-    ? () =>
-        withAnalytics(handleUpdate, "CreateUser_update-form_submitted", {
-          form: "Update",
-        })
-    : () =>
-        withAnalytics(handleCreate, "CreateUser_create-form_submitted", {
-          form: "Create",
-        });
-  const funcName = props.selectedUser ? "Update" : "Create";
+  const submitFunc = () =>
+    withAnalytics(handleUpdate, "UpdateUser_update-form_submitted", {
+      form: "Update",
+    });
 
   return (
     <div>
@@ -232,7 +181,6 @@ function CreateUser(props: CreateUserProps = {}) {
         clearError={clearError}
         email={email}
         errorMessage={errorMessage}
-        funcName={funcName}
         segments={{
           isAfricaCDC,
           isBiohub,
@@ -245,18 +193,18 @@ function CreateUser(props: CreateUserProps = {}) {
         name={name}
         onAdminChange={withAnalytics(() => {
           setIsAdmin(prevState => !prevState);
-        }, "CreateUser_admin_changed")}
+        }, "UpdateUser_admin_changed")}
         onAfricaCDCChange={() => setIsAfricaCDC(prevState => !prevState)}
         onBiohubChange={() => setIsBiohub(prevState => !prevState)}
         onDPHChange={() => setIsDPH(prevState => !prevState)}
         onEmailChange={withAnalytics(
           handleEmailChange,
-          "CreateUser_email_changed",
+          "UpdateUser_email_changed",
         )}
         onGCEChange={() => setIsGCE(prevState => !prevState)}
         onInstitutionChange={withAnalytics(
           handleInstitutionChange,
-          "CreateUser_institution_changed",
+          "UpdateUser_institution_changed",
         )}
         onLandscapeExplorerChange={() =>
           setIsLandscapeExplorer(prevState => !prevState)
@@ -270,16 +218,11 @@ function CreateUser(props: CreateUserProps = {}) {
         }
         onNameChange={withAnalytics(
           handleNameChange,
-          "CreateUser_name_changed",
+          "UpdateUser_name_changed",
         )}
         onOutbreakSurveyorChange={() =>
           setIsOutbreakSurveyor(prevState => !prevState)
         }
-        onSendActivationChange={withAnalytics(() => {
-          setSendActivation(prevState => !prevState);
-        }, "CreateUser_send-activation_changed")}
-        selectedUser={props.selectedUser}
-        sendActivation={sendActivation}
         serverErrors={serverErrors}
         showFailed={showFailed}
         submitFunc={submitFunc}
@@ -288,11 +231,10 @@ function CreateUser(props: CreateUserProps = {}) {
         successMessage={successMessage}
       />
       <div className="bottom">
-        <a href={props.selectedUser ? "/users" : "/"}>Back</a> |
-        <a href="/">Home</a>
+        <a href={"/users"}>Back</a> |<a href="/">Home</a>
       </div>
     </div>
   );
 }
 
-export default CreateUser;
+export default UpdateUser;

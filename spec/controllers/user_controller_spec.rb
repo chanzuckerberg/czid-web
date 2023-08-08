@@ -92,11 +92,6 @@ RSpec.describe UsersController, type: :request do
       assert_redirected_to root_url
     end
 
-    it "shouldnt get new" do
-      get new_user_url
-      assert_redirected_to root_url
-    end
-
     it "shouldnt should get edit" do
       get edit_user_url(@joe)
       assert_redirected_to root_url

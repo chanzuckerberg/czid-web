@@ -5,24 +5,8 @@ import { postWithCSRF, putWithCSRF } from "./core";
 const CREATE_USER = gql`
   # Creates a new user
 
-  mutation CreateUser(
-    $name: String
-    $email: String!
-    $institution: String
-    $role: Int
-    $sendActivation: Boolean
-    $archetypes: String
-    $segments: String
-  ) {
-    createUser(
-      name: $name
-      email: $email
-      institution: $institution
-      role: $role
-      sendActivation: $sendActivation
-      archetypes: $archetypes
-      segments: $segments
-    ) {
+  mutation CreateUser($email: String!) {
+    createUser(email: $email) {
       email
     }
   }

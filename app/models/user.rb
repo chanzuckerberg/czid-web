@@ -78,7 +78,6 @@ class User < ApplicationRecord
   ] }, allow_nil: false
 
   SIGNUP_PATH = {
-    general: "General", # Registered by an admin via /users/new
     project: "Project", # Invited to a project by an existing user
     self_registered: "Self-Registered", # Self-registered via the landing pg
   }.freeze

@@ -14,11 +14,6 @@ class UsersController < ApplicationController
              end
   end
 
-  # GET /users/new
-  def new
-    new_user
-  end
-
   # POST /users
   # POST /users.json
   def create
@@ -192,10 +187,6 @@ class UsersController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_user
     @user ||= User.find(params[:id])
-  end
-
-  def new_user(attrs = {})
-    @user ||= User.new(**attrs, created_by_user_id: current_user.id)
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

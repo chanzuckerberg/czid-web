@@ -75,18 +75,6 @@ const UserMenuDropDown = ({
             </a>
           }
         />,
-        <BareDropdown.Item
-          key="create_user"
-          text={
-            <a
-              className={cs.option}
-              href="/users/new"
-              data-testid="create-user"
-            >
-              Create User
-            </a>
-          }
-        />,
       );
     }
 

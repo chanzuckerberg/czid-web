@@ -18,11 +18,6 @@
       <div><i>Click on a name to edit details.</i></div>
       <br/>
       <p>
-        <%= link_to 'New User', new_user_path %> |
-        <%= link_to 'Front portal', root_path %>
-      </p>
-      <br/>
-      <p>
         Search by name or email: <input type="text" value="<%= @search_by %>" onkeydown="search(event)">
       </p>
     </div>
@@ -49,7 +44,7 @@
             <tr>
               <td><%= user.id %></td>
               <td><%= user.email %></td>
-              <td><u><%= link_to user.name, user if user.name %></u></td>
+              <td><u><%= link_to(user.name, edit_user_path(user)) if user.name %></u></td>
               <td><%= user.institution %></td>
               <td><%= user.role == 1 ? "ADMIN" : "" %></td>
               <td>
