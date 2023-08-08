@@ -35,6 +35,11 @@ import {
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { HEATMAP_ELASTICSEARCH_FEATURE } from "~/components/utils/features";
+import {
+  AMR_PIPELINE,
+  isPipelineFeatureAvailable,
+  MINIMUM_VERSIONS,
+} from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
@@ -588,11 +593,17 @@ const SamplesView = forwardRef(function SamplesView(
     const alreadyKickedOffAmrWorkflowRun =
       recentlyKickedOffAmrWorkflowRunsForSampleIds.has(sample.id);
 
+    const amrNotAvailableForPipelineVersion = !isPipelineFeatureAvailable(
+      AMR_PIPELINE,
+      sample.pipelineVersion,
+    );
+
     return (
       failedToUploadSample ||
       nonHostReadsUnavailable ||
       hasExistingAmrWorkflowRunInDatabase ||
-      alreadyKickedOffAmrWorkflowRun
+      alreadyKickedOffAmrWorkflowRun ||
+      amrNotAvailableForPipelineVersion
     );
   };
 
@@ -630,8 +641,7 @@ const SamplesView = forwardRef(function SamplesView(
           {invalidSampleNames.length} sample
           {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be run
         </span>{" "}
-        on the Antimicrobial Resistance pipeline because they either failed, are
-        still processing, or were already run.
+        {`on the Antimicrobial Resistance pipeline because they either failed, were originally run on mNGS pipeline version less than ${MINIMUM_VERSIONS[AMR_PIPELINE]}, are still processing, or were already run.`}
       </div>
     );
 

@@ -8,6 +8,7 @@ export const SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE =
   "SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE";
 export const AMR_MODERN_HOST_FILTERING_FEATURE =
   "AMR_MODERN_HOST_FILTERING_FEATURE";
+export const AMR_PIPELINE = "AMR_PIPELINE";
 
 export const MINIMUM_VERSIONS = {
   [MASS_NORMALIZED_FEATURE]: "4.0",
@@ -18,6 +19,7 @@ export const MINIMUM_VERSIONS = {
   // Pipeline versions are pinned for projects not using modern host filtering
   [SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE]: "8.0.0",
   [AMR_MODERN_HOST_FILTERING_FEATURE]: "0.3.1",
+  [AMR_PIPELINE]: "5",
 };
 
 /* Compares two strings with required major, minor, and patch versions and
