@@ -68,8 +68,8 @@ RSpec.describe Auth0UserManagementHelper, type: :helper do
             }],
           }
         end
-        allow(@auth0_management_client_double).to receive(:get_users).with(a_collection_including(page: 1)).and_return(mock_users[0..49])
-        allow(@auth0_management_client_double).to receive(:get_users).with(a_collection_including(page: 2)).and_return(mock_users[50..50])
+        allow(@auth0_management_client_double).to receive(:get_users).with(a_collection_including(page: 0)).and_return(mock_users[0..49])
+        allow(@auth0_management_client_double).to receive(:get_users).with(a_collection_including(page: 1)).and_return(mock_users[50..50])
       end
 
       it "should return auth0 user ids and emails for unverified users" do

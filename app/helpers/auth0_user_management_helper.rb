@@ -50,26 +50,23 @@ module Auth0UserManagementHelper
   # This method will fetch all auth0 connections (ex: idseq-legacy-users and Username-Password-Authentication) to retrieve these emails
   def self.unverified_auth0_users
     unverified_users_list = []
+    unverified_users_query = "email_verified:false AND logins_count:0 AND created_at:[* TO #{(Time.now.utc - 21.days).iso8601}]"
 
-    # The get_users endpoint returns a maximum of 50 users. Use the `page` parameter to show more pages of results.
-    # See: https://auth0.com/docs/manage-users/user-search/retrieve-users-with-get-users-endpoint
-    page_num = 1
-    while page_num != 0
+    page_num = 0
+    max_results_per_page = 50
+    query_next_page = true
+    while query_next_page
       # See:
       # - https://auth0.com/docs/api/management/v2#!/Users/get_users
       # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
-      unverified_users_query = "email_verified:false AND logins_count:0 AND created_at:[* TO #{(Time.now.utc - 21.days).iso8601}]"
-      auth0_users = auth0_management_client.get_users(q: unverified_users_query, page: page_num, fields: "email,identities")
+      auth0_users = auth0_management_client.get_users(q: unverified_users_query, page: page_num, per_page: max_results_per_page, fields: "email,identities")
       unverified_users_list += auth0_users.map { |u| { email: u["email"], auth0_user_id: u["identities"].first["user_id"] } }
 
-      max_results_per_page = 50
       if auth0_users.length < max_results_per_page
-        # Stop fetching more pages
-        page_num = 0
-      else
-        # Fetch next page
-        page_num += 1
+        query_next_page = false
       end
+
+      page_num += 1
     end
     unverified_users_list
   end
