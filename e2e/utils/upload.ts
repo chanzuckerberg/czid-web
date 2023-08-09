@@ -57,7 +57,7 @@ export async function uploadSampleFiles(
   // select analysis type
   const analysisTypeId = `${ANALYSIS_TYPE}-${kebabCase(analysisType)}`;
   const wgsWorkflowOption = await page.getByTestId(analysisTypeId);
- await wgsWorkflowOption.click();
+  await wgsWorkflowOption.click();
 
   if (analysisType === WORKFLOWS.MNGS) {
     await page
@@ -127,7 +127,9 @@ export async function fillMetadata(
 
   // nucleotide type
   await page.getByTestId("filters").nth(1).click();
-  await page.getByTestId(kebabCase(metaData["Nucleotide Type"] as string)).click();
+  await page
+    .getByTestId(kebabCase(metaData["Nucleotide Type"] as string))
+    .click();
 
   // await page.getByText(metaData["Nucleotide Type"] as string).click();
 

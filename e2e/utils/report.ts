@@ -78,21 +78,23 @@ export async function openSamplePage(
   openDetails = true,
 ) {
   if (projectName === "floo Neptunium") {
-    await page.goto(`${process.env.BASEURL}/public?currentDisplay=table&currentTab=samples&mapSidebarTab=summary&projectId=875`);
+    await page.goto(
+      `${process.env.BASEURL}/public?currentDisplay=table&currentTab=samples&mapSidebarTab=summary&projectId=875`,
+    );
   } else {
     await page.goto(`${process.env.BASEURL}/my_data`);
     await page.goto(`${process.env.BASEURL}/my_data`);
-  await page.getByTestId(MENU_ITEM_PUBLIC).click();
-  await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
-  await page.waitForTimeout(300);
-  while (
-    (await page.getByPlaceholder(SEARCH_PUBLIC).getAttribute("value")) !==
-    projectName
-  ) {
+    await page.getByTestId(MENU_ITEM_PUBLIC).click();
     await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
     await page.waitForTimeout(300);
-  }
-  await page.locator(".title").nth(0).click();
+    while (
+      (await page.getByPlaceholder(SEARCH_PUBLIC).getAttribute("value")) !==
+      projectName
+    ) {
+      await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
+      await page.waitForTimeout(300);
+    }
+    await page.locator(".title").nth(0).click();
   }
   // select metagenonomics samples
   await page.getByTestId(METAGENOMICS.toLowerCase()).click();

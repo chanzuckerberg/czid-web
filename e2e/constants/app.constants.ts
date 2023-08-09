@@ -46,7 +46,7 @@ export const SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS = {
     tooltip:
       "Total number of reads uploaded. For paired-end data, each R1 and R2 read counts as one read.",
     link: DOC_BASE_LINK + "360053758913-Sample-QC#Total-Reads",
-    testid:"total-read-info-icon",
+    testid: "total-read-info-icon",
   },
   nonHostReads: {
     tooltip: `Percentage of reads remaining after QC filtering, removing host and human reads, and subsampling to 1M (single-end) or 2M (paired-end) reads.`,
@@ -55,14 +55,14 @@ export const SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS = {
   qcPercent: {
     tooltip: `Percentage of reads remaining after QC filtering to remove low quality bases, short reads, and low complexity reads.`,
     link: DOC_BASE_LINK + "360053758913-Sample-QC#Passed-QC",
-    testid:"passed-qc-info-icon",
+    testid: "passed-qc-info-icon",
   },
   duplicateCompressionRatio: {
     tooltip: `Duplicate Compression Ratio is the ratio of the number of reads passing QC filtering and host/human read removal to the number of unique reads after duplicate removal.`,
     link:
       DOC_BASE_LINK +
       "360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
-      testid:"duplicate-compression-ratio-tooltip",
+    testid: "duplicate-compression-ratio-tooltip",
   },
   erccReads: {
     tooltip: `Total number of reads aligning to ERCC (External RNA Controls Consortium) sequences.`,
@@ -72,7 +72,7 @@ export const SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS = {
     tooltip:
       "Average length of the nucleotide sequence that is inserted between sequencing adapters.",
     link: DOC_BASE_LINK + "360053758913-Sample-QC#Mean-Insert-Size",
-    testid:"mean-insert-size-title",
+    testid: "mean-insert-size-title",
   },
   subsampledFraction: {
     tooltip: `After QC filtering and host/human data removal, the remaining reads are subsampled to1M (single-end) or 2M (paired-end) reads. This field reflects the ratio of subsampled reads to total reads passing QC filtering and host/human read removal steps.`,

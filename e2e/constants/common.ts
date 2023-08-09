@@ -55,7 +55,7 @@ export const ENTER = "Enter";
 export const PUBLIC_MENU_ITEM = "menu-item-public";
 export const PROJECT_NAME_SELECTOR = '[data-testid="project-name"]';
 export const PROJECT_COUNT = "project-count";
-export const SAMPLE_COUNT='[class*="filteredCount"]';
+export const SAMPLE_COUNT = '[class*="filteredCount"]';
 export const METADATA_COUNT_SELECTOR = '[data-testid="project-value"]';
 export const GO_TO_PROJECT = "Go to Project";
 export const LOADED = "loaded";

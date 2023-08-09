@@ -13,7 +13,6 @@ import {
   SIDE_LABEL_VALUE,
   VISIBLE,
 } from "../../constants/map";
-import { BasePage } from "../../pages/basePage";
 import { openSamplePage } from "../../utils/report";
 import { cookieBanner } from "../../utils/upload";
 const BAR_LABEL_ID = "date-histogram";
@@ -102,7 +101,6 @@ test.describe("Map view tests", () => {
     test(`Should display right side content for ${viewType}`, async ({
       page,
     }) => {
-      const basePage = new BasePage(page);
       const PROJECTS = "Projects";
       const SAMPLES = "Samples";
       const DATE_CREATED_S = "Date created";
@@ -140,16 +138,12 @@ test.describe("Map view tests", () => {
       await page.getByTestId(OVERALL_SIDEBAR).click();
 
       // verify  Overall area label
-      await expect(await basePage.findByLocator(SIDE_LABELS, 0)).toContainText(
-        SAMPLES,
-      );
-      await expect(await basePage.findByLocator(SIDE_LABELS, 1)).toContainText(
-        PROJECTS,
-      );
-      await expect(await basePage.findByLocator(SIDE_LABELS, 2)).toContainText(
+      await expect(page.locator(SIDE_LABELS).first()).toContainText(SAMPLES);
+      await expect(page.locator(SIDE_LABELS).nth(1)).toContainText(PROJECTS);
+      await expect(page.locator(SIDE_LABELS).nth(2)).toContainText(
         AVG_READS_PER_SAMPLE,
       );
-      await expect(await basePage.findByLocator(SIDE_LABELS, 3)).toContainText(
+      await expect(page.locator(SIDE_LABELS).nth(3)).toContainText(
         AVG_READS_FILTER_PER_SAMPLE,
       );
 

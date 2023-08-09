@@ -17,3 +17,5 @@ export const getByTypeAndName = (type: string, name: string): string =>
 export const getByRole = (role: string): string => `[role="${role}"]`;
 export const getMetadataField = (name: string): string =>
   `[class="data-table__data column-${name}"]`;
+
+export const getByLinkText = (text: string) => `a:has-text("${text}")`;

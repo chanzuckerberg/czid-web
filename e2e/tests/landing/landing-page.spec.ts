@@ -13,33 +13,31 @@ import {
   UPLOAD,
   VISUALIZATIONS,
 } from "../../constants/common";
-import { BasePage } from "../../pages/basePage";
+import { getByDataName } from "../../utils/selectors";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
-let basePage: BasePage;
 const href = "href";
 // This is a test that verify various ui elements  on the public and my data page
 test.describe("Landing page tests", () => {
   test("Should verify top nav elements", async ({ page }) => {
-    basePage = new BasePage(page);
-    await basePage.gotoUrl(`${process.env.BASEURL}/my_data`);
+    await page.goto(`${process.env.BASEURL}/my_data`);
 
     // verify logo
-    await expect(await basePage.findByDataName(CZID)).toBeVisible();
+    await expect(page.locator(getByDataName(CZID))).toBeVisible();
 
     // My Data menu item has correct url
-    await expect(await basePage.findByText(MY_DATA)).toHaveAttribute(
+    await expect(await page.getByText(MY_DATA)).toHaveAttribute(
       href,
       HREF.MYDATA,
     );
 
     // Public menu item has correct url
-    const linkWithTextPublic = await basePage.findByTestId("menu-item-public");
+    const linkWithTextPublic = page.getByTestId("menu-item-public");
     expect(await linkWithTextPublic.getAttribute(href)).toBe(HREF.PUBLIC);
 
     // Upload menu item has correct url
-    await expect(await basePage.findByText(UPLOAD)).toHaveAttribute(
+    await expect(await page.getByText(UPLOAD)).toHaveAttribute(
       href,
       HREF.UPLOAD,
     );
@@ -47,51 +45,41 @@ test.describe("Landing page tests", () => {
     // Info icon
     // todo: is this intended that this icon has not href
     const infoIconIndex = 0;
-    await expect(
-      await basePage.findByLocator("button", infoIconIndex),
-    ).toBeVisible();
+    await expect(page.getByRole("button").nth(infoIconIndex)).toBeVisible();
   });
 
   test("Should verify filter section", async ({ page }) => {
-    basePage = new BasePage(page);
-    await basePage.gotoUrl(`${process.env.BASEURL}/public`);
+    await page.goto(`${process.env.BASEURL}/public`);
 
     // verify filter sections
     const taxonFilterIndex = 0;
     await expect(
-      (await basePage.findByText(TAXON_FILTERS)).nth(taxonFilterIndex),
+      page.getByText(TAXON_FILTERS).nth(taxonFilterIndex),
     ).toBeVisible();
-    await expect(await basePage.findByText(METADATA_FILTERS)).toBeVisible();
+    await expect(page.getByText(METADATA_FILTERS)).toBeVisible();
   });
 
   test("Should verify discovery items", async ({ page }) => {
-    basePage = new BasePage(page);
-    await basePage.gotoUrl(`${process.env.BASEURL}/my_data`);
+    await page.goto(`${process.env.BASEURL}/my_data`);
 
     // Info icon
     // todo: is this intended that this icon has no href
     const infoIconIndex = 0;
-    await expect(
-      await basePage.findByLocator("button", infoIconIndex),
-    ).toBeVisible();
+    await expect(page.getByRole("button").nth(infoIconIndex)).toBeVisible();
 
     // filters
     const filterIconIndex = 1;
-    await expect(
-      await basePage.findByLocator("button", filterIconIndex),
-    ).toBeVisible();
+    await expect(page.getByRole("button").nth(filterIconIndex)).toBeVisible();
 
     // search field
-    await expect(
-      await basePage.findByPlaceHolder(SEARCH_MY_DATA),
-    ).toBeVisible();
+    await expect(await page.getByPlaceholder(SEARCH_MY_DATA)).toBeVisible();
 
     // verify discovery items
     const projectDiscoveryItemIndex = 0;
     await expect(
-      (await basePage.findByText(PROJECTS)).nth(projectDiscoveryItemIndex),
+      page.getByText(PROJECTS).nth(projectDiscoveryItemIndex),
     ).toBeVisible();
-    await expect((await basePage.findByText(SAMPLES)).nth(1)).toBeVisible();
-    await expect(await basePage.findByText(VISUALIZATIONS)).toBeVisible();
+    await expect(page.getByText(SAMPLES).nth(1)).toBeVisible();
+    await expect(page.getByText(VISUALIZATIONS)).toBeVisible();
   });
 });
