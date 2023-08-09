@@ -1,5 +1,5 @@
 import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import ReadViz from "./ReadViz";
 
 interface AccessionVizProps {
@@ -123,7 +123,7 @@ class AccessionViz extends React.Component<
           <a
             onClick={withAnalytics(
               this.renderMoreReads,
-              "AccessionViz_more-reads-link_clicked",
+              ANALYTICS_EVENT_NAMES.ACCESSION_VIZ_MORE_READS_LINK_CLICKED,
               {
                 reads: this.state.reads.length,
                 allReads: this.allReads.length,

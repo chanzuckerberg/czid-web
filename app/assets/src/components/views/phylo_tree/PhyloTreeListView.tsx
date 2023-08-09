@@ -537,7 +537,7 @@ class PhyloTreeListView extends React.Component<
                 <ShareButton
                   onClick={withAnalytics(
                     this.handleShareClick,
-                    "PhyloTreeListView_share-button_clicked",
+                    ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SHARE_BUTTON_CLICKED,
                     {
                       treeName: currentTree.name,
                       treeId: currentTree.id,
@@ -553,7 +553,7 @@ class PhyloTreeListView extends React.Component<
             <SaveButton
               onClick={withAnalytics(
                 this.handleSaveClick,
-                "PhyloTreeListView_save-button_clicked",
+                ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SAVE_BUTTON_CLICKED,
                 {
                   treeName: currentTree.name,
                   treeId: currentTree.id,
@@ -691,7 +691,7 @@ class PhyloTreeListView extends React.Component<
           mode={this.state.sidebarMode}
           onClose={withAnalytics(
             this.closeSidebar,
-            "PhyloTreeListView_details-sidebar_closed",
+            ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_DETAILS_SIDEBAR_CLOSED,
             {
               treeName: currentTree.name,
               treeId: currentTree.id,

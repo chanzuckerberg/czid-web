@@ -2,7 +2,7 @@ import { Button, Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import React, { useEffect, useState } from "react";
 import { createProject } from "~/api";
-import { trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks";
@@ -50,9 +50,12 @@ const ProjectCreationModal = ({
   }, [name, accessLevel, description]);
 
   useEffect(() => {
-    trackEvent("ProjectCreationModal_more-info-toggle_clicked", {
-      showInfo,
-    });
+    trackEvent(
+      ANALYTICS_EVENT_NAMES.PROJECT_CREATION_MODAL_MORE_INFO_TOGGLE_CLICKED,
+      {
+        showInfo,
+      },
+    );
   }, [showInfo]);
 
   const handleCreateProject = async () => {

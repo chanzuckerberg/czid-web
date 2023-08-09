@@ -1,7 +1,11 @@
 import cx from "classnames";
 import { get, keyBy } from "lodash/fp";
 import React from "react";
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { TaxonOption } from "~/components/common/filters/types";
 import { UserContext } from "~/components/common/UserContext";
@@ -233,7 +237,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
               disabled={!consentChecked}
               onClick={withAnalytics(
                 this.uploadSamplesAndMetadata,
-                "ReviewStep_start-upload-button_clicked",
+                ANALYTICS_EVENT_NAMES.REVIEW_STEP_START_UPLOAD_BUTTON_CLICKED,
                 {
                   samples: samples.length,
                   uploadType: uploadType,

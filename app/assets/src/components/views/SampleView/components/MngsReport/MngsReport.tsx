@@ -1,6 +1,6 @@
 import { isNil } from "lodash";
 import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { TABS } from "../../constants";
 import { getConsensusGenomeData } from "../../utils";
 import { SampleViewMessage } from "../SampleViewMessage";
@@ -88,7 +88,7 @@ export const MngsReport = ({
             onPreviousConsensusGenomeClick={handlePreviousConsensusGenomeClick}
             onTaxonNameClick={withAnalytics(
               handleTaxonClick,
-              "PipelineSampleReport_taxon-sidebar-link_clicked",
+              ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_TAXON_SIDEBAR_LINK_CLICKED,
             )}
             phyloTreeAllowed={sample ? sample.editable : false}
             pipelineVersion={pipelineRun?.pipeline_version}

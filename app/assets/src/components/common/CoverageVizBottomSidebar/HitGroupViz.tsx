@@ -5,7 +5,7 @@ import { get, map, size, sum } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
 import { getContigsSequencesByByteranges } from "~/api";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import GenomeViz from "~/components/visualizations/GenomeViz";
@@ -247,7 +247,7 @@ export default class HitGroupViz extends React.Component<
               className={cx(cs.icon, cs.downloadIcon)}
               onClick={withAnalytics(
                 this.handleContigDownload,
-                "HitGroupViz_contig-download-button_clicked",
+                ANALYTICS_EVENT_NAMES.HIT_GROUP_VIZ_CONTIG_DOWNLOAD_BUTTON_CLICKED,
                 {
                   numBytes: totalByterangeLength(
                     get("contigByteranges", contigDownloaderData),
@@ -274,7 +274,7 @@ export default class HitGroupViz extends React.Component<
               className={cx(cs.icon)}
               onClick={withAnalytics(
                 this.handleContigCopy,
-                "HitGroupViz_contig-copy-button_clicked",
+                ANALYTICS_EVENT_NAMES.HIT_GROUP_VIZ_CONTIG_COPY_BUTTON_CLICKED,
                 {
                   numBytes: totalByterangeLength(
                     get("contigByteranges", contigDownloaderData),

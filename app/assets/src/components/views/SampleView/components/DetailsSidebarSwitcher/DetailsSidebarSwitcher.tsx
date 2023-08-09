@@ -1,6 +1,6 @@
 import { compact, find, get, size } from "lodash/fp";
 import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
 import { TaxonDetailsModeProps } from "~/components/common/DetailsSidebar/TaxonDetailsMode";
@@ -82,7 +82,7 @@ export const DetailsSidebarSwitcher = ({
       mode={sidebarMode}
       onClose={withAnalytics(
         closeSidebar,
-        "SampleView_details-sidebar_closed",
+        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_DETAILS_SIDEBAR_CLOSED,
         {
           sampleId: sample.id,
           sampleName: sample.name,

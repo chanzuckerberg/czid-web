@@ -3,7 +3,11 @@ import cx from "classnames";
 import { some } from "lodash/fp";
 import React from "react";
 import { SortDirection } from "react-virtualized";
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
 import { selectedBulkDownloadVar } from "~/cache/initialCache";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
@@ -349,7 +353,7 @@ class BulkDownloadList extends React.Component {
           mode="bulkDownloadDetails"
           onClose={withAnalytics(
             this.handleSidebarClose,
-            "BulkDownloadList_details-sidebar_closed",
+            ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_LIST_DETAILS_SIDEBAR_CLOSED,
             {
               bulkDownloadId: selectedBulkDownload && selectedBulkDownload.id,
             },

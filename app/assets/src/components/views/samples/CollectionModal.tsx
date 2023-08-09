@@ -307,7 +307,7 @@ class CollectionModal extends React.Component<
           initialSelectedValue={appliedMethod}
           onChange={withAnalytics(
             this.handleMethodChange,
-            "CollectionModal_applied-correction-method_changed",
+            ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_APPLIED_CORRECTION_METHOD_CHANGED,
           )}
         />
         {this.renderSampleList()}
@@ -317,7 +317,7 @@ class CollectionModal extends React.Component<
             text="Create"
             onClick={withAnalytics(
               this.handleCreateBackground,
-              "CollectionModal_create-collection-button_clicked",
+              ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CREATE_COLLECTION_BUTTON_CLICKED,
               {
                 selectedSampleIds: this.props.selectedSampleIds.size,
               },
@@ -327,7 +327,7 @@ class CollectionModal extends React.Component<
             text="Cancel"
             onClick={withAnalytics(
               this.closeModal,
-              "CollectionModal_cancel-button_clicked",
+              ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CANCEL_BUTTON_CLICKED,
             )}
           />
         </div>
@@ -366,7 +366,7 @@ class CollectionModal extends React.Component<
           className="noStyleButton"
           onClick={withAnalytics(
             this.openModal,
-            "CollectionModal_open-link_clicked",
+            ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_OPEN_LINK_CLICKED,
           )}
         >
           {trigger}
@@ -377,7 +377,7 @@ class CollectionModal extends React.Component<
             narrow
             onClose={withAnalytics(
               this.closeModal,
-              "CollectionModal_close-link_clicked",
+              ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CLOSE_LINK_CLICKED,
             )}
             className={cs.collectionModal}
           >

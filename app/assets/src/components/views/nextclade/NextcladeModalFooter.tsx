@@ -1,5 +1,5 @@
 import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
@@ -102,7 +102,7 @@ const NextcladeModalFooter = ({
         text="View QC in Nextclade"
         onClick={withAnalytics(
           onClick,
-          "NextcladeModalFooter_view-qc-in-nextclade-button_clicked",
+          ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_FOOTER_VIEW_QC_IN_NEXTCLADE_BUTTON_CLICKED,
         )}
       />
     );

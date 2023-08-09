@@ -3,7 +3,7 @@ import cx from "classnames";
 import copy from "copy-to-clipboard";
 import moment from "moment";
 import React, { useState } from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { selectedBulkDownloadVar } from "~/cache/initialCache";
 import BasicPopup from "~/components/BasicPopup";
 import cs from "./bulk_download_details_mode_with_apollo.scss";
@@ -60,7 +60,7 @@ export const AdvancedDownloadTabWithApollo = () => {
   const handleCLICommandClick = hasCLICommand()
     ? withAnalytics(
         copyCommandToClipboard,
-        "AdvancedDownloadTab_copy-cloud-command-link_clicked",
+        ANALYTICS_EVENT_NAMES.ADVANCED_DOWNLOAD_TAB_COPY_CLOUD_COMMAND_LINK_CLICKED,
         {
           bulkDownloadId: id,
           fileSize: file_size,

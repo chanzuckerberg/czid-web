@@ -1621,7 +1621,7 @@ class UploadSampleStep extends React.Component<
                 className={cx(cs.createProjectButton, "noStyleButton")}
                 onClick={withAnalytics(
                   this.openCreateProject,
-                  "UploadSampleStep_create-project_opened",
+                  ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CREATE_PROJECT_OPENED,
                 )}
                 data-testid="create-project"
               >

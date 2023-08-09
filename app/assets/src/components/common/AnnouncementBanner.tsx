@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React, { useEffect, useState } from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { IconAlert, IconCloseSmall } from "~ui/icons";
 import cs from "./announcement_banner.scss";
@@ -55,7 +55,7 @@ const AnnouncementBanner = ({
         className={cx(cs.close, inverted && cs.inverted)}
         onClick={withAnalytics(
           handleAnnouncementBannerClose,
-          "AnnouncementBanner_close_clicked",
+          ANALYTICS_EVENT_NAMES.ANNOUNCEMENT_BANNER_CLOSE_CLICKED,
         )}
       />
     </div>

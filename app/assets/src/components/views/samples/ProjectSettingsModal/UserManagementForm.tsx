@@ -1,7 +1,7 @@
 import axios from "axios";
 import cx from "classnames";
 import React, { useContext, useState } from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import StringHelper from "~/helpers/StringHelper";
 import { Input } from "~ui/controls";
@@ -121,7 +121,7 @@ const UserManagementForm = ({
               rounded={false}
               onClick={withAnalytics(
                 handleAddUser,
-                "UserManagementForm_add-member-button_clicked",
+                ANALYTICS_EVENT_NAMES.USER_MANAGEMENT_FORM_ADD_MEMBER_BUTTON_CLICKED,
               )}
             />
           </div>

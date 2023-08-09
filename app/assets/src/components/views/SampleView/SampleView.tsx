@@ -1482,7 +1482,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               onBlastClick={this.handleBlastClick}
               onClose={withAnalytics(
                 this.closeCoverageViz,
-                "SampleView_coverage-viz-sidebar_closed",
+                ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_COVERAGE_VIZ_SIDEBAR_CLOSED,
                 {
                   sampleId: sample.id,
                   sampleName: sample.name,

@@ -1,5 +1,9 @@
 import React from "react";
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { postToUrlWithCSRF } from "~utils/links";
 import ExternalLink from "../../ui/controls/ExternalLink";
@@ -120,7 +124,7 @@ const UserMenuDropDown = ({
         text="Logout"
         onClick={withAnalytics(
           signOut,
-          "Header_dropdown-logout-option_clicked",
+          ANALYTICS_EVENT_NAMES.HEADER_DROPDOWN_LOGOUT_OPTION_CLICKED,
         )}
       />,
     );

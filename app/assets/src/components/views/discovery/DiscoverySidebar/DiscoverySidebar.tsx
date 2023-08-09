@@ -2,7 +2,11 @@ import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
 import { DimensionsDetailed, DimensionValue } from "~/interface/discoveryView";
@@ -266,7 +270,7 @@ export default class DiscoverySidebar extends React.Component<
             <a
               onClick={withAnalytics(
                 onClick,
-                "DiscoverySidebar_metadata-label_clicked",
+                ANALYTICS_EVENT_NAMES.DISCOVERY_SIDEBAR_METADATA_LABEL_CLICKED,
                 {
                   value,
                   count,
@@ -283,7 +287,7 @@ export default class DiscoverySidebar extends React.Component<
               className={cs.bar}
               onClick={withAnalytics(
                 onClick,
-                "DiscoverySidebar_metadata-bar_clicked",
+                ANALYTICS_EVENT_NAMES.DISCOVERY_SIDEBAR_METADATA_BAR_CLICKED,
                 {
                   value,
                   count,

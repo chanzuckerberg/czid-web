@@ -1,6 +1,6 @@
 import { find, get, head, isArray, isEmpty, map, set } from "lodash/fp";
 import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import {
   getBasespaceProjects,
   getSamplesForBasespaceProject,
@@ -191,7 +191,7 @@ export default class BasespaceSampleImport extends React.Component<BasespaceSamp
           rounded={false}
           onClick={withAnalytics(
             this.requestBasespaceBrowseGlobalPermissions,
-            "BasespaceSampleImport_connect-btn_clicked",
+            ANALYTICS_EVENT_NAMES.BASESPACE_SAMPLE_IMPORT_CONNECT_BTN_CLICKED,
             {},
           )}
         />
@@ -235,7 +235,7 @@ export default class BasespaceSampleImport extends React.Component<BasespaceSamp
             rounded={false}
             onClick={withAnalytics(
               this.fetchSamplesForBasespaceProject,
-              "BasespaceSampleImport_connect-project-btn_clicked",
+              ANALYTICS_EVENT_NAMES.BASESPACE_SAMPLE_IMPORT_CONNECT_PROJECT_BTN_CLICKED,
               {},
             )}
             className={cs.connectProjectButton}

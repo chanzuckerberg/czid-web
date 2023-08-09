@@ -1,6 +1,6 @@
 import { Icon } from "@czi-sds/components";
 import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import cs from "./map_banner.scss";
 
@@ -22,7 +22,7 @@ class MapBanner extends React.Component<MapBannerProps> {
               className={cs.clearAll}
               onClick={withAnalytics(
                 onClearFilters,
-                "MapBanner_clear-filters-link_clicked",
+                ANALYTICS_EVENT_NAMES.MAP_BANNER_CLEAR_FILTERS_LINK_CLICKED,
                 {
                   currentTab: item,
                 },

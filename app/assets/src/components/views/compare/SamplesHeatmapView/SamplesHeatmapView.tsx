@@ -2154,7 +2154,7 @@ class SamplesHeatmapView extends React.Component<
           mode={sidebarMode}
           onClose={withAnalytics(
             this.closeSidebar,
-            "SamplesHeatmapView_details-sidebar_closed",
+            ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_DETAILS_SIDEBAR_CLOSED,
             {
               sampleId: selectedSampleId,
               sidebarMode: sidebarMode,

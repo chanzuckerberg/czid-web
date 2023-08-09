@@ -3,7 +3,11 @@ import { diff } from "deep-object-diff";
 import { groupBy } from "lodash/fp";
 import React from "react";
 import { PanZoom } from "react-easy-panzoom";
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { getGraph } from "~/api/pipelineViz";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -952,7 +956,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
           <IconCloseSmall
             onClick={withAnalytics(
               () => this.toggleStage(i),
-              "PipelineViz_stage-collapse-button_clicked",
+              ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_STAGE_COLLAPSE_BUTTON_CLICKED,
               { stage: this.stageNames[i] },
             )}
             className={cs.closeIcon}
@@ -978,7 +982,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
           )}
           onClick={withAnalytics(
             () => this.toggleStage(i),
-            "PipelineViz_stage-expand-button_clicked",
+            ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_STAGE_EXPAND_BUTTON_CLICKED,
             { stage: this.stageNames[i] },
           )}
         >
@@ -1067,11 +1071,11 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
           <PlusMinusControl
             onPlusClick={withAnalytics(
               this.handleZoom(true),
-              "PipelineViz_zoom-in-control_clicked",
+              ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_ZOOM_IN_CONTROL_CLICKED,
             )}
             onMinusClick={withAnalytics(
               this.handleZoom(false),
-              "PipelineViz_zoom-out-control_clicked",
+              ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_ZOOM_OUT_CONTROL_CLICKED,
             )}
             className={cs.plusMinusControl}
           />
@@ -1083,7 +1087,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
           params={sidebarParams}
           onClose={withAnalytics(
             this.closeSidebar,
-            "PipelineViz_sidebar-close-button_clicked",
+            ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_SIDEBAR_CLOSE_BUTTON_CLICKED,
           )}
         />
       </div>

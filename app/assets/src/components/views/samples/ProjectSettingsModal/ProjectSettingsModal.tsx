@@ -2,7 +2,7 @@ import { Icon } from "@czi-sds/components";
 import axios from "axios";
 import cx from "classnames";
 import React, { useContext, useState } from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import Divider from "~/components/layout/Divider";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -51,7 +51,7 @@ const ProjectSettingsModal = ({
       <ShareButton
         onClick={withAnalytics(
           () => setModalOpen(true),
-          "ProjectSettingsModal_open-link_click",
+          ANALYTICS_EVENT_NAMES.PROJECT_SETTINGS_MODAL_OPEN_LINK_CLICK,
           {
             projectId: project.id,
             projectName: project.name,
@@ -64,7 +64,7 @@ const ProjectSettingsModal = ({
           narrow
           onClose={withAnalytics(
             () => setModalOpen(false),
-            "ProjectSettingsModal_close-modal_clicked",
+            ANALYTICS_EVENT_NAMES.PROJECT_SETTINGS_MODAL_CLOSE_MODAL_CLICKED,
             {
               projectId: project.id,
               projectName: project.name,
@@ -111,7 +111,7 @@ const ProjectSettingsModal = ({
                         <PublicProjectConfirmationModal
                           onConfirm={withAnalytics(
                             makeProjectPublic,
-                            "ProjectSettingsModal_public-button_confirmed",
+                            ANALYTICS_EVENT_NAMES.PROJECT_SETTINGS_MODAL_PUBLIC_BUTTON_CONFIRMED,
                             {
                               projectId: project.id,
                               projectName: project.name,

@@ -731,7 +731,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             )}
             onClick={withAnalytics(
               () => this.toggleExpandGenus({ taxId: rowData.taxId }),
-              "PipelineSampleReport_expand-genus_clicked",
+              ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_EXPAND_GENUS_CLICKED,
               { tax_id: rowData.taxId },
             )}
           />
@@ -753,7 +753,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           )}
           onClick={withAnalytics(
             () => this.toggleExpandAll(),
-            "PipelineSampleReport_expand-all_clicked",
+            ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_EXPAND_ALL_CLICKED,
           )}
         />
       </div>
@@ -814,14 +814,14 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           onClick: [
             withAnalytics(
               () => this.handleNtNrChange("nt"),
-              "ReportTable_count-type_clicked",
+              ANALYTICS_EVENT_NAMES.REPORT_TABLE_COUNT_TYPE_CLICKED,
               {
                 countType: "nt",
               },
             ),
             withAnalytics(
               () => this.handleNtNrChange("nr"),
-              "ReportTable_count-type_clicked",
+              ANALYTICS_EVENT_NAMES.REPORT_TABLE_COUNT_TYPE_CLICKED,
               {
                 countType: "nr",
               },
@@ -1014,7 +1014,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         fastaEnabled={fastaDownloadEnabled}
         onFastaActionClick={withAnalytics(
           this.downloadFastaUrl,
-          "PipelineSampleReport_taxon-fasta-link_clicked",
+          ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_TAXON_FASTA_LINK_CLICKED,
           analyticsContext,
         )}
         onConsensusGenomeClick={withAnalytics(
@@ -1031,19 +1031,19 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         coverageVizEnabled={coverageVizEnabled}
         onCoverageVizClick={withAnalytics(
           this.handleCoverageVizClick,
-          "PipelineSampleReport_coverage-viz-link_clicked",
+          ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_COVERAGE_VIZ_LINK_CLICKED,
           analyticsContext,
         )}
         contigVizEnabled={contigVizEnabled}
         onContigVizClick={withAnalytics(
           this.downloadContigUrl,
-          "PipelineSampleReport_contig-download-link_clicked",
+          ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_CONTIG_DOWNLOAD_LINK_CLICKED,
           analyticsContext,
         )}
         phyloTreeEnabled={phyloTreeEnabled}
         onPhyloTreeModalOpened={withAnalytics(
           this.handlePhyloTreeModalOpen,
-          "PipelineSampleReport_phylotree-link_clicked",
+          ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_PHYLOTREE_LINK_CLICKED,
           analyticsContext,
         )}
         percentIdentity={percentIdentity}

@@ -292,7 +292,7 @@ class DiscoveryFilters extends React.Component<
                   selectedKey,
                   valueToRemove: option.value,
                 }),
-              "DiscoveryFilters_tag_removed",
+              ANALYTICS_EVENT_NAMES.DISCOVERY_FILTERS_TAG_REMOVED,
               {
                 value: option.value,
                 text: option.text,
@@ -323,7 +323,7 @@ class DiscoveryFilters extends React.Component<
                 selectedKey: KEY_ANNOTATIONS_SELECTED,
                 valueToRemove: option.name,
               }),
-            "DiscoveryFilters_tag_removed",
+            ANALYTICS_EVENT_NAMES.DISCOVERY_FILTERS_TAG_REMOVED,
             {
               value: option.name,
               text: option.name,
@@ -357,7 +357,7 @@ class DiscoveryFilters extends React.Component<
                   selectedKey: KEY_TAXON_SELECTED,
                   valueToRemove: selectedTaxon.id,
                 }),
-              "DiscoveryFilters_tag_removed",
+              ANALYTICS_EVENT_NAMES.DISCOVERY_FILTERS_TAG_REMOVED,
               {
                 value: selectedTaxon.id,
                 text: selectedTaxon.name,

@@ -2,7 +2,7 @@ import { Icon, Menu, MenuItem, Tooltip } from "@czi-sds/components";
 import { PopoverProps } from "@mui/material";
 import cx from "classnames";
 import React, { useState } from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import cs from "./samples_view.scss";
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
 
@@ -73,7 +73,7 @@ const BulkSamplesActionsMenu = ({
         onClick={withAnalytics(() => {
           closeActionsMenu();
           handleClickPhyloTree();
-        }, "SamplesView_phylo-tree-modal-open_clicked")}
+        }, ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_PHYLO_TREE_MODAL_OPEN_CLICKED)}
       >
         <div data-testid="create-phylogenetic-tree" className={cs.itemWrapper}>
           <div className={cs.bulkActionsIcon}>

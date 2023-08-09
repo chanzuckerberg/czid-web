@@ -2,7 +2,7 @@ import { useReactiveVar } from "@apollo/client";
 import { forEach, get, trim } from "lodash/fp";
 import React, { useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import {
   activeAmrFiltersVar,
   amrDrugClassesVar,
@@ -151,7 +151,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
         onClose={() =>
           withAnalytics(
             setDetailsSidebarGeneName(null),
-            "AmrView_details-sidebar_closed",
+            ANALYTICS_EVENT_NAMES.AMR_VIEW_DETAILS_SIDEBAR_CLOSED,
           )
         }
         params={{ geneName: detailsSidebarGeneName }}

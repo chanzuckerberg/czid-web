@@ -1,7 +1,11 @@
 import cx from "classnames";
 import { find, get } from "lodash/fp";
 import React, { useState } from "react";
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import { NAME_COLUMN } from "./constants";
@@ -24,7 +28,7 @@ const MetadataCSVLocationsMenu = ({
       className={cx(cs.applyToAll, "noStyleButton")}
       onClick={withAnalytics(
         () => applyToAll(applyToAllSample),
-        "MetadataCsvLocationsMenu_apply-all_clicked",
+        ANALYTICS_EVENT_NAMES.METADATA_CSV_LOCATIONS_MENU_APPLY_ALL_CLICKED,
         {
           sampleName: applyToAllSample,
         },

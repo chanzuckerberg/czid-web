@@ -419,7 +419,7 @@ const SamplesView = forwardRef(function SamplesView(
         disabled={selectedIds.size === 0}
         onClick={withAnalytics(
           handleBulkDownloadModalOpen,
-          "SamplesView_bulk-download-modal-open_clicked",
+          ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_DOWNLOAD_MODAL_OPEN_CLICKED,
           { workflow },
         )}
       />
@@ -489,7 +489,7 @@ const SamplesView = forwardRef(function SamplesView(
         }
         onClick={withAnalytics(
           () => setNextcladeModalOpen(true),
-          "SamplesView_nextclade-modal-open_clicked",
+          ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_NEXTCLADE_MODAL_OPEN_CLICKED,
         )}
       />
     );
@@ -820,7 +820,7 @@ const SamplesView = forwardRef(function SamplesView(
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
             handleSelectAllRows,
-            "SamplesView_select-all-rows_clicked",
+            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_SELECT_ALL_ROWS_CLICKED,
           )}
           onSelectRow={handleSelectRow}
           onRowClick={handleRowClick}
@@ -956,7 +956,7 @@ const SamplesView = forwardRef(function SamplesView(
           csrf={document.getElementsByName("csrf-token")[0].content}
           onClose={withAnalytics(
             () => setPhyloCreationModalOpen(false),
-            "SamplesView_phylo-tree-modal_closed",
+            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_PHYLO_TREE_MODAL_CLOSED,
           )}
         />
       )}
@@ -965,7 +965,7 @@ const SamplesView = forwardRef(function SamplesView(
           open
           onClose={withAnalytics(
             () => setBulkDownloadModalOpen(false),
-            "SamplesView_bulk-download-modal_closed",
+            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_DOWNLOAD_MODAL_CLOSED,
           )}
           onGenerate={handleBulkDownloadGenerate}
           selectedObjects={selectedObjects}
@@ -996,7 +996,7 @@ const SamplesView = forwardRef(function SamplesView(
           open
           onClose={withAnalytics(
             () => setNextcladeModalOpen(false),
-            "SamplesView_nextclade-modal_closed",
+            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_NEXTCLADE_MODAL_CLOSED,
           )}
           selectedIds={selectedIds}
           workflowEntity={workflowEntity}

@@ -224,7 +224,7 @@ export const PrimaryHeaderControls = ({
               className={cs.controlElement}
               onClick={withAnalytics(
                 onSaveClick,
-                "SampleView_save-button_clicked",
+                ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAVE_BUTTON_CLICKED,
                 {
                   sampleId: sample?.id,
                 },

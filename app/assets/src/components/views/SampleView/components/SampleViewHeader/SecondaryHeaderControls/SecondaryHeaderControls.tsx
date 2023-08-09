@@ -1,7 +1,7 @@
 import { Button } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import {
   isMngsWorkflow,
   WORKFLOWS,
@@ -69,7 +69,7 @@ export const SecondaryHeaderControls = ({
         isAllCaps={true}
         onClick={withAnalytics(
           onDetailsClick,
-          "SampleView_sample-details-link_clicked",
+          ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAMPLE_DETAILS_LINK_CLICKED,
           {
             sampleId: sample?.id,
           },

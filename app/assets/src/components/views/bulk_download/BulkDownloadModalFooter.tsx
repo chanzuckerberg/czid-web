@@ -1,6 +1,6 @@
 import { filter, get, isUndefined, map, reject, size, some } from "lodash/fp";
 import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
@@ -257,7 +257,7 @@ export default function BulkDownloadModalFooter({
         text="Start Generating Download"
         onClick={withAnalytics(
           () => onDownloadRequest(getValidSampleIds()),
-          "BulkDownloadModalFooter_start-generating-button_clicked",
+          ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_FOOTER_START_GENERATING_BUTTON_CLICKED,
           {
             workflow,
           },

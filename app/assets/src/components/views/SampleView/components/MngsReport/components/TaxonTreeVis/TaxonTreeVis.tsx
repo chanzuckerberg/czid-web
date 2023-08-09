@@ -1,6 +1,10 @@
 import { get, getOr, map } from "lodash/fp";
 import React, { useEffect, useRef, useState } from "react";
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import {
   TABS,
   TREE_VIZ_TOOLTIP_METRICS,
@@ -58,7 +62,7 @@ export const TaxonTreeVis = ({
       tooltipContainer: treeTooltipRef.current,
       onCollapsedStateChange: withAnalytics(
         persistCollapsedInUrl,
-        "TaxonTreeVis_node-collapsed-state_changed",
+        ANALYTICS_EVENT_NAMES.TAXON_TREE_VIS_NODE_COLLAPSED_STATE_CHANGED,
       ),
       collapsed: getCollapsedInUrl() || new Set(),
     });

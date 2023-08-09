@@ -3,7 +3,11 @@ import moment from "moment";
 import React, { ReactNode } from "react";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { Accordion } from "~/components/layout";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
@@ -157,10 +161,13 @@ const PipelineStepDetailsMode = ({
         <a
           href={file.url}
           onClick={() =>
-            trackEvent("PipelineStepDetailsMode_file-link_clicked", {
-              fileName: file.fileName,
-              url: file.url,
-            })
+            trackEvent(
+              ANALYTICS_EVENT_NAMES.PIPELINE_STEP_DETAILS_MODE_FILE_LINK_CLICKED,
+              {
+                fileName: file.fileName,
+                url: file.url,
+              },
+            )
           }
         >
           {file.fileName}
@@ -190,7 +197,7 @@ const PipelineStepDetailsMode = ({
               onClick={withAnalytics(
                 // eslint-disable-next-line @typescript-eslint/no-empty-function
                 () => {},
-                "PipelineStepDetailsMode_resource-link_clicked",
+                ANALYTICS_EVENT_NAMES.PIPELINE_STEP_DETAILS_MODE_RESOURCE_LINK_CLICKED,
                 { linkName: linkInfo.name, linkUrl: linkInfo.url },
               )}
             >

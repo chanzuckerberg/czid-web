@@ -162,7 +162,7 @@ export const SamplesHeatmapHeader = ({
                 className={cs.controlElement}
                 onClick={withAnalytics(
                   onShareClick,
-                  "SamplesHeatmapHeader_share-button_clicked",
+                  ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_SHARE_BUTTON_CLICKED,
                   {
                     sampleIds: sampleIds.length,
                   },
@@ -177,7 +177,7 @@ export const SamplesHeatmapHeader = ({
           <SaveButton
             onClick={withAnalytics(
               onSaveClick,
-              "SamplesHeatmapHeader_save-button_clicked",
+              ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_SAVE_BUTTON_CLICKED,
               {
                 sampleIds: sampleIds.length,
                 path: window.location.pathname,
