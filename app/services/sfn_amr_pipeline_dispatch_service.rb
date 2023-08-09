@@ -172,6 +172,23 @@ class SfnAmrPipelineDispatchService
     params
   end
 
+  def card_params
+    prefix = card_prefix
+    {
+      card_json: "#{prefix}/card.json",
+      card_ontology: "#{prefix}/ontology.json",
+      kmer_db: "#{prefix}/61_kmer_db.json",
+      amr_kmer_db: "#{prefix}/all_amr_61mers.txt",
+      wildcard_data: "#{prefix}/wildcard_database.fasta",
+      wildcard_index: "#{prefix}/index-for-model-sequences.txt",
+    }
+  end
+
+  def card_prefix
+    latest_card_version_folder = AppConfigHelper.get_app_config(AppConfig::CARD_FOLDER)
+    "s3://#{S3_DATABASE_BUCKET}/card/#{latest_card_version_folder}"
+  end
+
   def generate_wdl_input
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
     host_filtering_params = @workflow_run.uses_modern_host_filtering? ? modern_host_filtering_parameters : host_filtering_parameters
@@ -181,7 +198,7 @@ class SfnAmrPipelineDispatchService
       non_host_reads: nonhost_reads_params,
       contigs: strtrue(@workflow_run.get_input("start_from_mngs")) ? "#{@sample.pipeline_runs.non_deprecated.first.sfn_results_path}/contigs.fasta" : nil,
       sample_name: @workflow_run.sample.name,
-    }.merge(host_filtering_params)
+    }.merge(host_filtering_params).merge(card_params)
 
     sfn_pipeline_input_json = {
       RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@workflow_run.workflow_version_tag}/run.wdl.zip",

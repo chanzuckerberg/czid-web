@@ -70,7 +70,7 @@ class AppConfig < ApplicationRecord
   ENABLE_DELETE_UNCLAIMED_USER_ACCOUNTS = "auto_delete_unclaimed_accounts".freeze
   # Folder name in S3 of latest version of CARD database to use for AMR.
   # Initially set to "2023-05-22".
-  CARD_VERSION_FOLDER = "card_version_folder".freeze
+  CARD_FOLDER = "card_folder".freeze
 
   after_save :clear_cached_record
 

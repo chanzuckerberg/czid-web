@@ -37,7 +37,9 @@ const CARDFooter = ({ geneName, ontology }: CARDFooterProps) => (
         target="_blank"
         rel="noopener noreferrer"
         onClick={() =>
-          trackEvent("GeneDetailsMode_creative-commons-license_clicked")
+          trackEvent(
+            ANALYTICS_EVENT_NAMES.GENE_DETAILS_MODE_CREATIVE_COMMONS_LICENSE_CLICKED,
+          )
         }
       >
         Creative Commons CC-BY license version 4.0

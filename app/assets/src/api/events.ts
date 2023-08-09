@@ -607,6 +607,10 @@ function EventDictionary() {
   /** The user clicked one of the links at the bottom of the gene details sidebar */
   this.GENE_DETAILS_MODE_FOOTER_LINK_CLICKED =
     "GENE_DETAILS_MODE_FOOTER_LINK_CLICKED";
+
+  /** The user clicked the creative commons license link at the bottom of the gene details sidebar */
+  this.GENE_DETAILS_MODE_CREATIVE_COMMONS_LICENSE_CLICKED =
+    "GENE_DETAILS_MODE_CREATIVE_COMMONS_LICENSE_CLICKED";
 }
 
 const eventNames = new EventDictionary();

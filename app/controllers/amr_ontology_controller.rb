@@ -2,7 +2,7 @@ class AmrOntologyController < ApplicationController
   include S3Util
 
   S3_JSON_PREFIX = "card".freeze
-  DEFAULT_CARD_VERSION = "2023-05-22".freeze
+  DEFAULT_CARD_FOLDER = "2023-05-22".freeze
 
   def fetch_ontology
     gene_name = params[:geneName]
@@ -40,7 +40,7 @@ class AmrOntologyController < ApplicationController
   private
 
   def fetch_current_ontology_file_key
-    latest_ontology_version = get_app_config(AppConfig::CARD_VERSION_FOLDER, DEFAULT_CARD_VERSION)
+    latest_ontology_version = get_app_config(AppConfig::CARD_FOLDER, DEFAULT_CARD_FOLDER)
     "#{S3_JSON_PREFIX}/#{latest_ontology_version}/ontology.json"
   end
 
