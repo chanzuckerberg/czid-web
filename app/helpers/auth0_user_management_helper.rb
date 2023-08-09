@@ -1,6 +1,10 @@
 module Auth0UserManagementHelper
   AUTH0_CONNECTION_NAME = ENV["AUTH0_CONNECTION"] || "Username-Password-Authentication"
 
+  # Auth0 limits the total number of users you can retrieve to 1000
+  # - See: https://auth0.com/docs/manage-users/user-search/view-search-results-by-page#limitation
+  MAX_RESULTS_PER_AUTH0_USER_SEARCH = 1000
+
   # Create a new user in the Auth0 user database.
   # This method creates the user only in the main user database (Username-Password-Authentication)
   def self.create_auth0_user(email:, name:, role: User::ROLE_REGULAR_USER)
@@ -54,8 +58,9 @@ module Auth0UserManagementHelper
 
     page_num = 0
     max_results_per_page = 50
+    max_pages = MAX_RESULTS_PER_AUTH0_USER_SEARCH / max_results_per_page
     query_next_page = true
-    while query_next_page
+    while query_next_page && page_num < max_pages
       # See:
       # - https://auth0.com/docs/api/management/v2#!/Users/get_users
       # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
