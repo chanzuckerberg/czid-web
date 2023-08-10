@@ -1,3 +1,4 @@
+import { Link } from "@czi-sds/components";
 import React, { useEffect, useState } from "react";
 import HeroEmailForm from "~/components/views/landing_page/HeroEmailForm";
 import cs from "./Hero.scss";
@@ -66,6 +67,17 @@ const Hero = ({ autoAcctCreationEnabled }: HeroProps) => {
         researchers
       </p>
       <HeroEmailForm autoAcctCreationEnabled={autoAcctCreationEnabled} />
+      <div className={cs.finePrint}>
+        {'By clicking "Register Now," you agree to our '}
+        <Link href="/terms" sdsStyle="dashed">
+          Terms
+        </Link>
+        {" and "}
+        <Link href="/privacy" sdsStyle="dashed">
+          Privacy Policy
+        </Link>
+        {"."}
+      </div>
     </div>
   );
 };

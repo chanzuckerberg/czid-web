@@ -103,6 +103,12 @@
       @include font-header-xs;
     }
   }
+
+  .finePrint {
+    @include font-body-xs;
+    color: $sds-color-gray-white;
+    margin-top: $sds-spaces-s;
+  }
 }
 
 .heroLineBreak {
