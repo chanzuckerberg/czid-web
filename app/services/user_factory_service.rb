@@ -51,10 +51,8 @@ class UserFactoryService
     table_name = "CZ ID Accounts"
     data = {
       fields: {
-        name: new_user.name,
-        email: new_user.email,
-        signupPath: signup_path,
         userId: new_user.id,
+        signupPath: signup_path,
       },
     }
     MetricUtil.post_to_airtable(table_name, data.to_json)

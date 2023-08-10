@@ -1,0 +1,18 @@
+@import "~styles/themes/typography";
+@import "~@czi-sds/components/dist/variables";
+
+.main {
+  padding-top: 100px;
+  padding-bottom: $sds-spaces-xl;
+}
+
+.checkbox {
+  :global(.MuiButtonBase-root.MuiCheckbox-root) {
+    padding: 0 9px 0 0;
+  }
+}
+
+.text {
+  @include font-body-xs;
+  color: $sds-color-gray-black;
+}

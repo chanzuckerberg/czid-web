@@ -108,8 +108,11 @@ RSpec.describe UsersController, type: :request do
     end
 
     context "with AppConfig::AUTO_ACCOUNT_CREATION_V1 disabled" do
-      it "shouldn't update user" do
+      before do
         AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "")
+      end
+
+      it "shouldn't update user" do
         post update_user_data_user_url @joe, params: { user: { name: "abc xyz" } }
         expect(response).to have_http_status :forbidden
         expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Nonadmin users are not allowed to modify user info")
@@ -117,8 +120,11 @@ RSpec.describe UsersController, type: :request do
     end
 
     context "with AppConfig::AUTO_ACCOUNT_CREATION_V1 enabled" do
-      it "should update user" do
+      before do
         AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
+      end
+
+      it "should update user" do
         expect(Auth0UserManagementHelper).to receive(:patch_auth0_user).with(old_email: @joe.email, email: @joe.email, name: "abc xyz", role: @joe.role)
         post update_user_data_user_url @joe, params: { user: { name: "abc xyz", email: @joe.email } }
         @joe.reload
@@ -126,53 +132,86 @@ RSpec.describe UsersController, type: :request do
       end
 
       it "shouldn't update a different user's info" do
-        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
         post update_user_data_user_url @admin, params: { user: { name: "abc xyz", email: @admin.email } }
         expect(response).to have_http_status :forbidden
         expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Users are not allowed to modify other users' info")
       end
 
-      it "should send user profile data to AirTable" do
-        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
-        # Params from user profile form
-        form_params = {
-          first_name: @joe.first_name,
-          last_name: @joe.last_name,
-          ror_institution: "Fake Institution",
-          ror_id: "1234",
-          country: "United States",
-          world_bank_income: "10000",
-          czid_usecase: ["medical detective"],
-          expertise_level: "expert",
-          referral_source: ["conference"],
-        }
+      context "when posting to AirTable" do
+        before do
+          # Params for UsersController#update endpoint
+          @sign_up_params = {
+            name: "abc xyz",
+            profile_form_version: User::PROFILE_FORM_VERSION[:in_app_form],
+          }
 
-        # Params for UsersController#update endpoint
-        sign_up_params = {
-          name: "abc xyz",
-          email: @joe.email,
-          profile_form_version: User::PROFILE_FORM_VERSION[:in_app_form],
-        }.merge(form_params)
+          # Expected parameters for posting to AirTable
+          @airtable_params = {
+            user_id: @joe.id,
+            admin: @joe.admin?,
+            date_created: @joe.created_at.strftime("%Y-%m-%d"),
+            quarter_year: UsersHelper.calculate_quarter_year,
+            survey_version: User::PROFILE_FORM_VERSION[:in_app_form].to_s,
+          }
+        end
 
-        # Expected parameters for posting to AirTable
-        airtable_params = {
-          user_id: @joe.id,
-          admin: @joe.admin?,
-          email: @joe.email,
-          date_created: @joe.created_at.strftime("%Y-%m-%d"),
-          quarter_year: UsersHelper.calculate_quarter_year,
-          survey_version: User::PROFILE_FORM_VERSION[:in_app_form].to_s,
-        }.merge(form_params)
+        it "should send complete user profile data" do
+          # Params from user profile form
+          form_params = {
+            first_name: @joe.first_name,
+            last_name: @joe.last_name,
+            ror_institution: "Fake Institution",
+            ror_id: "1234",
+            country: "United States",
+            world_bank_income: "10000",
+            czid_usecase: ["medical detective"],
+            expertise_level: "expert",
+            referral_source: ["conference"],
+            email: @joe.email, # opted in to email newsletter
+          }
 
-        expect(MetricUtil).to receive(:post_to_airtable).with(
-          "CZ ID User Profiles",
-          { fields: airtable_params, typecast: true }.to_json
-        )
+          new_user_params = @sign_up_params.merge(form_params)
+          airtable_post_params = @airtable_params.merge(form_params)
 
-        params = { user: sign_up_params }
-        post post_user_data_to_airtable_user_url @joe, params: params
+          expect(MetricUtil).to receive(:post_to_airtable).with(
+            "CZ ID User Profiles",
+            { fields: airtable_post_params, typecast: true }.to_json
+          )
 
-        expect(response).to have_http_status :ok
+          params = { user: new_user_params }
+          post post_user_data_to_airtable_user_url @joe, params: params
+
+          expect(response).to have_http_status :ok
+        end
+
+        it "should send user profile data without optional fields (ror_id, referral_source, email)" do
+          # Params from user profile form
+          form_params = {
+            first_name: @joe.first_name,
+            last_name: @joe.last_name,
+            ror_institution: "Fake Institution",
+            ror_id: "", # institution not found in ror db
+            country: "United States",
+            world_bank_income: "10000",
+            czid_usecase: ["medical detective"],
+            expertise_level: "expert",
+            referral_source: [], # none selected
+            email: "", # opted out of email newsletter
+          }
+
+          new_user_params = @sign_up_params.merge(form_params)
+          airtable_post_params = @airtable_params.merge(form_params)
+
+          expect(MetricUtil).to receive(:post_to_airtable).with(
+            "CZ ID User Profiles",
+            { fields: airtable_post_params, typecast: true }.to_json
+          )
+
+          params = { user: new_user_params }
+          post post_user_data_to_airtable_user_url @joe, params: params
+
+          expect(response).to have_http_status :ok
+        end
       end
     end
   end

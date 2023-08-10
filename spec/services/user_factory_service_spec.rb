@@ -110,10 +110,8 @@ RSpec.describe UserFactoryService do
         created_user = User.last
         airtable_data = {
           fields: {
-            name: created_user.name,
-            email: created_user.email,
-            signupPath: User::SIGNUP_PATH[:project],
             userId: created_user.id,
+            signupPath: User::SIGNUP_PATH[:project],
           },
         }
 
@@ -131,10 +129,8 @@ RSpec.describe UserFactoryService do
         created_user = User.last
         airtable_data = {
           fields: {
-            name: created_user.name,
-            email: created_user.email,
-            signupPath: User::SIGNUP_PATH[:self_registered],
             userId: created_user.id,
+            signupPath: User::SIGNUP_PATH[:self_registered],
           },
         }
 

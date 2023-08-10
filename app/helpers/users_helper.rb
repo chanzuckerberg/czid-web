@@ -10,7 +10,6 @@ module UsersHelper
       fields: {
         user_id: user.id,
         admin: user.admin?,
-        email: params[:email] || user.email || "",
         date_created: user.created_at.strftime("%Y-%m-%d"),
         quarter_year: calculate_quarter_year,
         survey_version: params[:profile_form_version] || "",
@@ -23,6 +22,7 @@ module UsersHelper
         czid_usecase: params[:czid_usecase] || [],
         expertise_level: params[:expertise_level] || "",
         referral_source: params[:referral_source] || [],
+        email: params[:email] || "",
       },
       typecast: true, # enables us to send new options for multiselect fields (e.g. "Other: <free text>" for Referral Source)
     }
