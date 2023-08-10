@@ -60,8 +60,9 @@ RSpec.describe DeleteUnclaimedUserAccounts, type: :job do
     end
 
     context "when no errors occur" do
-      it "should log the number of unclaimed user accounts" do
+      it "should log the number of unclaimed user accounts identified and deleted" do
         expect(LogUtil).to receive(:log_message).with("Found 2 unclaimed user accounts in Auth0")
+        expect(LogUtil).to receive(:log_message).with("Successfully deleted 2 unclaimed user accounts")
         DeleteUnclaimedUserAccounts.perform
       end
 
@@ -94,6 +95,11 @@ RSpec.describe DeleteUnclaimedUserAccounts, type: :job do
         expect(Auth0UserManagementHelper).not_to receive(:delete_auth0_user)
         expect { DeleteUnclaimedUserAccounts.perform }.not_to change(User, :count)
       end
+
+      it "should log the number of unclaimed user accounts identified" do
+        expect(LogUtil).to receive(:log_message).with("Nothing to delete! There are no accounts meeting the deletion criteria.")
+        DeleteUnclaimedUserAccounts.perform
+      end
     end
 
     context "when an unclaimed account contains samples" do # this should never happen
@@ -117,6 +123,12 @@ RSpec.describe DeleteUnclaimedUserAccounts, type: :job do
           exception: DeleteUnclaimedUserAccounts::DeleteUnclaimedUserAccountsError.new,
           user_id: user1.id
         )
+        DeleteUnclaimedUserAccounts.perform
+      end
+
+      it "should log the number of unclaimed user accounts identified and deleted" do
+        expect(LogUtil).to receive(:log_message).with("Found 2 unclaimed user accounts in Auth0")
+        expect(LogUtil).to receive(:log_message).with("Successfully deleted 1 unclaimed user accounts")
         DeleteUnclaimedUserAccounts.perform
       end
     end
@@ -149,6 +161,12 @@ RSpec.describe DeleteUnclaimedUserAccounts, type: :job do
           auth0_user_id: "1",
           days_since_creation: 30
         )
+        DeleteUnclaimedUserAccounts.perform
+      end
+
+      it "should log the number of unclaimed user accounts identified and deleted" do
+        expect(LogUtil).to receive(:log_message).with("Found 2 unclaimed user accounts in Auth0")
+        expect(LogUtil).to receive(:log_message).with("Successfully deleted 1 unclaimed user accounts")
         DeleteUnclaimedUserAccounts.perform
       end
     end
@@ -187,6 +205,12 @@ RSpec.describe DeleteUnclaimedUserAccounts, type: :job do
           user_id: user1.id,
           days_since_creation: 30
         )
+        DeleteUnclaimedUserAccounts.perform
+      end
+
+      it "should log the number of unclaimed user accounts identified and deleted" do
+        expect(LogUtil).to receive(:log_message).with("Found 2 unclaimed user accounts in Auth0")
+        expect(LogUtil).to receive(:log_message).with("Successfully deleted 1 unclaimed user accounts")
         DeleteUnclaimedUserAccounts.perform
       end
     end

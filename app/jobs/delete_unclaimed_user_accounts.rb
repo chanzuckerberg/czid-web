@@ -50,6 +50,7 @@ class DeleteUnclaimedUserAccounts < StandardError
   end
 
   def self.delete_unclaimed_accounts(unclaimed_accounts)
+    num_accounts_deleted = 0
     unclaimed_accounts.each_with_index do |account, index|
       Rails.logger.info("Deleting unclaimed account #{index}/#{unclaimed_accounts.length}...")
 
@@ -95,8 +96,12 @@ class DeleteUnclaimedUserAccounts < StandardError
             user_id: user.id,
             days_since_creation: days_since_creation
           )
+        else
+          num_accounts_deleted += 1
         end
       end
     end
+    # Log in ops-notifs channel for visibility
+    LogUtil.log_message("Successfully deleted #{num_accounts_deleted} unclaimed user accounts")
   end
 end
