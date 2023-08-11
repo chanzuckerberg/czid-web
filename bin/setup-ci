@@ -101,8 +101,5 @@ sudo sysctl -w vm.max_map_count=262144
 
 gem install bundler --conservative
 
-echo "== Building docker compose config =="
-docker-compose build
-
 echo "== Running npm install and webpack =="
 npm install && ./node_modules/.bin/webpack --config webpack.config.dev.js

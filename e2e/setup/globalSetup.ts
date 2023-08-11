@@ -23,12 +23,12 @@ async function globalSetup(config: FullConfig): Promise<void> {
   const password = process.env.CZID_PASSWORD;
 
   if (!checkCookies()) {
-    const browser = await chromium.launch({ headless: false });
+    const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
     await Promise.all([
       page.goto(`${process.env.BASEURL}`, { waitUntil: "networkidle" }),
     ]);
-    expect(page.getByText(tag)).toBeVisible({ timeout: 120000 });
+    expect(page.getByText(tag)).toBeVisible({ timeout: 1 });
     await page.getByTestId("home-top-nav-login").click();
     await login(page, username, password);
     await page.context().storageState({ path: storageState as string });

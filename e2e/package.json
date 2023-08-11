@@ -10,7 +10,8 @@
     "pw:ci": "NODE_ENV=ci DEBUG=pw:api npx playwright test -c ./setup/ci.config.ts",
     "pw:staging:headless": "NODE_ENV=staging npx playwright test -c ./setup/staging.config.ts",
     "pw:staging:debug": "DEBUG=pw:browser*,pw:api NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
-    "pw:report": "npx playwright show-report"
+    "pw:report": "npx playwright show-report",
+    "sauce:ci": "saucectl run -c ./.sauce/ci.yml"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",

@@ -6,16 +6,15 @@ class AddHostGenomeDrosophilaMelanogaster < ActiveRecord::Migration[6.1]
   def up
     return if HostGenome.find_by(name: "Drosophila Melanogaster")
 
-    hg = HostGenome.new
-    hg.name = "Drosophila Melanogaster"
-    hg.s3_star_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/drosophila_melanogaster/2023-01-19/host-genome-generation-0/drosophila_melanogaster_STAR_genome.tar"
-    hg.s3_bowtie2_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/drosophila_melanogaster/2023-01-19/host-genome-generation-0/drosophila_melanogaster_bowtie2_genome.tar"
-    hg.s3_minimap2_dna_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/drosophila_melanogaster/2023-01-19/host-genome-generation-0/drosophila_melanogaster_minimap2_genome_dna.mmi"
-    hg.s3_minimap2_rna_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/drosophila_melanogaster/2023-01-19/host-genome-generation-0/drosophila_melanogaster_minimap2_genome_rna.mmi"
-    hg.skip_deutero_filter = 0 # this is set to 0 because the host is not a deuterostome
-
-    hg.default_background_id = nil
-    hg.save!
+    HostGenome.create!(
+      name: "Drosophila Melanogaster",
+      s3_star_index_path: "s3://#{S3_DATABASE_BUCKET}/host_filter/drosophila_melanogaster/2023-01-19/host-genome-generation-0/drosophila_melanogaster_STAR_genome.tar",
+      s3_bowtie2_index_path: "s3://#{S3_DATABASE_BUCKET}/host_filter/drosophila_melanogaster/2023-01-19/host-genome-generation-0/drosophila_melanogaster_bowtie2_genome.tar",
+      s3_minimap2_dna_index_path: "s3://#{S3_DATABASE_BUCKET}/host_filter/drosophila_melanogaster/2023-01-19/host-genome-generation-0/drosophila_melanogaster_minimap2_genome_dna.mmi",
+      s3_minimap2_rna_index_path: "s3://#{S3_DATABASE_BUCKET}/host_filter/drosophila_melanogaster/2023-01-19/host-genome-generation-0/drosophila_melanogaster_minimap2_genome_rna.mmi",
+      skip_deutero_filter: 0, # this is set to 0 because the host is not a deuterostome,
+      default_background_id: nil,
+    )
   end
 
   def down

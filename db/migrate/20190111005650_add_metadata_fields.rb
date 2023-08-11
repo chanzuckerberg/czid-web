@@ -62,6 +62,8 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
       t.string :group, index: true
 
       t.timestamps
+
+      t.integer :default_for_new_host_genome, limit: 1, default: 0
     end
 
     # Certain meta-fields are appropriate for different (and potentially multiple) hosts. E.g.

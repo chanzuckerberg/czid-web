@@ -1,5 +1,3 @@
-require_all 'lib/seed_resources'
-
 module FactoryBot
   module Strategy
     class FindOrCreate
@@ -37,6 +35,10 @@ module FactoryBot
           TaxonLineage => ->(taxon_lineage_attributes) { TaxonLineage.where(taxid: taxon_lineage_attributes[:taxid]).first },
           OutputState => ->(output_state_attributes) { OutputState.where(pipeline_run_id: output_state_attributes[:pipeline_run_id], output: output_state_attributes[:output]).first },
           WorkflowVersion => ->(workflow_version_attributes) { WorkflowVersion.where(workflow: workflow_version_attributes[:workflow], version: workflow_version_attributes[:version]).first },
+          MetadataField => ->(metadata_field_attributes) { MetadataField.where(name: metadata_field_attributes[:name]).first },
+          Citation => ->(citation_attributes) { Citation.where(key: citation_attributes[:key]).first },
+          Pathogen => ->(pathogen_attributes) { Pathogen.where(tax_id: pathogen_attributes[:tax_id]).first },
+          Background => ->(background_attributes) { Background.where(name: background_attributes[:name]).first },
         }
 
         check_for_presence = check_if_record_exists.key?(evaluation.object.class) ? check_if_record_exists[evaluation.object.class].call(attributes) : evaluation.object.class.where(attributes).first

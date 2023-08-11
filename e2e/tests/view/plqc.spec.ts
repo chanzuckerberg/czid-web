@@ -9,8 +9,6 @@ import {
   LEARN_MORE,
   LEARN_MORE_TEXT,
   PIPELINE_CHART_HEADER,
-  TOTAL_READ_INFO_ICON,
-  TOTAL_READ_POPUP_CONTENT,
 } from "../../constants/map";
 import { openSamplePage } from "../../utils/report";
 

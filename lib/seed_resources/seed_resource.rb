@@ -9,6 +9,7 @@ end
 
 module SeedResource
   class Base
+    include FactoryBot::Syntax::Methods
     include Seedable
 
     def seed

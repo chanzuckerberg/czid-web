@@ -28,6 +28,7 @@ module SeedResource
             SeedResource::PipelineRuns.seed(sample, pipeline_runs_data)
           end
         end
+        sample
       end
     end
 

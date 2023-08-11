@@ -34,6 +34,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
     ############################
     ##### ALL HOST GENOMES #####
     ############################
+    all_host_genomes = HostGenome.all
 
     to_create << MetadataField.new(
       name: "sample_type",
@@ -44,7 +45,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_default: 1,
       is_required: 1,
       group: "Sample",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -58,7 +59,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_default: 1,
       is_required: 1,
       group: "Sample",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -70,7 +71,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_default: 1,
       is_required: 1,
       group: "Sample",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -82,7 +83,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_default: 1,
       is_required: 1,
       group: "Sample",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -92,7 +93,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       base_type: MetadataField::STRING_TYPE,
       is_core: 1,
       group: "Sample",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -105,7 +106,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -116,7 +117,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Infection",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -129,7 +130,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Infection",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -140,7 +141,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     ########################
@@ -285,7 +286,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Sequencing",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -297,7 +298,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Sequencing",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     to_create << MetadataField.new(
@@ -308,7 +309,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Sequencing",
-      host_genomes: HostGenome.all
+      host_genomes: all_host_genomes
     )
 
     ###########################
@@ -395,7 +396,9 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
 
     # Create the fields unless they already exist
     to_create.each do |m|
-      unless MetadataField.find_by(name: m.name)
+      metadata_field_exists = MetadataField.exists?(name: m.name)
+      unless metadata_field_exists
+        m.default_for_new_host_genome = 1
         m.save
       end
     end

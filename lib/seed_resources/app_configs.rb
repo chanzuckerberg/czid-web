@@ -27,7 +27,7 @@ module SeedResource
 
       workflow_versions.each do |workflow, version|
         find_or_create(:app_config, key: "#{workflow}-version", value: version)
-        find_or_create(:workflow_version, workflow: workflow.snakecase, version: version)
+        find_or_create(:workflow_version, workflow: workflow.underscore, version: version)
       end
     end
 
@@ -67,6 +67,7 @@ module SeedResource
         "ont_v1",
         "bulk_deletion",
         "left_heatmap_filters",
+        "amr_v3",
         "amr_v2",
         "amr_v1",
         "wgs_cg_upload",

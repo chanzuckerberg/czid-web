@@ -140,7 +140,7 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     await newPage.close();
 
     // toast is visible
-    expect(await page.getByRole("alert"));
+    expect(page.getByRole("alert"));
   });
 
   test("Should verify BlastX modal flow on click of hover action", async ({

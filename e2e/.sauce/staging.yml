@@ -1,0 +1,30 @@
+apiVersion: v1alpha
+kind: playwright
+showConsoleLog: true
+sauce:
+  region: us-west-1
+  concurrency: 5 
+  metadata:
+    tags:
+      - e2e
+      - czid
+      - ci
+    build: COMMIT $CI_COMMIT_SHORT_SHA
+  tunnel:
+    name: czid-github-sauce-connect 
+playwright:
+  version: package.json 
+  configFile: ./staging.config.ts 
+rootDir: ./
+env:
+  CZID_USERNAME: $CZID_USERNAME
+  CZID_PASSWORD: $CZID_PASSWORD
+suites:
+  - name: "Chromium Mac"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['.home.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+    shard: concurrency

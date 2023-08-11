@@ -67,6 +67,8 @@ module SeedResource
     def seed_taxon_lineages
       find_or_create(:taxon_lineage, tax_name: "Klebsiella pneumoniae", taxid: 573, genus_taxid: 570, superkingdom_taxid: 2)
       find_or_create(:taxon_lineage, tax_name: "Klebsiella", taxid: 570, genus_taxid: 570, superkingdom_taxid: 2)
+      find_or_create(:taxon_lineage, tax_name: "Betacoronavirus", taxid: 694_002, genus_taxid: 694_002, species_taxid: 694_003, superkingdom_taxid: 10_239)
+      find_or_create(:taxon_lineage, tax_name: "Betacoronavirus 1", taxid: 694_003, genus_taxid: 694_002, species_taxid: 694_003, superkingdom_taxid: 10_239)
     end
 
     def taxon_counts_data
@@ -106,7 +108,26 @@ module SeedResource
         alignment_length: 460.4253,
         e_value: -16.9874,
         bpm: 356_506,
-      },]
+      }, {
+        tax_level: 2,
+        nt: 87,
+        nt_base: 400_000,
+        taxon_name: "Betacoronavirus",
+        percent_identity: 96.65,
+        alignment_length: 463.1234,
+        e_value: -12.345,
+        bpm: 123_456,
+      },
+       {
+         tax_level: 1,
+         nt: 87,
+         nt_base: 400_000,
+         taxon_name: "Betacoronavirus 1",
+         percent_identity: 96.65,
+         alignment_length: 463.1234,
+         e_value: -12.345,
+         bpm: 123_456,
+       },]
     end
 
     def contigs_data

@@ -153,7 +153,7 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "lineage_json", size: :medium
+    t.text "lineage_json"
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
@@ -198,8 +198,8 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
 
   create_table "host_genomes", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "name", null: false, comment: "Friendly name of host genome. May be common name or scientific name of species. Must be unique and start with a capital letter."
-    t.string "s3_star_index_path", default: "s3://idseq-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
-    t.string "s3_bowtie2_index_path", default: "s3://idseq-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
+    t.string "s3_star_index_path", default: "s3://czid-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
+    t.string "s3_bowtie2_index_path", default: "s3://czid-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -230,7 +230,7 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type"
+    t.string "source_type", null: false
     t.text "source"
     t.text "parts"
     t.string "upload_client"
@@ -292,7 +292,7 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
   end
 
   create_table "metadata", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "key", null: false, collation: "latin1_swedish_ci"
+    t.string "key", null: false
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
@@ -544,14 +544,13 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1, default: 0
+    t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 100000, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
     t.integer "subsample_default", comment: "The default value of subsample for newly uploaded samples. Can be overridden by admin options."
     t.integer "max_input_fragments_default", comment: "The default value of max_input_fragments for newly uploaded samples. Can be overridden by admin options."
     t.bigint "creator_id", comment: "The user_id that created the project."
-    t.index ["created_at"], name: "index_projects_on_created_at"
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
@@ -600,7 +599,6 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.string "initial_workflow", default: "short-read-mngs", null: false, comment: "A soft enum (string) describing the initial workflow the sample was run on"
     t.datetime "deleted_at", comment: "When the user triggered deletion of the sample"
-    t.index ["created_at"], name: "index_samples_on_created_at"
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["name"], name: "index_samples_on_name"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
@@ -691,104 +689,14 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary", size: :medium
-    t.text "description", size: :medium
+    t.text "summary"
+    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
   end
 
   create_table "taxon_lineages", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.integer "taxid", null: false
-    t.integer "superkingdom_taxid", default: -700, null: false
-    t.integer "phylum_taxid", default: -600, null: false
-    t.integer "class_taxid", default: -500, null: false
-    t.integer "order_taxid", default: -400, null: false
-    t.integer "family_taxid", default: -300, null: false
-    t.integer "genus_taxid", default: -200, null: false
-    t.integer "species_taxid", default: -100, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "superkingdom_name", default: "", null: false
-    t.string "phylum_name", default: "", null: false
-    t.string "class_name", default: "", null: false
-    t.string "order_name", default: "", null: false
-    t.string "family_name", default: "", null: false
-    t.string "genus_name", default: "", null: false
-    t.string "species_name", default: "", null: false
-    t.string "superkingdom_common_name", default: "", null: false
-    t.string "phylum_common_name", default: "", null: false
-    t.string "class_common_name", default: "", null: false
-    t.string "order_common_name", default: "", null: false
-    t.string "family_common_name", default: "", null: false
-    t.string "genus_common_name", default: "", null: false
-    t.string "species_common_name", default: "", null: false
-    t.integer "kingdom_taxid", default: -650, null: false
-    t.string "kingdom_name", default: "", null: false
-    t.string "kingdom_common_name", default: "", null: false
-    t.string "tax_name"
-    t.boolean "is_phage", default: false, null: false
-    t.string "version_start", limit: 10, null: false, comment: "The first version for which the lineage is valid"
-    t.string "version_end", limit: 10, null: false, comment: "The last version for which the lineage is valid"
-    t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
-    t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
-    t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
-    t.index ["order_taxid"], name: "index_taxon_lineages_on_order_taxid"
-    t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
-    t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
-    t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
-    t.index ["tax_name"], name: "index_taxon_lineages_on_tax_name"
-    t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end", unique: true
-    t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end", unique: true
-    t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
-  end
-
-  create_table "taxon_lineages_new", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.integer "taxid", null: false
-    t.integer "superkingdom_taxid", default: -700, null: false
-    t.integer "phylum_taxid", default: -600, null: false
-    t.integer "class_taxid", default: -500, null: false
-    t.integer "order_taxid", default: -400, null: false
-    t.integer "family_taxid", default: -300, null: false
-    t.integer "genus_taxid", default: -200, null: false
-    t.integer "species_taxid", default: -100, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "superkingdom_name", default: "", null: false
-    t.string "phylum_name", default: "", null: false
-    t.string "class_name", default: "", null: false
-    t.string "order_name", default: "", null: false
-    t.string "family_name", default: "", null: false
-    t.string "genus_name", default: "", null: false
-    t.string "species_name", default: "", null: false
-    t.string "superkingdom_common_name", default: "", null: false
-    t.string "phylum_common_name", default: "", null: false
-    t.string "class_common_name", default: "", null: false
-    t.string "order_common_name", default: "", null: false
-    t.string "family_common_name", default: "", null: false
-    t.string "genus_common_name", default: "", null: false
-    t.string "species_common_name", default: "", null: false
-    t.integer "kingdom_taxid", default: -650, null: false
-    t.string "kingdom_name", default: "", null: false
-    t.string "kingdom_common_name", default: "", null: false
-    t.string "tax_name"
-    t.boolean "is_phage", default: false, null: false
-    t.string "version_start", limit: 10, null: false, comment: "The first version for which the lineage is valid"
-    t.string "version_end", limit: 10, null: false, comment: "The last version for which the lineage is valid"
-    t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
-    t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
-    t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
-    t.index ["order_taxid"], name: "index_taxon_lineages_on_order_taxid"
-    t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
-    t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
-    t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
-    t.index ["tax_name"], name: "index_taxon_lineages_on_tax_name"
-    t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end", unique: true
-    t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end", unique: true
-    t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
-  end
-
-  create_table "taxon_lineages_old", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "taxid", null: false
     t.integer "superkingdom_taxid", default: -700, null: false
     t.integer "phylum_taxid", default: -600, null: false
@@ -858,7 +766,7 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
   end
 
   create_table "users", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "email"
+    t.string "email", default: "", null: false
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -913,7 +821,6 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
     t.text "error_message"
     t.datetime "deleted_at", comment: "When the user triggered deletion of the workflow run"
     t.bigint "user_id", comment: "The ID of the user who kicked off the workflow run"
-    t.index ["created_at"], name: "index_workflow_runs_on_created_at"
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
 
@@ -962,4 +869,5 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
   add_foreign_key "snapshot_links", "projects"
   add_foreign_key "user_settings", "users"
   add_foreign_key "visualizations", "users", name: "visualizations_user_id_fk"
+  add_foreign_key "workflow_runs", "samples"
 end

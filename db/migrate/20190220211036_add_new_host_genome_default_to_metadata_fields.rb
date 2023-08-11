@@ -21,7 +21,6 @@ class AddNewHostGenomeDefaultToMetadataFields < ActiveRecord::Migration[5.1]
   ].freeze
 
   def up
-    add_column :metadata_fields, :default_for_new_host_genome, :integer, limit: 1, default: 0
     DEFAULTS.each do |key|
       field = MetadataField.find_by(name: key)
       if field
@@ -31,6 +30,5 @@ class AddNewHostGenomeDefaultToMetadataFields < ActiveRecord::Migration[5.1]
   end
 
   def down
-    remove_column :metadata_fields, :default_for_new_host_genome
   end
 end
