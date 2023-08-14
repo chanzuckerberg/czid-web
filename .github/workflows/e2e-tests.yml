@@ -1,9 +1,6 @@
 name: idseq-web e2e tests
 
 on:
-  pull_request:
-    branches:
-      - "**"
   workflow_run:
     workflows: ["Build and Push Docker Images"]
     types:
