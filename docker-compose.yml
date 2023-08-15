@@ -239,6 +239,7 @@ services:
     # image built from idseq repo main branch
     # for other versions, clone idseq repo, build image locally and change image to `concurreny-lambda:local`
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-local-concurreny-lambda:latest
+    platform: linux/amd64
     profiles: ["local-lambdas"]
     environment:
       - LOCAL_MODE=local
@@ -250,6 +251,7 @@ services:
     # image built from idseq repo main branch
     # for other versions, clone idseq repo, build image locally and change image to `indexing-lambda:local`
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-local-indexing-lambda:latest
+    platform: linux/amd64
     profiles: ["local-lambdas"]
     environment:
       - LOCAL_MODE=local
@@ -265,12 +267,29 @@ services:
     # image built from idseq repo main branch
     # for other versions, clone idseq repo, build image locally and change image to `eviction-lambda:local`
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-local-eviction-lambda:latest
+    platform: linux/amd64
     profiles: ["local-lambdas"]
     environment:
       - LOCAL_MODE=local
       - ES_HOST=heatmap-elasticsearch:9200
     ports:
       - 9092:8080
+  deleted-eviction-lambda:
+    # image built from idseq repo main branch
+    # for other versions, clone idseq repo, build image locally and change image to `deleted-eviction-lambda:local`
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-local-deleted-eviction-lambda:latest
+    platform: linux/amd64
+    profiles: ["local-lambdas"]
+    environment:
+      - LOCAL_MODE=local
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=local
+      - MYSQL_DB=idseq_development
+      - ES_HOST=heatmap-elasticsearch:9200
+    ports:
+      - 9093:8080
 networks:
   default:
     name: czidnet
