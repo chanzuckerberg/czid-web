@@ -38,7 +38,7 @@ export function CZIDReferralFormField({
   };
 
   return (
-    <div>
+    <div className={cs.main}>
       <div className={cs.titleSection}>
         <span className={cs.titleMainText}>How did you learn about CZ ID?</span>
         <span className={cs.titleSubText}> (select all that apply)</span>
