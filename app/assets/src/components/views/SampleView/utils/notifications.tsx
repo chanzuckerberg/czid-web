@@ -2,8 +2,8 @@ import { Link } from "@czi-sds/components";
 import React from "react";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
+import cs from "../sample_view.scss";
 import { NOTIFICATION_TYPES, TABS } from "./constants";
-import cs from "./sample_view.scss";
 
 export const showNotification = (
   notification: string,

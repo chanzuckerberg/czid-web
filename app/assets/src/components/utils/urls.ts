@@ -1,7 +1,7 @@
 import { find, isEmpty, map, pick, toLower, values } from "lodash/fp";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS, WORKFLOW_VALUES } from "~/components/utils/workflows";
-import { URL_FIELDS } from "~/components/views/SampleView/constants";
+import { URL_FIELDS } from "~/components/views/SampleView/utils";
 import { AnnotationFilterOption } from "~/interface/discovery";
 import { ThresholdFilterShape } from "~/interface/sample";
 import { LabelVal, SelectedOptions } from "~/interface/shared";

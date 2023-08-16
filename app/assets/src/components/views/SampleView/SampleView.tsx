@@ -93,6 +93,11 @@ import { BlastModalInfo } from "./components/ModalManager/components/BlastModals
 import { ReportPanel } from "./components/ReportPanel";
 import { SampleViewHeader } from "./components/SampleViewHeader";
 import { TabSwitcher } from "./components/TabSwitcher";
+import cs from "./sample_view.scss";
+import {
+  addSampleDeleteFlagToSessionStorage,
+  getConsensusGenomeData,
+} from "./utils";
 import {
   GENUS_LEVEL_INDEX,
   KEY_SAMPLE_VIEW_OPTIONS,
@@ -107,25 +112,21 @@ import {
   TAX_LEVEL_SPECIES,
   TREE_METRICS,
   URL_FIELDS,
-} from "./constants";
+} from "./utils/constants";
 import {
   adjustMetricPrecision,
   filterReportData,
   setDisplayName,
-} from "./filters";
-import { showNotification } from "./notifications";
-import cs from "./sample_view.scss";
+} from "./utils/filters";
+import { showNotification } from "./utils/notifications";
 import {
   determineInitialTab,
   getDefaultSelectedOptions,
   getWorkflowCount,
   hasAppliedFilters,
   hasMngsRuns,
-} from "./setup";
-import {
-  addSampleDeleteFlagToSessionStorage,
-  getConsensusGenomeData,
-} from "./utils";
+  loadState,
+} from "./utils/setup";
 
 // @ts-expect-error working with Lodash types
 const mapValuesWithKey = mapValues.convert({ cap: false });
@@ -148,7 +149,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const {
       selectedOptions: selectedOptionsFromLocal,
       ...nonNestedLocalState
-    } = this.loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
+    } = loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
 
     const { annotations, taxa, thresholdsShortReads } =
       tempSelectedOptions || {};
@@ -302,23 +303,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         workflowRunResults: results,
       });
     }
-  };
-
-  loadState = (
-    store: Storage,
-    key: string,
-  ): {
-    selectedOptions?: { background: number; metric: string };
-    [x: string]: unknown;
-  } => {
-    try {
-      return JSON.parse(store.getItem(key)) || {};
-    } catch (e) {
-      // Avoid possible bad transient state related crash
-      // eslint-disable-next-line no-console
-      console.warn(`Bad state: ${e}`);
-    }
-    return {};
   };
 
   fetchSample = async () => {
@@ -1318,7 +1302,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   revertToSampleViewFilters = () => {
-    const { selectedOptions: selectedOptionsFromLocal } = this.loadState(
+    const { selectedOptions: selectedOptionsFromLocal } = loadState(
       localStorage,
       KEY_SAMPLE_VIEW_OPTIONS,
     );

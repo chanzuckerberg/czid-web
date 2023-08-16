@@ -8,7 +8,7 @@ import {
 import {
   TABS,
   TREE_VIZ_TOOLTIP_METRICS,
-} from "~/components/views/SampleView/constants";
+} from "~/components/views/SampleView/utils";
 import { TidyTree } from "~/components/visualizations/TidyTree";
 import { Taxon } from "~/interface/shared";
 import { TaxonTreeNodeTooltip } from "./components/TaxonTreeNodeTooltip";

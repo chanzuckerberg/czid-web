@@ -17,14 +17,14 @@ import {
   isPipelineFeatureAvailable,
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
-import { BlastData, PickConsensusGenomeData } from "~/interface/sampleView";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,
   SPECIES_LEVEL_INDEX,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
-} from "./constants";
+} from "~/components/views/SampleView/utils";
+import { BlastData, PickConsensusGenomeData } from "~/interface/sampleView";
 import cs from "./hover_actions.scss";
 
 interface HoverActionsProps {
@@ -61,7 +61,7 @@ interface HoverActionsProps {
   taxSpecies?: $TSFixMeUnknown[];
 }
 
-const HoverActions = ({
+export const HoverActions = ({
   className,
   consensusGenomeEnabled,
   contigVizEnabled,
@@ -402,5 +402,3 @@ const HoverActions = ({
     </span>
   );
 };
-
-export default HoverActions;

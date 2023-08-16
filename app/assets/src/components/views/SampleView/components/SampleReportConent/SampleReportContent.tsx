@@ -2,10 +2,13 @@ import React from "react";
 import { IconAlert, IconLoading } from "~/components/ui/icons";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
-import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
+import {
+  CREATED_STATE,
+  RUNNING_STATE,
+  SUCCEEDED_STATE,
+} from "~/components/views/SampleView/utils/";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import cs from "./consensus_genome_view.scss";
-import { CREATED_STATE, RUNNING_STATE, SUCCEEDED_STATE } from "./constants";
+import cs from "./sample_report_content.scss";
 
 export interface SampleReportContentProps {
   loadingResults: boolean;
@@ -23,7 +26,7 @@ export interface SampleReportContentProps {
   };
 }
 
-const SampleReportContent = ({
+export const SampleReportContent = ({
   loadingResults,
   renderResults,
   workflowRun,
@@ -34,7 +37,7 @@ const SampleReportContent = ({
   const renderLoadingMessage = () => {
     return (
       <SampleMessage
-        icon={<IconLoading className={csSampleMessage.icon} />}
+        icon={<IconLoading className={cs.icon} />}
         message={"Loading report data."}
         status={"Loading"}
         type={"inProgress"}
@@ -52,7 +55,7 @@ const SampleReportContent = ({
     ) {
       return (
         <SampleMessage
-          icon={<IconLoading className={csSampleMessage.icon} />}
+          icon={<IconLoading className={cs.icon} />}
           link={loadingInfo.helpLink}
           linkText={loadingInfo.linkText}
           message={loadingInfo.message}
@@ -64,7 +67,7 @@ const SampleReportContent = ({
     } else if (!sample.upload_error && workflowRun.status === CREATED_STATE) {
       return (
         <SampleMessage
-          icon={<IconLoading className={csSampleMessage.icon} />}
+          icon={<IconLoading className={cs.icon} />}
           message={"Waiting to Start or Receive Files"}
           status={"IN PROGRESS"}
           type={"inProgress"}
@@ -94,5 +97,3 @@ const SampleReportContent = ({
   };
   return <>{loadingResults ? renderLoadingMessage() : renderContent()}</>;
 };
-
-export default SampleReportContent;

@@ -148,3 +148,20 @@ export const hasMngsRuns = (sample: Sample) => {
   ).length;
   return mngsWorkflowsCount > 0;
 };
+
+export const loadState = (
+  store: Storage,
+  key: string,
+): {
+  selectedOptions?: { background: number; metric: string };
+  [x: string]: unknown;
+} => {
+  try {
+    return JSON.parse(store.getItem(key)) || {};
+  } catch (e) {
+    // Avoid possible bad transient state related crash
+    // eslint-disable-next-line no-console
+    console.warn(`Bad state: ${e}`);
+  }
+  return {};
+};

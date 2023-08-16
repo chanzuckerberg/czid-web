@@ -26,14 +26,14 @@ import {
 } from "~/components/utils/features";
 import ThresholdMap from "~/components/utils/ThresholdMap";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { SelectedFilters } from "~/interface/discoveryView";
-import { ThresholdFilterData } from "~/interface/dropdown";
-import FilterTag from "~ui/controls/FilterTag";
 import {
   KEY_ANNOTATIONS_SELECTED,
   KEY_TAXON_SELECTED,
   KEY_TAXON_THRESHOLDS_SELECTED,
-} from "../SampleView/constants";
+} from "~/components/views/SampleView/utils";
+import { SelectedFilters } from "~/interface/discoveryView";
+import { ThresholdFilterData } from "~/interface/dropdown";
+import FilterTag from "~ui/controls/FilterTag";
 import { ANNOTATION_FILTER_OPTIONS, TAB_SAMPLES } from "./constants";
 import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
 import cs from "./discovery_filters.scss";

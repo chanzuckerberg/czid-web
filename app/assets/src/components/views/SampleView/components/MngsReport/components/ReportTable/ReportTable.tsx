@@ -37,15 +37,7 @@ import AnnotationPreview from "~/components/views/report/AnnotationPreview";
 import PathogenPreview from "~/components/views/report/PathogenPreview";
 import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
-import { Table } from "~/components/visualizations/table";
-import {
-  BlastData,
-  ColumnProps,
-  CurrentTabSample,
-  PickConsensusGenomeData,
-  SortFunctionsParams,
-} from "~/interface/sampleView";
-import { AnnotationType, Taxon } from "~/interface/shared";
+import { HoverActions } from "~/components/views/SampleView/components/ReportPanel/components/HoverActions/HoverActions";
 import {
   ANNOTATION_HIT,
   ANNOTATION_INCONCLUSIVE,
@@ -58,8 +50,16 @@ import {
   TABS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
-} from "../../../../constants";
-import HoverActions from "../../../../HoverActions";
+} from "~/components/views/SampleView/utils";
+import { Table } from "~/components/visualizations/table";
+import {
+  BlastData,
+  ColumnProps,
+  CurrentTabSample,
+  PickConsensusGenomeData,
+  SortFunctionsParams,
+} from "~/interface/sampleView";
+import { AnnotationType, Taxon } from "~/interface/shared";
 import cs from "./report_table.scss";
 
 // Values for null values when sorting ascending and descending

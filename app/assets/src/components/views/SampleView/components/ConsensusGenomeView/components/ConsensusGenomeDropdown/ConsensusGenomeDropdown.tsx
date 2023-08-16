@@ -13,7 +13,7 @@ interface ConsensusGenomeDropdownProps {
   initialSelectedValue?: number;
 }
 
-const ConsensusGenomeDropdown = ({
+export const ConsensusGenomeDropdown = ({
   workflowRuns,
   initialSelectedValue,
   onConsensusGenomeSelection,
@@ -55,5 +55,3 @@ ConsensusGenomeDropdown.defaultProps = {
   label: "Mapped to",
   rounded: true,
 };
-
-export default ConsensusGenomeDropdown;

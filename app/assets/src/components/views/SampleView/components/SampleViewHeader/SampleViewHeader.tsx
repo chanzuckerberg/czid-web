@@ -16,9 +16,9 @@ import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
 import { openUrl } from "~utils/links";
-import { PrimaryHeaderControls } from "./PrimaryHeaderControls";
+import { PrimaryHeaderControls } from "./components/PrimaryHeaderControls";
+import { SecondaryHeaderControls } from "./components/SecondaryHeaderControls";
 import cs from "./sample_view_header.scss";
-import { SecondaryHeaderControls } from "./SecondaryHeaderControls";
 
 interface SampleViewHeaderProps {
   backgroundId?: number;

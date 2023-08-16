@@ -27,6 +27,12 @@ import MetricPicker from "~/components/views/report/filters/MetricPicker";
 import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
 import {
+  CATEGORIES,
+  TABS,
+  THRESHOLDS,
+  TREE_METRICS,
+} from "~/components/views/SampleView/utils";
+import {
   CurrentTabSample,
   FilterSelections,
   SampleReportViewMode,
@@ -35,12 +41,6 @@ import { Background } from "~/interface/shared/specific";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
-import {
-  CATEGORIES,
-  TABS,
-  THRESHOLDS,
-  TREE_METRICS,
-} from "../../../../constants";
 import cs from "./report_filters.scss";
 
 interface ReportFiltersProps {

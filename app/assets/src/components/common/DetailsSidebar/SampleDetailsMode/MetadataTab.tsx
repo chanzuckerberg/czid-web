@@ -4,7 +4,7 @@ import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
-import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
+import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/utils";
 import {
   Metadata,
   MetadataType,

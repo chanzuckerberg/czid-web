@@ -1,9 +1,11 @@
 import { isNil } from "lodash";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
-import { TABS } from "../../constants";
-import { getConsensusGenomeData } from "../../utils";
-import { SampleViewMessage } from "../SampleViewMessage";
+import { SampleViewMessage } from "~/components/views/SampleView/components/SampleViewMessage";
+import {
+  getConsensusGenomeData,
+  TABS,
+} from "~/components/views/SampleView/utils";
 import { ReportFilters } from "./components/ReportFilters";
 import { ReportStatsRow } from "./components/ReportStatsRow";
 import { ReportTable } from "./components/ReportTable";

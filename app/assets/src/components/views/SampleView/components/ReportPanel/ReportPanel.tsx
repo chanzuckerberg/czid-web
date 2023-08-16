@@ -1,10 +1,10 @@
 import React from "react";
 import DeprecatedAmrView from "~/components/DeprecatedAmrView";
+import { TABS } from "~/components/views/SampleView/utils";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-import ConsensusGenomeView from "../../ConsensusGenomeView";
-import { TABS } from "../../constants";
 import { AmrView } from "../AmrView";
+import { ConsensusGenomeView } from "../ConsensusGenomeView";
 import { MngsReport } from "../MngsReport";
 import { ReportPanelProps } from "./types";
 

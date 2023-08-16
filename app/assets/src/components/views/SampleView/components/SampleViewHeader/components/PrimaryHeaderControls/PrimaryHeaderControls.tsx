@@ -23,6 +23,7 @@ import {
   FINALIZED_SAMPLE_UPLOAD_ERRORS,
   SampleUploadErrors,
 } from "~/components/views/samples/constants";
+import { TABS } from "~/components/views/SampleView/utils";
 import { parseUrlParams } from "~/helpers/url";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -30,7 +31,6 @@ import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
 import { DownloadButton, HelpButton, SaveButton } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
-import { TABS } from "../../../constants";
 import { AmrDownloadDropdown } from "./components/AmrDownloadDropdown";
 import { MngsDownloadDropdown } from "./components/MngsDownloadDropdown";
 import { OverflowMenu } from "./components/OverflowMenu";

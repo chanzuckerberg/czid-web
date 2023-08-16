@@ -7,7 +7,7 @@ import { WORKFLOW_VALUES } from "~/components/utils/workflows";
 import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
 import { WorkflowRunResults } from "~/interface/sampleView";
-import { ProjectPipelineVersions } from "~/interface/shared";
+import { Background, ProjectPipelineVersions } from "~/interface/shared";
 import {
   get,
   MAX_SAMPLES_FOR_GET_REQUEST,
@@ -390,7 +390,15 @@ const getBackgrounds = ({
   snapshotShareId,
   ownedOrPublicBackgroundsOnly,
   categorizeBackgrounds,
-}: $TSFixMe = {}) =>
+}: {
+  snapshotShareId?: string;
+  ownedOrPublicBackgroundsOnly?: boolean;
+  categorizeBackgrounds?: boolean;
+} = {}): Promise<{
+  owned_backgrounds: Background[];
+  other_backgrounds: Background[];
+  backgrounds?: Background[];
+}> =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") + "/backgrounds.json",
     {
@@ -409,7 +417,7 @@ const getCoverageVizSummary = ({
   sampleId?: number;
   snapshotShareId?: string;
   pipelineVersion?: string;
-} = {}): Promise<CoverageVizParams["accessionData"]> =>
+} = {}): Promise<{ [taxonId: number]: CoverageVizParams["accessionData"] }> =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}/coverage_viz_summary`,

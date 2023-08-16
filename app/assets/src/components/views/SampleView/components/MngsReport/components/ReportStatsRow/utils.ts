@@ -1,5 +1,5 @@
 import { compact, map, sum, values } from "lodash/fp";
-import { TABS } from "~/components/views/SampleView/constants";
+import { TABS } from "~/components/views/SampleView/utils";
 import ReportMetadata from "~/interface/reportMetaData";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";

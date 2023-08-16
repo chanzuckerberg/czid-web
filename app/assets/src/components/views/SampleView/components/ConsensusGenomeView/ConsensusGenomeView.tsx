@@ -11,6 +11,14 @@ import { formatPercent } from "~/components/utils/format";
 import { openUrlInNewTab } from "~/components/utils/links";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils/download";
+import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
+import {
+  CG_HISTOGRAM_FILL_COLOR,
+  CG_HISTOGRAM_HOVER_FILL_COLOR,
+  RUNNING_STATE,
+  SARS_COV_2_ACCESSION_ID,
+} from "~/components/views/SampleView/utils";
 import Histogram, {
   HISTOGRAM_SCALE,
 } from "~/components/visualizations/Histogram";
@@ -26,16 +34,8 @@ import {
   VIRAL_CONSENSUS_GENOME_DOC_LINK,
 } from "~utils/documentationLinks";
 import { FIELDS_METADATA } from "~utils/tooltip";
-import { getWorkflowRefAccessionFileLink } from "../report/utils/download";
+import { ConsensusGenomeDropdown } from "./components/ConsensusGenomeDropdown/ConsensusGenomeDropdown";
 import cs from "./consensus_genome_view.scss";
-import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
-import {
-  CG_HISTOGRAM_FILL_COLOR,
-  CG_HISTOGRAM_HOVER_FILL_COLOR,
-  RUNNING_STATE,
-  SARS_COV_2_ACCESSION_ID,
-} from "./constants";
-import SampleReportContent from "./SampleReportContent";
 
 interface ConsensusGenomeViewProps {
   link?: string;
@@ -47,7 +47,7 @@ interface ConsensusGenomeViewProps {
   workflowRunResults?: WorkflowRunResults | Record<string, never>;
 }
 
-const ConsensusGenomeView = ({
+export const ConsensusGenomeView = ({
   onWorkflowRunSelect,
   sample,
   loadingResults,
@@ -560,5 +560,3 @@ const ConsensusGenomeView = ({
     </>
   );
 };
-
-export default ConsensusGenomeView;

@@ -15,9 +15,9 @@ import {
 } from "~/components/utils/csv";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
+import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
+import { SUCCEEDED_STATE } from "~/components/views/SampleView/utils";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import { SUCCEEDED_STATE } from "../../constants";
-import SampleReportContent from "../../SampleReportContent";
 import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";

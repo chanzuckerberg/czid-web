@@ -15,8 +15,8 @@ import {
   TempSelectedOptionsShape,
 } from "~/components/utils/urls";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import ConsensusGenomeDropdown from "~/components/views/SampleView/ConsensusGenomeDropdown";
-import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
+import { ConsensusGenomeDropdown } from "~/components/views/SampleView/components/ConsensusGenomeView/components/ConsensusGenomeDropdown/ConsensusGenomeDropdown";
+import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/utils";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import {

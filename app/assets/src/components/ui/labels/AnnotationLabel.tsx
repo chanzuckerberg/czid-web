@@ -7,7 +7,7 @@ import {
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NONE,
   ANNOTATION_NOT_A_HIT,
-} from "~/components/views/SampleView/constants";
+} from "~/components/views/SampleView/utils";
 import BasicPopup from "../../BasicPopup";
 import cs from "./annotation_label.scss";
 

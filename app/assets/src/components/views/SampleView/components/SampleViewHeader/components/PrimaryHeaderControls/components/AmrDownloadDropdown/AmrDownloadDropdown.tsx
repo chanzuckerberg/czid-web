@@ -144,7 +144,12 @@ const AmrDownloadDropdown = ({
 
     if (disabled && tooltipText) {
       dropdownItem = (
-        <Tooltip arrow placement="top" title={tooltipText}>
+        <Tooltip
+          arrow
+          placement="top"
+          title={tooltipText}
+          key={`${value}-tooltip`}
+        >
           <span>{dropdownItem}</span>
         </Tooltip>
       );

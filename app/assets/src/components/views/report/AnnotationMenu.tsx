@@ -11,7 +11,7 @@ import {
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NONE,
   ANNOTATION_NOT_A_HIT,
-} from "../SampleView/constants";
+} from "~/components/views/SampleView/utils";
 import cs from "./annotation_menu.scss";
 
 interface AnnotationMenuProps {

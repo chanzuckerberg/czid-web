@@ -1,10 +1,14 @@
 import { filter, get, groupBy } from "lodash/fp";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import Sample from "~/interface/sample";
 import {
   KEY_DISCOVERY_VIEW_OPTIONS,
   SAMPLE_WAS_DELETED,
-} from "../discovery/constants";
+} from "~/components/views/discovery/constants";
+import Sample from "~/interface/sample";
+export * from "./constants";
+export * from "./filters";
+export * from "./notifications";
+export * from "./setup";
 
 export const addSampleDeleteFlagToSessionStorage = (sampleName: string) => {
   const shortenedSampleName =

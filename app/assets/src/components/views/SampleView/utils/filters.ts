@@ -10,6 +10,8 @@ import {
   some,
   values,
 } from "lodash/fp";
+import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
+import { Taxon } from "~/interface/shared";
 import { METRIC_DECIMAL_PLACES, TABS } from "./constants";
 
 export const applyFilters = ({
@@ -182,7 +184,11 @@ export const filterReportData = ({
     annotations,
     flags,
   },
-}: $TSFixMe) => {
+}: {
+  currentTab: CurrentTabSample;
+  reportData: Taxon[];
+  filters: FilterSelections;
+}) => {
   const categoriesSet = new Set(
     map(c => c.toLowerCase(), categories.categories || []),
   );
@@ -190,8 +196,8 @@ export const filterReportData = ({
     map(sc => sc.toLowerCase(), flatten(values(categories.subcategories))),
   );
 
-  const filteredData: $TSFixMe = [];
-  reportData.forEach((genusRow: $TSFixMe) => {
+  const filteredData: Taxon[] = [];
+  reportData.forEach(genusRow => {
     genusRow.passedFilters = applyFilters({
       row: genusRow,
       categories: categoriesSet,

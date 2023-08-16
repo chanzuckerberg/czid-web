@@ -71,6 +71,10 @@ import {
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "~/components/views/samples/SamplesView/ColumnConfiguration";
+import {
+  NOTIFICATION_TYPES,
+  showNotification,
+} from "~/components/views/SampleView/utils";
 import { loadState } from "~/helpers/storage";
 import {
   Conditions,
@@ -101,8 +105,6 @@ import {
 import { openUrl } from "~utils/links";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView/SamplesView";
-import { NOTIFICATION_TYPES } from "../SampleView/constants";
-import { showNotification } from "../SampleView/notifications";
 import VisualizationsView, {
   Visualization,
 } from "../visualizations/VisualizationsView";

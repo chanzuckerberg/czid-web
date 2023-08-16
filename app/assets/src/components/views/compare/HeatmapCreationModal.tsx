@@ -11,7 +11,7 @@ import {
   THRESHOLDS,
 } from "~/components/views/compare/SamplesHeatmapView/constants";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
-import { CATEGORIES } from "~/components/views/SampleView/constants";
+import { CATEGORIES } from "~/components/views/SampleView/utils";
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
 import {
