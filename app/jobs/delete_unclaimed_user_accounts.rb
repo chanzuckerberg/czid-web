@@ -8,6 +8,8 @@ class DeleteUnclaimedUserAccounts < StandardError
 
   @queue = :delete_unclaimed_user_accounts
 
+  DELAY_AFTER_DELETE_SECONDS = 0.1
+
   class DeleteUnclaimedUserAccountsError < StandardError
     def initialize
       super("Error deleting unclaimed user account.")
@@ -52,7 +54,7 @@ class DeleteUnclaimedUserAccounts < StandardError
   def self.delete_unclaimed_accounts(unclaimed_accounts)
     num_accounts_deleted = 0
     unclaimed_accounts.each_with_index do |account, index|
-      Rails.logger.info("Deleting unclaimed account #{index}/#{unclaimed_accounts.length}...")
+      Rails.logger.info("Deleting unclaimed account #{index + 1}/#{unclaimed_accounts.length}...")
 
       user = User.find_by(email: account[:email])
       days_since_creation = nil
@@ -100,6 +102,9 @@ class DeleteUnclaimedUserAccounts < StandardError
           num_accounts_deleted += 1
         end
       end
+
+      # 4. Sleep to avoid hitting Auth0 rate-limit
+      sleep(DELAY_AFTER_DELETE_SECONDS)
     end
     # Log in ops-notifs channel for visibility
     LogUtil.log_message("Successfully deleted #{num_accounts_deleted} unclaimed user accounts")
