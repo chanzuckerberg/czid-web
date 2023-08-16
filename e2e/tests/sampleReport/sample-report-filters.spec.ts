@@ -29,6 +29,9 @@ import {
   UNCATEGORIZED_FILTER,
   VIROIDS_FILTER,
   VIRUSES_FILTER,
+  NAME_TYPE_FILTER,
+  NAME_TYPES,
+  NAME_TYPE_FILTER_VALUE,
 } from "../../constants/sample";
 
 const sampleId = 25307;
@@ -68,6 +71,16 @@ test.describe("Sample report filter test", () => {
     // Verify filter result
     await expect(page.locator(FILTER_TAG)).toBeVisible();
     await expect(page.locator(FILTER_RESULT)).toContainText(KLEBSIELLA);
+  });
+
+  test("Should be able to filter by Name Type", async ({ page }) => {
+    for (let i = 0; i < NAME_TYPES.length; i++) {
+      await page.locator(NAME_TYPE_FILTER).click();
+      await page.getByTestId(kebabCase(NAME_TYPES[i])).click();
+      expect(
+        await (await page.locator(NAME_TYPE_FILTER_VALUE).textContent()).match(NAME_TYPES[i])
+      );
+    }
   });
 
   test(`Should be able to filter by Category name`, async ({ page }) => {

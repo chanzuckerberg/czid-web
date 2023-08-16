@@ -120,6 +120,10 @@ export const THRESHOLD_FILTERS = [
 export const READ_SPECIFICITY_FILTERS = ["All", "Specific Only"];
 export const ANNOTATION_FILTERS = ["Hit", "Not a hit", "Inconclusive"];
 
+export const NAME_TYPE_FILTER = '[data-testid="name-type-filter"]'
+export const NAME_TYPES = ["Scientific", "Common"];  // TODO: Fetch NAME_TYPE(s) from db
+export const NAME_TYPE_FILTER_VALUE = 'span[data-testid="name-type-filter"] + span'
+
 export const APPLY_BUTTON = '[data-testid="apply"]';
 export const APPLY = 'text="Apply"';
 export const THRESHOLD_FILTER = '[data-testid="threshold-filters-filter"]';
