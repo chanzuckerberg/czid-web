@@ -12,7 +12,6 @@ import {
   COLUMNS_LABEL,
   COLUMN_HEADER_PROP,
   EUKARYOTA_FILTER,
-  FILTER_RESULT,
   FILTER_TAG,
   FILTER_VALUE,
   KLEBSIELLA,
@@ -22,7 +21,6 @@ import {
   READ_SPECIFICITY,
   READ_SPECIFICITY_FILTERS,
   SCORE,
-  SEARCH_BAR,
   THRESHOLD_FILTER,
   THRESHOLD_FILTERS,
   TOTAL_READ_POPOUP_CONTENT,
@@ -66,12 +64,12 @@ test.describe("Sample report filter test", () => {
 
   test(`Should be able to filter by Taxon name`, async ({ page }) => {
     // Search for data
-    await page.locator(SEARCH_BAR).fill(KLEBSIELLA);
-    await page.getByText(KLEBSIELLA_GENUS).click();
+    await samplesPage.fillSearchBar(KLEBSIELLA);
+    await samplesPage.clickSearchResult(KLEBSIELLA_GENUS);
 
     // Verify filter result
-    await expect(page.locator(FILTER_TAG)).toBeVisible();
-    await expect(page.locator(FILTER_RESULT)).toContainText(KLEBSIELLA);
+    await samplesPage.validateFilterTags([KLEBSIELLA_GENUS])
+    await samplesPage.validateTaxonsFilteredByName(KLEBSIELLA)
   });
 
   test("Should be able to filter by Name Type", async () => {
@@ -79,7 +77,8 @@ test.describe("Sample report filter test", () => {
     let taxonNames = await samplesPage.getTaxonNames(sampleReport)
 
     for (let name_type_option of NAME_TYPES) {
-      await samplesPage.select_name_type_option(name_type_option, taxonNames[name_type_option])
+      await samplesPage.selectNameTypeOption(name_type_option)
+      await samplesPage.validateReportFilteredByNameType(name_type_option, taxonNames[name_type_option])
     }
   });
 

@@ -1,6 +1,7 @@
 import { expect, Page } from "@playwright/test";
 
 import { kebabCase } from "lodash";
+// #region constants
 import {
   ANNOTATION_FILTERS,
   ANNOTATION_TEXT,
@@ -34,6 +35,7 @@ import {
   NAME_TYPES,
   NAME_TYPE_FILTER_VALUE,
 } from "../constants/sample";
+// #endregion constants
 
 export class SamplesPage {
     public page: Page;
@@ -84,34 +86,70 @@ export class SamplesPage {
     public async getTaxonElementByName(name: string) {
       return await this.page.locator(`[class*='taxonName']:text("${name}")`)
     }
+    
+    public async getTaxonElements() {
+      return await this.page.locator("[class*='taxonName']").all()
+    }
+
+    public async getFilterTagElements() {
+      return await this.page.locator(FILTER_TAG).all()
+    }
     // #endregion Get
     
     // #region Click
-    public async click_name_type_filter() {
+    public async clickNameTypeFilter() {
       await this.page.locator(NAME_TYPE_FILTER).click();
     }
 
-    public async click_name_type_option(option: string) {
+    public async clickNameTypeOption(option: string) {
       await this.page.getByTestId(kebabCase(option)).click();
+    }
+    
+    public async clickSearchResult(text: string) {
+      await this.page.getByText(text).click();
     }
     // #endregion Click
 
+    // #region Fill
+    public async fillSearchBar(value) {
+      await this.page.locator(SEARCH_BAR).fill(value);
+    }
+    // #endregion Fill
+
     // #region Macro
-    public async select_name_type_option(option: string) {
-      await this.click_name_type_filter()
-      await this.click_name_type_option(option)
+    public async selectNameTypeOption(option: string) {
+      await this.clickNameTypeFilter()
+      await this.clickNameTypeOption(option)
     }
     // #endregion Macro
 
     // #region Validation
-    public async validate_report_filtered_by_name_type(name_type_option: string, expectedTaxonNames: []) {
+    public async validateReportFilteredByNameType(nameTypeOption: string, expectedTaxonNames: []) {
       // Assert the filter section updated
       expect(
-        (await this.getNameTypeFilterValue()).match(name_type_option)
+        (await this.getNameTypeFilterValue()).match(nameTypeOption)
       );
       // Assert the taxon common_names are on the page
       for (let taxonName of expectedTaxonNames) {
         expect(await this.getTaxonElementByName(taxonName)).toBeTruthy();
+      }
+    }
+
+    public async validateFilterTags(filterTags: string[]) {
+      const filterTagElements = await this.getFilterTagElements();
+      const foundTags: string[] = [];
+
+      for (const element of filterTagElements) {
+        const tagText = await element.textContent();
+        foundTags.push(tagText);
+      }
+      expect(filterTags).toEqual(foundTags);
+    }
+    
+    public async validateTaxonsFilteredByName(taxonName: string) {
+      let taxonElements = await this.getTaxonElements()
+      for (let taxonElement of taxonElements) {
+        expect(taxonElement).toContainText(taxonName);
       }
     }
     // #endregion Validation
