@@ -1,4 +1,10 @@
 class BenchmarkWorkflowRun < WorkflowRun
+  AWS_S3_TRUTH_FILES_BUCKET = "s3://idseq-bench/datasets/truth_files/".freeze
+
+  # TODO: generalize workflow portions of the constants below
+  OUTPUT_BENCHMARK_HTML = "benchmark.short_read_mngs_benchmark.benchmark_html".freeze
+  OUTPUT_BENCHMARK_NOTEBOOK = "benchmark.short_read_mngs_benchmark.benchmark_notebook".freeze
+
   def results(cacheable_only: false)
     results = {
       "benchmark_metrics" => parsed_cached_results&.[]("benchmark_metrics") || benchmark_metrics,
@@ -8,7 +14,8 @@ class BenchmarkWorkflowRun < WorkflowRun
     }
 
     unless cacheable_only
-      results["benchmark_info"] = parsed_cached_results&.[]("benchmark_info") || benchmark_info
+      results["benchmark_html_report"] = benchmark_html_report
+      results["benchmark_info"] = benchmark_info
     end
 
     results
@@ -27,9 +34,13 @@ class BenchmarkWorkflowRun < WorkflowRun
     return nil
   end
 
+  def benchmark_html_report
+    output(OUTPUT_BENCHMARK_HTML)
+  end
+
   def benchmark_info
     return {
-      run_ids: inputs&.[]("run_ids"), # Can either be WorkflowRun ids or a PipelineRun ids
+      sample_ids: inputs&.[]("sample_ids"),
       workflow: inputs&.[]("workflow_benchmarked"),
       ground_truth_file: inputs&.[]("ground_truth_file"),
     }
@@ -47,7 +58,10 @@ class BenchmarkWorkflowRun < WorkflowRun
     run_ids = inputs&.[]("run_ids")
     info = run_ids.each_with_object({}) do |run_id, result|
       pr = PipelineRun.find(run_id)
-      result[run_id] = {
+      sample_id = pr&.sample&.id
+
+      result[sample_id] = {
+        run_id: run_id,
         pipeline_version: pr&.pipeline_version,
         ncbi_index_version: pr&.alignment_config&.name,
       }

@@ -1,14 +1,18 @@
 import { Icon, Menu, MenuItem, Tooltip } from "@czi-sds/components";
 import { PopoverProps } from "@mui/material";
 import cx from "classnames";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
+import { BENCHMARKING_FEATURE } from "~/components/utils/features";
+import { BenchmarkSamplesMenuItem } from "./BenchmarkSamplesMenuItem";
 import cs from "./samples_view.scss";
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
 
 interface BulkSamplesActionsMenuProps {
   noObjectsSelected: boolean;
   handleBulkKickoffAmr: () => void;
+  handleClickBenchmark: () => void;
   handleClickPhyloTree: () => void;
 }
 
@@ -16,7 +20,9 @@ const BulkSamplesActionsMenu = ({
   noObjectsSelected,
   handleBulkKickoffAmr,
   handleClickPhyloTree,
+  handleClickBenchmark,
 }: BulkSamplesActionsMenuProps) => {
+  const { admin, allowedFeatures = [] } = useContext(UserContext) || {};
   const [menuAnchorEl, setMenuAnchorEl] =
     useState<PopoverProps["anchorEl"]>(null);
 
@@ -85,6 +91,9 @@ const BulkSamplesActionsMenu = ({
     );
   };
 
+  const hasAccessToBenchmark =
+    admin && allowedFeatures.includes(BENCHMARKING_FEATURE);
+
   return (
     <>
       <ToolbarButtonIcon
@@ -112,6 +121,15 @@ const BulkSamplesActionsMenu = ({
       >
         {renderKickoffPhyloTree()}
         {handleBulkKickoffAmr && renderBulkKickoffAmr()}
+        {hasAccessToBenchmark && (
+          <BenchmarkSamplesMenuItem
+            disabled={noObjectsSelected}
+            onClick={() => {
+              closeActionsMenu();
+              handleClickBenchmark();
+            }}
+          />
+        )}
       </Menu>
     </>
   );

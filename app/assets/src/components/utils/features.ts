@@ -35,3 +35,4 @@ export const HEATMAP_KNOWN_PATHOGEN_FILTER = "heatmap_pathogen_filter";
 export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const WGS_CG_UPLOAD_FEATURE = "wgs_cg_upload";
 export const APOLLO_CLIENT_STATE_MANAGEMENT = "apollo_client";
+export const BENCHMARKING_FEATURE = "benchmarking";

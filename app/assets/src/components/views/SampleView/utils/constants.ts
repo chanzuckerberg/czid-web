@@ -46,6 +46,7 @@ export const TABS = {
   AMR: WORKFLOWS.AMR.label,
   MERGED_NT_NR: "Metagenomics - Simplified",
   LONG_READ_MNGS: WORKFLOWS.LONG_READ_MNGS.label,
+  BENCHMARK: WORKFLOWS.BENCHMARK.label,
 };
 
 export const PIPELINE_RUN_TABS = [

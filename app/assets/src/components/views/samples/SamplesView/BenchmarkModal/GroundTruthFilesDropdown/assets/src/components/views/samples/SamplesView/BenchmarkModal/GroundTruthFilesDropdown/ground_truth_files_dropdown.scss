@@ -1,0 +1,12 @@
+@import "~@czi-sds/components/dist/variables";
+
+.truthFiles {
+  display: flex;
+  gap: $sds-spaces-s;
+  align-content: center;
+  margin-bottom: $sds-spaces-l;
+}
+
+.title {
+  font: $sds-font-header-xs-600-font;
+}

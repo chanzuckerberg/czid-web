@@ -1,0 +1,21 @@
+@import "~@czi-sds/components/dist/variables";
+
+.itemWrapper {
+  display: flex;
+  flex-direction: row;
+  white-space: normal;
+}
+
+.bulkActionsIcon {
+  margin-right: $sds-spaces-xs;
+
+  svg {
+    fill: $sds-color-gray-600;
+  }
+}
+
+.iconDisabled {
+  svg {
+    fill: $sds-color-gray-200;
+  }
+}

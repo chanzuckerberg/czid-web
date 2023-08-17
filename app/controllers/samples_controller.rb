@@ -33,7 +33,7 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
                    :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,
-                   :bulk_kickoff_workflow_runs, :user_is_collaborator, :validate_user_can_delete_objects, :bulk_delete, :benchmark,].freeze
+                   :bulk_kickoff_workflow_runs, :user_is_collaborator, :validate_user_can_delete_objects, :bulk_delete, :benchmark, :benchmark_ground_truth_files,].freeze
   OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :upload_credentials].freeze
   ACTIONS_TO_REDIRECT = [:show].freeze
@@ -42,7 +42,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
-  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project, :pipeline_logs, :cancel_pipeline_run, :benchmark]
+  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project, :pipeline_logs, :cancel_pipeline_run, :benchmark, :benchmark_ground_truth_files]
   before_action :login_required, only: [:bulk_import]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
@@ -343,6 +343,7 @@ class SamplesController < ApplicationController
       WorkflowRun::WORKFLOW[:long_read_mngs] => samples.where(initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs]).distinct.count,
       WorkflowRun::WORKFLOW[:consensus_genome] => samples_workflow_runs.by_workflow(WorkflowRun::WORKFLOW[:consensus_genome]).count,
       WorkflowRun::WORKFLOW[:amr] => samples_workflow_runs.by_workflow(WorkflowRun::WORKFLOW[:amr]).count,
+      WorkflowRun::WORKFLOW[:benchmark] => samples_workflow_runs.by_workflow(WorkflowRun::WORKFLOW[:benchmark]).count,
     }
     total_project_count = domain == "snapshot" ? project_ids.count : current_power.projects_by_domain(domain).count
 
@@ -1533,13 +1534,24 @@ class SamplesController < ApplicationController
   end
 
   def benchmark
-    permitted_params = params.permit(:groundTruthFile, :workflowBenchmarked, :project_id, runIds: [])
-    run_ids = permitted_params[:runIds]
+    permitted_params = params.permit(:groundTruthFile, :workflowBenchmarked, :projectId, sampleIds: [])
+    sample_ids = permitted_params[:sampleIds]
     ground_truth_file = permitted_params[:groundTruthFile] || nil
     workflow_benchmarked = permitted_params[:workflowBenchmarked]
-    project_id = permitted_params[:project_id] || Project.find_by(name: "CZID Benchmarks").id
+    project_id = permitted_params[:projectId] || Project.find_by(name: "CZID Benchmarks").id
 
-    sample_name = generate_benchmark_sample_name(run_ids, ground_truth_file)
+    # Get the pipeline run ids or workflow run ids for the samples (depends on the workflow benchmarked)
+    run_ids = sample_ids.reduce([]) do |result, sample_id|
+      s = Sample.find(sample_id)
+
+      result << if WorkflowRun::MNGS_WORKFLOWS.include?(workflow_benchmarked)
+                  s.pipeline_runs.non_deprecated.first.id
+                else
+                  s.workflow_runs.non_deprecated.first.id
+                end
+    end
+
+    sample_name = generate_benchmark_sample_name(sample_ids, ground_truth_file)
     # Skip callbacks and validations. A benchmark sample has no input files or host genomes.
     # rubocop:disable Rails/SkipsModelValidations
     Sample.insert({
@@ -1571,6 +1583,25 @@ class SamplesController < ApplicationController
     benchmark_wr.dispatch
 
     render json: { benchmarkWorkflowRunId: benchmark_wr.id }, status: :ok
+  end
+
+  def benchmark_ground_truth_files
+    ground_truth_file_names = Syscall.pipe_with_output(["aws", "s3", "ls", BenchmarkWorkflowRun::AWS_S3_TRUTH_FILES_BUCKET], ["awk", "{print $4}"])
+
+    if ground_truth_file_names
+      render(
+        json: {
+          groundTruthFileNames: ground_truth_file_names.split("\n").reject(&:empty?),
+          groundTruthFilesS3Bucket: BenchmarkWorkflowRun::AWS_S3_TRUTH_FILES_BUCKET,
+        }.to_json,
+        status: :ok
+      )
+    else
+      render(
+        json: { error: "Failed to get ground truth files" }.to_json,
+        status: :not_found
+      )
+    end
   end
 
   def cli_user_instructions

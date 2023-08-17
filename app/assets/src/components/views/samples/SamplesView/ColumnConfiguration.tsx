@@ -38,6 +38,8 @@ export const computeColumnsByWorkflow = ({
     return computeConsensusGenomeColumns({ basicIcon, metadataFields });
   } else if (workflow === WORKFLOWS.AMR.value) {
     return computeAmrColumns({ basicIcon, metadataFields });
+  } else if (workflow === WORKFLOWS.BENCHMARK.value) {
+    return computeBenchmarkColumns({ basicIcon });
   }
 };
 
@@ -486,6 +488,80 @@ const computeAmrColumns = ({ basicIcon, metadataFields }) => {
   return columns;
 };
 
+const computeBenchmarkColumns = ({ basicIcon }) => {
+  const fixedColumns = [
+    {
+      dataKey: "sample",
+      flexGrow: 1,
+      width: 350,
+      cellRenderer: ({ rowData }) =>
+        TableRenderers.renderSampleInfo({
+          rowData,
+          full: true,
+          basicIcon,
+        }),
+      headerClassName: cs.sampleHeader,
+    },
+    {
+      dataKey: "createdAt",
+      label: CREATED_ON,
+      width: 120,
+      className: cs.basicCell,
+      cellRenderer: TableRenderers.renderDateWithElapsed,
+    },
+    {
+      dataKey: "wdl_version",
+      label: PIPELINE_VERSION,
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+    {
+      dataKey: "workflowBenchmarked",
+      label: "Workflow Benchmarked",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+    // TODO: Create custom cell renderer for this to be able to display
+    // sample id, pipeline versions, ncbi index versions
+    {
+      dataKey: "aupr",
+      label: "AUPR",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: TableRenderers.renderNumberAndPercentage,
+    },
+    {
+      dataKey: "correlation",
+      label: "Correlation",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: TableRenderers.renderNumberAndPercentage,
+    },
+    {
+      dataKey: "groundTruthFile",
+      label: "Ground Truth File",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+  ];
+
+  const columns = [...fixedColumns];
+
+  for (const col of columns) {
+    const dataKey = col["dataKey"];
+    if (
+      Object.prototype.hasOwnProperty.call(SHARED_SAMPLE_TABLE_COLUMNS, dataKey)
+    ) {
+      col["columnData"] = SHARED_SAMPLE_TABLE_COLUMNS[dataKey];
+    } else if (Object.prototype.hasOwnProperty.call(FIELDS_METADATA, dataKey)) {
+      col["columnData"] = FIELDS_METADATA[dataKey];
+      col["label"] = FIELDS_METADATA[dataKey].label;
+    }
+  }
+
+  return columns;
+};
+
 const computeMetadataColumns = metadataFields => {
   // The following metadata fields are hard-coded in fixedColumns
   // and will always be available on the samples table.
@@ -543,6 +619,14 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
     "createdAt",
     "sample_type",
     "host",
+    "nonHostReads",
+    "totalReadsAMR",
+  ],
+  [WORKFLOWS.BENCHMARK.value]: [
+    "sample",
+    "createdAt",
+    "workflowBenchmarked",
+    "runIds",
     "nonHostReads",
     "totalReadsAMR",
   ],

@@ -243,6 +243,7 @@ class ObjectCollectionView<T extends MustHaveId> {
 
 class DiscoveryDataLayer {
   amrWorkflowRuns: $TSFixMe;
+  benchmarkWorkflowRuns: ObjectCollection<any>;
   cgWorkflowRuns: $TSFixMe;
   domain: string;
   longReadMngsSamples: $TSFixMe;
@@ -262,6 +263,10 @@ class DiscoveryDataLayer {
     );
     this.cgWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
     this.amrWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
+    this.benchmarkWorkflowRuns = new ObjectCollection(
+      domain,
+      this.fetchWorkflowRuns,
+    );
   }
 
   fetchSamples = async (

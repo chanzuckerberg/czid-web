@@ -40,6 +40,7 @@ import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
+  BENCHMARKING_FEATURE,
   ONT_V1_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
@@ -89,6 +90,7 @@ import {
 import {
   BaseWorkflowRun,
   CGRun,
+  Entry,
   FilterList,
   PipelineTypeRun,
   SamplesViewHandle,
@@ -169,9 +171,11 @@ class DiscoveryView extends React.Component<
   DiscoveryViewState
 > {
   amrWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
+  benchmarkWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
   cgWorkflowRuns: ObjectCollectionView<CGRun>;
   configForWorkflow: {
     amr: ConfigForWorkflow<BaseWorkflowRun>;
+    benchmark: ConfigForWorkflow<BaseWorkflowRun>;
     "consensus-genome": ConfigForWorkflow<CGRun>;
     "short-read-mngs": ConfigForWorkflow<PipelineTypeRun>;
     "long-read-mngs": ConfigForWorkflow<PipelineTypeRun>;
@@ -228,6 +232,7 @@ class DiscoveryView extends React.Component<
         [WORKFLOWS.LONG_READ_MNGS.value]: null,
         [WORKFLOWS.AMR.value]: null,
         [WORKFLOWS.CONSENSUS_GENOME.value]: null,
+        [WORKFLOWS.BENCHMARK.value]: null,
       },
       filteredSampleDimensions: [],
       filteredSampleStats: {},
@@ -261,6 +266,7 @@ class DiscoveryView extends React.Component<
         [WORKFLOWS.CONSENSUS_GENOME.value]: new Set(),
         [WORKFLOWS.SHORT_READ_MNGS.value]: new Set(),
         [WORKFLOWS.LONG_READ_MNGS.value]: new Set(),
+        [WORKFLOWS.BENCHMARK.value]: new Set(),
       },
       showFilters: true,
       showStats: true,
@@ -309,6 +315,18 @@ class DiscoveryView extends React.Component<
       },
       displayName: WORKFLOWS.AMR.value,
     });
+
+    this.benchmarkWorkflowRuns =
+      this.dataLayer.benchmarkWorkflowRuns.createView({
+        conditions: this.getConditionsFor(
+          TAB_SAMPLES,
+          WORKFLOWS.BENCHMARK.value,
+        ),
+        onViewChange: () => {
+          this.refreshWorkflowRunData(WORKFLOWS.BENCHMARK.value);
+        },
+        displayName: WORKFLOWS.BENCHMARK.value,
+      }) as ObjectCollectionView<Entry>;
 
     if (allowedFeatures.includes(ONT_V1_FEATURE)) {
       this.longReadMngsSamples = this.dataLayer.longReadMngsSamples.createView({
@@ -381,6 +399,19 @@ class DiscoveryView extends React.Component<
         noDataMessage:
           `No samples were processed by the AMR Pipeline. ` +
           "You can upload new samples or rerun mNGS samples through the AMR pipeline.",
+      },
+      [WORKFLOWS.BENCHMARK.value]: {
+        bannerTitle: `${WORKFLOWS.BENCHMARK.value.toUpperCase()} Samples`,
+        objectCollection: this.benchmarkWorkflowRuns,
+        noDataLinks: [
+          {
+            href: SAMPLES_UPLOAD_URL,
+            text: `Benchmark existing samples`,
+          },
+        ],
+        noDataMessage:
+          `No samples were processed by the Benchmark Pipeline. ` +
+          "You can Benchmark samples by selecting them in the mNGS table and clicking the 'Benchmark' icon.",
       },
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
         bannerTitle: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
@@ -793,12 +824,19 @@ class DiscoveryView extends React.Component<
         conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
         loadFirstPage: true,
       });
+      this.longReadMngsSamples.reset({
+        conditions: this.getConditionsFor(
+          TAB_SAMPLES,
+          WORKFLOWS.LONG_READ_MNGS.value,
+        ),
+        loadFirstPage: true,
+      });
 
-      if (allowedFeatures.includes(ONT_V1_FEATURE)) {
-        this.longReadMngsSamples.reset({
+      if (allowedFeatures.includes(BENCHMARKING_FEATURE)) {
+        this.benchmarkWorkflowRuns.reset({
           conditions: this.getConditionsFor(
             TAB_SAMPLES,
-            WORKFLOWS.LONG_READ_MNGS.value,
+            WORKFLOWS.BENCHMARK.value,
           ),
           loadFirstPage: true,
         });
@@ -820,6 +858,7 @@ class DiscoveryView extends React.Component<
           [WORKFLOWS.CONSENSUS_GENOME.value]: null,
           [WORKFLOWS.SHORT_READ_MNGS.value]: null,
           [WORKFLOWS.LONG_READ_MNGS.value]: null,
+          [WORKFLOWS.BENCHMARK.value]: null,
         },
         filteredSampleDimensions: [],
         filteredVisualizationCount: null,
@@ -1804,6 +1843,8 @@ class DiscoveryView extends React.Component<
           filteredSampleCountsByWorkflow[WORKFLOWS.AMR.value],
         filteredLongReadMngsSampleCount:
           filteredSampleCountsByWorkflow[WORKFLOWS.LONG_READ_MNGS.value],
+        filteredBenchmarkWorkflowRunCount:
+          filteredSampleCountsByWorkflow[WORKFLOWS.BENCHMARK.value],
       };
 
       trackEvent(
@@ -2103,11 +2144,24 @@ class DiscoveryView extends React.Component<
     );
   };
 
-  resetAmrData = () => {
-    this.amrWorkflowRuns.reset({
-      conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
-      loadFirstPage: true,
-    });
+  resetWorkflowDataOnTabChange = (workflow: WORKFLOW_VALUES) => {
+    switch (workflow) {
+      case WORKFLOWS.AMR.value:
+        this.amrWorkflowRuns.reset({
+          conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
+          loadFirstPage: true,
+        });
+        break;
+      case WORKFLOWS.BENCHMARK.value:
+        this.benchmarkWorkflowRuns.reset({
+          conditions: this.getConditionsFor(
+            TAB_SAMPLES,
+            WORKFLOWS.BENCHMARK.value,
+          ),
+          loadFirstPage: true,
+        });
+        break;
+    }
 
     this.resetSamplesView();
   };
@@ -2142,9 +2196,10 @@ class DiscoveryView extends React.Component<
       () => {
         this.updateBrowsingHistory("replace");
 
-        workflow === WORKFLOWS.AMR.value
-          ? this.resetAmrData()
-          : this.resetSamplesView();
+        // Refresh data when switching to the AMR or Benchmark tabs
+        // User can kickoff AMR from existing short-read-mngs samples
+        // Admins can also benchmark one or more existing mGNS samples
+        this.resetWorkflowDataOnTabChange(workflow);
       },
     );
     trackEvent(`DiscoveryView_${workflow}-tab_clicked`);
@@ -2153,10 +2208,14 @@ class DiscoveryView extends React.Component<
   computeWorkflowTabs = () => {
     const { snapshotShareId } = this.props;
     const { filteredSampleCountsByWorkflow } = this.state;
-    const { allowedFeatures = [] } = this.context || {};
+    const { admin, allowedFeatures = [] } = this.context || {};
     let workflows = WORKFLOW_ORDER;
     if (!allowedFeatures.includes(ONT_V1_FEATURE)) {
       workflows = pull("LONG_READ_MNGS", workflows);
+    }
+
+    if (!admin && !allowedFeatures.includes(BENCHMARKING_FEATURE)) {
+      workflows = pull("BENCHMARK", workflows);
     }
 
     if (snapshotShareId) workflows = [workflows[0]]; // Only short-read-mngs
@@ -2205,12 +2264,14 @@ class DiscoveryView extends React.Component<
     });
   };
 
-  handleNewAmrCreationsFromMngs = ({
-    numAmrRunsCreated,
+  handleNewWorkflowRunsCreated = ({
+    numWorkflowRunsCreated,
+    workflow,
   }: {
-    numAmrRunsCreated: number;
+    numWorkflowRunsCreated: number;
+    workflow: WORKFLOW_VALUES;
   }) => {
-    // When AMR workflow runs are kicked off from existing mNGS, we need to update the counts appropriately
+    // When workflow runs are kicked off from existing samples, we need to update the counts appropriately
     this.setState(
       ({
         filteredSampleCountsByWorkflow: prevFilteredSampleCountsByWorkflow,
@@ -2218,20 +2279,21 @@ class DiscoveryView extends React.Component<
       }) => {
         const prevSampleCountByWorkflow =
           prevUserDataCounts?.sampleCountByWorkflow;
-        const newAmrRunsCount =
-          prevFilteredSampleCountsByWorkflow?.amr + numAmrRunsCreated;
+        const newWorkflowRunsCount =
+          prevFilteredSampleCountsByWorkflow?.[workflow] +
+          numWorkflowRunsCreated;
 
         return {
           userDataCounts: {
             ...prevUserDataCounts,
             sampleCountByWorkflow: {
               ...prevSampleCountByWorkflow,
-              [WORKFLOWS.AMR.value]: newAmrRunsCount,
+              [workflow]: newWorkflowRunsCount,
             },
           },
           filteredSampleCountsByWorkflow: {
             ...prevFilteredSampleCountsByWorkflow,
-            [WORKFLOWS.AMR.value]: newAmrRunsCount,
+            [workflow]: newWorkflowRunsCount,
           },
         };
       },
@@ -2270,11 +2332,14 @@ class DiscoveryView extends React.Component<
 
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
     const amrHasLoaded = !this.amrWorkflowRuns.isLoading();
+    const benchmarkHasLoaded = !this.benchmarkWorkflowRuns.isLoading();
     const longReadSamplesHaveLoaded = allowedFeatures.includes(ONT_V1_FEATURE)
       ? !this.longReadMngsSamples.isLoading()
       : true;
+
     const tableHasLoaded =
       amrHasLoaded &&
+      benchmarkHasLoaded &&
       longReadSamplesHaveLoaded &&
       !this.cgWorkflowRuns.isLoading() &&
       !this.samples.isLoading() &&
@@ -2394,8 +2459,8 @@ class DiscoveryView extends React.Component<
                   sortDirection={orderDirection}
                   onUpdateSelectedIds={updateSelectedIds}
                   userDataCounts={userDataCounts}
-                  handleNewAmrCreationsFromMngs={
-                    this.handleNewAmrCreationsFromMngs
+                  handleNewWorkflowRunsCreated={
+                    this.handleNewWorkflowRunsCreated
                   }
                   filtersSidebarOpen={showFilters}
                   sampleStatsSidebarOpen={showStats}

@@ -231,6 +231,21 @@ const processAmrWorkflowRun = (workflowRun: $TSFixMe) => {
   };
 };
 
+const processBenchmarkWorkflowRun = (workflowRun: $TSFixMe) => {
+  const benchmarkMetrics = workflowRun?.cached_results?.benchmark_metrics;
+  const additionalInfo = workflowRun?.cached_results?.additional_info;
+  const benchmarkInfo = workflowRun?.cached_results?.benchmark_info;
+
+  return {
+    aupr: benchmarkMetrics?.aupr,
+    correlation: benchmarkMetrics?.correlation,
+    runIds: benchmarkInfo?.run_ids,
+    workflowBenchmarked: benchmarkInfo?.workflow,
+    groundTruthFile: benchmarkInfo?.ground_truth_file,
+    additionalInfo,
+  };
+};
+
 const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
   const getSampleField = (path: $TSFixMe) =>
     get(["sample", ...path], workflowRun);
@@ -241,6 +256,8 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
     workflowRunFields = processConsensusGenomeWorkflowRun(workflowRun);
   } else if (workflowRun.workflow === WORKFLOWS.AMR.value) {
     workflowRunFields = processAmrWorkflowRun(workflowRun);
+  } else if (workflowRun.workflow === WORKFLOWS.BENCHMARK.value) {
+    workflowRunFields = processBenchmarkWorkflowRun(workflowRun);
   }
 
   return {

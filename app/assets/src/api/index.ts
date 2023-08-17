@@ -4,9 +4,10 @@
 import axios from "axios";
 import { CoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/types";
 import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { BenchmarkWorkflowRunResults } from "~/components/views/SampleView/components/BenchmarkView/BenchmarkView";
 import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
-import { WorkflowRunResults } from "~/interface/sampleView";
+import { ConsensusGenomeWorkflowRunResults } from "~/interface/sampleView";
 import { Background, ProjectPipelineVersions } from "~/interface/shared";
 import {
   get,
@@ -455,7 +456,7 @@ const getWorkflowRunsInfo = (workflowRunIds: $TSFixMe) =>
 
 const getWorkflowRunResults = (
   workflowRunId: number,
-): Promise<WorkflowRunResults> =>
+): Promise<ConsensusGenomeWorkflowRunResults | BenchmarkWorkflowRunResults> =>
   get(`/workflow_runs/${workflowRunId}/results`);
 
 const getContigsSequencesByByteranges = (
@@ -742,6 +743,20 @@ const bulkKickoffWorkflowRuns = ({ sampleIds, workflow }: $TSFixMe) =>
     workflow,
   });
 
+const benchmarkSamples = ({
+  sampleIds,
+  groundTruthFile,
+  workflowToBenchmark,
+}: $TSFixMe) =>
+  postWithCSRF(`/samples/benchmark`, {
+    groundTruthFile,
+    sampleIds,
+    workflowBenchmarked: workflowToBenchmark,
+  });
+
+const getBenchmarkGroundTruthFiles = () =>
+  get("/samples/benchmark_ground_truth_files");
+
 const bulkDeleteObjects = ({
   selectedIds,
   workflow,
@@ -767,6 +782,7 @@ const validateUserCanDeleteObjects = ({
   });
 
 export {
+  benchmarkSamples,
   bulkDeleteObjects,
   bulkImportRemoteSamples,
   bulkKickoffWorkflowRuns,
@@ -780,6 +796,7 @@ export {
   getAllSampleTypes,
   getLaunchedFeatureList,
   getBackgrounds,
+  getBenchmarkGroundTruthFiles,
   getContigsSequencesByByteranges,
   getCoverageVizData,
   getCoverageVizSummary,

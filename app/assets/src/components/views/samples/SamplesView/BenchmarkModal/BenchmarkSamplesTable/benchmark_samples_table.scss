@@ -1,0 +1,33 @@
+@import "~@czi-sds/components/dist/variables";
+
+.header {
+  font: $sds-font-body-xxxs-600-font !important;
+  text-align: right !important;
+
+  &.sampleNameHeader {
+    text-align: left !important;
+  }
+}
+
+.cell {
+  font: $sds-font-body-xxs-400-font !important;
+  margin: $sds-spaces-m $sds-spaces-m $sds-spaces-m 0 !important;
+  text-align: right;
+
+  &.contigName {
+    text-align: left;
+  }
+}
+
+.tableDataRow {
+  border-bottom: 1px;
+
+  // Make every even table row except the header gray
+  &:not(:first-child):nth-child(even) {
+    background-color: $sds-color-gray-100;
+  }
+}
+
+.table {
+  margin-bottom: $sds-spaces-l;
+}

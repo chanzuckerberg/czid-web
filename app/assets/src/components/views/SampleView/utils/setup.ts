@@ -76,6 +76,7 @@ export const determineInitialTab = ({
     [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
     [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
     [WORKFLOWS.AMR.value]: amr,
+    [WORKFLOWS.BENCHMARK.value]: benchmark,
   } = workflowCount;
   if (currentTab && workflowCount[labelToVal(currentTab)] > 0) {
     return currentTab;
@@ -87,6 +88,8 @@ export const determineInitialTab = ({
     return TABS.CONSENSUS_GENOME;
   } else if (amr) {
     return TABS.AMR as WorkflowTabsSample;
+  } else if (benchmark) {
+    return TABS.BENCHMARK as WorkflowTabsSample;
   } else if (initialWorkflow) {
     return TABS[findInWorkflows(initialWorkflow, "value")];
   } else {

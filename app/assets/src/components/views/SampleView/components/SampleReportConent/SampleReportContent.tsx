@@ -17,10 +17,10 @@ export interface SampleReportContentProps {
   sample: Sample;
   loadingInfo: {
     message: string;
-    linkText: string;
-    helpLink: string;
+    linkText?: string;
+    helpLink?: string;
   };
-  eventNames: {
+  eventNames?: {
     loading: string;
     error: string;
   };
@@ -56,9 +56,9 @@ export const SampleReportContent = ({
       return (
         <SampleMessage
           icon={<IconLoading className={cs.icon} />}
-          link={loadingInfo.helpLink}
-          linkText={loadingInfo.linkText}
-          message={loadingInfo.message}
+          link={loadingInfo?.helpLink}
+          linkText={loadingInfo?.linkText}
+          message={loadingInfo?.message}
           status={"IN PROGRESS"}
           type={"inProgress"}
           analyticsEventName={eventNames?.loading}

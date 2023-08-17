@@ -4,6 +4,7 @@ import { TABS } from "~/components/views/SampleView/utils";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import { AmrView } from "../AmrView";
+import { BenchmarkView } from "../BenchmarkView";
 import { ConsensusGenomeView } from "../ConsensusGenomeView";
 import { MngsReport } from "../MngsReport";
 import { ReportPanelProps } from "./types";
@@ -81,6 +82,12 @@ export const ReportPanel = ({
       )}
       {currentTab === TABS.AMR && sample && (
         <AmrView sample={sample} workflowRun={currentRun as WorkflowRun} />
+      )}
+      {currentTab === TABS.BENCHMARK && sample && (
+        <BenchmarkView
+          sample={sample}
+          workflowRun={currentRun as WorkflowRun}
+        />
       )}
       {currentTab === TABS.CONSENSUS_GENOME && sample && (
         <ConsensusGenomeView

@@ -263,6 +263,7 @@ class WorkflowRun < ApplicationRecord
 
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
   scope :amr, -> { where(workflow: WORKFLOW[:amr]) }
+  scope :benchmarks, -> { where(workflow: WORKFLOW[:benchmark]) }
   scope :non_deprecated, -> { where(deprecated: false) }
   scope :non_deleted, -> { where(deleted_at: nil) }
   scope :active, -> { where(status: WorkflowRun::STATUS[:succeeded], deprecated: false) }

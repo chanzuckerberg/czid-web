@@ -24,8 +24,9 @@ class SfnGenericDispatchService
     end
   end
 
-  def initialize(workflow_name, inputs_json, output_prefix, wdl_file_name: nil, version: nil)
-    @workflow_name = workflow_name
+  def initialize(workflow_run, inputs_json:, output_prefix:, wdl_file_name: nil, version: nil)
+    @workflow_run = workflow_run
+    @workflow_name = @workflow_run.workflow
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_SINGLE_WDL_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
@@ -95,7 +96,8 @@ class SfnGenericDispatchService
   end
 
   def dispatch(sfn_input_json)
-    sfn_name = "czid-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-#{@workflow_name}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}" # TODO: make this work for all workflow runs
+    sample = @workflow_run.sample
+    sfn_name = "czid-#{Rails.env}-#{sample.project_id}-#{sample.id}-#{@workflow_run.id}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}" # TODO: make this work for all workflow runs
     sfn_input = JSON.dump(sfn_input_json)
     resp = AwsClient[:states].start_execution(state_machine_arn: @sfn_arn,
                                               name: sfn_name,

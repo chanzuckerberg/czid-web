@@ -129,7 +129,7 @@ export interface SampleViewState {
   view: SampleReportViewMode;
   workflowRun?: WorkflowRun;
   workflowRunId?: number;
-  workflowRunResults: WorkflowRunResults | Record<string, never>;
+  workflowRunResults: ConsensusGenomeWorkflowRunResults | Record<string, never>;
   sharedWithNoBackground: boolean;
 }
 
@@ -156,7 +156,7 @@ export interface AmrFilterSelections {
 
 export type SampleReportViewMode = "table" | "tree";
 
-export interface WorkflowRunResults {
+export interface ConsensusGenomeWorkflowRunResults {
   coverage_viz: {
     coverage_bin_size: number;
     coverage: $TSFixMeUnknown[];

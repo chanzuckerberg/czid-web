@@ -36,9 +36,9 @@ class SfnBenchmarkPipelineDispatchService
     raise SfnVersionMissingError, @workflow_run.workflow if benchmark_wdl_version.blank?
 
     dispatch_output = SfnGenericDispatchService.call(
-      @workflow_run.workflow,
-      sfn_input_json,
-      @workflow_run.sfn_output_path,
+      @workflow_run,
+      inputs_json: sfn_input_json,
+      output_prefix: @workflow_run.sfn_output_path,
       wdl_file_name: WorkflowRun::DEFAULT_WDL_FILE_NAME,
       version: benchmark_wdl_version
     )

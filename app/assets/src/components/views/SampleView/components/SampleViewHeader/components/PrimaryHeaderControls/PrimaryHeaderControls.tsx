@@ -32,6 +32,7 @@ import { PipelineRun } from "~/interface/shared";
 import { DownloadButton, HelpButton, SaveButton } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import { AmrDownloadDropdown } from "./components/AmrDownloadDropdown";
+import { BenchmarkDownloadDropdown } from "./components/BenchmarkDownloadDropdown";
 import { MngsDownloadDropdown } from "./components/MngsDownloadDropdown";
 import { OverflowMenu } from "./components/OverflowMenu";
 import { ShareButtonPopUp } from "./components/ShareButtonPopUp";
@@ -129,6 +130,13 @@ export const PrimaryHeaderControls = ({
         break;
       case WORKFLOWS.AMR.value:
         return renderDownloadDropdown();
+      case WORKFLOWS.BENCHMARK.value:
+        return (
+          <BenchmarkDownloadDropdown
+            className={cs.controlElement}
+            workflowRun={currentRun as WorkflowRun}
+          />
+        );
         break;
     }
   };

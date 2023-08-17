@@ -645,9 +645,10 @@ module SamplesHelper
     errors
   end
 
-  def generate_benchmark_sample_name(run_ids, ground_truth_file = nil)
+  def generate_benchmark_sample_name(sample_ids, ground_truth_file = nil)
     separator = "_vs_"
-    comparison = run_ids.join(separator)
+    sample_names = Sample.where(id: sample_ids).pluck(:name)
+    comparison = sample_names.join(separator)
     comparison += "#{separator}ground_truth_file" if ground_truth_file.present?
 
     "benchmark_#{comparison}"

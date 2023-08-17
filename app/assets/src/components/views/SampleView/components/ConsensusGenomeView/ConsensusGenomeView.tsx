@@ -25,7 +25,7 @@ import Histogram, {
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
 import Sample, { CreationSource, WorkflowRun } from "~/interface/sample";
-import { WorkflowRunResults } from "~/interface/sampleView";
+import { ConsensusGenomeWorkflowRunResults } from "~/interface/sampleView";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconArrowRight } from "~ui/icons";
@@ -44,7 +44,9 @@ interface ConsensusGenomeViewProps {
   sample: Sample;
   test?: string;
   workflowRun?: WorkflowRun;
-  workflowRunResults?: WorkflowRunResults | Record<string, never>;
+  workflowRunResults?:
+    | ConsensusGenomeWorkflowRunResults
+    | Record<string, never>;
 }
 
 export const ConsensusGenomeView = ({
