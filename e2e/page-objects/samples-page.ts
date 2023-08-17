@@ -10,6 +10,7 @@ import {
   ARCHAEA_FILTER,
   BACTERIA_FILTER,
   CANCEL_ICON,
+  X_CLOSE_ICON,
   CATEGORIES_FILTER,
   COLUMNS_LABEL,
   COLUMN_HEADER_PROP,
@@ -108,6 +109,22 @@ export class SamplesPage {
     public async clickSearchResult(text: string) {
       await this.page.getByText(text).click();
     }
+    
+    public async clickAnnotationFilter() {
+      await this.page.locator(ANNOTATION_TEXT).click();
+    }
+
+    public async clickAnnotationFilterOption(option: string) {
+      await this.page.getByTestId(`dropdown-${kebabCase(option)}`).click();
+    }
+
+    public async clickFilterTagCloseIcon(text: string) {
+      await this.page.locator(`${FILTER_TAG}:text('${text}') ${X_CLOSE_ICON}`).click();
+    }
+
+    public async clickTableHeaderByIndex(index: number) {
+      await this.page.locator(COLUMNS_LABEL).nth(index).click();
+    }
     // #endregion Click
 
     // #region Fill
@@ -120,6 +137,11 @@ export class SamplesPage {
     public async selectNameTypeOption(option: string) {
       await this.clickNameTypeFilter()
       await this.clickNameTypeOption(option)
+    }
+
+    public async selectAnnotationFilter(option: string) {
+      await this.clickAnnotationFilter()
+      await this.clickAnnotationFilterOption(option)
     }
     // #endregion Macro
 
@@ -135,7 +157,7 @@ export class SamplesPage {
       }
     }
 
-    public async validateFilterTags(filterTags: string[]) {
+    public async validateFilterTags(expectedfilterTags: string[]) {
       const filterTagElements = await this.getFilterTagElements();
       const foundTags: string[] = [];
 
@@ -143,13 +165,37 @@ export class SamplesPage {
         const tagText = await element.textContent();
         foundTags.push(tagText);
       }
-      expect(filterTags).toEqual(foundTags);
+      expect(expectedfilterTags).toEqual(foundTags);
     }
     
-    public async validateTaxonsFilteredByName(taxonName: string) {
+    public async validateTaxonsFilteredByName(expectedTaxonName: string) {
       let taxonElements = await this.getTaxonElements()
       for (let taxonElement of taxonElements) {
-        expect(taxonElement).toContainText(taxonName);
+        expect(taxonElement).toContainText(expectedTaxonName);
+      }
+    }
+    
+    public async validateAnnotationHasExpectedFilters(expectedAnnotationFilters: string[]) {
+      await this.clickAnnotationFilter(); // Open the filter dropdown
+      for (let annotationFilter of expectedAnnotationFilters) {
+        expect(
+          this.page.getByTestId(`dropdown-${kebabCase(annotationFilter)}`),
+        ).toBeVisible();
+      }
+      await this.clickAnnotationFilter(); // Close the filter dropdown
+    }
+
+    public async validateReportFilteredByAnnotation(expectedAnnotationFilters: string[]) {
+      for (let annotationFilter of expectedAnnotationFilters) {
+        await this.selectAnnotationFilter(annotationFilter)
+        await this.validateFilterTags([annotationFilter])
+
+        // TODO: Expand this validation to check each taxon in the report table matches the annotation criteria
+        // Question: Does anything in the report_v2 endpoint response correlate to the annotation criteria "Hit", "Not a hit", "Inconclusive"?
+        // report_v2 endpoint: /samples/${sampleId}/report_v2.json?&id=${sampleId}
+        
+        await this.clickTableHeaderByIndex(0) // Closes the annotation filter options
+        await this.clickFilterTagCloseIcon(annotationFilter);
       }
     }
     // #endregion Validation

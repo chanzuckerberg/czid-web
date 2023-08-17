@@ -62,7 +62,7 @@ test.describe("Sample report filter test", () => {
     }
   });
 
-  test(`Should be able to filter by Taxon name`, async ({ page }) => {
+  test(`Should be able to filter by Taxon name`, async () => {
     // Search for data
     await samplesPage.fillSearchBar(KLEBSIELLA);
     await samplesPage.clickSearchResult(KLEBSIELLA_GENUS);
@@ -167,26 +167,10 @@ test.describe("Sample report filter test", () => {
     }
   });
 
-  test(`Should be able to filter by Annotation`, async ({ page }) => {
-    await page.locator(ANNOTATION_TEXT).click();
-
-    for (let i = 0; i < ANNOTATION_FILTERS.length; i++) {
-      expect(
-        page.getByTestId(`dropdown-${kebabCase(ANNOTATION_FILTERS[i])}`),
-      ).toBeVisible();
-    }
-
-    await page.locator(ANNOTATION_TEXT).click();
+  test(`Should be able to filter by Annotation`, async () => {
+    await samplesPage.validateAnnotationHasExpectedFilters(ANNOTATION_FILTERS);
 
     // Verify filter are applied
-    for (let i = 0; i < ANNOTATION_FILTERS.length; i++) {
-      await page.locator(ANNOTATION_TEXT).click();
-      await page
-        .getByTestId(`dropdown-${kebabCase(ANNOTATION_FILTERS[i])}`)
-        .click();
-      await expect(page.locator(FILTER_TAG)).toHaveText(ANNOTATION_FILTERS[i]);
-      await page.locator(COLUMNS_LABEL).nth(0).click();
-      await page.locator(CANCEL_ICON).click();
-    }
+    await samplesPage.validateReportFilteredByAnnotation(ANNOTATION_FILTERS);
   });
 });

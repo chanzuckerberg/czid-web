@@ -36,6 +36,8 @@ export const COLUMNS_LABEL = 'div[data-testid*="column-header"]';
 export const FILTER_TAG = '[data-testid="filter-tag"]';
 export const CANCEL_ICON =
   '[data-testid="filter-tag"] [data-testid="x-close-icon"]';
+export const X_CLOSE_ICON =
+  '[data-testid="x-close-icon"]';
 export const TOTAL_READ_POPOUP_CONTENT = '[data-testid="column-tooltip"]';
 export const COLUMN_HEADER_PROP = {
   Score: {
