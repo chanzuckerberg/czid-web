@@ -2684,6 +2684,7 @@ class DiscoveryView extends React.Component<
             showStats={showStats && !!dimensions}
             showFilters={showFilters && !!dimensions}
             tabs={tabs}
+            workflow={workflow}
           />
         </div>
         <Divider style="medium" />

@@ -147,6 +147,12 @@ class DiscoveryFilters extends React.Component<
         disableAnnotationFilter: true,
         tooltipTitle: WORKFLOWS.AMR.pluralizedLabel,
       },
+      [WORKFLOWS.BENCHMARK.value]: {
+        disableTaxonFilter: true,
+        disableTaxonThresholdFilter: true,
+        disableAnnotationFilter: true,
+        tooltipTitle: WORKFLOWS.BENCHMARK.pluralizedLabel,
+      },
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
         disableTaxonFilter: false,
         disableTaxonThresholdFilter: true,

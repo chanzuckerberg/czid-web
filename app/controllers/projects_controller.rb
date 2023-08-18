@@ -267,7 +267,7 @@ class ProjectsController < ApplicationController
 
     hosts = samples.includes(:host_genome).group(:host_genome).distinct.count(:project_id)
     hosts = hosts.map do |host, count|
-      { value: host.id, text: host.name, count: count }
+      { value: host&.id, text: host&.name, count: count }
     end
     @timer.split("hosts")
 
