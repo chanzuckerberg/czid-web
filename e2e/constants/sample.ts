@@ -97,9 +97,12 @@ export const BACTERIA_FILTER = '[data-testid="dropdown-bacteria"]';
 export const EUKARYOTA_FILTER = '[data-testid="dropdown-eukaryota"]';
 export const VIROIDS_FILTER = '[data-testid="dropdown-viroids"]';
 export const VIRUSES_FILTER = '[data-testid="dropdown-viruses"]';
+export const VIRUSES_PHAGE_FILTER = '[data-testid="dropdown-viruses---phage"]';
 export const UNCATEGORIZED_FILTER = '[data-testid="dropdown-uncategorized"]';
 export const CATEGORIES_FILTER = '[data-testid="category-filter"]';
 export const FILTERS_DROPDOWN = '[data-testid="dropdown-menu"]';
+export const THRESHOLD_OPTION_FILTER = '[class*="thresholdFilterList"] [data-testid="filters"]'
+export const THRESHOLD_COMPARISON_OPERATORS = [">=", "<="]
 export const THRESHOLD_FILTERS = [
   "Score",
   "NT Z Score",
