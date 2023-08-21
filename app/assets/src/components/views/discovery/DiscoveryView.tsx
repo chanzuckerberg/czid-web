@@ -1225,7 +1225,7 @@ class DiscoveryView extends React.Component<
       return (
         <Tab
           key={nanoid()}
-          data-testid={label.toLowerCase()}
+          data-testid={label?.toLowerCase()}
           label={label}
           count={count}
         />
@@ -2657,6 +2657,11 @@ class DiscoveryView extends React.Component<
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
     const filterCount = this.getFilterCount();
+    const onBenchmarkingTab =
+      currentTab === TAB_SAMPLES && workflow === WORKFLOWS.BENCHMARK.value;
+    const displayFilters = onBenchmarkingTab
+      ? false
+      : showFilters && !!dimensions;
 
     return (
       <div className={cs.layout}>
@@ -2682,7 +2687,7 @@ class DiscoveryView extends React.Component<
             onTabChange={this.handleTabChange}
             searchValue={search || ""}
             showStats={showStats && !!dimensions}
-            showFilters={showFilters && !!dimensions}
+            showFilters={displayFilters}
             tabs={tabs}
             workflow={workflow}
           />
@@ -2690,7 +2695,7 @@ class DiscoveryView extends React.Component<
         <Divider style="medium" />
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
-            {showFilters && dimensions && (
+            {displayFilters && (
               <DiscoveryFilters
                 {...mapValues(
                   (dim: Dimension) => dim.values,
