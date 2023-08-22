@@ -37,8 +37,9 @@ The following norms are particularly relevant to `czid-web`.
    3. **Boolean methods**: should be prefixed with a verb `is` or `has`, e.g. `isThresholdValid`
 
 ### `lodash/fp`
-
 [`lodash/fp`](https://github.com/lodash/lodash/wiki/FP-Guide) provides nice immutable utility functions (see React section below on immutability). We use `lodash/fp` exclusively (no `lodash`) in order to prevent confusion between the two variants.
+
+When possible, please use native/built-in functions over lodash functions. For example, Array.map is a built in JS function, so you would not need to use the lodash map unless you were working with an object. Native functions tend to be more readable and performant than lodash. Additionally, avoid using `lodash.get`. JS now has [optional chaining](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining), which enables us to, eg, call functions or access object values only if they exist and continue error free if they do not. Optional chaining is more readable and performant than using loadsh `get`.
 
 ## _React Components_
 
