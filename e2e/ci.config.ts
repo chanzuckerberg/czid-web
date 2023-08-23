@@ -1,10 +1,4 @@
-import path from "path";
 import { devices, PlaywrightTestConfig } from "@playwright/test";
-import dotenv from "dotenv";
-
-dotenv.config({
-  path: path.resolve(__dirname, "../../", ".env.staging"),
-});
 
 const config: PlaywrightTestConfig = {
   expect: {
@@ -25,14 +19,12 @@ const config: PlaywrightTestConfig = {
     },
   ],
   reporter: [
-    ["list"],
     [
       "html",
       {
-        open: "failure",
-        host: "localhost",
-        port: 9220,
-        outputFolder: "../html-reports",
+        open: "never",
+        outputFolder: "__assets__/html-report/",
+        attachmentsBaseURL: "./",
       },
     ],
   ],

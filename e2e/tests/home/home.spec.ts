@@ -1,10 +1,7 @@
-import path from "path";
+import { CZID, footer, tag } from "@e2e/constants/common";
+import { getByDataName, getByLinkText, getByText } from "@e2e/utils/selectors";
 import { expect, test } from "@playwright/test";
-import dotenv from "dotenv";
-import { CZID, footer, tag } from "../../constants/common";
-import { getByDataName, getByLinkText, getByText } from "../../utils/selectors";
 
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 // This a test to verify if user is able to navigate to the home page.
 test.describe("Home page tests", () => {
   // overwrite global login with empty storage so we can visit home page

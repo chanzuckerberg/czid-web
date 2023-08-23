@@ -1,9 +1,9 @@
-import { expect, test } from "@playwright/test";
 import {
   HELP_CENTER_PROJECT_URL,
   PROJECT_NAME_NOT_AVAILABLE_ERROR,
-} from "../../constants/upload";
-import { stubRequest } from "../../utils/api";
+} from "@e2e/constants/upload";
+import { stubRequest } from "@e2e/utils/api";
+import { expect, test } from "@playwright/test";
 
 const baseUrl = process.env.BASEURL;
 const projectApi = "projects.json";
