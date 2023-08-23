@@ -101,14 +101,21 @@ export const VIRUSES_FILTER = '[data-testid="dropdown-viruses"]';
 export const VIRUSES_PHAGE_FILTER = '[data-testid="dropdown-viruses---phage"]';
 export const UNCATEGORIZED_FILTER = '[data-testid="dropdown-uncategorized"]';
 export const CATEGORIES_FILTER = '[data-testid="category-filter"]';
+export const ARCHAEA = "Archaea";
+export const BACTERIA = "Bacteria";
+export const EUKARYOTA = "Eukaryota";
+export const VIROIDS = "Viroids";
+export const VIRUSES = "Viruses";
+export const PHAGE = "Phage";
+export const UNCATEGORIZED = "Uncategorized";
 export const CATEGORY_NAMES = [
-  "Archaea",
-  "Bacteria",
-  "Eukaryota",
-  "Viroids",
-  "Viruses",
-  "Phage",
-  "Uncategorized",
+  ARCHAEA,
+  BACTERIA,
+  EUKARYOTA,
+  VIROIDS,
+  VIRUSES,
+  PHAGE,
+  UNCATEGORIZED
 ];
 export const FILTERS_DROPDOWN = '[data-testid="dropdown-menu"]';
 export const THRESHOLD_OPTION_FILTER = '[class*="thresholdFilterList"] [data-testid="filters"]'
@@ -132,11 +139,21 @@ export const THRESHOLD_FILTERS = [
   "NR L (alignment length in bp)",
   "NR E value (as a power of 10)",
 ];
-export const READ_SPECIFICITY_FILTERS = ["All", "Specific Only"];
+export const ALL = "All"
+export const SPECIFIC_ONLY = "Specific Only"
+export const READ_SPECIFICITY_FILTERS = [ALL, SPECIFIC_ONLY];
+
 export const ANNOTATION_FILTERS = ["Hit", "Not a hit", "Inconclusive"];
 
 export const NAME_TYPE_FILTER = '[data-testid="name-type-filter"]'
-export const NAME_TYPES = ["Scientific", "Common"];
+
+export const SCIENTIFIC = "Scientific";
+export const COMMON = "Common";
+export const NAME_TYPES = [
+  SCIENTIFIC,
+  COMMON
+];
+
 export const NAME_TYPE_FILTER_VALUE = 'span[data-testid="name-type-filter"] + span'
 
 export const APPLY_BUTTON = '[data-testid="apply"]';

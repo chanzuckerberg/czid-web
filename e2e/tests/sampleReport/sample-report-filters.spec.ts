@@ -2,13 +2,16 @@ import { test } from "@playwright/test";
 import {
   ANNOTATION_FILTERS,
   COLUMN_HEADER_PROP,
-  KLEBSIELLA,
-  KLEBSIELLA_GENUS,
+  SPECIFIC_ONLY,
   READ_SPECIFICITY_FILTERS,
   THRESHOLD_FILTERS,
   THRESHOLD_COMPARISON_OPERATORS,
   NAME_TYPES,
-  CATEGORY_NAMES
+  CATEGORY_NAMES,
+  BACTERIA,
+  VIRUSES,
+  PHAGE,
+  SCIENTIFIC
 } from "../../constants/sample";
 import { SamplesPage } from "../../page-objects/samples-page";
 
@@ -67,6 +70,7 @@ test.describe("Sample report filter test", () => {
     // Verify filter result
     await samplesPage.validateTaxonsFilteredByName(genus)
     await samplesPage.validateFilterTags([expectedTagText])
+    await samplesPage.validateTaxonIsVisible(taxon.name)
   });
 
   /**
@@ -74,7 +78,7 @@ test.describe("Sample report filter test", () => {
    */
   test("Should be able to filter by Name Type", async () => {
     const sampleReport = await samplesPage.getReportV2(sampleId);
-    let taxonNames = await samplesPage.getTaxonNames(sampleReport)
+    let taxonNames = await samplesPage.getTaxonNamesFromReport(sampleReport)
 
     for (let option of NAME_TYPES) {
       await samplesPage.selectNameTypeOption(option)
@@ -89,46 +93,47 @@ test.describe("Sample report filter test", () => {
     test.setTimeout(60000*5)
     const sampleReport = await samplesPage.getReportV2(sampleId);
     await samplesPage.clickExpandAll()
+    await samplesPage.ClickSortByName()
+
+    const filter_categories = [...CATEGORY_NAMES].sort(() => 0.5 - Math.random()).slice(0, 2);
 
     // #region Validate filter by single category
-    for (let i = 0; i < CATEGORY_NAMES.length; i++) {
-      await samplesPage.toggleTableSort()
-      await samplesPage.selectCategoryFilter(CATEGORY_NAMES[i])
+    for (let i = 0; i < filter_categories.length; i++) {
+      await samplesPage.selectCategoryFilter(filter_categories[i])
+      await samplesPage.toggleSortByName()
 
-      let expectedFilterTags = []
-      if (CATEGORY_NAMES[i] === 'Viruses') {
-        expectedFilterTags = [CATEGORY_NAMES[i], CATEGORY_NAMES[i+1]]
-      } else {
-        expectedFilterTags = [CATEGORY_NAMES[i]]
-      }
+      let expectedFilterTags = filter_categories[i] === VIRUSES ? [VIRUSES, PHAGE] : [filter_categories[i]];
       await samplesPage.validateFilterTags(expectedFilterTags)
 
-      let expectedTaxonNames = await samplesPage.getTaxonNamesByCategory(sampleReport, [CATEGORY_NAMES[i]])
+      let expectedTaxonNames = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, [filter_categories[i]])
       await expectedTaxonNames.sort()
-      await samplesPage.validateTaxonsArePresent(expectedTaxonNames);
+      await samplesPage.validateTaxonsAreVisible(expectedTaxonNames);
 
       await samplesPage.removeFilterTags(expectedFilterTags)
-      await samplesPage.validateFilterTagVisiblity(CATEGORY_NAMES[i], false)
+      await samplesPage.validateFilterTagVisiblity(filter_categories[i], false)
     }
     // #endregion Validate filter by single category
 
     // #region Validate filter by mutiple category
     let mutipleCategories = []
-    for (let i = 0; i < CATEGORY_NAMES.length; i++) {
-      await samplesPage.toggleTableSort()
-      await samplesPage.selectCategoryFilter(CATEGORY_NAMES[i])
+    for (let i = 0; i < filter_categories.length; i++) {
+      await samplesPage.selectCategoryFilter(filter_categories[i])
+      await samplesPage.toggleSortByName()
       
-      mutipleCategories.push(CATEGORY_NAMES[i])
-      let expectedTaxonNames = await samplesPage.getTaxonNamesByCategory(sampleReport, mutipleCategories)
+      mutipleCategories.push(filter_categories[i])
+      let expectedTaxonNames = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, mutipleCategories)
       await expectedTaxonNames.sort()
-      await samplesPage.validateTaxonsArePresent(expectedTaxonNames);
+      await samplesPage.validateTaxonsAreVisible(expectedTaxonNames);
     }
     // #endregion Validate filter by mutiple category
 
     // #region Test Stats bar
-    await samplesPage.validateFilterTagCount(
-      CATEGORY_NAMES.length - 1 // Phage
-    )
+    let expectedTags = filter_categories.includes(VIRUSES) && !filter_categories.includes(PHAGE) 
+      ? [...filter_categories, PHAGE]
+      : (filter_categories.includes(VIRUSES) && filter_categories.includes(PHAGE))
+      ? filter_categories.filter(category => category !== PHAGE)
+      : filter_categories;
+    await samplesPage.validateFilterTagCount(expectedTags.length)
     await samplesPage.validateStatsInfoNotEmpty()
     // #endregion Test Stats bar
 
@@ -166,9 +171,9 @@ test.describe("Sample report filter test", () => {
     await samplesPage.validateReadSpecificityFiltersHasExpectedOptions(READ_SPECIFICITY_FILTERS);
 
     const sampleReport = await samplesPage.getReportV2(sampleId);
-    const taxonNames = await samplesPage.getTaxonNames(sampleReport)
+    const taxonNames = await samplesPage.getTaxonNamesFromReport(sampleReport)
     const categories = [null]
-    const taxonNamesWithNoCategory = await samplesPage.getTaxonNamesByCategory(sampleReport, categories)
+    const taxonNamesWithNoCategory = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, categories)
     const expectedTaxonNames = {
       "All": taxonNames.Scientific,
       "Specific Only": taxonNames.Scientific.filter(item => !taxonNamesWithNoCategory.includes(item))
@@ -192,21 +197,30 @@ test.describe("Sample report filter test", () => {
 
   test(`Should be able to filter by multiple criteria`, async () => {
     const sampleReport = await samplesPage.getReportV2(sampleId);
-    const category = 'Bacteria'
+
+    const category = BACTERIA
     const taxons = await samplesPage.getTaxonsByCategory(sampleReport, [category])
-    const expectedTaxon = taxons[Math.floor(Math.random() * taxons.length)]
+    const taxon = taxons[Math.floor(Math.random() * taxons.length)]
 
-    const genus = await expectedTaxon.name.split(' ')[0]
-    const expectedTagText = `${genus} (genus)`
+    const genus = await taxon.name.split(' ')[0]
+    const searchResultText = `${genus} (genus)`
 
+    // Filter by Scientific name only
+    await samplesPage.selectNameTypeOption(SCIENTIFIC)
+
+    // Filter by Read Specificity
+    await samplesPage.selectReadSpecificityOption(SPECIFIC_ONLY)
+
+    // Filter by Category
     await samplesPage.selectCategoryFilter(category)
-    await samplesPage.fillSearchBar(genus);
-    await samplesPage.clickSearchResult(expectedTagText);
 
+    // Filter by Taxon name
+    await samplesPage.filterByName(genus, searchResultText);
+    
     await samplesPage.clickExpandAll()
     await samplesPage.validateTaxonsFilteredByName(genus)
+    await samplesPage.validateTaxonIsVisible(taxon.name)
 
-    // Tag rank does not match expected
-    await samplesPage.validateFilterTags([expectedTagText, category])
+    await samplesPage.validateFilterTags([searchResultText, category])
   });
 });

@@ -86,20 +86,18 @@ export class SamplesPage extends PageObject {
       return samples[Math.floor(Math.random() * samples.length)]
     }
     
-    public async getTaxonNames(sampleReport: any) {
+    public async getTaxonNamesFromReport(sampleReport: any) {
       let taxonNames = {
         "Scientific": [],
         "Common": []
       };
-      for (let key in sampleReport.counts) {
-        for (let taxonId in sampleReport.counts[key]) {
-          let taxon = sampleReport.counts[key][taxonId];
-          if (taxon.name && taxon.name.trim() !== '') {
-            taxonNames.Scientific.push(taxon.name);
-          }
-          if (taxon.common_name && taxon.common_name.trim() !== '') {
-            taxonNames.Common.push(taxon.common_name);
-          }
+      let taxons = await this.getTaxonsFromReport(sampleReport)
+      for (let taxon of taxons) {
+        if (taxon.name && taxon.name.trim() !== '') {
+          taxonNames.Scientific.push(taxon.name);
+        }
+        if (taxon.common_name && taxon.common_name.trim() !== '') {
+          taxonNames.Common.push(taxon.common_name);
         }
       }
       return taxonNames;
@@ -136,7 +134,7 @@ export class SamplesPage extends PageObject {
       return taxons.filter(taxon => taxon.category);
     }
 
-    public async getTaxonNamesByCategory(sampleReport: any, categories: string[]) {
+    public async getTaxonNamesFromReportByCategory(sampleReport: any, categories: string[]) {
       const taxons = await this.getTaxonsByCategory(sampleReport, categories)
       return taxons.map(taxon => taxon.name);
     }
@@ -244,7 +242,7 @@ export class SamplesPage extends PageObject {
     }
     
     public async clickSearchResult(text: string) {
-      await this.page.locator('[class="result"]').getByText(text).first().click();
+      await this.page.locator('[class="result"]').getByText(text, {exact: true}).first().click();
     }
     
     public async clickAnnotationFilter() {
@@ -267,6 +265,9 @@ export class SamplesPage extends PageObject {
       await this.page.locator('[aria-rowindex]').nth(index).click();
     }
     
+    public async ClickSortByName() {
+      await this.clickTableHeaderByIndex(0)
+    }
     
     public async clickClearFilters() {
       await this.page.locator(`text="Clear Filters"`).click();
@@ -286,25 +287,23 @@ export class SamplesPage extends PageObject {
     // #endregion Fill
 
     // #region Macro
-    public async findTaxonElementByName(name: string) {
+    public async isTaxonVisible(name: string) {
       await this.clickTableRowByIndex(0)
 
-      const taxonLocatorString = `[class*='taxonName']:text('${name}')`
+      const taxonLocatorString = `${TAXONS}:text('${name}')`
       const taxonElement = await this.page.locator(taxonLocatorString).first();
       if (!(await taxonElement.isVisible())) {
         await this.scrollUpToElement('[aria-rowindex="1"]')
         this.scrollDownToElement(taxonLocatorString)
       }
 
-      await taxonElement.scrollIntoViewIfNeeded()
       await taxonElement.waitFor({ state: 'visible' });
-    
       return taxonElement;
     }
     
-    public async toggleTableSort() {
-      await this.clickTableHeaderByIndex(0)
-      await this.clickTableHeaderByIndex(0)
+    public async toggleSortByName() {
+      await this.ClickSortByName()
+      await this.ClickSortByName()
     }
 
     public async hoverOverColumnByIndex(index: number) {
@@ -357,12 +356,16 @@ export class SamplesPage extends PageObject {
       await this.clickCategoriesOption(option)
       await this.pressEscape()
     }
+    
+    public async filterByName(name: string, searchResultText: string) {
+      await this.fillSearchBar(name);
+      await this.clickSearchResult(searchResultText);
+    }
     // #endregion Macro
 
     // #region Validation
     public async validateTotalReadPopupTest(expectedText: string) {
       await expect(this.page.locator(TOTAL_READ_POPOUP_CONTENT)).toHaveText(expectedText);
-
     }
 
     public async validateColumnsVisible() {
@@ -442,9 +445,6 @@ export class SamplesPage extends PageObject {
     
     public async validateTaxonsFilteredByName(expectedTaxonName: string) {
       let taxonElements = await this.getTaxonElements()
-      console.log("")
-      console.log(taxonElements)
-      console.log("")
       for (let taxonElement of taxonElements) {
         expect(taxonElement).toContainText(expectedTaxonName);
       }
@@ -478,6 +478,16 @@ export class SamplesPage extends PageObject {
     public async validateTaxonsArePresent(expectedTaxonNames: []) {
       for (let taxonName of expectedTaxonNames) {
         expect(await this.getTaxonElementByName(taxonName)).toBeTruthy();
+      }
+    }
+
+    public async validateTaxonIsVisible(name: string) {
+      expect(await this.isTaxonVisible(name)).toBeTruthy()
+    }
+
+    public async validateTaxonsAreVisible(taxonNames: string[]) {
+      for (let taxonName of taxonNames) {
+        await this.validateTaxonIsVisible(taxonName)
       }
     }
 
