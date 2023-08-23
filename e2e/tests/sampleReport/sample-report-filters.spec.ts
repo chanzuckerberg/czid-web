@@ -21,6 +21,7 @@ let samplesPage = null
 // These tests validate the user's proficiency in utilizing various filter functions on the sample report page, such as Nametype, Annotation, Category, Threshold filter, and Read specificity.
 test.describe("Sample report filter test", () => {
   test.beforeEach(async ({ page }) => {
+    test.setTimeout(60000*5)
     samplesPage = new SamplesPage(page)
 
     let randomSample = await samplesPage.getRandomCompletedSample()
@@ -34,7 +35,6 @@ test.describe("Sample report filter test", () => {
   });
 
   test(`Verify url displayed on the columns`, async () => {
-    test.setTimeout(60000*5)
     await samplesPage.validateColumnsVisible()
 
     const n = await samplesPage.getAllColumnText()
@@ -90,7 +90,6 @@ test.describe("Sample report filter test", () => {
    * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-3
    */
   test(`Should be able to filter by Category name`, async () => {
-    test.setTimeout(60000*5)
     const sampleReport = await samplesPage.getReportV2(sampleId);
     await samplesPage.clickExpandAll()
     await samplesPage.ClickSortByName()
@@ -147,7 +146,6 @@ test.describe("Sample report filter test", () => {
    * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-4
    */
   test(`Should be able to filter by Threshold`, async () => {
-    test.setTimeout(60000*10)
     const sampleReport = await samplesPage.getReportV2(sampleId);
     await samplesPage.validateThresholdOptionFilterHasExpectedOptions(THRESHOLD_FILTERS)
   
