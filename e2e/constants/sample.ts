@@ -4,6 +4,7 @@ export const NUMBER_INPUT = 'input[type="number"]';
 
 export const PATHOGEN_LINk = 'a[class="linkDefault-34rbs"]';
 
+export const TAXONS = '[class*="taxonName"]'
 export const FILTER_RESULT = '[data-testid="filter-tag"]';
 export const SEARCH_BAR = '[placeholder="Taxon name"]';
 export const ALL_COLUMN_HEADERS = [
@@ -100,6 +101,15 @@ export const VIRUSES_FILTER = '[data-testid="dropdown-viruses"]';
 export const VIRUSES_PHAGE_FILTER = '[data-testid="dropdown-viruses---phage"]';
 export const UNCATEGORIZED_FILTER = '[data-testid="dropdown-uncategorized"]';
 export const CATEGORIES_FILTER = '[data-testid="category-filter"]';
+export const CATEGORY_NAMES = [
+  "Archaea",
+  "Bacteria",
+  "Eukaryota",
+  "Viroids",
+  "Viruses",
+  "Phage",
+  "Uncategorized",
+];
 export const FILTERS_DROPDOWN = '[data-testid="dropdown-menu"]';
 export const THRESHOLD_OPTION_FILTER = '[class*="thresholdFilterList"] [data-testid="filters"]'
 export const THRESHOLD_COMPARISON_OPERATORS = [">=", "<="]

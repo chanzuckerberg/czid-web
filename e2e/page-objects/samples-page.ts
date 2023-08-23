@@ -5,41 +5,31 @@ import { ArticlesPage } from "./articles-page"
 import { kebabCase } from "lodash";
 // #region constants
 import {
-  ANNOTATION_FILTERS,
   ANNOTATION_TEXT,
   APPLY,
   APPLY_BUTTON,
   ARCHAEA_FILTER,
   BACTERIA_FILTER,
-  CANCEL_ICON,
   X_CLOSE_ICON,
   CATEGORIES_FILTER,
   COLUMNS_LABEL,
-  COLUMN_HEADER_PROP,
   EUKARYOTA_FILTER,
-  FILTER_RESULT,
   FILTER_TAG,
-  FILTER_VALUE,
-  KLEBSIELLA,
-  KLEBSIELLA_GENUS,
   LEARN_MORE_LINK,
   NUMBER_INPUT,
   READ_SPECIFICITY,
-  READ_SPECIFICITY_FILTERS,
-  SCORE,
   SEARCH_BAR,
   FILTERS_DROPDOWN,
   THRESHOLD_FILTER,
   THRESHOLD_OPTION_FILTER,
-  THRESHOLD_FILTERS,
   TOTAL_READ_POPOUP_CONTENT,
   UNCATEGORIZED_FILTER,
   VIROIDS_FILTER,
   VIRUSES_FILTER,
   VIRUSES_PHAGE_FILTER,
   NAME_TYPE_FILTER,
-  NAME_TYPES,
   NAME_TYPE_FILTER_VALUE,
+  TAXONS
 } from "../constants/sample";
 // #endregion constants
 
@@ -69,6 +59,32 @@ export class SamplesPage extends PageObject {
       const sampleReport = await response.json();
       return sampleReport;
     }
+
+    public async getSamples() {
+      const response = await this.page.context().request.get(
+        `${process.env.BASEURL}/samples/index_v2.json`
+      );
+      const responseJson = await response.json();
+      return responseJson.samples;
+    }
+
+    public async getCompletedSamples() {
+      const samples = await this.getSamples()
+      let completedSamples = []
+      for (let sample of samples) {
+        if (sample.details.mngs_run_info) {
+          if (sample.details.mngs_run_info.result_status_description === "COMPLETE") {
+            completedSamples.push(sample)
+          }
+        }
+      }
+      return completedSamples;
+    }
+
+    public async getRandomCompletedSample() {
+      const samples = await this.getCompletedSamples()
+      return samples[Math.floor(Math.random() * samples.length)]
+    }
     
     public async getTaxonNames(sampleReport: any) {
       let taxonNames = {
@@ -76,8 +92,8 @@ export class SamplesPage extends PageObject {
         "Common": []
       };
       for (let key in sampleReport.counts) {
-        for (let subKey in sampleReport.counts[key]) {
-          let taxon = sampleReport.counts[key][subKey];
+        for (let taxonId in sampleReport.counts[key]) {
+          let taxon = sampleReport.counts[key][taxonId];
           if (taxon.name && taxon.name.trim() !== '') {
             taxonNames.Scientific.push(taxon.name);
           }
@@ -89,17 +105,40 @@ export class SamplesPage extends PageObject {
       return taxonNames;
     }
 
-    public async getTaxonNamesWithNoCategory(sampleReport: any) {
-      let taxonNames = []
+    public async getTaxonsFromReport(sampleReport: any) {
+      let taxons = []
       for (let key in sampleReport.counts) {
-        for (let subKey in sampleReport.counts[key]) {
-          let taxon = sampleReport.counts[key][subKey];
-          if (taxon.category == null) {
-            taxonNames.push(taxon.name);
+        for (let taxonId in sampleReport.counts[key]) {
+          let taxon = sampleReport.counts[key][taxonId];
+          taxon.id = taxonId
+          if (taxon.name.split(' ').length >= 1) {
+            taxon.rank = 'species'
+          } else {
+            taxon.rank = 'genius'
           }
+          taxons.push(taxon);
         }
       }
-      return taxonNames;
+      return taxons;
+    }
+
+    public async getTaxonsByCategory(sampleReport: any, categories: string[]) {
+      const taxons = await this.getTaxonsFromReport(sampleReport);
+      const lowerCaseCategories = categories.map(category => `${category}`.toLowerCase());
+    
+      return taxons.filter(taxon => 
+        taxon.category && lowerCaseCategories.some(category => `${taxon.category}`.toLowerCase() === category)
+      );
+    }
+
+    public async getSpecificTaxons(sampleReport: any, categories: string[]) {
+      const taxons = await this.getTaxonsFromReport(sampleReport);
+      return taxons.filter(taxon => taxon.category);
+    }
+
+    public async getTaxonNamesByCategory(sampleReport: any, categories: string[]) {
+      const taxons = await this.getTaxonsByCategory(sampleReport, categories)
+      return taxons.map(taxon => taxon.name);
     }
     
     public async getNameTypeFilterValue() {
@@ -107,14 +146,17 @@ export class SamplesPage extends PageObject {
     }
     
     public async getTaxonElementByName(name: string) {
-      return await this.page.locator(`[class*='taxonName']:text("${name}")`)
+      const taxonElement = await this.page.locator(`${TAXONS}:text('${name}')`).first();
+      return taxonElement;
     }
     
     public async getTaxonElements() {
-      return await this.page.locator("[class*='taxonName']").all()
+      await this.page.locator(TAXONS).first().waitFor({state: 'visible'})
+      return await this.page.locator(TAXONS).all()
     }
 
     public async getFilterTagElements() {
+      await this.page.waitForSelector(FILTER_TAG, { state: 'visible' })
       return await this.page.locator(FILTER_TAG).all()
     }
     
@@ -139,6 +181,10 @@ export class SamplesPage extends PageObject {
     // #endregion Get
     
     // #region Click
+    public async clickExpandAll() {
+      await this.page.getByTestId("expand-taxon-parent-all").click()
+    }
+
     public async clickLearnMoreLink() {
       const [newPage] = await Promise.all([
         this.page.context().waitForEvent("page"),
@@ -161,6 +207,7 @@ export class SamplesPage extends PageObject {
     }
 
     public async clickApplyThresholdFilter() {
+      await this.page.waitForSelector(APPLY_BUTTON, { state: 'visible' })
       await this.page.locator(APPLY_BUTTON).locator(APPLY).click();
     }
 
@@ -197,7 +244,7 @@ export class SamplesPage extends PageObject {
     }
     
     public async clickSearchResult(text: string) {
-      await this.page.getByText(text).click();
+      await this.page.locator('[class="result"]').getByText(text).first().click();
     }
     
     public async clickAnnotationFilter() {
@@ -216,6 +263,11 @@ export class SamplesPage extends PageObject {
       await this.page.locator(COLUMNS_LABEL).nth(index).click();
     }
     
+    public async clickTableRowByIndex(index: number) {
+      await this.page.locator('[aria-rowindex]').nth(index).click();
+    }
+    
+    
     public async clickClearFilters() {
       await this.page.locator(`text="Clear Filters"`).click();
     }
@@ -224,14 +276,37 @@ export class SamplesPage extends PageObject {
     // #region Fill
     public async fillSearchBar(value: string) {
       await this.page.locator(SEARCH_BAR).fill(value);
+      await this.page.locator(SEARCH_BAR).click()
     }
 
     public async fillThresholdValue(value: number) {
+      await this.page.waitForSelector(NUMBER_INPUT, { state: 'visible' })
       await this.page.locator(NUMBER_INPUT).fill(value.toString());
     }
     // #endregion Fill
 
     // #region Macro
+    public async findTaxonElementByName(name: string) {
+      await this.clickTableRowByIndex(0)
+
+      const taxonLocatorString = `[class*='taxonName']:text('${name}')`
+      const taxonElement = await this.page.locator(taxonLocatorString).first();
+      if (!(await taxonElement.isVisible())) {
+        await this.scrollUpToElement('[aria-rowindex="1"]')
+        this.scrollDownToElement(taxonLocatorString)
+      }
+
+      await taxonElement.scrollIntoViewIfNeeded()
+      await taxonElement.waitFor({ state: 'visible' });
+    
+      return taxonElement;
+    }
+    
+    public async toggleTableSort() {
+      await this.clickTableHeaderByIndex(0)
+      await this.clickTableHeaderByIndex(0)
+    }
+
     public async hoverOverColumnByIndex(index: number) {
       await this.page.locator(COLUMNS_LABEL).nth(index).hover();
     }
@@ -275,6 +350,12 @@ export class SamplesPage extends PageObject {
     public async selectAnnotationFilter(option: string) {
       await this.clickAnnotationFilter()
       await this.clickAnnotationFilterOption(option)
+    }
+    
+    public async selectCategoryFilter(option: string) {
+      await this.clickCategoriesFilter()
+      await this.clickCategoriesOption(option)
+      await this.pressEscape()
     }
     // #endregion Macro
 
@@ -361,6 +442,9 @@ export class SamplesPage extends PageObject {
     
     public async validateTaxonsFilteredByName(expectedTaxonName: string) {
       let taxonElements = await this.getTaxonElements()
+      console.log("")
+      console.log(taxonElements)
+      console.log("")
       for (let taxonElement of taxonElements) {
         expect(taxonElement).toContainText(expectedTaxonName);
       }
@@ -388,6 +472,10 @@ export class SamplesPage extends PageObject {
         (await this.getReadSpecificityFilterValue()).match(readSpecificityOption)
       );
       // Assert the taxon common_names are on the page
+      await this.validateTaxonsArePresent(expectedTaxonNames);
+    }
+
+    public async validateTaxonsArePresent(expectedTaxonNames: []) {
       for (let taxonName of expectedTaxonNames) {
         expect(await this.getTaxonElementByName(taxonName)).toBeTruthy();
       }
@@ -399,8 +487,7 @@ export class SamplesPage extends PageObject {
         await this.validateFilterTags([annotationFilter])
 
         // TODO: Expand this validation to check each taxon in the report table matches the annotation criteria
-        // Question: Does anything in the report_v2 endpoint response correlate to the annotation criteria "Hit", "Not a hit", "Inconclusive"?
-        // report_v2 endpoint: /samples/${sampleId}/report_v2.json?&id=${sampleId}
+        // Question: Is this functionality missing in stage?
         
         await this.clickTableHeaderByIndex(0) // Closes the annotation filter options
         await this.clickFilterTagCloseIcon(annotationFilter);
