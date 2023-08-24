@@ -5,7 +5,7 @@
 x-web-variables: &web-variables
   ? SAMPLES_BUCKET_NAME=idseq-samples-development
   ? SAMPLES_BUCKET_NAME_V1=czi-infectious-disease-development-samples
-  ? S3_DATABASE_BUCKET=idseq-public-references
+  ? S3_DATABASE_BUCKET=czid-public-references
   ? S3_WORKFLOWS_BUCKET=idseq-workflows
   ? S3_AEGEA_ECS_EXECUTE_BUCKET=aegea-ecs-execute-development
   ? ES_ADDRESS=http://elasticsearch:9200

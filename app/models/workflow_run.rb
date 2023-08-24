@@ -368,6 +368,12 @@ class WorkflowRun < ApplicationRecord
     inputs&.[](input_name)
   end
 
+  def add_inputs(inputs_hash)
+    existing_inputs = inputs || {}
+    new_inputs = existing_inputs.merge(inputs_hash)
+    update!(inputs_json: new_inputs.to_json)
+  end
+
   def parsed_cached_results
     @parsed_cached_results ||= JSON.parse(cached_results || "null")
   end
