@@ -85,6 +85,7 @@
   .metadataValue {
     color: $sds-color-gray-500;
     word-break: break-all;
+    display: flex;
   }
 
   .emptyValue {
@@ -102,16 +103,16 @@
     }
   }
 
+  .pipelineVersion {
+    white-space: nowrap;
+  }
+
   .vizLink {
     @include font-header-xxs;
     // Override color: inherit in _header.scss.
     color: $sds-color-primary-400 !important;
-    margin-left: 12px;
-
-    .rightArrow {
-      font-size: 0.75em;
-      margin-left: $sds-spaces-xxs;
-    }
+    margin-left: $sds-spaces-l;
+    word-break: break-word;
   }
 }
 

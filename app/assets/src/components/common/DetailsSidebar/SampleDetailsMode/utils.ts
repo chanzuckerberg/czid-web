@@ -1,5 +1,6 @@
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 import moment from "moment";
+import { AMR_PIPELINE_HELP_LINK } from "~/components/utils/documentationLinks";
 import { usesLatestCardDbVersion } from "~/components/utils/pipeline_versions";
 import {
   WORKFLOWS,
@@ -18,6 +19,7 @@ import { AdditionalInfo } from "./SampleDetailsMode";
 
 const BLANK_TEXT = "unknown";
 const YYYY_MM_DD = "YYYY-MM-DD";
+const PIPELINE_VIZ_LINK_TEXT = "View Pipeline Visualization";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = (
@@ -50,7 +52,7 @@ export const processPipelineInfo = (
     if (pipelineRun.version.pipeline) {
       pipelineInfo.pipelineVersion = {
         text: `v${pipelineRun.version.pipeline}`,
-        linkLabel: "View Pipeline Visualization",
+        linkLabel: PIPELINE_VIZ_LINK_TEXT,
         link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${pipelineRun.version.pipeline}`,
       };
     }
@@ -178,6 +180,12 @@ export const processAMRWorkflowRun = (
     usesLatestCardDbVersion(pipelineVersion);
   const cardDbVersion = workflowRunUsesLatestCardDbVersion ? "3.2.6" : "3.2.3";
 
+  const pipelineVersionInfo = {
+    text: pipelineVersion,
+    linkLabel: PIPELINE_VIZ_LINK_TEXT,
+    link: AMR_PIPELINE_HELP_LINK,
+  };
+
   if (qualityMetrics) {
     const {
       total_reads: totalReads,
@@ -211,7 +219,7 @@ export const processAMRWorkflowRun = (
       analysisType: { text: workflow },
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
-      pipelineVersion: { text: pipelineVersion },
+      pipelineVersion: pipelineVersionInfo,
       cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
       totalReads: { text: numberWithCommas(totalReads) },
@@ -226,7 +234,7 @@ export const processAMRWorkflowRun = (
       analysisType: { text: workflow },
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
-      pipelineVersion: { text: pipelineVersion },
+      pipelineVersion: pipelineVersionInfo,
       cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
     };
