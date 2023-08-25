@@ -5,6 +5,7 @@ import {
   trackEvent,
   withAnalytics,
 } from "~/api/analytics";
+import { createAnnotation } from "~/api/blast";
 import AnnotationLabel from "~/components/ui/labels/AnnotationLabel";
 import {
   ANNOTATION_HIT,
@@ -12,17 +13,22 @@ import {
   ANNOTATION_NONE,
   ANNOTATION_NOT_A_HIT,
 } from "~/components/views/SampleView/utils";
+import { AnnotationType } from "~/interface/shared";
 import cs from "./annotation_menu.scss";
 
 interface AnnotationMenuProps {
+  onAnnotationUpdate: () => void;
+  pipelineRunId: number;
+  taxonId: number;
   currentLabelType?: "hit" | "not_a_hit" | "inconclusive" | "none";
-  onAnnotationSelected?: $TSFixMeFunction;
   analyticsContext?: object;
 }
 
 const AnnotationMenu = ({
+  onAnnotationUpdate,
+  pipelineRunId,
+  taxonId,
   currentLabelType,
-  onAnnotationSelected,
   analyticsContext,
 }: AnnotationMenuProps) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -35,8 +41,18 @@ const AnnotationMenu = ({
     setAnchorEl(null);
   };
 
+  const handleAnnotationCreation = (annotationType: AnnotationType) => {
+    createAnnotation({
+      pipelineRunId,
+      taxId: taxonId,
+      annotationType,
+    }).then(() => {
+      onAnnotationUpdate();
+    });
+  };
+
   const onItemSelected = (annotationType: $TSFixMe) => {
-    onAnnotationSelected(annotationType);
+    handleAnnotationCreation(annotationType);
     handleClose();
     trackEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_MENU_MENU_ITEM_CLICKED, {
       ...analyticsContext,

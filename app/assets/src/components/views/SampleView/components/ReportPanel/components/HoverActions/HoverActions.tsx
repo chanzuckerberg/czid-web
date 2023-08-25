@@ -1,128 +1,164 @@
 // These are the buttons that appear on a Report table row when hovered.
 import { ButtonIcon, IconNameToSizes } from "@czi-sds/components";
 import cx from "classnames";
-import { filter, kebabCase, pick, size } from "lodash/fp";
-import React, { useContext, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { filter, get, getOr, kebabCase, pick, size } from "lodash/fp";
+import React, { useState } from "react";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
-import { UserContext } from "~/components/common/UserContext";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
-import { AMR_V3_FEATURE } from "~/components/utils/features";
 import {
   CONSENSUS_GENOME_FEATURE,
   COVERAGE_VIZ_FEATURE,
   isPipelineFeatureAvailable,
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
+import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
+import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,
+  GENUS_LEVEL_INDEX,
   SPECIES_LEVEL_INDEX,
+  TABS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
 } from "~/components/views/SampleView/utils";
-import { BlastData, PickConsensusGenomeData } from "~/interface/sampleView";
+import {
+  BlastData,
+  CurrentTabSample,
+  PickConsensusGenomeData,
+} from "~/interface/sampleView";
+import { Taxon } from "~/interface/shared";
+import { INVALID_CALL_BASE_TAXID } from "../../../MngsReport/components/ReportTable/ReportTable";
 import cs from "./hover_actions.scss";
 
 interface HoverActionsProps {
   className?: string;
   consensusGenomeEnabled?: boolean;
-  contigVizEnabled?: boolean;
-  coverageVizEnabled?: boolean;
+  consensusGenomeData?: Record<string, object[]>;
+  currentTab: CurrentTabSample;
   fastaEnabled?: boolean;
-  onlyShowLongReadMNGSOptions: boolean;
+  isAlignVizAvailable: boolean;
+  isPhyloTreeAllowed: boolean; // TODO: this name isn't very descriptive
   onBlastClick: (params: BlastData) => void;
   onConsensusGenomeClick: (options: PickConsensusGenomeData) => void;
-  onContigVizClick: (options: object) => void;
   onCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void;
-  onFastaActionClick: (options: object) => void;
   onPhyloTreeModalOpened?: (options: object) => void;
   onPreviousConsensusGenomeClick?: (params: PickConsensusGenomeData) => void;
-  percentIdentity?: number;
-  phyloTreeEnabled?: boolean;
   pipelineVersion?: string;
   previousConsensusGenomeRuns?: $TSFixMeUnknown[];
+  projectId?: number;
+  rowData: Taxon;
   sampleId?: number;
   snapshotShareId?: string;
-  taxonStatsByCountType?: {
-    ntContigs: number;
-    ntReads: number;
-    nrContigs: number;
-    nrReads: number;
-  };
-  taxCategory?: string;
-  taxCommonName?: string;
-  taxId?: number;
-  taxLevel?: number;
-  taxName?: string;
-  taxSpecies?: $TSFixMeUnknown[];
 }
 
 export const HoverActions = ({
   className,
   consensusGenomeEnabled,
-  contigVizEnabled,
-  coverageVizEnabled,
+  currentTab,
   fastaEnabled,
+  isAlignVizAvailable,
+  isPhyloTreeAllowed,
   onBlastClick,
   onConsensusGenomeClick,
-  onContigVizClick,
   onCoverageVizClick,
-  onFastaActionClick,
   onPhyloTreeModalOpened,
   onPreviousConsensusGenomeClick,
-  onlyShowLongReadMNGSOptions,
-  percentIdentity,
-  phyloTreeEnabled,
   pipelineVersion,
   previousConsensusGenomeRuns,
+  projectId,
+  rowData,
   sampleId,
   snapshotShareId,
-  taxonStatsByCountType,
-  taxCategory,
-  taxCommonName,
-  taxId,
-  taxLevel,
-  taxName,
-  taxSpecies,
 }: HoverActionsProps) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
   const [showHoverActions, setShowHoverActions] = useState(false);
+
+  const {
+    taxId: taxonId,
+    taxLevel: taxonLevel,
+    name: taxonName,
+    common_name: taxonCommonName,
+    species: taxonSpecies,
+    category: taxonCategory,
+  } = rowData;
+
+  const taxonLevelIndex =
+    taxonLevel === TAX_LEVEL_SPECIES ? SPECIES_LEVEL_INDEX : GENUS_LEVEL_INDEX;
+
+  const validTaxonId = taxonId < INVALID_CALL_BASE_TAXID || taxonId > 0;
+  const contigVizEnabled = !!(
+    (get("nt.contigs", rowData) || get("nr.contigs", rowData)) // TODO: use optional chaining and update NT/NR types
+  );
+  const coverageVizEnabled =
+    currentTab === TABS.LONG_READ_MNGS ||
+    (isAlignVizAvailable && validTaxonId && getOr(0, "nt.count", rowData) > 0);
+  const phyloTreeEnabled =
+    isPhyloTreeAllowed &&
+    taxonId > 0 &&
+    PhyloTreeChecks.passesCreateCondition(
+      getOr(0, "nt.count", rowData),
+      getOr(0, "nr.count", rowData),
+    );
+  const percentIdentity = get("nt.percent_identity", rowData);
+  const taxonStatsByCountType = {
+    ntContigs: get("nt.contigs", rowData),
+    ntReads: get("nt.count", rowData),
+    nrContigs: get("nr.contigs", rowData),
+    nrReads: get("nr.count", rowData),
+  };
   const { ntContigs } = taxonStatsByCountType;
 
-  const handlePhyloModalOpen = () => {
-    onPhyloTreeModalOpened &&
-      onPhyloTreeModalOpened({
-        taxId,
-        taxName,
-      });
+  const analyticsContext = {
+    projectId: projectId,
+    sampleId: sampleId,
+    taxId: taxonId,
+    taxLevel: rowData.taxLevel,
+    taxName: rowData.name,
   };
 
-  const handleConsensusGenomeClick = () => {
-    onConsensusGenomeClick &&
+  const handlePhyloModalOpen = withAnalytics(
+    () =>
+      onPhyloTreeModalOpened({
+        taxId: taxonId,
+        taxName: taxonName,
+      }),
+    ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_PHYLOTREE_LINK_CLICKED,
+    analyticsContext,
+  );
+
+  const handleConsensusGenomeClick = withAnalytics(
+    () =>
       onConsensusGenomeClick({
         percentIdentity,
-        taxId,
-        taxName,
-      });
-  };
+        taxId: taxonId,
+        taxName: taxonName,
+      }),
+    ANALYTICS_EVENT_NAMES.REPORT_TABLE_CONSENSUS_GENOME_HOVER_ACTION_CLICKED,
+    analyticsContext,
+  );
 
-  const handlePreviousConsensusGenomeClick = () => {
-    onPreviousConsensusGenomeClick &&
+  const handlePreviousConsensusGenomeClick = withAnalytics(
+    () =>
       onPreviousConsensusGenomeClick({
         percentIdentity,
-        taxId,
-        taxName,
-      });
-  };
+        taxId: taxonId,
+        taxName: taxonName,
+      }),
+    ANALYTICS_EVENT_NAMES.REPORT_TABLE_PREVIOUS_CONSENSUS_GENOME_HOVER_ACTION_CLICKED,
+    analyticsContext,
+  );
 
-  const handleBlastClick = () => {
-    // If there are contigs, then BLAST contigs, otherwise BLAST reads.
-    onBlastClick &&
+  // If there are contigs, then BLAST contigs, otherwise BLAST reads.
+  const handleBlastClick = withAnalytics(
+    () =>
       onBlastClick({
         context: {
           blastedFrom: "HoverActions",
@@ -132,27 +168,90 @@ export const HoverActions = ({
         // shouldBlastContigs is only used by the BLAST v0 feature. It will be removed after BLAST v1 is launched
         shouldBlastContigs: ntContigs >= 0,
         taxonStatsByCountType,
-        taxName,
-        taxLevel,
-        taxId,
-      });
+        taxName: taxonName,
+        taxLevel: taxonLevelIndex,
+        taxId: taxonId,
+      }),
+    ANALYTICS_EVENT_NAMES.REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED,
+    analyticsContext,
+  );
+
+  const params = {
+    pipelineVersion,
+    taxCommonName: taxonCommonName,
+    taxId: taxonId,
+    taxLevel:
+      taxonLevelIndex === SPECIES_LEVEL_INDEX
+        ? TAX_LEVEL_SPECIES
+        : TAX_LEVEL_GENUS,
+    taxName: taxonName,
+    taxSpecies: taxonSpecies,
+    taxonStatsByCountType,
   };
+
+  const downloadFastaByUrl = () => {
+    if (!taxonLevelIndex) {
+      // eslint-disable-next-line no-console
+      console.error("Unknown taxLevel:", taxonLevelIndex);
+      return;
+    }
+    location.href = `/samples/${sampleId}/fasta/${taxonLevelIndex}/${taxonId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
+  };
+
+  const handleFastaActionClick = withAnalytics(
+    downloadFastaByUrl,
+    ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_TAXON_FASTA_LINK_CLICKED,
+    analyticsContext,
+  );
+
+  const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxonLevelIndex}_${taxonId}?pipeline_version=${pipelineVersion}`;
+  const openCoverageViz = () => {
+    onCoverageVizClick({
+      taxId: taxonId,
+      taxName: taxonName,
+      taxCommonName: taxonCommonName,
+      taxLevel: taxonLevel,
+      alignmentVizUrl,
+      taxSpecies: taxonSpecies,
+      taxonStatsByCountType,
+    });
+  };
+
+  const handleCoverageVizClick = withAnalytics(
+    openCoverageViz,
+    ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_COVERAGE_VIZ_LINK_CLICKED,
+    analyticsContext,
+  );
+
+  const openAlignmentVizUrl = () => {
+    window.open(alignmentVizUrl);
+  };
+
+  const handleAlignmentVizClick = withAnalytics(
+    openAlignmentVizUrl,
+    ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_COVERAGE_VIZ_LINK_CLICKED,
+    analyticsContext,
+  );
+
+  const downloadContigByUrl = () => {
+    location.href = getDownloadContigUrl({
+      pipelineVersion,
+      sampleId,
+      taxId: taxonId,
+    });
+  };
+
+  const handleContigVizClick = withAnalytics(
+    downloadContigByUrl,
+    ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_CONTIG_DOWNLOAD_LINK_CLICKED,
+    analyticsContext,
+  );
 
   // Metadata for each of the hover actions.
   const getHoverActions = () => {
     const hasCoverageViz =
       isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) ||
-      onlyShowLongReadMNGSOptions;
-    const params = {
-      pipelineVersion,
-      taxCommonName: taxCommonName,
-      taxId: taxId,
-      taxLevel:
-        taxLevel === SPECIES_LEVEL_INDEX ? TAX_LEVEL_SPECIES : TAX_LEVEL_GENUS,
-      taxName: taxName,
-      taxSpecies: taxSpecies,
-      taxonStatsByCountType,
-    };
+      currentTab === TABS.LONG_READ_MNGS;
 
     // Define all available icons (but don't display them)
     const HOVER_ACTIONS_VIZ = hasCoverageViz
@@ -160,7 +259,7 @@ export const HoverActions = ({
           key: `coverage_viz_${params.taxId}`,
           message: "Coverage Visualization",
           iconName: "barChartVertical4",
-          handleClick: onCoverageVizClick,
+          handleClick: handleCoverageVizClick,
           enabled: coverageVizEnabled,
           disabledMessage:
             "Coverage Visualization Not Available - requires reads in NT",
@@ -171,7 +270,7 @@ export const HoverActions = ({
           key: `alignment_viz_${params.taxId}`,
           message: "Alignment Visualization",
           iconName: "linesHorizontal",
-          handleClick: onCoverageVizClick,
+          handleClick: handleAlignmentVizClick,
           enabled: coverageVizEnabled,
           disabledMessage:
             "Alignment Visualization Not Available - requires reads in NT",
@@ -229,23 +328,19 @@ export const HoverActions = ({
       iconName: "download",
       options: [
         {
-          text: allowedFeatures.includes(AMR_V3_FEATURE)
-            ? "Contigs (.fasta)"
-            : "Contigs FASTA",
+          text: "Contigs (.fasta)",
           value: DOWNLOAD_CONTIGS,
           disabled: !contigVizEnabled,
         },
         {
-          text: allowedFeatures.includes(AMR_V3_FEATURE)
-            ? "Reads (.fasta)"
-            : "Reads FASTA",
+          text: "Reads (.fasta)",
           value: DOWNLOAD_READS,
           disabled: !fastaEnabled,
         },
       ],
       onChange: (value: typeof DOWNLOAD_CONTIGS | typeof DOWNLOAD_READS) => {
-        if (value === DOWNLOAD_CONTIGS) onContigVizClick(params || {});
-        else if (value === DOWNLOAD_READS) onFastaActionClick(params || {});
+        if (value === DOWNLOAD_CONTIGS) handleContigVizClick();
+        else if (value === DOWNLOAD_READS) handleFastaActionClick();
         else console.error("Unexpected dropdown value:", value);
       },
       enabled: contigVizEnabled || fastaEnabled,
@@ -253,9 +348,10 @@ export const HoverActions = ({
       params,
     };
 
+    // TODO: (FE Refactor): This should probably be configured in a wrapper component and passed as a prop
     // Build up the list of hover actions
     let hoverActions = [];
-    if (onlyShowLongReadMNGSOptions) {
+    if (currentTab === TABS.LONG_READ_MNGS) {
       hoverActions = [HOVER_ACTIONS_VIZ, HOVER_ACTIONS_DOWNLOAD];
     } else {
       hoverActions = [
@@ -280,9 +376,9 @@ export const HoverActions = ({
       !isPipelineFeatureAvailable(CONSENSUS_GENOME_FEATURE, pipelineVersion)
     ) {
       return `Consensus genome pipeline not available for mNGS pipeline versions < ${MINIMUM_VERSIONS[CONSENSUS_GENOME_FEATURE]}`;
-    } else if (taxCategory !== "viruses") {
+    } else if (taxonCategory !== "viruses") {
       return "Consensus genome pipeline is currently available for viruses only.";
-    } else if (taxLevel !== 1) {
+    } else if (taxonLevelIndex !== 1) {
       return "Consensus genome pipeline only available at the species level.";
     } else if (ntContigs === undefined || ntContigs <= 0) {
       return "Please select a virus with at least 1 contig that aligned to the NT database to run the consensus genome pipeline.";
@@ -291,6 +387,7 @@ export const HoverActions = ({
     }
   };
 
+  // TODO: move this to its own component
   // Render the hover action according to metadata.
   const renderHoverAction = (hoverAction: {
     key: string;

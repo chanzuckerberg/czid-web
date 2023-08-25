@@ -74,15 +74,13 @@ export const MngsReport = ({
         </div>
         {view === "table" && (
           <ReportTable
-            alignVizAvailable={!!reportMetadata?.alignVizAvailable}
             consensusGenomeData={getConsensusGenomeData(sample)}
-            consensusGenomeEnabled={sample?.editable}
             currentTab={currentTab}
             data={filteredReportData}
-            displayMergedNtNrValue={displayMergedNtNrValue}
-            displayNoBackground={isNil(selectedOptions.background)}
-            fastaDownloadEnabled={!!reportMetadata?.hasByteRanges}
-            initialDbType={displayMergedNtNrValue ? "merged_nt_nr" : "nt"}
+            isAlignVizAvailable={!!reportMetadata?.alignVizAvailable}
+            isConsensusGenomeEnabled={sample?.editable}
+            isFastaDownloadEnabled={!!reportMetadata?.hasByteRanges}
+            isPhyloTreeAllowed={sample ? sample.editable : false}
             onAnnotationUpdate={handleAnnotationUpdate}
             onBlastClick={handleBlastClick}
             onConsensusGenomeClick={handleConsensusGenomeClick}
@@ -92,13 +90,14 @@ export const MngsReport = ({
               handleTaxonClick,
               ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_TAXON_SIDEBAR_LINK_CLICKED,
             )}
-            phyloTreeAllowed={sample ? sample.editable : false}
             pipelineVersion={pipelineRun?.pipeline_version}
             pipelineRunId={pipelineRun?.id}
             projectId={project?.id}
             projectName={project?.name}
             sampleId={sample?.id}
             snapshotShareId={snapshotShareId}
+            shouldDisplayMergedNtNrValue={displayMergedNtNrValue}
+            shouldDisplayNoBackground={isNil(selectedOptions.background)}
           />
         )}
         {view === "tree" && filteredReportData.length > 0 && (

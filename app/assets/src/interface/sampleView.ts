@@ -188,22 +188,26 @@ export interface RawReportData {
   sortedGenus: number[];
 }
 
+export type CellRendererType = ({
+  cellData,
+  rowData,
+}: {
+  cellData?: Array<number> | number | string;
+  rowData?: Taxon;
+}) => JSX.Element | string;
+
+export type HeaderRendererType = () => JSX.Element;
+
 export interface ColumnProps {
   dataKey?: string;
-  cellRenderer?: ({
-    cellData,
-    rowData,
-  }: {
-    cellData?: Array<number> | number | string;
-    rowData?: Taxon;
-  }) => JSX.Element | string;
+  cellRenderer?: CellRendererType;
   className?: string;
   columnData?: { [key: string]: any };
   disableSort?: boolean;
   disableDrag?: boolean;
   flexGrow?: number;
   headerClassName?: string;
-  headerRenderer?: () => JSX.Element;
+  headerRenderer?: HeaderRendererType;
   label?: string;
   minWidth?: number;
   width?: number;
@@ -225,3 +229,5 @@ export type PickConsensusGenomeData = Pick<
   ConsensusGenomeData,
   "percentIdentity" | "taxId" | "taxName"
 >;
+
+export type DBType = "nt" | "nr" | "merged_nt_nr";

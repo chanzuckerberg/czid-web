@@ -1,5 +1,10 @@
 import { BlastData } from "~/interface/sampleView";
-import { AccessionData, Taxon, TooltipLocation } from "~/interface/shared";
+import {
+  AccessionData,
+  Taxon,
+  TaxonLevelType,
+  TooltipLocation,
+} from "~/interface/shared";
 
 export interface CoverageVizBottomSidebarProps {
   visible?: boolean;
@@ -17,7 +22,7 @@ export interface CoverageVizParamsRaw {
   taxId: number;
   taxName: string;
   taxCommonName: string;
-  taxLevel: "genus" | "species";
+  taxLevel: TaxonLevelType;
   taxSpecies: Taxon[];
   alignmentVizUrl: string;
   taxonStatsByCountType: {

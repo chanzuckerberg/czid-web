@@ -272,6 +272,8 @@ export interface Subcategories {
 
 export type AnnotationType = "not_a_hit" | "hit" | "inconclusive" | "none";
 
+export type TaxonLevelType = "genus" | "species";
+
 export interface Taxon {
   agg_score?: $TSFixMeUnknown;
   annotation?: AnnotationType;
@@ -297,7 +299,7 @@ export interface Taxon {
   };
   species_tax_ids?: number[];
   taxId?: number;
-  taxLevel?: "genus" | "species";
+  taxLevel?: TaxonLevelType;
   pathogenFlag: string;
   pathogenFlags: string[];
   lineageRank?: string;
