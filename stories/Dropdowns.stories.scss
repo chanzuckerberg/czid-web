@@ -1,7 +1,0 @@
-@import "~styles/themes/typography";
-@import "~styles/themes/elements";
-
-.dropdown {
-  @include font-body-s;
-  font-family: $font-family-default;
-}
