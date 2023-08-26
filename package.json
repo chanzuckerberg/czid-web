@@ -115,7 +115,7 @@
     "@mui/icons-material": "^5.8.4",
     "@mui/lab": "^5.0.0-alpha.92",
     "@mui/material": "^5.9.2",
-    "@reduxjs/toolkit": "^1.5.1",
+    "@reduxjs/toolkit": "^1.9.5",
     "@sentry/react": "^5.30.0",
     "@tanstack/react-table": "^8.8.5",
     "axios": "^0.21.2",
