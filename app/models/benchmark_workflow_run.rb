@@ -3,6 +3,8 @@ class BenchmarkWorkflowRun < WorkflowRun
 
   OUTPUT_BENCHMARK_HTML_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.benchmark_html".freeze
   OUTPUT_BENCHMARK_NOTEBOOK_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.benchmark_notebook".freeze
+  OUTPUT_BENCHMARK_TRUTH_NT_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.truth_nt".freeze
+  OUTPUT_BENCHMARK_TRUTH_NR_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.truth_nr".freeze
 
   def results(cacheable_only: false)
     results = {
