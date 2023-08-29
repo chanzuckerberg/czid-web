@@ -305,13 +305,16 @@ class WorkflowRunsController < ApplicationController
     permitted_params = params.permit(:downloadType)
     download_type = permitted_params[:downloadType]
     sample_name = @workflow_run.sample.name
+    @workflow_run = @workflow_run.workflow_by_class
 
     case download_type
     when "report_html"
-      s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_BENCHMARK_HTML)
+      output_name = @workflow_run.get_output_name(BenchmarkWorkflowRun::OUTPUT_BENCHMARK_HTML_TEMPLATE)
+      s3_path = @workflow_run.output_path(output_name)
       filename = "benchmark.html"
     when "report_ipynb"
-      s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_BENCHMARK_NOTEBOOK)
+      output_name = @workflow_run.get_output_name(BenchmarkWorkflowRun::OUTPUT_BENCHMARK_NOTEBOOK)
+      s3_path = @workflow_run.output_path(output_name)
       filename = "benchmark_notebook.ipynb"
     else
       render(

@@ -1,9 +1,8 @@
 class BenchmarkWorkflowRun < WorkflowRun
   AWS_S3_TRUTH_FILES_BUCKET = "s3://idseq-bench/datasets/truth_files/".freeze
 
-  # TODO: generalize workflow portions of the constants below
-  OUTPUT_BENCHMARK_HTML = "benchmark.short_read_mngs_benchmark.benchmark_html".freeze
-  OUTPUT_BENCHMARK_NOTEBOOK = "benchmark.short_read_mngs_benchmark.benchmark_notebook".freeze
+  OUTPUT_BENCHMARK_HTML_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.benchmark_html".freeze
+  OUTPUT_BENCHMARK_NOTEBOOK_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.benchmark_notebook".freeze
 
   def results(cacheable_only: false)
     results = {
@@ -21,6 +20,10 @@ class BenchmarkWorkflowRun < WorkflowRun
     results
   end
 
+  def get_output_name(output_template)
+    format(output_template, workflow_name: inputs&.[]("workflow_benchmarked")&.underscore)
+  end
+
   private
 
   def benchmark_metrics
@@ -35,7 +38,8 @@ class BenchmarkWorkflowRun < WorkflowRun
   end
 
   def benchmark_html_report
-    output(OUTPUT_BENCHMARK_HTML)
+    output_name = get_output_name(OUTPUT_BENCHMARK_HTML_TEMPLATE)
+    output(output_name)
   end
 
   def benchmark_info
