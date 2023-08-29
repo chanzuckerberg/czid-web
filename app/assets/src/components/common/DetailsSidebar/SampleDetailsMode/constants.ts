@@ -83,6 +83,10 @@ const CARD_DATABASE_VERSION = {
   name: "CARD Database Version",
   key: "cardDatabaseVersion",
 };
+const WILDCARD_DATABASE_VERSION = {
+  name: "Wildcard Database Version",
+  key: "wildcardDatabaseVersion",
+};
 
 export const SHORT_READ_MNGS_INFO_FIELDS = [
   ANALYSIS_TYPE,
@@ -132,6 +136,7 @@ export const AMR_WORKFLOW_INFO_FIELDS = [
   SEQUENCING_PLATFORM,
   PIPELINE_VERSION,
   CARD_DATABASE_VERSION,
+  WILDCARD_DATABASE_VERSION,
   TOTAL_READS,
   ERCC_READS,
   PASSED_FILTERS,

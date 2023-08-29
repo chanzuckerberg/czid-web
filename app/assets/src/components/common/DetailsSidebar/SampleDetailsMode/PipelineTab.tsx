@@ -69,6 +69,7 @@ export interface AmrPipelineTabInfo {
   compressionRatio?: { text: string };
   meanInsertSize?: { text: string };
   lastProcessedAt: { text: string };
+  wildcardDatabaseVersion?: { text: string };
 }
 
 type PipelineStepDictState = PiplineStepDictInterface | Record<string, never>;

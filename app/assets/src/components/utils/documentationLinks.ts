@@ -54,6 +54,8 @@ export const AMR_EXISTING_SAMPLES_LINK =
   "https://docs.google.com/document/d/12a_0PQcTRbB-0JC1SMjhLvdQzhBF2Z0TZseFkoH-aRI/edit#bookmark=id.lqgywt4vgvg3";
 export const AMR_DEPRECATED_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15090471044372-Current-vs-Deprecated-AMR-Pipelines";
+export const AMR_DATABASE_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15091031482644#AMR-database";
 export const GUPPY_BASECALLER_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13830756964372-Upload-Nanopore-Data-#guppy-basecaller";
 export const CONCAT_FILES_HELP_LINK =

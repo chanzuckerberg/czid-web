@@ -12,12 +12,14 @@ export interface WorkflowRun {
   inputs?: {
     accession_id: string;
     accession_name: string;
+    card_version: string;
     creation_source: CreationSource;
     ref_fasta: string;
     taxon_id: number;
     taxon_name: string;
     technology: string;
     wetlab_protocol: string;
+    wildcard_version: string;
   };
   run_finalized: boolean;
   parsed_cached_results?: {

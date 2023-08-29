@@ -1,10 +1,8 @@
-import { get } from "lodash/fp";
 import moment from "moment";
 import React from "react";
 import { Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
-import { usesLatestCardDbVersion } from "~/components/utils/pipeline_versions";
 import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
@@ -63,17 +61,34 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
 
   const getDatabaseVersionString = () => {
     if (!shouldIncludeDatabaseVersion) return "";
-    let dbVersion = get("version.alignment_db", currentRun);
+    let dbVersionString: string;
     if (workflowType === "amr") {
-      const workflowRunUsesLatestCardDbVersion = usesLatestCardDbVersion(
-        currentRun[versionKey],
-      );
-      const cardDbVersion = workflowRunUsesLatestCardDbVersion
-        ? "3.2.6"
-        : "3.2.3";
-      dbVersion = `CARD DB: ${cardDbVersion}`;
+      dbVersionString = getAmrDatabaseVersionString();
+    } else {
+      dbVersionString = getMngsDatabaseVersionString();
     }
-    return dbVersion ? `${dbVersion} | ` : "";
+    return dbVersionString;
+  };
+
+  const getMngsDatabaseVersionString = () => {
+    const pipelineRun = currentRun as PipelineRun;
+    const alignmentDbVersion = pipelineRun.version?.alignment_db;
+    return alignmentDbVersion ? alignmentDbVersion.concat(" | ") : "";
+  };
+
+  const getAmrDatabaseVersionString = () => {
+    const workflowRun = currentRun as WorkflowRun;
+    const cardVersion = workflowRun.inputs?.card_version;
+    const wildcardVersion = workflowRun.inputs?.wildcard_version;
+    let dbVersionString = "";
+    if (cardVersion) {
+      dbVersionString += `CARD DB: ${wildcardVersion} | `;
+    }
+    if (wildcardVersion) {
+      dbVersionString += `Wildcard DB: ${wildcardVersion} | `;
+    }
+
+    return dbVersionString;
   };
 
   const getWorkflowVersionString = () => {

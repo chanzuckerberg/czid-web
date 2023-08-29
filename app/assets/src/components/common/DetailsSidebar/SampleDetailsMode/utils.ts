@@ -1,7 +1,6 @@
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 import moment from "moment";
 import { AMR_PIPELINE_HELP_LINK } from "~/components/utils/documentationLinks";
-import { usesLatestCardDbVersion } from "~/components/utils/pipeline_versions";
 import {
   WORKFLOWS,
   WORKFLOW_KEY_FOR_VALUE,
@@ -168,6 +167,7 @@ export const processAMRWorkflowRun = (
     executed_at: executedAt,
     wdl_version: pipelineVersion,
     parsed_cached_results,
+    inputs,
   } = workflowRun;
 
   const qualityMetrics = parsed_cached_results?.quality_metrics;
@@ -175,10 +175,8 @@ export const processAMRWorkflowRun = (
   const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflowValue];
   const workflow = WORKFLOWS[workflowKey].label;
   const lastProcessedAt = moment(executedAt).format(YYYY_MM_DD);
-
-  const workflowRunUsesLatestCardDbVersion =
-    usesLatestCardDbVersion(pipelineVersion);
-  const cardDbVersion = workflowRunUsesLatestCardDbVersion ? "3.2.6" : "3.2.3";
+  const cardDbVersion = inputs?.card_version;
+  const wildcardVersion = inputs?.wildcard_version;
 
   const pipelineVersionInfo = {
     text: pipelineVersion,
@@ -228,6 +226,7 @@ export const processAMRWorkflowRun = (
       qcPercent: { text: qcPercent },
       compressionRatio: { text: compressionRatio },
       meanInsertSize: { text: meanInsertSize },
+      wildcardDatabaseVersion: { text: wildcardVersion },
     };
   } else {
     return {
@@ -237,6 +236,7 @@ export const processAMRWorkflowRun = (
       pipelineVersion: pipelineVersionInfo,
       cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
+      wildcardDatabaseVersion: { text: wildcardVersion },
     };
   }
 };
