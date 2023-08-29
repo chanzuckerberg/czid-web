@@ -169,7 +169,6 @@ export const PrimaryHeaderControls = ({
             currentTab={currentTab}
             workflowRun={currentRun as WorkflowRun}
             sample={sample}
-            view={view}
           />
         );
       }

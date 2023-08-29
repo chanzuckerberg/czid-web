@@ -22,7 +22,6 @@ interface AmrDownloadDropdownProps {
   currentTab?: string;
   workflowRun?: WorkflowRun;
   sample?: Sample;
-  view?: string;
 }
 
 const AmrDownloadDropdown = ({

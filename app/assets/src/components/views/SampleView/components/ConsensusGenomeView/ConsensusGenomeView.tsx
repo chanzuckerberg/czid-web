@@ -3,6 +3,7 @@ import cx from "classnames";
 import { camelCase, find, get, getOr, isEmpty, isNil, size } from "lodash/fp";
 import memoize from "memoize-one";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { getWorkflowRunResults } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
@@ -14,10 +15,12 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils/download";
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
 import {
+  cancellablePromise,
   CG_HISTOGRAM_FILL_COLOR,
   CG_HISTOGRAM_HOVER_FILL_COLOR,
   RUNNING_STATE,
   SARS_COV_2_ACCESSION_ID,
+  SUCCEEDED_STATE,
 } from "~/components/views/SampleView/utils";
 import Histogram, {
   HISTOGRAM_SCALE,
@@ -34,7 +37,7 @@ import {
   VIRAL_CONSENSUS_GENOME_DOC_LINK,
 } from "~utils/documentationLinks";
 import { FIELDS_METADATA } from "~utils/tooltip";
-import { ConsensusGenomeDropdown } from "./components/ConsensusGenomeDropdown/ConsensusGenomeDropdown";
+import { ConsensusGenomeDropdown } from "./components/ConsensusGenomeDropdown";
 import cs from "./consensus_genome_view.scss";
 
 interface ConsensusGenomeViewProps {
@@ -52,20 +55,45 @@ interface ConsensusGenomeViewProps {
 export const ConsensusGenomeView = ({
   onWorkflowRunSelect,
   sample,
-  loadingResults,
   workflowRun,
-  workflowRunResults,
 }: ConsensusGenomeViewProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
+
+  const [loadingResults, setLoadingResults] = useState(false);
+  const [workflowRunResults, setWorkflowRunResults] = useState(null);
 
   const coverageVizContainerRef = useRef();
   const [histogramTooltipData, setHistogramTooltipData] = useState(null);
   const [histogramTooltipLocation, setHistogramTooltipLocation] =
     useState(null);
+
   const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
     run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
   );
+
+  useEffect(() => {
+    if (
+      workflowRun?.status !== SUCCEEDED_STATE ||
+      workflowRun?.workflow !== "consensus-genome"
+    ) {
+      return;
+    }
+    const { runFetch, cancelFetch } = cancellablePromise(
+      getWorkflowRunResults(workflowRun?.id),
+    );
+    setLoadingResults(true);
+    setWorkflowRunResults(null);
+    const fetchResults = async () => {
+      const results =
+        workflowRun?.status === SUCCEEDED_STATE ? await runFetch : {};
+      setWorkflowRunResults(results);
+      setLoadingResults(false);
+    };
+
+    fetchResults();
+    return cancelFetch;
+  }, [workflowRun?.id, workflowRun?.status, workflowRun?.workflow]);
 
   useEffect(() => {
     if (
@@ -81,7 +109,7 @@ export const ConsensusGenomeView = ({
       <div className={cs.dropdownContainer}>
         <ConsensusGenomeDropdown
           workflowRuns={consensusGenomeWorkflowRuns}
-          initialSelectedValue={workflowRun.id}
+          initialSelectedValue={workflowRun?.id}
           onConsensusGenomeSelection={workflowRunId =>
             onWorkflowRunSelect(
               find({ id: workflowRunId }, consensusGenomeWorkflowRuns),

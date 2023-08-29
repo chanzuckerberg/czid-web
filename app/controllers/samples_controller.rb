@@ -954,6 +954,7 @@ class SamplesController < ApplicationController
       redirect_to my_data_path
     end
 
+    @current_user = current_user
     respond_to do |format|
       format.html
       format.json do

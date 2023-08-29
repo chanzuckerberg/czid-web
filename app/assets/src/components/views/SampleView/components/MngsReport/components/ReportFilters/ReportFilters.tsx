@@ -116,9 +116,9 @@ export const ReportFilters = ({
       default:
         return;
     }
-
     refreshDataFromOptionsChange({ key, newSelectedOptions });
   };
+
   const handleFilterChange = ({
     key,
     value,

@@ -36,7 +36,6 @@ export interface ReportPanelProps {
   }) => void;
   lineageData?: { [key: string]: Lineage };
   loadingReport?: boolean;
-  loadingWorkflowRunResults?: boolean;
   ownedBackgrounds?: Background[];
   otherBackgrounds?: Background[];
   project?: NumberId;

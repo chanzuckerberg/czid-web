@@ -162,11 +162,17 @@ export const adjustMetricPrecision = (species: $TSFixMe) => {
   return species;
 };
 
-export const setDisplayName = ({ reportData, nameType }: $TSFixMe) => {
+export const setDisplayName = ({
+  reportData,
+  nameType,
+}: {
+  reportData: Taxon[];
+  nameType: string;
+}) => {
   const useScientific = nameType === "Scientific name";
-  reportData.forEach((genus: $TSFixMe) => {
+  reportData.forEach(genus => {
     genus.displayName = useScientific ? genus.name : genus.common_name;
-    genus.species.forEach((species: $TSFixMe) => {
+    genus.species.forEach(species => {
       species.displayName = useScientific ? species.name : species.common_name;
     });
   });
@@ -187,7 +193,16 @@ export const filterReportData = ({
 }: {
   currentTab: CurrentTabSample;
   reportData: Taxon[];
-  filters: FilterSelections;
+  filters: Pick<
+    FilterSelections,
+    | "categories"
+    | "thresholdsShortReads"
+    | "thresholdsLongReads"
+    | "readSpecificity"
+    | "taxa"
+    | "annotations"
+    | "flags"
+  >;
 }) => {
   const categoriesSet = new Set(
     map(c => c.toLowerCase(), categories.categories || []),

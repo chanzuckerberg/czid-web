@@ -1,4 +1,5 @@
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { FilterSelections } from "~/interface/sampleView";
 
 export const SPECIES_LEVEL_INDEX = 1;
 export const GENUS_LEVEL_INDEX = 2;
@@ -22,6 +23,19 @@ export const URL_FIELDS = {
   view: "string",
   currentTab: "string",
   workflowRunId: "number",
+};
+
+export type URL_FIELDS = {
+  pipelineVersion: string;
+  selectedOptions: object;
+  tempSelectedOptions?: object;
+  view: string;
+  currentTab: string;
+  workflowRunId: number;
+};
+
+export type LOCAL_STORAGE_FIELDS = {
+  selectedOptions: Partial<Omit<FilterSelections, "background" | "taxon">>;
 };
 
 export const CG_HISTOGRAM_FILL_COLOR = "#A9BDFC";

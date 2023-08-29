@@ -29,7 +29,7 @@ const AnnouncementBanner = ({
         setShowAnnouncmentBanner(true);
       }
     }
-  }, [visible]);
+  }, [visible, id]);
 
   const handleAnnouncementBannerClose = () => {
     setShowAnnouncmentBanner(false);

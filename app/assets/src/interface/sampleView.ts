@@ -1,7 +1,4 @@
-import {
-  AccessionsSummary,
-  CoverageVizParamsRaw,
-} from "~/components/common/CoverageVizBottomSidebar/types";
+import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import {
   LongReadTabsSample,
@@ -12,6 +9,7 @@ import { PathogenFlags } from "~/components/views/compare/SamplesHeatmapView/Sam
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
+  AccessionData,
   Background,
   ConsensusGenomeData,
   DateString,
@@ -89,10 +87,7 @@ export interface SampleViewState {
   consensusGenomeCreationParams: ConsensusGenomeParams | Record<string, never>;
   consensusGenomePreviousParams: ConsensusGenomeData | Record<string, never>;
   coverageVizDataByTaxon: {
-    [taxonId: number]: {
-      best_accessions: AccessionsSummary[];
-      num_accessions: number;
-    };
+    [taxonId: number]: AccessionData;
   };
   coverageVizParams: CoverageVizParamsRaw | Record<string, never>;
   coverageVizVisible: boolean;

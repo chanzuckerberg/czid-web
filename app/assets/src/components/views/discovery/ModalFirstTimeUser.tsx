@@ -22,7 +22,7 @@ const ModalFirstTimeUser = ({ onClose }: ModalFirstTimeUserProps) => {
     trackEvent(ANALYTICS_EVENT_NAMES.MODAL_FIRST_TIME_USER_SHOWN, {
       userId: userId,
     });
-  }, []);
+  }, [userId]);
 
   return (
     <Modal

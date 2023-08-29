@@ -16,6 +16,7 @@ export const ReportPanel = ({
   currentTab,
   clearAllFilters,
   enableMassNormalizedBackgrounds,
+  refreshDataFromOptionsChange,
   filteredReportData,
   handleAnnotationUpdate,
   handleBlastClick,
@@ -26,10 +27,8 @@ export const ReportPanel = ({
   handleTaxonClick,
   handleViewClick,
   handleWorkflowRunSelect,
-  refreshDataFromOptionsChange,
   lineageData,
   loadingReport,
-  loadingWorkflowRunResults,
   ownedBackgrounds,
   otherBackgrounds,
   project,
@@ -39,7 +38,6 @@ export const ReportPanel = ({
   selectedOptions,
   snapshotShareId,
   view,
-  workflowRunResults,
 }: ReportPanelProps) => {
   return (
     <>
@@ -50,6 +48,7 @@ export const ReportPanel = ({
           backgrounds={backgrounds}
           currentTab={currentTab}
           clearAllFilters={clearAllFilters}
+          refreshDataFromOptionsChange={refreshDataFromOptionsChange}
           enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
           filteredReportData={filteredReportData}
           handleAnnotationUpdate={handleAnnotationUpdate}
@@ -62,7 +61,6 @@ export const ReportPanel = ({
           handleOptionChanged={handleOptionChanged}
           handleTaxonClick={handleTaxonClick}
           handleViewClick={handleViewClick}
-          refreshDataFromOptionsChange={refreshDataFromOptionsChange}
           lineageData={lineageData}
           loadingReport={loadingReport}
           ownedBackgrounds={ownedBackgrounds}
@@ -93,9 +91,7 @@ export const ReportPanel = ({
         <ConsensusGenomeView
           onWorkflowRunSelect={handleWorkflowRunSelect}
           sample={sample}
-          loadingResults={loadingWorkflowRunResults}
           workflowRun={currentRun as WorkflowRun}
-          workflowRunResults={workflowRunResults}
         />
       )}
     </>

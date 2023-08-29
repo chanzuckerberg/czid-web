@@ -43,7 +43,7 @@ export const MngsReport = ({
   view,
 }: MngsReportProps) => {
   const displayMergedNtNrValue = currentTab === TABS.MERGED_NT_NR;
-  if (reportMetadata.reportReady && reportData?.length > 0) {
+  if (reportMetadata.reportReady && reportData?.length > 0 && !loadingReport) {
     return (
       <div className={cs.reportViewContainer}>
         <ReportFilters
