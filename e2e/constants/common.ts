@@ -96,3 +96,9 @@ export const HEAT_MAP_ICON = "heatmap-icon";
 export const DOWNLOAD_ICON = "download-icon";
 export const BULK_DELETE_TRIGGER = "bulk-delete-trigger";
 export const DOT_HORIZONTAL = "dots-horizontal";
+
+export const QA_TEST_PROJECTS: Record<string, string> = {
+  CI: "E2E Test Project",
+  LOCAL: "E2E Test Project",
+  STAGING: "New QA Project",
+};

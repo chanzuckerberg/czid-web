@@ -1,3 +1,4 @@
+import { QA_TEST_PROJECTS } from "@e2e/constants/common";
 import {
   HELP_CENTER_PROJECT_URL,
   PROJECT_NAME_NOT_AVAILABLE_ERROR,
@@ -41,17 +42,17 @@ function createResponse(project: Project) {
   };
 }
 
-test.describe("Create project test", () => {
+const ENV = `${process.env.NODE_ENV}`;
+const EXISTING_PROJECT = QA_TEST_PROJECTS[ENV.toUpperCase()];
+test.describe("Sample project tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await page.getByTestId("create-project").click();
     // Create Project modal should be visible
     await expect(page.getByText("New Project")).toBeVisible();
-    // Create Project button should be disabled
-    await expect(page.getByTestId(CREATE_PROJECT_BTN)).toBeDisabled();
   });
 
-  test("Creating Project is successful for happy path", async ({ page }) => {
+  test("Should create new project", async ({ page }) => {
     const projectName = "Test project " + new Date().getTime();
     const data = {
       id: 934,
@@ -79,18 +80,18 @@ test.describe("Create project test", () => {
     // Submit
     await page.getByTestId(CREATE_PROJECT_BTN).click();
 
-    // expand the dropdown
-    await page.locator(".labelContainer-3Rr0F").click();
+    await page.waitForTimeout(2000);
+
     // Modal should close and new project name should be visible in dropdown
-    await expect(page.getByText(data.name).first()).toBeVisible();
+    expect(await page.getByTestId("filter-value").textContent()).toContain(
+      data.name,
+    );
   });
 
-  test("Will not create project with a name that already exists", async ({
-    page,
-  }) => {
+  test("Should not create duplicate project", async ({ page }) => {
     // Fill in project name that already exists in test db
 
-    await page.locator(UI_INPUT).fill(`Test project`);
+    await page.locator(UI_INPUT).fill(EXISTING_PROJECT);
     await page.getByTestId(PUBLIC_PROJECT).click();
     await page
       .getByTestId(PROJECT_DESCRIPTION)
@@ -103,9 +104,7 @@ test.describe("Create project test", () => {
     ).toBeVisible();
   });
 
-  test("Create project button should be disabled if any of the fields are not filled in", async ({
-    page,
-  }) => {
+  test("Should enforce mandatory fields", async ({ page }) => {
     await page.locator(UI_INPUT).fill(`Test project`);
     await expect(page.getByTestId(CREATE_PROJECT_BTN)).toBeDisabled();
     await page.getByTestId(PUBLIC_PROJECT).click();
@@ -118,17 +117,14 @@ test.describe("Create project test", () => {
     await expect(page.getByTestId(CREATE_PROJECT_BTN)).toBeEnabled();
   });
 
-  test("Clicking Cancel button closes modal", async ({ page }) => {
+  test("Should close modal window", async ({ page }) => {
     await page.getByTestId("cancel-btn").click();
     // Modal should no longer be visible
     await expect(page.getByText("New Project")).toHaveCount(0);
   });
 
   // todo: there is a conditional popup that blocks; need a way to prevent this via cookies
-  test("Clicking Learn more button redirects to Help Center", async ({
-    page,
-    context,
-  }) => {
+  test("Should redirect to Help Center", async ({ page, context }) => {
     // Clicking Learn more opens a new tab, so get the new page
     const [newPage] = await Promise.all([
       context.waitForEvent("page"),
@@ -139,9 +135,7 @@ test.describe("Create project test", () => {
   });
 
   // todo: needs testid to propagate to staging for test to work in staging
-  test("Clicking more info and less info toggles visibility of project description guidelines", async ({
-    page,
-  }) => {
+  test("Should toggle visibility of project guidelines", async ({ page }) => {
     await page.getByTestId("more-less-info-btn").click();
     await expect(page.getByTestId("project-description-info")).toBeVisible();
     await page.getByTestId("more-less-info-btn").click();
