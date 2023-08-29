@@ -6,6 +6,7 @@ export const GENUS_LEVEL_INDEX = 2;
 
 export const KEY_SAMPLE_VIEW_OPTIONS = "SampleViewOptions";
 
+export const NONE_BACKGROUND_VALUE = 0;
 export const KEY_SELECTED_OPTIONS_BACKGROUND = "background";
 export const KEY_SELECTED_OPTIONS_TAXA = "taxa";
 export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholdsShortReads";

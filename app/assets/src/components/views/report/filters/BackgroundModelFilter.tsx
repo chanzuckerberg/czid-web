@@ -96,6 +96,7 @@ const BackgroundModelFilter = React.memo(
           categories={backgroundSections}
           disabled={disabled}
           fluid
+          shouldIncludeNoneOption
           itemIdToName={backgroundIdToName}
           onChange={onChange}
           onClick={onClick}

@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import React from "react";
 import { DropdownProps } from "semantic-ui-react";
 import DropdownTrigger from "~/components/ui/controls/dropdowns/common/DropdownTrigger";
+import { NONE_BACKGROUND_VALUE } from "~/components/views/SampleView/utils/constants";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import cs from "./subtext_dropdown.scss";
@@ -25,6 +26,7 @@ interface SectionsDropdownProps extends DropdownProps {
       }[];
     };
   };
+  shouldIncludeNoneOption?: boolean;
   // Used to map the item to the item's name whenever the value of the item is not text.
   // e.g. BackgroundModel items' values are their numerical IDs however we want to display the names of the backgrounds,
   // so we do a lookup in itemIdToName to find the name of the background to display in the DropdownTrigger.
@@ -41,6 +43,7 @@ const SectionsDropdown = ({
   className,
   menuClassName,
   categories,
+  shouldIncludeNoneOption,
   itemIdToName,
   nullLabel,
   onChange,
@@ -92,7 +95,7 @@ const SectionsDropdown = ({
   };
 
   const prepareSectionItems = () => {
-    const items: $TSFixMe = [];
+    let items: $TSFixMe = [];
     const itemSearchStrings: $TSFixMe = [];
     const sections = {};
 
@@ -127,7 +130,27 @@ const SectionsDropdown = ({
     // Remove the last divider.
     items.pop();
 
+    if (shouldIncludeNoneOption) {
+      items = [...addNoneOption(), items];
+    }
+
     return { items, itemSearchStrings, sections };
+  };
+
+  const addNoneOption = (includeDivider = true) => {
+    const items = [
+      renderMenuItem({
+        text: "None",
+        value: NONE_BACKGROUND_VALUE,
+      }),
+    ];
+    itemIdToName[NONE_BACKGROUND_VALUE] = "None";
+
+    if (includeDivider) {
+      items.push(<BareDropdown.Divider key="none_divider" />);
+    }
+
+    return items;
   };
 
   const renderEmptySectionMessage = (message: $TSFixMe) => (

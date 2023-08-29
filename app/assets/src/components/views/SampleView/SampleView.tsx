@@ -101,6 +101,7 @@ import {
   KEY_SAMPLE_VIEW_OPTIONS,
   KEY_SELECTED_OPTIONS_BACKGROUND,
   LOCAL_STORAGE_FIELDS,
+  NONE_BACKGROUND_VALUE,
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
@@ -787,6 +788,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     });
 
     if (key === KEY_SELECTED_OPTIONS_BACKGROUND) {
+      if (value === NONE_BACKGROUND_VALUE) {
+        newSelectedOptions[KEY_SELECTED_OPTIONS_BACKGROUND] = null;
+      }
+
       trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED, {
         sampleId: sample.id,
         projectId: project.id,
