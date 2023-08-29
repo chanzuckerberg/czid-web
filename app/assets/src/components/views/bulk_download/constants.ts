@@ -48,6 +48,8 @@ export const BULK_DOWNLOAD_TYPES = {
   BIOM_FORMAT_DOWNLOAD_TYPE: "biom_format",
   AMR_RESULTS_BULK_DOWNLOAD: "amr_results_bulk_download",
   ORIGINAL_INPUT_FILES: "original_input_file",
+  // "host_gene_counts" is historical: it now serves various host count info.
+  // Transcript counts for short-read-mngs v8+, gene counts for v7 and before
   HOST_GENE_COUNTS: "host_gene_counts",
 };
 

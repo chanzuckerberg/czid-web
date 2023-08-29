@@ -11,6 +11,8 @@ module BulkDownloadTypesHelper
   SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE = "sample_taxon_report".freeze
   COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE = "combined_sample_taxon_results".freeze
   CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE = "contig_summary_report".freeze
+  # host_gene_counts type is legacy: it now serves various host count info.
+  # Transcript counts for short-read-mngs v8+, gene counts for v7 and before
   HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE = "host_gene_counts".freeze
   READS_NON_HOST_BULK_DOWNLOAD_TYPE = "reads_non_host".freeze
   CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE = "contigs_non_host".freeze
@@ -197,7 +199,7 @@ module BulkDownloadTypesHelper
     {
       type: HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE,
       display_name: "Host Gene Counts",
-      description: "Host gene count outputs",
+      description: "Host transcript counts (pipeline versions 8 and greater); Host gene counts (pipeline versions less than 8)",
       category: "reports",
       execution_type: ECS_EXECUTION_TYPE,
       collaborator_only: true,

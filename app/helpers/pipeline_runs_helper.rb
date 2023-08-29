@@ -10,7 +10,7 @@ module PipelineRunsHelper
         "validate_input_out" => "Validates input files are .fastq format; truncates to 75 million fragments",
         "bowtie2_ercc_filtered_out" => "Removes ERCCs",
         "fastp_out" => "Removes low quality bases, short reads, and low complexity reads",
-        "kallisto" => "Generates host gene counts",
+        "kallisto" => "Generates host transcript counts",
         "bowtie2_host_filtered_out" => "Implements primary step for subtracting host reads",
         "hisat2_host_filtered_out" => "Removes remaining host reads",
         "insert_size_metrics" => "Generates insert size metrics",

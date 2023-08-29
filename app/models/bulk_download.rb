@@ -479,12 +479,14 @@ class BulkDownload < ApplicationRecord
     end
 
     if download_type == HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
+      # Name of "host gene counts" is historical. v8+ short read now serves
+      # host transcript info instead, but type left alone for legacy reasons.
       download_src_urls, download_tar_names = pipeline_runs_ordered.each_with_object([[], []]).with_index do |(pr, result), pr_index|
         # samples_ordered and pipeline_runs_ordered are ordered by sample_id, so we can use the pipeline run index to get the associated sample
         download_tar_name = get_output_file_prefix(samples_ordered[pr_index], cleaned_project_names).to_s
-        download_tar_name += pipeline_version_uses_new_host_filtering_stage(pr.pipeline_version) ? "reads_per_gene.kallisto.tsv" : "reads_per_gene.star.tab"
+        download_tar_name += pipeline_version_uses_new_host_filtering_stage(pr.pipeline_version) ? "reads_per_transcript.kallisto.tsv" : "reads_per_gene.star.tab"
 
-        result[0] << pr.host_gene_count_s3_path
+        result[0] << pr.host_count_s3_path
         result[1] << download_tar_name
       end
     end

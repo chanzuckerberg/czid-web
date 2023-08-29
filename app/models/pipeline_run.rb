@@ -90,7 +90,7 @@ class PipelineRun < ApplicationRecord
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   BOWTIE2_ERCC_OUTPUT_NAME = "bowtie2_ERCC_counts.tsv".freeze
   KALLISTO_ERCC_OUTPUT_NAME = "ERCC_counts.tsv".freeze
-  HOST_GENE_COUNTS_OUTPUT_NAME = "reads_per_gene.kallisto.tsv".freeze
+  HOST_TRANSCRIPT_READS_OUTPUT_NAME = "reads_per_transcript.kallisto.tsv".freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
@@ -573,9 +573,9 @@ class PipelineRun < ApplicationRecord
     multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{hit_fasta_basename}"
   end
 
-  def host_gene_count_s3_path
+  def host_count_s3_path
     if pipeline_version_uses_new_host_filtering_stage(pipeline_version)
-      "#{host_filter_output_s3_path}/#{HOST_GENE_COUNTS_OUTPUT_NAME}"
+      "#{host_filter_output_s3_path}/#{HOST_TRANSCRIPT_READS_OUTPUT_NAME}"
     else
       "#{host_filter_output_s3_path}/#{READS_PER_GENE_STAR_TAB_NAME}"
     end
