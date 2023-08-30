@@ -1,8 +1,4 @@
-import path from "path";
-import { expect, Page, test } from "@playwright/test";
-import dotenv from "dotenv";
-import { kebabCase } from "lodash";
-import { TEST_PROJECTS } from "../../constants/common";
+import { SAMPLE_PROJECTS } from "@e2e/constants/common";
 import {
   ADD_THRESHOLD,
   ANNOTATION,
@@ -24,10 +20,10 @@ import {
   SEARCH,
   TIMEFRAME,
   VISIBILITY,
-} from "../../constants/filter";
-import { goToProjectSamples } from "../../utils/project";
-
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
+} from "@e2e/constants/filter";
+import { goToProjectSamples } from "@e2e/utils/project";
+import { expect, Page, test } from "@playwright/test";
+import { kebabCase } from "lodash";
 
 const chosenHosts = ["Human"];
 const sampleTypes = ["Ocular Fluid", "Nasopharyngeal Swab"];
@@ -40,7 +36,7 @@ const workflows = [
 const CANADA = "Alberta, Canada";
 const DALLAS = "Dallas County, Texas, USA";
 const ENV = (process.env.NODE_ENV as string) || "";
-const projectName = TEST_PROJECTS[ENV.toUpperCase()];
+const projectName = SAMPLE_PROJECTS[ENV.toUpperCase()];
 
 async function clearFilters(page: Page) {
   const totalFilters = await page.getByText(ADD_THRESHOLD).count();

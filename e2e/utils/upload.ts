@@ -1,35 +1,29 @@
 import path from "path";
-import { expect, Page } from "@playwright/test";
-import { kebabCase } from "lodash/fp";
 import {
-  ACCEPT_ALL_COOKIES,
   ANALYSIS_TYPE,
   COLLECTION_DATE,
   COLLECTION_LOCATION,
-  COLUMN_SELECTOR,
   CONTINUE,
-  DISEASES_CONDITIONS,
   FIXTURE_DIR,
-  HOST_GENUS_SPECIES,
+  GO_TO_PROJECT,
   HOST_ORGANISM,
-  HOST_SEX,
-  ISOLATE,
-  KNOWN_ORGANISM,
-  RNA_DNA,
+  LOADED,
   SAMPLE_TYPE,
   START_UPLOAD,
   UPLOAD_METADATA,
   WORKFLOWS,
-} from "../constants/common";
-import { Metadata } from "../types/metadata";
-import { pressKey } from "../utils/page";
-import { getFixture } from "./common";
-import { getMetadataField } from "./selectors";
+} from "@e2e/constants/common";
+import { Metadata } from "@e2e/types/metadata";
+import { fileChooser } from "@e2e/utils/page";
+import { expect, Page } from "@playwright/test";
+import { kebabCase } from "lodash/fp";
+import { updateMetadata } from "./metadata";
 
-const metadataFieldFixture = getFixture("metadata_fields");
 const REF_FILENAME = "consensus_papilloma.fa";
+const CONTINUE_BUTTON = '[class *="continueButton"]';
+const ONT = "sequencing-technology-ONT";
 
-export const uploadRefSequence = async page => {
+export const uploadRefSequence = async (page: Page) => {
   const REF_FILE = `./fixtures/reference_sequences/${REF_FILENAME}`;
   const [refSeqFileChooser] = await Promise.all([
     // It is important to call waitForEvent before click to set up waiting.
@@ -41,197 +35,25 @@ export const uploadRefSequence = async page => {
   await refSeqFileChooser.setFiles(path.resolve(REF_FILE));
 };
 
-export async function uploadSampleFiles(
+export async function uploadMetadata(
   page: Page,
-  projectName: string,
-  analysisType: string,
-  sampleFiles: Array<string>,
+  metadataTemplate: string,
 ): Promise<any> {
-  // select project
-  await page.getByTestId("select-project").click();
-  // type in search box
-  await page.locator('input[placeholder="Search"]').type(projectName);
-
-  await page.getByText(projectName).click();
-
-  // select analysis type
-  const analysisTypeId = `${ANALYSIS_TYPE}-${kebabCase(analysisType)}`;
-  const wgsWorkflowOption = await page.getByTestId(analysisTypeId);
-  await wgsWorkflowOption.click();
-
-  if (analysisType === WORKFLOWS.MNGS) {
-    await page
-      .getByTestId("sequencing-technology-Illumina") // todo: needs to be parameterized
-      .click();
-  }
-
-  if (analysisType === WORKFLOWS.WGS) {
-    // choose a taxon name
-    const taxonFilter = await page.getByTestId("upload-taxon-filter");
-    await taxonFilter.click();
-    await page.getByText("Unknown").click();
-
-    // upload a reference sequence
-    await uploadRefSequence(page);
-
-    // ensure filename displayed
-    await expect(wgsWorkflowOption).toContainText(REF_FILENAME);
-
-    // test file can be removed
-    await wgsWorkflowOption.getByTestId("ClearIcon").click();
-    await expect(wgsWorkflowOption).not.toContainText(REF_FILENAME);
-
-    // upload a reference sequence again
-    await uploadRefSequence(page);
-  }
-  const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
-  if ((await cookieBanner.count()) > 0) {
-    await cookieBanner.click();
-  }
-  // select files
-  const fileInputSelector = '[data-testid="drop-sample-files"] input';
-  const filePath = path.resolve(`${FIXTURE_DIR}/${sampleFiles}`);
-  await page.waitForTimeout(4000);
-  await page.setInputFiles(fileInputSelector, filePath);
-  await page.getByText(CONTINUE).click();
-
   // wait for page and file data to be imported
   expect(page.getByText(UPLOAD_METADATA)).toBeVisible();
-}
 
-export async function fillMetadata(
-  page: Page,
-  metaData: Metadata,
-): Promise<any> {
-  const inputSelector = 'input[type="text"]';
+  const sampleName = await getGeneratedSampleName(page);
+  // switch to csv upload
+  await page.getByText("CSV Upload").click();
 
-  // host organism
-  await page
-    .locator(inputSelector)
-    .nth(0)
-    .fill(String(metaData[HOST_ORGANISM]));
+  // create metadata file
+  const metadataFile = updateMetadata(metadataTemplate, sampleName);
 
-  // sample type
-  await page.locator(inputSelector).nth(1).fill(String(metaData[SAMPLE_TYPE]));
+  // upload csv
+  await fileChooser(page, metadataFile);
 
-  // water control
-  if (metaData["Water Control"] === "Yes") {
-    // todo: atm this crashes the test
-    // await page.locator('input[type="radio"]').nth(0).click({ force: true });
-  }
-  // collection date
-  await page
-    .locator(inputSelector)
-    .nth(2)
-    .fill(metaData[COLLECTION_DATE] as string);
-
-  // nucleotide type
-  await page.getByTestId("filters").nth(1).click();
-  await page
-    .getByTestId(kebabCase(metaData["Nucleotide Type"] as string))
-    .click();
-
-  // await page.getByText(metaData["Nucleotide Type"] as string).click();
-
-  // collection location
-  await page
-    .getByPlaceholder("Enter a city, region or country")
-    .type(metaData[COLLECTION_LOCATION] as string);
-  await page
-    .getByText(metaData[COLLECTION_LOCATION] as string)
-    .nth(0)
-    .click();
-
-  // first add optional columns so they can be filled
-  const optionalFields: Array<string> =
-    metadataFieldFixture["allOptionalFields"];
-  // clicking the + icon
-  await page.locator('[data-testid="select-columns"]:visible').click();
-  const items = page.locator(COLUMN_SELECTOR);
-  const indexOfFirstOptionalField = 5;
-  for (let i = indexOfFirstOptionalField; i < (await items.count()); i++) {
-    const optionName = (await items.nth(i).textContent()) as string;
-    // this is a hack: at the moment we are not handling all optional fields
-    if (optionalFields.includes(optionName)) {
-      await items.nth(i).click();
-    }
-  }
-
-  // close the column selection popup
-  await pressKey(page, "Escape");
-
-  // host sex
-  const hostSex = "host_sex";
-  await page.locator(getMetadataField(hostSex)).click();
-  await page.getByText(metaData[HOST_SEX] as string, { exact: true }).click();
-  // await page.getByText(metaData[HOST_SEX] as string).click();
-
-  // known organism
-  await page
-    .locator(inputSelector)
-    .nth(4)
-    .fill(metaData[KNOWN_ORGANISM] as string);
-
-  // infection class
-  const infectionClass = "infection_class";
-  await page.locator(getMetadataField(infectionClass)).click();
-  await page.getByTestId("unknown").click();
-
-  // host age
-  await page
-    .locator('input[type="number"]')
-    .nth(0)
-    .fill(String(metaData["Host Age"]));
-
-  // detection method
-  await page
-    .locator(inputSelector)
-    .nth(5)
-    .fill(metaData["Detection Method"] as string);
-
-  // library prep
-  await page.locator(getMetadataField("library_prep")).click();
-  await page.getByText(metaData["Library Prep"] as string).click();
-
-  // sequencer
-  await page.locator(getMetadataField("sequencer")).click();
-  await page.getByText(metaData["Sequencer"] as string).click();
-
-  // rna/dna input (ng)
-  await page
-    .locator('input[type="number"]')
-    .nth(1)
-    .fill(String(metaData[RNA_DNA]));
-
-  // host genus species
-  const hostGenusSpecies = "host_genus_species";
-  await page.locator(getMetadataField(hostGenusSpecies)).click();
-  await page.getByText(metaData[HOST_GENUS_SPECIES] as string).click();
-
-  // isolate
-  const isolate = "isolate";
-  if (metaData[ISOLATE] === "Yes") {
-    // at the moment this crashes the browser
-    await page.locator(getMetadataField(isolate)).click();
-  }
-
-  // diseases and conditions
-  await page
-    .locator(inputSelector)
-    .nth(6)
-    .fill(String(metaData[DISEASES_CONDITIONS]));
-
-  // click continue button
-  await page.locator(".continueButton-2Bayh").nth(1).click();
-}
-
-export async function submitUpload(page: Page): Promise<any> {
-  await page
-    .locator(
-      "text=I agree that the data I am uploading to CZ ID has been lawfully collected",
-    )
-    .click();
-  await page.getByText(START_UPLOAD).click();
+  // successful upload dialogue
+  expect(page.getByText(LOADED).nth(1)).toBeVisible();
 }
 
 export async function getGeneratedSampleName(
@@ -240,9 +62,389 @@ export async function getGeneratedSampleName(
   return page.getByTestId("sample-name").textContent();
 }
 
+export async function selectFiles(
+  page: Page,
+  selector: string,
+  filePath: string,
+  files: string[],
+): Promise<any> {
+  files.forEach(async sampleFile => {
+    const fullPath = path.resolve(`${filePath}/${sampleFile}`);
+    await page.setInputFiles(selector, fullPath);
+  });
+}
+
+export async function uploadSampleFiles(
+  page: Page,
+  projectName: string,
+  analysisType: string,
+  sampleFiles: Array<string>,
+  invalidSample?: boolean,
+  verifyDeleteFile?: boolean,
+  sequencingTechnology?: string,
+): Promise<any> {
+  const BASE_SPACE = "basespace";
+  await cookieBanner(page);
+
+  // search and select project
+  await page
+    .getByText("Select project", { exact: true })
+    .click({ timeout: 10000 });
+  await page.locator('input[placeholder="Search"]').type(projectName);
+  await page.getByText(projectName).click();
+
+  // without this upload fails
+  await page.waitForTimeout(4000);
+
+  // select analysis type
+  const analysisTypeId = `${ANALYSIS_TYPE}-${kebabCase(analysisType)}`;
+  const wgsWorkflowOption = page.getByTestId(analysisTypeId);
+  await wgsWorkflowOption.click();
+
+  if (analysisType === WORKFLOWS.MNGS) {
+    // locator("..") gives us parent so we can click the checkbox
+    await page.getByText("Illumina", { exact: true }).locator("..").click();
+    // verify basespace and S3
+    await expect(page.getByText("S3")).toBeEnabled();
+    await expect(page.getByText("Basespace")).toBeEnabled();
+  }
+
+  if (analysisType === WORKFLOWS.WGS) {
+    // choose a taxon name
+    const taxonFilter = page.getByTestId("upload-taxon-filter");
+    await taxonFilter.click();
+    await page.getByText("Unknown").click();
+
+    // upload a reference sequence
+    await uploadRefSequence(page);
+
+    // test file can be removed
+    await page
+      .getByTestId("clear-uploaded-file-button")
+      .getByTestId("ClearIcon")
+      .click();
+    await expect(wgsWorkflowOption).not.toContainText(REF_FILENAME);
+
+    // upload a reference sequence again
+    await uploadRefSequence(page);
+
+    // verify basespace
+    await expect(page.getByTestId(BASE_SPACE)).toBeEnabled();
+  }
+
+  if (sequencingTechnology === WORKFLOWS.LMNGS) {
+    await page.getByTestId(ONT).click();
+    await expect(page.getByTestId(ONT)).toContainText(
+      "Guppy Basecaller Setting",
+    );
+    // click the dropdown
+    await page.getByTestId(ONT).getByTestId("filters").click();
+    await expect(page.getByTestId("fast")).toBeVisible();
+    await expect(page.getByTestId("hac")).toBeVisible();
+    await expect(page.getByTestId("super")).toBeVisible();
+    await page.getByTestId("super").click();
+
+    // verify basespace
+    await expect(page.getByTestId(BASE_SPACE)).toBeDisabled();
+  }
+
+  if (sequencingTechnology === WORKFLOWS.SC2) {
+    await page.getByTestId("sequencing-technology-Illumina").click();
+    // click the dropdown
+    await page.getByTestId("filter-value").click();
+    await page.getByText("VarSkip").click();
+  }
+
+  // select files
+  const fileInputSelector = '[data-testid="drop-sample-files"] input';
+  await selectFiles(page, fileInputSelector, FIXTURE_DIR, sampleFiles);
+
+  // wait for upload to complete
+  const fileConfirmation = `${sampleFiles.length} Files Selected For Upload`;
+  await expect(page.getByText(fileConfirmation)).toBeVisible({
+    timeout: 10000,
+  });
+
+  // verify user is able to click to remove unselected samples
+  // check if the check box is checked then unchecked it
+  if (verifyDeleteFile && !invalidSample) {
+    if (await page.locator('input[value="all"]').isChecked()) {
+      await page.getByTestId("check-box").first().click();
+    }
+    // remove the unselected sample
+    await page.getByText("Click to remove unselected samples").click();
+
+    // verify the sample is no longer displayed
+    expect(await page.getByTestId("check-box").isVisible()).toBeFalsy();
+
+    // re-upload the file
+    await selectFiles(page, fileInputSelector, FIXTURE_DIR, sampleFiles);
+  }
+  if (invalidSample) {
+    // except an error message to be displayed
+    await expect(page.locator("div[class*='error']")).toContainText(
+      "There are no valid samples available for upload",
+    );
+  }
+}
+
+export async function uploadInvalidSampleFiles(
+  page: Page,
+  projectName: string,
+  analysisType: string,
+  invalidSampleFiles: Array<string>,
+  sequencingTechnology?: string,
+): Promise<any> {
+  // select project
+  await page.getByTestId("select-project").click();
+  // type in search box
+  await page.locator('input[placeholder="Search"]').type(projectName);
+
+  await page.getByText(projectName).click();
+  await page.waitForTimeout(3000);
+
+  // select analysis type
+  const analysisTypeId = `${ANALYSIS_TYPE}-${kebabCase(analysisType)}`;
+  const wgsWorkflowOption = page.getByTestId(analysisTypeId);
+  await wgsWorkflowOption.click();
+
+  if (
+    analysisType === WORKFLOWS.MNGS &&
+    sequencingTechnology !== WORKFLOWS.LMNGS
+  ) {
+    await page.getByTestId("sequencing-technology-Illumina").click();
+  }
+  if (sequencingTechnology === WORKFLOWS.LMNGS) {
+    await page.getByTestId(ONT).click();
+    await expect(page.getByTestId(ONT)).toContainText(
+      "Guppy Basecaller Setting",
+    );
+    // click the dropdown
+    await page.getByTestId(ONT).getByTestId("filters").click();
+    await expect(page.getByTestId("fast")).toBeVisible();
+    await expect(page.getByTestId("hac")).toBeVisible();
+    await expect(page.getByTestId("super")).toBeVisible();
+    await page.getByTestId("super").click();
+  }
+  if (analysisType === WORKFLOWS.WGS) {
+    // choose a taxon name
+    const taxonFilter = page.getByTestId("upload-taxon-filter");
+    await taxonFilter.click();
+    await page.getByText("Unknown").click();
+
+    // upload a reference sequence
+    await uploadRefSequence(page);
+
+    // ensure filename displayed
+    if (analysisType !== WORKFLOWS.WGS) {
+      await expect(wgsWorkflowOption).toContainText(REF_FILENAME);
+    }
+  }
+
+  await cookieBanner(page);
+  // select files
+  const fileInputSelector = '[data-testid="drop-sample-files"] input';
+  const filePath = path.resolve(`${FIXTURE_DIR}/${invalidSampleFiles}`);
+
+  await page.waitForTimeout(4000);
+  await page.setInputFiles(fileInputSelector, filePath);
+  // expect button to be disabled
+  expect(
+    await page
+      .getByTestId("upload-continue-button")
+      .locator("button")
+      .isDisabled(),
+  ).toBeTruthy();
+
+  // except an error message to be displayed
+  await expect(page.locator("div[class*='error']")).toContainText(
+    "There are no valid samples available for upload",
+  );
+}
+
+export async function isFieldEditable(
+  page: Page,
+  id: string,
+): Promise<boolean> {
+  const element = page.getByTestId(id);
+  const divs = element.locator("input");
+  if (
+    element !== undefined &&
+    divs !== undefined &&
+    divs.first() !== undefined
+  ) {
+    const firstDivClass = await divs.first().getAttribute("class");
+    if (
+      firstDivClass !== null &&
+      (firstDivClass.includes("hidden") || firstDivClass.includes("noInput"))
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  return false;
+}
+export async function fillMetadata(
+  page: Page,
+  sampleType: string,
+  metaData: Metadata,
+): Promise<any> {
+  // host organism
+  const hostId = "host-organism";
+  if (isFieldEditable(page, hostId)) {
+    const hostOrganism = page.getByTestId(hostId);
+    await hostOrganism.locator("input").fill(String(metaData[HOST_ORGANISM]));
+  }
+
+  // water control
+  if (sampleType === "metagenomics") {
+    const waterControlId = "water_control";
+    if (
+      metaData["Water Control"] === "Yes" &&
+      isFieldEditable(page, waterControlId)
+    ) {
+      const waterControl = page.getByTestId(waterControlId);
+      await waterControl.nth(0).click({ force: true });
+    }
+  }
+
+  // collection location
+  await page
+    .getByTestId("collection_location_v2")
+    .locator("input")
+    .type(metaData[COLLECTION_LOCATION] as string);
+
+  // click continue button
+  await page.locator(CONTINUE_BUTTON).nth(1).click();
+}
+
+export async function fillIncompleteData(
+  page: Page,
+  metaData: Metadata,
+): Promise<any> {
+  // host organism
+  await page
+    .getByTestId("host-organism")
+    .locator("input")
+    .fill(String(metaData[HOST_ORGANISM]));
+
+  // sample type
+  await page
+    .getByTestId("sample_type")
+    .locator("input")
+    .fill(String(metaData[SAMPLE_TYPE]));
+
+  // collection date
+  await page
+    .getByTestId("collection_date")
+    .locator("input")
+    .fill(metaData[COLLECTION_DATE] as string);
+
+  // click continue button
+  await page.locator(CONTINUE_BUTTON).nth(1).click();
+
+  // error message should be displayed
+  await expect(page.locator("div[class*= 'issueGroup']:visible")).toContainText(
+    "missing required metadata fields",
+  );
+}
+
+export async function verifyAnalysisType(
+  page: Page,
+  analysisType: string,
+): Promise<any> {
+  const UPLOAD_REVIEW = "upload-input-review";
+  if (analysisType === WORKFLOWS.MNGS) {
+    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
+      "Metagenomics",
+    );
+    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
+      "Illumina",
+    );
+  }
+  if (analysisType === WORKFLOWS.LMNGS) {
+    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
+      "Metagenomics",
+    );
+    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
+      "Nanopore",
+    );
+  }
+
+  if (analysisType === WORKFLOWS.AMR) {
+    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
+      "Antimicrobial Resistance",
+    );
+  }
+  await page.getByText("Continue").nth(1).click();
+}
+export async function submitUpload(page: Page): Promise<any> {
+  // verify user is not able to upload without accepting terms and conditions
+  expect(
+    await page.locator("button").getByText(START_UPLOAD).isDisabled(),
+  ).toBeTruthy();
+  await page.getByTestId("terms-agreement-checkbox").click();
+  expect(
+    await page.locator("button").getByText(START_UPLOAD).isDisabled(),
+  ).toBeFalsy();
+  await page.getByText(START_UPLOAD).click();
+}
+
 export async function cookieBanner(page: Page): Promise<void> {
-  const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
+  const cookieBanner = page.locator(
+    '[id="onetrust-accept-btn-handler"]:visible',
+  );
   if ((await cookieBanner.count()) > 0) {
     await cookieBanner.click();
   }
+}
+
+export async function testUploadSample(
+  page: Page,
+  projectName: string,
+  sampleType: string,
+  sampleFiles: string[],
+  invalidSample?: boolean,
+  verifyDeleteFile?: boolean,
+  metadataTemplate?: string,
+  sequencingTechnology?: string,
+): Promise<any> {
+  // upload files
+  await uploadSampleFiles(
+    page,
+    projectName,
+    sampleType,
+    sampleFiles,
+    invalidSample,
+    verifyDeleteFile,
+    sequencingTechnology,
+  );
+  await page.getByText(CONTINUE).click();
+
+  // wait for page and file data to be imported
+  expect(page.getByText(UPLOAD_METADATA)).toBeVisible({ timeout: 10000 });
+
+  if (
+    metadataTemplate !== undefined &&
+    (metadataTemplate.endsWith(".csv") || metadataTemplate.endsWith(".tsv"))
+  ) {
+    // upload metadata
+    await uploadMetadata(page, metadataTemplate);
+  } else {
+    // todo: add scenario manual input
+    await page.getByText("Auto-populate metadata (Admin-only)").click();
+  }
+
+  // verify analysis type on review page
+  await verifyAnalysisType(page, sequencingTechnology);
+
+  // submit
+  await submitUpload(page);
+
+  // assert no failure
+  await expect(page.getByText("All uploads failed")).not.toBeVisible();
+
+  // complete upload process
+  await page.getByText(GO_TO_PROJECT).click({ timeout: 30000 });
 }

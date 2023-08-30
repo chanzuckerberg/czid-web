@@ -1,6 +1,3 @@
-import path from "path";
-import { expect, test } from "@playwright/test";
-import dotenv from "dotenv";
 import {
   ANTIMICROBIAL_RESISTANCE,
   AVG_READS_FILTER_PER_SAMPLE,
@@ -32,26 +29,26 @@ import {
   PROJECTS,
   SAMPLES,
   SAMPLES_COLUMN,
+  SAMPLE_PROJECTS,
   SAMPLE_TYPE,
   SIDE_HEADERS,
   TABLE_VIEW,
-  TEST_PROJECTS,
   VISIBLE,
-} from "../../constants/common";
+} from "@e2e/constants/common";
 import {
   ANNOTATION,
   HOST,
   LOCATION,
   TIMEFRAME,
   VISIBILITY,
-} from "../../constants/filter";
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
+} from "@e2e/constants/filter";
+import { expect, test } from "@playwright/test";
 
 const sampleTypes = [METAGENOMICS];
 const PLUS_CIRCLE = "plus-circle";
 const ENV = (process.env.NODE_ENV as string) || "";
 const baseUrl = (process.env.BASEURL as string) || "";
-const projectName = TEST_PROJECTS[ENV.toUpperCase()];
+const projectName = SAMPLE_PROJECTS[ENV.toUpperCase()];
 const url =
   "public?currentDisplay=table&currentTab=samples&mapSidebarTab=summary&projectId=875&showFilters=true&showStats=true&workflow=short-read-mngs";
 // These tests verifies Ui elements displayed on the discovery view like header, side bars, bar charts and graphs

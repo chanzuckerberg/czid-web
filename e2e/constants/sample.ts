@@ -155,3 +155,34 @@ export const URL_DOWLOAD_TYPES = [
 ];
 
 export const FILTER_VALUE = "filter-value";
+export const SAMPLE_FILE_R1 = "RR004_water_2_S23A_R1_001.fastq";
+export const SAMPLE_FILE_R2 = "RR004_water_2_S23A_R2_001.fastq";
+
+export const SAMPLE_NAMES: Record<string, string[]> = {
+  STAGING: ["RNAEnr_10e4_viralcopies_RVOPv2_iSeq"],
+  LOCAL: [],
+  CI: [],
+};
+export const SAMPLE_IDS: Record<string, number[]> = {
+  STAGING: [
+    24329, 25307, 25983, 25745, 26022, 25528, 25986, 25987, 25609, 26101, 25747,
+    25746,
+  ],
+  LOCAL: [],
+  CI: [],
+};
+export const TEST_PROJECTS: Record<string, string> = {
+  STAGING: "New QA Project",
+  LOCAL: "E2E Test Project",
+  CI: "E2E Test Project",
+};
+export const TAXON_IDS: Record<string, number[]> = {
+  STAGING: [573, 694003],
+  LOCAL: [],
+  CI: [],
+};
+export const PHYLOTREE_IDS: Record<string, number[]> = {
+  STAGING: [244],
+  LOCAL: [],
+  CI: [],
+};

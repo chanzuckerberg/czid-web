@@ -14,6 +14,10 @@ module SeedResource
     def sfn_configs
       find_or_create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: "arn:aws:states:us-west-2:732052188396:stateMachine:idseq-swipe-dev-default-wdl")
       find_or_create(:app_config, key: AppConfig::ENABLE_SFN_NOTIFICATIONS, value: "1")
+
+      find_or_create(:app_config, key: AppConfig::SFN_ARN, value: "arn:aws:states:us-west-2:732052188396:stateMachine:idseq-swipe-dev-short-read-mngs-wdl")
+      find_or_create(:app_config, key: AppConfig::SFN_MNGS_ARN, value: "arn:aws:states:us-west-2:732052188396:stateMachine:idseq-swipe-dev-short-read-mngs-wdl")
+      find_or_create(:app_config, key: AppConfig::SFN_CG_ARN, value: "arn:aws:states:us-west-2:732052188396:stateMachine:idseq-swipe-dev-default-wdl")
     end
 
     def workflow_versions
