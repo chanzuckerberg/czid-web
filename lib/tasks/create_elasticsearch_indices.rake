@@ -1,11 +1,19 @@
-task create_elasticsearch_indices: :environment do
+task :create_elasticsearch_indices, [:es_host] => :environment do |_, args|
   # Silence debug logging
   silent = Logger.new(nil)
   Rails.logger = silent
   ActiveRecord::Base.logger = silent
   ActiveRecord::Base.logger.level = 2
-
+  es_host_override = args[:es_host]
   if ELASTICSEARCH_ON
+    unless es_host_override.nil?
+      Elasticsearch::Model.client = Elasticsearch::Client.new(
+        {
+          host: es_host_override,
+          transport_options: { request: { timeout: 200 } },
+        }
+      )
+    end
     # Index small tables
     models = [User, Project, Sample, Metadatum]
     models.each do |m|
