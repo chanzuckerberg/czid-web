@@ -146,7 +146,7 @@ const UploadTaxonFilter = ({
         label,
         intent: "default",
         sdsStyle: "square",
-        sdsType: "singleSelect",
+        sdsType: "label",
       }}
       isTriggerChangeOnOptionClick
       search

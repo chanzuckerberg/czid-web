@@ -129,7 +129,7 @@ const TaxonFilterSDS = ({
         label,
         intent: "default",
         sdsStyle: "square",
-        sdsType: "multiSelect",
+        sdsType: "label",
       }}
       label={label}
       multiple

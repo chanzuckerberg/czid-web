@@ -40,7 +40,7 @@ export const GroundTruthFilesDropdown = ({
           label,
           intent: "default",
           sdsStyle: "square",
-          sdsType: "singleSelect",
+          sdsType: "label",
         }}
         isTriggerChangeOnOptionClick
         label={label}
