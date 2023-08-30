@@ -795,6 +795,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED, {
         sampleId: sample.id,
         projectId: project.id,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         backgroundId: value,
       });
     }

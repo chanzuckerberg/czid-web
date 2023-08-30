@@ -65,6 +65,8 @@ export const SamplesHeatmapDownloadModal = ({
       await createBulkDownload(selectedDownloadSubmission);
       trackEvent(
         ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESS,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         {
           workflow: selectedDownloadSubmission["workflow"],
           downloadType: selectedDownloadSubmission["downloadType"],
@@ -74,6 +76,8 @@ export const SamplesHeatmapDownloadModal = ({
     } catch (e) {
       trackEvent(
         ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         {
           workflow: selectedDownloadSubmission["workflow"],
           downloadType: selectedDownloadSubmission["downloadType"],

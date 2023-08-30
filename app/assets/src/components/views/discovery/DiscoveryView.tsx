@@ -1298,7 +1298,11 @@ class DiscoveryView extends React.Component<
     this.setState({ sampleActiveColumnsByWorkflow }, () => {
       this.updateBrowsingHistory("replace");
       trackEvent(`DiscoveryView_columns_changed`, {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         newColumns: sampleActiveColumnsByWorkflow[workflow],
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         previousColumns: previousColumns,
       });
     });
@@ -1855,6 +1859,8 @@ class DiscoveryView extends React.Component<
           workflow,
           sortBy,
           sortDirection,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
           filters: this.preparedFilters(),
           filteredProjectCount,
           filteredVisualizationCount,

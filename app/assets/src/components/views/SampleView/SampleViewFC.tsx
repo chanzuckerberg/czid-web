@@ -596,6 +596,8 @@ const SampleViewFC = ({
           {
             sampleId: sample.id,
             projectId: project.id,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             backgroundId: value,
           },
         );

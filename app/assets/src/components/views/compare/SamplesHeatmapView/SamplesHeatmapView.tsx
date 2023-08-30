@@ -740,6 +740,8 @@ class SamplesHeatmapView extends React.Component<
 
     trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       {
         ...fetchHeatmapDataParams,
         loadTimeInMilliseconds,
@@ -876,6 +878,8 @@ class SamplesHeatmapView extends React.Component<
     trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR, {
       numSamples: size(sampleIds),
       numTaxons: size(allTaxonIds),
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       sampleIds,
       useHeatmapES,
     });
@@ -1528,6 +1532,8 @@ class SamplesHeatmapView extends React.Component<
       },
     );
     trackEvent("SamplesHeatmapView_taxon_added", {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       selected: currentAddedTaxa,
     });
     this.updateHistoryState();
@@ -1592,6 +1598,8 @@ class SamplesHeatmapView extends React.Component<
     });
     trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       pendingPinnedSampleIds,
     );
   };
@@ -1603,6 +1611,8 @@ class SamplesHeatmapView extends React.Component<
     });
     trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       pinnedSampleIds,
     );
   };

@@ -348,10 +348,16 @@ export default class HeatmapCreationModal extends React.Component<
                 ANALYTICS_EVENT_NAMES.HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED,
                 {
                   selectedBackground,
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
                   selectedCategories,
                   selectedSpecificity,
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
                   selectedSubcategories,
                   selectedTaxonLevel,
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
                   selectedThresholdFilters,
                 },
               );

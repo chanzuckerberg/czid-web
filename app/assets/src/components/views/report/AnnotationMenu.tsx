@@ -67,6 +67,8 @@ const AnnotationMenu = ({
         onClick={withAnalytics(
           handleClick,
           ANALYTICS_EVENT_NAMES.REPORT_TABLE_ANNOTATION_MENU_OPENED,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
           analyticsContext,
         )}
       />

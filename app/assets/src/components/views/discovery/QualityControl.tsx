@@ -514,6 +514,8 @@ function QualityControl({
       bin = samplesByInsertSize.current[binIndex];
     }
     trackEvent(ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_CLICKED, {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       bin,
     });
     handleBarClick(bin);
@@ -1082,6 +1084,8 @@ function QualityControl({
                     trackEvent(
                       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED,
                       {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
                         display,
                       },
                     );

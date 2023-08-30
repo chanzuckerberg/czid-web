@@ -383,6 +383,8 @@ const SamplesView = forwardRef(function SamplesView(
               });
               const log = () =>
                 trackEvent("SamplesView_heatmap-option_clicked", {
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
                   option,
                   selectedIds: selectedIds.size,
                 });
@@ -559,6 +561,8 @@ const SamplesView = forwardRef(function SamplesView(
       trackEvent(
         ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED,
         {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
           sampleIds: sampleIdsToKickoffAmr,
         },
       );

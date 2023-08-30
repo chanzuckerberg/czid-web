@@ -128,6 +128,8 @@ export const ReportFilters = ({
   }) => {
     trackEvent("SampleView_filter_changed", {
       key,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       value,
       sampleId,
     });
@@ -146,6 +148,8 @@ export const ReportFilters = ({
     trackEvent("SampleView_filter_removed", {
       key,
       subpath,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       value,
       sampleId,
     });

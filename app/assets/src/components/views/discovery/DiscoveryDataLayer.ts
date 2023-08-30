@@ -144,13 +144,18 @@ class ObjectCollectionView<T extends MustHaveId> {
     const endLoad = new Date();
 
     if (logLoadTime) {
-      trackEvent(ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_TABLE_PAGE_LOADED, {
-        domain: this._collection.domain,
-        displayName: this._displayName,
-        allIdsCount: this._orderedIds.length,
-        loadTimeInMilleseconds: endLoad.valueOf() - startLoad.valueOf(),
-        ...this._conditions,
-      });
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_TABLE_PAGE_LOADED,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
+        {
+          domain: this._collection.domain,
+          displayName: this._displayName,
+          allIdsCount: this._orderedIds.length,
+          loadTimeInMilleseconds: endLoad.valueOf() - startLoad.valueOf(),
+          ...this._conditions,
+        },
+      );
     }
 
     return objectRows;
