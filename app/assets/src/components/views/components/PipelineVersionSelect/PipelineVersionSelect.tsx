@@ -82,7 +82,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
     const wildcardVersion = workflowRun.inputs?.wildcard_version;
     let dbVersionString = "";
     if (cardVersion) {
-      dbVersionString += `CARD DB: ${wildcardVersion} | `;
+      dbVersionString += `CARD DB: ${cardVersion} | `;
     }
     if (wildcardVersion) {
       dbVersionString += `Wildcard DB: ${wildcardVersion} | `;
