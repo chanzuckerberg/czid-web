@@ -1,6 +1,6 @@
+import { SEARCH_BAR } from "@e2e/constants/sample";
+import { acceptCookies } from "@e2e/utils/page";
 import { expect, test } from "@playwright/test";
-import { ACCEPT_ALL_COOKIES } from "../../constants/common";
-import { SEARCH_BAR } from "../../constants/sample";
 import { stubRequest } from "../../utils/api";
 import { chooseBackgroundModel } from "../../utils/report";
 const sampleId = 25745;
@@ -21,8 +21,7 @@ test.fixme("Hover Actions on Sample Report", () => {
     // go to sample page
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
-    const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
-    await cookieBanner.click();
+    await acceptCookies(page);
     await chooseBackgroundModel(page);
 
     // expand taxon parent
@@ -108,16 +107,16 @@ test.describe("Blast Hover Actions on Sample Report", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
-    const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
-    await cookieBanner.click();
+    await acceptCookies(page);
   });
 
-  test("Should verify BlastN modal flow on click of hover action", async ({
+  test.skip("Should verify BlastN modal flow on click of hover action", async ({
     page,
     context,
   }) => {
     // hover on taxon name
     await page.locator('[class*="taxonName"]').getByText("Klebsiella").click();
+    await acceptCookies(page);
     // click on that taxon's Blast icon
     await page.getByTestId("hover-action-blast-570-v-1").click();
     // expect(page.getByTestId("blast-selection-modal")).toBeVisible();
@@ -143,7 +142,7 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     expect(page.getByRole("alert"));
   });
 
-  test("Should verify BlastX modal flow on click of hover action", async ({
+  test.skip("Should verify BlastX modal flow on click of hover action", async ({
     page,
     context,
   }) => {

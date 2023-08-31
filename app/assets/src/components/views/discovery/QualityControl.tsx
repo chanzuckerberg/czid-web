@@ -905,9 +905,10 @@ function QualityControl({
               >
                 Duplicate Compression Ratio
                 <ColumnHeaderTooltip
+                  data-testid="duplicate-tooltip-info-icon"
                   trigger={
                     <span
-                      data-testid="duplicate-compression-ratio-tooltip"
+                      data-testid="duplicate-tooltip"
                       onFocus={() => {
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
@@ -961,9 +962,10 @@ function QualityControl({
               >
                 Mean Insert Size
                 <ColumnHeaderTooltip
-                  data-testid="mean-insert-size-tooltip"
+                  data-testid="mean-insert-size-info-icon"
                   trigger={
                     <span
+                      data-testid="mean-insert-size-tooltip"
                       onFocus={() => {
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,

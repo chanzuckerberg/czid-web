@@ -43,7 +43,6 @@ export const AVG_READS_PER_SAMPLE = "Avg. reads per sample";
 export const AVG_READS_FILTER_PER_SAMPLE =
   "Avg. reads passing filters per sample";
 export const VISIBLE = "visible";
-export const ACCEPT_ALL_COOKIES = "Accept All Cookies";
 export const SAMPLE_TYPE = "Sample Type";
 export const NUMBER_OF_COLUMN = 2;
 export const CHECKED_BOX = '[data-testid="checked"]';
@@ -75,7 +74,8 @@ export const START_UPLOAD = "Start Upload";
 export const HOST_ORGANISM = "Host Organism";
 export const FIXTURE_DIR = "./fixtures/samples";
 export const SELECT_PROJECT = '[data-testid="select-project"]';
-export const SAMPLE_PROJECTS = {
+export const TEST_PROJECTS: Record<string, string> = {
+  CI: "omar test",
   DEV: "omar test",
   STAGING: "floo Neptunium",
   PROD: "floo Neptunium",

@@ -76,9 +76,9 @@ export async function goToProjectSamples(
   await page.keyboard.press("Enter");
   await page.getByText(projectName).nth(0).click();
   if (index === 0) {
-    await page.locator('[data-testid="metagenomics"]').click();
+    await page.getByTestId("metagenomics").click();
   }
   if (index === 1) {
-    await page.locator('[data-testid="consensus-genomes"]').click();
+    await page.getByTestId("consensus-genomes").click();
   }
 }

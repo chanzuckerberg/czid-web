@@ -1,3 +1,4 @@
+import { acceptCookies } from "@e2e/utils/page";
 import { test } from "@playwright/test";
 import { kebabCase } from "lodash";
 const sampleId = 25307;
@@ -56,7 +57,7 @@ test.describe("Sample report tests", () => {
     await page.getByTestId("metadata").click();
 
     // accept cookies
-    await page.getByText("Accept All Cookies").click();
+    await acceptCookies(page);
   });
 
   test(`Should edit sample info section`, async ({ page }) => {

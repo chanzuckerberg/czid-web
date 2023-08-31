@@ -22,6 +22,7 @@ import {
   SEQUENCING_INFO,
   URL_DOWLOAD_TYPES,
 } from "../constants/sample";
+import { acceptCookies } from "./page";
 
 export const sectionIndices: Record<string, number> = {
   sampleInfo: 0,
@@ -104,7 +105,7 @@ export async function openSamplePage(
 
   // expand side bar
   if (openDetails) await page.getByText("Sample Details").click();
-  // await cookieBanner(page);
+  await acceptCookies(page);
 }
 
 export async function verifySectionTitles(

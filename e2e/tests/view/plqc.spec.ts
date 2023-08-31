@@ -14,11 +14,20 @@ import { openSamplePage } from "../../utils/report";
 
 const projectName = "floo Neptunium";
 
+type ChartData = {
+  titleId: string;
+  titleText: string;
+  infoIcon: string;
+  tooltipId: string;
+  tooltipText: string;
+  index: number;
+  link: string;
+};
+
 async function verifyBarChartContent(
   page: Page,
   context: BrowserContext,
-  data: any,
-  index: number,
+  chartData: ChartData,
 ) {
   const BARS = '[data-testid*="histogram"]';
   const BAR_CHARTS = ".bar-0";
@@ -28,12 +37,18 @@ async function verifyBarChartContent(
   // click to switch display to bar chart
   await page.getByTestId("plqc-view").click();
 
-  // Verify text displayed after hovering
-  await page.getByTestId(TOTAL_READ_INFO_ICON).hover();
+  // verify chart title
+  expect(await page.getByTestId(chartData.titleId).textContent()).toContain(
+    chartData.titleText,
+  );
 
-  expect(
-    await page.getByTestId(TOTAL_READ_POPUP_CONTENT).textContent(),
-  ).toContain(data["tooltip"]);
+  // Verify text displayed after hovering
+
+  await page.getByTestId(chartData.tooltipId).hover();
+
+  expect(await page.getByTestId(chartData.infoIcon).textContent()).toContain(
+    chartData.tooltipText,
+  );
   // Verify link attached to the popup
   const [newPage] = await Promise.all([
     context.waitForEvent("page"),
@@ -42,14 +57,14 @@ async function verifyBarChartContent(
   ]);
   await newPage.waitForLoadState();
   const actualLink = (await newPage.url()).split("/").pop();
-  const expectedLink = data["link"].split("/").pop();
+  const expectedLink = chartData.link.split("/").pop();
   expect(actualLink).toContain(expectedLink);
   newPage.close();
 
   // Find the number of bar charts displayed
   const bars = await page
     .locator(BAR_CHARTS)
-    .nth(index)
+    .nth(chartData.index)
     .locator(BARS)
     .allInnerTexts();
 
@@ -57,15 +72,15 @@ async function verifyBarChartContent(
   for (let i = 0; i < bars.length; i++) {
     const graphHeight = await page
       .locator(`.rect-${i}`)
-      .nth(index)
+      .nth(chartData.index)
       .getAttribute("height");
     // if the height of the chart is zero do not hover over it
     if (
       graphHeight !== "0" &&
-      (await page.locator(`.rect-${i}`).nth(index).isVisible())
+      (await page.locator(`.rect-${i}`).nth(chartData.index).isVisible())
     ) {
-      await page.locator(HEADER_READS).nth(index).hover();
-      await page.locator(`.rect-${i}`).nth(index).hover();
+      await page.locator(HEADER_READS).nth(chartData.index).hover();
+      await page.locator(`.rect-${i}`).nth(chartData.index).hover();
       await expect(page.getByTestId(BAR_POPUP).nth(0)).toBeVisible();
       await expect(page.getByTestId(BAR_POPUP).nth(1)).toBeVisible();
     }
@@ -79,12 +94,16 @@ test.describe("PLQC view tests", () => {
   }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
     await openSamplePage(page, projectName, false, false);
-    await verifyBarChartContent(
-      page,
-      context,
-      SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.totalReads,
-      0,
-    );
+    const ChartData = {
+      titleId: "total-read-title",
+      titleText: "Total Reads",
+      tooltipId: "total-read-info-icon",
+      infoIcon: "total-read-tooltip",
+      tooltipText: SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.totalReads["tooltip"],
+      index: 0,
+      link: SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.totalReads["link"],
+    };
+    await verifyBarChartContent(page, context, ChartData);
   });
 
   test(`Should verify QUALITY_READ bar chart content`, async ({
@@ -93,40 +112,60 @@ test.describe("PLQC view tests", () => {
   }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
     await openSamplePage(page, projectName, false, false);
-    await verifyBarChartContent(
-      page,
-      context,
-      SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.qcPercent,
-      1,
-    );
+    const ChartData = {
+      titleId: "passed-qc-title",
+      titleText: "Passed QC",
+      infoIcon: "passed-qc-tooltip",
+      tooltipId: "passed-qc-info-icon",
+      tooltipText: SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.qcPercent["tooltip"],
+      index: 1,
+      link: SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.qcPercent["link"],
+    };
+    await verifyBarChartContent(page, context, ChartData);
   });
 
-  test(`Should verify DUPLICATE_READ bar chart content`, async ({
+  // unskip after new test id is deployed to staging
+  test.skip(`Should verify DUPLICATE_READ bar chart content`, async ({
     page,
     context,
   }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
     await openSamplePage(page, projectName, false, false);
-    await verifyBarChartContent(
-      page,
-      context,
-      SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.duplicateCompressionRatio,
-      2,
-    );
+    const ChartData = {
+      titleId: "duplicate-compression-ratio-title",
+      titleText: "Duplicate Compression Ratio",
+      infoIcon: "duplicate-tooltip-info-icon",
+      tooltipId: "duplicate-tooltip",
+      tooltipText:
+        SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.duplicateCompressionRatio[
+          "tooltip"
+        ],
+      index: 1,
+      link: SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.duplicateCompressionRatio[
+        "link"
+      ],
+    };
+    await verifyBarChartContent(page, context, ChartData);
   });
 
-  test(`Should verify INSERT_LENGTH bar chart content`, async ({
+  // unskip after test id is deployed to staging
+  test.skip(`Should verify INSERT_LENGTH bar chart content`, async ({
     page,
     context,
   }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
     await openSamplePage(page, projectName, false, false);
-    await verifyBarChartContent(
-      page,
-      context,
-      SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.meanInsertSize,
-      3,
-    );
+    const ChartData = {
+      titleId: "mean-insert-size-title",
+      titleText: "Mean Insert Size",
+      infoIcon: "mean-insert-size-info-icon",
+      tooltipId: "mean-insert-size-tooltip",
+      tooltipText:
+        SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.meanInsertSize["tooltip"],
+      index: 1,
+      link: SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.meanInsertSize["link"],
+    };
+    await verifyBarChartContent(page, context, ChartData);
   });
 
   test(`Should verify pipeline bar chart content`, async ({

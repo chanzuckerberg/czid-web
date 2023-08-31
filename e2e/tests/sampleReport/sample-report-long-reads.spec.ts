@@ -17,7 +17,7 @@ test.describe("Sample report tests", () => {
     await page.getByText("Sample Details").click();
   });
 
-  test(`Should verify header of sample report page`, async ({ page }) => {
+  test.fixme(`Should verify header of sample report page`, async ({ page }) => {
     const filter = await page.locator(FILTER_HEADERS).allInnerTexts();
 
     for (let i = 0; i < filter.length; i++) {

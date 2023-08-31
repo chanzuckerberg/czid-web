@@ -9,7 +9,9 @@ const attributes = ["name", "value"];
 test.describe("Sample report metadata test", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
-    await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
+    await page.goto(`${process.env.BASEURL}/samples/${sampleId}`, {
+      waitUntil: "domcontentloaded",
+    });
 
     // click details link
     await page.getByText("Sample Details").click();

@@ -1,4 +1,3 @@
-import { OVERALL, SAMPLE_PROJECTS } from "@e2e/constants/common";
 import {
   AVG_READS_FILTER_PER_SAMPLE,
   DATE_CREATED_SIDEBAR,
@@ -12,22 +11,24 @@ import {
   SIDE_LABEL_VALUE,
   VISIBLE,
 } from "@e2e/constants/map";
+import { acceptCookies } from "@e2e/utils/page";
 import { openSamplePage } from "@e2e/utils/report";
-import { cookieBanner } from "@e2e/utils/upload";
 import { expect, test } from "@playwright/test";
+import { OVERALL, TEST_PROJECTS } from "../../constants/common";
+
 const BAR_LABEL_ID = "date-histogram";
 const DATE_CREATED_ID = "date-histogram";
 const OVERALL_AREA_ID = "overall-content";
 const DATE_LABEL_ID = "date-histogram-first-date";
 const PLQC = "Plqc";
 const ENV = (process.env.NODE_ENV as string) || "";
-const projectName = SAMPLE_PROJECTS[ENV.toUpperCase()];
+const projectName = TEST_PROJECTS[ENV.toUpperCase()];
 const viewTypes = [MAP_VIEW_STRING, PLQC];
 // These tests verifies Ui elements displayed on the map  view like header, side bars, bar charts and graphs
 test.describe("Map view tests", () => {
   test.beforeEach(async ({ page }) => {
     await openSamplePage(page, projectName, false, false);
-    await cookieBanner(page);
+    await acceptCookies(page);
   });
   viewTypes.forEach(viewType => {
     test(`Should collapse and expand right side areas for ${viewType}`, async ({
