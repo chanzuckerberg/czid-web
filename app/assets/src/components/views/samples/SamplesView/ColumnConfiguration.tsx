@@ -511,13 +511,13 @@ const computeBenchmarkColumns = ({ basicIcon }) => {
     },
     {
       dataKey: "wdl_version",
-      label: PIPELINE_VERSION,
+      label: "Benchmark Version",
       flexGrow: 1,
       className: cs.basicCell,
     },
     {
       dataKey: "workflowBenchmarked",
-      label: "Workflow Benchmarked",
+      label: "Workflow",
       flexGrow: 1,
       className: cs.basicCell,
     },
@@ -528,20 +528,27 @@ const computeBenchmarkColumns = ({ basicIcon }) => {
       label: "AUPR",
       flexGrow: 1,
       className: cs.basicCell,
-      cellRenderer: TableRenderers.renderNumberAndPercentage,
+      cellRenderer: TableRenderers.renderNtNrValue,
+    },
+    {
+      dataKey: "l2Norm",
+      label: "L2 Norm",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: TableRenderers.renderNtNrValue,
     },
     {
       dataKey: "correlation",
       label: "Correlation",
       flexGrow: 1,
       className: cs.basicCell,
-      cellRenderer: TableRenderers.renderNumberAndPercentage,
     },
     {
       dataKey: "groundTruthFile",
       label: "Ground Truth File",
       flexGrow: 1,
       className: cs.basicCell,
+      cellRenderer: TableRenderers.baseRendererWithTooltip,
     },
   ];
 

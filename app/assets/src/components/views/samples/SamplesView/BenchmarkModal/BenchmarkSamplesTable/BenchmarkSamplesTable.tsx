@@ -1,3 +1,4 @@
+import { Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import { get, map, pick } from "lodash/fp";
 import React from "react";
@@ -12,24 +13,35 @@ interface BenchmarkSamplesTableProps {
 const COLUMNS = [
   {
     dataKey: "name",
-    width: 400,
+    width: 500,
+    flexGrow: 2,
     label: "Name",
     headerClassName: cx(cs.header, cs.sampleNameHeader),
     cellDataGetter: ({ dataKey, rowData }) => get(["sample", dataKey], rowData),
+    cellRenderer: function sampleNameCellRenderer({ cellData: sampleName }) {
+      return (
+        <Tooltip arrow placement="top" title={sampleName}>
+          <div className={cx(cs.cell, cs.sampleName)}>{sampleName}</div>
+        </Tooltip>
+      );
+    },
   },
   {
     dataKey: "pipelineVersion",
     width: 90,
-    label: "Reads",
+    flexGrow: 1,
+    label: "Pipeline Version",
     className: cx(cs.cell),
     headerClassName: cs.header,
   },
   {
-    dataKey: "pipelineNcbiIndex",
+    dataKey: "ncbiIndexVersion",
     width: 90,
+    flexGrow: 1,
     label: "NCBI Index",
     className: cx(cs.cell),
     headerClassName: cs.header,
+    cellDataGetter: ({ dataKey, rowData }) => get(["sample", dataKey], rowData),
   },
 ];
 const ROW_HEIGHT = 38;
@@ -40,7 +52,10 @@ export const BenchmarkSamplesTable = ({
 }: BenchmarkSamplesTableProps) => {
   const objectsToDisplay = map(
     object =>
-      pick(["sample.name", "pipelineVersion", "pipelineNcbiIndex"], object),
+      pick(
+        ["sample.name", "pipelineVersion", "sample.ncbiIndexVersion"],
+        object,
+      ),
     selectedObjects,
   );
 

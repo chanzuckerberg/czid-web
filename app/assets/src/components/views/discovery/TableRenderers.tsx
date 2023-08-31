@@ -1,4 +1,4 @@
-import { Icon } from "@czi-sds/components";
+import { Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import { at, get, isNil } from "lodash/fp";
 import moment from "moment";
@@ -120,6 +120,20 @@ class TableRenderers extends React.Component {
       <div className={cs.base} data-testid={data}>
         {data}
       </div>
+    );
+  };
+
+  static baseRendererWithTooltip = ({ cellData }) => {
+    return (
+      <Tooltip
+        arrow
+        placement="top-start"
+        title={cellData}
+        width="wide"
+        sdsStyle="dark"
+      >
+        <div className={cs.base}>{cellData}</div>
+      </Tooltip>
     );
   };
 
@@ -338,6 +352,27 @@ class TableRenderers extends React.Component {
           <div className={cs.vizDetails}>{detailsRenderer(item)}</div>
         </div>
       </div>
+    );
+  };
+
+  static renderNtNrValue = ({ cellData }) => {
+    const { nt, nr } = cellData || {};
+
+    return (
+      nt &&
+      nr && (
+        <div className={cs.ntNrContainer}>
+          <div className={cs.ntNrSection}>
+            <h5 className={cs.ntNrHeader}>NT</h5>
+            <h6 className={cs.ntNrValue}>{nt?.toFixed(3)}</h6>
+          </div>
+          |
+          <div className={cs.ntNrSection}>
+            <h5 className={cs.ntNrHeader}>NR</h5>
+            <h6 className={cs.ntNrValue}>{nr?.toFixed(3)}</h6>
+          </div>
+        </div>
+      )
     );
   };
 

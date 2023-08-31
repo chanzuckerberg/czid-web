@@ -54,7 +54,7 @@ export const BenchmarkModal = ({
     : null;
   const samplesToBenchmark = take(2, selectedObjects);
   return (
-    <Dialog open={open} onClose={onClose} sdsSize="s">
+    <Dialog open={open} onClose={onClose} sdsSize="m">
       <DialogTitle
         title="Benchmark Samples"
         subtitle={`Workflow benchmarked: ${workflow}`}

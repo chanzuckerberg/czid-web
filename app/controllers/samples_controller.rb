@@ -1552,7 +1552,7 @@ class SamplesController < ApplicationController
                 end
     end
 
-    sample_name = generate_benchmark_sample_name(sample_ids, ground_truth_file)
+    sample_name = generate_benchmark_sample_name(sample_ids, project_id, ground_truth_file)
     # Skip callbacks and validations. A benchmark sample has no input files or host genomes.
     # rubocop:disable Rails/SkipsModelValidations
     Sample.insert({
@@ -1572,6 +1572,7 @@ class SamplesController < ApplicationController
                          workflow: WorkflowRun::WORKFLOW[:benchmark],
                          created_at: Time.current,
                          updated_at: Time.current,
+                         wdl_version: AppConfigHelper.get_workflow_version(WorkflowRun::WORKFLOW[:benchmark]),
                          inputs_json: {
                            run_ids: run_ids,
                            workflow_benchmarked: workflow_benchmarked,

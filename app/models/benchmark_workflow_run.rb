@@ -5,10 +5,12 @@ class BenchmarkWorkflowRun < WorkflowRun
   OUTPUT_BENCHMARK_NOTEBOOK_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.benchmark_notebook".freeze
   OUTPUT_BENCHMARK_TRUTH_NT_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.truth_nt".freeze
   OUTPUT_BENCHMARK_TRUTH_NR_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.truth_nr".freeze
+  OUTPUT_BENCHMARK_CORRELATION_TEMPLATE = "benchmark.%<workflow_name>s_benchmark.correlation".freeze
 
   def results(cacheable_only: false)
     results = {
       "benchmark_metrics" => parsed_cached_results&.[]("benchmark_metrics") || benchmark_metrics,
+      "benchmark_info" => parsed_cached_results&.[]("benchmark_info") || benchmark_info,
       # Store additional info about the runs used in the benchmark.
       # In the case that a run gets deleted, we can still refer to this info for benchmark results.
       "additional_info" => parsed_cached_results&.[]("additional_info") || additional_info,
@@ -45,8 +47,10 @@ class BenchmarkWorkflowRun < WorkflowRun
   end
 
   def benchmark_info
+    sample_ids = Sample.where(id: PipelineRun.where(id: inputs&.[]("run_ids")).pluck(:sample_id)).pluck(:id)
+
     return {
-      sample_ids: inputs&.[]("sample_ids"),
+      sample_ids: sample_ids,
       workflow: inputs&.[]("workflow_benchmarked"),
       ground_truth_file: inputs&.[]("ground_truth_file"),
     }

@@ -39,14 +39,21 @@ class BenchmarkMetricsService
       nr_file = JSON.parse(@benchmark_workflow_run.output(nr_file_path))
     end
 
-    metrics = {}.tap do |h|
-      if nt_file.present? && nr_file.present?
-        h[:nt_aupr] = nt_file["aupr"]["aupr"]
-        h[:nt_l2_norm] = nt_file["l2_norm"]
+    correlation_file_path = @benchmark_workflow_run.get_output_name(BenchmarkWorkflowRun::OUTPUT_BENCHMARK_CORRELATION_TEMPLATE)
+    begin
+      correlation = @benchmark_workflow_run.output(correlation_file_path)&.to_f
+    rescue SfnExecution::OutputNotFoundError
+      correlation = nil
+    end
 
-        h[:nr_aupr] = nr_file["aupr"]["aupr"]
-        h[:nr_l2_norm] = nr_file["l2_norm"]
-      end
+    metrics = {}.tap do |h|
+      h[:nt_aupr] = nt_file&.[]("aupr")&.[]("aupr")&.round(4)
+      h[:nt_l2_norm] = nt_file&.[]("l2_norm")&.round(4)
+
+      h[:nr_aupr] = nr_file&.[]("aupr")&.[]("aupr")&.round(4)
+      h[:nr_l2_norm] = nr_file&.[]("l2_norm")&.round(4)
+
+      h[:correlation] = correlation
     end
 
     metrics

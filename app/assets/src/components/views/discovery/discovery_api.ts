@@ -107,6 +107,7 @@ const processRawSample = (sample: $TSFixMe) => {
       pipelineRunStatus: toLower(
         get("mngs_run_info.result_status_description", sample.details),
       ),
+      ncbiIndexVersion: get("mngs_run_info.ncbi_index_version", sample.details),
       pipelineRunCreatedAt: get("mngs_run_info.created_at", sample.details),
       pipelineRunFinalized: get("mngs_run_info.finalized", sample.details),
       uploadError: toLower(
@@ -237,9 +238,15 @@ const processBenchmarkWorkflowRun = (workflowRun: $TSFixMe) => {
   const benchmarkInfo = workflowRun?.cached_results?.benchmark_info;
 
   return {
-    aupr: benchmarkMetrics?.aupr,
+    aupr: {
+      nt: benchmarkMetrics?.nt_aupr,
+      nr: benchmarkMetrics?.nr_aupr,
+    },
+    l2Norm: {
+      nt: benchmarkMetrics?.nt_l2_norm,
+      nr: benchmarkMetrics?.nr_l2_norm,
+    },
     correlation: benchmarkMetrics?.correlation,
-    runIds: benchmarkInfo?.run_ids,
     workflowBenchmarked: benchmarkInfo?.workflow,
     groundTruthFile: benchmarkInfo?.ground_truth_file,
     additionalInfo,
