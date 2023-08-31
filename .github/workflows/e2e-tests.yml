@@ -5,6 +5,8 @@ on:
     workflows: ["Build and Push Docker Images"]
     types:
       - completed
+    branches: 
+      - "**"
 
 env:
   AWS_DEFAULT_OUTPUT: json
