@@ -56,7 +56,7 @@ test.describe("Generic upload flow tests", () => {
   });
 
   for (const testPair of allowedUploadPairs) {
-    test.only(`Should run combination of ${testPair.join(
+    test(`Should run combination of ${testPair.join(
       ", ",
     )} workflow combination `, async ({ page }) => {
       const [analysisType1, analysisType2] = testPair;
@@ -75,7 +75,7 @@ test.describe("Generic upload flow tests", () => {
   }
 
   for (const testPair of disallowedUploadPairs) {
-    test.only(`Should not allow ${testPair.join(
+    test(`Should not allow ${testPair.join(
       ", ",
     )} workflow combination`, async ({ page }) => {
       const [analysisType1, analysisType2] = testPair;
@@ -93,7 +93,7 @@ test.describe("Generic upload flow tests", () => {
     });
   }
 
-  test.only("Should verify analysis info", async ({ page }) => {
+  test("Should verify analysis info", async ({ page }) => {
     // choose project and upload sample files
     const sampleType = WORKFLOWS.WGS.toLowerCase();
     await uploadSampleFiles(page, projectName, sampleType, SAMPLE_FILES);
@@ -118,7 +118,7 @@ test.describe("Generic upload flow tests", () => {
     expect(analysisReview).toContainText("None provided");
   });
 
-  test.only("Should upload with local basespace", async ({ page }) => {
+  test("Should upload with local basespace", async ({ page }) => {
     const checkbox = await getCheckboxForWorkflow({
       page,
       workflow: WORKFLOWS.WGS,
@@ -130,7 +130,7 @@ test.describe("Generic upload flow tests", () => {
     expect(basespace).toBeEnabled();
   });
 
-  test.only("Should force user to complete all required wgs fields", async ({
+  test("Should force user to complete all required wgs fields", async ({
     page,
   }) => {
     // we need to find the tooltip again every time we hover the continue button because the

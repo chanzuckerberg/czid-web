@@ -20,9 +20,7 @@ test.describe("Upload WGS sample tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await cookieBanner(page);
   });
-  test.only("Should upload WGS sample with manual metadata", async ({
-    page,
-  }) => {
+  test("Should upload WGS sample with manual metadata", async ({ page }) => {
     const verifyDeleteFile = false;
     const metadataFile = "manual";
     const invalidSample = false;
@@ -37,7 +35,7 @@ test.describe("Upload WGS sample tests", () => {
     );
   });
 
-  test.only("Should not be able to upload invalid or incomplete sample", async ({
+  test("Should not be able to upload invalid or incomplete sample", async ({
     page,
   }) => {
     const truncatedSampleFiles = ["truncated_R1_001.fastq"];
@@ -48,9 +46,7 @@ test.describe("Upload WGS sample tests", () => {
       truncatedSampleFiles,
     );
   });
-  test.only("Should upload WGS sample with metadata csv file", async ({
-    page,
-  }) => {
+  test("Should upload WGS sample with metadata csv file", async ({ page }) => {
     const verifyDeleteFile = false;
     const metadataFile = "metagenomics.csv";
     const invalidSample = false;

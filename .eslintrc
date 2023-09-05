@@ -17,7 +17,7 @@
     "prettier",
     "prettier/standard"
   ],
-  "plugins": ["react", "react-hooks", "sonarjs", "standard"],
+  "plugins": ["react", "react-hooks", "sonarjs", "standard", "no-only-tests"],
   "rules": {
     "camelcase": "warn",
     "comma-dangle": ["error", "always-multiline"],
@@ -31,6 +31,7 @@
     ],
     "no-console": ["error", { "allow": ["warn", "error"] }],
     "no-prototype-builtins": "warn",
+    "no-only-tests/no-only-tests": "error",
     "no-unreachable": "error",
     "no-unused-vars": "error",
     "no-trailing-spaces": "warn",

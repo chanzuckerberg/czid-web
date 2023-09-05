@@ -21,9 +21,7 @@ test.describe("AMR sample upload tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await cookieBanner(page);
   });
-  test.only("Should upload AMR sample with manual metadata", async ({
-    page,
-  }) => {
+  test("Should upload AMR sample with manual metadata", async ({ page }) => {
     const verifyDeleteFile = false;
     const invalidSample = false;
     await testUploadSample(
@@ -36,7 +34,7 @@ test.describe("AMR sample upload tests", () => {
     );
   });
 
-  test.only("Should upload invalid AMR sample", async ({ page }) => {
+  test("Should upload invalid AMR sample", async ({ page }) => {
     const truncatedSampleFiles = ["truncated_R1_001.fastq"];
     await uploadInvalidSampleFiles(
       page,
@@ -46,9 +44,7 @@ test.describe("AMR sample upload tests", () => {
     );
   });
 
-  test.only("Should upload AMR sample with metadata csv file", async ({
-    page,
-  }) => {
+  test("Should upload AMR sample with metadata csv file", async ({ page }) => {
     const verifyDeleteFile = false;
     const metadataFile = "amr.csv";
     const invalidSample = false;

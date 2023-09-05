@@ -21,9 +21,7 @@ test.describe("Metagenomics sample upload tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await cookieBanner(page);
   });
-  test.only("Should upload mNGS sample with manual metadata", async ({
-    page,
-  }) => {
+  test("Should upload mNGS sample with manual metadata", async ({ page }) => {
     const verifyDeleteFile = false;
     const metadataFile = "manual";
     const invalidSample = false;
@@ -38,7 +36,7 @@ test.describe("Metagenomics sample upload tests", () => {
     );
   });
 
-  test.only("Should not upload invalid sample", async ({ page }) => {
+  test("Should not upload invalid sample", async ({ page }) => {
     const truncatedSampleFiles = ["truncated_R1_001.fastq"];
     await uploadInvalidSampleFiles(
       page,
@@ -48,9 +46,7 @@ test.describe("Metagenomics sample upload tests", () => {
     );
   });
 
-  test.only("Should upload mNGS sample with metadata csv file", async ({
-    page,
-  }) => {
+  test("Should upload mNGS sample with metadata csv file", async ({ page }) => {
     const verifyDeleteFile = false;
     const metadataFile = "metagenomics.csv";
     const invalidSample = false;
