@@ -8,10 +8,24 @@ class HardDeleteObjects
   extend Resque::Plugins::Retry # automatically retries job once on failure (e.g. deploy cancels job)
 
   @queue = :hard_delete_objects
-  @retry_delay = 120 # wait 120 seconds before re-enqueuing job in the event of a random failure
+  @retry_exceptions = {
+    Aws::S3::Errors::ServiceUnavailable => [1, 2, 3, 4, 5].map do |i|
+      delay = 120 * (2**i)
+      jitter = delay * 0.1 # e.g., 10% of the delay value
+      delay + rand(-jitter..jitter).round()
+    end,
+    StandardError => 120,
+    SignalException => 3600, # if SIGTERM or SIGKILL (most likely due to deploy) retry after an hour
+  }
 
-  DELETION_ATTEMPTS = 2 # retry deletion of object in case we hit a random deadlock
-  RETRY_DELAY_SECONDS = 20
+  give_up_callback do |exception, *args|
+    if exception.is_a?(Aws::S3::Errors::ServiceUnavailable)
+      LogUtil.log_error(
+        "Bulk Deletion Error: All retries failed to destroy with args #{args} due to S3 503 Slow Down error. Further action is required.",
+        exception: exception
+      )
+    end
+  end
 
   # object ids are pipeline run ids or workflow run ids
   def self.perform(run_ids, sample_ids, workflow, user_id)
@@ -103,20 +117,33 @@ class HardDeleteObjects
   end
 
   def self.delete_object_with_retries(object, workflow)
-    (1..DELETION_ATTEMPTS).each do |attempt_number|
+    deletion_attempts = 2 # retry deletion of object in case we hit a random deadlock
+    retry_delay_seconds = 20
+
+    (1..deletion_attempts).each do |attempt_number|
       object.destroy!
       return object.id
     rescue StandardError => e
-      if attempt_number == DELETION_ATTEMPTS
+      if e.is_a?(Aws::S3::Errors::ServiceUnavailable)
+        # start exponential backoff if we start to encounter S3 503 Slow Down errors
         LogUtil.log_error(
-          "Bulk Deletion Error: Failed to destroy #{object.class.name} after #{DELETION_ATTEMPTS} attempts.",
+          "Bulk Deletion Error: Failed to destroy #{object.class.name} due to S3 503 Slow Down error. Enter retry strategy with exponential backoff.",
+          exception: e,
+          object_id: object.id,
+          workflow: workflow
+        )
+        raise e
+      end
+      if attempt_number == deletion_attempts
+        LogUtil.log_error(
+          "Bulk Deletion Error: Failed to destroy #{object.class.name} after #{deletion_attempts} attempts.",
           exception: e,
           object_id: object.id,
           workflow: workflow
         )
         return nil
       else
-        sleep(RETRY_DELAY_SECONDS)
+        sleep(retry_delay_seconds)
         LogUtil.log_message("Failed to destroy #{object.class.name} after #{attempt_number} attempts, retrying", exception: e)
       end
     end
