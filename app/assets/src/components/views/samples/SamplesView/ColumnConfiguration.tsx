@@ -1,4 +1,4 @@
-import { camelCase, get, merge } from "lodash/fp";
+import { camelCase, get, map, merge, values } from "lodash/fp";
 import { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { WGS_CG_UPLOAD_FEATURE } from "~/components/utils/features";
@@ -11,6 +11,9 @@ import {
 } from "~/components/views/samples/constants";
 import { MetadataType } from "~/interface/shared";
 import { WORKFLOWS } from "~utils/workflows";
+import { StackedBasicValues } from "../../discovery/components/StackedBasicValues";
+import { StackedSampleIds } from "../../discovery/components/StackedSampleIds";
+import { ValueWithTooltip } from "../../discovery/components/ValueWithTooltip";
 import cs from "./samples_view.scss";
 
 // Label constants
@@ -548,7 +551,39 @@ const computeBenchmarkColumns = ({ basicIcon }) => {
       label: "Ground Truth File",
       flexGrow: 1,
       className: cs.basicCell,
-      cellRenderer: TableRenderers.baseRendererWithTooltip,
+      cellRenderer: ValueWithTooltip,
+    },
+    {
+      dataKey: "sampleId",
+      label: "Sample IDs",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: StackedSampleIds,
+      cellDataGetter: ({ rowData }) => rowData?.additionalInfo ?? {},
+    },
+    {
+      dataKey: "pipelineVersion",
+      label: "Pipeline Versions",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: StackedBasicValues,
+      cellDataGetter: extractBenchmarkAdditionalInfo,
+    },
+    {
+      dataKey: "ncbiIndexVersion",
+      label: "NCBI Index Versions",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: StackedBasicValues,
+      cellDataGetter: extractBenchmarkAdditionalInfo,
+    },
+    {
+      dataKey: "runId",
+      label: "Pipeline Run IDs",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: StackedBasicValues,
+      cellDataGetter: extractBenchmarkAdditionalInfo,
     },
   ];
 
@@ -567,6 +602,12 @@ const computeBenchmarkColumns = ({ basicIcon }) => {
   }
 
   return columns;
+};
+
+const extractBenchmarkAdditionalInfo = ({ dataKey, rowData }) => {
+  const additionalInfo = rowData?.additionalInfo ?? {};
+
+  return map(({ [dataKey]: value }) => value, values(additionalInfo));
 };
 
 const computeMetadataColumns = metadataFields => {

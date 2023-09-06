@@ -1,0 +1,9 @@
+@import "~@czi-sds/components/dist/variables";
+@import "~styles/themes/elements";
+
+.base {
+  @include loadingAnimation;
+
+  background-clip: content-box;
+  height: 20px;
+}

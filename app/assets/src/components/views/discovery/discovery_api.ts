@@ -9,6 +9,7 @@ import {
   getVisualizations,
   getWorkflowRuns,
 } from "~/api";
+import { camelize } from "~/components/utils/objectUtil";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import {
   formatSemanticVersion,
@@ -234,7 +235,7 @@ const processAmrWorkflowRun = (workflowRun: $TSFixMe) => {
 
 const processBenchmarkWorkflowRun = (workflowRun: $TSFixMe) => {
   const benchmarkMetrics = workflowRun?.cached_results?.benchmark_metrics;
-  const additionalInfo = workflowRun?.cached_results?.additional_info;
+  const additionalInfo = camelize(workflowRun?.cached_results?.additional_info);
   const benchmarkInfo = workflowRun?.cached_results?.benchmark_info;
 
   return {

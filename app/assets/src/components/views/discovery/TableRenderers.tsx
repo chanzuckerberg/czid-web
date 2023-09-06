@@ -1,4 +1,4 @@
-import { Icon, Tooltip } from "@czi-sds/components";
+import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import { at, get, isNil } from "lodash/fp";
 import moment from "moment";
@@ -120,20 +120,6 @@ class TableRenderers extends React.Component {
       <div className={cs.base} data-testid={data}>
         {data}
       </div>
-    );
-  };
-
-  static baseRendererWithTooltip = ({ cellData }) => {
-    return (
-      <Tooltip
-        arrow
-        placement="top-start"
-        title={cellData}
-        width="wide"
-        sdsStyle="dark"
-      >
-        <div className={cs.base}>{cellData}</div>
-      </Tooltip>
     );
   };
 

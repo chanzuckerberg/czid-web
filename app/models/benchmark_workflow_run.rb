@@ -18,7 +18,6 @@ class BenchmarkWorkflowRun < WorkflowRun
 
     unless cacheable_only
       results["benchmark_html_report"] = benchmark_html_report
-      results["benchmark_info"] = benchmark_info
     end
 
     results
@@ -47,10 +46,7 @@ class BenchmarkWorkflowRun < WorkflowRun
   end
 
   def benchmark_info
-    sample_ids = Sample.where(id: PipelineRun.where(id: inputs&.[]("run_ids")).pluck(:sample_id)).pluck(:id)
-
     return {
-      sample_ids: sample_ids,
       workflow: inputs&.[]("workflow_benchmarked"),
       ground_truth_file: inputs&.[]("ground_truth_file"),
     }
@@ -71,7 +67,11 @@ class BenchmarkWorkflowRun < WorkflowRun
       sample_id = pr&.sample&.id
 
       result[sample_id] = {
+        sample_name: pr&.sample&.name,
         run_id: run_id,
+        # Since only two samples can be used for benchmarking, we can just check if the current run is the first or second.
+        # The second run_id will be the REF for benchmarking
+        is_ref: run_id == run_ids.second,
         pipeline_version: pr&.pipeline_version,
         ncbi_index_version: pr&.alignment_config&.name,
       }
