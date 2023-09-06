@@ -1,11 +1,9 @@
 import { useReactiveVar } from "@apollo/client";
 import { cx } from "@emotion/css";
 import { filter, forEach, map, split, trim } from "lodash/fp";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { activeAmrFiltersVar, amrDrugClassesVar } from "~/cache/initialCache";
-import { UserContext } from "~/components/common/UserContext";
 import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
-import { AMR_V3_FEATURE } from "~/components/utils/features";
 import { ColumnId } from "../../constants";
 import { AmrResult } from "../AmrSampleReport/types";
 import cs from "./amr_filters_container.scss";
@@ -122,7 +120,6 @@ export const AmrFiltersContainer = ({
   hideFilters,
   setHideFilters,
 }: AmrFiltersContainerProps) => {
-  const { allowedFeatures } = useContext(UserContext) || {};
   const [dataFilters, setDataFilters] = useState<FiltersType>(DATA_FILTER_INIT);
 
   // set the data filter function (using setDataFilterFunc callback) based on the current dataFilters
@@ -213,17 +210,14 @@ export const AmrFiltersContainer = ({
               hideFilters={hideFilters}
               updateThresholdFilters={updateThresholdFilters}
             />
-            {allowedFeatures.includes(AMR_V3_FEATURE) && (
-              <DrugClassFilter
-                hideFilters={hideFilters}
-                drugClassOptions={
-                  drugClassList
-                    ?.sort()
-                    .map(drugClass => ({ name: drugClass })) ?? []
-                }
-                onDrugClassChange={updateDrugClassFilter}
-              />
-            )}
+            <DrugClassFilter
+              hideFilters={hideFilters}
+              drugClassOptions={
+                drugClassList?.sort().map(drugClass => ({ name: drugClass })) ??
+                []
+              }
+              onDrugClassChange={updateDrugClassFilter}
+            />
           </div>
         </div>
       </div>

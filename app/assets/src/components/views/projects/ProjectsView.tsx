@@ -97,7 +97,6 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
         cellRenderer: ({ cellData }) =>
           TableRenderers.renderSampleCounts({
             cellData,
-            allowedFeatures: this.context?.allowedFeatures || [],
           }),
       },
     ];

@@ -1,8 +1,6 @@
 import { Button, ButtonIcon, DropdownMenu, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
-import React, { useContext, useState } from "react";
-import { UserContext } from "~/components/common/UserContext";
-import { AMR_V3_FEATURE } from "~/components/utils/features";
+import React, { useState } from "react";
 import { isAmrGeneLevelDownloadAvailable } from "~/components/utils/pipeline_versions";
 import rowStyles from "~/components/views/SampleView/components/AmrView/components/AmrSampleReport/components/StyledTableRow/styled_table_row.scss";
 import {
@@ -34,8 +32,6 @@ export const GeneCell = ({
 }: GeneCellProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
 
   const handleGeneNameClick = () => {
     setDetailsSidebarGeneName(geneName);
@@ -102,42 +98,40 @@ export const GeneCell = ({
           </Button>
         </span>
       </Tooltip>
-      {allowedFeatures.includes(AMR_V3_FEATURE) && (
-        <>
-          <Tooltip
-            title={
-              isAmrGeneLevelDownloadAvailable(workflowWdlVersion)
-                ? ""
-                : "Downloads are not available for pipeline runs before v1.1"
-            }
-            placement="top"
-            sdsStyle="light"
-          >
-            <span>
-              <ButtonIcon
-                disabled={!isAmrGeneLevelDownloadAvailable(workflowWdlVersion)}
-                onClick={handleAnchorClick}
-                className={cx(
-                  rowStyles.downloadIcon,
-                  isOpen && rowStyles.showHoverActions,
-                )}
-                sdsSize="small"
-                sdsType="primary"
-                sdsIcon={"download"}
-              />
-            </span>
-          </Tooltip>
-          <DropdownMenu
-            className={cs.hoverAction}
-            open={isOpen}
-            anchorEl={anchorEl}
-            onClickAway={handleClickAway}
-            onKeyDown={handleKeyEscape}
-            options={geneLevelDownloadOptions}
-            renderOption={renderDownloadOption}
-          />
-        </>
-      )}
+      <>
+        <Tooltip
+          title={
+            isAmrGeneLevelDownloadAvailable(workflowWdlVersion)
+              ? ""
+              : "Downloads are not available for pipeline runs before v1.1"
+          }
+          placement="top"
+          sdsStyle="light"
+        >
+          <span>
+            <ButtonIcon
+              disabled={!isAmrGeneLevelDownloadAvailable(workflowWdlVersion)}
+              onClick={handleAnchorClick}
+              className={cx(
+                rowStyles.downloadIcon,
+                isOpen && rowStyles.showHoverActions,
+              )}
+              sdsSize="small"
+              sdsType="primary"
+              sdsIcon={"download"}
+            />
+          </span>
+        </Tooltip>
+        <DropdownMenu
+          className={cs.hoverAction}
+          open={isOpen}
+          anchorEl={anchorEl}
+          onClickAway={handleClickAway}
+          onKeyDown={handleKeyEscape}
+          options={geneLevelDownloadOptions}
+          renderOption={renderDownloadOption}
+        />
+      </>
     </span>
   );
 };

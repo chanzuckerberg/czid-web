@@ -4,7 +4,6 @@ import { at, get, isNil } from "lodash/fp";
 import moment from "moment";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
-import { AMR_V3_FEATURE } from "~/components/utils/features";
 import { numberWithCommas } from "~/helpers/strings";
 import StatusLabel from "~ui/labels/StatusLabel";
 // CSS file must be loaded after any elements you might want to override
@@ -71,7 +70,7 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderSampleCounts = ({ cellData: counts, allowedFeatures }) => {
+  static renderSampleCounts = ({ cellData: counts }) => {
     const [
       numberOfSamples,
       mngsAnalysisRunsCount,
@@ -106,9 +105,7 @@ class TableRenderers extends React.Component {
             data-testid="nmgs-cg-sample-counts"
           >
             {`${mngsAnalysisRunsCount} mNGS`} | {`${cgAnlaysisRunsCount} CG`}
-            {allowedFeatures.includes(AMR_V3_FEATURE)
-              ? ` | ${amrAnalysisRunsCount} AMR`
-              : ""}
+            {` | ${amrAnalysisRunsCount} AMR`}
           </div>
         </div>
       )
