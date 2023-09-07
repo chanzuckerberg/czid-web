@@ -1,3 +1,4 @@
+import { AmrDeprectatedData } from "~/interface/sampleView";
 import { get } from "./core";
 
 export const getAMRCounts = (sampleIds: $TSFixMe) =>
@@ -14,5 +15,5 @@ export const getOntology = (geneName: $TSFixMe) =>
     },
   });
 
-export const getAmrDeprecatedData = (sampleId: $TSFixMe) =>
+export const getAmrDeprecatedData = (sampleId): Promise<AmrDeprectatedData[]> =>
   get(`/samples/${sampleId}/amr.json`);

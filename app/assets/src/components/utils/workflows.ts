@@ -42,6 +42,14 @@ export const WORKFLOWS = {
     pipelineName: "Nanopore mNGS",
     shorthand: "mNGS",
   },
+  BENCHMARK: {
+    label: "Benchmark" as const,
+    pluralizedLabel: "Benchmarks",
+    value: "benchmark" as const,
+    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
+    pipelineName: "Benchmark",
+    shorthand: "BM",
+  },
 };
 
 export const WORKFLOW_KEY_FOR_VALUE = {
@@ -49,6 +57,7 @@ export const WORKFLOW_KEY_FOR_VALUE = {
   [WORKFLOWS.CONSENSUS_GENOME.value]: "CONSENSUS_GENOME" as const,
   [WORKFLOWS.SHORT_READ_MNGS.value]: "SHORT_READ_MNGS" as const,
   [WORKFLOWS.LONG_READ_MNGS.value]: "LONG_READ_MNGS" as const,
+  [WORKFLOWS.BENCHMARK.value]: "BENCHMARK" as const,
 };
 
 export const workflowIsWorkflowRunEntity = (workflow: WORKFLOW_VALUES) => {
@@ -61,6 +70,7 @@ export const WORKFLOW_ORDER = [
   "LONG_READ_MNGS" as const,
   "CONSENSUS_GENOME" as const,
   "AMR" as const,
+  "BENCHMARK" as const,
 ];
 
 export const workflowIsBeta = (
@@ -136,7 +146,8 @@ export type MetagenomicTabsSample =
 
 export type WorkflowTabsSample =
   | "Consensus Genome"
-  | "Antimicrobial Resistance";
+  | "Antimicrobial Resistance"
+  | "Benchmark";
 
 export type LongReadTabsSample = "Nanopore";
 

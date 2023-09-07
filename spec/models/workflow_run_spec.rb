@@ -385,6 +385,34 @@ describe WorkflowRun, type: :model do
     end
   end
 
+  describe "#add_inputs" do
+    let(:parsed_input) { { "start_from_mngs" => "true" } }
+    let(:inputs_json) { parsed_input.to_json }
+    let(:project) { create(:project) }
+    let(:sample) { create(:sample, project: project) }
+    let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:amr], inputs_json: inputs_json) }
+    let(:workflow_run_no_input) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:amr]) }
+    let(:new_parsed_input) { { "card_version" => "3.2.6" } }
+
+    it "creates inputs JSON if inputs_json is nil" do
+      workflow_run_no_input.add_inputs(parsed_input)
+      workflow_run_no_input.reload
+      expect(workflow_run_no_input.inputs_json).to eq(parsed_input.to_json)
+    end
+
+    it "appends to existing inputs if inputs_json is non-nil" do
+      workflow_run.add_inputs(new_parsed_input)
+      workflow_run.reload
+      expect(workflow_run.inputs_json).to eq({ "start_from_mngs" => "true", "card_version" => "3.2.6" }.to_json)
+    end
+
+    it "overwrites existing values for the keys being added" do
+      workflow_run.add_inputs({ "start_from_mngs" => "false" })
+      workflow_run.reload
+      expect(workflow_run.inputs_json).to eq({ "start_from_mngs" => "false" }.to_json)
+    end
+  end
+
   describe "#handle_sample_upload_failure" do
     before do
       @project = create(:project)

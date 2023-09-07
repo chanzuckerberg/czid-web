@@ -1,0 +1,20 @@
+@import "~@czi-sds/components/dist/variables";
+
+.stackedValues {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.stackedValue {
+  font: $sds-font-body-xxs-400-font;
+}
+
+.horizontalSeparator {
+  background: $sds-color-gray-black;
+  opacity: 0.3;
+  height: 1px;
+  width: 26px;
+  margin: $sds-spaces-xxs 0;
+}

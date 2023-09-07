@@ -4,12 +4,15 @@ import { IconAlert, IconLoading } from "~/components/ui/icons";
 import { sampleErrorInfo, UPLOAD_URL } from "~/components/utils/sample";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
+import {
+  ONT_PIPELINE_RUNNING_STATUS_MESSAGE,
+  TABS,
+} from "~/components/views/SampleView/utils";
 import { IconAlertType } from "~/interface/icon";
 import ReportMetadata, { PipelineRunStatus } from "~/interface/reportMetaData";
 import Sample, { SampleStatus } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
-import { ONT_PIPELINE_RUNNING_STATUS_MESSAGE, TABS } from "../../constants";
 
 interface SampleViewMessageProps {
   currentTab: CurrentTabSample;

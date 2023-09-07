@@ -9,11 +9,10 @@ import {
   ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
+import { getWorkflowCount, TABS } from "~/components/views/SampleView/utils";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
-import { TABS } from "../../constants";
-import { getWorkflowCount } from "../../setup";
 import cs from "./tab_switcher.scss";
 
 interface TabSwitcherProps {

@@ -33,8 +33,8 @@ interface ViewOnlyLinkFormState {
   backgroundOptions?: {
     mass_normalized: boolean;
     text: string;
-    name: string;
-    id: number;
+    name?: string;
+    id?: number;
     value?: number;
   }[];
   disableSharingConfirmationModalOpen: boolean;

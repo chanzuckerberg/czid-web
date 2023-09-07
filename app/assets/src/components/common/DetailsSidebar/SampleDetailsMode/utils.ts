@@ -1,6 +1,6 @@
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 import moment from "moment";
-import { usesLatestCardDbVersion } from "~/components/utils/pipeline_versions";
+import { AMR_PIPELINE_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
   WORKFLOWS,
   WORKFLOW_KEY_FOR_VALUE,
@@ -18,6 +18,7 @@ import { AdditionalInfo } from "./SampleDetailsMode";
 
 const BLANK_TEXT = "unknown";
 const YYYY_MM_DD = "YYYY-MM-DD";
+const PIPELINE_VIZ_LINK_TEXT = "View Pipeline Visualization";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = (
@@ -50,7 +51,7 @@ export const processPipelineInfo = (
     if (pipelineRun.version.pipeline) {
       pipelineInfo.pipelineVersion = {
         text: `v${pipelineRun.version.pipeline}`,
-        linkLabel: "View Pipeline Visualization",
+        linkLabel: PIPELINE_VIZ_LINK_TEXT,
         link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${pipelineRun.version.pipeline}`,
       };
     }
@@ -166,6 +167,7 @@ export const processAMRWorkflowRun = (
     executed_at: executedAt,
     wdl_version: pipelineVersion,
     parsed_cached_results,
+    inputs,
   } = workflowRun;
 
   const qualityMetrics = parsed_cached_results?.quality_metrics;
@@ -173,10 +175,14 @@ export const processAMRWorkflowRun = (
   const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflowValue];
   const workflow = WORKFLOWS[workflowKey].label;
   const lastProcessedAt = moment(executedAt).format(YYYY_MM_DD);
+  const cardDbVersion = inputs?.card_version;
+  const wildcardVersion = inputs?.wildcard_version;
 
-  const workflowRunUsesLatestCardDbVersion =
-    usesLatestCardDbVersion(pipelineVersion);
-  const cardDbVersion = workflowRunUsesLatestCardDbVersion ? "3.2.6" : "3.2.3";
+  const pipelineVersionInfo = {
+    text: pipelineVersion,
+    linkLabel: PIPELINE_VIZ_LINK_TEXT,
+    link: AMR_PIPELINE_HELP_LINK,
+  };
 
   if (qualityMetrics) {
     const {
@@ -211,7 +217,7 @@ export const processAMRWorkflowRun = (
       analysisType: { text: workflow },
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
-      pipelineVersion: { text: pipelineVersion },
+      pipelineVersion: pipelineVersionInfo,
       cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
       totalReads: { text: numberWithCommas(totalReads) },
@@ -220,15 +226,17 @@ export const processAMRWorkflowRun = (
       qcPercent: { text: qcPercent },
       compressionRatio: { text: compressionRatio },
       meanInsertSize: { text: meanInsertSize },
+      wildcardDatabaseVersion: { text: wildcardVersion },
     };
   } else {
     return {
       analysisType: { text: workflow },
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
-      pipelineVersion: { text: pipelineVersion },
+      pipelineVersion: pipelineVersionInfo,
       cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
+      wildcardDatabaseVersion: { text: wildcardVersion },
     };
   }
 };

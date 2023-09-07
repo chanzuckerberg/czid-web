@@ -14,7 +14,7 @@ class LocationTest < ActiveSupport::TestCase
   test "should perform the right geosearch query" do
     api_response = [true, LocationTestHelper::API_GEOSEARCH_RESPONSE]
     query = "search.php?addressdetails=1&normalizecity=1&q=UCSF"
-    mock = MiniTest::Mock.new
+    mock = Minitest::Mock.new
     mock.expect(:call, api_response, [query])
     Location.stub :location_api_request, mock do
       res = Location.geosearch("UCSF")
@@ -26,7 +26,7 @@ class LocationTest < ActiveSupport::TestCase
   test "should use result limits in geosearch requests" do
     limit = 7
     query = "search.php?addressdetails=1&normalizecity=1&q=UCSF&limit=#{limit}"
-    mock = MiniTest::Mock.new
+    mock = Minitest::Mock.new
     mock.expect(:call, nil, [query])
     Location.stub :location_api_request, mock do
       Location.geosearch("UCSF", limit)
@@ -47,7 +47,7 @@ class LocationTest < ActiveSupport::TestCase
     params_with_junk[:junk] = "junkvalue"
     new_location = Location.new
 
-    mock_new = MiniTest::Mock.new
+    mock_new = Minitest::Mock.new
     mock_new.expect(:call, new_location, [location_params])
     Location.stub :new, mock_new do
       res = Location.new_from_params(params_with_junk)
@@ -68,7 +68,7 @@ class LocationTest < ActiveSupport::TestCase
     osm_id = api_response["osm_id"]
     osm_type = api_response["osm_type"]
     query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type[0].capitalize}"
-    mock = MiniTest::Mock.new
+    mock = Minitest::Mock.new
     mock.expect(:call, [true, api_response], [query])
     Location.stub :location_api_request, mock do
       res = Location.geosearch_by_osm_id(osm_id, osm_type)
@@ -83,7 +83,7 @@ class LocationTest < ActiveSupport::TestCase
     osm_type = api_response["osm_type"]
 
     new_location = Location.new
-    mock_geosearch = MiniTest::Mock.new
+    mock_geosearch = Minitest::Mock.new
     mock_geosearch.expect(:call, [true, api_response], [osm_id, osm_type])
     Location.stub :find_by, nil do
       Location.stub :geosearch_by_osm_id, mock_geosearch do
@@ -98,7 +98,7 @@ class LocationTest < ActiveSupport::TestCase
   test "should geosearch by country and state name" do
     api_response = [true, LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE]
     query = "search.php?addressdetails=1&normalizecity=1&country=USA&state=California"
-    mock = MiniTest::Mock.new
+    mock = Minitest::Mock.new
     mock.expect(:call, api_response, [query])
     Location.stub :location_api_request, mock do
       res = Location.geosearch_by_levels("USA", "California")
@@ -110,9 +110,9 @@ class LocationTest < ActiveSupport::TestCase
   test "should fetch a missing Country parent level for a location" do
     original = locations(:ucsf)
     api_response = [true, LocationTestHelper::API_GEOSEARCH_USA_RESPONSE]
-    mock_geosearch = MiniTest::Mock.new
+    mock_geosearch = Minitest::Mock.new
     mock_geosearch.expect(:call, api_response, [original.country_name])
-    mock_new_from_params = MiniTest::Mock.new
+    mock_new_from_params = Minitest::Mock.new
     mock_new_from_params.expect(:call, locations(:bangladesh), [Hash])
 
     Location.stub :geosearch_by_levels, mock_geosearch do
@@ -133,10 +133,10 @@ class LocationTest < ActiveSupport::TestCase
     original = locations(:columbus)
     api_response_usa = [true, LocationTestHelper::API_GEOSEARCH_USA_RESPONSE]
     api_response_ca = [true, LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE]
-    mock_geosearch = MiniTest::Mock.new
+    mock_geosearch = Minitest::Mock.new
     mock_geosearch.expect(:call, api_response_usa, [original.country_name])
     mock_geosearch.expect(:call, api_response_ca, [original.country_name, original.state_name])
-    mock_new_from_params = MiniTest::Mock.new
+    mock_new_from_params = Minitest::Mock.new
     mock_new_from_params.expect(:call, locations(:bangladesh), [Hash])
     mock_new_from_params.expect(:call, locations(:california), [Hash])
 

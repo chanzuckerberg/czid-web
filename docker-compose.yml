@@ -5,10 +5,10 @@
 x-web-variables: &web-variables
   ? SAMPLES_BUCKET_NAME=idseq-samples-development
   ? SAMPLES_BUCKET_NAME_V1=czi-infectious-disease-development-samples
-  ? S3_DATABASE_BUCKET=idseq-public-references
+  ? S3_DATABASE_BUCKET=czid-public-references
   ? S3_WORKFLOWS_BUCKET=idseq-workflows
   ? S3_AEGEA_ECS_EXECUTE_BUCKET=aegea-ecs-execute-development
-  ? ES_ADDRESS=http://elasticsearch:9200
+  ? ES_ADDRESS=http://opensearch:9200
   ? AIRTABLE_API_KEY
   ? AIRTABLE_BASE_ID
   ? AUTH_TOKEN_SECRET
@@ -30,7 +30,7 @@ x-web-variables: &web-variables
   ? SERVER_DOMAIN
   ? SMTP_PASSWORD
   ? SMTP_USER
-  ? HEATMAP_ES_ADDRESS=http://heatmap-elasticsearch:9200
+  ? HEATMAP_ES_ADDRESS=http://opensearch:9200
   ? INDEXING_LAMBDA_MODE=local
   ? LOCAL_TAXON_INDEXING_URL=concurrency-lambda:8080
   ? LOCAL_EVICTION_URL=eviction-lambda:8080
@@ -57,54 +57,34 @@ x-env-variables: &env-variables
 
 version: '3.4'
 services:
-  elasticsearch:
-    image: elasticsearch:6.4.3
+  opensearch:
+    image: opensearchproject/opensearch:2.7.0
     environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=false
-      - xpack.monitoring.enabled=false
-      - xpack.graph.enabled=false
-      - xpack.watcher.enabled=false
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - ./docker_data/elasticsearch/data:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-    platform: linux/amd64
-  heatmap-elasticsearch:
-    build:
-      context: ./docker/open_distro
-      dockerfile: Dockerfile
-    environment:
-      - node.name=heatmap-elasticsearch-node
+      - node.name=elasticsearch-node
       - discovery.type=single-node
       - cluster.name=es-docker-cluster
       - bootstrap.memory_lock=true
+      - plugins.security.disabled=true
+      - compatibility.override_main_response_version=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - ./docker_data/heatmap_elasticsearch/data:/usr/share/opensearch/data
+      - ./docker_data/opensearch/data:/usr/share/opensearch/data
     ports:
       - 9400:9200
       - 9600:9600
   opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:1.2.0
-    container_name: opensearch-dashboards
+    image: opensearchproject/opensearch-dashboards:2.7.0
     environment:
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
-      - OPENSEARCH_HOSTS=http://heatmap-elasticsearch:9200
+      - OPENSEARCH_HOSTS=http://opensearch:9200
     ports:
       - 5601:5601
     depends_on:
-      - heatmap-elasticsearch
+      - opensearch
   db:
     image: mysql:5.7
     environment:
@@ -155,8 +135,7 @@ services:
     depends_on:
       - db
       - redis
-      - elasticsearch
-      - heatmap-elasticsearch
+      - opensearch
       - shoryuken
     environment:
       <<: [*web-variables, *aws-variables, *auth0-variables, *env-variables]
@@ -260,7 +239,7 @@ services:
       - MYSQL_USERNAME=root
       - MYSQL_PASSWORD=local
       - MYSQL_DB=idseq_development
-      - ES_HOST=heatmap-elasticsearch:9200
+      - ES_HOST=opensearch:9200
     ports:
       - 9091:8080
   eviction-lambda:
@@ -271,7 +250,12 @@ services:
     profiles: ["local-lambdas"]
     environment:
       - LOCAL_MODE=local
-      - ES_HOST=heatmap-elasticsearch:9200
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=local
+      - MYSQL_DB=idseq_development
+      - ES_HOST=opensearch:9200
     ports:
       - 9092:8080
   deleted-eviction-lambda:
@@ -287,7 +271,7 @@ services:
       - MYSQL_USERNAME=root
       - MYSQL_PASSWORD=local
       - MYSQL_DB=idseq_development
-      - ES_HOST=heatmap-elasticsearch:9200
+      - ES_HOST=opensearch:9200
     ports:
       - 9093:8080
 networks:

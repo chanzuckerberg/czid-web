@@ -1182,27 +1182,56 @@ RSpec.describe SamplesController, type: :controller do
         project = create(:project, users: [@admin])
         @benchmarking_project = create(:project, users: [@admin], name: "CZID Benchmarks")
 
-        sample_one = create(:sample, project: project, name: "Test Sample One")
-        @pipeline_run_one = create(:pipeline_run, sample: sample_one)
+        @sample_one = create(:sample, project: project, name: "Test Sample One")
+        @pipeline_run_one = create(:pipeline_run, sample: @sample_one)
 
-        sample_two = create(:sample, project: project, name: "Test Sample Two")
-        @pipeline_run_two = create(:pipeline_run, sample: sample_two)
+        @sample_two = create(:sample, project: project, name: "Test Sample Two")
+        @pipeline_run_two = create(:pipeline_run, sample: @sample_two)
       end
 
       context "when user is an admin" do
         it "should create a new sample with a benchmark workflow run" do
-          pipeline_run_ids = [@pipeline_run_one.id, @pipeline_run_two.id]
+          sample_ids = [@sample_one.id, @sample_two.id]
           allow(SfnBenchmarkPipelineDispatchService).to receive(:call).and_return(true)
-          post :benchmark, params: { runIds: pipeline_run_ids, workflowBenchmarked: WorkflowRun::WORKFLOW[:short_read_mngs], project: @benchmarking_project }
+          post :benchmark, params: { sampleIds: sample_ids, workflowBenchmarked: WorkflowRun::WORKFLOW[:short_read_mngs], projectId: @benchmarking_project.id }
 
           benchmark_sample = Sample.where(project: @benchmarking_project).last
           benchmark_workflow_run = WorkflowRun.where(sample: benchmark_sample).last
 
           expect(response).to have_http_status(:ok)
           expect(benchmark_workflow_run.workflow).to eq(WorkflowRun::WORKFLOW[:benchmark])
-          expect(benchmark_workflow_run.get_input("run_ids").map(&:to_i)).to eq(pipeline_run_ids)
+          expect(benchmark_workflow_run.get_input("run_ids").map(&:to_i)).to eq([@pipeline_run_one.id, @pipeline_run_two.id])
           expect(benchmark_workflow_run.get_input("workflow_benchmarked")).to eq(WorkflowRun::WORKFLOW[:short_read_mngs])
           expect(benchmark_workflow_run.get_input("ground_truth_file")).to eq(nil)
+        end
+      end
+    end
+
+    describe "GET #benchmark_ground_truth_files" do
+      context "when user is an admin" do
+        before do
+          sign_in @admin
+        end
+
+        it "should return a list of ground truth file names from S3" do
+          allow(Syscall).to receive(:pipe_with_output).and_return("\ntruth_file_1.txt\ntruth_file_2.txt")
+          get :benchmark_ground_truth_files
+          json_response = JSON.parse(response.body)
+
+          expect(response).to have_http_status(:ok)
+          expect(json_response["groundTruthFileNames"]).to eq(["truth_file_1.txt", "truth_file_2.txt"])
+          expect(json_response["groundTruthFilesS3Bucket"]).to eq(BenchmarkWorkflowRun::AWS_S3_TRUTH_FILES_BUCKET)
+        end
+      end
+
+      context "when user is not an admin" do
+        before do
+          sign_in @joe
+        end
+
+        it "should redirect to root path" do
+          get :benchmark_ground_truth_files
+          expect(response).to redirect_to root_path
         end
       end
     end

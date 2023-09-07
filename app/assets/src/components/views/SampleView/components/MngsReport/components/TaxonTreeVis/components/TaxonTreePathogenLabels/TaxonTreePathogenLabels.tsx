@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import { Taxon } from "~/interface/shared";
-import { TaxonTreePathogenLabel } from "../TaxonTreePathogenLabel/TaxonTreePathogenLabel";
+import { TaxonTreePathogenLabel } from "../TaxonTreePathogenLabel";
 
 interface TaxonTreePathogenLabelsProps {
   taxa: Taxon[];
@@ -21,6 +21,7 @@ export const TaxonTreePathogenLabels = ({
         genusData.pathogenFlags.forEach(pathogenFlag => {
           labels.push(
             <TaxonTreePathogenLabel
+              key={`label-${genusData.taxId}-${pathogenFlag}`}
               taxId={genusData.taxId}
               tagType={pathogenFlag}
             />,
@@ -32,6 +33,7 @@ export const TaxonTreePathogenLabels = ({
           speciesData.pathogenFlags.forEach(pathogenFlag => {
             labels.push(
               <TaxonTreePathogenLabel
+                key={`label-${genusData.taxId}-${pathogenFlag}`}
                 taxId={genusData.taxId}
                 tagType={pathogenFlag}
               />,
@@ -43,6 +45,7 @@ export const TaxonTreePathogenLabels = ({
       if (genusData.pathogenFlag) {
         labels.push(
           <TaxonTreePathogenLabel
+            key={`label-${genusData.taxId}-${genusData.pathogenFlag}`}
             taxId={genusData.taxId}
             tagType={genusData.pathogenFlag}
           />,
@@ -52,6 +55,7 @@ export const TaxonTreePathogenLabels = ({
         if (speciesData.pathogenFlag) {
           labels.push(
             <TaxonTreePathogenLabel
+              key={`label-${speciesData.taxId}-${speciesData.pathogenFlag}`}
               taxId={speciesData.taxId}
               tagType={speciesData.pathogenFlag}
             />,

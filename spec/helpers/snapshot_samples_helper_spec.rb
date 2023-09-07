@@ -167,7 +167,7 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
         first_sample = formatted_samples.first
         expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :mngs_run_info, :uploader, :workflow_runs_count_by_workflow)
         expect(first_sample[:derived_sample_output].keys).to contain_exactly(:host_genome_name, :pipeline_run, :project_name, :summary_stats)
-        expect(first_sample[:mngs_run_info].keys).to contain_exactly(:finalized, :report_ready, :result_status_description, :total_runtime, :with_assembly, :created_at)
+        expect(first_sample[:mngs_run_info].keys).to contain_exactly(:finalized, :report_ready, :result_status_description, :total_runtime, :with_assembly, :ncbi_index_version, :created_at)
       end
     end
 

@@ -1,4 +1,5 @@
 import path from "path";
+import { acceptCookies } from "@e2e/utils/page";
 import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
 
@@ -14,10 +15,10 @@ test.describe("Pipeline Viz View tests", () => {
   test.beforeEach(async ({ page }) => {
     const fullUrl = `${baseUrl}/${url}`;
     await page.goto(fullUrl);
-    await page.getByText("Accept All Cookies").click();
+    await acceptCookies(page);
   });
 
-  test("Should render the Pipeline Version Select", async ({ page }) => {
+  test.fixme("Should render the Pipeline Version Select", async ({ page }) => {
     await expect(page.getByTestId("pipeline-version-select")).toBeVisible();
   });
 

@@ -32,3 +32,10 @@ export async function fileChooser(page: Page, filePath: string) {
   ]);
   await fileChooser.setFiles([path.resolve(filePath)]);
 }
+
+export async function acceptCookies(page: Page) {
+  const cookies = page.getByText("Accept All Cookies");
+  if (await cookies.isVisible()) {
+    await cookies.click({ timeout: 0 });
+  }
+}

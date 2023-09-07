@@ -2,7 +2,7 @@ import { Button, DropdownPopper } from "@czi-sds/components";
 import { find, isEmpty, isEqual, map, some } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";
-import { NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS } from "~/components/views/SampleView/constants";
+import { NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS } from "~/components/views/SampleView/utils";
 import {
   ThresholdFilterData,
   ThresholdFilterOperator,

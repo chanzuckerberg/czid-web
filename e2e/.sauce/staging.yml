@@ -1,6 +1,11 @@
+# See https://docs.saucelabs.com/web-apps/automated-testing/playwright/#supported-testing-platforms for a list of supported versions.
+# See https://docs.saucelabs.com/web-apps/automated-testing/playwright/yaml/#configfile for a list of supported configuration files.
+
 apiVersion: v1alpha
 kind: playwright
 showConsoleLog: true
+defaults:
+  timeout: 15m
 sauce:
   region: us-west-1
   concurrency: 5 
@@ -8,7 +13,7 @@ sauce:
     tags:
       - e2e
       - czid
-      - ci
+      - staging
     build: COMMIT $CI_COMMIT_SHORT_SHA
 playwright:
   version: package.json 
@@ -17,6 +22,7 @@ rootDir: ./
 env:
   CZID_USERNAME: $CZID_USERNAME
   CZID_PASSWORD: $CZID_PASSWORD
+  NODE_ENV: $NODE_ENV
 suites:
   - name: "Chromium Mac"
     platformName: "macOS 12"

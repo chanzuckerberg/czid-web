@@ -13,6 +13,10 @@ export function NewsletterOptInCheckbox({
 }: NewsletterOptInCheckboxProps) {
   return (
     <div className={cs.main}>
+      <div className={cs.titleSection}>
+        <span className={cs.titleMainText}>Newsletter</span>
+        <span className={cs.titleOptionalText}> — optional</span>
+      </div>
       <span className={cs.checkbox}>
         <InputCheckbox
           stage={optedInToNewsletter ? "checked" : "unchecked"}

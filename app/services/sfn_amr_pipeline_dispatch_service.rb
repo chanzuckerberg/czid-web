@@ -40,6 +40,10 @@ class SfnAmrPipelineDispatchService
     @workflow_run.update(
       wdl_version: @wdl_version
     )
+
+    # Get latest CARD versions and write them to inputs_json
+    versions = @workflow_run.uses_modern_host_filtering? ? AmrWorkflowRun.latest_card_versions : AmrWorkflowRun::DEFAULT_CARD_VERSIONS
+    @workflow_run.add_inputs(versions)
   end
 
   def call
@@ -172,8 +176,16 @@ class SfnAmrPipelineDispatchService
     params
   end
 
-  def card_params
-    prefix = card_prefix
+  def card_params(uses_modern_host_filtering)
+    # AMR pipeline versions before modern host filtering will
+    # use default CARD version set in AMR WDL
+    unless uses_modern_host_filtering
+      return {}
+    end
+
+    # AMR pipeline versions using modern host filtering will
+    # use the latest version of CARD available
+    prefix = AmrWorkflowRun.latest_card_folder_path
     {
       card_json: "#{prefix}/card.json",
       card_ontology: "#{prefix}/ontology.json",
@@ -184,15 +196,10 @@ class SfnAmrPipelineDispatchService
     }
   end
 
-  def card_prefix
-    latest_card_version_folder = AppConfigHelper.get_app_config(AppConfig::CARD_FOLDER)
-    "s3://#{S3_DATABASE_BUCKET}/card/#{latest_card_version_folder}"
-  end
-
   def generate_wdl_input
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
     host_filtering_params = @workflow_run.uses_modern_host_filtering? ? modern_host_filtering_parameters : host_filtering_parameters
-
+    card_params = card_params(@workflow_run.uses_modern_host_filtering?)
     run_inputs = {
       docker_image_id: retrieve_docker_image_id,
       non_host_reads: nonhost_reads_params,

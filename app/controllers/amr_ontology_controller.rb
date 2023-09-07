@@ -2,7 +2,7 @@ class AmrOntologyController < ApplicationController
   include S3Util
 
   S3_JSON_PREFIX = "card".freeze
-  DEFAULT_CARD_FOLDER = "2023-05-22".freeze
+  DEFAULT_CARD_FOLDER = "card-3.2.6-wildcard-4.0.0".freeze
 
   def fetch_ontology
     gene_name = params[:geneName]

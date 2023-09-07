@@ -15,9 +15,12 @@ import {
 } from "~/components/utils/csv";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
+import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
+import {
+  cancellablePromise,
+  SUCCEEDED_STATE,
+} from "~/components/views/SampleView/utils";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import { SUCCEEDED_STATE } from "../../constants";
-import SampleReportContent from "../../SampleReportContent";
 import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";
@@ -50,19 +53,27 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   }, [dataFilterFunc, reportTableData]);
 
   useEffect(() => {
-    if (workflowRun.status !== SUCCEEDED_STATE) {
+    if (
+      workflowRun.status !== SUCCEEDED_STATE ||
+      loadingResults ||
+      workflowRun.workflow !== "amr"
+    ) {
       return;
     }
     setLoadingResults(true);
+    const { runFetch, cancelFetch } = cancellablePromise(
+      getWorkflowRunResults(workflowRun.id),
+    );
     const fetchResults = async () => {
-      const reportDataRaw = await getWorkflowRunResults(workflowRun.id);
+      const reportDataRaw = await runFetch;
       const reportData = camelize(reportDataRaw);
-      setReportTableData(reportData.reportTableData);
-      setDrugClassesReactiveVar(reportData.reportTableData);
+      setReportTableData(reportData?.reportTableData);
+      setDrugClassesReactiveVar(reportData?.reportTableData);
       setLoadingResults(false);
     };
 
     fetchResults();
+    return cancelFetch;
   }, []);
 
   useEffect(() => {

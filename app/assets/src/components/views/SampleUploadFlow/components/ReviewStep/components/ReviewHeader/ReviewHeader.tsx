@@ -34,6 +34,7 @@ const ReviewHeader = ({
             },
           );
         }}
+        data-testid="edit-analysis-type"
       >
         Edit Analysis Type
       </div>

@@ -1,5 +1,10 @@
 import { BlastData } from "~/interface/sampleView";
-import { Taxon, TooltipLocation } from "~/interface/shared";
+import {
+  AccessionData,
+  Taxon,
+  TaxonLevelType,
+  TooltipLocation,
+} from "~/interface/shared";
 
 export interface CoverageVizBottomSidebarProps {
   visible?: boolean;
@@ -17,7 +22,7 @@ export interface CoverageVizParamsRaw {
   taxId: number;
   taxName: string;
   taxCommonName: string;
-  taxLevel: "genus" | "species";
+  taxLevel: TaxonLevelType;
   taxSpecies: Taxon[];
   alignmentVizUrl: string;
   taxonStatsByCountType: {
@@ -37,12 +42,8 @@ export interface CoverageVizParams
   taxonName: CoverageVizParamsRaw["taxName"];
   taxonCommonName: CoverageVizParamsRaw["taxCommonName"];
   taxonLevel: CoverageVizParamsRaw["taxLevel"];
-  accessionData: {
-    best_accessions: AccessionsSummary[];
-    num_accessions: number;
-  };
+  accessionData: AccessionData;
 }
-
 export interface AccessionsSummary {
   id: string;
   num_contigs: number;

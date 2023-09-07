@@ -1,6 +1,7 @@
 import path from "path";
 import { expect, Page, test } from "@playwright/test";
 import dotenv from "dotenv";
+
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 const COMPLETE_SETUP_BTN = "complete-setup-btn";

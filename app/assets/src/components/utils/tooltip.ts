@@ -1,4 +1,7 @@
-import { UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK } from "~/components/utils/documentationLinks";
+import {
+  AMR_DATABASE_HELP_LINK,
+  UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
+} from "~/components/utils/documentationLinks";
 
 const TOOLTIP_BUFFER = 10;
 const TOOLTIP_MAX_WIDTH = 400;
@@ -132,5 +135,11 @@ export const FIELDS_METADATA = {
     label: "Ct Value",
     tooltip:
       "The number of cycles required for the fluorescent signal to cross the background fluorescent threshold during qPCR. The value is inversely proportional to the amount of target nucleic acid.",
+  },
+  wildcardDatabaseVersion: {
+    label: "WildCARD",
+    tooltip:
+      "Supplemental CARD module of predicted Resistomes, Variants, and Prevalence data.",
+    link: AMR_DATABASE_HELP_LINK,
   },
 };

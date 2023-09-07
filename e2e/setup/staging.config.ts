@@ -1,10 +1,4 @@
-import path from "path";
 import { devices, PlaywrightTestConfig } from "@playwright/test";
-import dotenv from "dotenv";
-
-dotenv.config({
-  path: path.resolve(__dirname, "../../", ".env.staging"),
-});
 
 const config: PlaywrightTestConfig = {
   expect: {

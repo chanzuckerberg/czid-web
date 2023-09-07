@@ -1,11 +1,7 @@
 import fs from "fs";
-import path from "path";
 import { chromium, expect, FullConfig } from "@playwright/test";
-import dotenv from "dotenv";
 import { tag } from "../constants/common";
 import { login } from "../utils/login";
-
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 /**
  * This function is run once at the start of the test

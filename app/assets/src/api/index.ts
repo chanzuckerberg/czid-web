@@ -4,10 +4,11 @@
 import axios from "axios";
 import { CoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/types";
 import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { BenchmarkWorkflowRunResults } from "~/components/views/SampleView/components/BenchmarkView/BenchmarkView";
 import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
-import { WorkflowRunResults } from "~/interface/sampleView";
-import { ProjectPipelineVersions } from "~/interface/shared";
+import { ConsensusGenomeWorkflowRunResults } from "~/interface/sampleView";
+import { Background, ProjectPipelineVersions } from "~/interface/shared";
 import {
   get,
   MAX_SAMPLES_FOR_GET_REQUEST,
@@ -390,7 +391,15 @@ const getBackgrounds = ({
   snapshotShareId,
   ownedOrPublicBackgroundsOnly,
   categorizeBackgrounds,
-}: $TSFixMe = {}) =>
+}: {
+  snapshotShareId?: string;
+  ownedOrPublicBackgroundsOnly?: boolean;
+  categorizeBackgrounds?: boolean;
+} = {}): Promise<{
+  owned_backgrounds: Background[];
+  other_backgrounds: Background[];
+  backgrounds?: Background[];
+}> =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") + "/backgrounds.json",
     {
@@ -409,7 +418,7 @@ const getCoverageVizSummary = ({
   sampleId?: number;
   snapshotShareId?: string;
   pipelineVersion?: string;
-} = {}): Promise<CoverageVizParams["accessionData"]> =>
+} = {}): Promise<{ [taxonId: number]: CoverageVizParams["accessionData"] }> =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}/coverage_viz_summary`,
@@ -447,7 +456,7 @@ const getWorkflowRunsInfo = (workflowRunIds: $TSFixMe) =>
 
 const getWorkflowRunResults = (
   workflowRunId: number,
-): Promise<WorkflowRunResults> =>
+): Promise<ConsensusGenomeWorkflowRunResults | BenchmarkWorkflowRunResults> =>
   get(`/workflow_runs/${workflowRunId}/results`);
 
 const getContigsSequencesByByteranges = (
@@ -734,6 +743,20 @@ const bulkKickoffWorkflowRuns = ({ sampleIds, workflow }: $TSFixMe) =>
     workflow,
   });
 
+const benchmarkSamples = ({
+  sampleIds,
+  groundTruthFile,
+  workflowToBenchmark,
+}: $TSFixMe) =>
+  postWithCSRF(`/samples/benchmark`, {
+    groundTruthFile,
+    sampleIds,
+    workflowBenchmarked: workflowToBenchmark,
+  });
+
+const getBenchmarkGroundTruthFiles = () =>
+  get("/samples/benchmark_ground_truth_files");
+
 const bulkDeleteObjects = ({
   selectedIds,
   workflow,
@@ -759,6 +782,7 @@ const validateUserCanDeleteObjects = ({
   });
 
 export {
+  benchmarkSamples,
   bulkDeleteObjects,
   bulkImportRemoteSamples,
   bulkKickoffWorkflowRuns,
@@ -772,6 +796,7 @@ export {
   getAllSampleTypes,
   getLaunchedFeatureList,
   getBackgrounds,
+  getBenchmarkGroundTruthFiles,
   getContigsSequencesByByteranges,
   getCoverageVizData,
   getCoverageVizSummary,

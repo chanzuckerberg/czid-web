@@ -17,24 +17,22 @@ import {
 import Papa from "papaparse";
 import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
 import { labelToVal, WORKFLOWS } from "~/components/utils/workflows";
-import { ThresholdFilterData } from "~/interface/dropdown";
-import { AmrFilterSelections, FilterSelections } from "~/interface/sampleView";
-import { Entries } from "~/interface/shared";
-import { countActiveFilters } from "../views/SampleView/components/AmrView/components/AmrFiltersContainer/utils";
-import { AmrResult } from "../views/SampleView/components/AmrView/components/AmrSampleReport/types";
+import { countActiveFilters } from "~/components/views/SampleView/components/AmrView/components/AmrFiltersContainer/utils";
+import { AmrResult } from "~/components/views/SampleView/components/AmrView/components/AmrSampleReport/types";
 import {
   ColumnSection,
   SECTION_TO_COLUMN_IDS,
-} from "../views/SampleView/components/AmrView/constants";
+} from "~/components/views/SampleView/components/AmrView/constants";
 import {
   BACKGROUND_FIELDS,
-  TAXON_COUNT_TYPE_METRICS,
-  TAXON_GENERAL_FIELDS,
-} from "../views/SampleView/constants";
-import {
   getAppliedFilters,
   hasAppliedFilters,
-} from "../views/SampleView/setup";
+  TAXON_COUNT_TYPE_METRICS,
+  TAXON_GENERAL_FIELDS,
+} from "~/components/views/SampleView/utils";
+import { ThresholdFilterData } from "~/interface/dropdown";
+import { AmrFilterSelections, FilterSelections } from "~/interface/sampleView";
+import { Entries } from "~/interface/shared";
 import { logError } from "./logUtil";
 import { IdMap } from "./objectUtil";
 

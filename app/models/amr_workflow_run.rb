@@ -24,6 +24,25 @@
   OUTPUT_CONTIGS_BAM = "amr.tsvToSam.output_sorted".freeze
   OUTPUT_CONTIGS_BAI = "amr.tsvToSam.output_sorted_bai".freeze
   OUTPUT_COMPREHENSIVE_AMR_METRICS_TSV = "amr.RunResultsPerSample.final_summary".freeze
+  DEFAULT_CARD_VERSIONS = {
+    "card_version" => "3.2.3",
+    "wildcard_version" => "3.1.0",
+  }.freeze
+
+  def self.latest_card_folder_path
+    card_folder = AppConfigHelper.get_app_config(AppConfig::CARD_FOLDER)
+    "s3://#{S3_DATABASE_BUCKET}/card/#{card_folder}"
+  end
+
+  def self.latest_card_versions
+    # card_folder has format of "card-{version}-wildcard-{version}"
+    card_folder = AppConfigHelper.get_app_config(AppConfig::CARD_FOLDER)
+    _card, card_version, _wildcard, wildcard_version = card_folder.split("-")
+    {
+      "card_version" => card_version,
+      "wildcard_version" => wildcard_version,
+    }
+  end
 
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).

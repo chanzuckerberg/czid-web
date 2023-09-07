@@ -49,7 +49,7 @@ export const SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS = {
     testid: "total-read-info-icon",
   },
   nonHostReads: {
-    tooltip: `Percentage of reads remaining after QC filtering, removing host and human reads, and subsampling to 1M (single-end) or 2M (paired-end) reads.`,
+    tooltip: `Reads remaining after QC filtering and removal of host and human reads. Values for pipeline v8.0 and up reflect reads remaining after subsampling.`,
     link: DOC_BASE_LINK + "360034790554-Pipeline-Details#passed-filters",
   },
   qcPercent: {

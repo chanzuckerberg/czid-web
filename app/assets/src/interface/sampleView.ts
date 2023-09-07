@@ -1,7 +1,4 @@
-import {
-  AccessionsSummary,
-  CoverageVizParamsRaw,
-} from "~/components/common/CoverageVizBottomSidebar/types";
+import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import {
   LongReadTabsSample,
@@ -12,6 +9,7 @@ import { PathogenFlags } from "~/components/views/compare/SamplesHeatmapView/Sam
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
+  AccessionData,
   Background,
   ConsensusGenomeData,
   DateString,
@@ -89,10 +87,7 @@ export interface SampleViewState {
   consensusGenomeCreationParams: ConsensusGenomeParams | Record<string, never>;
   consensusGenomePreviousParams: ConsensusGenomeData | Record<string, never>;
   coverageVizDataByTaxon: {
-    [taxonId: number]: {
-      best_accessions: AccessionsSummary[];
-      num_accessions: number;
-    };
+    [taxonId: number]: AccessionData;
   };
   coverageVizParams: CoverageVizParamsRaw | Record<string, never>;
   coverageVizVisible: boolean;
@@ -129,7 +124,7 @@ export interface SampleViewState {
   view: SampleReportViewMode;
   workflowRun?: WorkflowRun;
   workflowRunId?: number;
-  workflowRunResults: WorkflowRunResults | Record<string, never>;
+  workflowRunResults: ConsensusGenomeWorkflowRunResults | Record<string, never>;
   sharedWithNoBackground: boolean;
 }
 
@@ -156,7 +151,7 @@ export interface AmrFilterSelections {
 
 export type SampleReportViewMode = "table" | "tree";
 
-export interface WorkflowRunResults {
+export interface ConsensusGenomeWorkflowRunResults {
   coverage_viz: {
     coverage_bin_size: number;
     coverage: $TSFixMeUnknown[];
@@ -188,22 +183,26 @@ export interface RawReportData {
   sortedGenus: number[];
 }
 
+export type CellRendererType = ({
+  cellData,
+  rowData,
+}: {
+  cellData?: Array<number> | number | string;
+  rowData?: Taxon;
+}) => JSX.Element | string;
+
+export type HeaderRendererType = () => JSX.Element;
+
 export interface ColumnProps {
   dataKey?: string;
-  cellRenderer?: ({
-    cellData,
-    rowData,
-  }: {
-    cellData?: Array<number> | number | string;
-    rowData?: Taxon;
-  }) => JSX.Element | string;
+  cellRenderer?: CellRendererType;
   className?: string;
   columnData?: { [key: string]: any };
   disableSort?: boolean;
   disableDrag?: boolean;
   flexGrow?: number;
   headerClassName?: string;
-  headerRenderer?: () => JSX.Element;
+  headerRenderer?: HeaderRendererType;
   label?: string;
   minWidth?: number;
   width?: number;
@@ -225,3 +224,5 @@ export type PickConsensusGenomeData = Pick<
   ConsensusGenomeData,
   "percentIdentity" | "taxId" | "taxName"
 >;
+
+export type DBType = "nt" | "nr" | "merged_nt_nr";

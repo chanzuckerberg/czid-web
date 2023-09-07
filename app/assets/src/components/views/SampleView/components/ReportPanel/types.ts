@@ -5,11 +5,11 @@ import {
   AmrDeprectatedData,
   BlastData,
   ConsensusGenomeClick,
+  ConsensusGenomeWorkflowRunResults,
   CurrentTabSample,
   FilterSelections,
   Lineage,
   SampleReportViewMode,
-  WorkflowRunResults,
 } from "~/interface/sampleView";
 import { Background, NumberId, PipelineRun, Taxon } from "~/interface/shared";
 
@@ -36,7 +36,6 @@ export interface ReportPanelProps {
   }) => void;
   lineageData?: { [key: string]: Lineage };
   loadingReport?: boolean;
-  loadingWorkflowRunResults?: boolean;
   ownedBackgrounds?: Background[];
   otherBackgrounds?: Background[];
   project?: NumberId;
@@ -46,5 +45,7 @@ export interface ReportPanelProps {
   selectedOptions?: FilterSelections;
   snapshotShareId?: string;
   view?: SampleReportViewMode;
-  workflowRunResults?: Record<string, never> | WorkflowRunResults;
+  workflowRunResults?:
+    | Record<string, never>
+    | ConsensusGenomeWorkflowRunResults;
 }

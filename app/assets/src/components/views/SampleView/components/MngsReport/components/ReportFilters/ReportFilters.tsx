@@ -27,6 +27,12 @@ import MetricPicker from "~/components/views/report/filters/MetricPicker";
 import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
 import {
+  CATEGORIES,
+  TABS,
+  THRESHOLDS,
+  TREE_METRICS,
+} from "~/components/views/SampleView/utils";
+import {
   CurrentTabSample,
   FilterSelections,
   SampleReportViewMode,
@@ -35,12 +41,6 @@ import { Background } from "~/interface/shared/specific";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
-import {
-  CATEGORIES,
-  TABS,
-  THRESHOLDS,
-  TREE_METRICS,
-} from "../../../../constants";
 import cs from "./report_filters.scss";
 
 interface ReportFiltersProps {
@@ -116,9 +116,9 @@ export const ReportFilters = ({
       default:
         return;
     }
-
     refreshDataFromOptionsChange({ key, newSelectedOptions });
   };
+
   const handleFilterChange = ({
     key,
     value,
@@ -128,6 +128,8 @@ export const ReportFilters = ({
   }) => {
     trackEvent("SampleView_filter_changed", {
       key,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       value,
       sampleId,
     });
@@ -146,6 +148,8 @@ export const ReportFilters = ({
     trackEvent("SampleView_filter_removed", {
       key,
       subpath,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       value,
       sampleId,
     });

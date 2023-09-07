@@ -437,6 +437,7 @@ module SamplesHelper
       pipeline_run_entry[:finalized] = pipeline_run.finalized
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
       pipeline_run_entry[:created_at] = pipeline_run.created_at
+      pipeline_run_entry[:ncbi_index_version] = pipeline_run&.alignment_config&.name
     else
       pipeline_run_entry[:result_status_description] = 'QUEUED FOR PROCESSING'
       pipeline_run_entry[:finalized] = 0
@@ -645,12 +646,27 @@ module SamplesHelper
     errors
   end
 
-  def generate_benchmark_sample_name(run_ids, ground_truth_file = nil)
+  def increment_sample_name(sample_name, existing_project_sample_names)
+    # If the sample name already exists in the project, add _1, _2, _3, etc.
+    # If the sample name does not exist in the project, return the sample name.
+    name = sample_name
+    i = 0
+    while existing_project_sample_names.map(&:downcase).include?(name.downcase)
+      i += 1
+      name = "#{name}_#{i}"
+    end
+
+    name
+  end
+
+  def generate_benchmark_sample_name(sample_ids, project_id, ground_truth_file = nil)
     separator = "_vs_"
-    comparison = run_ids.join(separator)
+    sample_names = Sample.where(id: sample_ids).pluck(:name)
+    comparison = sample_names.join(separator)
     comparison += "#{separator}ground_truth_file" if ground_truth_file.present?
 
-    "benchmark_#{comparison}"
+    existing_project_sample_names = Sample.where(project_id: project_id).pluck(:name)
+    increment_sample_name("benchmark_#{comparison}", existing_project_sample_names)
   end
 
   def upload_samples_with_metadata(samples_to_upload, metadata, user)

@@ -1,4 +1,4 @@
-import { camelCase, get, merge } from "lodash/fp";
+import { camelCase, get, map, merge, values } from "lodash/fp";
 import { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { WGS_CG_UPLOAD_FEATURE } from "~/components/utils/features";
@@ -11,6 +11,9 @@ import {
 } from "~/components/views/samples/constants";
 import { MetadataType } from "~/interface/shared";
 import { WORKFLOWS } from "~utils/workflows";
+import { StackedBasicValues } from "../../discovery/components/StackedBasicValues";
+import { StackedSampleIds } from "../../discovery/components/StackedSampleIds";
+import { ValueWithTooltip } from "../../discovery/components/ValueWithTooltip";
 import cs from "./samples_view.scss";
 
 // Label constants
@@ -38,6 +41,8 @@ export const computeColumnsByWorkflow = ({
     return computeConsensusGenomeColumns({ basicIcon, metadataFields });
   } else if (workflow === WORKFLOWS.AMR.value) {
     return computeAmrColumns({ basicIcon, metadataFields });
+  } else if (workflow === WORKFLOWS.BENCHMARK.value) {
+    return computeBenchmarkColumns({ basicIcon });
   }
 };
 
@@ -486,6 +491,125 @@ const computeAmrColumns = ({ basicIcon, metadataFields }) => {
   return columns;
 };
 
+const computeBenchmarkColumns = ({ basicIcon }) => {
+  const fixedColumns = [
+    {
+      dataKey: "sample",
+      flexGrow: 1,
+      width: 350,
+      cellRenderer: ({ rowData }) =>
+        TableRenderers.renderSampleInfo({
+          rowData,
+          full: true,
+          basicIcon,
+        }),
+      headerClassName: cs.sampleHeader,
+    },
+    {
+      dataKey: "createdAt",
+      label: CREATED_ON,
+      width: 120,
+      className: cs.basicCell,
+      cellRenderer: TableRenderers.renderDateWithElapsed,
+    },
+    {
+      dataKey: "wdl_version",
+      label: "Benchmark Version",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+    {
+      dataKey: "workflowBenchmarked",
+      label: "Workflow",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+    // TODO: Create custom cell renderer for this to be able to display
+    // sample id, pipeline versions, ncbi index versions
+    {
+      dataKey: "aupr",
+      label: "AUPR",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: TableRenderers.renderNtNrValue,
+    },
+    {
+      dataKey: "l2Norm",
+      label: "L2 Norm",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: TableRenderers.renderNtNrValue,
+    },
+    {
+      dataKey: "correlation",
+      label: "Correlation",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+    {
+      dataKey: "groundTruthFile",
+      label: "Ground Truth File",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: ValueWithTooltip,
+    },
+    {
+      dataKey: "sampleId",
+      label: "Sample IDs",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: StackedSampleIds,
+      cellDataGetter: ({ rowData }) => rowData?.additionalInfo ?? {},
+    },
+    {
+      dataKey: "pipelineVersion",
+      label: "Pipeline Versions",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: StackedBasicValues,
+      cellDataGetter: extractBenchmarkAdditionalInfo,
+    },
+    {
+      dataKey: "ncbiIndexVersion",
+      label: "NCBI Index Versions",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: StackedBasicValues,
+      cellDataGetter: extractBenchmarkAdditionalInfo,
+    },
+    {
+      dataKey: "runId",
+      label: "Pipeline Run IDs",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: StackedBasicValues,
+      cellDataGetter: extractBenchmarkAdditionalInfo,
+    },
+  ];
+
+  const columns = [...fixedColumns];
+
+  for (const col of columns) {
+    const dataKey = col["dataKey"];
+    if (
+      Object.prototype.hasOwnProperty.call(SHARED_SAMPLE_TABLE_COLUMNS, dataKey)
+    ) {
+      col["columnData"] = SHARED_SAMPLE_TABLE_COLUMNS[dataKey];
+    } else if (Object.prototype.hasOwnProperty.call(FIELDS_METADATA, dataKey)) {
+      col["columnData"] = FIELDS_METADATA[dataKey];
+      col["label"] = FIELDS_METADATA[dataKey].label;
+    }
+  }
+
+  return columns;
+};
+
+const extractBenchmarkAdditionalInfo = ({ dataKey, rowData }) => {
+  const additionalInfo = rowData?.additionalInfo ?? {};
+
+  return map(({ [dataKey]: value }) => value, values(additionalInfo));
+};
+
 const computeMetadataColumns = metadataFields => {
   // The following metadata fields are hard-coded in fixedColumns
   // and will always be available on the samples table.
@@ -543,6 +667,14 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
     "createdAt",
     "sample_type",
     "host",
+    "nonHostReads",
+    "totalReadsAMR",
+  ],
+  [WORKFLOWS.BENCHMARK.value]: [
+    "sample",
+    "createdAt",
+    "workflowBenchmarked",
+    "runIds",
     "nonHostReads",
     "totalReadsAMR",
   ],

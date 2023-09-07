@@ -369,3 +369,27 @@
     }
   }
 }
+
+.ntNrContainer {
+  display: flex;
+  gap: $sds-spaces-xs;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.ntNrSection {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: $sds-spaces-xxxs;
+}
+
+.ntNrHeader {
+  font: $sds-font-header-xxxs-600-font;
+  margin: 0 0 $sds-spaces-xxs 0;
+}
+
+.ntNrValue {
+  font: $sds-font-body-xs-400-font;
+  margin: 0px;
+}

@@ -317,6 +317,8 @@ class PhyloTreeListView extends React.Component<
       trackEvent("PhyloTreeListView_taxon-details-sidebar_closed", {
         sidebarMode: "taxonDetails",
         treeName: currentTree.name,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         treeId: currentTree.id,
       });
     } else {
@@ -331,10 +333,20 @@ class PhyloTreeListView extends React.Component<
       });
       trackEvent("PhyloTreeListView_taxon-details-sidebar_opened", {
         sidebarMode: "taxonDetails",
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         treeName: currentTree.name,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         treeId: currentTree.id,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         parentTaxonId: currentTree.parent_taxid,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         taxonId: currentTree.taxid || currentTree.tax_id,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         taxonName: currentTree.tax_name,
       });
     }
@@ -540,6 +552,8 @@ class PhyloTreeListView extends React.Component<
                     ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SHARE_BUTTON_CLICKED,
                     {
                       treeName: currentTree.name,
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
                       treeId: currentTree.id,
                     },
                   )}
@@ -556,6 +570,8 @@ class PhyloTreeListView extends React.Component<
                 ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SAVE_BUTTON_CLICKED,
                 {
                   treeName: currentTree.name,
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
                   treeId: currentTree.id,
                 },
               )}
@@ -694,6 +710,8 @@ class PhyloTreeListView extends React.Component<
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_DETAILS_SIDEBAR_CLOSED,
             {
               treeName: currentTree.name,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
               treeId: currentTree.id,
             },
           )}

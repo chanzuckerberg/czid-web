@@ -51,6 +51,8 @@ const InfoBanner = ({
 }: InfoBannerProps) => {
   // This is a hack to associate the event with the parent component, DiscoveryView
   trackEvent("DiscoveryView_no-results-banner_displayed", {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
     message,
     title,
     type,

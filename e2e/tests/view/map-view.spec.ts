@@ -1,5 +1,3 @@
-import { expect, test } from "@playwright/test";
-import { OVERALL, TEST_PROJECTS } from "../../constants/common";
 import {
   AVG_READS_FILTER_PER_SAMPLE,
   DATE_CREATED_SIDEBAR,
@@ -12,9 +10,12 @@ import {
   SIDE_LABELS,
   SIDE_LABEL_VALUE,
   VISIBLE,
-} from "../../constants/map";
-import { openSamplePage } from "../../utils/report";
-import { cookieBanner } from "../../utils/upload";
+} from "@e2e/constants/map";
+import { acceptCookies } from "@e2e/utils/page";
+import { openSamplePage } from "@e2e/utils/report";
+import { expect, test } from "@playwright/test";
+import { OVERALL, TEST_PROJECTS } from "../../constants/common";
+
 const BAR_LABEL_ID = "date-histogram";
 const DATE_CREATED_ID = "date-histogram";
 const OVERALL_AREA_ID = "overall-content";
@@ -27,7 +28,7 @@ const viewTypes = [MAP_VIEW_STRING, PLQC];
 test.describe("Map view tests", () => {
   test.beforeEach(async ({ page }) => {
     await openSamplePage(page, projectName, false, false);
-    await cookieBanner(page);
+    await acceptCookies(page);
   });
   viewTypes.forEach(viewType => {
     test(`Should collapse and expand right side areas for ${viewType}`, async ({

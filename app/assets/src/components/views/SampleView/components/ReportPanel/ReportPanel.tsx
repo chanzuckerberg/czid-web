@@ -1,10 +1,11 @@
 import React from "react";
 import DeprecatedAmrView from "~/components/DeprecatedAmrView";
+import { TABS } from "~/components/views/SampleView/utils";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-import ConsensusGenomeView from "../../ConsensusGenomeView";
-import { TABS } from "../../constants";
 import { AmrView } from "../AmrView";
+import { BenchmarkView } from "../BenchmarkView";
+import { ConsensusGenomeView } from "../ConsensusGenomeView";
 import { MngsReport } from "../MngsReport";
 import { ReportPanelProps } from "./types";
 
@@ -15,6 +16,7 @@ export const ReportPanel = ({
   currentTab,
   clearAllFilters,
   enableMassNormalizedBackgrounds,
+  refreshDataFromOptionsChange,
   filteredReportData,
   handleAnnotationUpdate,
   handleBlastClick,
@@ -25,10 +27,8 @@ export const ReportPanel = ({
   handleTaxonClick,
   handleViewClick,
   handleWorkflowRunSelect,
-  refreshDataFromOptionsChange,
   lineageData,
   loadingReport,
-  loadingWorkflowRunResults,
   ownedBackgrounds,
   otherBackgrounds,
   project,
@@ -38,7 +38,6 @@ export const ReportPanel = ({
   selectedOptions,
   snapshotShareId,
   view,
-  workflowRunResults,
 }: ReportPanelProps) => {
   return (
     <>
@@ -49,6 +48,7 @@ export const ReportPanel = ({
           backgrounds={backgrounds}
           currentTab={currentTab}
           clearAllFilters={clearAllFilters}
+          refreshDataFromOptionsChange={refreshDataFromOptionsChange}
           enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
           filteredReportData={filteredReportData}
           handleAnnotationUpdate={handleAnnotationUpdate}
@@ -61,7 +61,6 @@ export const ReportPanel = ({
           handleOptionChanged={handleOptionChanged}
           handleTaxonClick={handleTaxonClick}
           handleViewClick={handleViewClick}
-          refreshDataFromOptionsChange={refreshDataFromOptionsChange}
           lineageData={lineageData}
           loadingReport={loadingReport}
           ownedBackgrounds={ownedBackgrounds}
@@ -82,13 +81,17 @@ export const ReportPanel = ({
       {currentTab === TABS.AMR && sample && (
         <AmrView sample={sample} workflowRun={currentRun as WorkflowRun} />
       )}
+      {currentTab === TABS.BENCHMARK && sample && (
+        <BenchmarkView
+          sample={sample}
+          workflowRun={currentRun as WorkflowRun}
+        />
+      )}
       {currentTab === TABS.CONSENSUS_GENOME && sample && (
         <ConsensusGenomeView
           onWorkflowRunSelect={handleWorkflowRunSelect}
           sample={sample}
-          loadingResults={loadingWorkflowRunResults}
           workflowRun={currentRun as WorkflowRun}
-          workflowRunResults={workflowRunResults}
         />
       )}
     </>

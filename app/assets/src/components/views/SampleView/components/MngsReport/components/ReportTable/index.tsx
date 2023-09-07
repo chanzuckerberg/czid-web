@@ -1,4 +1,4 @@
-import ReportTable from "./ReportTable";
+import { ReportTable } from "./ReportTable";
 export { ReportTable };
 
 /*

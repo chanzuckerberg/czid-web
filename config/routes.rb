@@ -77,6 +77,7 @@ Rails.application.routes.draw do
       get :dimensions
       get :reads_stats
       get :stats
+      get :benchmark_ground_truth_files
 
       post :validate_sample_files
       post :enable_mass_normalized_backgrounds
@@ -278,6 +279,7 @@ Rails.application.routes.draw do
       get :zip_link
       get :amr_report_downloads
       get :amr_gene_level_downloads
+      get :benchmark_report_downloads
       get :cg_report_downloads
 
       put :rerun

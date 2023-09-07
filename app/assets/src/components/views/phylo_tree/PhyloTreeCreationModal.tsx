@@ -493,9 +493,13 @@ class PhyloTreeCreationModal extends React.Component<
         trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
           {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             previousSelectedProjectPipelineRuns: Array.from(
               previousSelectedProjectPipelineRuns,
             ),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             newSelectedProjectPipelineRuns: Array.from(
               newSelectedProjectPipelineRuns,
             ),
@@ -531,9 +535,13 @@ class PhyloTreeCreationModal extends React.Component<
         trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
           {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             previousSelectedOtherPipelineRuns: Array.from(
               previousSelectedOtherPipelineRuns,
             ),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             newSelectedOtherPipelineRuns: Array.from(
               newSelectedOtherPipelineRuns,
             ),
@@ -562,9 +570,13 @@ class PhyloTreeCreationModal extends React.Component<
         trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
           {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             previousSelectedProjectPipelineRuns: Array.from(
               previousSelectedProjectPipelineRuns,
             ),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             newSelectedProjectPipelineRuns: Array.from(
               newSelectedProjectPipelineRuns,
             ),
@@ -593,9 +605,13 @@ class PhyloTreeCreationModal extends React.Component<
         trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
           {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             previousSelectedOtherPipelineRuns: Array.from(
               previousSelectedOtherPipelineRuns,
             ),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
             newSelectedOtherPipelineRuns: Array.from(
               newSelectedOtherPipelineRuns,
             ),
@@ -687,6 +703,8 @@ class PhyloTreeCreationModal extends React.Component<
       if (phyloTreeId) {
         trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
           {
             treeId: phyloTreeId,
             ...sharedAnalyticsPayload,
@@ -698,6 +716,8 @@ class PhyloTreeCreationModal extends React.Component<
       } else {
         trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
           sharedAnalyticsPayload,
         );
 
@@ -791,6 +811,8 @@ class PhyloTreeCreationModal extends React.Component<
     trackEvent(
       ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TREE_NAME_ENTERED,
       {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         treeNameValid,
         treeName,
       },

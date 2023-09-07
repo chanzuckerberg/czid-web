@@ -8,3 +8,4 @@ storage/state.json
 playwright-report/
 html-reports/
 summary.json
+artifacts/

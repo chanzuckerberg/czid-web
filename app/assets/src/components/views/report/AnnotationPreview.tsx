@@ -4,7 +4,7 @@ import {
   ANNOTATION_HIT,
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NOT_A_HIT,
-} from "~/components/views/SampleView/constants";
+} from "~/components/views/SampleView/utils";
 import cs from "./annotation_preview.scss";
 
 interface AnnotationPreviewProps {

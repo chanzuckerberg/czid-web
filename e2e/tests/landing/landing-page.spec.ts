@@ -1,6 +1,3 @@
-import path from "path";
-import { expect, test } from "@playwright/test";
-import dotenv from "dotenv";
 import {
   CZID,
   HREF,
@@ -12,10 +9,9 @@ import {
   TAXON_FILTERS,
   UPLOAD,
   VISUALIZATIONS,
-} from "../../constants/common";
-import { getByDataName } from "../../utils/selectors";
-
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
+} from "@e2e/constants/common";
+import { getByDataName } from "@e2e/utils/selectors";
+import { expect, test } from "@playwright/test";
 
 const href = "href";
 // This is a test that verify various ui elements  on the public and my data page

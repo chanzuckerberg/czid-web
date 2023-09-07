@@ -43,7 +43,6 @@ export const AVG_READS_PER_SAMPLE = "Avg. reads per sample";
 export const AVG_READS_FILTER_PER_SAMPLE =
   "Avg. reads passing filters per sample";
 export const VISIBLE = "visible";
-export const ACCEPT_ALL_COOKIES = "Accept All Cookies";
 export const SAMPLE_TYPE = "Sample Type";
 export const NUMBER_OF_COLUMN = 2;
 export const CHECKED_BOX = '[data-testid="checked"]';
@@ -76,12 +75,14 @@ export const HOST_ORGANISM = "Host Organism";
 export const FIXTURE_DIR = "./fixtures/samples";
 export const SELECT_PROJECT = '[data-testid="select-project"]';
 export const TEST_PROJECTS: Record<string, string> = {
+  CI: "omar test",
   DEV: "omar test",
   STAGING: "floo Neptunium",
   PROD: "floo Neptunium",
-};
+} as const;
 export const WORKFLOWS = {
   MNGS: "mngs",
+  LMNGS: "ONT",
   WGS: "viral-consensus-genome",
   AMR: "amr",
   SC2: "covid-consensus-genome",
@@ -96,3 +97,10 @@ export const HEAT_MAP_ICON = "heatmap-icon";
 export const DOWNLOAD_ICON = "download-icon";
 export const BULK_DELETE_TRIGGER = "bulk-delete-trigger";
 export const DOT_HORIZONTAL = "dots-horizontal";
+
+export const MENU_ITEM_UPLOAD = "menu-item-upload";
+export const QA_TEST_PROJECTS: Record<string, string> = {
+  CI: "E2E Test Project",
+  LOCAL: "E2E Test Project",
+  STAGING: "New QA Project",
+};

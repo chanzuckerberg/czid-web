@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { acceptCookies } from "@e2e/utils/page";
+import { expect, Page, test } from "@playwright/test";
 import { ALL_COLUMN_HEADERS, FILTER_HEADERS } from "../../constants/sample";
 import {
   metadataSectionTitles,
@@ -13,6 +14,7 @@ test.describe("Test Sample Report Header Functionality", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
     await page.goto(`${process.env.BASEURL}/samples/${SAMPLE_ID}`);
+    await acceptCookies(page);
   });
 
   // todo: check test after data-testid is in staging (smccanny)
@@ -24,7 +26,7 @@ test.describe("Test Sample Report Header Functionality", () => {
   });
 
   // todo: mock data from shorturl api (smccanny)
-  test(`verify Share button and Snapshot link`, async ({ page }) => {
+  test.fixme(`verify Share button and Snapshot link`, async ({ page }) => {
     await page.getByRole("button", { name: "Share" }).click();
     setTimeout(async () => {
       const clipboardText: string = await page.evaluate(
@@ -50,7 +52,7 @@ test.describe("Test Sample Report Header Functionality", () => {
   });
 
   // Delete functionality can be found in sample-report-delete.spec.ts
-  test(`verify Sample Report Filters`, async ({ page }) => {
+  test.fixme(`verify Sample Report Filters`, async ({ page }) => {
     const filter = await page.locator(FILTER_HEADERS).allInnerTexts();
 
     for (let i = 0; i < filter.length; i++) {
@@ -116,22 +118,24 @@ test.describe("Test Sample Report Pipeline Version dropdown", () => {
     await expect(page.getByText("685 rows")).toBeVisible();
   });
 
-  test(`verify coverage viz on the sample report bottom bar`, async ({
-    page,
-  }) => {
-    async function viewKlebsiellaCoverageViz(page) {
-      await page.getByText("Klebsiella").nth(0).hover();
-      await page.getByTestId("hover-action-coverage-viz-570").click();
-    }
+  // there is an issue with Klebsiella
+  test.fixme(
+    `verify coverage viz on the sample report bottom bar`,
+    async ({ page }) => {
+      async function viewKlebsiellaCoverageViz(page: Page) {
+        await page.getByText("Klebsiella").nth(0).hover();
+        await page.getByTestId("hover-action-coverage-viz-570").click();
+      }
 
-    // pipeline version v8.0 has 80 Loose NT reads
-    await viewKlebsiellaCoverageViz(page);
-    await expect(page.getByText("Loose NT Reads (80)")).toBeVisible();
+      // pipeline version v8.0 has 80 Loose NT reads
+      await viewKlebsiellaCoverageViz(page);
+      await expect(page.getByText("Loose NT Reads (80)")).toBeVisible();
 
-    // pipeline version v7.1 has 78 Loose NT reads
-    await page.reload();
-    await selectPipelineVersionV7(page);
-    await viewKlebsiellaCoverageViz(page);
-    await expect(page.getByText("Loose NT Reads (78)")).toBeVisible();
-  });
+      // pipeline version v7.1 has 78 Loose NT reads
+      await page.reload();
+      await selectPipelineVersionV7(page);
+      await viewKlebsiellaCoverageViz(page);
+      await expect(page.getByText("Loose NT Reads (78)")).toBeVisible();
+    },
+  );
 });

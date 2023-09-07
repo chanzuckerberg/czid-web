@@ -2,11 +2,11 @@ import { MenuItem, Tooltip } from "@czi-sds/components";
 import React from "react";
 import { TwoWayKeyStringMap } from "~/components/utils/objectUtil";
 import { isAmrGeneLevelContigDownloadAvailable } from "~/components/utils/pipeline_versions";
-import { downloadAmrGeneLevelData } from "~/components/views/SampleView/components/SampleViewHeader/PrimaryHeaderControls/components/AmrDownloadDropdown/amrDownloadUtils";
+import { downloadAmrGeneLevelData } from "~/components/views/SampleView/components/SampleViewHeader/components/PrimaryHeaderControls/components/AmrDownloadDropdown/amrDownloadUtils";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,
-} from "~/components/views/SampleView/constants";
+} from "~/components/views/SampleView/utils";
 import { SDSFormattedDropdownOption } from "~/interface/dropdown";
 
 const DOWNLOAD_TYPE_TO_NAME = new TwoWayKeyStringMap({

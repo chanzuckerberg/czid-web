@@ -938,6 +938,7 @@ RSpec.describe "Sample request", type: :request do
       let(:fake_sfn_arn) { "fake:sfn:arn" }
       let(:test_workflow_name) { WorkflowRun::WORKFLOW[:amr] }
       let(:fake_wdl_version) { "10.0.0" }
+      let(:fake_card_folder) { "card-1-wildcard-2" }
 
       before do
         host_genome1 = create(:host_genome, name: "Human")
@@ -947,6 +948,7 @@ RSpec.describe "Sample request", type: :request do
         @sample3 = create(:sample, project: @project, name: "Test Sample Three", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], host_genome: host_genome1)
         create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: fake_sfn_arn)
         create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: test_workflow_name), value: fake_wdl_version)
+        create(:app_config, key: AppConfig::CARD_FOLDER, value: fake_card_folder)
       end
 
       it "should raise an error for unrecognized workflow types" do

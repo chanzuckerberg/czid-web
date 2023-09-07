@@ -3,7 +3,7 @@ class WorkflowRunsController < ApplicationController
   include ParameterSanitization
   include PipelineOutputsHelper
 
-  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :amr_report_downloads, :amr_gene_level_downloads, :cg_report_downloads]
+  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :amr_report_downloads, :amr_gene_level_downloads, :cg_report_downloads, :benchmark_report_downloads]
   before_action :admin_required, only: [:rerun]
 
   MAX_PAGE_SIZE = 100
@@ -280,6 +280,42 @@ class WorkflowRunsController < ApplicationController
     when "report_csv"
       send_data AmrReportDataService.call(@workflow_run, csv: true), filename: @workflow_run.sample.name + '_report.csv'
       return
+    else
+      render(
+        json: { status: "Output not found" },
+        status: :not_found
+      )
+    end
+
+    if s3_path.present? && filename.present?
+      presigned_url = get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_#{@workflow_run.id}_#{filename}")
+
+      if presigned_url
+        redirect_to presigned_url
+      else
+        render(
+          json: { status: "Output not available" },
+          status: :not_found
+        )
+      end
+    end
+  end
+
+  def benchmark_report_downloads
+    permitted_params = params.permit(:downloadType)
+    download_type = permitted_params[:downloadType]
+    sample_name = @workflow_run.sample.name
+    @workflow_run = @workflow_run.workflow_by_class
+
+    case download_type
+    when "report_html"
+      output_name = @workflow_run.get_output_name(BenchmarkWorkflowRun::OUTPUT_BENCHMARK_HTML_TEMPLATE)
+      s3_path = @workflow_run.output_path(output_name)
+      filename = "benchmark.html"
+    when "report_ipynb"
+      output_name = @workflow_run.get_output_name(BenchmarkWorkflowRun::OUTPUT_BENCHMARK_NOTEBOOK)
+      s3_path = @workflow_run.output_path(output_name)
+      filename = "benchmark_notebook.ipynb"
     else
       render(
         json: { status: "Output not found" },

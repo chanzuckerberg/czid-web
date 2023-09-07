@@ -263,6 +263,7 @@ class WorkflowRun < ApplicationRecord
 
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
   scope :amr, -> { where(workflow: WORKFLOW[:amr]) }
+  scope :benchmarks, -> { where(workflow: WORKFLOW[:benchmark]) }
   scope :non_deprecated, -> { where(deprecated: false) }
   scope :non_deleted, -> { where(deleted_at: nil) }
   scope :active, -> { where(status: WorkflowRun::STATUS[:succeeded], deprecated: false) }
@@ -365,6 +366,12 @@ class WorkflowRun < ApplicationRecord
 
   def get_input(input_name)
     inputs&.[](input_name)
+  end
+
+  def add_inputs(inputs_hash)
+    existing_inputs = inputs || {}
+    new_inputs = existing_inputs.merge(inputs_hash)
+    update!(inputs_json: new_inputs.to_json)
   end
 
   def parsed_cached_results

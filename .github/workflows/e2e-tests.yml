@@ -5,6 +5,8 @@ on:
     workflows: ["Build and Push Docker Images"]
     types:
       - completed
+    branches: 
+      - "**"
 
 env:
   AWS_DEFAULT_OUTPUT: json
@@ -19,7 +21,7 @@ jobs:
     # This will cancel the whole workflow for non-current pushes on your branch
     steps:
       - name: Cancel Outdated Builds
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 

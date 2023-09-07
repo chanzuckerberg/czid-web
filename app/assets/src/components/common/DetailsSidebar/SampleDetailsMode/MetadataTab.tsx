@@ -4,7 +4,7 @@ import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
-import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
+import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/utils";
 import {
   Metadata,
   MetadataType,
@@ -87,7 +87,8 @@ const MetadataTab = ({
       [section.name]: toggleValue,
     });
     setSectionEditing({ ...sectionEditing, [section.name]: false });
-
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
     trackEvent("MetadataTab_section_toggled", {
       section: section.name,
       sectionOpen: toggleValue,
@@ -104,7 +105,8 @@ const MetadataTab = ({
     });
     // The section being edited should be opened.
     setIsSectionOpen({ ...isSectionOpen, [section.name]: true });
-
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
     trackEvent("MetadataTab_section-edit_toggled", {
       section: section.name,
       sectionEditing: toggleValue,

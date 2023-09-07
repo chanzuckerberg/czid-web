@@ -6,7 +6,6 @@ import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import { IconArrowRight } from "~/components/ui/icons";
 import {
   READ_DEDUP_KEYS,
   RESULTS_FOLDER_ROOT_KEY,
@@ -61,7 +60,7 @@ export interface AmrPipelineTabInfo {
   analysisType: { text: WORKFLOW_LABELS };
   workflow: { text: WORKFLOW_LABELS };
   technology: { text: string };
-  pipelineVersion: { text: string };
+  pipelineVersion: { text: string; link: string; linkLabel: string };
   cardDatabaseVersion?: { text: string };
   totalReads?: { text: string };
   totalErccReads?: { text: string };
@@ -70,6 +69,7 @@ export interface AmrPipelineTabInfo {
   compressionRatio?: { text: string };
   meanInsertSize?: { text: string };
   lastProcessedAt: { text: string };
+  wildcardDatabaseVersion?: { text: string };
 }
 
 type PipelineStepDictState = PiplineStepDictInterface | Record<string, never>;
@@ -142,10 +142,7 @@ const PipelineTab = ({
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
     const metadataLink = !snapshotShareId && linkLabel && link && (
-      <Link className={cs.vizLink} href={link}>
-        {linkLabel}
-        <IconArrowRight />
-      </Link>
+      <Link href={link}>{linkLabel}</Link>
     );
 
     return {
@@ -160,8 +157,8 @@ const PipelineTab = ({
               trackEvent("PipelineTab_pipeline-visualization-link_clicked")
             }
           >
-            {text}
-            {metadataLink}
+            <span className={cs.pipelineVersion}>{text}</span>
+            <span className={cs.vizLink}>{metadataLink}</span>
           </div>
         ),
       fieldMetadata: get(field.key, FIELDS_METADATA),

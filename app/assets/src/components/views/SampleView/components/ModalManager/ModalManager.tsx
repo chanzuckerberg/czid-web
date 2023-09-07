@@ -28,7 +28,7 @@ interface ModalManagerProps {
   handleBlastSelectionModalContinue: (blastModalInfo: BlastModalInfo) => void;
   handleConsensusGenomeClick: (x: ConsensusGenomeTaxData) => void;
   handleConsensusGenomeErrorModalRetry: () => Promise<void>;
-  handleModalAction: (openOrClosed: string, names: string[]) => void;
+  handleModalAction: (modals: ["open" | "close", string][]) => void;
   handlePreviousConsensusGenomeReportClick: (x: {
     rowData: WorkflowRun;
   }) => void;
@@ -62,9 +62,10 @@ export const ModalManager = ({
           case "blastSelection":
             return (
               <BlastSelectionModal
+                key={modalName}
                 open={modalsVisible.blastSelection}
                 onContinue={handleBlastSelectionModalContinue}
-                onClose={() => handleModalAction("close", ["blastSelection"])}
+                onClose={() => handleModalAction([["close", "blastSelection"]])}
                 taxonName={blastData?.taxName}
                 taxonStatsByCountType={blastData?.taxonStatsByCountType}
               />
@@ -72,8 +73,9 @@ export const ModalManager = ({
           case "blastContigs":
             return (
               <BlastContigsModal
+                key={modalName}
                 open={modalsVisible.blastContigs}
-                onClose={() => handleModalAction("close", ["blastContigs"])}
+                onClose={() => handleModalAction([["close", "blastContigs"]])}
                 blastModalInfo={blastModalInfo}
                 context={blastData?.context}
                 pipelineVersion={blastData?.pipelineVersion}
@@ -85,8 +87,9 @@ export const ModalManager = ({
           case "blastReads":
             return (
               <BlastReadsModal
+                key={modalName}
                 open={modalsVisible.blastReads}
-                onClose={() => handleModalAction("close", ["blastReads"])}
+                onClose={() => handleModalAction([["close", "blastReads"]])}
                 blastModalInfo={blastModalInfo}
                 context={blastData?.context}
                 pipelineVersion={blastData?.pipelineVersion}
@@ -99,9 +102,10 @@ export const ModalManager = ({
           case "consensusGenomeCreation":
             return (
               <ConsensusGenomeCreationModal
+                key={modalName}
                 consensusGenomeData={consensusGenomeData}
                 onClose={() =>
-                  handleModalAction("close", ["consensusGenomeCreation"])
+                  handleModalAction([["close", "consensusGenomeCreation"]])
                 }
                 onCreation={onConsensusGenomeCreation}
                 open={modalsVisible.consensusGenomeCreation}
@@ -111,9 +115,10 @@ export const ModalManager = ({
           case "consensusGenomePrevious":
             return (
               <ConsensusGenomePreviousModal
+                key={modalName}
                 consensusGenomeData={consensusGenomePreviousParams}
                 onClose={() =>
-                  handleModalAction("close", ["consensusGenomePrevious"])
+                  handleModalAction([["close", "consensusGenomePrevious"]])
                 }
                 onNew={handleConsensusGenomeClick}
                 onRowClick={handlePreviousConsensusGenomeReportClick}
@@ -124,13 +129,14 @@ export const ModalManager = ({
           case "consensusGenomeError":
             return (
               <ErrorModal
+                key={modalName}
                 helpLinkEvent={
                   ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_ERROR_MODAL_HELP_LINK_CLICKED
                 }
                 labelText="Failed"
                 open={modalsVisible.consensusGenomeError}
                 onCancel={() =>
-                  handleModalAction("close", ["consensusGenomeError"])
+                  handleModalAction([["close", "consensusGenomeError"]])
                 }
                 onConfirm={handleConsensusGenomeErrorModalRetry}
                 title={

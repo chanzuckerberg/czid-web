@@ -3,7 +3,10 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { ThresholdFilterData } from "../dropdown";
 import { BooleanNums, DateString, NameId, NumberId } from "./generic";
-
+export interface AccessionData {
+  best_accessions: AccessionsSummary[];
+  num_accessions: number;
+}
 export interface BulkDownloadDetails extends NumberId {
   num_samples: number;
   params: { [key: string]: DownloadTypeParam };
@@ -21,10 +24,7 @@ export interface BulkDownloadDetails extends NumberId {
 }
 
 export interface ConsensusGenomeData {
-  accessionData?: {
-    best_accessions: AccessionsSummary[];
-    num_accessions: number;
-  };
+  accessionData?: AccessionData;
   percentIdentity?: number;
   taxId?: number;
   taxName?: string;
@@ -272,6 +272,8 @@ export interface Subcategories {
 
 export type AnnotationType = "not_a_hit" | "hit" | "inconclusive" | "none";
 
+export type TaxonLevelType = "genus" | "species";
+
 export interface Taxon {
   agg_score?: $TSFixMeUnknown;
   annotation?: AnnotationType;
@@ -287,7 +289,7 @@ export interface Taxon {
   highlightedChildren?: boolean;
   highlighted?: boolean;
   passedFilters?: boolean;
-  pathogens?: undefined;
+  pathogens?: Record<string, any> | null;
   species?: Taxon[];
   genus?: Taxon;
   species_annotations?: {
@@ -297,7 +299,7 @@ export interface Taxon {
   };
   species_tax_ids?: number[];
   taxId?: number;
-  taxLevel?: "genus" | "species";
+  taxLevel?: TaxonLevelType;
   pathogenFlag: string;
   pathogenFlags: string[];
   lineageRank?: string;

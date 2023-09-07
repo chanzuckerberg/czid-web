@@ -5,12 +5,10 @@ import {
   get,
   head,
   isEmpty,
-  isNil,
   isNull,
   isUndefined,
   keys,
   map,
-  mapValues,
   merge,
   omit,
   pick,
@@ -25,7 +23,6 @@ import {
   getSample,
   getSampleReportData,
   getSamples,
-  getWorkflowRunResults,
   kickoffConsensusGenome,
 } from "~/api";
 import { getAmrDeprecatedData } from "~/api/amr";
@@ -93,42 +90,41 @@ import { BlastModalInfo } from "./components/ModalManager/components/BlastModals
 import { ReportPanel } from "./components/ReportPanel";
 import { SampleViewHeader } from "./components/SampleViewHeader";
 import { TabSwitcher } from "./components/TabSwitcher";
+import cs from "./sample_view.scss";
+import {
+  addSampleDeleteFlagToSessionStorage,
+  getConsensusGenomeData,
+  mapValuesWithKey,
+} from "./utils";
 import {
   GENUS_LEVEL_INDEX,
   KEY_SAMPLE_VIEW_OPTIONS,
   KEY_SELECTED_OPTIONS_BACKGROUND,
   LOCAL_STORAGE_FIELDS,
+  NONE_BACKGROUND_VALUE,
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
-  SUCCEEDED_STATE,
   TABS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
   TREE_METRICS,
   URL_FIELDS,
-} from "./constants";
+} from "./utils/constants";
 import {
   adjustMetricPrecision,
   filterReportData,
   setDisplayName,
-} from "./filters";
-import { showNotification } from "./notifications";
-import cs from "./sample_view.scss";
+} from "./utils/filters";
+import { showNotification } from "./utils/notifications";
 import {
   determineInitialTab,
   getDefaultSelectedOptions,
   getWorkflowCount,
   hasAppliedFilters,
   hasMngsRuns,
-} from "./setup";
-import {
-  addSampleDeleteFlagToSessionStorage,
-  getConsensusGenomeData,
-} from "./utils";
-
-// @ts-expect-error working with Lodash types
-const mapValuesWithKey = mapValues.convert({ cap: false });
+  loadState,
+} from "./utils/setup";
 
 class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   urlParser: UrlQueryParser;
@@ -148,7 +144,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const {
       selectedOptions: selectedOptionsFromLocal,
       ...nonNestedLocalState
-    } = this.loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
+    } = loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
 
     const { annotations, taxa, thresholdsShortReads } =
       tempSelectedOptions || {};
@@ -256,70 +252,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     this.fetchBackgrounds();
   };
 
-  componentDidUpdate(_: unknown, prevState: SampleViewState) {
-    const {
-      amrDeprecatedData,
-      currentTab,
-      loadingWorkflowRunResults,
-      workflowRun,
-      workflowRunResults,
-    } = this.state;
+  componentDidUpdate() {
+    const { amrDeprecatedData, currentTab } = this.state;
 
     if (currentTab === TABS.AMR_DEPRECATED && !amrDeprecatedData) {
       this.fetchAmrDeprecatedData();
     }
-    // Only the Consensus Genome Tab needs workflowRunResults,
-    // here we fetch it and it can remain unchanged for all other tabs.
-    if (currentTab === TABS.CONSENSUS_GENOME) {
-      const currentRun = this.getCurrentRun() as WorkflowRun;
-      const isFirstCGLoad = !isNil(currentRun) && isNil(workflowRunResults);
-      const tabChanged = currentTab !== prevState.currentTab;
-      const workflowRunChanged =
-        workflowRun &&
-        get("id", workflowRun) !== get("id", prevState.workflowRun);
-      if (
-        !loadingWorkflowRunResults &&
-        (isFirstCGLoad || tabChanged || workflowRunChanged)
-      ) {
-        this.fetchWorkflowRunResults();
-      }
-    }
   }
-
-  fetchWorkflowRunResults = async () => {
-    const { loadingWorkflowRunResults } = this.state;
-    if (!loadingWorkflowRunResults) {
-      this.setState({ loadingWorkflowRunResults: true });
-      const currentWorkflowRun = this.getCurrentRun() as WorkflowRun;
-      // getWorkflowRunResults raises error unless successful
-      const results =
-        currentWorkflowRun.status === SUCCEEDED_STATE
-          ? await getWorkflowRunResults(currentWorkflowRun.id)
-          : {};
-
-      this.setState({
-        loadingWorkflowRunResults: false,
-        workflowRunResults: results,
-      });
-    }
-  };
-
-  loadState = (
-    store: Storage,
-    key: string,
-  ): {
-    selectedOptions?: { background: number; metric: string };
-    [x: string]: unknown;
-  } => {
-    try {
-      return JSON.parse(store.getItem(key)) || {};
-    } catch (e) {
-      // Avoid possible bad transient state related crash
-      // eslint-disable-next-line no-console
-      console.warn(`Bad state: ${e}`);
-    }
-    return {};
-  };
 
   fetchSample = async () => {
     this.setState({ loadingReport: true });
@@ -849,9 +788,15 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     });
 
     if (key === KEY_SELECTED_OPTIONS_BACKGROUND) {
+      if (value === NONE_BACKGROUND_VALUE) {
+        newSelectedOptions[KEY_SELECTED_OPTIONS_BACKGROUND] = null;
+      }
+
       trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED, {
         sampleId: sample.id,
         projectId: project.id,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
         backgroundId: value,
       });
     }
@@ -1080,10 +1025,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       },
     });
     // Close both modals in case they came via the previous runs modal + error modal
-    this.handleModalAction("close", [
-      "consensusGenomeCreation",
-      "consensusGenomePrevious",
-      "consensusGenomeError",
+    this.handleModalAction([
+      ["close", "consensusGenomeCreation"],
+      ["close", "consensusGenomePrevious"],
+      ["close", "consensusGenomeError"],
     ]);
     showNotification(NOTIFICATION_TYPES.consensusGenomeCreated, {
       handleTabChange: this.handleTabChange,
@@ -1102,8 +1047,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const usedAccessions = uniq(
       map("inputs.accession_id", get(taxId, getConsensusGenomeData(sample))),
     );
-    this.handleModalAction("open", ["consensusGenomeCreation"]);
-    this.handleModalAction("close", ["consensusGenomePrevious"]);
+    this.handleModalAction([["open", "consensusGenomeCreation"]]);
     this.setState({
       consensusGenomeData: {
         accessionData,
@@ -1122,7 +1066,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     taxName,
   }: ConsensusGenomeClick) => {
     const previousRuns = get(taxId, getConsensusGenomeData(this.state.sample));
-    this.handleModalAction("open", ["consensusGenomePrevious"]);
+    this.handleModalAction([["open", "consensusGenomePrevious"]]);
     this.setState({
       consensusGenomePreviousParams: {
         percentIdentity,
@@ -1150,7 +1094,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
           ...consensusGenomeCreationParams,
         },
       );
-      this.handleModalAction("open", ["consensusGenomeError"]);
+      this.handleModalAction([["open", "consensusGenomeError"]]);
     }
   };
 
@@ -1199,7 +1143,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   }: {
     rowData: WorkflowRun;
   }) => {
-    this.handleModalAction("close", ["consensusGenomePrevious"]);
+    this.handleModalAction([["close", "consensusGenomePrevious"]]);
     this.setState(
       {
         workflowRun: rowData,
@@ -1209,22 +1153,24 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   handleBlastClick = (blastData: BlastData) => {
-    this.handleModalAction("open", ["blastSelection"]);
+    this.handleModalAction([["open", "blastSelection"]]);
     this.setState({ blastData });
   };
 
   handleBlastSelectionModalContinue = (blastModalInfo: BlastModalInfo) => {
     const { shouldBlastContigs } = blastModalInfo;
     const modalToOpen = shouldBlastContigs ? "blastContigs" : "blastReads";
-    this.handleModalAction("close", ["blastSelection"]);
-    this.handleModalAction("open", [modalToOpen]);
+    this.handleModalAction([
+      ["close", "blastSelection"],
+      ["open", modalToOpen],
+    ]);
     this.setState({ blastModalInfo });
   };
 
-  handleModalAction = (openOrClose: "open" | "close", modals: string[]) => {
+  handleModalAction = (modals: ["close" | "open", string][]) => {
     const modalsVisible = this.state.modalsVisible;
     modals.forEach(modal => {
-      modalsVisible[modal] = openOrClose === "open";
+      modalsVisible[modal[1]] = modal[0] === "open";
     });
     this.setState({ modalsVisible });
   };
@@ -1318,7 +1264,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   revertToSampleViewFilters = () => {
-    const { selectedOptions: selectedOptionsFromLocal } = this.loadState(
+    const { selectedOptions: selectedOptionsFromLocal } = loadState(
       localStorage,
       KEY_SAMPLE_VIEW_OPTIONS,
     );
@@ -1443,7 +1389,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             refreshDataFromOptionsChange={this.refreshDataFromOptionsChange}
             lineageData={this.state.lineageData}
             loadingReport={this.state.loadingReport}
-            loadingWorkflowRunResults={this.state.loadingWorkflowRunResults}
             ownedBackgrounds={this.state.ownedBackgrounds}
             otherBackgrounds={this.state.otherBackgrounds}
             project={project}
@@ -1453,7 +1398,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             selectedOptions={selectedOptions}
             snapshotShareId={snapshotShareId}
             view={view}
-            workflowRunResults={this.state.workflowRunResults}
           />
         </NarrowContainer>
         <DetailsSidebarSwitcher

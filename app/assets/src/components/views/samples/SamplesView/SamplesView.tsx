@@ -22,7 +22,7 @@ import React, {
 } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { SortDirectionType } from "react-virtualized";
-import { bulkKickoffWorkflowRuns } from "~/api";
+import { benchmarkSamples, bulkKickoffWorkflowRuns } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
   trackEvent,
@@ -56,6 +56,7 @@ import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
 import { CreationSource } from "~/interface/sample";
 import {
+  Entry,
   PipelineTypeRun,
   SamplesViewHandle,
   SamplesViewProps,
@@ -72,6 +73,7 @@ import {
   WORKFLOW_ENTITIES,
 } from "~utils/workflows";
 import { DISCOVERY_DOMAIN_PUBLIC } from "../../discovery/discovery_api";
+import { BenchmarkModal } from "./BenchmarkModal";
 import { BulkDeleteModal } from "./BulkDeleteModal";
 import { BulkDeleteTrigger } from "./BulkDeleteTrigger";
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
@@ -112,7 +114,7 @@ const SamplesView = forwardRef(function SamplesView(
     domain,
     filters,
     filtersSidebarOpen,
-    handleNewAmrCreationsFromMngs,
+    handleNewWorkflowRunsCreated,
     hasAtLeastOneFilterApplied,
     hideAllTriggers,
     mapLevel,
@@ -168,6 +170,7 @@ const SamplesView = forwardRef(function SamplesView(
   let infiniteTable: InfiniteTable;
   const [referenceSelectId, setReferenceSelectId] = useState(null);
   const [phyloCreationModalOpen, setPhyloCreationModalOpen] = useState(false);
+  const [benchmarkModalOpen, setBenchmarkModalOpen] = useState(false);
   const [bulkDownloadModalOpen, setBulkDownloadModalOpen] = useState(false);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] =
     useState<boolean>(false);
@@ -201,6 +204,10 @@ const SamplesView = forwardRef(function SamplesView(
       [WORKFLOWS.AMR.value]: {
         singlularDisplay: WORKFLOWS.AMR.label.toLowerCase(),
         pluralDisplay: WORKFLOWS.AMR.pluralizedLabel.toLowerCase(),
+      },
+      [WORKFLOWS.BENCHMARK.value]: {
+        singlularDisplay: WORKFLOWS.BENCHMARK.label.toLowerCase(),
+        pluralDisplay: WORKFLOWS.BENCHMARK.pluralizedLabel.toLowerCase(),
       },
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
         singlularDisplay: WORKFLOWS.CONSENSUS_GENOME.label.toLowerCase(),
@@ -376,6 +383,8 @@ const SamplesView = forwardRef(function SamplesView(
               });
               const log = () =>
                 trackEvent("SamplesView_heatmap-option_clicked", {
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
                   option,
                   selectedIds: selectedIds.size,
                 });
@@ -405,6 +414,10 @@ const SamplesView = forwardRef(function SamplesView(
 
   const handleClickPhyloTree = () => {
     setPhyloCreationModalOpen(true);
+  };
+
+  const handleClickBenchmark = () => {
+    setBenchmarkModalOpen(true);
   };
 
   const renderBulkDownloadTrigger = () => {
@@ -548,12 +561,15 @@ const SamplesView = forwardRef(function SamplesView(
       trackEvent(
         ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED,
         {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
           sampleIds: sampleIdsToKickoffAmr,
         },
       );
 
-      handleNewAmrCreationsFromMngs({
-        numAmrRunsCreated: size(amrPipelineEligibility.eligible),
+      handleNewWorkflowRunsCreated({
+        numWorkflowRunsCreated: size(amrPipelineEligibility.eligible),
+        workflow: WORKFLOWS.AMR.value,
       });
 
       setRecentlyKickedOffAmrWorkflowRunsForSampleIds(
@@ -607,12 +623,83 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
+  const isIneligibleForBenchmark = (sample: Entry) => {
+    const failedToUploadSample = !isEmpty(get("sample.uploadError", sample));
+    const pipelineRunIncomplete = !(
+      get("sample.pipelineRunStatus", sample) === PipelineRunStatuses.Complete
+    );
+
+    return failedToUploadSample || pipelineRunIncomplete;
+  };
+
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const kickoffAmrPipelineForSamples = (sampleIds: number[]) => {
     bulkKickoffWorkflowRuns({
       sampleIds,
       workflow: WORKFLOWS.AMR.value,
+    });
+  };
+
+  const handleBenchmark = async ({
+    samplesToBenchmark,
+    fullGroundTruthFilePath = "",
+  }: {
+    fullGroundTruthFilePath: string;
+    samplesToBenchmark: Entry[];
+  }) => {
+    const benchmarkEligibility = reduce(
+      (result, sample) => {
+        if (isIneligibleForBenchmark(sample)) {
+          result.ineligible.push(sample);
+        } else {
+          result.eligible.push(sample);
+        }
+        return result;
+      },
+      {
+        eligible: [] as Entry[],
+        ineligible: [] as Entry[],
+      },
+      samplesToBenchmark,
+    );
+
+    if (size(benchmarkEligibility.eligible) > 0) {
+      const sampleIds = map("id", benchmarkEligibility.eligible);
+      kickoffBenchmark({
+        sampleIds,
+        groundTruthFilePath: fullGroundTruthFilePath,
+      });
+      renderBenchmarkKickedOffNotification();
+
+      handleNewWorkflowRunsCreated({
+        numWorkflowRunsCreated: size(benchmarkEligibility.eligible),
+        workflow: WORKFLOWS.BENCHMARK.value,
+      });
+    }
+
+    if (size(benchmarkEligibility.ineligible) > 0) {
+      const ineligibleSampleNames = map(
+        sample => get("sample.name", sample),
+        benchmarkEligibility.ineligible,
+      );
+      // We need this 10ms delay to allow the first toast to render properly before showing the second toast
+      await delay(10);
+      renderIneligibleSamplesForBenchmarkNotification(ineligibleSampleNames);
+    }
+  };
+
+  const kickoffBenchmark = ({
+    sampleIds,
+    groundTruthFilePath,
+  }: {
+    sampleIds: number[];
+    groundTruthFilePath: string;
+  }) => {
+    benchmarkSamples({
+      sampleIds,
+      workflowToBenchmark: workflow,
+      groundTruthFile: groundTruthFilePath,
     });
   };
 
@@ -630,6 +717,64 @@ const SamplesView = forwardRef(function SamplesView(
     showToast(({ closeToast }) => renderAmrNotification(closeToast), {
       autoClose: 12000,
     });
+  };
+
+  const renderBenchmarkKickedOffNotification = () => {
+    const renderBenchmarkNotification = (onClose: () => void) => (
+      <Notification displayStyle="elevated" type="info" onClose={onClose}>
+        <div className={cs.amrNotification}>
+          {`The Benchmark has been kicked off. To view the benchmarks, visit the`}{" "}
+          <div className={cs.amrTab}>Benchmark</div> tab.
+        </div>
+      </Notification>
+    );
+
+    showToast(({ closeToast }) => renderBenchmarkNotification(closeToast), {
+      autoClose: 12000,
+    });
+  };
+
+  const renderIneligibleSamplesForBenchmarkNotification = (
+    invalidSampleNames: string[],
+  ) => {
+    const header = (
+      <div>
+        <span className={cs.highlight}>
+          {invalidSampleNames.length} sample
+          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in
+          the
+        </span>{" "}
+        Benchmark because they either failed or are still processing.
+      </div>
+    );
+
+    const content = (
+      <span>
+        {invalidSampleNames.map((name, index) => {
+          return (
+            <div key={index} className={cs.messageLine}>
+              {name}
+            </div>
+          );
+        })}
+      </span>
+    );
+
+    showToast(
+      ({ closeToast }) => (
+        <AccordionNotification
+          header={header}
+          content={content}
+          open={false}
+          type={"warning"}
+          displayStyle={"elevated"}
+          onClose={closeToast}
+        />
+      ),
+      {
+        autoClose: 12000,
+      },
+    );
   };
 
   const renderIneligibleSamplesForBulkKickoffAmrNotification = (
@@ -657,20 +802,21 @@ const SamplesView = forwardRef(function SamplesView(
       </span>
     );
 
-    const renderAmrNotification = (onClose: () => void) => (
-      <AccordionNotification
-        header={header}
-        content={content}
-        open={false}
-        type={"warning"}
-        displayStyle={"elevated"}
-        onClose={onClose}
-      />
+    showToast(
+      ({ closeToast }) => (
+        <AccordionNotification
+          header={header}
+          content={content}
+          open={false}
+          type={"warning"}
+          displayStyle={"elevated"}
+          onClose={closeToast}
+        />
+      ),
+      {
+        autoClose: 12000,
+      },
     );
-
-    showToast(({ closeToast }) => renderAmrNotification(closeToast), {
-      autoClose: 12000,
-    });
   };
 
   const renderBulkDeleteTrigger = () => (
@@ -689,6 +835,7 @@ const SamplesView = forwardRef(function SamplesView(
         domain !== DISCOVERY_DOMAIN_PUBLIC ? handleBulkKickoffAmr : null
       }
       handleClickPhyloTree={handleClickPhyloTree}
+      handleClickBenchmark={handleClickBenchmark}
     />
   );
 
@@ -958,6 +1105,17 @@ const SamplesView = forwardRef(function SamplesView(
             () => setPhyloCreationModalOpen(false),
             ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_PHYLO_TREE_MODAL_CLOSED,
           )}
+        />
+      )}
+      {benchmarkModalOpen && (
+        <BenchmarkModal
+          onConfirm={({ fullGroundTruthFilePath, samplesToBenchmark }) =>
+            handleBenchmark({ fullGroundTruthFilePath, samplesToBenchmark })
+          }
+          open={benchmarkModalOpen}
+          onClose={() => setBenchmarkModalOpen(false)}
+          selectedObjects={selectedObjects}
+          workflow={workflow}
         />
       )}
       {bulkDownloadModalOpen && (

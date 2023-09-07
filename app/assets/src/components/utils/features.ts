@@ -3,7 +3,6 @@ export const MERGED_NT_NR_FEATURE = "merged_nt_nr";
 export const CG_FLAT_LIST_FEATURE = "cg_flat_list";
 export const DRAGGABLE_COLUMNS_FEATURE = "draggable_columns";
 export const BLAST_FEATURE = "blast";
-export const ANNOTATION_FEATURE = "annotation";
 export const SORTING_V0_FEATURE = "sorting_v0";
 // SORTING_V0_ADMIN_FEATURE enables sorting on all domains and will be enabled for admin testing purposes only
 export const SORTING_V0_ADMIN_FEATURE = "sorting_v0_admin";
@@ -17,8 +16,6 @@ export const SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE =
 export const ANNOTATION_FILTER_FEATURE = "annotation_filter";
 export const BLAST_V1_FEATURE = "blast_v1";
 export const AMR_V1_FEATURE = "amr_v1";
-export const AMR_V2_FEATURE = "amr_v2";
-export const AMR_V3_FEATURE = "amr_v3";
 // ONT_V1_FEATURE enables the Beta ONT pipeline
 export const ONT_V1_FEATURE = "ont_v1";
 // ONT_V1_HARD_LAUNCH_FEATURE removes Beta labels on the ONT pipeline and will be enabled for the hard launch
@@ -34,4 +31,8 @@ export const HEATMAP_PATHOGEN_FLAGGING_FEATURE = "heatmap_pathogens";
 export const HEATMAP_KNOWN_PATHOGEN_FILTER = "heatmap_pathogen_filter";
 export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const WGS_CG_UPLOAD_FEATURE = "wgs_cg_upload";
+// experimental feature to trial apollo client state management - not in use in production
 export const APOLLO_CLIENT_STATE_MANAGEMENT = "apollo_client";
+// temporary feature to test the new sample view Aug 2023
+export const SAMPLEVIEW_FC = "sampleView_fc";
+export const BENCHMARKING_FEATURE = "benchmarking";

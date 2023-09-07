@@ -9,9 +9,38 @@ import store from "~/redux/store";
 // This is exported from here as well for importing convenience.
 export const ANALYTICS_EVENT_NAMES = eventNames;
 
+/**
+ * Values we consider reasonable to send as properties of an analytics event.
+ *
+ * This is a convention we are choosing to make. Our analytics library allows
+ * us to send pretty much anything, but we want to ensure a flat structure of
+ * key-value pairs for downstream analysis since the structure of the event
+ * properties implicitly determines the schema used for the event table when
+ * Segment it gets synced to the the data warehouse. If we send an object, or
+ * an array, or any other more complex data structure, things can get very
+ * messy when the event payload gets translated into DB tables.
+ *
+ * If you must send more complicated info (for example, an array of IDs),
+ * convert it into a string (JSON.stringify, probably) then send the string.
+ * The data analysts working with the events can parse the resulting JSON
+ * as part of the analysis queries, and this is generally much cleaner than
+ * dealing with the strange tables that are automatically generated when
+ * working with any kind of nested data structure.
+ *
+ * We enforce this structure for EventData in the various functions that wrap
+ * the calls to our analytics library (eg `logAnalyticsEvent`, etc). Any event
+ * we send for analytics should conform to this structure, however it winds
+ * up being sent.
+ */
+type EventValue = string | number | boolean | null;
+type EventData = Record<string, EventValue>;
+
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
-const logAnalyticsEvent = async (eventName: $TSFixMe, eventData = {}) => {
+const logAnalyticsEvent = async (
+  eventName: $TSFixMe,
+  eventData: EventData = {},
+) => {
   if (window.analytics) {
     // Include high value user groups in event properties to avoid JOINs downstream.
     // @ts-expect-error ts-migrate(2339) FIXME: Property 'analytics' does not exist on type 'Windo... Remove this comment to see the full error message
@@ -39,6 +68,8 @@ const logAnalyticsEvent = async (eventName: $TSFixMe, eventData = {}) => {
     const globalAnalyticsContext = getGlobalAnalyticsContext(store.getState());
 
     if (globalAnalyticsContext) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       eventData["globalContext"] = globalAnalyticsContext;
     }
 
@@ -62,7 +93,7 @@ const logAnalyticsEvent = async (eventName: $TSFixMe, eventData = {}) => {
 export const withAnalytics = (
   handleEvent: $TSFixMe,
   eventName: $TSFixMe,
-  eventData = {},
+  eventData: EventData = {},
 ) => {
   if (typeof handleEvent !== "function") {
     // eslint-disable-next-line no-console
@@ -81,7 +112,7 @@ export const trackPageTransition = () => {
   trackAppcuesPageTransition();
 };
 
-export const trackEvent = (eventName: $TSFixMe, eventData = {}) => {
+export const trackEvent = (eventName: $TSFixMe, eventData: EventData = {}) => {
   logAnalyticsEvent(eventName, eventData);
   trackEventForAppcues(eventName, eventData);
 };

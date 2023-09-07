@@ -22,7 +22,10 @@ export interface SamplesViewProps {
   filters?: FilterList;
   filtersSidebarOpen?: boolean;
   hasAtLeastOneFilterApplied?: boolean;
-  handleNewAmrCreationsFromMngs?(param: { numAmrRunsCreated: number }): void;
+  handleNewWorkflowRunsCreated?(param: {
+    numWorkflowRunsCreated: number;
+    workflow: WORKFLOW_VALUES;
+  }): void;
   hideAllTriggers?: boolean;
   mapLevel?: string;
   mapLocationData?: Record<string, unknown>;
@@ -76,7 +79,7 @@ export interface Conditions {
 
 export interface ViewProps {
   conditions?: Conditions;
-  pageSize: number;
+  pageSize?: number;
   onViewChange: () => void;
   displayName: string;
 }
