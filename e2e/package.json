@@ -11,13 +11,8 @@
     "pw:staging:headless": "NODE_ENV=staging npx playwright test -c ./setup/staging.config.ts",
     "pw:staging:debug": "DEBUG=pw:browser*,pw:api NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
     "pw:report": "npx playwright show-report",
-<<<<<<< HEAD
     "sauce:ci": "saucectl run -c ./.sauce/ci.yml",
     "sauce:staging": "saucectl run -c ./.sauce/staging.yml"
-=======
-    "sauce:ci": "NODE_ENV=ci saucectl run -c ./.sauce/ci.yml",
-    "sauce:staging": "NODE_ENV=staging saucectl run -c ./.sauce/staging.yml"
->>>>>>> main
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
