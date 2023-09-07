@@ -1,6 +1,9 @@
 # Ignore node_modules directory
 node_modules/
 
+playwright-report/
+html-reports/
+
 # Ignore .git directory
 .git/
 

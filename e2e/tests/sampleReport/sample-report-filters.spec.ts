@@ -58,6 +58,7 @@ test.describe("Sample report filter test", () => {
   test(`Should be able to filter by Taxon name`, async () => {
     const sampleReport = await samplesPage.getReportV2(sampleId);
     const taxons = await samplesPage.getSpecificTaxons(sampleReport)
+
     const taxon = taxons[Math.floor(Math.random() * taxons.length)]
     const genus = await taxon.name.split(' ')[0]
     const expectedTagText = `${genus} (genus)`
@@ -193,6 +194,9 @@ test.describe("Sample report filter test", () => {
     await samplesPage.validateReportFilteredByAnnotation(ANNOTATION_FILTERS);
   });
 
+  /**
+   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-7
+   */
   test(`Should be able to filter by multiple criteria`, async () => {
     const sampleReport = await samplesPage.getReportV2(sampleId);
 
