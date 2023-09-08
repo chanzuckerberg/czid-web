@@ -1,0 +1,27 @@
+@import "~@czi-sds/components/dist/variables";
+
+.reportWrapper {
+  position: relative;
+  margin-top: $sds-spaces-xl;
+  height: 250px;
+  display: flex;
+  flex-direction: row;
+}
+
+.tableWrapper {
+  display: flex;
+  flex-shrink: 1;
+  flex-basis: auto;
+
+  overflow-x: clip;
+  div {
+    div {
+      // Note this has to be !important in order to override styles from React Virtuoso
+      position: inherit !important;
+    }
+  }
+}
+
+.virtuosoOverride {
+  max-height: fit-content;
+}

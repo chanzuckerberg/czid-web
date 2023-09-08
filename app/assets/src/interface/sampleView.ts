@@ -226,3 +226,15 @@ export type PickConsensusGenomeData = Pick<
 >;
 
 export type DBType = "nt" | "nr" | "merged_nt_nr";
+
+export interface BenchmarkWorkflowRunAdditionalInfo {
+  [key: number]: BenchmarkWorkflowRunAdditionalInfoEntry;
+}
+
+export interface BenchmarkWorkflowRunAdditionalInfoEntry {
+  sampleName: string;
+  isRef: boolean;
+  runId: number;
+  pipelineVersion: string;
+  ncbiIndexVersion: string;
+}

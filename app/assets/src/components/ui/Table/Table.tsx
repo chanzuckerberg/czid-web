@@ -11,6 +11,7 @@ import {
   useReactTable,
   VisibilityTableState,
 } from "@tanstack/react-table";
+import cx from "classnames";
 import { isEqual, map } from "lodash";
 import React, { useEffect, useState } from "react";
 import { TableVirtuoso } from "react-virtuoso";
@@ -19,6 +20,7 @@ import { rowSelectionColumn } from "./columnDefinitions/RowSelectionColumn";
 import { EmptyTable } from "./components/EmptyTable";
 import { HeaderContent } from "./components/HeaderContent";
 import { StyledSdsTable } from "./components/StyledSdsTable";
+import cs from "./table.scss";
 
 interface TableProps<T> {
   columns: ColumnDef<T, any>[];
@@ -38,6 +40,7 @@ interface TableProps<T> {
   checkedRows?: T[];
   onSetCheckedRows?(rowData: T[]): void;
   enableMultiRowSelection?: boolean;
+  virtuosoClassname?: string;
 }
 
 /**
@@ -60,6 +63,7 @@ export const Table = <T,>({
   setTableReference,
   uniqueIdentifier,
   tableRowComponent,
+  virtuosoClassname,
   ...props
 }: TableProps<T> & Partial<TableOptions<any>>): JSX.Element => {
   const { enableMultiRowSelection } = props;
@@ -169,7 +173,7 @@ export const Table = <T,>({
 
   return (
     <TableVirtuoso
-      style={{ maxHeight: "calc(100% - 185px)" }}
+      className={cx(cs.virtuoso, virtuosoClassname)}
       totalCount={rows.length}
       components={{
         Table: StyledSdsTable,

@@ -1,18 +1,9 @@
 import { isEmpty } from "lodash/fp";
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { BenchmarkWorkflowRunAdditionalInfo } from "~/interface/sampleView";
 import { ValueWithTooltip } from "../ValueWithTooltip";
 import cs from "./stacked_sample_ids.scss";
-
-export interface BenchmarkWorkflowRunAdditionalInfo {
-  [key: number]: {
-    sampleName: string;
-    isRef: boolean;
-    runId: number;
-    pipelineVersion: string;
-    ncbiIndexVersion: string;
-  };
-}
 
 interface StackedSampleIdsProps {
   cellData: BenchmarkWorkflowRunAdditionalInfo[];
