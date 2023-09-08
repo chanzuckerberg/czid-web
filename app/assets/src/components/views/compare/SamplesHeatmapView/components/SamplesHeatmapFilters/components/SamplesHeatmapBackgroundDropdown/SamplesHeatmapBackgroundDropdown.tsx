@@ -12,7 +12,7 @@ interface SamplesHeatmapBackgroundDropdownProps {
   disabled?: boolean;
   enableMassNormalizedBackgrounds?: boolean;
   label?: string;
-  onChange: $TSFixMeFunction;
+  onChange: (background: number) => void;
   placeholder?: string;
   rounded?: boolean;
   value?: string | number;
@@ -83,24 +83,21 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
         value={{ name: valueToName(value, backgroundOptions), value: value }}
         DropdownMenuProps={{
           getOptionDisabled: getOptionDisabled,
-          isOptionEqualToValue: (option, value) => option.value === value,
+          isOptionEqualToValue: (option, value) => {
+            return option.value === value;
+          },
         }}
         InputDropdownProps={{
           sdsStyle: "minimal",
+          sdsType: "label",
           disabled: disabled,
-          details: valueToName(value, backgroundOptions),
+          value: valueToName(value, backgroundOptions),
         }}
         options={backgroundOptions}
       />
     );
   },
 );
-
-// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'Na... Remove this comment to see the full error message
-SamplesHeatmapBackgroundDropdown.defaultProps = {
-  rounded: true,
-  label: "Background",
-};
 
 SamplesHeatmapBackgroundDropdown.displayName =
   "SamplesHeatmapBackgroundDropdown";

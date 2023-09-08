@@ -46,7 +46,8 @@ export const SamplesHeatmapViewOptionsDropdown = ({
       InputDropdownProps={{
         sdsStyle: "minimal",
         disabled: disabled,
-        details: selectedOptionName,
+        sdsType: "label",
+        value: selectedOptionName,
       }}
     />
   );

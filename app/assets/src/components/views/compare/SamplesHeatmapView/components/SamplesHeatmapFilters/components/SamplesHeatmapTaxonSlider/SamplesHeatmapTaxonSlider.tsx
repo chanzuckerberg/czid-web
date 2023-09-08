@@ -47,8 +47,9 @@ export const SamplesHeatmapTaxonSlider = ({
         onClick={handleDropdownInputClick}
         label={<div className={cs.label}>Taxa Per Sample</div>}
         sdsStyle="minimal"
+        sdsType="label"
         sdsStage="default"
-        details={value.toString()}
+        value={value.toString()}
       />
       <Popover
         anchorEl={anchorEl}

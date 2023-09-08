@@ -135,7 +135,7 @@ const SamplesHeatmapFilters = ({
     );
   };
 
-  const onBackgroundChange = (background: $TSFixMe) => {
+  const onBackgroundChange = (background: number) => {
     if (background === selectedOptions.background) {
       return;
     }
