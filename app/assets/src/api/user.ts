@@ -130,7 +130,7 @@ interface userPostAirtableData {
   expertiseLevel: string;
   czidUsecases: string[];
   referralSource: string[];
-  email?: string;
+  newsletterConsent: boolean;
 }
 
 interface userPostAirtableDataAPI {
@@ -144,7 +144,7 @@ interface userPostAirtableDataAPI {
   expertise_level: string;
   czid_usecase: string[];
   referral_source: string[];
-  email?: string;
+  newsletter_consent: boolean;
 }
 
 const postToAirtable = ({
@@ -159,7 +159,7 @@ const postToAirtable = ({
   expertiseLevel,
   czidUsecases,
   referralSource,
-  email,
+  newsletterConsent,
 }: userPostAirtableData) => {
   const userAirtableData: userPostAirtableDataAPI = {
     first_name: firstName,
@@ -172,7 +172,7 @@ const postToAirtable = ({
     expertise_level: expertiseLevel,
     czid_usecase: czidUsecases,
     referral_source: referralSource,
-    ...(email && { email: email }),
+    newsletter_consent: newsletterConsent,
   };
   return postWithCSRF(`/users/${userId}/post_user_data_to_airtable`, {
     user: userAirtableData,

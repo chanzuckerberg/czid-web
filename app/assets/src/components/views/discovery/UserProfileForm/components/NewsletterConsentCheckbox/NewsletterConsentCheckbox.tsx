@@ -1,16 +1,16 @@
 import { InputCheckbox } from "@czi-sds/components";
 import React from "react";
-import cs from "./newsletter_opt_in_checkbox.scss";
+import cs from "./newsletter_consent_checkbox.scss";
 
-interface NewsletterOptInCheckboxProps {
-  optedInToNewsletter: boolean;
-  setOptedInToNewsletter: (checkBoxValue: boolean) => void;
+interface NewsletterConsentCheckboxProps {
+  newsletterConsent: boolean;
+  setNewsletterConsent: (checkBoxValue: boolean) => void;
 }
 
-export function NewsletterOptInCheckbox({
-  optedInToNewsletter,
-  setOptedInToNewsletter,
-}: NewsletterOptInCheckboxProps) {
+export function NewsletterConsentCheckbox({
+  newsletterConsent,
+  setNewsletterConsent,
+}: NewsletterConsentCheckboxProps) {
   return (
     <div className={cs.main}>
       <div className={cs.titleSection}>
@@ -19,8 +19,8 @@ export function NewsletterOptInCheckbox({
       </div>
       <span className={cs.checkbox}>
         <InputCheckbox
-          stage={optedInToNewsletter ? "checked" : "unchecked"}
-          onClick={() => setOptedInToNewsletter(!optedInToNewsletter)}
+          stage={newsletterConsent ? "checked" : "unchecked"}
+          onClick={() => setNewsletterConsent(!newsletterConsent)}
         />
       </span>
       <span className={cs.text}>
