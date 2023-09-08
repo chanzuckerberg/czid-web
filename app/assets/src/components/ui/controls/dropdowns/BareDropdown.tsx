@@ -190,6 +190,7 @@ class BareDropdown extends React.Component<
             (item: $TSFixMe) =>
               item.type !== BareDropdown.Header &&
               item.type !== BareDropdown.Divider &&
+              item.key !== "0" && // "None" Background
               get("props.flag", item) !== "unsearchable",
           )
         : items;

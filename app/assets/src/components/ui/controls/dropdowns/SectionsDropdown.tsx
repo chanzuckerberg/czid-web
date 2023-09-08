@@ -131,7 +131,7 @@ const SectionsDropdown = ({
     items.pop();
 
     if (shouldIncludeNoneOption) {
-      items = [...addNoneOption(), items];
+      items = [...addNoneOption(), ...items];
     }
 
     return { items, itemSearchStrings, sections };
@@ -154,7 +154,11 @@ const SectionsDropdown = ({
   };
 
   const renderEmptySectionMessage = (message: $TSFixMe) => (
-    <BareDropdown.Item className={cs.emptySection} key={nanoid()}>
+    <BareDropdown.Item
+      className={cs.emptySection}
+      flag={"unsearchable"}
+      key={nanoid()}
+    >
       <div className={cs.message}>{message}</div>
     </BareDropdown.Item>
   );
