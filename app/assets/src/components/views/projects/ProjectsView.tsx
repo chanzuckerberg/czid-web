@@ -75,7 +75,7 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
       {
         dataKey: "created_at",
         label: "Created On",
-        width: 120,
+        width: 100,
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
@@ -93,7 +93,7 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
       {
         dataKey: "sample_counts",
         label: "Counts",
-        width: 140,
+        width: 180,
         cellRenderer: ({ cellData }) =>
           TableRenderers.renderSampleCounts({
             cellData,
