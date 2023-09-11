@@ -7,6 +7,12 @@ export const StyledTableRow = React.forwardRef<
   TableRowProps
 >(function styledTableRow(props, ref) {
   return (
-    <TableRow {...props} className={cs.styledTableRow} ref={ref} rev={null} />
+    <TableRow
+      data-testid="amr-table-row"
+      {...props}
+      className={cs.styledTableRow}
+      ref={ref}
+      rev={null}
+    />
   );
 });

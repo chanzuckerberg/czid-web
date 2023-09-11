@@ -107,6 +107,7 @@ export const AmrSampleReport = ({
 
   return (
     <div
+      data-testid="amr-sample-report"
       className={
         hideFilters
           ? cx(cs.reportWrapper, cs.reportWrapperFiltersClosed)

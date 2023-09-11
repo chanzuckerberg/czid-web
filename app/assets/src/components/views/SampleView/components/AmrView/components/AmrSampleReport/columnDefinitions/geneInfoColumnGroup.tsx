@@ -14,6 +14,7 @@ export const getGeneInfoColumnGroup = (
     header: function geneInfoGroupHeader({ header }) {
       return (
         <th
+          data-testid="gene-info-group-header"
           key={`header-${header.id}`}
           className={cs.rowCountHeader}
           colSpan={header.colSpan}

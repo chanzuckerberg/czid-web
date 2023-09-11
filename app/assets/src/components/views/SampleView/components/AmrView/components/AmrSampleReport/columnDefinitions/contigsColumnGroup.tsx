@@ -24,6 +24,7 @@ export const getContigsColumnGroup = (
 
       return (
         <th
+          data-testid="contigs-group-header"
           key={`header-${header.id}`}
           className={cs.groupedHeader}
           colSpan={header.colSpan}

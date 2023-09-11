@@ -22,6 +22,7 @@ export const getReadsColumnGroup = (
 
       return (
         <th
+          data-testid="reads-group-header"
           key={`header-${header.id}`}
           className={cs.groupedHeader}
           colSpan={header.colSpan}
