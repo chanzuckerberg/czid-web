@@ -22,6 +22,7 @@ import FAQPage from "~/components/views/support/FAQPage";
 import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoticeForUserResearch";
 import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";
 import TermsOfUsePreview from "~/components/views/support/TermsOfUsePreview";
+import AdminSettings from "../admin_settings/AdminSettings";
 
 // These props come from Rails .html.erb views via the react_component function in app/assets/src/index.tsx (the entrypoint)
 interface DiscoveryViewRouterProps {
@@ -119,6 +120,9 @@ const DiscoveryViewRouter = ({
       </Route>
       <Route exact path="/faqs">
         <FAQPage />
+      </Route>
+      <Route exact path="/admin_settings">
+        <AdminSettings />
       </Route>
       {userSignedIn ? (
         <Route>

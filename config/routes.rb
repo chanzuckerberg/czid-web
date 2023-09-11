@@ -111,8 +111,10 @@ Rails.application.routes.draw do
   get 'select', to: 'home#index'
   get 'taxon_descriptions', to: 'home#taxon_descriptions'
   get 'admin_settings', to: 'home#admin_settings'
+  get 'app_configs', to: 'home#app_configs'
   get 'user_profile_form', to: 'home#user_profile_form'
-  put 'app_config', to: 'home#set_workflow_version'
+  put 'workflow_version', to: 'home#set_workflow_version'
+  put 'set_app_config', to: 'home#set_app_config'
   post 'feedback', to: 'home#feedback'
   post 'sign_up', to: 'home#sign_up'
 

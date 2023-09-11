@@ -6,9 +6,6 @@ textarea {
 .submit {
   vertical-align: top;
 }
-.workflow_versions {
-  padding: $sds-spaces-xl;
-}
 
 .page {
   margin: $sds-spaces-m;
@@ -22,7 +19,7 @@ textarea {
     margin-bottom: $sds-spaces-m;
   }
 
-  .addFeatureFlagContainer {
+  .adminActionContainer {
     padding: $sds-spaces-xl;
 
     .actions {
@@ -34,6 +31,10 @@ textarea {
       display: flex;
       gap: $sds-spaces-m;
       margin-bottom: $sds-spaces-m;
+    }
+
+    .appConfigDropdown {
+      margin-bottom: $sds-spaces-l;
     }
   }
 

@@ -1,7 +1,7 @@
 class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required, except: [:landing, :sign_up, :maintenance, :page_not_found]
-  before_action :admin_required, only: [:all_data, :admin_settings, :set_workflow_version]
+  before_action :admin_required, only: [:all_data, :admin_settings, :set_workflow_version, :set_app_config, :app_configs]
   before_action :check_profile_form_completion, except: [:landing, :sign_up, :maintenance, :page_not_found, :user_profile_form]
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance, :page_not_found]
   skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
@@ -171,8 +171,9 @@ class HomeController < ApplicationController
   end
 
   def set_workflow_version
-    workflow_name = params["app_config"]["key"].gsub("-version", "")
-    version = params["app_config"]["value"]
+    permitted_params = params.permit(:key, :value)
+    workflow_name = permitted_params[:key].gsub("-version", "")
+    version = permitted_params[:value]
     begin
       check_valid_workflow(workflow_name, version) || raise("Updating workflow failed could not find wdl file")
       AppConfigHelper.set_workflow_version(workflow_name, version)
@@ -190,6 +191,22 @@ class HomeController < ApplicationController
     render json: {
       status: :success,
     }
+  end
+
+  def set_app_config
+    permitted_params = params.permit(:key, :value)
+    config_name = permitted_params[:key]
+    value = permitted_params[:value]
+
+    AppConfigHelper.set_app_config(config_name, value)
+
+    render json: {
+      status: :success,
+    }
+  end
+
+  def app_configs
+    render json: AppConfig.all.as_json
   end
 
   private

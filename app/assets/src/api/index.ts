@@ -600,12 +600,18 @@ const getSamplesReadStats = async (sampleIds: $TSFixMe) => {
   }, {});
 };
 
-const setWorkflowVersion = (workflowName: $TSFixMe, version: $TSFixMe) =>
-  putWithCSRF("/app_config", {
-    app_config: {
-      key: workflowName,
-      value: version,
-    },
+const setWorkflowVersion = (workflowName: string, version: string) =>
+  putWithCSRF("/workflow_version", {
+    key: workflowName,
+    value: version,
+  });
+
+const getAppConfigs = () => get("/app_configs");
+
+const setAppConfig = (appConfig: string, value: string) =>
+  putWithCSRF("/set_app_config", {
+    key: appConfig,
+    value,
   });
 
 const getLaunchedFeatureList = () => get("/users/feature_flags");
@@ -794,6 +800,7 @@ export {
   getAllHostGenomes,
   getAllHostGenomesPublic,
   getAllSampleTypes,
+  getAppConfigs,
   getLaunchedFeatureList,
   getBackgrounds,
   getBenchmarkGroundTruthFiles,
@@ -841,6 +848,7 @@ export {
   saveSampleName,
   saveSampleNotes,
   saveVisualization,
+  setAppConfig,
   setWorkflowVersion,
   shortenUrl,
   updateUserSetting,
