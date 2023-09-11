@@ -204,7 +204,7 @@ export const HoverActions = ({
     analyticsContext,
   );
 
-  const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxonLevelIndex}_${taxonId}?pipeline_version=${pipelineVersion}`;
+  const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxonLevel}_${taxonId}?pipeline_version=${pipelineVersion}`;
   const openCoverageViz = () => {
     onCoverageVizClick({
       taxId: taxonId,
