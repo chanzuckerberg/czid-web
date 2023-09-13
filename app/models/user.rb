@@ -59,6 +59,9 @@ class User < ApplicationRecord
   }, allow_nil: true
   attr_accessor :email_arguments
 
+  # `User` creation/changes/deletions get auto-tracked for analytics
+  ENABLE_MODEL_AUTO_ANALYTICS = true
+
   ROLE_REGULAR_USER = 0
   ROLE_ADMIN = 1
   validates :role, presence: true, inclusion: { in: [

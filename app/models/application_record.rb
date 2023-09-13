@@ -1,6 +1,16 @@
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
+  # We have auto-analytics tracking set up for specific DB models we flag.
+  # For models that are flagged, we fire off tracking events for any create,
+  # change, or delete of that model. Originally, we did this for all models,
+  # but it turned out we didn't actually use much of that data, so now we have
+  # this opt-in approach. If a model should have auto-analytics enabled, add
+  # an `ENABLE_MODEL_AUTO_ANALYTICS` constant with `true` to that model's code.
+  # We set this constant here at the `ApplicationRecord` level so we can rely
+  # on a default value of `false` when a given model does not explicitly set it
+  # since all models inherit from ApplicationRecord.
+  ENABLE_MODEL_AUTO_ANALYTICS = false
   # NOTE: Batch ActiveRecord operations such as update_all and delete_all do not
   # fire callbacks.
   after_create { |record| log_analytics record, "created" }
@@ -39,7 +49,9 @@ class ApplicationRecord < ActiveRecord::Base
 
   # See also EventDictionary
   def log_analytics(record, action)
-    return if record.class.name == DeletionLog.name
+    # Short-circuit to no-op if model not explicitly marked for auto-analytics.
+    # See above in this file for more info on DB model auto-analytics.
+    return unless record.class.const_get :ENABLE_MODEL_AUTO_ANALYTICS
 
     # example: "visualization_updated"
     event = "#{record.class.name.underscore}_#{action}"
