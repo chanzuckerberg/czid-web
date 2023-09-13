@@ -33,4 +33,6 @@ export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const WGS_CG_UPLOAD_FEATURE = "wgs_cg_upload";
 // experimental feature to trial apollo client state management - not in use in production
 export const APOLLO_CLIENT_STATE_MANAGEMENT = "apollo_client";
+// temporary feature to test the new sample view Aug 2023
+export const SAMPLEVIEW_FC = "sampleView_fc";
 export const BENCHMARKING_FEATURE = "benchmarking";
