@@ -1,17 +1,8 @@
 <div id="sample_view">
-  <% if @current_user.allowed_feature?("sampleView_fc") %>
-    <%= javascript_tag do %>
-      react_component('SampleViewFC', {
-        sampleId: <%= @sample.id %>,
-        snapshotShareId: '<%= @share_id %>',
-      }, 'sample_view', JSON.parse('<%= raw escape_json(user_context)%>'));
-    <% end %>
-  <% else %>
-    <%= javascript_tag do %>
-      react_component('SampleView', {
-        sampleId: <%= @sample.id %>,
-        snapshotShareId: '<%= @share_id %>',
-      }, 'sample_view', JSON.parse('<%= raw escape_json(user_context)%>'));
-    <% end %>
+<%= javascript_tag do %>
+  react_component('SampleView', {
+    sampleId: <%= @sample.id %>,
+    snapshotShareId: '<%= @share_id %>',
+  }, 'sample_view', JSON.parse('<%= raw escape_json(user_context)%>'));
   <% end %>
 </div>
