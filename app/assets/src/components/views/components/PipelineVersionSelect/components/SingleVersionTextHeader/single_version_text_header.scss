@@ -1,0 +1,10 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.pipelineVersion {
+  @include font-body-xxxs;
+  color: $sds-color-gray-500;
+  margin-right: $sds-spaces-xxs;
+}

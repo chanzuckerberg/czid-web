@@ -1,9 +1,9 @@
 import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ViewHeader from "~/components/layout/ViewHeader";
-import { PipelineVersionSelect } from "~/components/views/components/PipelineVersionSelect";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
+import { PipelineVersionSelect } from "../components/PipelineVersionSelect";
 import cs from "./pipeline_viz.scss";
 
 interface PipelineVizHeaderProps {
@@ -42,8 +42,6 @@ const PipelineVizHeader = ({
               currentRun={pipelineRun}
               allRuns={pipelineVersions}
               onVersionChange={handlePipelineVersionSelect}
-              versionKey={"pipeline_version"}
-              timeKey={"created_at"}
               workflowType={workflowType}
             />
           </div>

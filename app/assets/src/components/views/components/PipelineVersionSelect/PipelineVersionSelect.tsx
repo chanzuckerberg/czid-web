@@ -1,45 +1,41 @@
 import moment from "moment";
 import React from "react";
-import { Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";
-import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
-import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
+import { WORKFLOW_VALUES } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
+import { MultipleVersionsDropdownHeader } from "./components/MultipleVersionsDropdownHeader";
+import { SingleVersionTextHeader } from "./components/SingleVersionTextHeader";
 import cs from "./pipeline_version_select.scss";
+import { PipelineVersionSelectConfig } from "./workflowTypeConfig";
 
 interface PipelineVersionSelectProps {
   sampleId?: number;
   shouldIncludeDatabaseVersion: boolean;
   currentRun?: WorkflowRun | PipelineRun;
   allRuns?: WorkflowRun[] | PipelineRun[] | string[];
-  workflowType?: string;
-  versionKey?: string;
-  timeKey?: string;
-  onVersionChange: $TSFixMeFunction;
+  workflowType?: WORKFLOW_VALUES;
+  onVersionChange: (x: string) => void;
 }
 
-export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
-  const {
-    sampleId,
-    shouldIncludeDatabaseVersion = false,
-    currentRun,
-    allRuns = [],
-    workflowType,
-    versionKey,
-    timeKey,
-    onVersionChange,
-  } = props;
+export const PipelineVersionSelect = ({
+  sampleId,
+  shouldIncludeDatabaseVersion = false,
+  currentRun,
+  allRuns = [],
+  workflowType,
+  onVersionChange,
+}: PipelineVersionSelectProps) => {
+  const { timeKey, versionKey, workflowName, getDatabaseVersionString } =
+    PipelineVersionSelectConfig[workflowType];
 
   // gather data for pipeline version and last processed
-
   const lastProcessedAt = currentRun?.[timeKey];
-  const currentPipelineVersion = currentRun ? currentRun[versionKey] : "";
+  const currentPipelineVersion = currentRun?.[versionKey];
 
   // if the pipeline never finished processing, return null
   if (!lastProcessedAt || !currentPipelineVersion) return null;
 
-  // the pipeline viz header provides other versions as a list of strings, not PipelineRuns or WorkflowRuns
   const allPipelineVersions: string[] =
     allRuns.length > 0 && typeof allRuns[0] === "string"
       ? allRuns
@@ -59,139 +55,43 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
     return ` processed ${lastProcessedFormattedDate} |`;
   };
 
-  const getDatabaseVersionString = () => {
-    if (!shouldIncludeDatabaseVersion) return "";
-    let dbVersionString: string;
-    if (workflowType === "amr") {
-      dbVersionString = getAmrDatabaseVersionString();
-    } else {
-      dbVersionString = getMngsDatabaseVersionString();
-    }
-    return dbVersionString;
+  const onPipelineVersionSelect = (version: string) => {
+    trackEvent("SampleView_pipeline-select_clicked", {
+      sampleId,
+      pipelineVersion: version,
+      workflowType,
+    });
+    onVersionChange(version);
   };
 
-  const getMngsDatabaseVersionString = () => {
-    const pipelineRun = currentRun as PipelineRun;
-    const alignmentDbVersion = pipelineRun.version?.alignment_db;
-    return alignmentDbVersion ? alignmentDbVersion.concat(" | ") : "";
-  };
-
-  const getAmrDatabaseVersionString = () => {
-    const workflowRun = currentRun as WorkflowRun;
-    const cardVersion = workflowRun.inputs?.card_version;
-    const wildcardVersion = workflowRun.inputs?.wildcard_version;
-    let dbVersionString = "";
-    if (cardVersion) {
-      dbVersionString += `CARD DB: ${cardVersion} | `;
-    }
-    if (wildcardVersion) {
-      dbVersionString += `Wildcard DB: ${wildcardVersion} | `;
-    }
-
-    return dbVersionString;
-  };
-
-  const getWorkflowVersionString = () => {
-    if (!currentRun[versionKey]) return "";
-
-    const workflowKey = findInWorkflows(workflowType, "value");
-    // we special case abbreviate AMR because it's so long
-    const workflowName =
-      workflowType === "amr" ? "AMR" : WORKFLOWS[workflowKey].pipelineName;
-
-    return `${workflowName} Pipeline v${currentRun[versionKey]}`;
-  };
-
-  // construct the header
-  const renderSingleVersionTextHeader = () => {
-    return (
-      <>
-        <Popup
-          content={"This is the only version available."}
-          position={"top center"}
-          inverted={false}
-          trigger={
-            <span
-              className={cs.pipelineVersion}
-              data-testid="pipeline-version-select"
-            >
-              {getWorkflowVersionString()}
-            </span>
-          }
-        />
-
-        <span className={cs.pipelineVersion}>
-          {` | ${getDatabaseVersionString()}${getLastProcessedString()}`}
-        </span>
-      </>
-    );
-  };
-
-  const renderMultipleVersionsDropdownHeader = () => {
-    const options = otherPipelineVersions.map(version => ({
-      text: `Pipeline v${version} `,
-      value: version,
-    }));
-
-    const onPipelineVersionSelect = (version: string) => {
-      trackEvent("SampleView_pipeline-select_clicked", {
-        sampleId,
-        pipelineVersion: version,
-        workflowType,
-      });
-      onVersionChange(version);
-    };
-
-    return (
-      <>
-        <Popup
-          content={"Select pipeline version."}
-          position={"top center"}
-          inverted={true}
-          trigger={
-            <BareDropdown
-              className={cs.pipelineVersionDropdown}
-              trigger={
-                <span className={cs.pipelineVersionDropdown}>
-                  {`${getWorkflowVersionString()}`}
-                </span>
-              }
-              options={options}
-              onChange={(version: string) => onPipelineVersionSelect(version)}
-              smallArrow={true}
-              arrowInsideTrigger={false}
-              data-testid="pipeline-version-select"
-            />
-          }
-        />
-        <span
-          className={cs.pipelineVersion}
-        >{` | ${getDatabaseVersionString()}${getLastProcessedString()}`}</span>
-      </>
-    );
-  };
-
+  const currentPipelineString =
+    currentRun[versionKey] &&
+    `${workflowName} Pipeline v${currentRun[versionKey]}`;
+  const versionInfoString = ` | ${
+    shouldIncludeDatabaseVersion ? getDatabaseVersionString(currentRun) : ""
+  }${getLastProcessedString()}`;
   // figure out which version of the header to use and return it
   // only one version, and it's the current one? return a string rather than a dropdown.
-  if (
+  const showSingleVersionTextHeader =
     allPipelineVersions.length === 0 ||
     (allPipelineVersions.length === 1 &&
-      allPipelineVersions[0] === currentPipelineVersion)
-  ) {
-    return (
-      <div className={cs.pipelineVersionSelectContainer}>
-        {renderSingleVersionTextHeader()}
-      </div>
-    );
-  } else {
-    // multiple versions? create dropdown
+      allPipelineVersions[0] === currentPipelineVersion);
 
-    return (
-      <div className={cs.pipelineVersionSelectContainer}>
-        {renderMultipleVersionsDropdownHeader()}
-      </div>
-    );
-  }
+  return (
+    <div className={cs.pipelineVersionSelectContainer}>
+      {showSingleVersionTextHeader ? (
+        <SingleVersionTextHeader
+          currentPipelineString={currentPipelineString}
+          versionInfoString={versionInfoString}
+        />
+      ) : (
+        <MultipleVersionsDropdownHeader
+          currentPipelineString={currentPipelineString}
+          otherPipelineVersions={otherPipelineVersions}
+          onPipelineVersionSelect={onPipelineVersionSelect}
+          versionInfoString={versionInfoString}
+        />
+      )}
+    </div>
+  );
 };
-
-export default PipelineVersionSelect;

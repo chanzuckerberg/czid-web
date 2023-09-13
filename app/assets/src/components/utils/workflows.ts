@@ -160,3 +160,13 @@ type WorkflowKeys = keyof Workflows;
 export type WORKFLOW_VALUES = Workflows[WorkflowKeys]["value"];
 export type WORKFLOW_LABELS = Workflows[WorkflowKeys]["label"];
 type WorkflowAttrs = keyof Workflows[WorkflowKeys];
+
+export enum WorkflowType {
+  AMR = "amr",
+  CONSENSUS_GENOME = "consensus-genome",
+  SHORT_READ_MNGS = "short-read-mngs",
+  LONG_READ_MNGS = "long-read-mngs",
+  BENCHMARK = "benchmark",
+}
+
+export type WorkflowConfigType<T> = Record<Required<WorkflowType>, T>;

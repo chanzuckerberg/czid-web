@@ -2,14 +2,11 @@ import { Button } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
-import {
-  isMngsWorkflow,
-  WORKFLOWS,
-  WORKFLOW_VALUES,
-} from "~/components/utils/workflows";
+import { WORKFLOW_VALUES } from "~/components/utils/workflows";
 import { PipelineVersionSelect } from "~/components/views/components/PipelineVersionSelect";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
+import { PipelineRunsButton } from "./components/PipelineRunsButton";
 import cs from "./secondary_header_controls.scss";
 
 interface SecondaryHeaderControlsProps {
@@ -18,7 +15,6 @@ interface SecondaryHeaderControlsProps {
   getAllRuns: () => WorkflowRun[] | PipelineRun[];
   workflow: WORKFLOW_VALUES;
   onPipelineVersionChange: (newPipelineVersion: string) => void;
-  userIsAdmin: boolean;
   onDetailsClick: () => void;
 }
 
@@ -28,40 +24,19 @@ export const SecondaryHeaderControls = ({
   getAllRuns,
   workflow,
   onPipelineVersionChange,
-  userIsAdmin,
   onDetailsClick,
 }: SecondaryHeaderControlsProps) => {
   return (
     <div className={cs.controlsTopRowContainer}>
       <PipelineVersionSelect
         sampleId={get("id", sample)}
-        // show the CARD db version for AMR but not for other workflows
-        shouldIncludeDatabaseVersion={workflow === "amr"}
         currentRun={currentRun}
         allRuns={getAllRuns()}
         workflowType={workflow}
-        versionKey={
-          isMngsWorkflow(workflow) ? "pipeline_version" : "wdl_version"
-        }
-        timeKey={isMngsWorkflow(workflow) ? "created_at" : "executed_at"}
         onVersionChange={onPipelineVersionChange}
+        shouldIncludeDatabaseVersion={workflow === "amr"}
       />
-      {userIsAdmin && workflow !== WORKFLOWS.CONSENSUS_GENOME.value && (
-        <>
-          <Button
-            className={cs.controlElement}
-            sdsType="primary"
-            sdsStyle="minimal"
-            isAllCaps
-            onClick={() =>
-              (location.href = `/samples/${sample?.id}/pipeline_runs`)
-            }
-          >
-            Pipeline Runs
-          </Button>
-          <span className={cs.seperator}> | </span>
-        </>
-      )}
+      <PipelineRunsButton sample={sample} workflow={workflow} />
       <Button
         data-testid="sample-details"
         sdsType="primary"

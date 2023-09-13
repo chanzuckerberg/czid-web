@@ -1,7 +1,6 @@
 import { get } from "lodash/fp";
-import React, { useContext } from "react";
+import React from "react";
 import { trackEvent } from "~/api/analytics";
-import { UserContext } from "~/components/common/UserContext";
 import ViewHeader from "~/components/layout/ViewHeader";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import {
@@ -56,9 +55,6 @@ export const SampleViewHeader = ({
   onShareClick,
   onDeleteRunSuccess,
 }: SampleViewHeaderProps) => {
-  const userContext = useContext(UserContext);
-  const { admin: userIsAdmin } = userContext || {};
-
   const getBreadcrumbLink = () => {
     if (!project) return;
     return snapshotShareId
@@ -112,7 +108,6 @@ export const SampleViewHeader = ({
               getAllRuns={getAllRunsPerWorkflow}
               workflow={workflow}
               onPipelineVersionChange={onPipelineVersionChange}
-              userIsAdmin={userIsAdmin}
               onDetailsClick={onDetailsClick}
             />
             <PrimaryHeaderControls
