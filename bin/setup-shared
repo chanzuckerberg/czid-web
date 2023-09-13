@@ -30,7 +30,7 @@ fi
 
 
 echo "== Bringing up all services =="
-aws-oidc exec -- docker-compose up -d db redis web resque resque-result-monitor resque-pipeline-monitor elasticsearch
+aws-oidc exec -- docker-compose up -d db redis web resque resque-result-monitor resque-pipeline-monitor
 sleep 10
 
 echo "== Creating ES indices =="
