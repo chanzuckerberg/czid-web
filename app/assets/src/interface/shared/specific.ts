@@ -161,6 +161,7 @@ export interface PipelineRun {
     alignment_db: string;
   };
   host_subtracted: string;
+  guppy_basecaller_setting: string | null;
 }
 
 export interface ProjectPipelineVersions {

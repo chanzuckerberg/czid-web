@@ -87,6 +87,10 @@ const WILDCARD_DATABASE_VERSION = {
   name: "Wildcard Database Version",
   key: "wildcardDatabaseVersion",
 };
+const GUPPY_BASECALLER_VERSION = {
+  name: "Guppy Basecaller Version",
+  key: "guppyBasecallerVersion",
+};
 
 export const SHORT_READ_MNGS_INFO_FIELDS = [
   ANALYSIS_TYPE,
@@ -108,6 +112,7 @@ export const LONG_READ_MNGS_INFO_FIELDS = [
   ANALYSIS_TYPE,
   SEQUENCING_PLATFORM,
   PIPELINE_VERSION,
+  GUPPY_BASECALLER_VERSION,
   NCBI_INDEX_DATE,
   HOST_SUBTRACTED,
   TOTAL_READS,

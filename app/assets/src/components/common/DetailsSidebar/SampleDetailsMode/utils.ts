@@ -77,6 +77,9 @@ export const processPipelineInfo = (
     pipelineInfo.ncbiIndexDate = {
       text: pipelineRun?.version?.alignment_db,
     };
+    pipelineInfo.guppyBasecallerVersion = {
+      text: pipelineRun?.guppy_basecaller_setting,
+    };
 
     if (summaryStats) {
       const adjustedRemainingReads = summaryStats.adjusted_remaining_reads
