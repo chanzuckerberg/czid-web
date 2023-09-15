@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import { connect } from "react-redux";
@@ -93,7 +94,6 @@ import cs from "./sample_view.scss";
 import {
   addSampleDeleteFlagToSessionStorage,
   adjustMetricPrecision,
-  cancellablePromise,
   determineInitialTab,
   filterReportData,
   GENUS_LEVEL_INDEX,
@@ -106,6 +106,7 @@ import {
   KEY_SAMPLE_VIEW_OPTIONS,
   KEY_SELECTED_OPTIONS_BACKGROUND,
   loadState,
+  NONE_BACKGROUND_VALUE,
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   provideOptionToRevertToSampleViewFilters,
@@ -148,6 +149,8 @@ const SampleViewFC = ({
     workflowRunIdFromUrl,
     currentTabFromUrl,
   } = getStateFromUrlandLocalStorage(location, localStorage);
+
+  const initialCurrentTab = useRef(currentTabFromUrl);
 
   const [pipelineVersion, setPipelineVersion] = useState<string>(
     pipelineVersionFromUrl,
@@ -333,15 +336,16 @@ const SampleViewFC = ({
       const newCurrentTab = determineInitialTab({
         initialWorkflow: sample.initial_workflow,
         workflowCount: getWorkflowCount(sample),
-        currentTab: currentTabFromUrl,
+        currentTab: initialCurrentTab.current,
       });
+
       setCurrentTab(newCurrentTab);
     };
 
     fetchSample().catch(error => {
       console.error(error);
     });
-  }, [snapshotShareId, sampleId, currentTabFromUrl, pipelineVersion]);
+  }, [snapshotShareId, sampleId, pipelineVersion]);
 
   useEffect(() => {
     // track Clicks on tabs
@@ -352,33 +356,25 @@ const SampleViewFC = ({
       });
     }
     if (currentTab === TABS.CONSENSUS_GENOME || currentTab === TABS.AMR) {
-      let workflowRun;
-      if (workflowRunId) {
-        workflowRun = find({ id: workflowRunId }, sample?.workflow_runs);
-      } else {
-        workflowRun = find(
-          { workflow: labelToVal(currentTab) },
-          sample?.workflow_runs,
-        );
-      }
-      setWorkflowRun(workflowRun);
-      setWorkflowRunId(workflowRun?.id);
+      const newWorkflowRun = find(
+        { workflow: labelToVal(currentTab) },
+        sample?.workflow_runs,
+      );
+      setWorkflowRun(newWorkflowRun);
+      setWorkflowRunId(newWorkflowRun?.id);
     }
-  }, [workflowRunId, currentTab, sample?.workflow_runs]);
+  }, [currentTab, sample?.workflow_runs]);
 
   useEffect(() => {
-    const { runFetch, cancelFetch } = cancellablePromise<AmrDeprectatedData[]>(
-      getAmrDeprecatedData(sampleId),
-    );
     const fetchAmrDeprecatedData = async () => {
-      const amrDeprecatedData: AmrDeprectatedData[] = await runFetch;
+      const amrDeprecatedData: AmrDeprectatedData[] =
+        await getAmrDeprecatedData(sampleId);
       setAmrDeprecatedData(amrDeprecatedData);
     };
-    if (currentTab === TABS.AMR_DEPRECATED && !amrDeprecatedData) {
+    if (!amrDeprecatedData) {
       fetchAmrDeprecatedData();
     }
-    return cancelFetch;
-  }, [currentTab, sampleId, amrDeprecatedData]);
+  }, [sampleId, amrDeprecatedData]);
 
   useEffect(() => {
     // define function to fetch all background data
@@ -519,7 +515,7 @@ const SampleViewFC = ({
           });
         selectedBackground = null;
       }
-      const backgroundIdUsed = backgroundId || selectedBackground?.id;
+      const backgroundIdUsed = backgroundId || selectedBackground?.id || null;
 
       setLoadingReport(true);
       trackEvent("PipelineSampleReport_sample_viewed", {
@@ -601,6 +597,9 @@ const SampleViewFC = ({
             backgroundId: value,
           },
         );
+        if (value === NONE_BACKGROUND_VALUE) {
+          value = null;
+        }
       }
       dispatchSelectedOptions({
         type: "optionChanged",
@@ -626,6 +625,8 @@ const SampleViewFC = ({
     [backgrounds, handleDeliberateOptionChanged],
   );
 
+  const previousBackground = useRef(undefined);
+
   useEffect(() => {
     if (!sample?.pipeline_runs || sample?.pipeline_runs?.length === 0) {
       // don't fetch sample report data if there is no mngs run on the sample
@@ -635,45 +636,46 @@ const SampleViewFC = ({
     if (!ignoreProjectBackground && hasPersistedBackground === null) {
       return;
     }
-    setLoadingReport(true);
-    const { runFetch, cancelFetch } = cancellablePromise(
+    if (selectedOptions.background !== previousBackground.current) {
       fetchSampleReportData({
         backgroundId: selectedOptions.background,
-      }),
-    );
-    runFetch
-      .then(successfullyFetchedSampleReportData => {
-        // if project background is different than background
-        if (successfullyFetchedSampleReportData) {
-          if (!ignoreProjectBackground) {
-            persistNewBackgroundModelSelection({
-              newBackgroundId: selectedOptions.background,
+      })
+        .then(successfullyFetchedSampleReportData => {
+          // if project background is different than background
+          previousBackground.current = selectedOptions.background;
+          if (successfullyFetchedSampleReportData) {
+            if (!ignoreProjectBackground) {
+              persistNewBackgroundModelSelection({
+                newBackgroundId: selectedOptions.background,
+              });
+            }
+          } else {
+            handleInvalidBackgroundSelection({
+              invalidBackgroundId: selectedOptions.background,
             });
           }
-        } else {
-          handleInvalidBackgroundSelection({
-            invalidBackgroundId: selectedOptions.background,
-          });
-        }
-      })
-      .catch(err => console.error(err));
-    return cancelFetch;
+        })
+        .catch(err => console.error(err));
+    }
   }, [
     selectedOptions.background,
     ignoreProjectBackground,
-    hasPersistedBackground,
     fetchSampleReportData,
+    hasPersistedBackground,
     persistNewBackgroundModelSelection,
     sample?.pipeline_runs,
     handleInvalidBackgroundSelection,
+    previousBackground,
   ]);
-
   useEffect(() => {
     project?.id && updateDiscoveryProjectId(project.id);
   }, [project?.id, updateDiscoveryProjectId]);
 
   useEffect(() => {
-    const fetchProjectSamples = async (projectId, snapshotShareId) => {
+    const fetchProjectSamples = async (
+      projectId: number,
+      snapshotShareId: string,
+    ) => {
       // only really need sample names and ids, so request the basic version without extra details
       const projectSamples: {
         samples: Pick<Sample, "id" | "name">[];
@@ -718,15 +720,15 @@ const SampleViewFC = ({
     reportData,
   ]);
 
+  const shouldShowCoverageViz =
+    isPipelineFeatureAvailable(
+      COVERAGE_VIZ_FEATURE,
+      get("pipeline_version", pipelineRun),
+    ) || currentTab === TABS.LONG_READ_MNGS;
+
   useEffect(() => {
     const fetchCoverageVizData = async () => {
-      if (
-        isPipelineFeatureAvailable(
-          COVERAGE_VIZ_FEATURE,
-          get("pipeline_version", pipelineRun),
-        ) ||
-        currentTab === TABS.LONG_READ_MNGS
-      ) {
+      if (shouldShowCoverageViz) {
         const coverageVizSummary = await getCoverageVizSummary({
           sampleId: sampleId,
           snapshotShareId,
@@ -738,7 +740,7 @@ const SampleViewFC = ({
     fetchCoverageVizData().catch(error => {
       console.error("Error fetching coverage viz data", error);
     });
-  }, [pipelineVersion, sampleId, snapshotShareId, currentTab, pipelineRun]);
+  }, [pipelineVersion, sampleId, snapshotShareId, shouldShowCoverageViz]);
 
   const handlePipelineVersionSelect = (newPipelineVersion: string) => {
     if (newPipelineVersion === pipelineVersion) {

@@ -304,23 +304,3 @@ const overwriteAggregatescoreMetric = selectedOptionsFromLocal => {
   }
   return selectedOptionsFromLocal;
 };
-
-export const cancellablePromise = <T>(promise: Promise<T>) => {
-  const isCancelled = { value: false };
-  const wrappedPromise: Promise<T> = new Promise((resolve, reject) => {
-    promise
-      .then(d => {
-        return isCancelled.value ? reject(isCancelled) : resolve(d);
-      })
-      .catch(e => {
-        reject(isCancelled.value ? isCancelled : e);
-      });
-  });
-
-  return {
-    runFetch: wrappedPromise,
-    cancelFetch: () => {
-      isCancelled.value = true;
-    },
-  };
-};

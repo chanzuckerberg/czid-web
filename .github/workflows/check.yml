@@ -177,11 +177,11 @@ jobs:
     - name: ESLint
       # setup-node automatically creates annotations from this output
       # Use eslint-disable or fix another warning to stay below the max.
-      run: npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 50
+      run: npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 49
     - name: ESLint a11y Rules
       # These rules are related to web accessibility, with a separate warnings budget.
       # Use eslint-disable or fix another warning to stay below the max.
-      run: npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 187
+      run: npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 186
     - name: Check for Unused Packages
       # Uses Depcheck to flag unused dependencies in package.json
       run: exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')

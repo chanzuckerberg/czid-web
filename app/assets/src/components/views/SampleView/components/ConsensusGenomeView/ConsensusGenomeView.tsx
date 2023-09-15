@@ -2,7 +2,13 @@ import { Button, Icon } from "@czi-sds/components";
 import cx from "classnames";
 import { camelCase, find, get, getOr, isEmpty, isNil, size } from "lodash/fp";
 import memoize from "memoize-one";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { getWorkflowRunResults } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
@@ -15,7 +21,6 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils/download";
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
 import {
-  cancellablePromise,
   CG_HISTOGRAM_FILL_COLOR,
   CG_HISTOGRAM_HOVER_FILL_COLOR,
   RUNNING_STATE,
@@ -79,30 +84,146 @@ export const ConsensusGenomeView = ({
     ) {
       return;
     }
-    const { runFetch, cancelFetch } = cancellablePromise(
-      getWorkflowRunResults(workflowRun?.id),
-    );
     setLoadingResults(true);
     setWorkflowRunResults(null);
+
     const fetchResults = async () => {
       const results =
-        workflowRun?.status === SUCCEEDED_STATE ? await runFetch : {};
+        workflowRun?.status === SUCCEEDED_STATE
+          ? await getWorkflowRunResults(workflowRun?.id)
+          : {};
       setWorkflowRunResults(results);
       setLoadingResults(false);
     };
 
     fetchResults();
-    return cancelFetch;
   }, [workflowRun?.id, workflowRun?.status, workflowRun?.workflow]);
+
+  const getHistogramTooltipData = memoize((accessionData, coverageIndex) => {
+    // coverageObj format:
+    //   [binIndex, averageCoverageDepth, coverageBreadth, numberContigs, numberReads]
+    const coverageObj = accessionData.coverage[coverageIndex];
+    const binSize = accessionData.coverage_bin_size;
+
+    return [
+      {
+        name: "Coverage",
+        data: [
+          [
+            "Base Pair Range",
+            // \u2013 is en-dash
+            `${Math.round(coverageObj[0] * binSize)}\u2013${Math.round(
+              (coverageObj[0] + 1) * binSize,
+            )}`,
+          ],
+          ["Coverage Depth", `${coverageObj[1]}x`],
+          ["Coverage Breadth", formatPercent(coverageObj[2])],
+        ],
+      },
+    ];
+  });
+
+  const handleHistogramBarEnter = useCallback(
+    (hoverData: $TSFixMe) => {
+      if (hoverData && hoverData[0] === 0) {
+        const tooltipData = getHistogramTooltipData(
+          workflowRunResults.coverage_viz,
+          hoverData[1],
+        );
+
+        setHistogramTooltipData(tooltipData);
+      }
+    },
+    [getHistogramTooltipData, workflowRunResults?.coverage_viz],
+  );
+
+  const handleHistogramBarHover = (clientX: $TSFixMe, clientY: $TSFixMe) => {
+    setHistogramTooltipLocation({
+      left: clientX,
+      top: clientY,
+    });
+  };
+
+  const handleHistogramBarExit = () => {
+    setHistogramTooltipLocation(null);
+    setHistogramTooltipData(null);
+  };
+
+  const renderHistogram = useCallback(() => {
+    if (coverageVizContainerRef.current !== null) {
+      const coverageVizData = workflowRunResults.coverage_viz.coverage.map(
+        valueArr => ({
+          x0: valueArr[0] * workflowRunResults.coverage_viz.coverage_bin_size,
+          length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
+        }),
+      );
+
+      const accessionID =
+        workflowRunResults.taxon_info.accession_id ?? "Unknown accession";
+
+      // accessionName for WGS could not exist, if so fall back to taxonName
+      const taxonName =
+        workflowRunResults.taxon_info.accession_name ??
+        workflowRunResults.taxon_info.taxon_name ??
+        "Unknown taxon";
+
+      const { creation_source: creationSource, ref_fasta: refFasta } =
+        workflowRun.inputs ?? {};
+      const isWGS = creationSource === CreationSource.WGS;
+      const subtext = isWGS ? refFasta : `${accessionID} - ${taxonName}`;
+
+      new Histogram(coverageVizContainerRef.current, [coverageVizData], {
+        barOpacity: 1,
+        colors: [CG_HISTOGRAM_FILL_COLOR],
+        domain: [0, workflowRunResults.coverage_viz.total_length],
+        hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
+        labelsBold: true,
+        labelsLarge: true,
+        labelX: "Reference Sequence",
+        labelY: "Coverage (SymLog)",
+        labelXSubtext: subtext,
+        labelYHorizontalOffset: 30,
+        labelYVerticalOffset: 54,
+        labelYLarge: true,
+        margins: {
+          left: 100,
+          right: 50,
+          top: 22,
+          bottom: 75,
+        },
+        numBins: Math.round(
+          workflowRunResults.coverage_viz.total_length /
+            workflowRunResults.coverage_viz.coverage_bin_size,
+        ),
+        numTicksY: 2,
+        showStatistics: false,
+        skipBins: true,
+        yScaleType: HISTOGRAM_SCALE.SYM_LOG,
+        yTickFormat: numberWithCommas,
+        skipNiceDomains: true,
+        onHistogramBarHover: handleHistogramBarHover,
+        onHistogramBarEnter: handleHistogramBarEnter,
+        onHistogramBarExit: handleHistogramBarExit,
+      }).update();
+    }
+  }, [
+    handleHistogramBarEnter,
+    workflowRun.inputs,
+    workflowRunResults?.coverage_viz?.coverage,
+    workflowRunResults?.coverage_viz?.coverage_bin_size,
+    workflowRunResults?.coverage_viz?.total_length,
+    workflowRunResults?.taxon_info?.accession_id,
+    workflowRunResults?.taxon_info?.accession_name,
+    workflowRunResults?.taxon_info?.taxon_name,
+  ]);
 
   useEffect(() => {
     if (
       !isNil(coverageVizContainerRef.current) &&
-      workflowRunResults &&
-      workflowRunResults.coverage_viz
+      workflowRunResults?.coverage_viz
     )
       renderHistogram();
-  }, [coverageVizContainerRef.current, workflowRunResults]);
+  }, [renderHistogram, workflowRunResults?.coverage_viz]);
 
   const renderConsensusGenomeDropdown = () => {
     return (
@@ -167,112 +288,6 @@ export const ConsensusGenomeView = ({
         )}
       </>
     );
-  };
-
-  const getHistogramTooltipData = memoize((accessionData, coverageIndex) => {
-    // coverageObj format:
-    //   [binIndex, averageCoverageDepth, coverageBreadth, numberContigs, numberReads]
-    const coverageObj = accessionData.coverage[coverageIndex];
-    const binSize = accessionData.coverage_bin_size;
-
-    return [
-      {
-        name: "Coverage",
-        data: [
-          [
-            "Base Pair Range",
-            // \u2013 is en-dash
-            `${Math.round(coverageObj[0] * binSize)}\u2013${Math.round(
-              (coverageObj[0] + 1) * binSize,
-            )}`,
-          ],
-          ["Coverage Depth", `${coverageObj[1]}x`],
-          ["Coverage Breadth", formatPercent(coverageObj[2])],
-        ],
-      },
-    ];
-  });
-
-  const handleHistogramBarEnter = (hoverData: $TSFixMe) => {
-    if (hoverData && hoverData[0] === 0) {
-      const tooltipData = getHistogramTooltipData(
-        workflowRunResults.coverage_viz,
-        hoverData[1],
-      );
-
-      setHistogramTooltipData(tooltipData);
-    }
-  };
-
-  const handleHistogramBarHover = (clientX: $TSFixMe, clientY: $TSFixMe) => {
-    setHistogramTooltipLocation({
-      left: clientX,
-      top: clientY,
-    });
-  };
-
-  const handleHistogramBarExit = () => {
-    setHistogramTooltipLocation(null);
-    setHistogramTooltipData(null);
-  };
-
-  const renderHistogram = () => {
-    if (coverageVizContainerRef.current !== null) {
-      const coverageVizData = workflowRunResults.coverage_viz.coverage.map(
-        valueArr => ({
-          x0: valueArr[0] * workflowRunResults.coverage_viz.coverage_bin_size,
-          length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
-        }),
-      );
-
-      const accessionID =
-        workflowRunResults.taxon_info.accession_id ?? "Unknown accession";
-
-      // accessionName for WGS could not exist, if so fall back to taxonName
-      const taxonName =
-        workflowRunResults.taxon_info.accession_name ??
-        workflowRunResults.taxon_info.taxon_name ??
-        "Unknown taxon";
-
-      const { creation_source: creationSource, ref_fasta: refFasta } =
-        workflowRun.inputs ?? {};
-      const isWGS = creationSource === CreationSource.WGS;
-      const subtext = isWGS ? refFasta : `${accessionID} - ${taxonName}`;
-
-      new Histogram(coverageVizContainerRef.current, [coverageVizData], {
-        barOpacity: 1,
-        colors: [CG_HISTOGRAM_FILL_COLOR],
-        domain: [0, workflowRunResults.coverage_viz.total_length],
-        hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
-        labelsBold: true,
-        labelsLarge: true,
-        labelX: "Reference Sequence",
-        labelY: "Coverage (SymLog)",
-        labelXSubtext: subtext,
-        labelYHorizontalOffset: 30,
-        labelYVerticalOffset: 54,
-        labelYLarge: true,
-        margins: {
-          left: 100,
-          right: 50,
-          top: 22,
-          bottom: 75,
-        },
-        numBins: Math.round(
-          workflowRunResults.coverage_viz.total_length /
-            workflowRunResults.coverage_viz.coverage_bin_size,
-        ),
-        numTicksY: 2,
-        showStatistics: false,
-        skipBins: true,
-        yScaleType: HISTOGRAM_SCALE.SYM_LOG,
-        yTickFormat: numberWithCommas,
-        skipNiceDomains: true,
-        onHistogramBarHover: handleHistogramBarHover,
-        onHistogramBarEnter: handleHistogramBarEnter,
-        onHistogramBarExit: handleHistogramBarExit,
-      }).update();
-    }
   };
 
   const downloadCustomRefFile = () => {

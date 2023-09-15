@@ -16,10 +16,7 @@ import {
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
-import {
-  cancellablePromise,
-  SUCCEEDED_STATE,
-} from "~/components/views/SampleView/utils";
+import { SUCCEEDED_STATE } from "~/components/views/SampleView/utils";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
@@ -61,11 +58,9 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
       return;
     }
     setLoadingResults(true);
-    const { runFetch, cancelFetch } = cancellablePromise(
-      getWorkflowRunResults(workflowRun.id),
-    );
+
     const fetchResults = async () => {
-      const reportDataRaw = await runFetch;
+      const reportDataRaw = await getWorkflowRunResults(workflowRun.id);
       const reportData = camelize(reportDataRaw);
       setReportTableData(reportData?.reportTableData);
       setDrugClassesReactiveVar(reportData?.reportTableData);
@@ -73,7 +68,6 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     };
 
     fetchResults();
-    return cancelFetch;
   }, []);
 
   useEffect(() => {
