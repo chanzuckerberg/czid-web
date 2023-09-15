@@ -15,7 +15,7 @@ import CZIDReferralFormField from "./components/CZIDReferralFormField";
 import CZIDUsecaseFormField from "./components/CZIDUsecaseFormField";
 import InstitutionFormField from "./components/InstitutionFormField";
 import NameField from "./components/NameField";
-import NewsletterOptInCheckbox from "./components/NewsletterOptInCheckbox";
+import NewsletterConsentCheckbox from "./components/NewsletterConsentCheckbox";
 import SequencingExpertiseFormField from "./components/SequencingExpertiseFormField";
 import {
   INVALID_USERNAME_CHARACTER_TOOLTIP_TEXT,
@@ -43,8 +43,7 @@ export function UserProfileForm() {
   const [rorId, setRORId] = useState<string>("");
   const [country, setCountry] = useState<string>("");
   const [worldBankIncome, setWorldBankIncome] = useState<string>("");
-  const [optedInToNewsletter, setOptedInToNewsletter] =
-    useState<boolean>(false);
+  const [newsletterConsent, setNewsletterConsent] = useState<boolean>(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -108,7 +107,7 @@ export function UserProfileForm() {
       czidUsecases: selectedUsecaseCheckboxes,
       referralSource: selectedReferralCheckboxes,
       expertiseLevel: selectedSequencingExpertise,
-      ...(optedInToNewsletter && { email: currentUser.userEmail }),
+      newsletterConsent: newsletterConsent,
     });
   }
 
@@ -201,9 +200,9 @@ export function UserProfileForm() {
           selectedReferralCheckboxes={selectedReferralCheckboxes}
           setSelectedReferralCheckboxes={setSelectedReferralCheckboxes}
         />
-        <NewsletterOptInCheckbox
-          optedInToNewsletter={optedInToNewsletter}
-          setOptedInToNewsletter={setOptedInToNewsletter}
+        <NewsletterConsentCheckbox
+          newsletterConsent={newsletterConsent}
+          setNewsletterConsent={setNewsletterConsent}
         />
         <div className={cs["submit-button"]}>{submitButton()}</div>
         <div className={cs.linkContainer}>

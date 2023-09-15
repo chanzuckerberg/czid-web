@@ -137,81 +137,49 @@ RSpec.describe UsersController, type: :request do
         expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Users are not allowed to modify other users' info")
       end
 
-      context "when posting to AirTable" do
-        before do
-          # Params for UsersController#update endpoint
-          @sign_up_params = {
-            name: "abc xyz",
-            profile_form_version: User::PROFILE_FORM_VERSION[:in_app_form],
-          }
+      it "should send complete user profile data" do
+        # Params from user profile form
+        form_params = {
+          first_name: @joe.first_name,
+          last_name: @joe.last_name,
+          ror_institution: "Fake Institution",
+          ror_id: "1234",
+          country: "United States",
+          world_bank_income: "10000",
+          czid_usecase: ["medical detective"],
+          expertise_level: "expert",
+          referral_source: ["conference"],
+          newsletter_consent: "true",
+        }
 
-          # Expected parameters for posting to AirTable
-          @airtable_params = {
-            user_id: @joe.id,
-            admin: @joe.admin?,
-            date_created: @joe.created_at.strftime("%Y-%m-%d"),
-            quarter_year: UsersHelper.calculate_quarter_year,
-            survey_version: User::PROFILE_FORM_VERSION[:in_app_form].to_s,
-          }
-        end
+        # Params for UsersController#update endpoint
+        sign_up_params = {
+          name: "abc xyz",
+          profile_form_version: User::PROFILE_FORM_VERSION[:in_app_form],
+        }
 
-        it "should send complete user profile data" do
-          # Params from user profile form
-          form_params = {
-            first_name: @joe.first_name,
-            last_name: @joe.last_name,
-            ror_institution: "Fake Institution",
-            ror_id: "1234",
-            country: "United States",
-            world_bank_income: "10000",
-            czid_usecase: ["medical detective"],
-            expertise_level: "expert",
-            referral_source: ["conference"],
-            email: @joe.email, # opted in to email newsletter
-          }
+        # Expected parameters for posting to AirTable
+        airtable_params = {
+          user_id: @joe.id,
+          email: @joe.email,
+          admin: @joe.admin?,
+          date_created: @joe.created_at.strftime("%Y-%m-%d"),
+          quarter_year: UsersHelper.calculate_quarter_year,
+          survey_version: User::PROFILE_FORM_VERSION[:in_app_form].to_s,
+        }
 
-          new_user_params = @sign_up_params.merge(form_params)
-          airtable_post_params = @airtable_params.merge(form_params)
+        new_user_params = sign_up_params.merge(form_params)
+        airtable_post_params = airtable_params.merge(form_params)
 
-          expect(MetricUtil).to receive(:post_to_airtable).with(
-            "CZ ID User Profiles",
-            { fields: airtable_post_params, typecast: true }.to_json
-          )
+        expect(MetricUtil).to receive(:post_to_airtable).with(
+          "CZ ID User Profiles",
+          { fields: airtable_post_params, typecast: true }.to_json
+        )
 
-          params = { user: new_user_params }
-          post post_user_data_to_airtable_user_url @joe, params: params
+        params = { user: new_user_params }
+        post post_user_data_to_airtable_user_url @joe, params: params
 
-          expect(response).to have_http_status :ok
-        end
-
-        it "should send user profile data without optional fields (ror_id, referral_source, email)" do
-          # Params from user profile form
-          form_params = {
-            first_name: @joe.first_name,
-            last_name: @joe.last_name,
-            ror_institution: "Fake Institution",
-            ror_id: "", # institution not found in ror db
-            country: "United States",
-            world_bank_income: "10000",
-            czid_usecase: ["medical detective"],
-            expertise_level: "expert",
-            referral_source: [], # none selected
-            email: "", # opted out of email newsletter
-          }
-
-          new_user_params = @sign_up_params.merge(form_params)
-          airtable_post_params = @airtable_params.merge(form_params)
-
-          expect(MetricUtil).to receive(:post_to_airtable).with(
-            "CZ ID User Profiles",
-            { fields: airtable_post_params, typecast: true }.to_json
-          )
-
-          params = { user: new_user_params }
-          post post_user_data_to_airtable_user_url @joe, params: params
-
-          expect(response).to have_http_status :ok
-        end
+        expect(response).to have_http_status :ok
       end
     end
   end

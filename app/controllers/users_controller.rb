@@ -199,6 +199,6 @@ class UsersController < ApplicationController
   end
 
   def profile_params
-    params.require(:user).permit(:first_name, :last_name, :email, :profile_form_version, :ror_institution, :ror_id, :country, :world_bank_income, :expertise_level, :signup_path, czid_usecase: [], referral_source: [])
+    params.require(:user).permit(:first_name, :last_name, :profile_form_version, :ror_institution, :ror_id, :country, :world_bank_income, :expertise_level, :signup_path, :newsletter_consent, czid_usecase: [], referral_source: [])
   end
 end
