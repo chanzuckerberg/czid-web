@@ -199,7 +199,7 @@ export const getWorkflowTypeFromLabel = (
   if (otherMngsTabLabels.includes(label)) {
     label = "Metagenomic";
   }
-  return Object.keys(WORKFLOW_TABS).find(
-    key => WORKFLOW_TABS[key] === label,
+  return Object.keys(WORKFLOWS).find(
+    key => WORKFLOWS[key].label === label,
   ) as WorkflowType;
 };
