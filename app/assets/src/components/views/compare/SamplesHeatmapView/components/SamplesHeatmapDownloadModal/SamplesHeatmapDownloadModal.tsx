@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { createBulkDownload } from "~/api/bulk_downloads";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
+import { WorkflowType } from "~/components/utils/workflows";
 import { humanize } from "~/helpers/strings";
 import { SelectedOptions } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
@@ -89,7 +90,7 @@ export const SamplesHeatmapDownloadModal = ({
   };
 
   const handleBulkDownload = (
-    workflow = "short-read-mngs",
+    workflow = WorkflowType.SHORT_READ_MNGS,
     workflowEntity = "Samples",
   ) => {
     trackEvent(

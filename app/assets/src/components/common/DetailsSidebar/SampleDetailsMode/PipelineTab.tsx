@@ -13,7 +13,12 @@ import {
   RESULTS_FOLDER_STEP_KEYS,
 } from "~/components/utils/resultsFolder";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
-import { WORKFLOWS, WORKFLOW_LABELS } from "~/components/utils/workflows";
+import {
+  getWorkflowTypeFromLabel,
+  WorkflowLabelType,
+  WorkflowType,
+  WORKFLOW_TABS,
+} from "~/components/utils/workflows";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import {
@@ -48,7 +53,7 @@ interface PipelineTabProps {
 }
 
 export interface MngsPipelineInfo {
-  workflow?: { text: WORKFLOW_LABELS };
+  workflow?: { text: WorkflowLabelType };
   [key: string]: {
     text?: string;
     link?: string;
@@ -57,8 +62,8 @@ export interface MngsPipelineInfo {
 }
 
 export interface AmrPipelineTabInfo {
-  analysisType: { text: WORKFLOW_LABELS };
-  workflow: { text: WORKFLOW_LABELS };
+  analysisType: { text: WorkflowLabelType };
+  workflow: { text: WorkflowLabelType };
   technology: { text: string };
   pipelineVersion: { text: string; link: string; linkLabel: string };
   cardDatabaseVersion?: { text: string };
@@ -112,10 +117,10 @@ const PipelineTab = ({
     useState<PipelineStepDictState>({});
 
   const INFO_FIELDS_FOR_WORKFLOW = {
-    [WORKFLOWS.AMR.label]: AMR_WORKFLOW_INFO_FIELDS,
-    [WORKFLOWS.CONSENSUS_GENOME.label]: CG_WORKFLOW_INFO_FIELDS,
-    [WORKFLOWS.SHORT_READ_MNGS.label]: SHORT_READ_MNGS_INFO_FIELDS,
-    [WORKFLOWS.LONG_READ_MNGS.label]: LONG_READ_MNGS_INFO_FIELDS,
+    [WorkflowType.AMR]: AMR_WORKFLOW_INFO_FIELDS,
+    [WorkflowType.CONSENSUS_GENOME]: CG_WORKFLOW_INFO_FIELDS,
+    [WorkflowType.SHORT_READ_MNGS]: SHORT_READ_MNGS_INFO_FIELDS,
+    [WorkflowType.LONG_READ_MNGS]: LONG_READ_MNGS_INFO_FIELDS,
   };
 
   useEffect(() => {
@@ -356,15 +361,15 @@ const PipelineTab = ({
     );
   };
 
-  const workflow: WORKFLOW_LABELS =
-    get(["workflow", "text"], pipelineInfo) ?? WORKFLOWS.SHORT_READ_MNGS.label;
+  const workflow: WorkflowLabelType =
+    get(["workflow", "text"], pipelineInfo) ?? WORKFLOW_TABS.SHORT_READ_MNGS;
   const mngsWorkflows = [
-    WORKFLOWS.SHORT_READ_MNGS.label,
-    WORKFLOWS.LONG_READ_MNGS.label,
-  ] as WORKFLOW_LABELS[];
+    WORKFLOW_TABS.SHORT_READ_MNGS,
+    WORKFLOW_TABS.LONG_READ_MNGS,
+  ] as WorkflowLabelType[];
   const workflowIsMngs = mngsWorkflows.includes(workflow);
 
-  const fields = INFO_FIELDS_FOR_WORKFLOW[workflow];
+  const fields = INFO_FIELDS_FOR_WORKFLOW[getWorkflowTypeFromLabel(workflow)];
 
   const pipelineInfoFields = fields.map(getPipelineInfoField);
   const title =

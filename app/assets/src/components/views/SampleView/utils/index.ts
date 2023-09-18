@@ -13,7 +13,7 @@ import {
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import {
   KEY_DISCOVERY_VIEW_OPTIONS,
   SAMPLE_WAS_DELETED,
@@ -25,7 +25,6 @@ import {
   KEY_SAMPLE_VIEW_OPTIONS,
   LOCAL_STORAGE_FIELDS,
   NOTIFICATION_TYPES,
-  TABS,
   TREE_METRICS,
   URL_FIELDS,
 } from "./constants";
@@ -58,7 +57,7 @@ export const getConsensusGenomeData = (sample: Sample) => {
   return groupBy(
     "inputs.taxon_id",
     filter(
-      { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
+      { workflow: WorkflowType.CONSENSUS_GENOME },
       get("workflow_runs", sample),
     ),
   );
@@ -96,7 +95,8 @@ export const initializeSelectedOptions = ({
   return {
     ...getDefaultSelectedOptions(),
     // for long read mNGS samples, do not allow taxon filters in tempSelectedOptions to persist from DiscoveryView
-    ...(!isEmpty(tempSelectedOptions) && currentTab !== TABS.LONG_READ_MNGS
+    ...(!isEmpty(tempSelectedOptions) &&
+    currentTab !== WORKFLOW_TABS.LONG_READ_MNGS
       ? tempSelectedOptions
       : {
           ...selectedOptionsFromLocal,
@@ -281,7 +281,7 @@ export const provideOptionToRevertToSampleViewFilters = (
 
   if (
     persistedDiscoveryFiltersPresent &&
-    currentTabFromUrl !== TABS.LONG_READ_MNGS
+    currentTabFromUrl !== WORKFLOW_TABS.LONG_READ_MNGS
   ) {
     showNotification(NOTIFICATION_TYPES.discoveryViewFiltersPersisted, {
       revertToSampleViewFilters: notificationCallback,
@@ -299,7 +299,7 @@ const overwriteAggregatescoreMetric = selectedOptionsFromLocal => {
     // is computed once the user selects a background.
     selectedOptionsFromLocal["metricShortReads"] = find(
       { value: "nt_r" },
-      TREE_METRICS[TABS.SHORT_READ_MNGS],
+      TREE_METRICS[WorkflowType.SHORT_READ_MNGS],
     ).value;
   }
   return selectedOptionsFromLocal;

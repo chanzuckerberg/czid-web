@@ -17,7 +17,7 @@ import { WGS_CG_UPLOAD_FEATURE } from "~/components/utils/features";
 import { formatPercent } from "~/components/utils/format";
 import { openUrlInNewTab } from "~/components/utils/links";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils/download";
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
 import {
@@ -74,7 +74,7 @@ export const ConsensusGenomeView = ({
     useState(null);
 
   const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
-    run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
+    run => run.workflow === WorkflowType.CONSENSUS_GENOME,
   );
 
   useEffect(() => {

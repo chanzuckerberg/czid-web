@@ -1,5 +1,5 @@
 import { compact, map, sum, values } from "lodash/fp";
-import { TABS } from "~/components/views/SampleView/utils";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import ReportMetadata from "~/interface/reportMetaData";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
@@ -11,7 +11,7 @@ const countReportRows = (
 ) => {
   let total = 0;
   let filtered = 0;
-  if (currentTab === TABS.MERGED_NT_NR) {
+  if (currentTab === WORKFLOW_TABS.MERGED_NT_NR) {
     reportData.forEach(genusRow => {
       if (genusRow["merged_nt_nr"]) {
         total += 1;
@@ -104,7 +104,7 @@ export const renderReportInfo = (
   currentTab: CurrentTabSample,
   reportMetadata: ReportMetadata,
 ) => {
-  if (currentTab === TABS.SHORT_READ_MNGS) {
+  if (currentTab === WORKFLOW_TABS.SHORT_READ_MNGS) {
     const {
       truncatedReadsCount,
       postSubsamplingCount,
@@ -119,7 +119,7 @@ export const renderReportInfo = (
       reportInfoMsg += msg;
       return reportInfoMsg;
     }, "");
-  } else if (currentTab === TABS.LONG_READ_MNGS) {
+  } else if (currentTab === WORKFLOW_TABS.LONG_READ_MNGS) {
     const { postSubsamplingCount, preSubsamplingCount, taxonWhitelisted } =
       reportMetadata;
     return compact([
@@ -145,7 +145,7 @@ export const countFilters = (
   } = selectedOptions;
 
   const numThresholdsFilters =
-    currentTab === TABS.SHORT_READ_MNGS
+    currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
       ? thresholdsShortReads.length
       : thresholdsLongReads.length;
 

@@ -4,7 +4,7 @@ import {
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import {
   PIPELINE_HELP_LINKS,
@@ -72,8 +72,8 @@ const IlluminaSequencingPlatformOption = ({
       pipelineVersion={pipelineVersion}
       pipelineHelpLink={
         !isCg
-          ? PIPELINE_HELP_LINKS[WORKFLOWS.SHORT_READ_MNGS.value]
-          : PIPELINE_HELP_LINKS[WORKFLOWS.CONSENSUS_GENOME.value]
+          ? PIPELINE_HELP_LINKS[WorkflowType.SHORT_READ_MNGS]
+          : PIPELINE_HELP_LINKS[WorkflowType.CONSENSUS_GENOME]
       }
       versionHelpLink={versionHelpLink}
     />

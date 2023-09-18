@@ -1,4 +1,4 @@
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import { FilterSelections } from "~/interface/sampleView";
 
 export const SPECIES_LEVEL_INDEX = 1;
@@ -54,21 +54,11 @@ export const METRIC_DECIMAL_PLACES = {
   e_value: 1,
 };
 
-export const TABS = {
-  CONSENSUS_GENOME: WORKFLOWS.CONSENSUS_GENOME.label,
-  SHORT_READ_MNGS: WORKFLOWS.SHORT_READ_MNGS.label,
-  AMR_DEPRECATED: "Antimicrobial Resistance (Deprecated)",
-  AMR: WORKFLOWS.AMR.label,
-  MERGED_NT_NR: "Metagenomics - Simplified",
-  LONG_READ_MNGS: WORKFLOWS.LONG_READ_MNGS.label,
-  BENCHMARK: WORKFLOWS.BENCHMARK.label,
-};
-
 export const PIPELINE_RUN_TABS = [
-  TABS.SHORT_READ_MNGS,
-  TABS.LONG_READ_MNGS,
-  TABS.AMR_DEPRECATED,
-  TABS.MERGED_NT_NR,
+  WORKFLOW_TABS.SHORT_READ_MNGS,
+  WORKFLOW_TABS.LONG_READ_MNGS,
+  WORKFLOW_TABS.AMR_DEPRECATED,
+  WORKFLOW_TABS.MERGED_NT_NR,
 ];
 
 export const NOTIFICATION_TYPES = {
@@ -156,8 +146,8 @@ export const LONG_READS_THRESHOLDS = [
 ];
 
 export const THRESHOLDS = {
-  [TABS.SHORT_READ_MNGS]: SHORT_READS_THRESHOLDS,
-  [TABS.LONG_READ_MNGS]: LONG_READS_THRESHOLDS,
+  [WORKFLOW_TABS.SHORT_READ_MNGS]: SHORT_READS_THRESHOLDS,
+  [WORKFLOW_TABS.LONG_READ_MNGS]: LONG_READS_THRESHOLDS,
 };
 
 // We intend to eventually support backgrounds for long-read-mngs in future iterations of ONT
@@ -172,14 +162,14 @@ export const BACKGROUND_DEPENDENT_READS_THRESHOLDS =
   );
 
 export const TREE_METRICS = {
-  [TABS.SHORT_READ_MNGS]: [
+  [WorkflowType.SHORT_READ_MNGS]: [
     { text: "Aggregate Score", value: "aggregatescore" },
     { text: NT_R_TOTAL_READS, value: "nt_r" },
     { text: "NT rPM", value: "nt_rpm" },
     { text: NR_R_TOTAL_READS, value: "nr_r" },
     { text: "NR rPM", value: "nr_rpm" },
   ],
-  [TABS.LONG_READ_MNGS]: [
+  [WorkflowType.LONG_READ_MNGS]: [
     { text: "NT b (total bases)", value: "nt_b" },
     { text: "NT bPM", value: "nt_bpm" },
     { text: "NR b (total bases)", value: "nr_b" },
@@ -188,7 +178,7 @@ export const TREE_METRICS = {
 };
 
 export const TREE_VIZ_TOOLTIP_METRICS = {
-  [TABS.SHORT_READ_MNGS]: {
+  [WorkflowType.SHORT_READ_MNGS]: {
     aggregatescore: {
       label: "Aggregate Score",
       agg: (arr: number[]) => Math.max(...arr),
@@ -210,7 +200,7 @@ export const TREE_VIZ_TOOLTIP_METRICS = {
       agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
     },
   },
-  [TABS.LONG_READ_MNGS]: {
+  [WorkflowType.LONG_READ_MNGS]: {
     nt_b: {
       label: "NT b",
       agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
@@ -358,8 +348,8 @@ export const LONG_READ_TAXON_COUNT_TYPE_METRICS = [
 ];
 
 export const TAXON_COUNT_TYPE_METRICS = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: SHORT_READ_TAXON_COUNT_TYPE_METRICS,
-  [WORKFLOWS.LONG_READ_MNGS.value]: LONG_READ_TAXON_COUNT_TYPE_METRICS,
+  [WorkflowType.SHORT_READ_MNGS]: SHORT_READ_TAXON_COUNT_TYPE_METRICS,
+  [WorkflowType.LONG_READ_MNGS]: LONG_READ_TAXON_COUNT_TYPE_METRICS,
 };
 
 export const SARS_COV_2_ACCESSION_ID = "MN908947.3";

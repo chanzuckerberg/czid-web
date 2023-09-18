@@ -1,7 +1,7 @@
 import moment from "moment";
 import React from "react";
 import { trackEvent } from "~/api/analytics";
-import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import { MultipleVersionsDropdownHeader } from "./components/MultipleVersionsDropdownHeader";
@@ -14,7 +14,7 @@ interface PipelineVersionSelectProps {
   shouldIncludeDatabaseVersion: boolean;
   currentRun?: WorkflowRun | PipelineRun;
   allRuns?: WorkflowRun[] | PipelineRun[] | string[];
-  workflowType?: WORKFLOW_VALUES;
+  workflowType?: WorkflowType;
   onVersionChange: (x: string) => void;
 }
 

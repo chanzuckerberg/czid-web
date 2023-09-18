@@ -1,6 +1,6 @@
 import { SortDirectionType } from "react-virtualized";
 import { ThresholdForAPI } from "~/components/utils/ThresholdMap";
-import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { AnnotationValue } from "~/interface/discovery";
 import { LocationObject } from "~/interface/shared";
@@ -24,7 +24,7 @@ export interface SamplesViewProps {
   hasAtLeastOneFilterApplied?: boolean;
   handleNewWorkflowRunsCreated?(param: {
     numWorkflowRunsCreated: number;
-    workflow: WORKFLOW_VALUES;
+    workflow: WorkflowType;
   }): void;
   hideAllTriggers?: boolean;
   mapLevel?: string;
@@ -63,7 +63,7 @@ export interface SamplesViewProps {
   snapshotShareId?: string;
   sortable?: boolean;
   userDataCounts?: { sampleCountByWorkflow: { [key: string]: number } };
-  workflow?: WORKFLOW_VALUES;
+  workflow?: WorkflowType;
   workflowEntity?: string;
 }
 
@@ -74,7 +74,7 @@ export interface Conditions {
   projectId?: number;
   search?: string;
   snapshotShareId?: string;
-  workflow?: WORKFLOW_VALUES;
+  workflow?: WorkflowType;
 }
 
 export interface ViewProps {

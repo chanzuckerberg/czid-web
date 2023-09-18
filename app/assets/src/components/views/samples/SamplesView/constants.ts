@@ -1,4 +1,4 @@
-import { WORKFLOWS } from "~utils/workflows";
+import { WorkflowType } from "~utils/workflows";
 
 export const TRIGGERS = {
   backgroundModel: "backgroundModel",
@@ -11,21 +11,21 @@ export const TRIGGERS = {
 };
 
 export const WORKFLOW_TRIGGERS = {
-  [WORKFLOWS.CONSENSUS_GENOME.value]: [
+  [WorkflowType.CONSENSUS_GENOME]: [
     TRIGGERS.nextclade,
     TRIGGERS.download,
     TRIGGERS.genepi,
     TRIGGERS.bulk_delete,
   ],
-  [WORKFLOWS.SHORT_READ_MNGS.value]: [
+  [WorkflowType.SHORT_READ_MNGS]: [
     TRIGGERS.backgroundModel,
     TRIGGERS.heatmap,
     TRIGGERS.download,
     TRIGGERS.bulk_delete,
     TRIGGERS.more_actions,
   ],
-  [WORKFLOWS.AMR.value]: [TRIGGERS.download, TRIGGERS.bulk_delete],
-  [WORKFLOWS.LONG_READ_MNGS.value]: [TRIGGERS.download, TRIGGERS.bulk_delete],
+  [WorkflowType.AMR]: [TRIGGERS.download, TRIGGERS.bulk_delete],
+  [WorkflowType.LONG_READ_MNGS]: [TRIGGERS.download, TRIGGERS.bulk_delete],
 };
 
 export const SARS_COV_2 = "Severe acute respiratory syndrome coronavirus 2";

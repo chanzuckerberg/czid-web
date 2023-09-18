@@ -15,6 +15,7 @@ import {
 } from "~/components/utils/csv";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
+import { WorkflowType } from "~/components/utils/workflows";
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
 import { SUCCEEDED_STATE } from "~/components/views/SampleView/utils";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -53,7 +54,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     if (
       workflowRun.status !== SUCCEEDED_STATE ||
       loadingResults ||
-      workflowRun.workflow !== "amr"
+      workflowRun.workflow !== WorkflowType.AMR
     ) {
       return;
     }

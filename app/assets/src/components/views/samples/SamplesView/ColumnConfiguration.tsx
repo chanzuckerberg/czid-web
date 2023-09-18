@@ -10,7 +10,7 @@ import {
   SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
 } from "~/components/views/samples/constants";
 import { MetadataType } from "~/interface/shared";
-import { WORKFLOWS } from "~utils/workflows";
+import { WorkflowType } from "~utils/workflows";
 import { StackedBasicValues } from "../../discovery/components/StackedBasicValues";
 import { StackedSampleIds } from "../../discovery/components/StackedSampleIds";
 import { ValueWithTooltip } from "../../discovery/components/ValueWithTooltip";
@@ -33,15 +33,15 @@ export const computeColumnsByWorkflow = ({
   // At the moment, columns for long read mNGS are the same as for short read mNGS.
   // To change that in the future, just add another function to compute columns.
   if (
-    workflow === WORKFLOWS.SHORT_READ_MNGS.value ||
-    workflow === WORKFLOWS.LONG_READ_MNGS.value
+    workflow === WorkflowType.SHORT_READ_MNGS ||
+    workflow === WorkflowType.LONG_READ_MNGS
   ) {
     return computeMngsColumns({ basicIcon, metadataFields, workflow });
-  } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+  } else if (workflow === WorkflowType.CONSENSUS_GENOME) {
     return computeConsensusGenomeColumns({ basicIcon, metadataFields });
-  } else if (workflow === WORKFLOWS.AMR.value) {
+  } else if (workflow === WorkflowType.AMR) {
     return computeAmrColumns({ basicIcon, metadataFields });
-  } else if (workflow === WORKFLOWS.BENCHMARK.value) {
+  } else if (workflow === WorkflowType.BENCHMARK) {
     return computeBenchmarkColumns({ basicIcon });
   }
 };
@@ -178,7 +178,7 @@ const computeMngsColumns = ({ basicIcon, metadataFields, workflow }) => {
 
   const columnData = merge(
     SHARED_SAMPLE_TABLE_COLUMNS,
-    workflow === WORKFLOWS.LONG_READ_MNGS.value
+    workflow === WorkflowType.LONG_READ_MNGS
       ? LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS
       : SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
   );
@@ -636,7 +636,7 @@ const computeMetadataColumns = metadataFields => {
 };
 
 export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: [
+  [WorkflowType.SHORT_READ_MNGS]: [
     "sample",
     "createdAt",
     "host",
@@ -645,7 +645,7 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
     "qcPercent",
   ],
   // update these default columns if long read should be different from short read
-  [WORKFLOWS.LONG_READ_MNGS.value]: [
+  [WorkflowType.LONG_READ_MNGS]: [
     "sample",
     "createdAt",
     "host",
@@ -653,7 +653,7 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
     "nonHostReads",
     "qcPercent",
   ],
-  [WORKFLOWS.CONSENSUS_GENOME.value]: [
+  [WorkflowType.CONSENSUS_GENOME]: [
     "sample",
     "referenceAccession",
     "createdAt",
@@ -662,7 +662,7 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
     "totalReadsCG",
     "percentGenomeCalled",
   ],
-  [WORKFLOWS.AMR.value]: [
+  [WorkflowType.AMR]: [
     "sample",
     "createdAt",
     "sample_type",
@@ -670,7 +670,7 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
     "nonHostReads",
     "totalReadsAMR",
   ],
-  [WORKFLOWS.BENCHMARK.value]: [
+  [WorkflowType.BENCHMARK]: [
     "sample",
     "createdAt",
     "workflowBenchmarked",

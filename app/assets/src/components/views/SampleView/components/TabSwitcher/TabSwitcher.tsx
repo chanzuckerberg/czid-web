@@ -8,8 +8,12 @@ import {
   MERGED_NT_NR_FEATURE,
   ONT_V1_FEATURE,
 } from "~/components/utils/features";
-import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
-import { getWorkflowCount, TABS } from "~/components/views/SampleView/utils";
+import {
+  WORKFLOWS,
+  WorkflowType,
+  WORKFLOW_TABS,
+} from "~/components/utils/workflows";
+import { getWorkflowCount } from "~/components/views/SampleView/utils";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
@@ -54,39 +58,37 @@ export const TabSwitcher = ({
       ),
     });
 
-    const mergedNtNrTab = customTab(TABS.MERGED_NT_NR, "Prototype");
+    const mergedNtNrTab = customTab(WORKFLOW_TABS.MERGED_NT_NR, "Prototype");
     const ontTab = customTab(
-      TABS.LONG_READ_MNGS,
+      WORKFLOW_TABS.LONG_READ_MNGS,
       "Beta",
-      WORKFLOWS.LONG_READ_MNGS.pluralizedLabel,
+      WORKFLOWS[WorkflowType.LONG_READ_MNGS].pluralizedLabel,
     );
 
     const {
-      [WORKFLOWS.SHORT_READ_MNGS.value]: shortReadMngs,
-      [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
-      [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
-      [WORKFLOWS.AMR.value]: amr,
+      [WorkflowType.SHORT_READ_MNGS]: shortReadMngs,
+      [WorkflowType.LONG_READ_MNGS]: longReadMngs,
+      [WorkflowType.CONSENSUS_GENOME]: cg,
+      [WorkflowType.AMR]: amr,
     } = getWorkflowCount(sample);
 
     const deprecatedAmrLabel =
       allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
       reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
-      TABS.AMR_DEPRECATED;
+      WORKFLOW_TABS.AMR_DEPRECATED;
 
     const workflowTabs = compact([
-      shortReadMngs && TABS.SHORT_READ_MNGS,
+      shortReadMngs && WORKFLOW_TABS.SHORT_READ_MNGS,
       longReadMngs && allowedFeatures.includes(ONT_V1_FEATURE) && ontTab,
       shortReadMngs &&
         allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
         mergedNtNrTab,
       shortReadMngs && deprecatedAmrLabel,
-      amr && TABS.AMR,
-      cg && TABS.CONSENSUS_GENOME,
+      amr && WORKFLOW_TABS.AMR,
+      cg && WORKFLOW_TABS.CONSENSUS_GENOME,
     ]);
     if (isEmpty(workflowTabs)) {
-      return [
-        WORKFLOWS[findInWorkflows(sample.initial_workflow, "value")]?.label,
-      ];
+      return [WORKFLOWS[sample.initial_workflow]?.label];
     } else {
       return workflowTabs;
     }

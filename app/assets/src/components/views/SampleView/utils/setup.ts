@@ -1,36 +1,34 @@
 import { find, getOr, isEmpty, omit, size } from "lodash/fp";
 import { diff } from "~/components/utils/objectUtil";
 import {
-  findInWorkflows,
+  getWorkflowTypeFromLabel,
   isMngsWorkflow,
-  labelToVal,
   WorkflowCount,
   WORKFLOWS,
-  WorkflowTabsSample,
+  WorkflowType,
   WORKFLOW_ENTITIES,
-  WORKFLOW_VALUES,
+  WORKFLOW_TABS,
 } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
-import { TABS, TREE_METRICS } from "./constants";
+import { TREE_METRICS } from "./constants";
 
 export const getWorkflowCount = (sample: Sample): WorkflowCount => {
   const count = {};
-  Object.keys(WORKFLOWS).forEach(workflow => {
+  Object.keys(WORKFLOWS).forEach((workflow: WorkflowType) => {
     switch (WORKFLOWS[workflow].entity) {
       case WORKFLOW_ENTITIES.SAMPLES:
         /* This line works to separate Illumina/Nanopore because all pipeline runs for a
         sample will be of one technology type (Illumina or Nanopore).
         Equivalently, to deprecate initial_workflow we could update samples_controller#show
         to return technology and filter the pipeline runs by technology. */
-        count[WORKFLOWS[workflow].value] =
-          sample.initial_workflow === WORKFLOWS[workflow].value &&
-          size(sample.pipeline_runs);
+        count[workflow] =
+          sample.initial_workflow === workflow && size(sample.pipeline_runs);
         break;
       case WORKFLOW_ENTITIES.WORKFLOW_RUNS:
-        count[WORKFLOWS[workflow].value] = size(
+        count[workflow] = size(
           sample.workflow_runs.filter(
-            (run: $TSFixMe) => run.workflow === WORKFLOWS[workflow].value,
+            (run: $TSFixMe) => run.workflow === workflow,
           ),
         );
         break;
@@ -50,10 +48,12 @@ export const getDefaultSelectedOptions = (): FilterSelections => {
     // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.
     metricShortReads: find(
       { value: "nt_r" },
-      TREE_METRICS[TABS.SHORT_READ_MNGS],
+      TREE_METRICS[WorkflowType.SHORT_READ_MNGS],
     ).value,
-    metricLongReads: find({ value: "nt_b" }, TREE_METRICS[TABS.LONG_READ_MNGS])
-      .value,
+    metricLongReads: find(
+      { value: "nt_b" },
+      TREE_METRICS[WorkflowType.LONG_READ_MNGS],
+    ).value,
     nameType: "Scientific name",
     readSpecificity: 0,
     taxa: [],
@@ -67,33 +67,33 @@ export const determineInitialTab = ({
   workflowCount,
   currentTab,
 }: {
-  initialWorkflow: string;
+  initialWorkflow: WorkflowType;
   workflowCount: WorkflowCount;
   currentTab: CurrentTabSample | null;
-}): CurrentTabSample => {
+}) => {
   const {
-    [WORKFLOWS.SHORT_READ_MNGS.value]: shortReadMngs,
-    [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
-    [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
-    [WORKFLOWS.AMR.value]: amr,
-    [WORKFLOWS.BENCHMARK.value]: benchmark,
+    [WorkflowType.SHORT_READ_MNGS]: shortReadMngs,
+    [WorkflowType.LONG_READ_MNGS]: longReadMngs,
+    [WorkflowType.CONSENSUS_GENOME]: cg,
+    [WorkflowType.AMR]: amr,
+    [WorkflowType.BENCHMARK]: benchmark,
   } = workflowCount;
-  if (currentTab && workflowCount[labelToVal(currentTab)] > 0) {
+  if (currentTab && workflowCount[getWorkflowTypeFromLabel(currentTab)] > 0) {
     return currentTab;
   } else if (shortReadMngs) {
-    return TABS.SHORT_READ_MNGS;
+    return WORKFLOW_TABS.SHORT_READ_MNGS;
   } else if (longReadMngs) {
-    return TABS.LONG_READ_MNGS;
+    return WORKFLOW_TABS.LONG_READ_MNGS;
   } else if (cg) {
-    return TABS.CONSENSUS_GENOME;
+    return WORKFLOW_TABS.CONSENSUS_GENOME;
   } else if (amr) {
-    return TABS.AMR as WorkflowTabsSample;
+    return WORKFLOW_TABS.AMR;
   } else if (benchmark) {
-    return TABS.BENCHMARK as WorkflowTabsSample;
+    return WORKFLOW_TABS.BENCHMARK;
   } else if (initialWorkflow) {
-    return TABS[findInWorkflows(initialWorkflow, "value")];
+    return WORKFLOW_TABS[initialWorkflow];
   } else {
-    return TABS.SHORT_READ_MNGS;
+    return WORKFLOW_TABS.SHORT_READ_MNGS;
   }
 };
 
@@ -128,7 +128,7 @@ export const hasAppliedFilters = (currentTab, selectedOptions) => {
   const hasReadSpecificityFilters = readSpecificity !== 0;
   const hasTaxonFilter = !isEmpty(taxa);
   const thresholds =
-    currentTab === TABS.SHORT_READ_MNGS
+    currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
       ? thresholdsShortReads
       : thresholdsLongReads;
   const hasThresholdFilters = !isEmpty(thresholds);
@@ -146,7 +146,7 @@ export const hasMngsRuns = (sample: Sample) => {
   // remove keys of workflowCount that are falsy
   // and count how many of the remaining keys are mngs workflows
   const mngsWorkflowsCount = Object.entries(workflowCount).filter(
-    ([workflow, count]: [WORKFLOW_VALUES, number]) =>
+    ([workflow, count]: [WorkflowType, number]) =>
       isMngsWorkflow(workflow) && count > 0,
   ).length;
   return mngsWorkflowsCount > 0;

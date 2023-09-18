@@ -1,5 +1,5 @@
 import { AccessionsSummary } from "~/components/common/CoverageVizBottomSidebar/types";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { ThresholdFilterData } from "../dropdown";
 import { BooleanNums, DateString, NameId, NumberId } from "./generic";
@@ -165,10 +165,10 @@ export interface PipelineRun {
 }
 
 export interface ProjectPipelineVersions {
-  [WORKFLOWS.AMR.value]: string;
-  [WORKFLOWS.CONSENSUS_GENOME.value]: string;
-  [WORKFLOWS.LONG_READ_MNGS.value]: string;
-  [WORKFLOWS.SHORT_READ_MNGS.value]: string;
+  [WorkflowType.AMR]: string;
+  [WorkflowType.CONSENSUS_GENOME]: string;
+  [WorkflowType.LONG_READ_MNGS]: string;
+  [WorkflowType.SHORT_READ_MNGS]: string;
 }
 
 export interface Project {

@@ -6,9 +6,11 @@ import {
   withAnalytics,
 } from "~/api/analytics";
 import {
-  TABS,
-  TREE_VIZ_TOOLTIP_METRICS,
-} from "~/components/views/SampleView/utils";
+  getWorkflowTypeFromLabel,
+  WorkflowLabelType,
+  WORKFLOW_TABS,
+} from "~/components/utils/workflows";
+import { TREE_VIZ_TOOLTIP_METRICS } from "~/components/views/SampleView/utils";
 import { TidyTree } from "~/components/visualizations/TidyTree";
 import { Taxon } from "~/interface/shared";
 import { TaxonTreeNodeTooltip } from "./components/TaxonTreeNodeTooltip";
@@ -20,7 +22,7 @@ interface TaxonTreeVisProps {
   metric?: string;
   nameType?: string;
   taxa?: Taxon[];
-  currentTab: string;
+  currentTab: WorkflowLabelType;
   onTaxonClick: $TSFixMeFunction;
 }
 
@@ -41,7 +43,8 @@ export const TaxonTreeVis = ({
   onTaxonClick,
   taxa,
 }: TaxonTreeVisProps) => {
-  const metrics = TREE_VIZ_TOOLTIP_METRICS[currentTab];
+  const metrics =
+    TREE_VIZ_TOOLTIP_METRICS[getWorkflowTypeFromLabel(currentTab)];
 
   const [activeNode, setActiveNode] = useState(null);
   const [treeVis, setTreeVis] = useState(null);
@@ -139,7 +142,7 @@ export const TaxonTreeVis = ({
   };
 
   const getNodeValues = nodeData => {
-    if (currentTab === TABS.SHORT_READ_MNGS) {
+    if (currentTab === WORKFLOW_TABS.SHORT_READ_MNGS) {
       return {
         aggregatescore: nodeData.agg_score,
         nt_r: get("nt.count", nodeData) || 0,
@@ -149,7 +152,7 @@ export const TaxonTreeVis = ({
         nr_rpm: get("nr.rpm", nodeData) || 0,
         nr_zscore: get("nr.z_score", nodeData) || 0,
       };
-    } else if (currentTab === TABS.LONG_READ_MNGS) {
+    } else if (currentTab === WORKFLOW_TABS.LONG_READ_MNGS) {
       return {
         nt_b: get("nt.base_count", nodeData) || 0,
         nt_bpm: get("nt.bpm", nodeData) || 0,

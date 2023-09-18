@@ -2,7 +2,6 @@ import { Button } from "@czi-sds/components";
 import cx from "classnames";
 import {
   difference,
-  find,
   forEach,
   get,
   intersection,
@@ -11,7 +10,6 @@ import {
   reduce,
   size,
   union,
-  values,
 } from "lodash/fp";
 import React, {
   forwardRef,
@@ -70,7 +68,9 @@ import Notification from "~ui/notifications/Notification";
 import {
   workflowIsWorkflowRunEntity,
   WORKFLOWS,
+  WorkflowType,
   WORKFLOW_ENTITIES,
+  WORKFLOW_TABS,
 } from "~utils/workflows";
 import { DISCOVERY_DOMAIN_PUBLIC } from "../../discovery/discovery_api";
 import { BenchmarkModal } from "./BenchmarkModal";
@@ -96,7 +96,7 @@ import { getSelectedObjects, getStatusCounts } from "./utils";
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
 
-const SHORT_READ_MNGS_VALUE = WORKFLOWS.SHORT_READ_MNGS.value;
+const SHORT_READ_MNGS_VALUE = WorkflowType.SHORT_READ_MNGS;
 
 /**
  * Upon changing SamplesView from a class to a function component,
@@ -146,7 +146,7 @@ const SamplesView = forwardRef(function SamplesView(
     sortBy,
     sortDirection,
     userDataCounts,
-    workflow = WORKFLOWS.SHORT_READ_MNGS.value,
+    workflow = WorkflowType.SHORT_READ_MNGS,
     workflowEntity,
   }: SamplesViewProps,
   ref: React.Ref<SamplesViewHandle>,
@@ -201,23 +201,28 @@ const SamplesView = forwardRef(function SamplesView(
 
   const setupWorkflowConfigs = () => {
     configForWorkflow = {
-      [WORKFLOWS.AMR.value]: {
-        singlularDisplay: WORKFLOWS.AMR.label.toLowerCase(),
-        pluralDisplay: WORKFLOWS.AMR.pluralizedLabel.toLowerCase(),
+      [WorkflowType.AMR]: {
+        singlularDisplay: WORKFLOW_TABS.AMR.toLowerCase(),
+        pluralDisplay:
+          WORKFLOWS[WorkflowType.AMR].pluralizedLabel.toLowerCase(),
       },
-      [WORKFLOWS.BENCHMARK.value]: {
-        singlularDisplay: WORKFLOWS.BENCHMARK.label.toLowerCase(),
-        pluralDisplay: WORKFLOWS.BENCHMARK.pluralizedLabel.toLowerCase(),
+      [WorkflowType.BENCHMARK]: {
+        singlularDisplay: WORKFLOW_TABS.BENCHMARK.toLowerCase(),
+        pluralDisplay:
+          WORKFLOWS[WorkflowType.BENCHMARK].pluralizedLabel.toLowerCase(),
       },
-      [WORKFLOWS.CONSENSUS_GENOME.value]: {
-        singlularDisplay: WORKFLOWS.CONSENSUS_GENOME.label.toLowerCase(),
-        pluralDisplay: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel.toLowerCase(),
+      [WorkflowType.CONSENSUS_GENOME]: {
+        singlularDisplay: WORKFLOW_TABS.CONSENSUS_GENOME.toLowerCase(),
+        pluralDisplay:
+          WORKFLOWS[
+            WorkflowType.CONSENSUS_GENOME
+          ].pluralizedLabel.toLowerCase(),
       },
-      [WORKFLOWS.SHORT_READ_MNGS.value]: {
+      [WorkflowType.SHORT_READ_MNGS]: {
         singlularDisplay: "sample",
         pluralDisplay: "samples",
       },
-      [WORKFLOWS.LONG_READ_MNGS.value]: {
+      [WorkflowType.LONG_READ_MNGS]: {
         singlularDisplay: "sample",
         pluralDisplay: "samples",
       },
@@ -281,7 +286,7 @@ const SamplesView = forwardRef(function SamplesView(
 
     trackEvent("SamplesView_row_selected", {
       rowIsChecked: checked,
-      rowType: find({ value: workflow }, values(WORKFLOWS)).entity,
+      rowType: WORKFLOWS[workflow].entity,
       selectedId: value,
       numberOfSelectedIds: newSelected.size,
       workflow,
@@ -569,7 +574,7 @@ const SamplesView = forwardRef(function SamplesView(
 
       handleNewWorkflowRunsCreated({
         numWorkflowRunsCreated: size(amrPipelineEligibility.eligible),
-        workflow: WORKFLOWS.AMR.value,
+        workflow: WorkflowType.AMR,
       });
 
       setRecentlyKickedOffAmrWorkflowRunsForSampleIds(
@@ -600,10 +605,8 @@ const SamplesView = forwardRef(function SamplesView(
       get("sample.pipelineRunStatus", sample) === PipelineRunStatuses.Complete
     );
     const hasExistingAmrWorkflowRunInDatabase =
-      get(
-        ["sample", "workflowRunsCountByWorkflow", WORKFLOWS.AMR.value],
-        sample,
-      ) > 0;
+      get(["sample", "workflowRunsCountByWorkflow", WorkflowType.AMR], sample) >
+      0;
     // `recentlyKickedOffAmrWorkflowRunsForSampleIds` only gets updated when the user sucessfully
     // kicks off new AMR workflow runs by clicking the BulkKickoffAmr trigger
     const alreadyKickedOffAmrWorkflowRun =
@@ -637,7 +640,7 @@ const SamplesView = forwardRef(function SamplesView(
   const kickoffAmrPipelineForSamples = (sampleIds: number[]) => {
     bulkKickoffWorkflowRuns({
       sampleIds,
-      workflow: WORKFLOWS.AMR.value,
+      workflow: WorkflowType.AMR,
     });
   };
 
@@ -674,7 +677,7 @@ const SamplesView = forwardRef(function SamplesView(
 
       handleNewWorkflowRunsCreated({
         numWorkflowRunsCreated: size(benchmarkEligibility.eligible),
-        workflow: WORKFLOWS.BENCHMARK.value,
+        workflow: WorkflowType.BENCHMARK,
       });
     }
 
@@ -881,7 +884,7 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderToolbar = () => {
-    const hideDisplaySwitcher = workflow === WORKFLOWS.LONG_READ_MNGS.value;
+    const hideDisplaySwitcher = workflow === WorkflowType.LONG_READ_MNGS;
     return (
       <div className={cs.samplesToolbar}>
         {!hideDisplaySwitcher && renderDisplaySwitcher()}
@@ -994,9 +997,7 @@ const SamplesView = forwardRef(function SamplesView(
           onDisplaySwitch(display);
           trackEvent(`SamplesView_${display}-switch_clicked`);
         }}
-        includePLQC={
-          !!projectId && workflow === WORKFLOWS.SHORT_READ_MNGS.value
-        }
+        includePLQC={!!projectId && workflow === WorkflowType.SHORT_READ_MNGS}
       />
     );
   };

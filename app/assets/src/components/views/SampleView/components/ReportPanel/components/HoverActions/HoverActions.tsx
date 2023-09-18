@@ -19,6 +19,7 @@ import {
   isPipelineFeatureAvailable,
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
 import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import {
@@ -26,7 +27,6 @@ import {
   DOWNLOAD_READS,
   GENUS_LEVEL_INDEX,
   SPECIES_LEVEL_INDEX,
-  TABS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
 } from "~/components/views/SampleView/utils";
@@ -98,7 +98,7 @@ export const HoverActions = ({
     (get("nt.contigs", rowData) || get("nr.contigs", rowData)) // TODO: use optional chaining and update NT/NR types
   );
   const coverageVizEnabled =
-    currentTab === TABS.LONG_READ_MNGS ||
+    currentTab === WORKFLOW_TABS.LONG_READ_MNGS ||
     (isAlignVizAvailable && validTaxonId && getOr(0, "nt.count", rowData) > 0);
   const phyloTreeEnabled =
     isPhyloTreeAllowed &&
@@ -251,7 +251,7 @@ export const HoverActions = ({
   const getHoverActions = () => {
     const hasCoverageViz =
       isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) ||
-      currentTab === TABS.LONG_READ_MNGS;
+      currentTab === WORKFLOW_TABS.LONG_READ_MNGS;
 
     // Define all available icons (but don't display them)
     const HOVER_ACTIONS_VIZ = hasCoverageViz
@@ -351,7 +351,7 @@ export const HoverActions = ({
     // TODO: (FE Refactor): This should probably be configured in a wrapper component and passed as a prop
     // Build up the list of hover actions
     let hoverActions = [];
-    if (currentTab === TABS.LONG_READ_MNGS) {
+    if (currentTab === WORKFLOW_TABS.LONG_READ_MNGS) {
       hoverActions = [HOVER_ACTIONS_VIZ, HOVER_ACTIONS_DOWNLOAD];
     } else {
       hoverActions = [

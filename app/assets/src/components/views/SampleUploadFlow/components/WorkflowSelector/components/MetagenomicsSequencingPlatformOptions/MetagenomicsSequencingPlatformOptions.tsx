@@ -5,7 +5,7 @@ import {
   isPipelineFeatureAvailable,
   SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE,
 } from "~/components/utils/pipeline_versions";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
 import {
@@ -44,10 +44,10 @@ const MetagenomicsSequencingPlatformOptions = ({
   const { ILLUMINA, NANOPORE } = SEQUENCING_TECHNOLOGY_OPTIONS;
   const MNGS = UPLOAD_WORKFLOWS.MNGS.value;
   const isPinnedVersion =
-    projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value] &&
+    projectPipelineVersions?.[WorkflowType.SHORT_READ_MNGS] &&
     !isPipelineFeatureAvailable(
       SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE,
-      projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value],
+      projectPipelineVersions?.[WorkflowType.SHORT_READ_MNGS],
     );
 
   return (
@@ -67,7 +67,7 @@ const MetagenomicsSequencingPlatformOptions = ({
           selectedWetlabProtocol={selectedWetlabProtocol}
           onWetlabProtocolChange={onWetlabProtocolChange}
           pipelineVersion={
-            projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value]
+            projectPipelineVersions?.[WorkflowType.SHORT_READ_MNGS]
           }
           versionHelpLink={ILLUMINA_MNGS_PINNED_PIPELINE_VERSION_HELP_LINK}
         />
@@ -82,7 +82,7 @@ const MetagenomicsSequencingPlatformOptions = ({
           selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
           onChangeGuppyBasecallerSetting={onChangeGuppyBasecallerSetting}
           pipelineVersion={
-            projectPipelineVersions?.[WORKFLOWS.LONG_READ_MNGS.value]
+            projectPipelineVersions?.[WorkflowType.LONG_READ_MNGS]
           }
         />
       </div>

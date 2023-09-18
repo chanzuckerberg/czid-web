@@ -10,7 +10,7 @@ import {
   getWorkflowRuns,
 } from "~/api";
 import { camelize } from "~/components/utils/objectUtil";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import {
   formatSemanticVersion,
   numberWithPlusOrMinus,
@@ -260,11 +260,11 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
 
   let workflowRunFields = null;
 
-  if (workflowRun.workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+  if (workflowRun.workflow === WorkflowType.CONSENSUS_GENOME) {
     workflowRunFields = processConsensusGenomeWorkflowRun(workflowRun);
-  } else if (workflowRun.workflow === WORKFLOWS.AMR.value) {
+  } else if (workflowRun.workflow === WorkflowType.AMR) {
     workflowRunFields = processAmrWorkflowRun(workflowRun);
-  } else if (workflowRun.workflow === WORKFLOWS.BENCHMARK.value) {
+  } else if (workflowRun.workflow === WorkflowType.BENCHMARK) {
     workflowRunFields = processBenchmarkWorkflowRun(workflowRun);
   }
 

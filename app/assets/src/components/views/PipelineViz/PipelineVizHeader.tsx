@@ -1,6 +1,7 @@
 import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ViewHeader from "~/components/layout/ViewHeader";
+import { WorkflowType } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import { PipelineVersionSelect } from "../components/PipelineVersionSelect";
@@ -28,8 +29,8 @@ const PipelineVizHeader = ({
   // TODO: may need to update the props being passed into this component in the future to include some indication of the workflow type if we develop pipeline viz for workflows other than mNGS.
   const workflowType =
     pipelineRun?.technology === "Illumina"
-      ? "short-read-mngs"
-      : "long-read-mngs";
+      ? WorkflowType.SHORT_READ_MNGS
+      : WorkflowType.LONG_READ_MNGS;
 
   return (
     <NarrowContainer>

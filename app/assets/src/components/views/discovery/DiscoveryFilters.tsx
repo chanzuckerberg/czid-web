@@ -25,7 +25,7 @@ import {
   TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
 import ThresholdMap from "~/components/utils/ThresholdMap";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WORKFLOWS, WorkflowType } from "~/components/utils/workflows";
 import {
   KEY_ANNOTATIONS_SELECTED,
   KEY_TAXON_SELECTED,
@@ -141,35 +141,35 @@ class DiscoveryFilters extends React.Component<
 
   setupWorkflowConfigs = () => {
     this.configForWorkflow = {
-      [WORKFLOWS.AMR.value]: {
+      [WorkflowType.AMR]: {
         disableTaxonFilter: true,
         disableTaxonThresholdFilter: true,
         disableAnnotationFilter: true,
-        tooltipTitle: WORKFLOWS.AMR.pluralizedLabel,
+        tooltipTitle: WORKFLOWS[WorkflowType.AMR].pluralizedLabel,
       },
-      [WORKFLOWS.BENCHMARK.value]: {
+      [WorkflowType.BENCHMARK]: {
         disableTaxonFilter: true,
         disableTaxonThresholdFilter: true,
         disableAnnotationFilter: true,
-        tooltipTitle: WORKFLOWS.BENCHMARK.pluralizedLabel,
+        tooltipTitle: WORKFLOWS[WorkflowType.BENCHMARK].pluralizedLabel,
       },
-      [WORKFLOWS.CONSENSUS_GENOME.value]: {
+      [WorkflowType.CONSENSUS_GENOME]: {
         disableTaxonFilter: false,
         disableTaxonThresholdFilter: true,
         disableAnnotationFilter: true,
-        tooltipTitle: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
+        tooltipTitle: WORKFLOWS[WorkflowType.CONSENSUS_GENOME].pluralizedLabel,
       },
-      [WORKFLOWS.SHORT_READ_MNGS.value]: {
+      [WorkflowType.SHORT_READ_MNGS]: {
         disableTaxonFilter: false,
         disableTaxonThresholdFilter: false,
         disableAnnotationFilter: false,
-        tooltipTitle: WORKFLOWS.SHORT_READ_MNGS.pluralizedLabel,
+        tooltipTitle: WORKFLOWS[WorkflowType.SHORT_READ_MNGS].pluralizedLabel,
       },
-      [WORKFLOWS.LONG_READ_MNGS.value]: {
+      [WorkflowType.LONG_READ_MNGS]: {
         disableTaxonFilter: true,
         disableTaxonThresholdFilter: true,
         disableAnnotationFilter: true,
-        tooltipTitle: WORKFLOWS.LONG_READ_MNGS.label + " samples",
+        tooltipTitle: WORKFLOWS[WorkflowType.LONG_READ_MNGS].label + " samples",
       },
     };
   };

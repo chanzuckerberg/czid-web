@@ -1,10 +1,6 @@
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
-import {
-  LongReadTabsSample,
-  MetagenomicTabsSample,
-  WorkflowTabsSample,
-} from "~/components/utils/workflows";
+import { WorkflowLabelType } from "~/components/utils/workflows";
 import { PathogenFlags } from "~/components/views/compare/SamplesHeatmapView/SamplesHeatmapView";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -26,11 +22,7 @@ export interface SampleViewProps {
   updateDiscoveryProjectId?(projectId: number): void;
 }
 
-export type CurrentTabSample =
-  | MetagenomicTabsSample
-  | WorkflowTabsSample
-  | LongReadTabsSample;
-
+export type CurrentTabSample = WorkflowLabelType;
 export interface AmrDeprectatedData {
   allele: string;
   annotation_gene?: $TSFixMeUnknown;

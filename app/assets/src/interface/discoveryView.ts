@@ -1,7 +1,7 @@
 import { RouteComponentProps } from "react-router-dom";
 import { SortDirectionType } from "react-virtualized";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
-import { WorkflowCount, WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowCount, WorkflowType } from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { FilterList } from "./samplesView";
 import { MustHaveId, Project } from "./shared";
@@ -54,7 +54,7 @@ export type SelectedFilters = {
 };
 
 export type WorkflowSets = {
-  [K in WORKFLOW_VALUES]: Set<number>;
+  [K in WorkflowType]: Set<number>;
 };
 
 export type MapEntry = {
@@ -109,7 +109,7 @@ export interface DiscoveryViewState {
     projectCount: number;
     visualizationCount: number;
   };
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
   workflowEntity: string;
 }
 
@@ -130,6 +130,6 @@ export interface Conditions {
   search: string;
   orderBy: string;
   orderDir: SortDirectionType;
-  filters: FilterList & { workflow: WORKFLOW_VALUES };
+  filters: FilterList & { workflow: WorkflowType };
   sampleIds?: string[];
 }

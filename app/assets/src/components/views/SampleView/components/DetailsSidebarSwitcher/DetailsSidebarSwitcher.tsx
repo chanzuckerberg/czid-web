@@ -4,7 +4,7 @@ import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
 import { TaxonDetailsModeProps } from "~/components/common/DetailsSidebar/TaxonDetailsMode";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Background, PipelineRun, Taxon } from "~/interface/shared";
@@ -55,13 +55,11 @@ export const DetailsSidebarSwitcher = ({
 
   const getSampleSideBarParams = (): SampleDetailsModeProps => {
     const sampleWorkflowLabels = compact([
-      size(sample.pipeline_runs) && WORKFLOWS.SHORT_READ_MNGS.label,
-      find(
-        { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
-        sample.workflow_runs,
-      ) && WORKFLOWS.CONSENSUS_GENOME.label,
-      find({ workflow: WORKFLOWS.AMR.value }, sample.workflow_runs) &&
-        WORKFLOWS.AMR.label,
+      size(sample.pipeline_runs) && WORKFLOW_TABS.SHORT_READ_MNGS,
+      find({ workflow: WorkflowType.CONSENSUS_GENOME }, sample.workflow_runs) &&
+        WORKFLOW_TABS.CONSENSUS_GENOME,
+      find({ workflow: WorkflowType.AMR }, sample.workflow_runs) &&
+        WORKFLOW_TABS.AMR,
     ]);
     return {
       currentRun: getCurrentRun(),

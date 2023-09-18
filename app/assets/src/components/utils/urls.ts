@@ -1,6 +1,6 @@
-import { find, isEmpty, map, pick, toLower, values } from "lodash/fp";
+import { isEmpty, map, pick, toLower } from "lodash/fp";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { WORKFLOWS, WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import { URL_FIELDS } from "~/components/views/SampleView/utils";
 import { AnnotationFilterOption } from "~/interface/discovery";
 import { ThresholdFilterShape } from "~/interface/sample";
@@ -24,7 +24,7 @@ interface generateUrlOptions {
   sampleId: number;
   snapshotShareId?: string | null;
   tempSelectedOptions?: TempSelectedOptionsShape | Record<string, never>;
-  workflow?: WORKFLOW_VALUES | null;
+  workflow?: WorkflowType | null;
   workflowRunId?: number | null;
 }
 
@@ -35,9 +35,7 @@ const generateUrlToSampleView = ({
   workflow = null,
   workflowRunId = null,
 }: generateUrlOptions): string => {
-  const currentTab = workflow
-    ? find({ value: workflow }, values(WORKFLOWS)).label
-    : null;
+  const currentTab = workflow ? WORKFLOW_TABS[workflow] : null;
   const snapshotSharePrefix = snapshotShareId ? `/pub/${snapshotShareId}` : "";
 
   /* we don't want to persist the default background to the sample report

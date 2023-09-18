@@ -1,6 +1,6 @@
 import { groupBy, maxBy, sortBy, sum } from "lodash/fp";
 import { openUrlInPopupWindow } from "~/components/utils/links";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { getURLParamString } from "~/helpers/url";
 import {
   ProjectPipelineVersions,
@@ -202,20 +202,20 @@ export const groupSamplesByLane = ({
 
 export const getPipelineVersionString = (
   projectPipelineVersions: ProjectPipelineVersions,
-  workflow: "amr" | "consensus-genome" | "mngs",
+  workflow: WorkflowType.AMR | WorkflowType.CONSENSUS_GENOME | "mngs",
   technology: SEQUENCING_TECHNOLOGY_OPTIONS,
 ): string => {
   if (workflow === "amr") {
-    return projectPipelineVersions[WORKFLOWS.AMR.value];
+    return projectPipelineVersions[WorkflowType.AMR];
   } else if (workflow === "consensus-genome") {
-    return projectPipelineVersions[WORKFLOWS.CONSENSUS_GENOME.value];
+    return projectPipelineVersions[WorkflowType.CONSENSUS_GENOME];
   } else {
     // workflow is "mngs"
     if (technology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA) {
-      return projectPipelineVersions[WORKFLOWS.SHORT_READ_MNGS.value];
+      return projectPipelineVersions[WorkflowType.SHORT_READ_MNGS];
     } else {
       // technology is NANOPORE
-      return projectPipelineVersions[WORKFLOWS.LONG_READ_MNGS.value];
+      return projectPipelineVersions[WorkflowType.LONG_READ_MNGS];
     }
   }
 };

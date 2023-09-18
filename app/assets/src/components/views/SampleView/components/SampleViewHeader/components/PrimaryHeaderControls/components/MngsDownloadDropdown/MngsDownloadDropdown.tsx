@@ -6,13 +6,12 @@ import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadB
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
 import { showToast } from "~/components/utils/toast";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
   logDownloadOption,
 } from "~/components/views/report/utils/download";
-import { TABS } from "~/components/views/SampleView/utils";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
@@ -55,13 +54,13 @@ const MngsDownloadDropdown = ({
     switch (option) {
       case "download_csv":
         isNull(backgroundId) &&
-          sample.initial_workflow !== WORKFLOWS.LONG_READ_MNGS.value &&
+          sample.initial_workflow !== WorkflowType.LONG_READ_MNGS &&
           renderNoBackgroundSelectedNotification();
         downloadCSV();
         break;
       case "download_csv_with_filters":
         isNull(backgroundId) &&
-          sample.initial_workflow !== WORKFLOWS.LONG_READ_MNGS.value &&
+          sample.initial_workflow !== WorkflowType.LONG_READ_MNGS &&
           renderNoBackgroundSelectedNotification();
         triggerFileDownload({
           downloadUrl: getDownloadReportTableWithAppliedFiltersLink(),
@@ -139,7 +138,7 @@ const MngsDownloadDropdown = ({
     {
       text: "Download Report Table (.csv)",
       value: "download_csv",
-      disabled: currentTab === TABS.MERGED_NT_NR,
+      disabled: currentTab === WORKFLOW_TABS.MERGED_NT_NR,
     },
     {
       text: "Download Report Table with Applied Filters (.csv)",

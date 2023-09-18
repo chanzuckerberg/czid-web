@@ -7,7 +7,6 @@ import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { WORKFLOWS } from "~/components/utils/workflows";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { humanize } from "~/helpers/strings";
 import Checkbox from "~ui/controls/Checkbox";
@@ -466,8 +465,9 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
     // for CG bulk downloads v0, just don't display any categories
     if (
       visibleTypes.some(
-        // @ts-expect-error Property 'display_name' does not exist on type 'unknown'
-        type => type.display_name === WORKFLOWS.CONSENSUS_GENOME.label,
+        type =>
+          // @ts-expect-error Property 'display_name' does not exist on type 'unknown'
+          type.display_name === WORKFLOW_TABS.CONSENSUS_GENOME,
       )
     ) {
       visibleTypes.sort(

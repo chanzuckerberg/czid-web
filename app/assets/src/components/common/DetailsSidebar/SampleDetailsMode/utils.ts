@@ -1,10 +1,7 @@
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 import moment from "moment";
 import { AMR_PIPELINE_HELP_LINK } from "~/components/utils/documentationLinks";
-import {
-  WORKFLOWS,
-  WORKFLOW_KEY_FOR_VALUE,
-} from "~/components/utils/workflows";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import {
   CG_WETLAB_OPTIONS,
   ILLUMINA,
@@ -61,13 +58,13 @@ export const processPipelineInfo = (
       text:
         get("technology", pipelineRun) ===
         SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
-          ? WORKFLOWS.SHORT_READ_MNGS.label
-          : WORKFLOWS.LONG_READ_MNGS.label,
+          ? WORKFLOW_TABS.SHORT_READ_MNGS
+          : WORKFLOW_TABS.LONG_READ_MNGS,
     };
 
     // Analysis type for both Illumina & ONT mNGS is "Metagenomic", so decouple it from workflow field.
     pipelineInfo.analysisType = {
-      text: WORKFLOWS.SHORT_READ_MNGS.label,
+      text: WORKFLOW_TABS.SHORT_READ_MNGS,
     };
 
     pipelineInfo.technology = {
@@ -156,7 +153,7 @@ export const processCGWorkflowRunInfo = workflowRun => {
         CG_WETLAB_OPTIONS,
       ),
     ),
-    workflow: get("label", find({ value: workflowRun.workflow }, WORKFLOWS)),
+    workflow: WORKFLOW_TABS[workflowRun.workflow],
   };
 
   return mapValues(v => ({ text: v }), cgWorkflowRunInfo);
@@ -166,7 +163,7 @@ export const processAMRWorkflowRun = (
   workflowRun: WorkflowRun,
 ): AmrPipelineTabInfo => {
   const {
-    workflow: workflowValue,
+    workflow,
     executed_at: executedAt,
     wdl_version: pipelineVersion,
     parsed_cached_results,
@@ -175,8 +172,7 @@ export const processAMRWorkflowRun = (
 
   const qualityMetrics = parsed_cached_results?.quality_metrics;
 
-  const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflowValue];
-  const workflow = WORKFLOWS[workflowKey].label;
+  const workflowLabel = WORKFLOW_TABS[workflow];
   const lastProcessedAt = moment(executedAt).format(YYYY_MM_DD);
   const cardDbVersion = inputs?.card_version;
   const wildcardVersion = inputs?.wildcard_version;
@@ -217,8 +213,8 @@ export const processAMRWorkflowRun = (
     );
 
     return {
-      analysisType: { text: workflow },
-      workflow: { text: workflow },
+      analysisType: { text: workflowLabel },
+      workflow: { text: workflowLabel },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: pipelineVersionInfo,
       cardDatabaseVersion: { text: cardDbVersion },
@@ -233,8 +229,8 @@ export const processAMRWorkflowRun = (
     };
   } else {
     return {
-      analysisType: { text: workflow },
-      workflow: { text: workflow },
+      analysisType: { text: workflowLabel },
+      workflow: { text: workflowLabel },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: pipelineVersionInfo,
       cardDatabaseVersion: { text: cardDbVersion },

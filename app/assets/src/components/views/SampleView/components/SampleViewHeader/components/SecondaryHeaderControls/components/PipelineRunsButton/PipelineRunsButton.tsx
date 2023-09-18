@@ -1,14 +1,14 @@
 import { Button } from "@czi-sds/components";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
-import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import cs from "./pipeline_runs_button.scss";
 import { PipelineRunsButtonConfig } from "./workflowTypeConfig";
 
 export interface PipelineRunsButtonProps {
   sample: Sample;
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
 }
 
 export const PipelineRunsButton = ({

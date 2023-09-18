@@ -10,11 +10,11 @@ import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { getCsrfToken } from "~/api/utils";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { UserContext } from "~/components/common/UserContext";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import {
   ANNOTATION_NOT_A_HIT,
   NANOPORE_DEFAULT_COLUMN_WIDTH,
-  TABS,
   TAX_LEVEL_SPECIES,
 } from "~/components/views/SampleView/utils";
 import { Table } from "~/components/visualizations/table";
@@ -185,7 +185,9 @@ export const ReportTable = ({
   );
 
   const numericColumnWidth =
-    currentTab === TABS.LONG_READ_MNGS ? NANOPORE_DEFAULT_COLUMN_WIDTH : 70;
+    currentTab === WORKFLOW_TABS.LONG_READ_MNGS
+      ? NANOPORE_DEFAULT_COLUMN_WIDTH
+      : 70;
 
   const sharedColumns = getSharedColumns(
     dbType,
@@ -196,8 +198,8 @@ export const ReportTable = ({
 
   const columns = compact(
     nonNumericColumns.concat(
-      currentTab === TABS.SHORT_READ_MNGS && illuminaColumns,
-      currentTab === TABS.LONG_READ_MNGS && nanoporeColumns,
+      currentTab === WORKFLOW_TABS.SHORT_READ_MNGS && illuminaColumns,
+      currentTab === WORKFLOW_TABS.LONG_READ_MNGS && nanoporeColumns,
       sharedColumns,
     ),
   );
@@ -261,7 +263,7 @@ export const ReportTable = ({
   };
 
   const readsPerMillionKey =
-    currentTab === TABS.SHORT_READ_MNGS ? "rpm" : "bpm";
+    currentTab === WORKFLOW_TABS.SHORT_READ_MNGS ? "rpm" : "bpm";
 
   return (
     <div className={cs.reportTable}>

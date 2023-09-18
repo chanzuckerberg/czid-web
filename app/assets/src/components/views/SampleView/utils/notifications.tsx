@@ -1,9 +1,10 @@
 import { Link } from "@czi-sds/components";
 import React from "react";
 import { showToast } from "~/components/utils/toast";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import Notification from "~ui/notifications/Notification";
 import cs from "../sample_view.scss";
-import { NOTIFICATION_TYPES, TABS } from "./constants";
+import { NOTIFICATION_TYPES } from "./constants";
 
 export const showNotification = (
   notification: string,
@@ -136,11 +137,11 @@ const renderConsensusGenomeCreated = (
       <div
         className={cs.consensusGenomeLink}
         onClick={() => {
-          handleTabChange(TABS.CONSENSUS_GENOME);
+          handleTabChange(WORKFLOW_TABS.CONSENSUS_GENOME);
           closeToast();
         }}
         onKeyDown={() => {
-          handleTabChange(TABS.CONSENSUS_GENOME);
+          handleTabChange(WORKFLOW_TABS.CONSENSUS_GENOME);
           closeToast();
         }}
       >

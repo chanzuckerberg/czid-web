@@ -3,7 +3,7 @@
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import { CoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/types";
-import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { BenchmarkWorkflowRunResults } from "~/components/views/SampleView/components/BenchmarkView/BenchmarkView";
 import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
@@ -768,7 +768,7 @@ const bulkDeleteObjects = ({
   workflow,
 }: {
   selectedIds: number[];
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
 }) =>
   postWithCSRF(`/samples/bulk_delete`, {
     selectedIds,
@@ -780,7 +780,7 @@ const validateUserCanDeleteObjects = ({
   workflow,
 }: {
   selectedIds: number[];
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
 }) =>
   postWithCSRF(`/samples/validate_user_can_delete_objects.json`, {
     selectedIds,

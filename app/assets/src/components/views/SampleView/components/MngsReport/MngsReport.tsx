@@ -1,11 +1,9 @@
 import { isNil } from "lodash";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import { SampleViewMessage } from "~/components/views/SampleView/components/SampleViewMessage";
-import {
-  getConsensusGenomeData,
-  TABS,
-} from "~/components/views/SampleView/utils";
+import { getConsensusGenomeData } from "~/components/views/SampleView/utils";
 import { ReportFilters } from "./components/ReportFilters";
 import { ReportStatsRow } from "./components/ReportStatsRow";
 import { ReportTable } from "./components/ReportTable";
@@ -42,7 +40,7 @@ export const MngsReport = ({
   snapshotShareId,
   view,
 }: MngsReportProps) => {
-  const displayMergedNtNrValue = currentTab === TABS.MERGED_NT_NR;
+  const displayMergedNtNrValue = currentTab === WORKFLOW_TABS.MERGED_NT_NR;
   if (reportMetadata.reportReady && reportData?.length > 0 && !loadingReport) {
     return (
       <div className={cs.reportViewContainer}>
@@ -104,7 +102,7 @@ export const MngsReport = ({
           <TaxonTreeVis
             lineage={lineageData}
             metric={
-              currentTab === TABS.SHORT_READ_MNGS
+              currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
                 ? selectedOptions.metricShortReads
                 : selectedOptions.metricLongReads
             }

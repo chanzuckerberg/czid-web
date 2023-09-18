@@ -3,8 +3,8 @@ import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import {
   getShorthandFromWorkflow,
+  WorkflowType,
   WORKFLOW_ENTITIES,
-  WORKFLOW_VALUES,
 } from "~/components/utils/workflows";
 import { ObjectType } from "~/interface/samplesView";
 import cs from "../samples_view.scss";
@@ -13,7 +13,7 @@ import ToolbarButtonIcon from "../ToolbarButtonIcon";
 interface BulkDeleteTriggerProps {
   onClick(): void;
   selectedObjects: ObjectType[];
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
   workflowEntity: string;
 }
 

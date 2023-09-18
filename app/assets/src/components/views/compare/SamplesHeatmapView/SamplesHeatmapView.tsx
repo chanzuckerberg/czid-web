@@ -59,7 +59,7 @@ import {
   getTempSelectedOptions,
   HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
 } from "~/components/utils/urls";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
@@ -797,7 +797,7 @@ class SamplesHeatmapView extends React.Component<
 
     const { validIds, invalidSampleNames } = await validateSampleIds({
       sampleIds,
-      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+      workflow: WorkflowType.SHORT_READ_MNGS,
     });
 
     this.setState(

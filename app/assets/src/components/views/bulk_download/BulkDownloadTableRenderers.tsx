@@ -1,5 +1,5 @@
 import { Icon } from "@czi-sds/components";
-import { find, get } from "lodash/fp";
+import { get } from "lodash/fp";
 import React from "react";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import LoadingBar from "~ui/controls/LoadingBar";
@@ -63,10 +63,8 @@ export default class BulkDownloadTableRenderers extends React.Component {
     let analysisTypeString = count === 1 ? "Sample" : "Samples";
     if (bulkDownloadType !== BULK_DOWNLOAD_TYPES.SAMPLE_METADATA) {
       const workflowLabelField = count === 1 ? "label" : "pluralizedLabel";
-      const workflowObj = find(
-        { value: get("analysis_type", rowData) },
-        WORKFLOWS,
-      );
+      const workflowObj = WORKFLOWS[get("analysis_type", rowData)];
+
       analysisTypeString = get(workflowLabelField, workflowObj);
     }
 

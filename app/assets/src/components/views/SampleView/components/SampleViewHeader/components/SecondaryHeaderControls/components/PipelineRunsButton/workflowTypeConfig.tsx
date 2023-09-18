@@ -1,7 +1,7 @@
 import { WorkflowConfigType, WorkflowType } from "~/components/utils/workflows";
 
 export const PipelineRunsButtonConfig: WorkflowConfigType<{
-  hasPipelineRunsButton: boolean;
+  hasPipelineRunsButton: boolean | null;
 }> = {
   [WorkflowType.AMR]: {
     hasPipelineRunsButton: true,
@@ -17,5 +17,11 @@ export const PipelineRunsButtonConfig: WorkflowConfigType<{
   },
   [WorkflowType.BENCHMARK]: {
     hasPipelineRunsButton: true,
+  },
+  [WorkflowType.MERGED_NT_NR]: {
+    hasPipelineRunsButton: null,
+  },
+  [WorkflowType.AMR_DEPRECATED]: {
+    hasPipelineRunsButton: null,
   },
 };

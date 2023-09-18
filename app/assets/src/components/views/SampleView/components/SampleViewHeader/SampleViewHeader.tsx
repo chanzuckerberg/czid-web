@@ -7,7 +7,7 @@ import {
   findInWorkflows,
   isMngsWorkflow,
   WORKFLOWS,
-  WORKFLOW_VALUES,
+  WorkflowType,
 } from "~/components/utils/workflows";
 import Project from "~/interface/project";
 import ReportMetadata from "~/interface/reportMetaData";
@@ -62,9 +62,9 @@ export const SampleViewHeader = ({
       : `/home?project_id=${project.id}`;
   };
 
-  const workflow: WORKFLOW_VALUES =
+  const workflow: WorkflowType =
     WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
-    WORKFLOWS.SHORT_READ_MNGS.value;
+    WorkflowType.SHORT_READ_MNGS;
 
   const getAllRunsPerWorkflow = () => {
     const runsByType =

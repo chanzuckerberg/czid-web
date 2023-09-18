@@ -16,7 +16,10 @@ import {
 } from "lodash/fp";
 import Papa from "papaparse";
 import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
-import { labelToVal, WORKFLOWS } from "~/components/utils/workflows";
+import {
+  getWorkflowTypeFromLabel,
+  WorkflowType,
+} from "~/components/utils/workflows";
 import { countActiveFilters } from "~/components/views/SampleView/components/AmrView/components/AmrFiltersContainer/utils";
 import { AmrResult } from "~/components/views/SampleView/components/AmrView/components/AmrSampleReport/types";
 import {
@@ -319,11 +322,11 @@ export const computeMngsReportTableValuesForCSV = (
   currentTab,
   withMultiFlags = false,
 ) => {
-  const workflow = labelToVal(currentTab);
+  const workflow = getWorkflowTypeFromLabel(currentTab);
   const csvRows = [];
   const csvHeaders = [
     ...TAXON_GENERAL_FIELDS,
-    ...(workflow === WORKFLOWS.SHORT_READ_MNGS.value ? BACKGROUND_FIELDS : []),
+    ...(workflow === WorkflowType.SHORT_READ_MNGS ? BACKGROUND_FIELDS : []),
     ...Array.from(TAXON_COUNT_TYPE_METRICS[workflow], metric => "nt." + metric),
     ...Array.from(TAXON_COUNT_TYPE_METRICS[workflow], metric => "nr." + metric),
   ];

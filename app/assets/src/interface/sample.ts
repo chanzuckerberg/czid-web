@@ -1,4 +1,4 @@
-import { WORKFLOW_VALUES } from "../components/utils/workflows";
+import { WorkflowType } from "../components/utils/workflows";
 import { PipelineRun } from "./shared";
 import { DateString } from "./shared/generic";
 
@@ -6,7 +6,7 @@ export interface WorkflowRun {
   id: number;
   wdl_version: string;
   executed_at: DateString;
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
   status: string;
   input_error: string;
   inputs?: {
@@ -69,7 +69,7 @@ export default interface Sample {
   default_background_id: number;
   default_pipeline_run_id: number;
   editable: boolean;
-  initial_workflow: string;
+  initial_workflow: WorkflowType;
   upload_error: string;
   user_id: number;
   host_genome_id: number;

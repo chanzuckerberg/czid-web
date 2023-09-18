@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React from "react";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
 import {
@@ -60,7 +60,7 @@ const ConsensusGenomeSequencingPlatformOptions = ({
           isSelected={selectedTechnology === ILLUMINA}
           onClick={() => onTechnologyToggle(CG, ILLUMINA)}
           pipelineVersion={
-            projectPipelineVersions?.[WORKFLOWS.CONSENSUS_GENOME.value]
+            projectPipelineVersions?.[WorkflowType.CONSENSUS_GENOME]
           }
           onWetlabProtocolChange={onWetlabProtocolChange}
         />
@@ -80,7 +80,7 @@ const ConsensusGenomeSequencingPlatformOptions = ({
           selectedWetlabProtocol={selectedWetlabProtocol}
           onWetlabProtocolChange={onWetlabProtocolChange}
           pipelineVersion={
-            projectPipelineVersions?.[WORKFLOWS.CONSENSUS_GENOME.value]
+            projectPipelineVersions?.[WorkflowType.CONSENSUS_GENOME]
           }
         />
       </div>

@@ -57,10 +57,10 @@ import {
 } from "~/components/utils/pipeline_versions";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
-  findInWorkflows,
+  getWorkflowTypeFromLabel,
   isMngsWorkflow,
-  labelToVal,
-  WORKFLOWS,
+  WorkflowType,
+  WORKFLOW_TABS,
 } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import {
@@ -83,7 +83,6 @@ import {
 } from "~/interface/sampleView";
 import { Background, Taxon } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
-import { WORKFLOW_VALUES } from "../../utils/workflows";
 import { DetailsSidebarSwitcher } from "./components/DetailsSidebarSwitcher";
 import { ModalManager } from "./components/ModalManager";
 import { BlastModalInfo } from "./components/ModalManager/components/BlastModals/constants";
@@ -105,7 +104,6 @@ import {
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
-  TABS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
   TREE_METRICS,
@@ -157,7 +155,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
     if (
       persistedDiscoveryFiltersPresent &&
-      currentTab !== TABS.LONG_READ_MNGS
+      currentTab !== WORKFLOW_TABS.LONG_READ_MNGS
     ) {
       showNotification(NOTIFICATION_TYPES.discoveryViewFiltersPersisted, {
         revertToSampleViewFilters: this.revertToSampleViewFilters,
@@ -173,7 +171,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       // is computed once the user selects a background.
       selectedOptionsFromLocal["metricShortReads"] = find(
         { value: "nt_r" },
-        TREE_METRICS[TABS.SHORT_READ_MNGS],
+        TREE_METRICS[WORKFLOW_TABS.SHORT_READ_MNGS],
       ).value;
     }
 
@@ -213,7 +211,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       selectedOptions: {
         ...getDefaultSelectedOptions(),
         // for long read mNGS samples, do not allow taxon filters in tempSelectedOptions to persist from DiscoveryView
-        ...(!isEmpty(tempSelectedOptions) && currentTab !== TABS.LONG_READ_MNGS
+        ...(!isEmpty(tempSelectedOptions) &&
+        currentTab !== WORKFLOW_TABS.LONG_READ_MNGS
           ? tempSelectedOptions
           : {
               ...selectedOptionsFromLocal,
@@ -255,7 +254,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   componentDidUpdate() {
     const { amrDeprecatedData, currentTab } = this.state;
 
-    if (currentTab === TABS.AMR_DEPRECATED && !amrDeprecatedData) {
+    if (currentTab === WORKFLOW_TABS.AMR_DEPRECATED && !amrDeprecatedData) {
       this.fetchAmrDeprecatedData();
     }
   }
@@ -301,7 +300,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     });
     const tabChanged = newCurrentTab !== currentTab;
 
-    if (newCurrentTab === TABS.SHORT_READ_MNGS) {
+    if (newCurrentTab === WORKFLOW_TABS.SHORT_READ_MNGS) {
       const selectedBackground = backgrounds.find(
         background => selectedOptions.background === background.id,
       );
@@ -503,7 +502,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const backgroundIdUsed = backgroundId || selectedOptions.background;
     const mergeNtNr =
       allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
-      (currentTab === TABS.MERGED_NT_NR || currentTab === TABS.SHORT_READ_MNGS);
+      (currentTab === WORKFLOW_TABS.MERGED_NT_NR ||
+        currentTab === WORKFLOW_TABS.SHORT_READ_MNGS);
 
     this.setState({ loadingReport: true });
     trackEvent("PipelineSampleReport_sample_viewed", {
@@ -596,7 +596,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         COVERAGE_VIZ_FEATURE,
         get("pipeline_version", pipelineRun),
       ) ||
-      currentTab === TABS.LONG_READ_MNGS
+      currentTab === WORKFLOW_TABS.LONG_READ_MNGS
     ) {
       const coverageVizSummary = await getCoverageVizSummary({
         sampleId: sample.id,
@@ -617,8 +617,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     }
 
     if (
-      currentTab === TABS.SHORT_READ_MNGS ||
-      currentTab === TABS.LONG_READ_MNGS
+      currentTab === WORKFLOW_TABS.SHORT_READ_MNGS ||
+      currentTab === WORKFLOW_TABS.LONG_READ_MNGS
     ) {
       const newRun = find(
         { pipeline_version: newPipelineVersion },
@@ -638,11 +638,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         },
       );
     } else if (
-      currentTab === TABS.CONSENSUS_GENOME ||
-      currentTab === TABS.AMR
+      currentTab === WORKFLOW_TABS.CONSENSUS_GENOME ||
+      currentTab === WORKFLOW_TABS.AMR
     ) {
-      const workflowVal: WORKFLOW_VALUES =
-        WORKFLOWS[findInWorkflows(currentTab, "label")]?.value;
+      const workflowVal: WorkflowType = getWorkflowTypeFromLabel(currentTab);
       const newRun = find(
         { wdl_version: newPipelineVersion, workflow: workflowVal },
         sample.workflow_runs,
@@ -679,7 +678,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const { currentTab, reportMetadata, sample, project, workflowRun } =
       this.state;
     const workflowCount = getWorkflowCount(sample);
-    const workflow = labelToVal(currentTab);
+    const workflow = getWorkflowTypeFromLabel(currentTab);
 
     let status: string;
     if (isMngsWorkflow(workflow)) {
@@ -720,7 +719,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     workflowCount[workflow] -= 1;
 
     const nextTab = determineInitialTab({
-      initialWorkflow: sample.initial_workflow,
+      initialWorkflow: sample.initial_workflow as WorkflowType,
       workflowCount,
       currentTab,
     });
@@ -738,9 +737,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   handleTabChange = (tab: CurrentTabSample) => {
-    if (tab === TABS.CONSENSUS_GENOME || tab === TABS.AMR) {
+    if (tab === WORKFLOW_TABS.CONSENSUS_GENOME || tab === WORKFLOW_TABS.AMR) {
       const workflow = find(
-        { workflow: labelToVal(tab) },
+        { workflow: getWorkflowTypeFromLabel(tab) },
         this.state.sample.workflow_runs,
       );
       this.handleWorkflowRunSelect(workflow);
@@ -1011,7 +1010,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const { sample } = this.state;
     const workflowRuns = await kickoffConsensusGenome({
       sampleId: sample.id,
-      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+      workflow: WorkflowType.CONSENSUS_GENOME,
       alignment_config_name: sample?.pipeline_runs[0]?.alignment_config_name,
       ...consensusGenomeParams,
       technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
@@ -1148,7 +1147,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       {
         workflowRun: rowData,
       },
-      () => this.handleTabChange(TABS.CONSENSUS_GENOME),
+      () => this.handleTabChange(WORKFLOW_TABS.CONSENSUS_GENOME),
     );
   };
 
@@ -1191,9 +1190,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     newSelectedOptions.categories = {};
     newSelectedOptions.taxa = [];
     // Only clear thresholds filters that apply to the current tab
-    if (currentTab === TABS.SHORT_READ_MNGS) {
+    if (currentTab === WORKFLOW_TABS.SHORT_READ_MNGS) {
       newSelectedOptions.thresholdsShortReads = [];
-    } else if (currentTab === TABS.LONG_READ_MNGS) {
+    } else if (currentTab === WORKFLOW_TABS.LONG_READ_MNGS) {
       newSelectedOptions.thresholdsLongReads = [];
     }
     newSelectedOptions.annotations = [];
@@ -1232,9 +1231,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         return find({ id: workflowRunId }, sample.workflow_runs);
       }
 
-      const workflowType = Object.values(WORKFLOWS).find(
-        workflow => workflow.label === currentTab,
-      ).value;
+      const workflowType = getWorkflowTypeFromLabel(currentTab);
 
       if (workflowRun && workflowRun.workflow === workflowType) {
         return workflowRun;
@@ -1420,7 +1417,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             COVERAGE_VIZ_FEATURE,
             get("pipeline_version", pipelineRun),
           ) ||
-            currentTab === TABS.LONG_READ_MNGS) && (
+            currentTab === WORKFLOW_TABS.LONG_READ_MNGS) && (
             <CoverageVizBottomSidebar
               nameType={selectedOptions.nameType}
               onBlastClick={this.handleBlastClick}

@@ -14,9 +14,8 @@ import {
   generateUrlToSampleView,
   TempSelectedOptionsShape,
 } from "~/components/utils/urls";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import { ConsensusGenomeDropdown } from "~/components/views/SampleView/components/ConsensusGenomeView/components/ConsensusGenomeDropdown/ConsensusGenomeDropdown";
-import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/utils";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import {
@@ -292,7 +291,7 @@ const SampleDetailsMode = ({
       const consensusGenomeWorkflowRuns =
         sample &&
         sample.workflow_runs.filter(
-          run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
+          run => run.workflow === WorkflowType.CONSENSUS_GENOME,
         );
 
       const consensusGenomeDropdown = currentWorkflowTab ===

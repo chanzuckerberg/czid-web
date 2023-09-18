@@ -24,7 +24,7 @@ import MetadataCSVUpload from "~/components/common/Metadata/MetadataCSVUpload";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
 import { generateClientDownloadFromEndpoint } from "~/components/utils/clientDownload";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { MetadataType } from "~/interface/shared";
 import { IconAlert } from "~ui/icons";
 import IssueGroup from "~ui/notifications/IssueGroup";
@@ -515,7 +515,7 @@ class MetadataUpload extends React.Component<
               <span className={cs.label}>
                 {"Available organisms for host subtraction: "}
               </span>
-              {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value)
+              {workflows.has(WorkflowType.CONSENSUS_GENOME)
                 ? "Human only"
                 : hostGenomes &&
                   hostGenomes

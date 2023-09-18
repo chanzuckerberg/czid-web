@@ -1,12 +1,12 @@
 import { Notification } from "@czi-sds/components";
 import React from "react";
 import { pluralize } from "~/components/utils/stringUtil";
-import { WORKFLOW_LABELS } from "~/components/utils/workflows";
+import { WorkflowLabelType } from "~/components/utils/workflows";
 
 interface DeleteSuccessNotificationProps {
   onClose(): void;
   sampleCount: number;
-  workflowLabel: WORKFLOW_LABELS;
+  workflowLabel: WorkflowLabelType;
 }
 
 const DeleteSuccessNotification = ({

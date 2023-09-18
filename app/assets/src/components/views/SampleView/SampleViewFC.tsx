@@ -48,11 +48,10 @@ import {
   isPipelineFeatureAvailable,
 } from "~/components/utils/pipeline_versions";
 import {
-  findInWorkflows,
+  getWorkflowTypeFromLabel,
   isMngsWorkflow,
-  labelToVal,
-  WORKFLOWS,
-  WORKFLOW_VALUES,
+  WorkflowType,
+  WORKFLOW_TABS,
 } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { usePrevious } from "~/helpers/customHooks/usePrevious";
@@ -115,7 +114,6 @@ import {
   shouldEnableMassNormalizedBackgrounds,
   showNotification,
   SPECIES_LEVEL_INDEX,
-  TABS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
   urlParser,
@@ -355,9 +353,12 @@ const SampleViewFC = ({
         tab: currentTab,
       });
     }
-    if (currentTab === TABS.CONSENSUS_GENOME || currentTab === TABS.AMR) {
+    if (
+      currentTab === WORKFLOW_TABS.CONSENSUS_GENOME ||
+      currentTab === WORKFLOW_TABS.AMR
+    ) {
       const newWorkflowRun = find(
-        { workflow: labelToVal(currentTab) },
+        { workflow: getWorkflowTypeFromLabel(currentTab) },
         sample?.workflow_runs,
       );
       setWorkflowRun(newWorkflowRun);
@@ -430,7 +431,8 @@ const SampleViewFC = ({
 
   const mergeNtNr =
     allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
-    (currentTab === TABS.MERGED_NT_NR || currentTab === TABS.SHORT_READ_MNGS);
+    (currentTab === WORKFLOW_TABS.MERGED_NT_NR ||
+      currentTab === WORKFLOW_TABS.SHORT_READ_MNGS);
 
   const processRawSampleReportData = useCallback(
     (rawReportData: RawReportData) => {
@@ -724,7 +726,7 @@ const SampleViewFC = ({
     isPipelineFeatureAvailable(
       COVERAGE_VIZ_FEATURE,
       get("pipeline_version", pipelineRun),
-    ) || currentTab === TABS.LONG_READ_MNGS;
+    ) || currentTab === WORKFLOW_TABS.LONG_READ_MNGS;
 
   useEffect(() => {
     const fetchCoverageVizData = async () => {
@@ -748,8 +750,8 @@ const SampleViewFC = ({
     }
 
     if (
-      currentTab === TABS.SHORT_READ_MNGS ||
-      currentTab === TABS.LONG_READ_MNGS
+      currentTab === WORKFLOW_TABS.SHORT_READ_MNGS ||
+      currentTab === WORKFLOW_TABS.LONG_READ_MNGS
     ) {
       const newRun = find(
         { pipeline_version: newPipelineVersion },
@@ -761,11 +763,10 @@ const SampleViewFC = ({
       setFilteredReportData([]);
       setReportData([]);
     } else if (
-      currentTab === TABS.CONSENSUS_GENOME ||
-      currentTab === TABS.AMR
+      currentTab === WORKFLOW_TABS.CONSENSUS_GENOME ||
+      currentTab === WORKFLOW_TABS.AMR
     ) {
-      const workflowVal: WORKFLOW_VALUES =
-        WORKFLOWS[findInWorkflows(currentTab, "label")]?.value;
+      const workflowVal: WorkflowType = getWorkflowTypeFromLabel(currentTab);
       const newRun = find(
         { wdl_version: newPipelineVersion, workflow: workflowVal },
         sample.workflow_runs,
@@ -777,7 +778,7 @@ const SampleViewFC = ({
 
   const handleDeleteCurrentRun = () => {
     const workflowCount = getWorkflowCount(sample);
-    const workflow = labelToVal(currentTab);
+    const workflow = getWorkflowTypeFromLabel(currentTab);
 
     let status: string;
     if (isMngsWorkflow(workflow)) {
@@ -894,7 +895,7 @@ const SampleViewFC = ({
   ) => {
     const workflowRuns = await kickoffConsensusGenome({
       sampleId: sample.id,
-      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+      workflow: WorkflowType.CONSENSUS_GENOME,
       alignment_config_name: sample?.pipeline_runs[0]?.alignment_config_name,
       ...consensusGenomeParams,
       technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
@@ -911,7 +912,7 @@ const SampleViewFC = ({
       ["close", "consensusGenomeError"],
     ]);
     showNotification(NOTIFICATION_TYPES.consensusGenomeCreated, {
-      handleTabChange: () => setCurrentTab(TABS.CONSENSUS_GENOME),
+      handleTabChange: () => setCurrentTab(WORKFLOW_TABS.CONSENSUS_GENOME),
     });
   };
 
@@ -981,7 +982,7 @@ const SampleViewFC = ({
     handleModalAction([["close", "consensusGenomePrevious"]]);
     setWorkflowRun(rowData);
     setWorkflowRunId(rowData.id);
-    setCurrentTab(TABS.CONSENSUS_GENOME);
+    setCurrentTab(WORKFLOW_TABS.CONSENSUS_GENOME);
   };
 
   const handleBlastClick = (blastData: BlastData) => {
@@ -1046,9 +1047,9 @@ const SampleViewFC = ({
     newSelectedOptions.categories = {};
     newSelectedOptions.taxa = [];
     // Only clear thresholds filters that apply to the current tab
-    if (currentTab === TABS.SHORT_READ_MNGS) {
+    if (currentTab === WORKFLOW_TABS.SHORT_READ_MNGS) {
       newSelectedOptions.thresholdsShortReads = [];
-    } else if (currentTab === TABS.LONG_READ_MNGS) {
+    } else if (currentTab === WORKFLOW_TABS.LONG_READ_MNGS) {
       newSelectedOptions.thresholdsLongReads = [];
     }
     newSelectedOptions.annotations = [];
@@ -1073,9 +1074,7 @@ const SampleViewFC = ({
         return find({ id: workflowRunId }, sample.workflow_runs);
       }
 
-      const workflowType = Object.values(WORKFLOWS).find(
-        workflow => workflow.label === currentTab,
-      ).value;
+      const workflowType = getWorkflowTypeFromLabel(currentTab);
 
       if (workflowRun && workflowRun.workflow === workflowType) {
         return workflowRun;
@@ -1222,7 +1221,7 @@ const SampleViewFC = ({
           COVERAGE_VIZ_FEATURE,
           get("pipeline_version", pipelineRun),
         ) ||
-          currentTab === TABS.LONG_READ_MNGS) && (
+          currentTab === WORKFLOW_TABS.LONG_READ_MNGS) && (
           <CoverageVizBottomSidebar
             nameType={selectedOptions.nameType}
             onBlastClick={handleBlastClick}

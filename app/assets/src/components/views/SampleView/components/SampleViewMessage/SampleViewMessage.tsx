@@ -2,12 +2,10 @@ import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { IconAlert, IconLoading } from "~/components/ui/icons";
 import { sampleErrorInfo, UPLOAD_URL } from "~/components/utils/sample";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
-import {
-  ONT_PIPELINE_RUNNING_STATUS_MESSAGE,
-  TABS,
-} from "~/components/views/SampleView/utils";
+import { ONT_PIPELINE_RUNNING_STATUS_MESSAGE } from "~/components/views/SampleView/utils";
 import { IconAlertType } from "~/interface/icon";
 import ReportMetadata, { PipelineRunStatus } from "~/interface/reportMetaData";
 import Sample, { SampleStatus } from "~/interface/sample";
@@ -73,7 +71,7 @@ export const SampleViewMessage = ({
     // Note that the pipeline status "WAITING" is obtained from the API at `app/services/pipeline_report_service.rb`
     status = SampleStatus.IN_PROGRESS;
     message =
-      currentTab === TABS.LONG_READ_MNGS
+      currentTab === WORKFLOW_TABS.LONG_READ_MNGS
         ? ONT_PIPELINE_RUNNING_STATUS_MESSAGE
         : jobStatus;
     icon = <IconLoading className={csSampleMessage.icon} />;

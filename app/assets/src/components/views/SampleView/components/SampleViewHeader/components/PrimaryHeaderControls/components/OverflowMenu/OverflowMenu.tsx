@@ -4,7 +4,7 @@ import { PopoverProps } from "@mui/material";
 import React, { useState } from "react";
 import {
   getShorthandFromWorkflow,
-  WORKFLOW_VALUES,
+  WorkflowType,
 } from "~/components/utils/workflows";
 import { BulkDeleteModal } from "~/components/views/samples/SamplesView/BulkDeleteModal";
 import cs from "./overflow_menu.scss";
@@ -19,7 +19,7 @@ export const OverflowMenu = ({
   userOwnsRun,
 }: {
   className: string;
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
   deleteId: number;
   onDeleteRunSuccess: () => void;
   redirectOnSuccess?: boolean;

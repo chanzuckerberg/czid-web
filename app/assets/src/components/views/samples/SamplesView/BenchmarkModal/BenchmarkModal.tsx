@@ -10,7 +10,7 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from "~/components/ui/controls/buttons";
-import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { Entry } from "~/interface/samplesView";
 import cs from "./benchmark_modal.scss";
 import { BenchmarkSamplesTable } from "./BenchmarkSamplesTable";
@@ -27,7 +27,7 @@ interface BenchmarkModalProps {
   }) => void;
   onClose: () => void;
   selectedObjects: Entry[];
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
 }
 
 export const BenchmarkModal = ({

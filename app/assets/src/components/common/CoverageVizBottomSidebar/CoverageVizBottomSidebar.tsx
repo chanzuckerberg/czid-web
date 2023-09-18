@@ -17,7 +17,7 @@ import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import Histogram from "~/components/visualizations/Histogram";
@@ -452,7 +452,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
         <div className={cs.fill} />
         {!snapshotShareId && (
           <div className={cs.headerControls}>
-            {workflow === WORKFLOWS.SHORT_READ_MNGS.value && (
+            {workflow === WorkflowType.SHORT_READ_MNGS && (
               <div className={cs.vizLinkContainer}>
                 <a
                   className={cs.linkWithArrow}
@@ -693,7 +693,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
                 with at least one assembled contig in NT.
               </div>
               {!snapshotShareId &&
-                workflow === WORKFLOWS.SHORT_READ_MNGS.value && (
+                workflow === WorkflowType.SHORT_READ_MNGS && (
                   <a
                     className={cs.linkWithArrow}
                     href={params.alignmentVizUrl}

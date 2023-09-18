@@ -18,7 +18,7 @@ import {
 import { expect, Locator, Page, test } from "@playwright/test";
 
 type WORKFLOW_KEYS = keyof typeof WORKFLOWS;
-type WORKFLOW_VALUES = (typeof WORKFLOWS)[WORKFLOW_KEYS];
+type WorkflowType = (typeof WORKFLOWS)[WORKFLOW_KEYS];
 const ENV = (process.env.NODE_ENV as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
 const SAMPLE_FILES = [SAMPLE_FILE_R1, SAMPLE_FILE_R2];
@@ -27,7 +27,7 @@ const getCheckboxForWorkflow = async ({
   workflow,
 }: {
   page: Page;
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
 }): Promise<Locator> => {
   return page.getByTestId(`analysis-type-${workflow}`).locator("input");
 };

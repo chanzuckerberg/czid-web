@@ -6,7 +6,7 @@ import {
   ILLUMINA_MNGS_PIPELINE_HELP_LINK,
   NANOPORE_MNGS_PIPELINE_HELP_LINK,
 } from "~/components/utils/documentationLinks";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 
 export const NO_TARGET_PROJECT_ERROR =
   "Please select a CZ ID project to upload your samples to.";
@@ -43,7 +43,7 @@ export const UPLOAD_WORKFLOWS: {
   },
   AMR: {
     label: "Antimicrobial Resistance" as const,
-    value: WORKFLOWS.AMR.value,
+    value: WorkflowType.AMR,
     icon: "bacteria" as const,
   },
 };
@@ -108,20 +108,20 @@ export const ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY = {
 // to the WORKFLOW that should be dispatched to in the backend
 export const WORKFLOWS_BY_UPLOAD_SELECTIONS = {
   [UPLOAD_WORKFLOWS.MNGS.value]: {
-    [ILLUMINA]: WORKFLOWS.SHORT_READ_MNGS.value,
-    [NANOPORE]: WORKFLOWS.LONG_READ_MNGS.value,
-    [NO_TECHNOLOGY_SELECTED]: WORKFLOWS.SHORT_READ_MNGS.value, // Case when user does not have access to ont_v1
+    [ILLUMINA]: WorkflowType.SHORT_READ_MNGS,
+    [NANOPORE]: WorkflowType.LONG_READ_MNGS,
+    [NO_TECHNOLOGY_SELECTED]: WorkflowType.SHORT_READ_MNGS, // Case when user does not have access to ont_v1
   },
   [UPLOAD_WORKFLOWS.AMR.value]: {
-    [ILLUMINA]: WORKFLOWS.AMR.value, // Case when short-read-mngs and amr are both selected
-    [NO_TECHNOLOGY_SELECTED]: WORKFLOWS.AMR.value, // Case when only amr is selected
+    [ILLUMINA]: WorkflowType.AMR, // Case when short-read-mngs and amr are both selected
+    [NO_TECHNOLOGY_SELECTED]: WorkflowType.AMR, // Case when only amr is selected
   },
   [UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value]: {
-    [ILLUMINA]: WORKFLOWS.CONSENSUS_GENOME.value,
-    [NANOPORE]: WORKFLOWS.CONSENSUS_GENOME.value,
+    [ILLUMINA]: WorkflowType.CONSENSUS_GENOME,
+    [NANOPORE]: WorkflowType.CONSENSUS_GENOME,
   },
   [UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value]: {
-    [ILLUMINA]: WORKFLOWS.CONSENSUS_GENOME.value,
+    [ILLUMINA]: WorkflowType.CONSENSUS_GENOME,
   },
 };
 
@@ -406,10 +406,10 @@ export const REMOTE_UPLOAD = "remote";
 export const BASESPACE_UPLOAD = "basespace";
 
 export const PIPELINE_HELP_LINKS = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: ILLUMINA_MNGS_PIPELINE_HELP_LINK,
-  [WORKFLOWS.LONG_READ_MNGS.value]: NANOPORE_MNGS_PIPELINE_HELP_LINK,
-  [WORKFLOWS.CONSENSUS_GENOME.value]: CG_PIPELINE_HELP_LINK,
-  [WORKFLOWS.AMR.value]: AMR_PIPELINE_HELP_LINK,
+  [WorkflowType.SHORT_READ_MNGS]: ILLUMINA_MNGS_PIPELINE_HELP_LINK,
+  [WorkflowType.LONG_READ_MNGS]: NANOPORE_MNGS_PIPELINE_HELP_LINK,
+  [WorkflowType.CONSENSUS_GENOME]: CG_PIPELINE_HELP_LINK,
+  [WorkflowType.AMR]: AMR_PIPELINE_HELP_LINK,
 };
 
 // TYPES

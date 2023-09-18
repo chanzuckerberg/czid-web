@@ -4,7 +4,7 @@ import { findIndex, startCase } from "lodash/fp";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
-import { WORKFLOWS, WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import { TAB_SAMPLES, TAB_VISUALIZATIONS } from "./constants";
 import cs from "./discovery_header.scss";
@@ -40,7 +40,7 @@ interface DiscoveryHeaderProps {
     value: string;
     label: JSX.Element;
   }>;
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
 }
 
 const DiscoveryHeader = ({
@@ -126,7 +126,7 @@ const DiscoveryHeader = ({
 
   const disableSidebars =
     currentTab === TAB_VISUALIZATIONS ||
-    (currentTab === TAB_SAMPLES && workflow === WORKFLOWS.BENCHMARK.value);
+    (currentTab === TAB_SAMPLES && workflow === WorkflowType.BENCHMARK);
 
   return (
     <div className={cs.header}>

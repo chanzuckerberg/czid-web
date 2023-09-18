@@ -10,9 +10,10 @@ import {
   some,
   values,
 } from "lodash/fp";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
-import { METRIC_DECIMAL_PLACES, TABS } from "./constants";
+import { METRIC_DECIMAL_PLACES } from "./constants";
 
 export const applyFilters = ({
   row,
@@ -218,7 +219,7 @@ export const filterReportData = ({
       categories: categoriesSet,
       subcategories: subcategoriesSet,
       thresholds:
-        currentTab === TABS.SHORT_READ_MNGS
+        currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
           ? thresholdsShortReads
           : thresholdsLongReads,
       readSpecificity,
@@ -233,7 +234,7 @@ export const filterReportData = ({
         categories: categoriesSet,
         subcategories: subcategoriesSet,
         thresholds:
-          currentTab === TABS.SHORT_READ_MNGS
+          currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
             ? thresholdsShortReads
             : thresholdsLongReads,
         readSpecificity,

@@ -18,7 +18,7 @@ import { CreationSource } from "~/interface/sample";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
-import { WORKFLOWS } from "~utils/workflows";
+import { WorkflowType } from "~utils/workflows";
 import cs from "./nextclade_modal.scss";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
@@ -81,7 +81,7 @@ export default class NextcladeModal extends React.Component<
       await validateWorkflowRunIds({
         basic: false,
         workflowRunIds: Array.from(selectedIds),
-        workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+        workflow: WorkflowType.CONSENSUS_GENOME,
       });
 
     const { workflowRunInfo } = await getWorkflowRunsInfo(validIds);

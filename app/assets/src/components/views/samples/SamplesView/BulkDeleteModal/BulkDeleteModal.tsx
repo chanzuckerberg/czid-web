@@ -10,10 +10,7 @@ import { bulkDeleteObjects, validateUserCanDeleteObjects } from "~/api";
 import { ErrorButton } from "~/components/ui/controls/buttons";
 import { pluralize } from "~/components/utils/stringUtil";
 import { showToast } from "~/components/utils/toast";
-import {
-  getLabelFromWorkflow,
-  WORKFLOW_VALUES,
-} from "~/components/utils/workflows";
+import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import cs from "./bulk_delete_modal.scss";
 import { DeleteErrorNotification } from "./DeleteErrorNotification";
 import { DeleteSampleModalText } from "./DeleteSampleModalText";
@@ -24,7 +21,7 @@ interface BulkDeleteModalProps {
   isOpen: boolean;
   onClose(): void;
   selectedIds: number[];
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
   onSuccess?(): void;
   redirectOnSuccess?: boolean;
 }
@@ -61,7 +58,7 @@ const BulkDeleteModal = ({
     validateSamplesCanBeDeleted();
   }, [selectedIds, workflow]);
 
-  const workflowLabel = getLabelFromWorkflow(workflow);
+  const workflowLabel = WORKFLOW_TABS[workflow];
 
   const onDeleteSuccess = ({ successCount }) => {
     if (!redirectOnSuccess) {

@@ -61,9 +61,10 @@ import {
   workflowIsBeta,
   workflowIsWorkflowRunEntity,
   WORKFLOWS,
+  WorkflowType,
   WORKFLOW_ENTITIES,
   WORKFLOW_ORDER,
-  WORKFLOW_VALUES,
+  WORKFLOW_TABS,
 } from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
@@ -228,11 +229,11 @@ class DiscoveryView extends React.Component<
       filteredProjectCount: null,
       filteredProjectDimensions: [],
       filteredSampleCountsByWorkflow: {
-        [WORKFLOWS.SHORT_READ_MNGS.value]: null,
-        [WORKFLOWS.LONG_READ_MNGS.value]: null,
-        [WORKFLOWS.AMR.value]: null,
-        [WORKFLOWS.CONSENSUS_GENOME.value]: null,
-        [WORKFLOWS.BENCHMARK.value]: null,
+        [WorkflowType.SHORT_READ_MNGS]: null,
+        [WorkflowType.LONG_READ_MNGS]: null,
+        [WorkflowType.AMR]: null,
+        [WorkflowType.CONSENSUS_GENOME]: null,
+        [WorkflowType.BENCHMARK]: null,
       },
       filteredSampleDimensions: [],
       filteredSampleStats: {},
@@ -262,26 +263,23 @@ class DiscoveryView extends React.Component<
       selectableSampleIds: [],
       selectableWorkflowRunIds: [],
       selectedSampleIdsByWorkflow: {
-        [WORKFLOWS.AMR.value]: new Set(),
-        [WORKFLOWS.CONSENSUS_GENOME.value]: new Set(),
-        [WORKFLOWS.SHORT_READ_MNGS.value]: new Set(),
-        [WORKFLOWS.LONG_READ_MNGS.value]: new Set(),
-        [WORKFLOWS.BENCHMARK.value]: new Set(),
+        [WorkflowType.AMR]: new Set(),
+        [WorkflowType.CONSENSUS_GENOME]: new Set(),
+        [WorkflowType.SHORT_READ_MNGS]: new Set(),
+        [WorkflowType.LONG_READ_MNGS]: new Set(),
+        [WorkflowType.BENCHMARK]: new Set(),
       },
       showFilters: true,
       showStats: true,
       userDataCounts: null,
-      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+      workflow: WorkflowType.SHORT_READ_MNGS,
       workflowEntity: WORKFLOW_ENTITIES.SAMPLES,
       ...localState,
       ...sessionState,
       ...urlState,
     };
 
-    this.workflowEntity = find(
-      { value: this.state.workflow },
-      values(WORKFLOWS),
-    ).entity;
+    this.workflowEntity = WORKFLOWS[this.state.workflow].entity;
 
     this.dataLayer = new DiscoveryDataLayer(domain);
 
@@ -289,55 +287,52 @@ class DiscoveryView extends React.Component<
     this.samples = this.dataLayer.samples.createView({
       conditions: this.getConditionsFor(
         TAB_SAMPLES,
-        WORKFLOWS.SHORT_READ_MNGS.value,
+        WorkflowType.SHORT_READ_MNGS,
       ),
       onViewChange: () => {
-        this.refreshSampleData(WORKFLOWS.SHORT_READ_MNGS.value);
+        this.refreshSampleData(WorkflowType.SHORT_READ_MNGS);
       },
-      displayName: WORKFLOWS.SHORT_READ_MNGS.value,
+      displayName: WorkflowType.SHORT_READ_MNGS,
     });
 
     this.cgWorkflowRuns = this.dataLayer.cgWorkflowRuns.createView({
       conditions: this.getConditionsFor(
         TAB_SAMPLES,
-        WORKFLOWS.CONSENSUS_GENOME.value,
+        WorkflowType.CONSENSUS_GENOME,
       ),
       onViewChange: () => {
-        this.refreshWorkflowRunData(WORKFLOWS.CONSENSUS_GENOME.value);
+        this.refreshWorkflowRunData(WorkflowType.CONSENSUS_GENOME);
       },
-      displayName: WORKFLOWS.CONSENSUS_GENOME.value,
+      displayName: WorkflowType.CONSENSUS_GENOME,
     });
 
     this.amrWorkflowRuns = this.dataLayer.amrWorkflowRuns.createView({
-      conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
+      conditions: this.getConditionsFor(TAB_SAMPLES, WorkflowType.AMR),
       onViewChange: () => {
-        this.refreshWorkflowRunData(WORKFLOWS.AMR.value);
+        this.refreshWorkflowRunData(WorkflowType.AMR);
       },
-      displayName: WORKFLOWS.AMR.value,
+      displayName: WorkflowType.AMR,
     });
 
     this.benchmarkWorkflowRuns =
       this.dataLayer.benchmarkWorkflowRuns.createView({
-        conditions: this.getConditionsFor(
-          TAB_SAMPLES,
-          WORKFLOWS.BENCHMARK.value,
-        ),
+        conditions: this.getConditionsFor(TAB_SAMPLES, WorkflowType.BENCHMARK),
         onViewChange: () => {
-          this.refreshWorkflowRunData(WORKFLOWS.BENCHMARK.value);
+          this.refreshWorkflowRunData(WorkflowType.BENCHMARK);
         },
-        displayName: WORKFLOWS.BENCHMARK.value,
+        displayName: WorkflowType.BENCHMARK,
       }) as ObjectCollectionView<Entry>;
 
     if (allowedFeatures.includes(ONT_V1_FEATURE)) {
       this.longReadMngsSamples = this.dataLayer.longReadMngsSamples.createView({
         conditions: this.getConditionsFor(
           TAB_SAMPLES,
-          WORKFLOWS.LONG_READ_MNGS.value,
+          WorkflowType.LONG_READ_MNGS,
         ),
         onViewChange: () => {
-          this.refreshSampleData(WORKFLOWS.LONG_READ_MNGS.value);
+          this.refreshSampleData(WorkflowType.LONG_READ_MNGS);
         },
-        displayName: WORKFLOWS.LONG_READ_MNGS.value,
+        displayName: WorkflowType.LONG_READ_MNGS,
       });
     }
 
@@ -382,8 +377,8 @@ class DiscoveryView extends React.Component<
 
   setupWorkflowConfigs = () => {
     this.configForWorkflow = {
-      [WORKFLOWS.AMR.value]: {
-        bannerTitle: `${WORKFLOWS.AMR.value.toUpperCase()} Samples`,
+      [WorkflowType.AMR]: {
+        bannerTitle: `${WorkflowType.AMR.toUpperCase()} Samples`,
         objectCollection: this.amrWorkflowRuns,
         noDataLinks: [
           {
@@ -400,8 +395,8 @@ class DiscoveryView extends React.Component<
           `No samples were processed by the AMR Pipeline. ` +
           "You can upload new samples or rerun mNGS samples through the AMR pipeline.",
       },
-      [WORKFLOWS.BENCHMARK.value]: {
-        bannerTitle: `${WORKFLOWS.BENCHMARK.value.toUpperCase()} Samples`,
+      [WorkflowType.BENCHMARK]: {
+        bannerTitle: `${WorkflowType.BENCHMARK.toUpperCase()} Samples`,
         objectCollection: this.benchmarkWorkflowRuns,
         noDataLinks: [
           {
@@ -413,41 +408,41 @@ class DiscoveryView extends React.Component<
           `No samples were processed by the Benchmark Pipeline. ` +
           "You can Benchmark samples by selecting them in the mNGS table and clicking the 'Benchmark' icon.",
       },
-      [WORKFLOWS.CONSENSUS_GENOME.value]: {
-        bannerTitle: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
+      [WorkflowType.CONSENSUS_GENOME]: {
+        bannerTitle: WORKFLOWS[WorkflowType.CONSENSUS_GENOME].pluralizedLabel,
         objectCollection: this.cgWorkflowRuns,
         noDataLinks: this.getNoDataLinks(
-          WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
+          WORKFLOWS[WorkflowType.CONSENSUS_GENOME].pluralizedLabel,
         ),
         noDataMessage: this.getNoDataBannerMessage(
-          WORKFLOWS.CONSENSUS_GENOME.label,
+          WORKFLOW_TABS.CONSENSUS_GENOME,
         ),
       },
-      [WORKFLOWS.SHORT_READ_MNGS.value]: {
-        bannerTitle: `${WORKFLOWS.SHORT_READ_MNGS.label} Samples`,
+      [WorkflowType.SHORT_READ_MNGS]: {
+        bannerTitle: `${WORKFLOW_TABS.SHORT_READ_MNGS} Samples`,
         objectCollection: this.samples,
         noDataLinks: this.getNoDataLinks(
-          WORKFLOWS.SHORT_READ_MNGS.pluralizedLabel,
+          WORKFLOWS[WorkflowType.SHORT_READ_MNGS].pluralizedLabel,
         ),
         noDataMessage: this.getNoDataBannerMessage(
-          WORKFLOWS.SHORT_READ_MNGS.label,
+          WORKFLOW_TABS.SHORT_READ_MNGS,
         ),
       },
-      [WORKFLOWS.LONG_READ_MNGS.value]: {
-        bannerTitle: `${WORKFLOWS.LONG_READ_MNGS.label} Samples`,
+      [WorkflowType.LONG_READ_MNGS]: {
+        bannerTitle: `${WORKFLOW_TABS.LONG_READ_MNGS} Samples`,
         objectCollection: this.longReadMngsSamples,
         noDataLinks: this.getNoDataLinks(
-          WORKFLOWS.LONG_READ_MNGS.pluralizedLabel,
+          WORKFLOWS[WorkflowType.LONG_READ_MNGS].pluralizedLabel,
         ),
         noDataMessage: this.getNoDataBannerMessage(
-          WORKFLOWS.LONG_READ_MNGS.label,
+          WORKFLOW_TABS.LONG_READ_MNGS,
         ),
       },
     };
   };
 
   getWorkflowToDisplay = (
-    initialWorkflow: WORKFLOW_VALUES,
+    initialWorkflow: WorkflowType,
     countByWorkflow: WorkflowCount,
   ) => {
     // If default workflow does not have any samples, switch to a tab with samples
@@ -459,27 +454,27 @@ class DiscoveryView extends React.Component<
     }
 
     const numOfShortReadMngsSamples =
-      countByWorkflow?.[WORKFLOWS.SHORT_READ_MNGS.value];
+      countByWorkflow?.[WorkflowType.SHORT_READ_MNGS];
     const numOfLongReadMngsSamples =
-      countByWorkflow?.[WORKFLOWS.LONG_READ_MNGS.value];
-    const numOfCgSamples = countByWorkflow?.[WORKFLOWS.CONSENSUS_GENOME.value];
-    const numOfAmrSamples = countByWorkflow?.[WORKFLOWS.AMR.value];
+      countByWorkflow?.[WorkflowType.LONG_READ_MNGS];
+    const numOfCgSamples = countByWorkflow?.[WorkflowType.CONSENSUS_GENOME];
+    const numOfAmrSamples = countByWorkflow?.[WorkflowType.AMR];
 
     if (numOfShortReadMngsSamples > 0) {
-      return WORKFLOWS.SHORT_READ_MNGS.value;
+      return WorkflowType.SHORT_READ_MNGS;
     } else if (
       numOfLongReadMngsSamples > 0 &&
       allowedFeatures.includes(ONT_V1_FEATURE)
     ) {
-      return WORKFLOWS.LONG_READ_MNGS.value;
+      return WorkflowType.LONG_READ_MNGS;
     } else if (numOfCgSamples > 0) {
-      return WORKFLOWS.CONSENSUS_GENOME.value;
+      return WorkflowType.CONSENSUS_GENOME;
     } else if (numOfAmrSamples > 0) {
-      return WORKFLOWS.AMR.value;
+      return WorkflowType.AMR;
     }
 
     // If the user has no samples at all, return short-read-mngs
-    return WORKFLOWS.SHORT_READ_MNGS.value;
+    return WorkflowType.SHORT_READ_MNGS;
   };
 
   async componentDidMount() {
@@ -513,14 +508,14 @@ class DiscoveryView extends React.Component<
     };
   }
 
-  getConditionsFor = (tab: string, workflow: WORKFLOW_VALUES = null) => {
+  getConditionsFor = (tab: string, workflow: WorkflowType = null) => {
     return {
       ...this.getConditions(workflow),
       ...this.getDataLayerOrderStateFieldsFor(tab, workflow),
     };
   };
 
-  getConditions = (workflow?: WORKFLOW_VALUES): Conditions => {
+  getConditions = (workflow?: WorkflowType): Conditions => {
     const { projectId, search, orderBy, orderDirection } = this.state;
     const { snapshotShareId } = this.props;
 
@@ -543,12 +538,11 @@ class DiscoveryView extends React.Component<
     stateObject: Partial<DiscoveryViewState>;
   }) {
     const defaultCGColumns =
-      DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[WORKFLOWS.CONSENSUS_GENOME.value];
+      DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[WorkflowType.CONSENSUS_GENOME];
 
     // eslint-disable-next-line standard/computed-property-even-spacing
-    stateObject.sampleActiveColumnsByWorkflow[
-      WORKFLOWS.CONSENSUS_GENOME.value
-    ] = defaultCGColumns;
+    stateObject.sampleActiveColumnsByWorkflow[WorkflowType.CONSENSUS_GENOME] =
+      defaultCGColumns;
     stateObject["updatedAt"] = new Date();
 
     return stateObject;
@@ -566,7 +560,7 @@ class DiscoveryView extends React.Component<
 
   getOrderStateFieldsFor = (
     tab: string,
-    workflow: WORKFLOW_VALUES = null,
+    workflow: WorkflowType = null,
   ): {
     orderBy: string | undefined;
     orderDirection: SortDirectionType | undefined;
@@ -579,7 +573,7 @@ class DiscoveryView extends React.Component<
 
   getDataLayerOrderStateFieldsFor = (
     tab: string,
-    workflow: WORKFLOW_VALUES = null,
+    workflow: WorkflowType = null,
   ) => {
     const { orderBy, orderDirection: orderDir } = this.getOrderStateFieldsFor(
       tab,
@@ -799,7 +793,7 @@ class DiscoveryView extends React.Component<
     this.samples.reset({
       conditions: this.getConditionsFor(
         TAB_SAMPLES,
-        WORKFLOWS.SHORT_READ_MNGS.value,
+        WorkflowType.SHORT_READ_MNGS,
       ),
       loadFirstPage: true,
     });
@@ -816,18 +810,18 @@ class DiscoveryView extends React.Component<
       this.cgWorkflowRuns.reset({
         conditions: this.getConditionsFor(
           TAB_SAMPLES,
-          WORKFLOWS.CONSENSUS_GENOME.value,
+          WorkflowType.CONSENSUS_GENOME,
         ),
         loadFirstPage: true,
       });
       this.amrWorkflowRuns.reset({
-        conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
+        conditions: this.getConditionsFor(TAB_SAMPLES, WorkflowType.AMR),
         loadFirstPage: true,
       });
       this.longReadMngsSamples.reset({
         conditions: this.getConditionsFor(
           TAB_SAMPLES,
-          WORKFLOWS.LONG_READ_MNGS.value,
+          WorkflowType.LONG_READ_MNGS,
         ),
         loadFirstPage: true,
       });
@@ -836,7 +830,7 @@ class DiscoveryView extends React.Component<
         this.benchmarkWorkflowRuns.reset({
           conditions: this.getConditionsFor(
             TAB_SAMPLES,
-            WORKFLOWS.BENCHMARK.value,
+            WorkflowType.BENCHMARK,
           ),
           loadFirstPage: true,
         });
@@ -854,11 +848,11 @@ class DiscoveryView extends React.Component<
         filteredProjectCount: null,
         filteredProjectDimensions: [],
         filteredSampleCountsByWorkflow: {
-          [WORKFLOWS.AMR.value]: null,
-          [WORKFLOWS.CONSENSUS_GENOME.value]: null,
-          [WORKFLOWS.SHORT_READ_MNGS.value]: null,
-          [WORKFLOWS.LONG_READ_MNGS.value]: null,
-          [WORKFLOWS.BENCHMARK.value]: null,
+          [WorkflowType.AMR]: null,
+          [WorkflowType.CONSENSUS_GENOME]: null,
+          [WorkflowType.SHORT_READ_MNGS]: null,
+          [WorkflowType.LONG_READ_MNGS]: null,
+          [WorkflowType.BENCHMARK]: null,
         },
         filteredSampleDimensions: [],
         filteredVisualizationCount: null,
@@ -1038,7 +1032,7 @@ class DiscoveryView extends React.Component<
     });
   };
 
-  refreshSampleData = (workflowTypeToUpdate: WORKFLOW_VALUES) => {
+  refreshSampleData = (workflowTypeToUpdate: WorkflowType) => {
     const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
     const collectionToUpdate = configToUpdate.objectCollection;
     this.setState(prevState => {
@@ -1066,7 +1060,7 @@ class DiscoveryView extends React.Component<
     });
   };
 
-  refreshWorkflowRunData = (workflowTypeToUpdate: WORKFLOW_VALUES) => {
+  refreshWorkflowRunData = (workflowTypeToUpdate: WorkflowType) => {
     const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
     const collectionToUpdate = configToUpdate.objectCollection;
 
@@ -1191,7 +1185,7 @@ class DiscoveryView extends React.Component<
     this.setState(
       {
         workflow,
-        workflowEntity: find({ value: workflow }, values(WORKFLOWS)).entity,
+        workflowEntity: WORKFLOWS[workflow].entity,
         userDataCounts: {
           sampleCountByWorkflow: sampleStats.countByWorkflow,
           sampleCount: sampleStats.count,
@@ -1840,15 +1834,15 @@ class DiscoveryView extends React.Component<
 
       const filteredSampleCounts = {
         filteredSampleCount:
-          filteredSampleCountsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value],
+          filteredSampleCountsByWorkflow[WorkflowType.SHORT_READ_MNGS],
         filteredWorkflowRunCount:
-          filteredSampleCountsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value],
+          filteredSampleCountsByWorkflow[WorkflowType.CONSENSUS_GENOME],
         filteredAmrWorkflowRunCount:
-          filteredSampleCountsByWorkflow[WORKFLOWS.AMR.value],
+          filteredSampleCountsByWorkflow[WorkflowType.AMR],
         filteredLongReadMngsSampleCount:
-          filteredSampleCountsByWorkflow[WORKFLOWS.LONG_READ_MNGS.value],
+          filteredSampleCountsByWorkflow[WorkflowType.LONG_READ_MNGS],
         filteredBenchmarkWorkflowRunCount:
-          filteredSampleCountsByWorkflow[WORKFLOWS.BENCHMARK.value],
+          filteredSampleCountsByWorkflow[WorkflowType.BENCHMARK],
       };
 
       trackEvent(
@@ -2139,7 +2133,7 @@ class DiscoveryView extends React.Component<
       <div className={cs.workflowTabs}>
         <Tabs
           sdsSize="small"
-          value={findIndex({ value: workflow }, this.computeWorkflowTabs())}
+          value={findIndex(workflow, this.computeWorkflowTabs())}
           onChange={(_, selectedTabIndex) =>
             this.handleWorkflowTabChange(selectedTabIndex)
           }
@@ -2150,19 +2144,19 @@ class DiscoveryView extends React.Component<
     );
   };
 
-  resetWorkflowDataOnTabChange = (workflow: WORKFLOW_VALUES) => {
+  resetWorkflowDataOnTabChange = (workflow: WorkflowType) => {
     switch (workflow) {
-      case WORKFLOWS.AMR.value:
+      case WorkflowType.AMR:
         this.amrWorkflowRuns.reset({
-          conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
+          conditions: this.getConditionsFor(TAB_SAMPLES, WorkflowType.AMR),
           loadFirstPage: true,
         });
         break;
-      case WORKFLOWS.BENCHMARK.value:
+      case WorkflowType.BENCHMARK:
         this.benchmarkWorkflowRuns.reset({
           conditions: this.getConditionsFor(
             TAB_SAMPLES,
-            WORKFLOWS.BENCHMARK.value,
+            WorkflowType.BENCHMARK,
           ),
           loadFirstPage: true,
         });
@@ -2181,7 +2175,7 @@ class DiscoveryView extends React.Component<
     const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
 
     // PLQC is currently only available for short read mNGS samples
-    const plqcWorkflows = [WORKFLOWS.SHORT_READ_MNGS.value as typeof workflow];
+    const plqcWorkflows = [WorkflowType.SHORT_READ_MNGS as typeof workflow];
     if (currentDisplay === DISPLAY_PLQC && !plqcWorkflows.includes(workflow)) {
       currentDisplay = "table";
     }
@@ -2196,7 +2190,7 @@ class DiscoveryView extends React.Component<
           selectableSampleIds: workflowObjects.getIds(),
         }),
         workflow,
-        workflowEntity: find({ value: workflow }, values(WORKFLOWS)).entity,
+        workflowEntity: WORKFLOWS[workflow].entity,
         ...this.getOrderStateFieldsFor(currentTab, workflow),
       },
       () => {
@@ -2217,11 +2211,11 @@ class DiscoveryView extends React.Component<
     const { admin, allowedFeatures = [] } = this.context || {};
     let workflows = WORKFLOW_ORDER;
     if (!allowedFeatures.includes(ONT_V1_FEATURE)) {
-      workflows = pull("LONG_READ_MNGS", workflows);
+      workflows = pull(WorkflowType.LONG_READ_MNGS, workflows);
     }
 
     if (!admin && !allowedFeatures.includes(BENCHMARKING_FEATURE)) {
-      workflows = pull("BENCHMARK", workflows);
+      workflows = pull(WorkflowType.BENCHMARK, workflows);
     }
 
     if (snapshotShareId) workflows = [workflows[0]]; // Only short-read-mngs
@@ -2230,8 +2224,7 @@ class DiscoveryView extends React.Component<
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
       const isBeta = workflowIsBeta(name, allowedFeatures);
 
-      let workflowCount: number | string =
-        filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
+      let workflowCount: number | string = filteredSampleCountsByWorkflow[name];
 
       // This count is set to null when we reset data, so show "-" as loading state.
       // This is the same pattern used for the top level tabs.
@@ -2265,7 +2258,7 @@ class DiscoveryView extends React.Component<
             }
           />
         ),
-        value: WORKFLOWS[name].value,
+        value: name,
       };
     });
   };
@@ -2275,7 +2268,7 @@ class DiscoveryView extends React.Component<
     workflow,
   }: {
     numWorkflowRunsCreated: number;
-    workflow: WORKFLOW_VALUES;
+    workflow: WorkflowType;
   }) => {
     // When workflow runs are kicked off from existing samples, we need to update the counts appropriately
     this.setState(
@@ -2549,10 +2542,10 @@ class DiscoveryView extends React.Component<
       filterCount || search ? filteredSampleDimensions : sampleDimensions;
     const loading = loadingDimensions || loadingStats;
     const selectedMngsSampleIds =
-      selectedSampleIdsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value];
+      selectedSampleIdsByWorkflow[WorkflowType.SHORT_READ_MNGS];
 
     const filteredMngsSampleCount =
-      filteredSampleCountsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value];
+      filteredSampleCountsByWorkflow[WorkflowType.SHORT_READ_MNGS];
     return (
       <div className={cs.rightPane}>
         {showStats &&
@@ -2664,7 +2657,7 @@ class DiscoveryView extends React.Component<
     const dimensions = this.getCurrentDimensions();
     const filterCount = this.getFilterCount();
     const onBenchmarkingTab =
-      currentTab === TAB_SAMPLES && workflow === WORKFLOWS.BENCHMARK.value;
+      currentTab === TAB_SAMPLES && workflow === WorkflowType.BENCHMARK;
     const displayFilters = onBenchmarkingTab
       ? false
       : showFilters && !!dimensions;

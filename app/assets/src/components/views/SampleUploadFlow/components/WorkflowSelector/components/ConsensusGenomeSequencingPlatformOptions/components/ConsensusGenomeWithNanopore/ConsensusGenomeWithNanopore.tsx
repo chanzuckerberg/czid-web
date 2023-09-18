@@ -1,7 +1,7 @@
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { ARTIC_PIPELINE_LINK } from "~/components/utils/documentationLinks";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import {
   PIPELINE_HELP_LINKS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
@@ -65,7 +65,7 @@ const ConsensusGenomeWithNanopore = ({
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE}
       tooltipText={tooltipText}
       pipelineVersion={pipelineVersion}
-      pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.CONSENSUS_GENOME.value]}
+      pipelineHelpLink={PIPELINE_HELP_LINKS[WorkflowType.CONSENSUS_GENOME]}
     />
   );
 };

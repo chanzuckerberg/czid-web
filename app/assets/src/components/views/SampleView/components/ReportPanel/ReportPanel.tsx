@@ -1,6 +1,6 @@
 import React from "react";
 import DeprecatedAmrView from "~/components/DeprecatedAmrView";
-import { TABS } from "~/components/views/SampleView/utils";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import { AmrView } from "../AmrView";
@@ -41,9 +41,9 @@ export const ReportPanel = ({
 }: ReportPanelProps) => {
   return (
     <>
-      {(currentTab === TABS.SHORT_READ_MNGS ||
-        currentTab === TABS.LONG_READ_MNGS ||
-        currentTab === TABS.MERGED_NT_NR) && (
+      {(currentTab === WORKFLOW_TABS.SHORT_READ_MNGS ||
+        currentTab === WORKFLOW_TABS.LONG_READ_MNGS ||
+        currentTab === WORKFLOW_TABS.MERGED_NT_NR) && (
         <MngsReport
           backgrounds={backgrounds}
           currentTab={currentTab}
@@ -75,19 +75,19 @@ export const ReportPanel = ({
           view={view}
         />
       )}
-      {currentTab === TABS.AMR_DEPRECATED && amrDeprecatedData && (
+      {currentTab === WORKFLOW_TABS.AMR_DEPRECATED && amrDeprecatedData && (
         <DeprecatedAmrView amr={amrDeprecatedData} />
       )}
-      {currentTab === TABS.AMR && sample && (
+      {currentTab === WORKFLOW_TABS.AMR && sample && (
         <AmrView sample={sample} workflowRun={currentRun as WorkflowRun} />
       )}
-      {currentTab === TABS.BENCHMARK && sample && (
+      {currentTab === WORKFLOW_TABS.BENCHMARK && sample && (
         <BenchmarkView
           sample={sample}
           workflowRun={currentRun as WorkflowRun}
         />
       )}
-      {currentTab === TABS.CONSENSUS_GENOME && sample && (
+      {currentTab === WORKFLOW_TABS.CONSENSUS_GENOME && sample && (
         <ConsensusGenomeView
           onWorkflowRunSelect={handleWorkflowRunSelect}
           sample={sample}

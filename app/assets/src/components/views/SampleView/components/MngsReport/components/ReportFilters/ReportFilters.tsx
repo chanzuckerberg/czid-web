@@ -19,6 +19,10 @@ import {
   PATHOGEN_FLAG_FILTER_FEATURE,
 } from "~/components/utils/features";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
+import {
+  getWorkflowTypeFromLabel,
+  WORKFLOW_TABS,
+} from "~/components/utils/workflows";
 import AnnotationFilter from "~/components/views/report/filters/AnnotationFilter";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
@@ -28,7 +32,6 @@ import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
 import {
   CATEGORIES,
-  TABS,
   THRESHOLDS,
   TREE_METRICS,
 } from "~/components/views/SampleView/utils";
@@ -88,7 +91,7 @@ export const ReportFilters = ({
 }: ReportFiltersProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
-  const showBackgroundFilter = currentTab === TABS.SHORT_READ_MNGS;
+  const showBackgroundFilter = currentTab === WORKFLOW_TABS.SHORT_READ_MNGS;
   const handleFilterRemove = ({
     key,
     subpath,
@@ -200,7 +203,7 @@ export const ReportFilters = ({
       onClose={() =>
         handleRemoveFilter({
           key:
-            currentTab === TABS.SHORT_READ_MNGS
+            currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
               ? "thresholdsShortReads"
               : "thresholdsLongReads",
           value: threshold,
@@ -248,18 +251,18 @@ export const ReportFilters = ({
   const treeMetrics = !selected.background
     ? filter(
         metric => metric.value !== "aggregatescore",
-        TREE_METRICS[currentTab],
+        TREE_METRICS[getWorkflowTypeFromLabel(currentTab)],
       )
-    : TREE_METRICS[currentTab];
+    : TREE_METRICS[getWorkflowTypeFromLabel(currentTab)];
 
   // Display reads OR bases metrics based on the sample's workflow
   const selectedTreeMetric =
-    currentTab === TABS.SHORT_READ_MNGS
+    currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
       ? selected.metricShortReads
       : selected.metricLongReads;
 
   const selectedThresholds =
-    currentTab === TABS.SHORT_READ_MNGS
+    currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
       ? selected.thresholdsShortReads
       : selected.thresholdsLongReads;
 
@@ -390,7 +393,7 @@ export const ReportFilters = ({
             onApply={(value: ThresholdConditions) =>
               handleFilterChange({
                 key:
-                  currentTab === TABS.SHORT_READ_MNGS
+                  currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
                     ? "thresholdsShortReads"
                     : "thresholdsLongReads",
                 value,
@@ -449,7 +452,7 @@ export const ReportFilters = ({
               onChange={(value: string) =>
                 handleFilterChange({
                   key:
-                    currentTab === TABS.SHORT_READ_MNGS
+                    currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
                       ? "metricShortReads"
                       : "metricLongReads",
                   value,

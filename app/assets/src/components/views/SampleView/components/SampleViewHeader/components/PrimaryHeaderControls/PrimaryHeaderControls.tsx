@@ -15,15 +15,14 @@ import {
 } from "~/components/utils/appcues";
 import {
   isMngsWorkflow,
-  WORKFLOWS,
-  WORKFLOW_VALUES,
+  WorkflowType,
+  WORKFLOW_TABS,
 } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import {
   FINALIZED_SAMPLE_UPLOAD_ERRORS,
   SampleUploadErrors,
 } from "~/components/views/samples/constants";
-import { TABS } from "~/components/views/SampleView/utils";
 import { parseUrlParams } from "~/helpers/url";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -49,7 +48,7 @@ interface PrimaryHeaderControlsProps {
   reportMetadata: ReportMetadata;
   sample: Sample;
   view: string;
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
 }
 
 export const PrimaryHeaderControls = ({
@@ -110,7 +109,7 @@ export const PrimaryHeaderControls = ({
           className={cs.controlElement}
           text="Download All"
           onClick={() => onDownloadAll(workflow)}
-          primary={workflow === WORKFLOWS.AMR.value}
+          primary={workflow === WorkflowType.AMR}
         />
       )
     );
@@ -121,16 +120,16 @@ export const PrimaryHeaderControls = ({
       return;
     }
     switch (workflow) {
-      case WORKFLOWS.LONG_READ_MNGS.value:
-      case WORKFLOWS.SHORT_READ_MNGS.value:
+      case WorkflowType.LONG_READ_MNGS:
+      case WorkflowType.SHORT_READ_MNGS:
         return renderDownloadDropdown();
         break;
-      case WORKFLOWS.CONSENSUS_GENOME.value:
+      case WorkflowType.CONSENSUS_GENOME:
         return renderDownloadAll(workflow);
         break;
-      case WORKFLOWS.AMR.value:
+      case WorkflowType.AMR:
         return renderDownloadDropdown();
-      case WORKFLOWS.BENCHMARK.value:
+      case WorkflowType.BENCHMARK:
         return (
           <BenchmarkDownloadDropdown
             className={cs.controlElement}
@@ -143,8 +142,8 @@ export const PrimaryHeaderControls = ({
 
   const renderDownloadDropdown = () => {
     switch (workflow) {
-      case WORKFLOWS.LONG_READ_MNGS.value:
-      case WORKFLOWS.SHORT_READ_MNGS.value: {
+      case WorkflowType.LONG_READ_MNGS:
+      case WorkflowType.SHORT_READ_MNGS: {
         return (
           <MngsDownloadDropdown
             className={cs.controlElement}
@@ -161,7 +160,7 @@ export const PrimaryHeaderControls = ({
         );
       }
 
-      case WORKFLOWS.AMR.value: {
+      case WorkflowType.AMR: {
         return (
           <AmrDownloadDropdown
             className={cs.controlElement}
@@ -186,9 +185,9 @@ export const PrimaryHeaderControls = ({
 
     // Show help button only for SHORT_READ_MNGS and AMR workflows or when shouldHideConsensusGenomeHelpButton is false
     if (
-      workflow === WORKFLOWS.LONG_READ_MNGS.value ||
-      currentTab === TABS.AMR_DEPRECATED ||
-      (workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
+      workflow === WorkflowType.LONG_READ_MNGS ||
+      currentTab === WORKFLOW_TABS.AMR_DEPRECATED ||
+      (workflow === WorkflowType.CONSENSUS_GENOME &&
         shouldHideConsensusGenomeHelpButton)
     ) {
       return;
@@ -196,17 +195,17 @@ export const PrimaryHeaderControls = ({
 
     // format appCueFlowId and anaylticsEventName based on workflow
     const appCueFlowId = {
-      [WORKFLOWS.SHORT_READ_MNGS.value]: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
-      [WORKFLOWS.CONSENSUS_GENOME.value]: SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
-      [WORKFLOWS.AMR.value]: SAMPLE_VIEW_HEADER_AMR_HELP_SIDEBAR,
+      [WorkflowType.SHORT_READ_MNGS]: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
+      [WorkflowType.CONSENSUS_GENOME]: SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
+      [WorkflowType.AMR]: SAMPLE_VIEW_HEADER_AMR_HELP_SIDEBAR,
     };
 
     const anaylticsEventName = {
-      [WORKFLOWS.SHORT_READ_MNGS.value]:
+      [WorkflowType.SHORT_READ_MNGS]:
         ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
-      [WORKFLOWS.CONSENSUS_GENOME.value]:
+      [WorkflowType.CONSENSUS_GENOME]:
         ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED,
-      [WORKFLOWS.AMR.value]:
+      [WorkflowType.AMR]:
         ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_AMR_HELP_BUTTON_CLICKED,
     };
 
@@ -223,8 +222,8 @@ export const PrimaryHeaderControls = ({
 
   const renderSaveButton = () => {
     switch (workflow) {
-      case WORKFLOWS.LONG_READ_MNGS.value:
-      case WORKFLOWS.SHORT_READ_MNGS.value:
+      case WorkflowType.LONG_READ_MNGS:
+      case WorkflowType.SHORT_READ_MNGS:
         return (
           userIsAdmin && (
             <SaveButton
@@ -250,7 +249,7 @@ export const PrimaryHeaderControls = ({
     const readyToDelete = currentRunLoaded || sample?.upload_error;
     return (
       readyToDelete &&
-      currentTab !== TABS.AMR_DEPRECATED && (
+      currentTab !== WORKFLOW_TABS.AMR_DEPRECATED && (
         <OverflowMenu
           className={cs.controlElement}
           workflow={workflow}

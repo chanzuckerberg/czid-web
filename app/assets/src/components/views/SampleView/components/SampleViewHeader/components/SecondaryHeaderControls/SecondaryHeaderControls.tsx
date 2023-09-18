@@ -2,7 +2,7 @@ import { Button } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
-import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { PipelineVersionSelect } from "~/components/views/components/PipelineVersionSelect";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
@@ -13,7 +13,7 @@ interface SecondaryHeaderControlsProps {
   sample: Sample;
   currentRun: WorkflowRun | PipelineRun;
   getAllRuns: () => WorkflowRun[] | PipelineRun[];
-  workflow: WORKFLOW_VALUES;
+  workflow: WorkflowType;
   onPipelineVersionChange: (newPipelineVersion: string) => void;
   onDetailsClick: () => void;
 }

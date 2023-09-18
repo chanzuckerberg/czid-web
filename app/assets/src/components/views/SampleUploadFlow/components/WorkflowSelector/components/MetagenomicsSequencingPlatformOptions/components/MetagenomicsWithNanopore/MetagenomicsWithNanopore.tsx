@@ -7,7 +7,7 @@ import {
   MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
 import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import {
   PIPELINE_HELP_LINKS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
@@ -74,7 +74,7 @@ const MetagenomicsWithNanopore = ({
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE}
       tooltipText={tooltipText}
       pipelineVersion={pipelineVersion}
-      pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.LONG_READ_MNGS.value]}
+      pipelineHelpLink={PIPELINE_HELP_LINKS[WorkflowType.LONG_READ_MNGS]}
     />
   );
 };

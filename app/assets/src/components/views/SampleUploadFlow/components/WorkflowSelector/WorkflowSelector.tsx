@@ -15,7 +15,7 @@ import {
   AMR_MODERN_HOST_FILTERING_FEATURE,
   isPipelineFeatureAvailable,
 } from "~/components/utils/pipeline_versions";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
 import { IconCovidVirusXLarge } from "~ui/icons";
 import {
@@ -144,10 +144,10 @@ const WorkflowSelector = ({
   };
 
   const isPinnedVersion =
-    projectPipelineVersions?.[WORKFLOWS.AMR.value] &&
+    projectPipelineVersions?.[WorkflowType.AMR] &&
     !isPipelineFeatureAvailable(
       AMR_MODERN_HOST_FILTERING_FEATURE,
-      projectPipelineVersions?.[WORKFLOWS.AMR.value],
+      projectPipelineVersions?.[WorkflowType.AMR],
     );
 
   return (
@@ -208,8 +208,8 @@ const WorkflowSelector = ({
           <div className={cs.technologyContent}>
             <PipelineVersionIndicator
               isPinnedVersion={isPinnedVersion}
-              pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.AMR.value]}
-              version={projectPipelineVersions?.[WORKFLOWS.AMR.value]}
+              pipelineHelpLink={PIPELINE_HELP_LINKS[WorkflowType.AMR]}
+              version={projectPipelineVersions?.[WorkflowType.AMR]}
               versionHelpLink={AMR_PINNED_PIPELINE_VERSION_HELP_LINK}
             />
           </div>

@@ -26,7 +26,7 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import List from "~/components/ui/List";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import {
   SHARED_SAMPLE_TABLE_COLUMNS,
   SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
@@ -73,7 +73,7 @@ function QualityControlWrapper(props: QualityControlWrapperProps) {
   const { loading, error, data } = useQuery(QUALITY_CONTROL_QUERY, {
     variables: {
       projectId: props.projectId,
-      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+      workflow: WorkflowType.SHORT_READ_MNGS,
       hostIds: props.filters.host,
       ...props.filters,
     },
