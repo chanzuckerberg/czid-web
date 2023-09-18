@@ -321,8 +321,8 @@ ActiveRecord::Schema.define(version: 2023_07_06_191003) do
     t.string "group"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "examples"
     t.integer "default_for_new_host_genome", limit: 1, default: 0
+    t.string "examples"
     t.index ["group"], name: "index_metadata_fields_on_group"
   end
 

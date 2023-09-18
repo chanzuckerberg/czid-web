@@ -254,6 +254,10 @@ function EventDictionary() {
   this.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED =
     "SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED";
 
+  /** Copy of SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED without expanded tables bc it has a compliant type for the payload */
+  this.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED_ALLISON_TESTING =
+    "SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED_ALLISON_TESTING";
+
   /** The user ran into an error while loading heatmap data. */
   this.SAMPLES_HEATMAP_VIEW_LOADING_ERROR =
     "SAMPLES_HEATMAP_VIEW_LOADING_ERROR";

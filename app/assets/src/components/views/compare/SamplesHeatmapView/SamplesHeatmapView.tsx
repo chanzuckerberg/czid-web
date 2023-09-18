@@ -724,6 +724,27 @@ class SamplesHeatmapView extends React.Component<
       taxonTags: taxonTags,
     };
 
+    // Made a copy of fetchHeatmapDataParams with values that are compliant with the
+    // eventData types. This is to ensure that the data we send to analytics is valid and
+    // that we're not making extra, unused tables. fetchHeatmapDataParamsCompliantTypes is
+    // only used to send compliant data to Segment.
+    const fetchHeatmapDataParamsCompliantTypes = {
+      sampleIds: JSON.stringify(fetchHeatmapDataParams.sampleIds),
+      removedTaxonIds: fetchHeatmapDataParams.removedTaxonIds,
+      presets: JSON.stringify(fetchHeatmapDataParams.presets),
+      species: fetchHeatmapDataParams.species,
+      categories: JSON.stringify(fetchHeatmapDataParams.categories),
+      subcategories: JSON.stringify(fetchHeatmapDataParams.subcategories),
+      sortBy: fetchHeatmapDataParams.sortBy,
+      thresholdFilters: JSON.stringify(fetchHeatmapDataParams.thresholdFilters),
+      taxonsPerSample: fetchHeatmapDataParams.taxonsPerSample,
+      readSpecificity: fetchHeatmapDataParams.readSpecificity,
+      background: fetchHeatmapDataParams.background,
+      heatmapTs: fetchHeatmapDataParams.heatmapTs,
+      addedTaxonIds: JSON.stringify(fetchHeatmapDataParams.addedTaxonIds),
+      taxonTags: JSON.stringify(fetchHeatmapDataParams.taxonTags),
+    };
+
     if (useHeatmapES) {
       fetchHeatmapDataParams.addedTaxonIds = Array.from(
         this.state.addedTaxonIds,
@@ -744,6 +765,15 @@ class SamplesHeatmapView extends React.Component<
       // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
       {
         ...fetchHeatmapDataParams,
+        loadTimeInMilliseconds,
+        useHeatmapES,
+      },
+    );
+
+    trackEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED_ALLISON_TESTING,
+      {
+        ...fetchHeatmapDataParamsCompliantTypes,
         loadTimeInMilliseconds,
         useHeatmapES,
       },
