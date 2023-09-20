@@ -211,16 +211,17 @@ class VisualizationsController < ApplicationController
   end
 
   def download_heatmap
+    background_id = background_for_heatmap
     if current_user.allowed_feature?("heatmap_elasticsearch")
       heatmap_es_dict = TopTaxonsElasticsearchService.call(
         params: params,
         samples_for_heatmap: samples_for_heatmap,
-        background_for_heatmap: background_for_heatmap
+        background_for_heatmap: background_id
       )
       output_csv = if params[:includePathogens] == "true"
-                     generate_heatmap_csv(heatmap_es_dict, pathogen_flags_by_id())
+                     generate_heatmap_csv(heatmap_es_dict, background_id, pathogen_flags_by_id())
                    else
-                     generate_heatmap_csv(heatmap_es_dict)
+                     generate_heatmap_csv(heatmap_es_dict, background_id)
                    end
     else
       @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
@@ -228,7 +229,7 @@ class VisualizationsController < ApplicationController
         samples_for_heatmap,
         background_for_heatmap
       )
-      output_csv = generate_heatmap_csv(@sample_taxons_dict)
+      output_csv = generate_heatmap_csv(@sample_taxons_dict, background_id)
     end
     send_data output_csv, filename: 'heatmap.csv'
   end

@@ -77,6 +77,7 @@ import { OptionsType } from "./components/SamplesHeatmapFilters/SamplesHeatmapFi
 import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
 import SamplesHeatmapLegend from "./components/SamplesHeatmapLegend";
 import {
+  APPLIED_FILTERS,
   BACKGROUND_METRICS,
   HEATMAP_FILTERS,
   METRIC_OPTIONS,
@@ -466,15 +467,20 @@ class SamplesHeatmapView extends React.Component<
     );
   };
 
-  prepareParams = () => {
+  prepareParams = (removeFilters = false) => {
     const params = this.getUrlParams();
-
-    // Parameters stored as objects
-    // @ts-expect-error Type 'string' is not assignable to type 'any[]'.ts(2322)
-    params.thresholdFilters = JSON.stringify(params.thresholdFilters);
-    // @ts-expect-error Type 'string' is not assignable to type 'object'.ts(2322)
-    params.subcategories = JSON.stringify(params.subcategories);
-    return queryString.stringify(params, { arrayFormat: "bracket" });
+    if (removeFilters) {
+      const removedParams = omit(APPLIED_FILTERS, params);
+      return queryString.stringify(removedParams, { arrayFormat: "bracket" });
+    } else {
+      // Parameters stored as objects
+      const newParams = {
+        ...params,
+        thresholdFilters: JSON.stringify(params.thresholdFilters),
+        subcategories: JSON.stringify(params.subcategories),
+      };
+      return queryString.stringify(newParams, { arrayFormat: "bracket" });
+    }
   };
 
   getUrlForCurrentParams = () => {
@@ -617,7 +623,7 @@ class SamplesHeatmapView extends React.Component<
 
   handleDownloadCsv = () => {
     const url = new URL("/visualizations/download_heatmap", window.origin);
-    const href = `${url.toString()}?${this.prepareParams()}`;
+    const href = `${url.toString()}?${this.prepareParams(true)}`;
     // target="_blank" is needed to avoid unload handler
     window.open(href, "_blank");
   };

@@ -20,6 +20,14 @@ export const HEATMAP_FILTERS = [
   "taxonTags",
 ];
 
+export const APPLIED_FILTERS = [
+  "thresholdFilters",
+  "readSpecificity",
+  "categories",
+  "subcategories",
+  "taxonTags",
+];
+
 export const MICROBIOME_DOWNLOAD_METRIC_OPTIONS = [
   { text: "NT rPM", value: "NT.rpm" },
   { text: "NT r (total reads)", value: "NT.r" },

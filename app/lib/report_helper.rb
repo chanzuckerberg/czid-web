@@ -64,7 +64,7 @@ module ReportHelper
   }.freeze
 
   # TODO: (gdingle): refactor to class method
-  def generate_heatmap_csv(sample_taxa_hash, pathogen_flags_by_sample = nil)
+  def generate_heatmap_csv(sample_taxa_hash, background_id, pathogen_flags_by_sample = nil)
     attribute_names = [
       "sample_name",
       "tax_id",
@@ -105,6 +105,8 @@ module ReportHelper
           csv << data_values.values_at(*attribute_names.map(&:to_sym))
         end
       end
+      background_name = Background.find(background_id)&.name
+      csv << ["Background: #{background_name}"]
     end
   end
 
