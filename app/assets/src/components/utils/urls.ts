@@ -1,6 +1,6 @@
 import { isEmpty, map, pick, toLower } from "lodash/fp";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
+import { WORKFLOWS, WorkflowType } from "~/components/utils/workflows";
 import { URL_FIELDS } from "~/components/views/SampleView/utils";
 import { AnnotationFilterOption } from "~/interface/discovery";
 import { ThresholdFilterShape } from "~/interface/sample";
@@ -35,7 +35,7 @@ const generateUrlToSampleView = ({
   workflow = null,
   workflowRunId = null,
 }: generateUrlOptions): string => {
-  const currentTab = workflow ? WORKFLOW_TABS[workflow] : null;
+  const currentTab = workflow ? WORKFLOWS[workflow]?.label : null;
   const snapshotSharePrefix = snapshotShareId ? `/pub/${snapshotShareId}` : "";
 
   /* we don't want to persist the default background to the sample report

@@ -127,6 +127,12 @@ const TAB_SHORTHAND_CONFIG: WorkflowConfigType<[string, WorkflowLabelType]> = {
   ],
 };
 
+// WORKFLOW_TABS is used to quickly compare workflow labels.
+// It is meant to be used with the syntax WORKFLOW_TABS.SHORT_READ_MNGS
+// It is not meant to be used to look up labels, for that use WORKFLOWS
+// i.e. use workflowLabel = WORKFLOWS[workflow]?.label
+// Do not use workflowLabel = WORKFLOW_TABS[workflow] <-- this doesn't work
+// because workflow is a WorkflowType like "short-read-mngs" and not a key like "SHORT_READ_MNGS"
 export const WORKFLOW_TABS = Object.fromEntries(
   Object.values(TAB_SHORTHAND_CONFIG),
 );

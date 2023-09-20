@@ -91,7 +91,7 @@ export const determineInitialTab = ({
   } else if (benchmark) {
     return WORKFLOW_TABS.BENCHMARK;
   } else if (initialWorkflow) {
-    return WORKFLOW_TABS[initialWorkflow];
+    return WORKFLOWS[initialWorkflow]?.label;
   } else {
     return WORKFLOW_TABS.SHORT_READ_MNGS;
   }

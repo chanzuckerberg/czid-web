@@ -6,7 +6,6 @@ import {
   concat,
   escapeRegExp,
   find,
-  findIndex,
   get as _get,
   isEmpty,
   isNull,
@@ -2128,12 +2127,16 @@ class DiscoveryView extends React.Component<
 
   renderWorkflowTabs = () => {
     const { workflow } = this.state;
+    const workflowTabValues = this.computeWorkflowTabs().map(tab => tab.value);
+    const tabIndex = workflowTabValues.findIndex(
+      workflowTabValue => workflowTabValue === workflow,
+    );
 
     return (
       <div className={cs.workflowTabs}>
         <Tabs
           sdsSize="small"
-          value={findIndex(workflow, this.computeWorkflowTabs())}
+          value={tabIndex}
           onChange={(_, selectedTabIndex) =>
             this.handleWorkflowTabChange(selectedTabIndex)
           }

@@ -1,7 +1,7 @@
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 import moment from "moment";
 import { AMR_PIPELINE_HELP_LINK } from "~/components/utils/documentationLinks";
-import { WORKFLOW_TABS } from "~/components/utils/workflows";
+import { WORKFLOWS, WORKFLOW_TABS } from "~/components/utils/workflows";
 import {
   CG_WETLAB_OPTIONS,
   ILLUMINA,
@@ -153,7 +153,7 @@ export const processCGWorkflowRunInfo = workflowRun => {
         CG_WETLAB_OPTIONS,
       ),
     ),
-    workflow: WORKFLOW_TABS[workflowRun.workflow],
+    workflow: WORKFLOWS[workflowRun.workflow].label,
   };
 
   return mapValues(v => ({ text: v }), cgWorkflowRunInfo);
@@ -172,7 +172,7 @@ export const processAMRWorkflowRun = (
 
   const qualityMetrics = parsed_cached_results?.quality_metrics;
 
-  const workflowLabel = WORKFLOW_TABS[workflow];
+  const workflowLabel = WORKFLOWS[workflow]?.label;
   const lastProcessedAt = moment(executedAt).format(YYYY_MM_DD);
   const cardDbVersion = inputs?.card_version;
   const wildcardVersion = inputs?.wildcard_version;
