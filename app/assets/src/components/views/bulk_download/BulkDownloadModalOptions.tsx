@@ -7,6 +7,7 @@ import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { humanize } from "~/helpers/strings";
 import Checkbox from "~ui/controls/Checkbox";
