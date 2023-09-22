@@ -1,4 +1,3 @@
-import { size } from "lodash/fp";
 import React, { useContext } from "react";
 import { TaxonOption } from "~/components/common/filters/types";
 import { UserContext } from "~/components/common/UserContext";
@@ -7,10 +6,7 @@ import {
   AMR_PINNED_PIPELINE_VERSION_HELP_LINK,
   AMR_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
-import {
-  ONT_V1_FEATURE,
-  WGS_CG_UPLOAD_FEATURE,
-} from "~/components/utils/features";
+import { ONT_V1_FEATURE } from "~/components/utils/features";
 import {
   AMR_MODERN_HOST_FILTERING_FEATURE,
   isPipelineFeatureAvailable,
@@ -111,36 +107,8 @@ const WorkflowSelector = ({
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
-  // TODO (mlila): delete this when we remove WGS_CG_UPLOAD_FEATURE
-  const shouldDisableWorkflowOption = (workflow: UploadWorkflows) => {
-    const workflowIsCurrentlySelected = selectedWorkflows.has(workflow);
-    const selectedMNGSNanopore =
-      selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value) &&
-      selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
-
-    switch (workflow) {
-      case UPLOAD_WORKFLOWS.MNGS.value:
-        return (
-          !workflowIsCurrentlySelected &&
-          selectedWorkflows.has(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value)
-        );
-      case UPLOAD_WORKFLOWS.AMR.value:
-        return (
-          !workflowIsCurrentlySelected &&
-          (selectedWorkflows.has(
-            UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
-          ) ||
-            selectedMNGSNanopore)
-        );
-      case UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value:
-        return !workflowIsCurrentlySelected && size(selectedWorkflows) > 0;
-    }
-  };
-
   const shouldDisableWorkflow = (workflow: UploadWorkflows) => {
-    return allowedFeatures.includes(WGS_CG_UPLOAD_FEATURE)
-      ? !enabledWorkflows.includes(workflow)
-      : shouldDisableWorkflowOption(workflow);
+    return !enabledWorkflows.includes(workflow);
   };
 
   const isPinnedVersion =
@@ -215,36 +183,34 @@ const WorkflowSelector = ({
           </div>
         }
       />
-      {allowedFeatures.includes(WGS_CG_UPLOAD_FEATURE) && (
-        <AnalysisType
-          description="Run your samples through our Illumina supported pipeline to get viral consensus genomes using your own reference sequence. Pipeline report does not link to Nextclade."
-          isDisabled={shouldDisableWorkflow(
+      <AnalysisType
+        description="Run your samples through our Illumina supported pipeline to get viral consensus genomes using your own reference sequence. Pipeline report does not link to Nextclade."
+        isDisabled={shouldDisableWorkflow(
+          UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
+        )}
+        onClick={() =>
+          onWorkflowToggle(
             UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
-          )}
-          onClick={() =>
-            onWorkflowToggle(
-              UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
-              SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
-            )
-          }
-          isSelected={selectedWorkflows.has(
-            UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
-          )}
-          sdsIcon={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.icon}
-          testKey={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value}
-          title={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.label}
-          sequencingPlatformOptions={
-            <ViralConsensusGenomeSequencingPlatformOptions
-              bedFileName={bedFileName}
-              refSeqFileName={refSeqFileName}
-              selectedTaxon={selectedTaxon}
-              onBedFileChanged={onBedFileChanged}
-              onRefSeqFileChanged={onRefSeqFileChanged}
-              onTaxonChange={onTaxonChange}
-            />
-          }
-        />
-      )}
+            SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
+          )
+        }
+        isSelected={selectedWorkflows.has(
+          UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
+        )}
+        sdsIcon={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.icon}
+        testKey={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value}
+        title={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.label}
+        sequencingPlatformOptions={
+          <ViralConsensusGenomeSequencingPlatformOptions
+            bedFileName={bedFileName}
+            refSeqFileName={refSeqFileName}
+            selectedTaxon={selectedTaxon}
+            onBedFileChanged={onBedFileChanged}
+            onRefSeqFileChanged={onRefSeqFileChanged}
+            onTaxonChange={onTaxonChange}
+          />
+        }
+      />
       <AnalysisType
         description="Run your samples through our Illumina or Nanopore supported pipelines to get consensus genomes for SARS-CoV-2. Send consensus genomes to Nextclade."
         isDisabled={shouldDisableWorkflow(

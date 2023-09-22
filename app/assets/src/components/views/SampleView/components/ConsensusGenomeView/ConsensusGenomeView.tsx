@@ -1,49 +1,26 @@
-import { Button, Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { camelCase, find, get, getOr, isEmpty, isNil, size } from "lodash/fp";
-import memoize from "memoize-one";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { find, isEmpty, size } from "lodash/fp";
+import React, { useEffect, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
-import { trackEvent } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
-import { UserContext } from "~/components/common/UserContext";
-import { WGS_CG_UPLOAD_FEATURE } from "~/components/utils/features";
-import { formatPercent } from "~/components/utils/format";
-import { openUrlInNewTab } from "~/components/utils/links";
-import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WorkflowType } from "~/components/utils/workflows";
-import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils/download";
+import cs from "~/components/views/SampleView/components/ConsensusGenomeView/consensus_genome_view.scss";
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
 import {
-  CG_HISTOGRAM_FILL_COLOR,
-  CG_HISTOGRAM_HOVER_FILL_COLOR,
   RUNNING_STATE,
   SARS_COV_2_ACCESSION_ID,
   SUCCEEDED_STATE,
 } from "~/components/views/SampleView/utils";
-import Histogram, {
-  HISTOGRAM_SCALE,
-} from "~/components/visualizations/Histogram";
-import { Table } from "~/components/visualizations/table";
-import { numberWithCommas } from "~/helpers/strings";
-import Sample, { CreationSource, WorkflowRun } from "~/interface/sample";
+import Sample, { WorkflowRun } from "~/interface/sample";
 import { ConsensusGenomeWorkflowRunResults } from "~/interface/sampleView";
-import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconArrowRight } from "~ui/icons";
 import {
   SARS_COV_2_CONSENSUS_GENOME_DOC_LINK,
   VIRAL_CONSENSUS_GENOME_DOC_LINK,
 } from "~utils/documentationLinks";
-import { FIELDS_METADATA } from "~utils/tooltip";
+import { ConsensusGenomeCoverageView } from "./components/ConsensusGenomeCoverageView";
 import { ConsensusGenomeDropdown } from "./components/ConsensusGenomeDropdown";
-import cs from "./consensus_genome_view.scss";
+import { ConsensusGenomeMetricsTable } from "./components/ConsensusGenomeMetricsTable";
 
 interface ConsensusGenomeViewProps {
   link?: string;
@@ -52,9 +29,6 @@ interface ConsensusGenomeViewProps {
   sample: Sample;
   test?: string;
   workflowRun?: WorkflowRun;
-  workflowRunResults?:
-    | ConsensusGenomeWorkflowRunResults
-    | Record<string, never>;
 }
 
 export const ConsensusGenomeView = ({
@@ -62,21 +36,20 @@ export const ConsensusGenomeView = ({
   sample,
   workflowRun,
 }: ConsensusGenomeViewProps) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
-
   const [loadingResults, setLoadingResults] = useState(false);
-  const [workflowRunResults, setWorkflowRunResults] = useState(null);
-
-  const coverageVizContainerRef = useRef();
-  const [histogramTooltipData, setHistogramTooltipData] = useState(null);
-  const [histogramTooltipLocation, setHistogramTooltipLocation] =
-    useState(null);
+  const [workflowRunResults, setWorkflowRunResults] =
+    useState<ConsensusGenomeWorkflowRunResults | null>(null);
 
   const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
     run => run.workflow === WorkflowType.CONSENSUS_GENOME,
   );
 
+  const helpLinkUrl =
+    workflowRun?.inputs?.accession_id === SARS_COV_2_ACCESSION_ID
+      ? SARS_COV_2_CONSENSUS_GENOME_DOC_LINK
+      : VIRAL_CONSENSUS_GENOME_DOC_LINK;
+
+  // Fetching data
   useEffect(() => {
     if (
       workflowRun?.status !== SUCCEEDED_STATE ||
@@ -92,501 +65,73 @@ export const ConsensusGenomeView = ({
         workflowRun?.status === SUCCEEDED_STATE
           ? await getWorkflowRunResults(workflowRun?.id)
           : {};
-      setWorkflowRunResults(results);
+      setWorkflowRunResults(results as ConsensusGenomeWorkflowRunResults);
       setLoadingResults(false);
     };
 
     fetchResults();
   }, [workflowRun?.id, workflowRun?.status, workflowRun?.workflow]);
 
-  const getHistogramTooltipData = memoize((accessionData, coverageIndex) => {
-    // coverageObj format:
-    //   [binIndex, averageCoverageDepth, coverageBreadth, numberContigs, numberReads]
-    const coverageObj = accessionData.coverage[coverageIndex];
-    const binSize = accessionData.coverage_bin_size;
-
-    return [
-      {
-        name: "Coverage",
-        data: [
-          [
-            "Base Pair Range",
-            // \u2013 is en-dash
-            `${Math.round(coverageObj[0] * binSize)}\u2013${Math.round(
-              (coverageObj[0] + 1) * binSize,
-            )}`,
-          ],
-          ["Coverage Depth", `${coverageObj[1]}x`],
-          ["Coverage Breadth", formatPercent(coverageObj[2])],
-        ],
-      },
-    ];
-  });
-
-  const handleHistogramBarEnter = useCallback(
-    (hoverData: $TSFixMe) => {
-      if (hoverData && hoverData[0] === 0) {
-        const tooltipData = getHistogramTooltipData(
-          workflowRunResults.coverage_viz,
-          hoverData[1],
-        );
-
-        setHistogramTooltipData(tooltipData);
-      }
-    },
-    [getHistogramTooltipData, workflowRunResults?.coverage_viz],
-  );
-
-  const handleHistogramBarHover = (clientX: $TSFixMe, clientY: $TSFixMe) => {
-    setHistogramTooltipLocation({
-      left: clientX,
-      top: clientY,
-    });
-  };
-
-  const handleHistogramBarExit = () => {
-    setHistogramTooltipLocation(null);
-    setHistogramTooltipData(null);
-  };
-
-  const renderHistogram = useCallback(() => {
-    if (coverageVizContainerRef.current !== null) {
-      const coverageVizData = workflowRunResults.coverage_viz.coverage.map(
-        valueArr => ({
-          x0: valueArr[0] * workflowRunResults.coverage_viz.coverage_bin_size,
-          length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
-        }),
-      );
-
-      const accessionID =
-        workflowRunResults.taxon_info.accession_id ?? "Unknown accession";
-
-      // accessionName for WGS could not exist, if so fall back to taxonName
-      const taxonName =
-        workflowRunResults.taxon_info.accession_name ??
-        workflowRunResults.taxon_info.taxon_name ??
-        "Unknown taxon";
-
-      const { creation_source: creationSource, ref_fasta: refFasta } =
-        workflowRun.inputs ?? {};
-      const isWGS = creationSource === CreationSource.WGS;
-      const subtext = isWGS ? refFasta : `${accessionID} - ${taxonName}`;
-
-      new Histogram(coverageVizContainerRef.current, [coverageVizData], {
-        barOpacity: 1,
-        colors: [CG_HISTOGRAM_FILL_COLOR],
-        domain: [0, workflowRunResults.coverage_viz.total_length],
-        hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
-        labelsBold: true,
-        labelsLarge: true,
-        labelX: "Reference Sequence",
-        labelY: "Coverage (SymLog)",
-        labelXSubtext: subtext,
-        labelYHorizontalOffset: 30,
-        labelYVerticalOffset: 54,
-        labelYLarge: true,
-        margins: {
-          left: 100,
-          right: 50,
-          top: 22,
-          bottom: 75,
-        },
-        numBins: Math.round(
-          workflowRunResults.coverage_viz.total_length /
-            workflowRunResults.coverage_viz.coverage_bin_size,
-        ),
-        numTicksY: 2,
-        showStatistics: false,
-        skipBins: true,
-        yScaleType: HISTOGRAM_SCALE.SYM_LOG,
-        yTickFormat: numberWithCommas,
-        skipNiceDomains: true,
-        onHistogramBarHover: handleHistogramBarHover,
-        onHistogramBarEnter: handleHistogramBarEnter,
-        onHistogramBarExit: handleHistogramBarExit,
-      }).update();
-    }
-  }, [
-    handleHistogramBarEnter,
-    workflowRun.inputs,
-    workflowRunResults?.coverage_viz?.coverage,
-    workflowRunResults?.coverage_viz?.coverage_bin_size,
-    workflowRunResults?.coverage_viz?.total_length,
-    workflowRunResults?.taxon_info?.accession_id,
-    workflowRunResults?.taxon_info?.accession_name,
-    workflowRunResults?.taxon_info?.taxon_name,
-  ]);
-
-  useEffect(() => {
-    if (
-      !isNil(coverageVizContainerRef.current) &&
-      workflowRunResults?.coverage_viz
-    )
-      renderHistogram();
-  }, [renderHistogram, workflowRunResults?.coverage_viz]);
-
-  const renderConsensusGenomeDropdown = () => {
-    return (
-      <div className={cs.dropdownContainer}>
-        <ConsensusGenomeDropdown
-          workflowRuns={consensusGenomeWorkflowRuns}
-          initialSelectedValue={workflowRun?.id}
-          onConsensusGenomeSelection={workflowRunId =>
-            onWorkflowRunSelect(
-              find({ id: workflowRunId }, consensusGenomeWorkflowRuns),
-            )
-          }
-        />
-      </div>
-    );
-  };
-
-  const renderHeaderInfoAndDropdown = () => {
-    const shouldRenderCGDropdown = size(consensusGenomeWorkflowRuns) > 1;
-    return (
-      <div
-        className={cx(
-          cs.headerContainer,
-          !shouldRenderCGDropdown && cs.removeBottomMargin,
-        )}
-      >
-        {shouldRenderCGDropdown && renderConsensusGenomeDropdown()}
-        {get("status", workflowRun) !== RUNNING_STATE && (
-          <ExternalLink
-            className={cx(
-              cs.learnMoreLink,
-              !shouldRenderCGDropdown && cs.alignRight,
-            )}
-            href={computeHelpLink()}
-            analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
-          >
-            Learn more about consensus genomes <IconArrowRight />
-          </ExternalLink>
-        )}
-      </div>
-    );
-  };
+  const shouldRenderCGDropdown = size(consensusGenomeWorkflowRuns) > 1;
 
   const renderResults = () => {
     return (
       <>
         <div className={cs.resultsContainer}>
           {workflowRunResults &&
-            !isEmpty(workflowRunResults.quality_metrics) &&
-            renderMetricsTable()}
-          {workflowRunResults &&
-            !isEmpty(workflowRunResults.coverage_viz) &&
-            renderCoverageView()}
+            !isEmpty(workflowRunResults.quality_metrics) && (
+              <ConsensusGenomeMetricsTable
+                helpLinkUrl={helpLinkUrl}
+                workflowRunResults={workflowRunResults}
+              />
+            )}
+          {workflowRunResults && !isEmpty(workflowRunResults.coverage_viz) && (
+            <ConsensusGenomeCoverageView
+              helpLinkUrl={helpLinkUrl}
+              sampleId={sample.id}
+              workflowRun={workflowRun}
+              workflowRunResults={workflowRunResults}
+            />
+          )}
         </div>
-        {histogramTooltipLocation && histogramTooltipData && (
-          <div
-            style={getTooltipStyle(histogramTooltipLocation)}
-            className={cs.hoverTooltip}
-          >
-            <TooltipVizTable data={histogramTooltipData} />
-          </div>
-        )}
       </>
     );
   };
 
-  const downloadCustomRefFile = () => {
-    const fileLocation = getWorkflowRefAccessionFileLink(workflowRun.id);
-    openUrlInNewTab(fileLocation);
-  };
-
-  const getAccessionMetrics = () => {
-    const {
-      accession_id: accessionId,
-      taxonId,
-      taxon_name: taxonName,
-    } = workflowRunResults.taxon_info;
-    const {
-      coverage_breadth: coverageBreadth,
-      coverage_depth: coverageDepth,
-      total_length: totalLength,
-    } = workflowRunResults.coverage_viz;
-
-    const referenceNCBIEntry = (
-      <BasicPopup
-        trigger={
-          <div className={cs.ncbiLinkWrapper}>
-            <ExternalLink
-              href={`https://www.ncbi.nlm.nih.gov/nuccore/${accessionId}?report=genbank`}
-              analyticsEventName={"ConsensusGenomeView_ncbi-link_clicked"}
-              analyticsEventData={{
-                accessionId,
-                taxonId,
-                sampleId: sample.id,
-              }}
-            >
-              {accessionId}
-            </ExternalLink>
-          </div>
-        }
-        inverted={false}
-        content={taxonName}
-      />
-    );
-
-    if (!allowedFeatures.includes(WGS_CG_UPLOAD_FEATURE)) {
-      return {
-        referenceNCBIEntry,
-        referenceLength: totalLength,
-        coverageDepth: `${coverageDepth.toFixed(1)}x`,
-        coverageBreadth: formatPercent(coverageBreadth),
-      };
-    }
-
-    const customReference = (
-      <Button
-        sdsType="secondary"
-        sdsStyle="minimal"
-        isAllCaps
-        onClick={downloadCustomRefFile}
-        className={cs.customReference}
-      >
-        <Icon sdsIcon="download" sdsSize="xs" sdsType="button" />
-        <span className={cs.downloadLink}>Download</span>
-      </Button>
-    );
-
-    return {
-      ...(accessionId
-        ? {
-            referenceNCBIEntry,
-          }
-        : {
-            customReference,
-          }),
-      referenceLength: totalLength,
-      coverageDepth: `${coverageDepth.toFixed(1)}x`,
-      coverageBreadth: formatPercent(coverageBreadth),
-    };
-  };
-
-  const renderCoverageView = () => {
-    const { accession_id: accessionId } = workflowRunResults.taxon_info;
-
-    const helpLink = (
-      <ExternalLink
-        href={computeHelpLink()}
-        analyticsEventName={"ConsensusGenomeView_help-link_clicked"}
-      >
-        Learn more.
-      </ExternalLink>
-    );
-
-    const metrics = getAccessionMetrics();
-
-    const CG_VIEW_METRIC_COLUMNS = [
-      accessionId ? "referenceNCBIEntry" : "customReference",
-      "referenceLength",
-      "coverageDepth",
-      "coverageBreadth",
-    ].map(key => [
-      {
-        key,
-        ...FIELDS_METADATA[key],
-      },
-    ]);
-
-    return (
-      <div className={cs.section}>
-        <div className={cs.title}>
-          How good is the coverage?
-          {renderHelpIcon({
-            text: "These metrics and chart help determine the coverage of the reference accession.",
-            link: helpLink,
-            analytics: {
-              analyticsEventName:
-                "ConsensusGenomeView_quality-metrics-help-icon_hovered",
-            },
-            iconStyle: cs.lower,
-          })}
-        </div>
-        <div className={cx(cs.coverageContainer, cs.raisedContainer)}>
-          <div className={cs.metrics}>
-            {CG_VIEW_METRIC_COLUMNS.map((col, index) => (
-              <div className={cs.column} key={index}>
-                {col.map(metric => (
-                  <div className={cs.metric} key={metric.key}>
-                    <div className={cs.label}>
-                      <BasicPopup
-                        trigger={<div>{metric.label}</div>}
-                        inverted={false}
-                        content={metric.tooltip}
-                      />
-                    </div>
-                    <div className={cs.value}>{metrics[metric.key]}</div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-          <div
-            className={cs.coverageVizHistogram}
-            ref={coverageVizContainerRef}
-            onMouseEnter={() =>
-              trackEvent("ConsensusGenomeView_coverage-viz-histogram_hovered")
-            }
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const renderHelpIcon = ({
-    text,
-    link = null,
-    analytics = null,
-    iconStyle = null,
-  }: $TSFixMe) => {
-    return (
-      <HelpIcon
-        text={
-          <>
-            {text} {link}
-          </>
-        }
-        className={cx(cs.helpIcon, !!iconStyle && iconStyle)}
-        // @ts-expect-error Working with Lodash types
-        analyticsEventName={getOr(undefined, "analyticsEventName", analytics)}
-        analyticsEventData={getOr(undefined, "analyticsEventData", analytics)}
-      />
-    );
-  };
-
-  const renderMetricsTable = () => {
-    const metricsData = {
-      taxon_name: workflowRunResults.taxon_info.taxon_name,
-      ...workflowRunResults.quality_metrics,
-    };
-    const helpLink = (
-      <ExternalLink
-        href={computeHelpLink()}
-        analyticsEventName={
-          "ConsensusGenomeView_quality-metrics-help-link_clicked"
-        }
-      >
-        Learn more.
-      </ExternalLink>
-    );
-    return (
-      <div className={cs.section}>
-        <div className={cs.title}>
-          Is my consensus genome complete?
-          {renderHelpIcon({
-            text: "These metrics help determine the quality of the reference accession.",
-            link: helpLink,
-            analytics: {
-              analyticsEventName:
-                "ConsensusGenomeView_quality-metrics-help-icon_hovered",
-            },
-            iconStyle: cs.lower,
-          })}
-        </div>
-        <div className={cx(cs.metricsTable, cs.raisedContainer)}>
-          <Table
-            columns={computeQualityMetricColumns()}
-            data={[metricsData]}
-            defaultRowHeight={55}
-            gridClassName={cs.tableGrid}
-            headerClassName={cs.tableHeader}
-            headerRowClassName={cs.tableHeaderRow}
-            headerHeight={25}
-            headerLabelClassName={cs.tableHeaderLabel}
-            rowClassName={cs.tableRow}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const computeQualityMetricColumns = () => {
-    const renderRowCell = (
-      { cellData }: $TSFixMe,
-      options: { percent?: $TSFixMeUnknown } = {},
-    ) => (
-      <div className={cs.cell}>
-        {cellData}
-        {options && options.percent ? "%" : null}
-      </div>
-    );
-    const columns = [
-      {
-        className: cs.taxonName,
-        dataKey: "taxon_name",
-        headerClassName: cs.primaryHeader,
-        label: "Taxon",
-        width: 320,
-      },
-      {
-        dataKey: "mapped_reads",
-        width: 80,
-      },
-      {
-        cellRenderer: (cellData: $TSFixMe) =>
-          renderRowCell(cellData, { percent: true }),
-        dataKey: "gc_percent",
-        width: 60,
-      },
-      {
-        dataKey: "ref_snps",
-        width: 20,
-      },
-      {
-        cellRenderer: (cellData: $TSFixMe) =>
-          renderRowCell(cellData, { percent: true }),
-        dataKey: "percent_identity",
-        width: 30,
-      },
-      {
-        dataKey: "n_actg",
-        width: 135,
-      },
-      {
-        cellRenderer: (cellData: $TSFixMe) =>
-          renderRowCell(cellData, { percent: true }),
-        dataKey: "percent_genome_called",
-        width: 100,
-      },
-      {
-        dataKey: "n_missing",
-        width: 75,
-      },
-      {
-        dataKey: "n_ambiguous",
-        width: 100,
-      },
-    ];
-
-    for (const col of columns) {
-      if (!col["cellRenderer"]) {
-        col["cellRenderer"] = renderRowCell;
-      }
-      col["flexGrow"] = 1;
-
-      // TODO: Convert to send in camelCase from the backend.
-      const key = camelCase(col["dataKey"]);
-      if (key in FIELDS_METADATA) {
-        col["columnData"] = FIELDS_METADATA[key];
-        col["label"] = FIELDS_METADATA[key].label;
-      }
-    }
-    return columns;
-  };
-
-  const computeHelpLink = () => {
-    if (get("inputs.accession_id", workflowRun) === SARS_COV_2_ACCESSION_ID) {
-      return SARS_COV_2_CONSENSUS_GENOME_DOC_LINK;
-    }
-    return VIRAL_CONSENSUS_GENOME_DOC_LINK;
-  };
-
   return (
     <>
-      {renderHeaderInfoAndDropdown()}
+      <div
+        className={cx(
+          cs.headerContainer,
+          !shouldRenderCGDropdown && cs.removeBottomMargin,
+        )}
+      >
+        {shouldRenderCGDropdown && (
+          <div className={cs.dropdownContainer}>
+            <ConsensusGenomeDropdown
+              workflowRuns={consensusGenomeWorkflowRuns}
+              initialSelectedValue={workflowRun?.id}
+              onConsensusGenomeSelection={workflowRunId =>
+                onWorkflowRunSelect(
+                  find({ id: workflowRunId }, consensusGenomeWorkflowRuns),
+                )
+              }
+            />
+          </div>
+        )}
+        {workflowRun?.status !== RUNNING_STATE && (
+          <ExternalLink
+            className={cx(
+              cs.learnMoreLink,
+              !shouldRenderCGDropdown && cs.alignRight,
+            )}
+            href={helpLinkUrl}
+            analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
+          >
+            Learn more about consensus genomes <IconArrowRight />
+          </ExternalLink>
+        )}
+      </div>
       <SampleReportContent
         sample={sample}
         workflowRun={workflowRun}
@@ -594,7 +139,7 @@ export const ConsensusGenomeView = ({
         loadingInfo={{
           linkText: "Learn about Consensus Genomes",
           message: "Your Consensus Genome is being generated!",
-          helpLink: computeHelpLink(),
+          helpLink: helpLinkUrl,
         }}
         eventNames={{
           error: "ConsensusGenomeView_sample-error-info-link_clicked",
