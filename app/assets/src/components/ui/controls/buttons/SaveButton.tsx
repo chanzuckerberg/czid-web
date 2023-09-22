@@ -3,7 +3,7 @@ import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 
 interface SaveButtonProps {
-  onClick: $TSFixMeFunction;
+  onClick: () => void;
   className?: string;
 }
 

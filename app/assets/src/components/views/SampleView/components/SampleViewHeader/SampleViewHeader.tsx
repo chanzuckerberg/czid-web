@@ -4,10 +4,8 @@ import { trackEvent } from "~/api/analytics";
 import ViewHeader from "~/components/layout/ViewHeader";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import {
-  findInWorkflows,
+  getWorkflowTypeFromLabel,
   isMngsWorkflow,
-  WORKFLOWS,
-  WorkflowType,
 } from "~/components/utils/workflows";
 import Project from "~/interface/project";
 import ReportMetadata from "~/interface/reportMetaData";
@@ -61,10 +59,7 @@ export const SampleViewHeader = ({
       ? `/pub/${snapshotShareId}`
       : `/home?project_id=${project.id}`;
   };
-
-  const workflow: WorkflowType =
-    WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
-    WorkflowType.SHORT_READ_MNGS;
+  const workflow = getWorkflowTypeFromLabel(currentTab);
 
   const getAllRunsPerWorkflow = () => {
     const runsByType =

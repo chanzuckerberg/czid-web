@@ -33,12 +33,12 @@ export const ANALYTICS_EVENT_NAMES = eventNames;
  * up being sent.
  */
 type EventValue = string | number | boolean | null;
-type EventData = Record<string, EventValue>;
+export type EventData = Record<string, EventValue>;
 
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
 const logAnalyticsEvent = async (
-  eventName: $TSFixMe,
+  eventName: string,
   eventData: EventData = {},
 ) => {
   if (window.analytics) {
@@ -92,7 +92,7 @@ const logAnalyticsEvent = async (
  **/
 export const withAnalytics = (
   handleEvent: $TSFixMe,
-  eventName: $TSFixMe,
+  eventName: string,
   eventData: EventData = {},
 ) => {
   if (typeof handleEvent !== "function") {
@@ -112,7 +112,7 @@ export const trackPageTransition = () => {
   trackAppcuesPageTransition();
 };
 
-export const trackEvent = (eventName: $TSFixMe, eventData: EventData = {}) => {
+export const trackEvent = (eventName: string, eventData: EventData = {}) => {
   logAnalyticsEvent(eventName, eventData);
   trackEventForAppcues(eventName, eventData);
 };

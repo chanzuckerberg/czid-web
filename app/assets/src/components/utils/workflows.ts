@@ -172,28 +172,6 @@ export const mngsWorkflows = [
 export const isMngsWorkflow = (workflow: WorkflowType) =>
   mngsWorkflows.includes(workflow);
 
-/**
- *
- * Return key of matched element in WORKFLOWS object
- *
- * ie.
- * toCompare === "Antimicrobial Resistance"
- * keyToFind === "label"
- * Returns "AMR";
- *
- * @param {string} toCompare String to search for within WORKFLOWS values
- * @param {string} keyToSearch Key at which to search
- * @return {string} Key in WORKFLOWS where toCompare was found
- */
-export const findInWorkflows = (
-  toCompare: string,
-  keyToSearch: keyof WorkflowStrings,
-): (typeof WORKFLOWS)[WorkflowType][typeof keyToSearch] => {
-  return Object.keys(WORKFLOWS).find(
-    workflow => WORKFLOWS[workflow][keyToSearch] === toCompare,
-  );
-};
-
 export const getWorkflowTypeFromLabel = (
   label: WorkflowLabelType,
 ): WorkflowType => {

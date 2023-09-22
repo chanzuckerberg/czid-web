@@ -2,7 +2,7 @@ import { MenuItem, Tooltip } from "@czi-sds/components";
 import React from "react";
 import { TwoWayKeyStringMap } from "~/components/utils/objectUtil";
 import { isAmrGeneLevelContigDownloadAvailable } from "~/components/utils/pipeline_versions";
-import { downloadAmrGeneLevelData } from "~/components/views/SampleView/components/SampleViewHeader/components/PrimaryHeaderControls/components/AmrDownloadDropdown/amrDownloadUtils";
+import { downloadAmrGeneLevelData } from "~/components/views/SampleView/components/SampleViewHeader/components/PrimaryHeaderControls/components/SampleViewDownloadButton/components/AmrDownloadDropdown/amrDownloadUtils";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,

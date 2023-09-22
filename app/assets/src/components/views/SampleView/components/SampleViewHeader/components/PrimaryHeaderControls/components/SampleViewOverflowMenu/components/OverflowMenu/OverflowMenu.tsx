@@ -1,31 +1,42 @@
 import { Button, Icon, Menu, MenuItem, Tooltip } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import { PopoverProps } from "@mui/material";
-import React, { useState } from "react";
-import {
-  getShorthandFromWorkflow,
-  WorkflowType,
-} from "~/components/utils/workflows";
+import React, { useContext, useState } from "react";
+import { UserContext } from "~/components/common/UserContext";
+import { WorkflowLabelType } from "~/components/utils/workflows";
 import { BulkDeleteModal } from "~/components/views/samples/SamplesView/BulkDeleteModal";
 import cs from "./overflow_menu.scss";
 
-export const OverflowMenu = ({
-  className,
-  workflow,
-  deleteId,
-  onDeleteRunSuccess,
-  redirectOnSuccess,
-  runFinalized,
-  userOwnsRun,
-}: {
+interface OverflowMenuProps {
+  readyToDelete: boolean;
   className: string;
-  workflow: WorkflowType;
   deleteId: number;
   onDeleteRunSuccess: () => void;
   redirectOnSuccess?: boolean;
   runFinalized: boolean;
-  userOwnsRun: boolean;
-}) => {
+  sampleUserId: number;
+  bulkDeleteObjects: (selectedIds: number[]) => Promise<any>;
+  validateUserCanDeleteObjects: (selectedIds: number[]) => Promise<any>;
+  workflowShorthand: string;
+  workflowLabel: WorkflowLabelType;
+  isShortReadMngs: boolean;
+}
+
+export const OverflowMenu = ({
+  readyToDelete,
+  className,
+  deleteId,
+  onDeleteRunSuccess,
+  redirectOnSuccess,
+  runFinalized,
+  sampleUserId,
+  bulkDeleteObjects,
+  validateUserCanDeleteObjects,
+  workflowShorthand,
+  workflowLabel,
+  isShortReadMngs,
+}: OverflowMenuProps) => {
+  if (!readyToDelete) return null;
   const [menuAnchorEl, setMenuAnchorEl] =
     useState<PopoverProps["anchorEl"]>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
@@ -38,6 +49,8 @@ export const OverflowMenu = ({
     setMenuAnchorEl(null);
   };
 
+  const { userId } = useContext(UserContext) || {};
+  const userOwnsRun = userId === sampleUserId;
   const deleteDisabled = !(userOwnsRun && runFinalized);
 
   const renderDeleteRunMenuItem = () => {
@@ -57,7 +70,7 @@ export const OverflowMenu = ({
             sdsType="static"
             className={cs.icon}
           />
-          <span>{`Delete ${getShorthandFromWorkflow(workflow)} Run`}</span>
+          <span>{`Delete ${workflowShorthand} Run`}</span>
         </div>
       </MenuItem>
     );
@@ -112,9 +125,12 @@ export const OverflowMenu = ({
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
         selectedIds={[deleteId]}
-        workflow={workflow}
         onSuccess={onDeleteRunSuccess}
         redirectOnSuccess={redirectOnSuccess}
+        bulkDeleteObjects={bulkDeleteObjects}
+        validateUserCanDeleteObjects={validateUserCanDeleteObjects}
+        workflowLabel={workflowLabel}
+        isShortReadMngs={isShortReadMngs}
       />
     </>
   );

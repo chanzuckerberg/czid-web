@@ -6,49 +6,53 @@ import {
   DialogTitle,
 } from "@czi-sds/components";
 import React, { useEffect, useState } from "react";
-import { bulkDeleteObjects, validateUserCanDeleteObjects } from "~/api";
 import { ErrorButton } from "~/components/ui/controls/buttons";
 import { pluralize } from "~/components/utils/stringUtil";
 import { showToast } from "~/components/utils/toast";
-import { WORKFLOWS, WorkflowType } from "~/components/utils/workflows";
+import { WorkflowLabelType } from "~/components/utils/workflows";
 import cs from "./bulk_delete_modal.scss";
 import { DeleteErrorNotification } from "./DeleteErrorNotification";
 import { DeleteSampleModalText } from "./DeleteSampleModalText";
 import { DeleteSuccessNotification } from "./DeleteSuccessNotification";
 import { InvalidSampleDeletionWarning } from "./InvalidSampleDeletionWarning";
-
 interface BulkDeleteModalProps {
+  bulkDeleteObjects: (selectedIds: number[]) => Promise<any>;
   isOpen: boolean;
   onClose(): void;
   selectedIds: number[];
-  workflow: WorkflowType;
   onSuccess?(): void;
   redirectOnSuccess?: boolean;
+  validateUserCanDeleteObjects: (selectedIds: number[]) => Promise<any>;
+  workflowLabel: WorkflowLabelType;
+  isShortReadMngs: boolean;
 }
 
 const BulkDeleteModal = ({
   isOpen,
   onClose,
   selectedIds,
-  workflow,
   onSuccess,
   redirectOnSuccess,
+  workflowLabel,
+  isShortReadMngs,
+  validateUserCanDeleteObjects,
+  bulkDeleteObjects,
 }: BulkDeleteModalProps) => {
   const [isValidating, setIsValidating] = useState<boolean>(true);
   const [validIds, setValidsIds] = useState<number[]>([]);
   const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-  const validateSamplesCanBeDeleted = async () => {
-    const { validIds: newIds, invalidSampleNames: newInvalidNames } =
-      await validateUserCanDeleteObjects({ selectedIds, workflow });
-
-    setIsValidating(false);
-    setValidsIds(newIds);
-    setInvalidSampleNames(newInvalidNames);
-  };
-
   useEffect(() => {
+    const validateSamplesCanBeDeleted = async () => {
+      const { validIds: newIds, invalidSampleNames: newInvalidNames } =
+        await validateUserCanDeleteObjects(selectedIds);
+
+      setIsValidating(false);
+      setValidsIds(newIds);
+      setInvalidSampleNames(newInvalidNames);
+    };
+
     setIsValidating(true);
     setValidsIds([]);
     setInvalidSampleNames([]);
@@ -56,9 +60,7 @@ const BulkDeleteModal = ({
     if (!isOpen) return;
 
     validateSamplesCanBeDeleted();
-  }, [selectedIds, workflow]);
-
-  const workflowLabel = WORKFLOWS[workflow]?.label;
+  }, [isOpen, selectedIds, validateUserCanDeleteObjects]);
 
   const onDeleteSuccess = ({ successCount }) => {
     if (!redirectOnSuccess) {
@@ -90,10 +92,7 @@ const BulkDeleteModal = ({
   const handleDeleteSamples = async () => {
     setIsDeleting(true);
     try {
-      const { error } = await bulkDeleteObjects({
-        selectedIds: validIds,
-        workflow,
-      });
+      const { error } = await bulkDeleteObjects(validIds);
       if (error) {
         console.error(error);
         onDeleteError({ errorCount: validIds.length });
@@ -120,7 +119,7 @@ const BulkDeleteModal = ({
         {pluralize("run", validIds.length)}?
       </DialogTitle>
       <DialogContent>
-        <DeleteSampleModalText workflow={workflow} />
+        <DeleteSampleModalText isShortReadMngs={isShortReadMngs} />
         {invalidSampleNames.length > 0 && (
           <InvalidSampleDeletionWarning
             invalidSampleNames={invalidSampleNames}

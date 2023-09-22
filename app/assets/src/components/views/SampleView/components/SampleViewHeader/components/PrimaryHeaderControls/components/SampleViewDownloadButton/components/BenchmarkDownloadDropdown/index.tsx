@@ -1,5 +1,8 @@
-import { BenchmarkDownloadDropdown } from "./BenchmarkDownloadDropdown";
-export { BenchmarkDownloadDropdown };
+import {
+  BenchmarkDownloadDropdown,
+  BenchmarkDownloadDropdownProps,
+} from "./BenchmarkDownloadDropdown";
+export { BenchmarkDownloadDropdown, BenchmarkDownloadDropdownProps };
 
 /*
  NOTE: component code should go in BenchmarkDownloadDropdown.tsx

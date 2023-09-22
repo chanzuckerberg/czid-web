@@ -20,7 +20,12 @@ import React, {
 } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { SortDirectionType } from "react-virtualized";
-import { benchmarkSamples, bulkKickoffWorkflowRuns } from "~/api";
+import {
+  benchmarkSamples,
+  bulkDeleteObjects,
+  bulkKickoffWorkflowRuns,
+  validateUserCanDeleteObjects,
+} from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
   trackEvent,
@@ -1138,7 +1143,14 @@ const SamplesView = forwardRef(function SamplesView(
         onClose={() => setIsBulkDeleteModalOpen(false)}
         onSuccess={onBulkDeleteSuccess}
         selectedIds={Array.from(selectedIds)}
-        workflow={workflow}
+        isShortReadMngs={workflow === WorkflowType.SHORT_READ_MNGS}
+        workflowLabel={WORKFLOWS[workflow]?.label}
+        validateUserCanDeleteObjects={selectedIds =>
+          validateUserCanDeleteObjects({ selectedIds, workflow })
+        }
+        bulkDeleteObjects={selectedIds =>
+          bulkDeleteObjects({ selectedIds, workflow })
+        }
       />
       {heatmapCreationModalOpen && (
         <HeatmapCreationModal

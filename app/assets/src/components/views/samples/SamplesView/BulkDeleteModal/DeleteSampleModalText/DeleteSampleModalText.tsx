@@ -1,9 +1,12 @@
 import { List, ListItem } from "@czi-sds/components";
 import React from "react";
-import { WorkflowType } from "~/components/utils/workflows";
 import cs from "./delete_sample_modal_text.scss";
 
-const DeleteSampleModalText = ({ workflow }: { workflow: WorkflowType }) => (
+const DeleteSampleModalText = ({
+  isShortReadMngs,
+}: {
+  isShortReadMngs: boolean;
+}) => (
   <div>
     <div>
       Deleting your runs will remove the following from CZ ID for
@@ -17,7 +20,7 @@ const DeleteSampleModalText = ({ workflow }: { workflow: WorkflowType }) => (
       <ListItem>
         Any bulk download files that contain the deleted runs.
       </ListItem>
-      {workflow === WorkflowType.SHORT_READ_MNGS && (
+      {isShortReadMngs && (
         <ListItem>
           Any associated AMR reports labeled &quot;deprecated&quot;.
         </ListItem>

@@ -16,19 +16,20 @@ import {
   NONHOST_DOWNLOADS_TOOLTIP,
 } from "./amrDownloadUtils";
 
-interface AmrDownloadDropdownProps {
-  backgroundId?: number;
+export interface AmrDownloadDropdownProps {
+  readyToDownload?: boolean;
   className?: string;
-  currentTab?: string;
   workflowRun?: WorkflowRun;
   sample?: Sample;
 }
 
-const AmrDownloadDropdown = ({
+export const AmrDownloadDropdown = ({
+  readyToDownload,
   className,
   workflowRun,
   sample,
 }: AmrDownloadDropdownProps) => {
+  if (!readyToDownload) return null;
   const amrReportTableDownloadWithAppliedFiltersLink = useReactiveVar(
     amrReportTableDownloadWithAppliedFiltersLinkVar,
   );
@@ -165,5 +166,3 @@ const AmrDownloadDropdown = ({
     />
   );
 };
-
-export default AmrDownloadDropdown;

@@ -6,7 +6,7 @@ import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadB
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
 import { showToast } from "~/components/utils/toast";
-import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
+import { WorkflowType } from "~/components/utils/workflows";
 import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
@@ -16,27 +16,31 @@ import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
 
-interface MngsDownloadDropdownProps {
+export interface MngsDownloadDropdownProps {
+  readyToDownload?: boolean;
   backgroundId?: number;
   className?: string;
-  currentTab?: string;
-  getDownloadReportTableWithAppliedFiltersLink?: $TSFixMeFunction;
+  disableDownloadCSV: boolean;
+  getDownloadReportTableWithAppliedFiltersLink?: () => string;
   hasAppliedFilters?: boolean;
   pipelineRun?: PipelineRun;
   sample?: Sample;
   view?: string;
 }
 
-const MngsDownloadDropdown = ({
+export const MngsDownloadDropdown = ({
+  readyToDownload,
   backgroundId,
   className,
-  currentTab,
+  disableDownloadCSV,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
   pipelineRun,
   sample,
   view,
 }: MngsDownloadDropdownProps) => {
+  if (!readyToDownload) return null;
+
   const downloadCSV = () => {
     const resParams = {
       ...(backgroundId && { background_id: backgroundId }),
@@ -138,7 +142,7 @@ const MngsDownloadDropdown = ({
     {
       text: "Download Report Table (.csv)",
       value: "download_csv",
-      disabled: currentTab === WORKFLOW_TABS.MERGED_NT_NR,
+      disabled: disableDownloadCSV,
     },
     {
       text: "Download Report Table with Applied Filters (.csv)",
@@ -158,5 +162,3 @@ const MngsDownloadDropdown = ({
     />
   );
 };
-
-export default MngsDownloadDropdown;
