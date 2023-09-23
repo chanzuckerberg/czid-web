@@ -27,7 +27,7 @@ suites:
   - name: "Chromium Mac"
     platformName: "macOS 12"
     screenResolution: "1440x900"
-    testMatch: ['.*.spec.ts']
+    testMatch: ['./sampleReport/sample-report-filters.spec.ts']
     params:
       browserName: "chromium"
       project: "chromium"

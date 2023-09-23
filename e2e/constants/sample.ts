@@ -4,6 +4,7 @@ export const NUMBER_INPUT = 'input[type="number"]';
 
 export const PATHOGEN_LINk = 'a[class="linkDefault-34rbs"]';
 
+export const TAXONS = '[class*="taxonName"]'
 export const FILTER_RESULT = '[data-testid="filter-tag"]';
 export const SEARCH_BAR = '[placeholder="Taxon name"]';
 export const ALL_COLUMN_HEADERS = [
@@ -36,6 +37,8 @@ export const COLUMNS_LABEL = 'div[data-testid*="column-header"]';
 export const FILTER_TAG = '[data-testid="filter-tag"]';
 export const CANCEL_ICON =
   '[data-testid="filter-tag"] [data-testid="x-close-icon"]';
+export const X_CLOSE_ICON =
+  '[data-testid="x-close-icon"]';
 export const TOTAL_READ_POPOUP_CONTENT = '[data-testid="column-tooltip"]';
 export const COLUMN_HEADER_PROP = {
   Score: {
@@ -95,9 +98,28 @@ export const BACTERIA_FILTER = '[data-testid="dropdown-bacteria"]';
 export const EUKARYOTA_FILTER = '[data-testid="dropdown-eukaryota"]';
 export const VIROIDS_FILTER = '[data-testid="dropdown-viroids"]';
 export const VIRUSES_FILTER = '[data-testid="dropdown-viruses"]';
+export const VIRUSES_PHAGE_FILTER = '[data-testid="dropdown-viruses---phage"]';
 export const UNCATEGORIZED_FILTER = '[data-testid="dropdown-uncategorized"]';
 export const CATEGORIES_FILTER = '[data-testid="category-filter"]';
+export const ARCHAEA = "Archaea";
+export const BACTERIA = "Bacteria";
+export const EUKARYOTA = "Eukaryota";
+export const VIROIDS = "Viroids";
+export const VIRUSES = "Viruses";
+export const PHAGE = "Phage";
+export const UNCATEGORIZED = "Uncategorized";
+export const CATEGORY_NAMES = [
+  ARCHAEA,
+  BACTERIA,
+  EUKARYOTA,
+  VIROIDS,
+  VIRUSES,
+  PHAGE,
+  UNCATEGORIZED
+];
 export const FILTERS_DROPDOWN = '[data-testid="dropdown-menu"]';
+export const THRESHOLD_OPTION_FILTER = '[class*="thresholdFilterList"] [data-testid="filters"]'
+export const THRESHOLD_COMPARISON_OPERATORS = [">=", "<="]
 export const THRESHOLD_FILTERS = [
   "Score",
   "NT Z Score",
@@ -117,8 +139,22 @@ export const THRESHOLD_FILTERS = [
   "NR L (alignment length in bp)",
   "NR E value (as a power of 10)",
 ];
-export const READ_SPECIFICITY_FILTERS = ["All", "Specific Only"];
+export const ALL = "All"
+export const SPECIFIC_ONLY = "Specific Only"
+export const READ_SPECIFICITY_FILTERS = [ALL, SPECIFIC_ONLY];
+
 export const ANNOTATION_FILTERS = ["Hit", "Not a hit", "Inconclusive"];
+
+export const NAME_TYPE_FILTER = '[data-testid="name-type-filter"]'
+
+export const SCIENTIFIC = "Scientific";
+export const COMMON = "Common";
+export const NAME_TYPES = [
+  SCIENTIFIC,
+  COMMON
+];
+
+export const NAME_TYPE_FILTER_VALUE = 'span[data-testid="name-type-filter"] + span'
 
 export const APPLY_BUTTON = '[data-testid="apply"]';
 export const APPLY = 'text="Apply"';

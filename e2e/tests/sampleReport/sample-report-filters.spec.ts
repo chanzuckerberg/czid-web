@@ -1,180 +1,228 @@
-import { expect, test } from "@playwright/test";
-import { kebabCase } from "lodash";
+import { test } from "@playwright/test";
 import {
   ANNOTATION_FILTERS,
-  ANNOTATION_TEXT,
-  APPLY,
-  APPLY_BUTTON,
-  ARCHAEA_FILTER,
-  BACTERIA_FILTER,
-  CANCEL_ICON,
-  CATEGORIES_FILTER,
-  COLUMNS_LABEL,
   COLUMN_HEADER_PROP,
-  EUKARYOTA_FILTER,
-  FILTER_RESULT,
-  FILTER_TAG,
-  FILTER_VALUE,
-  KLEBSIELLA,
-  KLEBSIELLA_GENUS,
-  LEARN_MORE_LINK,
-  NUMBER_INPUT,
-  READ_SPECIFICITY,
+  SPECIFIC_ONLY,
   READ_SPECIFICITY_FILTERS,
-  SCORE,
-  SEARCH_BAR,
-  THRESHOLD_FILTER,
   THRESHOLD_FILTERS,
-  TOTAL_READ_POPOUP_CONTENT,
-  UNCATEGORIZED_FILTER,
-  VIROIDS_FILTER,
-  VIRUSES_FILTER,
+  THRESHOLD_COMPARISON_OPERATORS,
+  NAME_TYPES,
+  CATEGORY_NAMES,
+  BACTERIA,
+  VIRUSES,
+  PHAGE,
+  SCIENTIFIC
 } from "../../constants/sample";
+import { SamplesPage } from "../../page-objects/samples-page";
 
-const sampleId = 25307;
+let sampleId = null;
+let samplesPage = null
+
 // These tests validate the user's proficiency in utilizing various filter functions on the sample report page, such as Nametype, Annotation, Category, Threshold filter, and Read specificity.
 test.describe("Sample report filter test", () => {
   test.beforeEach(async ({ page }) => {
-    // go to sample page
-    await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
+    test.setTimeout(60000*5)
+    samplesPage = new SamplesPage(page)
+
+    let randomSample = await samplesPage.getRandomCompletedSample()
+    sampleId = randomSample.id
+
+    await samplesPage.navigate(sampleId)
   });
 
-  test(`Verify url displayed on the columns`, async ({ page, context }) => {
-    await expect(page.locator(COLUMNS_LABEL).nth(1)).toBeVisible();
-    const n = await page.locator(COLUMNS_LABEL).allInnerTexts();
-    for (let i = 1; i < n.length; i++) {
-      await page.locator(COLUMNS_LABEL).nth(i).hover();
-      await expect(page.locator(TOTAL_READ_POPOUP_CONTENT)).toHaveText(
-        COLUMN_HEADER_PROP[n[i]]["description"],
-      );
+  test.afterEach(async () => {
+    await samplesPage.close()
+  });
 
-      const [newPage] = await Promise.all([
-        context.waitForEvent("page"),
-        await page.locator(LEARN_MORE_LINK).click(),
-      ]);
-      await newPage.waitForLoadState();
+  test(`Verify url displayed on the columns`, async () => {
+    await samplesPage.validateColumnsVisible()
+
+    const n = await samplesPage.getAllColumnText()
+    for (let i = 1; i < n.length; i++) {
+      await samplesPage.hoverOverColumnByIndex(i)
+      await samplesPage.validateTotalReadPopupTest(COLUMN_HEADER_PROP[n[i]]["description"]);
+
+      let articlePage = await samplesPage.clickLearnMoreLink()
+
       const link = COLUMN_HEADER_PROP[n[i]]["url"];
-      expect(newPage.url().includes(link)).toBeTruthy();
-      await newPage.close();
-      await page.locator(COLUMNS_LABEL).nth(i).click();
+      await articlePage.validateUrlIncludesLinkText(link)
+      await articlePage.close();
+      
+      await samplesPage.clickTableHeaderByIndex(i)
     }
   });
 
-  test(`Should be able to filter by Taxon name`, async ({ page }) => {
+  /**
+   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-1
+   */
+  test(`Should be able to filter by Taxon name`, async () => {
+    const sampleReport = await samplesPage.getReportV2(sampleId);
+    const taxons = await samplesPage.getSpecificTaxons(sampleReport)
+
+    const taxon = taxons[Math.floor(Math.random() * taxons.length)]
+    const genus = await taxon.name.split(' ')[0]
+    const expectedTagText = `${genus} (genus)`
+
     // Search for data
-    await page.locator(SEARCH_BAR).fill(KLEBSIELLA);
-    await page.getByText(KLEBSIELLA_GENUS).click();
+    await samplesPage.fillSearchBar(genus);
+    await samplesPage.clickSearchResult(expectedTagText);
+    await samplesPage.clickExpandAll()
 
     // Verify filter result
-    await expect(page.locator(FILTER_TAG)).toBeVisible();
-    await expect(page.locator(FILTER_RESULT)).toContainText(KLEBSIELLA);
+    await samplesPage.validateTaxonsFilteredByName(genus)
+    await samplesPage.validateFilterTags([expectedTagText])
+    await samplesPage.validateTaxonIsVisible(taxon.name)
   });
 
-  test(`Should be able to filter by Category name`, async ({ page }) => {
-    const drop_down = [
-      ARCHAEA_FILTER,
-      BACTERIA_FILTER,
-      EUKARYOTA_FILTER,
-      VIROIDS_FILTER,
-      VIRUSES_FILTER,
-      UNCATEGORIZED_FILTER,
-    ];
-    const filter_tag = [
-      "Archaea",
-      "Bacteria",
-      "Eukaryota",
-      "Viroids",
-      "Viruses",
-      "Phage",
-      "Uncategorized",
-    ];
-    for (let i = 0; i < drop_down.length; i++) {
-      await page.locator(CATEGORIES_FILTER).click();
-      await page.locator(drop_down[i]).click();
-      await expect(
-        page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`),
-      ).toBeVisible();
-      await page.keyboard.press("Escape");
-      // test Remove filter x button
-      await page
-        .locator(FILTER_TAG)
-        .locator(`text="${filter_tag[i]}"`)
-        .getByTestId("x-close-icon")
-        .click();
-      await expect(
-        page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`),
-      ).not.toBeVisible();
-    }
+  /**
+   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-2
+   */
+  test("Should be able to filter by Name Type", async () => {
+    const sampleReport = await samplesPage.getReportV2(sampleId);
+    let taxonNames = await samplesPage.getTaxonNamesFromReport(sampleReport)
 
-    for (let i = 0; i < drop_down.length; i++) {
-      await page.locator(CATEGORIES_FILTER).click();
-      await expect(page.locator(drop_down[i])).toBeVisible();
-      await page.locator(drop_down[i]).click();
-      await page.keyboard.press("Escape");
-    }
-    // test Stats bar
-    await expect(page.getByTestId("stats-info")).not.toBeEmpty();
-
-    // test Clear Filters button
-    await page.locator(`text="Clear Filters"`).click();
-    await expect(page.getByTestId("filter-tag")).toHaveCount(0);
-  });
-
-  test(`Should be able to filter by Threshold`, async ({ page }) => {
-    await page.locator(THRESHOLD_FILTER).click();
-    await page.getByTestId(FILTER_VALUE).getByText(SCORE).click();
-
-    // Verify drop down contains required elements
-    for (let i = 0; i < THRESHOLD_FILTERS.length; i++) {
-      expect(
-        await page.getByTestId(kebabCase(THRESHOLD_FILTERS[i])),
-      ).toBeVisible();
-    }
-    await page.locator(THRESHOLD_FILTER).click();
-
-    // Verify Threshold filter are applied
-    for (let i = 0; i < THRESHOLD_FILTERS.length; i++) {
-      await page.locator(THRESHOLD_FILTER).click();
-      await page.getByTestId(FILTER_VALUE).getByText(SCORE).click();
-      await page.getByTestId(kebabCase(THRESHOLD_FILTERS[i])).click();
-      await page.locator(NUMBER_INPUT).fill("10");
-      await page.locator(APPLY_BUTTON).locator(APPLY).click();
-      await expect(page.locator(FILTER_TAG)).toHaveText(
-        THRESHOLD_FILTERS[i] + " >= 10",
-      );
-      await page.locator(CANCEL_ICON).click();
+    for (let option of NAME_TYPES) {
+      await samplesPage.selectNameTypeOption(option)
+      await samplesPage.validateReportFilteredByNameType(option, taxonNames[option])
     }
   });
 
-  test(`Should be able to filter by Read Specificity`, async ({ page }) => {
-    await page.locator(READ_SPECIFICITY).click();
-    for (let i = 0; i < READ_SPECIFICITY_FILTERS.length; i++) {
-      expect(
-        await page.getByTestId(kebabCase(READ_SPECIFICITY_FILTERS[i])),
-      ).toBeVisible();
+  /**
+   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-3
+   */
+  test(`Should be able to filter by Category name`, async () => {
+    const sampleReport = await samplesPage.getReportV2(sampleId);
+    await samplesPage.clickExpandAll()
+    await samplesPage.ClickSortByName()
+
+    const filter_categories = [...CATEGORY_NAMES].sort(() => 0.5 - Math.random()).slice(0, 2);
+
+    // #region Validate filter by single category
+    for (let i = 0; i < filter_categories.length; i++) {
+      await samplesPage.selectCategoryFilter(filter_categories[i])
+      await samplesPage.toggleSortByName()
+
+      let expectedFilterTags = filter_categories[i] === VIRUSES ? [VIRUSES, PHAGE] : [filter_categories[i]];
+      await samplesPage.validateFilterTags(expectedFilterTags)
+
+      let expectedTaxonNames = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, [filter_categories[i]])
+      await expectedTaxonNames.sort()
+      await samplesPage.validateTaxonsAreVisible(expectedTaxonNames);
+
+      await samplesPage.removeFilterTags(expectedFilterTags)
+      await samplesPage.validateFilterTagVisiblity(filter_categories[i], false)
+    }
+    // #endregion Validate filter by single category
+
+    // #region Validate filter by mutiple category
+    let mutipleCategories = []
+    for (let i = 0; i < filter_categories.length; i++) {
+      await samplesPage.selectCategoryFilter(filter_categories[i])
+      await samplesPage.toggleSortByName()
+      
+      mutipleCategories.push(filter_categories[i])
+      let expectedTaxonNames = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, mutipleCategories)
+      await expectedTaxonNames.sort()
+      await samplesPage.validateTaxonsAreVisible(expectedTaxonNames);
+    }
+    // #endregion Validate filter by mutiple category
+
+    // #region Test Stats bar
+    let expectedTags = filter_categories.includes(VIRUSES) && !filter_categories.includes(PHAGE) 
+      ? [...filter_categories, PHAGE]
+      : (filter_categories.includes(VIRUSES) && filter_categories.includes(PHAGE))
+      ? filter_categories.filter(category => category !== PHAGE)
+      : filter_categories;
+    await samplesPage.validateFilterTagCount(expectedTags.length)
+    await samplesPage.validateStatsInfoNotEmpty()
+    // #endregion Test Stats bar
+
+    // #region Test Clear Filters button
+    await samplesPage.clickClearFilters()
+    await samplesPage.validateFilterTagCount(0)
+    // #endregion Test Clear Filters button
+  });
+
+  /**
+   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-4
+   */
+  test(`Should be able to filter by Threshold`, async () => {
+    const sampleReport = await samplesPage.getReportV2(sampleId);
+    await samplesPage.validateThresholdOptionFilterHasExpectedOptions(THRESHOLD_FILTERS)
+  
+    for (let thresholdOption of THRESHOLD_FILTERS) {
+      for (let operator of THRESHOLD_COMPARISON_OPERATORS) {
+        let thresholdValue = Math.floor(Math.random() * 10) + 1;
+        await samplesPage.selectThresholdOptions(thresholdOption, operator, thresholdValue)
+  
+        await samplesPage.validateFilterTags([thresholdOption + ` ${operator} ${thresholdValue}`])
+        await samplesPage.validateReportFilteredThreshold(thresholdOption, operator, thresholdValue, sampleReport)
+  
+        await samplesPage.clickFilterTagCloseIcon(operator)
+      }
     }
   });
 
-  test(`Should be able to filter by Annotation`, async ({ page }) => {
-    await page.locator(ANNOTATION_TEXT).click();
+  /**
+   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-5
+   */
+  test(`Should be able to filter by Read Specificity`, async () => {
+    await samplesPage.validateReadSpecificityFiltersHasExpectedOptions(READ_SPECIFICITY_FILTERS);
 
-    for (let i = 0; i < ANNOTATION_FILTERS.length; i++) {
-      expect(
-        page.getByTestId(`dropdown-${kebabCase(ANNOTATION_FILTERS[i])}`),
-      ).toBeVisible();
+    const sampleReport = await samplesPage.getReportV2(sampleId);
+    const taxonNames = await samplesPage.getTaxonNamesFromReport(sampleReport)
+    const categories = [null]
+    const taxonNamesWithNoCategory = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, categories)
+    const expectedTaxonNames = {
+      "All": taxonNames.Scientific,
+      "Specific Only": taxonNames.Scientific.filter(item => !taxonNamesWithNoCategory.includes(item))
     }
 
-    await page.locator(ANNOTATION_TEXT).click();
+    for (let option of READ_SPECIFICITY_FILTERS) {
+      await samplesPage.selectReadSpecificityOption(option)
+      await samplesPage.validateReportFilteredByReadSpecificity(option, expectedTaxonNames[option])
+    }
+  });
+
+  /**
+   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-6
+   */
+  test(`Should be able to filter by Annotation`, async () => {
+    await samplesPage.validateAnnotationFiltersHasExpectedOptions(ANNOTATION_FILTERS);
 
     // Verify filter are applied
-    for (let i = 0; i < ANNOTATION_FILTERS.length; i++) {
-      await page.locator(ANNOTATION_TEXT).click();
-      await page
-        .getByTestId(`dropdown-${kebabCase(ANNOTATION_FILTERS[i])}`)
-        .click();
-      await expect(page.locator(FILTER_TAG)).toHaveText(ANNOTATION_FILTERS[i]);
-      await page.locator(COLUMNS_LABEL).nth(0).click();
-      await page.locator(CANCEL_ICON).click();
-    }
+    await samplesPage.validateReportFilteredByAnnotation(ANNOTATION_FILTERS);
+  });
+
+  /**
+   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-7
+   */
+  test(`Should be able to filter by multiple criteria`, async () => {
+    const sampleReport = await samplesPage.getReportV2(sampleId);
+
+    const category = BACTERIA
+    const taxons = await samplesPage.getTaxonsByCategory(sampleReport, [category])
+    const taxon = taxons[Math.floor(Math.random() * taxons.length)]
+
+    const genus = await taxon.name.split(' ')[0]
+    const searchResultText = `${genus} (genus)`
+
+    // Filter by Scientific name only
+    await samplesPage.selectNameTypeOption(SCIENTIFIC)
+
+    // Filter by Read Specificity
+    await samplesPage.selectReadSpecificityOption(SPECIFIC_ONLY)
+
+    // Filter by Category
+    await samplesPage.selectCategoryFilter(category)
+
+    // Filter by Taxon name
+    await samplesPage.filterByName(genus, searchResultText);
+    
+    await samplesPage.clickExpandAll()
+    await samplesPage.validateTaxonsFilteredByName(genus)
+    await samplesPage.validateTaxonIsVisible(taxon.name)
+
+    await samplesPage.validateFilterTags([searchResultText, category])
   });
 });
