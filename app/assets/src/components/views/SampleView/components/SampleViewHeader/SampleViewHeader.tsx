@@ -6,6 +6,7 @@ import { generateUrlToSampleView } from "~/components/utils/urls";
 import {
   getWorkflowTypeFromLabel,
   isMngsWorkflow,
+  WorkflowType,
 } from "~/components/utils/workflows";
 import Project from "~/interface/project";
 import ReportMetadata from "~/interface/reportMetaData";
@@ -59,7 +60,8 @@ export const SampleViewHeader = ({
       ? `/pub/${snapshotShareId}`
       : `/home?project_id=${project.id}`;
   };
-  const workflow = getWorkflowTypeFromLabel(currentTab);
+  const workflow =
+    getWorkflowTypeFromLabel(currentTab) || WorkflowType.SHORT_READ_MNGS;
 
   const getAllRunsPerWorkflow = () => {
     const runsByType =
