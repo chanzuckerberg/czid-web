@@ -150,7 +150,7 @@ export const adjustMetricPrecision = (species: $TSFixMe) => {
       species[key] = parseFloat(
         Number(metricValue).toFixed(METRIC_DECIMAL_PLACES[key]),
       );
-    } else if (["nt", "nr", "merged_nt_nr"].includes(key)) {
+    } else if (["nt", "nr"].includes(key)) {
       Object.entries(species[key]).forEach(([metricKey, metricValue]) => {
         if (metricKey in METRIC_DECIMAL_PLACES && metricValue) {
           species[key][metricKey] = parseFloat(

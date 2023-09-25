@@ -40,7 +40,6 @@ export const MngsReport = ({
   snapshotShareId,
   view,
 }: MngsReportProps) => {
-  const displayMergedNtNrValue = currentTab === WORKFLOW_TABS.MERGED_NT_NR;
   if (reportMetadata.reportReady && reportData?.length > 0 && !loadingReport) {
     return (
       <div className={cs.reportViewContainer}>
@@ -49,7 +48,6 @@ export const MngsReport = ({
           loadingReport={loadingReport}
           ownedBackgrounds={ownedBackgrounds}
           otherBackgrounds={otherBackgrounds}
-          shouldDisableFilters={displayMergedNtNrValue}
           refreshDataFromOptionsChange={refreshDataFromOptionsChange}
           onFilterChanged={handleOptionChanged}
           sampleId={sample?.id}
@@ -94,7 +92,6 @@ export const MngsReport = ({
             projectName={project?.name}
             sampleId={sample?.id}
             snapshotShareId={snapshotShareId}
-            shouldDisplayMergedNtNrValue={displayMergedNtNrValue}
             shouldDisplayNoBackground={isNil(selectedOptions.background)}
           />
         )}

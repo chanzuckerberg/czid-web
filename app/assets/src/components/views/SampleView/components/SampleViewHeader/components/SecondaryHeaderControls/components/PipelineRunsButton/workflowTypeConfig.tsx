@@ -18,9 +18,6 @@ export const PipelineRunsButtonConfig: WorkflowConfigType<{
   [WorkflowType.BENCHMARK]: {
     hasPipelineRunsButton: true,
   },
-  [WorkflowType.MERGED_NT_NR]: {
-    hasPipelineRunsButton: null,
-  },
   [WorkflowType.AMR_DEPRECATED]: {
     hasPipelineRunsButton: null,
   },

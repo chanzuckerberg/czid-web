@@ -27,7 +27,7 @@ export const ReportStatsRow = ({
     <div className={cs.statsRow}>
       {renderReportInfo(currentTab, reportMetadata)}
       <div className={cs.statsRowFilterInfo} data-testid={"stats-info"}>
-        {filteredMessage(currentTab, filteredReportData, reportData)}
+        {filteredMessage(filteredReportData, reportData)}
         {!!countFilters(currentTab, selectedOptions) && (
           <span className={cs.clearAllFilters}>
             <Button

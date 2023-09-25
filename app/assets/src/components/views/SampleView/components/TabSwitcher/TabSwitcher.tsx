@@ -5,7 +5,6 @@ import Tabs from "~/components/ui/controls/Tabs";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import {
   AMR_DEPRECATED_FEATURE,
-  MERGED_NT_NR_FEATURE,
   ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import {
@@ -58,7 +57,6 @@ export const TabSwitcher = ({
       ),
     });
 
-    const mergedNtNrTab = customTab(WORKFLOW_TABS.MERGED_NT_NR, "Prototype");
     const ontTab = customTab(
       WORKFLOW_TABS.LONG_READ_MNGS,
       "Beta",
@@ -80,9 +78,6 @@ export const TabSwitcher = ({
     const workflowTabs = compact([
       shortReadMngs && WORKFLOW_TABS.SHORT_READ_MNGS,
       longReadMngs && allowedFeatures.includes(ONT_V1_FEATURE) && ontTab,
-      shortReadMngs &&
-        allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
-        mergedNtNrTab,
       shortReadMngs && deprecatedAmrLabel,
       amr && WORKFLOW_TABS.AMR,
       cg && WORKFLOW_TABS.CONSENSUS_GENOME,

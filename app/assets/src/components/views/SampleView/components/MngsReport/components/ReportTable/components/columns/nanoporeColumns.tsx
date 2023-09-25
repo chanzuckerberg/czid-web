@@ -14,11 +14,8 @@ import { getCountTypeValuesFromDataRow, nestedNtNrSortFunction } from "./utils";
 
 export const getNanoporeColumns: (
   dbType: DBType,
-  shouldDisplayMergedNtNrValue: boolean,
-) => Array<ColumnProps> = (dbType, shouldDisplayMergedNtNrValue) => {
-  const countTypes = shouldDisplayMergedNtNrValue
-    ? ["merged_nt_nr"]
-    : ["nt", "nr"];
+) => Array<ColumnProps> = dbType => {
+  const countTypes = ["nt", "nr"];
 
   return [
     {

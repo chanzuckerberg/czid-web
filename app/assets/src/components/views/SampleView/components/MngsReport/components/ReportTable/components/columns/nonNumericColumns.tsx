@@ -31,7 +31,6 @@ export const getNonNumericColumns = (
   pipelineVersion: string,
   projectId: number,
   sampleId: number,
-  shouldDisplayMergedNtNrValue: boolean,
   handlePhyloTreeModalOpen: (
     phyloTreeModalParams: PhyloTreeModalParamsType,
   ) => void,
@@ -76,7 +75,6 @@ export const getNonNumericColumns = (
         pipelineRunId,
         projectId,
         sampleId,
-        shouldDisplayMergedNtNrValue,
         handlePhyloTreeModalOpen,
         onAnnotationUpdate,
         onBlastClick,

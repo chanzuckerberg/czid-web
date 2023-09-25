@@ -20,7 +20,6 @@ export interface MngsDownloadDropdownProps {
   readyToDownload?: boolean;
   backgroundId?: number;
   className?: string;
-  disableDownloadCSV: boolean;
   getDownloadReportTableWithAppliedFiltersLink?: () => string;
   hasAppliedFilters?: boolean;
   pipelineRun?: PipelineRun;
@@ -32,7 +31,6 @@ export const MngsDownloadDropdown = ({
   readyToDownload,
   backgroundId,
   className,
-  disableDownloadCSV,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
   pipelineRun,
@@ -142,7 +140,6 @@ export const MngsDownloadDropdown = ({
     {
       text: "Download Report Table (.csv)",
       value: "download_csv",
-      disabled: disableDownloadCSV,
     },
     {
       text: "Download Report Table with Applied Filters (.csv)",

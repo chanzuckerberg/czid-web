@@ -1,9 +1,5 @@
 import { get, isEmpty } from "lodash/fp";
-import {
-  WorkflowConfigType,
-  WorkflowType,
-  WORKFLOW_TABS,
-} from "~/components/utils/workflows";
+import { WorkflowConfigType, WorkflowType } from "~/components/utils/workflows";
 import ReportMetadata from "~/interface/reportMetaData";
 import { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
@@ -45,7 +41,6 @@ type SampleViewDownloadButtonConfigType = (x: {
     | DownloadAllButtonType
     | MngsDownloadDropdownType;
   readyToDownload: boolean;
-  disableDownloadCSV?: boolean;
 };
 
 export const SampleViewDownloadButtonConfig: WorkflowConfigType<SampleViewDownloadButtonConfigType> =
@@ -58,10 +53,9 @@ export const SampleViewDownloadButtonConfig: WorkflowConfigType<SampleViewDownlo
       component: DownloadAllButton,
       readyToDownload: currentRun && get("status", currentRun) === "SUCCEEDED",
     }),
-    [WorkflowType.SHORT_READ_MNGS]: ({ reportMetadata, currentTab }) => ({
+    [WorkflowType.SHORT_READ_MNGS]: ({ reportMetadata }) => ({
       component: MngsDownloadDropdown,
       readyToDownload: !isEmpty(reportMetadata),
-      disableDownloadCSV: currentTab === WORKFLOW_TABS.MERGED_NT_NR,
     }),
     [WorkflowType.LONG_READ_MNGS]: ({ reportMetadata }) => ({
       component: MngsDownloadDropdown,
@@ -74,10 +68,5 @@ export const SampleViewDownloadButtonConfig: WorkflowConfigType<SampleViewDownlo
     [WorkflowType.AMR_DEPRECATED]: ({ reportMetadata }) => ({
       component: MngsDownloadDropdown,
       readyToDownload: !isEmpty(reportMetadata),
-    }),
-    [WorkflowType.MERGED_NT_NR]: ({ reportMetadata }) => ({
-      component: MngsDownloadDropdown,
-      readyToDownload: !isEmpty(reportMetadata),
-      disableDownloadCSV: true,
     }),
   };

@@ -16,16 +16,8 @@ export const getSharedColumns: (
   dbType: DBType,
   handleNtNrChange: (selectedDbType: "nr" | "nt") => void,
   numericColumnWidth: number,
-  shouldDisplayMergedNtNrValue: boolean,
-) => Array<ColumnProps> = (
-  dbType,
-  handleNtNrChange,
-  numericColumnWidth,
-  shouldDisplayMergedNtNrValue: boolean,
-) => {
-  const countTypes = shouldDisplayMergedNtNrValue
-    ? ["merged_nt_nr"]
-    : ["nt", "nr"];
+) => Array<ColumnProps> = (dbType, handleNtNrChange, numericColumnWidth) => {
+  const countTypes = ["nt", "nr"];
 
   return [
     {
@@ -97,28 +89,12 @@ export const getSharedColumns: (
         }),
       width: numericColumnWidth,
     },
-    shouldDisplayMergedNtNrValue
-      ? {
-          cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
-            getCountTypeValuesFromDataRow({
-              rowData,
-              field: "source_count_type",
-              defaultValue: "-",
-              countTypes: countTypes,
-            }),
-          dataKey: "source_count_type",
-          columnData: REPORT_TABLE_COLUMNS["sourceCountType"],
-          // TODO(omar): Do users want to sort by SourceDB if prototype is successful?
-          disableSort: true,
-          label: "Source DB",
-          width: 70,
-        }
-      : {
-          dataKey: "ntnrSelector",
-          disableSort: true,
-          headerClassName: cs.ntnrSelectorHeader,
-          headerRenderer: getNtNrSelectorRenderer(dbType, handleNtNrChange),
-          width: 40,
-        },
+    {
+      dataKey: "ntnrSelector",
+      disableSort: true,
+      headerClassName: cs.ntnrSelectorHeader,
+      headerRenderer: getNtNrSelectorRenderer(dbType, handleNtNrChange),
+      width: 40,
+    },
   ];
 };

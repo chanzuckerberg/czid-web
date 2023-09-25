@@ -217,7 +217,7 @@ export type PickConsensusGenomeData = Pick<
   "percentIdentity" | "taxId" | "taxName"
 >;
 
-export type DBType = "nt" | "nr" | "merged_nt_nr";
+export type DBType = "nt" | "nr";
 
 export interface BenchmarkWorkflowRunAdditionalInfo {
   [key: number]: BenchmarkWorkflowRunAdditionalInfoEntry;

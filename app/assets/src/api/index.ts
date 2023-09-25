@@ -43,7 +43,6 @@ const getSampleReportData = ({
   sampleId,
   background,
   pipelineVersion = null,
-  mergeNtNr = false,
 }: $TSFixMe) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
@@ -53,7 +52,7 @@ const getSampleReportData = ({
         id: sampleId,
         pipeline_version: pipelineVersion,
         background: background,
-        merge_nt_nr: mergeNtNr,
+        merge_nt_nr: false, // TODO: we should remove this, but I don't want to break anything
       },
     },
   );

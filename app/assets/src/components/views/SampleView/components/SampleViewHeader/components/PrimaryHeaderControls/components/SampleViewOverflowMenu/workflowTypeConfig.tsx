@@ -55,7 +55,4 @@ export const SampleViewOverflowMenuConfig: WorkflowConfigType<SampleViewOverflow
     [WorkflowType.AMR_DEPRECATED]: () => ({
       isVisible: false,
     }),
-    [WorkflowType.MERGED_NT_NR]: () => ({
-      isVisible: false,
-    }),
   };

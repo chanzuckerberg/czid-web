@@ -40,15 +40,12 @@ export const SampleViewDownloadButton = ({
       sampleId: sample?.id,
     });
   };
-  const {
-    component: DownloadButtonByWorkflow,
-    readyToDownload,
-    disableDownloadCSV,
-  } = SampleViewDownloadButtonConfig[workflow]({
-    currentRun,
-    reportMetadata,
-    currentTab,
-  });
+  const { component: DownloadButtonByWorkflow, readyToDownload } =
+    SampleViewDownloadButtonConfig[workflow]({
+      currentRun,
+      reportMetadata,
+      currentTab,
+    });
   return (
     <DownloadButtonByWorkflow
       readyToDownload={readyToDownload}
@@ -57,7 +54,6 @@ export const SampleViewDownloadButton = ({
       sample={sample}
       handleDownloadAllClick={() => onDownloadAll(workflow)}
       backgroundId={backgroundId}
-      disableDownloadCSV={disableDownloadCSV}
       getDownloadReportTableWithAppliedFiltersLink={
         getDownloadReportTableWithAppliedFiltersLink
       }

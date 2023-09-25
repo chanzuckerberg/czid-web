@@ -21,16 +21,10 @@ import {
 
 export const getIlluminaColumns: (
   dbType: DBType,
-  displayMergedNtNrValue: boolean,
   displayNoBackground: boolean,
   pipelineVersion?: string,
-) => Array<ColumnProps> = (
-  dbType,
-  displayMergedNtNrValue,
-  displayNoBackground,
-  pipelineVersion,
-) => {
-  const countTypes = displayMergedNtNrValue ? ["merged_nt_nr"] : ["nt", "nr"];
+) => Array<ColumnProps> = (dbType, displayNoBackground, pipelineVersion) => {
+  const countTypes = ["nt", "nr"];
   const assemblyEnabled = isPipelineFeatureAvailable(
     ASSEMBLY_FEATURE,
     pipelineVersion,
@@ -38,13 +32,8 @@ export const getIlluminaColumns: (
 
   return [
     {
-      cellRenderer: getAggregateScoreRenderer(
-        displayNoBackground,
-        displayMergedNtNrValue,
-      ),
-      columnData: displayMergedNtNrValue
-        ? REPORT_TABLE_COLUMNS["unavailable"]
-        : REPORT_TABLE_COLUMNS["NT_aggregatescore"],
+      cellRenderer: getAggregateScoreRenderer(displayNoBackground),
+      columnData: REPORT_TABLE_COLUMNS["NT_aggregatescore"],
       dataKey: "agg_score",
       label: "Score",
       width: 130,
@@ -60,18 +49,14 @@ export const getIlluminaColumns: (
     },
     {
       cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
-        displayMergedNtNrValue
-          ? null
-          : getCountTypeValuesFromDataRow({
-              rowData,
-              field: "z_score",
-              defaultValue: 0,
-              countTypes: countTypes,
-            }),
+        getCountTypeValuesFromDataRow({
+          rowData,
+          field: "z_score",
+          defaultValue: 0,
+          countTypes: countTypes,
+        }),
       cellRenderer: getZScoreRenderer(dbType, displayNoBackground),
-      columnData: displayMergedNtNrValue
-        ? REPORT_TABLE_COLUMNS["unavailable"]
-        : REPORT_TABLE_COLUMNS["zscore"],
+      columnData: REPORT_TABLE_COLUMNS["zscore"],
       dataKey: "z_score",
       sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
         nestedNtNrSortFunction({

@@ -42,8 +42,7 @@ export const ReportPanel = ({
   return (
     <>
       {(currentTab === WORKFLOW_TABS.SHORT_READ_MNGS ||
-        currentTab === WORKFLOW_TABS.LONG_READ_MNGS ||
-        currentTab === WORKFLOW_TABS.MERGED_NT_NR) && (
+        currentTab === WORKFLOW_TABS.LONG_READ_MNGS) && (
         <MngsReport
           backgrounds={backgrounds}
           currentTab={currentTab}

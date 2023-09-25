@@ -1,5 +1,5 @@
 import { cx } from "@emotion/css";
-import { filter, get } from "lodash/fp";
+import { get } from "lodash/fp";
 import React from "react";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
@@ -39,7 +39,6 @@ export const getNameRenderer = (
   pipelineRunId: number,
   projectId: number,
   sampleId: number,
-  shouldDisplayMergedNtNrValue: boolean,
   handlePhyloTreeModalOpen: (
     phyloTreeModalParams: PhyloTreeModalParamsType,
   ) => void,
@@ -68,10 +67,7 @@ export const getNameRenderer = (
     let childrenCount = 0;
 
     if (rowData.taxLevel === TAX_LEVEL_GENUS) {
-      childrenCount = shouldDisplayMergedNtNrValue
-        ? filter(species => species["merged_nt_nr"], rowData.filteredSpecies)
-            .length
-        : rowData.filteredSpecies.length;
+      childrenCount = rowData.filteredSpecies.length;
     }
 
     const isDimmed =

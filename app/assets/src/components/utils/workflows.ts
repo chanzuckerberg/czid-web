@@ -8,7 +8,6 @@ export const WORKFLOW_ENTITIES = {
 
 // String constants
 const ANTIMICROBIAL_RESISTANCE = "Antimicrobial Resistance";
-const METAGENOMICS_SIMPLIFIED = "Metagenomics - Simplified";
 const AMR_DEPRECATED = "Antimicrobial Resistance (Deprecated)";
 
 /**
@@ -20,7 +19,6 @@ export enum WorkflowType {
   SHORT_READ_MNGS = "short-read-mngs",
   LONG_READ_MNGS = "long-read-mngs",
   BENCHMARK = "benchmark",
-  MERGED_NT_NR = "merged-nt-nr",
   AMR_DEPRECATED = "amr-deprecated",
 }
 
@@ -83,13 +81,6 @@ export const WORKFLOWS: WorkflowConfigType<WorkflowStrings> = {
     pipelineName: "Benchmark",
     shorthand: "BM",
   },
-  [WorkflowType.MERGED_NT_NR]: {
-    label: METAGENOMICS_SIMPLIFIED,
-    pluralizedLabel: METAGENOMICS_SIMPLIFIED,
-    entity: null,
-    pipelineName: "Merged NT/NR",
-    shorthand: "mNGS",
-  },
   [WorkflowType.AMR_DEPRECATED]: {
     label: AMR_DEPRECATED,
     pluralizedLabel: AMR_DEPRECATED,
@@ -116,10 +107,6 @@ const TAB_SHORTHAND_CONFIG: WorkflowConfigType<[string, WorkflowLabelType]> = {
   [WorkflowType.BENCHMARK]: [
     "BENCHMARK",
     WORKFLOWS[WorkflowType.BENCHMARK].label,
-  ],
-  [WorkflowType.MERGED_NT_NR]: [
-    "MERGED_NT_NR",
-    WORKFLOWS[WorkflowType.MERGED_NT_NR].label,
   ],
   [WorkflowType.AMR_DEPRECATED]: [
     "AMR_DEPRECATED",

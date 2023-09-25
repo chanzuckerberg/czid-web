@@ -64,6 +64,5 @@ export const PipelineVersionSelectConfig: WorkflowConfigType<PipelineVersionSele
       workflowName: WORKFLOWS[WorkflowType.BENCHMARK].pipelineName,
       getDatabaseVersionString: () => "",
     },
-    [WorkflowType.MERGED_NT_NR]: shortReadConfig,
     [WorkflowType.AMR_DEPRECATED]: shortReadConfig,
   };

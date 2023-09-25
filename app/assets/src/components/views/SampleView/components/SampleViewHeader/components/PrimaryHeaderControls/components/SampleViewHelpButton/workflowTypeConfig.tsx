@@ -41,7 +41,4 @@ export const SampleViewHelpButtonConfig: WorkflowConfigType<SampleViewHelpButton
     [WorkflowType.AMR_DEPRECATED]: {
       isVisible: false,
     },
-    [WorkflowType.MERGED_NT_NR]: {
-      isVisible: false,
-    },
   };

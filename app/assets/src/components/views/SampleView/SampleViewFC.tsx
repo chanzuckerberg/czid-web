@@ -38,10 +38,7 @@ import {
   computeMngsReportTableValuesForCSV,
   createCSVObjectURL,
 } from "~/components/utils/csv";
-import {
-  MERGED_NT_NR_FEATURE,
-  MULTITAG_PATHOGENS_FEATURE,
-} from "~/components/utils/features";
+import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
   COVERAGE_VIZ_FEATURE,
@@ -429,11 +426,6 @@ const SampleViewFC = ({
     }
   }, [project?.id, ignoreProjectBackground, hasPersistedBackground]);
 
-  const mergeNtNr =
-    allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
-    (currentTab === WORKFLOW_TABS.MERGED_NT_NR ||
-      currentTab === WORKFLOW_TABS.SHORT_READ_MNGS);
-
   const processRawSampleReportData = useCallback(
     (rawReportData: RawReportData) => {
       const reportData: Taxon[] = [];
@@ -530,7 +522,6 @@ const SampleViewFC = ({
           sampleId,
           background: backgroundIdUsed,
           pipelineVersion,
-          mergeNtNr,
         });
         if (rawReportData) {
           processRawSampleReportData(rawReportData);
@@ -557,7 +548,6 @@ const SampleViewFC = ({
       selectedOptions.background,
       snapshotShareId,
       pipelineVersion,
-      mergeNtNr,
       processRawSampleReportData,
     ],
   );

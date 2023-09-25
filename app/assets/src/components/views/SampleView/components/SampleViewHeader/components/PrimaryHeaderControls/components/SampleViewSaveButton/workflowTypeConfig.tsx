@@ -10,5 +10,4 @@ export const SampleViewSaveButtonConfig: WorkflowConfigType<SampleViewSaveButton
     [WorkflowType.LONG_READ_MNGS]: true,
     [WorkflowType.BENCHMARK]: false,
     [WorkflowType.AMR_DEPRECATED]: true,
-    [WorkflowType.MERGED_NT_NR]: true,
   };

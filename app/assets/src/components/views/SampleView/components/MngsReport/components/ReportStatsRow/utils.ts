@@ -4,56 +4,22 @@ import ReportMetadata from "~/interface/reportMetaData";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
 
-const countReportRows = (
-  currentTab: CurrentTabSample,
-  filteredReportData: Taxon[],
-  reportData: Taxon[],
-) => {
-  let total = 0;
-  let filtered = 0;
-  if (currentTab === WORKFLOW_TABS.MERGED_NT_NR) {
-    reportData.forEach(genusRow => {
-      if (genusRow["merged_nt_nr"]) {
-        total += 1;
-        genusRow.species.forEach(speciesRow => {
-          if (speciesRow["merged_nt_nr"]) {
-            total += 1;
-          }
-        });
-      }
-    });
-    filteredReportData.forEach(genusRow => {
-      if (genusRow["merged_nt_nr"]) {
-        filtered += 1;
-        genusRow.filteredSpecies.forEach(speciesRow => {
-          if (speciesRow["merged_nt_nr"]) {
-            filtered += 1;
-          }
-        });
-      }
-    });
-  } else {
-    total = reportData.length;
-    filtered = filteredReportData.length;
-    reportData.forEach(genusRow => {
-      total += genusRow.species.length;
-      filtered += genusRow.filteredSpecies.length;
-    });
-  }
+const countReportRows = (filteredReportData: Taxon[], reportData: Taxon[]) => {
+  let total = reportData.length;
+  let filtered = filteredReportData.length;
+  reportData.forEach(genusRow => {
+    total += genusRow.species.length;
+    filtered += genusRow.filteredSpecies.length;
+  });
 
   return { total, filtered };
 };
 
 export const filteredMessage = (
-  currentTab: CurrentTabSample,
   filteredReportData: Taxon[],
   reportData: Taxon[],
 ) => {
-  const { total, filtered } = countReportRows(
-    currentTab,
-    filteredReportData,
-    reportData,
-  );
+  const { total, filtered } = countReportRows(filteredReportData, reportData);
 
   return filtered !== total
     ? `${filtered} rows passing the above filters, out of ${total} total rows `

@@ -227,7 +227,6 @@ export type TaxonDescription = {
 
 export type TaxonDist = {
   __typename?: "TaxonDist";
-  mergedNtNr?: Maybe<TaxonDistributionObject>;
   nr?: Maybe<TaxonDistributionObject>;
   nt?: Maybe<TaxonDistributionObject>;
 };
@@ -315,13 +314,6 @@ export type TaxonDistributionQuery = {
   __typename?: "Query";
   taxonDist?: {
     __typename?: "TaxonDist";
-    mergedNtNr?: {
-      __typename?: "TaxonDistributionObject";
-      mean?: number | null;
-      rpmList?: Array<number | null> | null;
-      stdev?: number | null;
-      taxLevel?: number | null;
-    } | null;
     nr?: {
       __typename?: "TaxonDistributionObject";
       taxLevel?: number | null;
@@ -615,25 +607,6 @@ export const TaxonDistributionDocument = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "mergedNtNr" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "mean" } },
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "rpmList" },
-                      },
-                      { kind: "Field", name: { kind: "Name", value: "stdev" } },
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "taxLevel" },
-                      },
-                    ],
-                  },
-                },
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "nr" },

@@ -51,7 +51,6 @@ export type PhyloTreeModalParamsType = {
 };
 interface ReportTableProps {
   data?: Taxon[];
-  shouldDisplayMergedNtNrValue?: boolean;
   shouldDisplayNoBackground?: boolean;
   onTaxonNameClick?: (clickedTaxonData: Taxon) => void;
   rowHeight?: number;
@@ -78,7 +77,6 @@ interface ReportTableProps {
 
 export const ReportTable = ({
   data = [],
-  shouldDisplayMergedNtNrValue,
   shouldDisplayNoBackground,
   onTaxonNameClick,
   rowHeight = 54,
@@ -100,9 +98,7 @@ export const ReportTable = ({
   sampleId,
   snapshotShareId,
 }: ReportTableProps) => {
-  const [dbType, setDbType] = useState<DBType>(
-    shouldDisplayMergedNtNrValue ? "merged_nt_nr" : "nt",
-  );
+  const [dbType, setDbType] = useState<DBType>("nt");
   const [expandedGenusIds, setExpandedGenusIds] = useState<Set<number>>(
     new Set(),
   );
@@ -160,7 +156,6 @@ export const ReportTable = ({
     pipelineVersion,
     projectId,
     sampleId,
-    shouldDisplayMergedNtNrValue,
     setPhyloTreeModalParams,
     onAnnotationUpdate,
     onBlastClick,
@@ -174,15 +169,11 @@ export const ReportTable = ({
 
   const illuminaColumns = getIlluminaColumns(
     dbType,
-    shouldDisplayMergedNtNrValue,
     shouldDisplayNoBackground,
     pipelineVersion,
   );
 
-  const nanoporeColumns = getNanoporeColumns(
-    dbType,
-    shouldDisplayMergedNtNrValue,
-  );
+  const nanoporeColumns = getNanoporeColumns(dbType);
 
   const numericColumnWidth =
     currentTab === WORKFLOW_TABS.LONG_READ_MNGS
@@ -193,7 +184,6 @@ export const ReportTable = ({
     dbType,
     handleNtNrChange,
     numericColumnWidth,
-    shouldDisplayMergedNtNrValue,
   );
 
   const columns = compact(
@@ -239,20 +229,10 @@ export const ReportTable = ({
     // removes collapsed rows
     const tableRows: Taxon[] = [];
     data.forEach(genusData => {
-      if (shouldDisplayMergedNtNrValue && !genusData["merged_nt_nr"]) {
-        // skip lines without merged counts
-        return;
-      }
-
       tableRows.push(genusData);
 
       if (expandedGenusIds.has(genusData.taxId)) {
         genusData.filteredSpecies.forEach(speciesData => {
-          if (shouldDisplayMergedNtNrValue && !speciesData["merged_nt_nr"]) {
-            // skip lines without merged counts
-            return;
-          }
-
           // Add a pointer to the genus data for sorting purposes
           speciesData.genus = genusData;
           tableRows.push(speciesData);
@@ -273,9 +253,7 @@ export const ReportTable = ({
         data={getTableRows()}
         defaultRowHeight={rowHeight}
         defaultSortBy={
-          shouldDisplayNoBackground || shouldDisplayMergedNtNrValue
-            ? readsPerMillionKey
-            : "agg_score"
+          shouldDisplayNoBackground ? readsPerMillionKey : "agg_score"
         }
         defaultSortDirection={SortDirection.DESC}
         headerClassName={cs.header}

@@ -12,8 +12,7 @@ import { Taxon } from "~/interface/shared";
 // component directly
 export const getAggregateScoreRenderer: (
   displayNoBackground: boolean,
-  displayMergedNtNrValue: boolean,
-) => CellRendererType = (displayNoBackground, displayMergedNtNrValue) =>
+) => CellRendererType = displayNoBackground =>
   function aggregateScoreRenderer({
     cellData,
     rowData,
@@ -21,7 +20,7 @@ export const getAggregateScoreRenderer: (
     cellData: number;
     rowData: Taxon;
   }) {
-    if (displayNoBackground || displayMergedNtNrValue) {
+    if (displayNoBackground) {
       return (
         <ColumnHeaderTooltip
           trigger={<div className={cs.noData}>-</div>}

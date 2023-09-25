@@ -45,10 +45,7 @@ import {
   computeMngsReportTableValuesForCSV,
   createCSVObjectURL,
 } from "~/components/utils/csv";
-import {
-  MERGED_NT_NR_FEATURE,
-  MULTITAG_PATHOGENS_FEATURE,
-} from "~/components/utils/features";
+import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
   COVERAGE_VIZ_FEATURE,
@@ -488,7 +485,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     backgroundId,
   }: { backgroundId?: number } = {}) => {
     const { snapshotShareId, sampleId } = this.props;
-    const { allowedFeatures = [] } = this.context || {};
     const { currentTab, selectedOptions, pipelineRun, pipelineVersion } =
       this.state;
     // On consensus-genome-only or amr-only report pages,
@@ -500,10 +496,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     }
 
     const backgroundIdUsed = backgroundId || selectedOptions.background;
-    const mergeNtNr =
-      allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
-      (currentTab === WORKFLOW_TABS.MERGED_NT_NR ||
-        currentTab === WORKFLOW_TABS.SHORT_READ_MNGS);
 
     this.setState({ loadingReport: true });
     trackEvent("PipelineSampleReport_sample_viewed", {
@@ -516,7 +508,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         sampleId,
         background: backgroundIdUsed,
         pipelineVersion,
-        mergeNtNr,
       });
       this.setState(
         ({ selectedOptions: prevSelectedOptions }) => {

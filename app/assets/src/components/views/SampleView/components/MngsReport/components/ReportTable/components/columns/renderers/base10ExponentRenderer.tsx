@@ -12,11 +12,7 @@ export const getBase10ExponentRenderer: (
   function base10ExponentRenderer({ cellData }: { cellData: Array<number> }) {
     if (!cellData.length) return "-";
 
-    const hasMergedNtNrValue = cellData.length === 1;
-
-    return hasMergedNtNrValue ? (
-      <div>{TableRenderers.format10BaseExponent(cellData[0])}</div>
-    ) : (
+    return (
       <NtNrStack
         cellData={cellData.map(val => TableRenderers.format10BaseExponent(val))}
         dbType={dbType}

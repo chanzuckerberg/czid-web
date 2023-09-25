@@ -69,7 +69,6 @@ interface ReportFiltersProps {
     key: string;
     newSelectedOptions: FilterSelections;
   }) => void;
-  shouldDisableFilters?: boolean;
   showBackgroundFilter?: boolean;
   snapshotShareId?: string;
 }
@@ -86,7 +85,6 @@ export const ReportFilters = ({
   view,
   refreshDataFromOptionsChange,
   enableMassNormalizedBackgrounds,
-  shouldDisableFilters,
   snapshotShareId,
 }: ReportFiltersProps) => {
   const userContext = useContext(UserContext);
@@ -245,7 +243,6 @@ export const ReportFilters = ({
     );
   };
 
-  const sharedFilterProps = { disabled: shouldDisableFilters };
   // Only show aggregate score metric as a selectable option if the user has a background selected.
   // The aggregate score is computed by having background model applied.
   const treeMetrics = !selected.background
@@ -315,7 +312,6 @@ export const ReportFilters = ({
                 value,
               })
             }
-            {...sharedFilterProps}
           />
         </div>
         {/* from server */}
@@ -339,7 +335,6 @@ export const ReportFilters = ({
                 })
               }
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
-              {...sharedFilterProps}
             />
           </div>
         )}
@@ -380,7 +375,6 @@ export const ReportFilters = ({
                 },
               })
             }
-            {...sharedFilterProps}
           />
         </div>
         <div className={cs.filterListElement}>
@@ -399,7 +393,6 @@ export const ReportFilters = ({
                 value,
               })
             }
-            {...sharedFilterProps}
           />
         </div>
         <div className={cs.filterListElement}>
@@ -411,7 +404,6 @@ export const ReportFilters = ({
                 value,
               })
             }
-            {...sharedFilterProps}
           />
         </div>
         {view === "table" &&
@@ -425,7 +417,6 @@ export const ReportFilters = ({
                     value,
                   })
                 }
-                {...sharedFilterProps}
               />
             </div>
           )}
@@ -440,7 +431,6 @@ export const ReportFilters = ({
                     value,
                   })
                 }
-                {...sharedFilterProps}
               />
             </div>
           )}
