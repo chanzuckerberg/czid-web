@@ -231,29 +231,16 @@ export const getStateFromUrlandLocalStorage = (
     currentTab: currentTabFromUrl,
     view: viewFromUrl,
     pipelineVersion: pipelineVersionFromUrl,
-    ...nonNestedUrlState
   } = urlParser.parse(location.search);
 
-  const {
-    selectedOptions: rawSelectedOptionsFromLocal,
-    ...nonNestedLocalState
-  } = loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
+  const { selectedOptions: rawSelectedOptionsFromLocal } = loadState(
+    localStorage,
+    KEY_SAMPLE_VIEW_OPTIONS,
+  );
 
   const selectedOptionsFromLocal = overwriteAggregatescoreMetric(
     rawSelectedOptionsFromLocal,
   );
-
-  // Note from Suzette - August 2023
-  // This error is added to help us identify when we are not handling state in the URL or localStorage and should be removed once we have handled all state
-  if (!isEmpty(nonNestedLocalState) || !isEmpty(nonNestedUrlState)) {
-    console.error({
-      "Unhandled State in localStorage": nonNestedLocalState,
-      "Unhandled State in URL": nonNestedUrlState,
-    });
-    throw new Error(
-      "Unhandled State in URL or localStorage - please handle the information or confirm that it is unneeded and remove from URL or localstorage",
-    );
-  }
 
   return {
     viewFromUrl,
