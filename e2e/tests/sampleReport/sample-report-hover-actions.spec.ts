@@ -1,8 +1,9 @@
 import { SEARCH_BAR } from "@e2e/constants/sample";
+import { stubRequest } from "@e2e/utils/api";
 import { acceptCookies } from "@e2e/utils/page";
+import { chooseBackgroundModel } from "@e2e/utils/report";
 import { expect, test } from "@playwright/test";
-import { stubRequest } from "../../utils/api";
-import { chooseBackgroundModel } from "../../utils/report";
+
 const sampleId = 25745;
 
 const createConsensusGenomeApi = `/samples/${sampleId}/kickoff_workflow`;

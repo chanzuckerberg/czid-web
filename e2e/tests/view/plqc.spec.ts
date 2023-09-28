@@ -1,16 +1,16 @@
-import { BrowserContext, expect, Page, test } from "@playwright/test";
 import {
   SHARED_SAMPLE_TABLE_COLUMNS,
   SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
-} from "../../constants/app.constants";
+} from "@e2e/constants/app.constants";
 import {
   BAR_POPUP,
   HEADER_READS,
   LEARN_MORE,
   LEARN_MORE_TEXT,
   PIPELINE_CHART_HEADER,
-} from "../../constants/map";
-import { openSamplePage } from "../../utils/report";
+} from "@e2e/constants/map";
+import { openSamplePage } from "@e2e/utils/report";
+import { BrowserContext, expect, Page, test } from "@playwright/test";
 
 const projectName = "floo Neptunium";
 

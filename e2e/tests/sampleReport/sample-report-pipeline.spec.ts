@@ -1,6 +1,6 @@
+import { getFixture } from "@e2e/utils/common";
+import { getTabSection, verifySectionDetails } from "@e2e/utils/report";
 import { test } from "@playwright/test";
-import { getFixture } from "../../utils/common";
-import { getTabSection, verifySectionDetails } from "../../utils/report";
 
 const sampleId = 25307;
 const fixtures = getFixture("report_data");

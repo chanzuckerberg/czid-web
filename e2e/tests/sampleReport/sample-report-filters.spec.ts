@@ -1,5 +1,3 @@
-import { expect, test } from "@playwright/test";
-import { kebabCase } from "lodash";
 import {
   ANNOTATION_FILTERS,
   ANNOTATION_TEXT,
@@ -29,7 +27,9 @@ import {
   UNCATEGORIZED_FILTER,
   VIROIDS_FILTER,
   VIRUSES_FILTER,
-} from "../../constants/sample";
+} from "@e2e/constants/sample";
+import { expect, test } from "@playwright/test";
+import { kebabCase } from "lodash";
 
 const sampleId = 25307;
 // These tests validate the user's proficiency in utilizing various filter functions on the sample report page, such as Nametype, Annotation, Category, Threshold filter, and Read specificity.

@@ -1,11 +1,12 @@
+import { ALL_COLUMN_HEADERS, FILTER_HEADERS } from "@e2e/constants/sample";
 import { acceptCookies } from "@e2e/utils/page";
-import { expect, Page, test } from "@playwright/test";
-import { ALL_COLUMN_HEADERS, FILTER_HEADERS } from "../../constants/sample";
 import {
   metadataSectionTitles,
   pipelineSectionTitles,
   verifySectionTitles,
-} from "../../utils/report";
+} from "@e2e/utils/report";
+import { expect, Page, test } from "@playwright/test";
+
 const SAMPLE_ID = 25307;
 const IFRAME = "appcues-container iframe";
 

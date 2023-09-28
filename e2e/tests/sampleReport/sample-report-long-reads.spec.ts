@@ -1,10 +1,10 @@
-import { expect, test } from "@playwright/test";
-import { ALL_COLUMN_HEADERS, FILTER_HEADERS } from "../../constants/sample";
+import { ALL_COLUMN_HEADERS, FILTER_HEADERS } from "@e2e/constants/sample";
 import {
   metadataSectionTitles,
   pipelineSectionTitlesLongReads,
   verifySectionTitles,
-} from "../../utils/report";
+} from "@e2e/utils/report";
+import { expect, test } from "@playwright/test";
 const sampleId = 26022;
 
 // These tests verify the ui displayed on the Table  for the sample report page

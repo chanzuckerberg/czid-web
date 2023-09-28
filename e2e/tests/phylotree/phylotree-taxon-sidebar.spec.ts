@@ -1,9 +1,9 @@
-import { test } from "@playwright/test";
 import {
   testHistogramAppears,
   testTaxonInfo,
   testTaxonLinks,
-} from "../../utils/taxon-sidebar";
+} from "@e2e/utils/taxon-sidebar";
+import { test } from "@playwright/test";
 
 const phyloTreeId = 244;
 

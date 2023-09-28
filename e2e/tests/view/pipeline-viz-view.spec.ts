@@ -1,9 +1,6 @@
-import path from "path";
+
 import { acceptCookies } from "@e2e/utils/page";
 import { expect, test } from "@playwright/test";
-import dotenv from "dotenv";
-
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 const baseUrl = (process.env.BASEURL as string) || "";
 const sampleId = "25609";

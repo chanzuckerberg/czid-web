@@ -1,5 +1,5 @@
+import { TREE_NODES } from "@e2e/constants/sample";
 import { expect, test } from "@playwright/test";
-import { TREE_NODES } from "../../constants/sample";
 
 const sampleId = 25307;
 // These tests verify the ui displayed on the treeview for the sample report page

@@ -2,7 +2,7 @@ name: idseq-web e2e tests
 
 on:
   workflow_run:
-    workflows: ["Build and Push Docker Images"]
+    workflows: [Build and Push Docker Images]
     types:
       - completed
     branches: 
@@ -34,8 +34,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3 
       - uses: actions/setup-node@v3
-        with:
-          node-version-file: ".node-version"
 
       - name: Configure AWS Credentials
         id: configure_aws_credentials
@@ -61,7 +59,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ci/${{ env.EXECUTOR_ROLE }}
 
-      - name: Configure login & smtp credentials
+      - name: Configure login, sauce & slack credentials
         uses: aws-actions/aws-secretsmanager-get-secrets@v1.0.0
         with:
           secret-ids: |
@@ -116,4 +114,104 @@ jobs:
           SAUCE_REST_ENDPOINT: 'https://us-west-1.saucelabs.com/'
           CI_COMMIT_SHORT_SHA: ${{env.CI_COMMIT_SHORT_SHA}}
           BRANCH: ${{env.BRANCH}}
-            
+
+      - name: Read JUnit results
+        if: failure() || success()
+        run: | 
+          cd e2e
+          npm install
+          node ./sauceTestResults.cjs
+
+      - name: Read Summary Report
+        if: failure() || success()
+        run: |
+          TOTAL=$(cat ./e2e/summary.json | jq -r '.total')
+          echo "TOTAL=$TOTAL" >> $GITHUB_ENV
+          STATUS=$(cat ./e2e/summary.json | jq -r '.status')
+          echo "STATUS=$STATUS" >> $GITHUB_ENV 
+          PASSED=$(cat ./e2e/summary.json | jq -r '.passed')
+          echo "PASSED=$PASSED" >> $GITHUB_ENV 
+          FAILED=$(cat ./e2e/summary.json | jq -r '.failed')
+          echo "FAILED=$FAILED" >> $GITHUB_ENV 
+          ERROR=$(cat ./e2e/summary.json | jq -r '.error')
+          echo "ERROR=$ERROR" >> $GITHUB_ENV
+          SKIPPED=$(cat ./e2e/summary.json | jq -r '.failed')
+          echo "SKIPPED=$SKIPPED" >> $GITHUB_ENV 
+          DURATION=$(cat ./e2e/summary.json | jq -r '.duration')
+          echo "DURATION=$DURATION" >> $GITHUB_ENV
+      
+      - name: Pull Request URL
+        if: failure() || success()
+        uses: ammaratef45/pr-url-action@v1
+
+      - name: Post to Slack channel
+        if: failure() || success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: repo,eventName,workflow,job,took
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : 'danger',
+                title: `E2E Test Results :test_tube:`,
+                fields: [{
+                  title: 'Site Under Test',
+                  value: '${{ env.SITE }}',
+                  short: true
+                },
+                {
+                  title: 'Triggered By',
+                  value: `${{ github.event_name }}`,
+                  short: true
+                },
+                {
+                  title: 'Repo',
+                  value: `${process.env.AS_REPO}`,
+                  short: true
+                },
+                {
+                  title: 'Execution Time',
+                  value: `${process.env.AS_TOOK}`,
+                  short: true
+                },
+                {
+                  title: 'Workflow',
+                  value: `${process.env.AS_WORKFLOW}`,
+                  short: true
+                },
+                {
+                  title: 'Total Tests',
+                  value: (`${{ env.TOTAL }}`,
+                  short: true
+                },
+                                {
+                  title: 'Passed',
+                  value: (`${{ env.PASSED }}`,
+                  short: true
+                },
+                {
+                  title: 'Failures',
+                  value: (`${{ env.FAILED }}`,
+                  short: true
+                },
+                {
+                  title: 'Skipped',
+                  value: (`${{ env.SKIPPED }}`,
+                  short: true
+                }, 
+                {
+                  title: 'Errors',
+                  value: (`${{ env.ERROR }}`,
+                  short: true
+                },                               
+                {
+                  title: 'Pull Request',
+                  value: `${{ steps.pr-url.outputs.url }}`,
+                  short: false
+                }]
+              }]
+            }  
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK }}   
+                   

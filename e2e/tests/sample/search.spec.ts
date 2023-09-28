@@ -1,6 +1,3 @@
-import path from "path";
-import { expect, test } from "@playwright/test";
-import dotenv from "dotenv";
 import {
   ENTER,
   METADATA_COUNT_SELECTOR,
@@ -10,10 +7,9 @@ import {
   SAMPLES,
   SAMPLE_COUNT,
   SEARCH_PUBLIC,
-} from "../../constants/common";
-import { SAMPLE_NAME_SELECTOR } from "../../constants/filter";
-
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
+} from "@e2e/constants/common";
+import { SAMPLE_NAME_SELECTOR } from "@e2e/constants/filter";
+import { expect, test } from "@playwright/test";
 
 const projectName = "AMR beta test";
 const sampleName = "RNAEnr_10e4_viralcopies_RVOPv2_iSeq";

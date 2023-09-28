@@ -1,5 +1,5 @@
+import { stubRequest } from "@e2e/utils/api";
 import { expect, test } from "@playwright/test";
-import { stubRequest } from "../../utils/api";
 
 const samplesPage = `${process.env.BASEURL}/my_data?currentTab=samples`;
 
