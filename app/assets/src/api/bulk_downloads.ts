@@ -1,7 +1,10 @@
-import { WORKFLOW_ENTITIES } from "~utils/workflows";
+import { BulkDownloadType } from "~/interface/shared";
+import { WorkflowType, WORKFLOW_ENTITIES } from "~utils/workflows";
 import { get, postWithCSRF } from "./core";
 
-export const getBulkDownloadTypes = (workflow: $TSFixMe) =>
+export const getBulkDownloadTypes = (
+  workflow: WorkflowType,
+): Promise<BulkDownloadType[]> =>
   get(`/bulk_downloads/types?workflow=${workflow}`);
 
 export const getBulkDownloadMetrics = (workflow: $TSFixMe) =>

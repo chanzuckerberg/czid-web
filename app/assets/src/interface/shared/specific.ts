@@ -23,6 +23,35 @@ export interface BulkDownloadDetails extends NumberId {
   log_url: string;
 }
 
+export type BulkDownloadType = {
+  category?: string;
+  description?: string;
+  displayName?: string;
+  executionType?: string;
+  fields?: BulkDownloadTypeField[];
+  fileTypeDisplay?: string;
+  type?: string;
+  workflows?: string[];
+  display_name?: string;
+  hide_in_creation_modal?: boolean;
+  file_type_display?: string;
+  admin_only?: boolean;
+  required_allowed_feature?: string;
+};
+
+export type BulkDownloadTypeField = {
+  default_value?: {
+    value?: string;
+    display_name?: string;
+  };
+  display_name?: string;
+  type?: string;
+  options: {
+    value: string;
+    display_name: string;
+  }[];
+};
+
 export interface ConsensusGenomeData {
   accessionData?: AccessionData;
   percentIdentity?: number;

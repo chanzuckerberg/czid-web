@@ -25,9 +25,10 @@ import {
 import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { getURLParamString } from "~/helpers/url";
 import { Entry } from "~/interface/samplesView";
+import { BulkDownloadType } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
-import { WORKFLOW_ENTITIES } from "~utils/workflows";
+import { WorkflowType, WORKFLOW_ENTITIES } from "~utils/workflows";
 import cs from "./bulk_download_modal.scss";
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
 import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
@@ -79,12 +80,30 @@ interface BulkDownloadModalProps {
   selectedIds?: Set<number>;
   // called when a bulk download has successfully been kicked off
   onGenerate: $TSFixMeFunction;
-  workflow: string;
+  workflow: WorkflowType;
   workflowEntity?: string;
 }
 
+interface BulkDownloadModalState {
+  bulkDownloadTypes: BulkDownloadType[] | null;
+  selectedFields: Record<string, string>;
+  selectedFieldsDisplay: Record<string, $TSFixMeUnknown>;
+  selectedDownloadTypeName: string | null;
+  validObjectIds: Set<$TSFixMeUnknown>;
+  invalidSampleNames: string[];
+  validationError: string | null;
+  backgroundOptions: $TSFixMeUnknown[];
+  metricsOptions: $TSFixMeUnknown[];
+  allObjectsUploadedByCurrentUser: boolean;
+  loading: boolean;
+  waitingForCreate: boolean;
+  createStatus: string | null;
+  createError: string | null;
+  userIsCollaboratorOnAllSamples: boolean;
+}
+
 class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
-  state = {
+  state: BulkDownloadModalState = {
     bulkDownloadTypes: null,
     // We save the fields for ALL download types.
     // If the user clicks between different download types, all their selections are saved.
@@ -159,7 +178,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     ]);
 
     // Set any default bulk download field values.
-    bulkDownloadTypes.forEach((type: $TSFixMe) => {
+    bulkDownloadTypes.forEach(type => {
       if (type.fields) {
         type.fields.forEach(field => {
           if (field.default_value) {
@@ -263,7 +282,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     this.createBulkDownload(selectedDownload);
   };
 
-  handleSelectDownloadType = (newSelectedDownloadTypeName: $TSFixMe) => {
+  handleSelectDownloadType = (newSelectedDownloadTypeName: string) => {
     const { workflow } = this.props;
     const { selectedDownloadTypeName } = this.state;
     if (newSelectedDownloadTypeName === selectedDownloadTypeName) {
@@ -319,11 +338,11 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   };
 
   handleFieldSelect = (
-    downloadType,
-    fieldType,
-    value,
-    displayName,
-  ): $TSFixMe => {
+    downloadType: string,
+    fieldType: string,
+    value: $TSFixMe,
+    displayName: string,
+  ) => {
     const { workflow } = this.props;
     this.setState(prevState => {
       trackEvent(
