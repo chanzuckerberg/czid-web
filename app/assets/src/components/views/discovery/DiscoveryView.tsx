@@ -30,11 +30,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router";
 import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  trackPageTransition,
-} from "~/api/analytics";
+import { trackEvent, trackPageTransition } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -933,7 +929,6 @@ class DiscoveryView extends React.Component<
     workflowObjects.reset({
       conditions,
       loadFirstPage: true,
-      logLoadTime: true,
     });
 
     this.resetSamplesView();
@@ -942,7 +937,7 @@ class DiscoveryView extends React.Component<
   resetProjectsData = () => {
     const conditions = this.getConditions();
 
-    this.projects.reset({ conditions, loadFirstPage: true, logLoadTime: true });
+    this.projects.reset({ conditions, loadFirstPage: true });
     this.projectsView && this.projectsView.reset();
   };
 
@@ -952,7 +947,6 @@ class DiscoveryView extends React.Component<
     this.visualizations.reset({
       conditions,
       loadFirstPage: true,
-      logLoadTime: true,
     });
     this.visualizationsView && this.visualizationsView.reset();
   };
@@ -1819,47 +1813,9 @@ class DiscoveryView extends React.Component<
     sortBy: string;
     sortDirection: SortDirectionType;
   }) => {
-    const { domain } = this.props;
-    const {
-      currentTab,
-      filteredSampleCountsByWorkflow,
-      filteredProjectCount,
-      filteredVisualizationCount,
-      workflow,
-    } = this.state;
     this.setState({ orderBy: sortBy, orderDirection: sortDirection }, () => {
       this.updateBrowsingHistory("replace");
       this.resetDataFromSortChange();
-
-      const filteredSampleCounts = {
-        filteredSampleCount:
-          filteredSampleCountsByWorkflow[WorkflowType.SHORT_READ_MNGS],
-        filteredWorkflowRunCount:
-          filteredSampleCountsByWorkflow[WorkflowType.CONSENSUS_GENOME],
-        filteredAmrWorkflowRunCount:
-          filteredSampleCountsByWorkflow[WorkflowType.AMR],
-        filteredLongReadMngsSampleCount:
-          filteredSampleCountsByWorkflow[WorkflowType.LONG_READ_MNGS],
-        filteredBenchmarkWorkflowRunCount:
-          filteredSampleCountsByWorkflow[WorkflowType.BENCHMARK],
-      };
-
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED,
-        {
-          domain,
-          currentTab,
-          workflow,
-          sortBy,
-          sortDirection,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-          filters: this.preparedFilters(),
-          filteredProjectCount,
-          filteredVisualizationCount,
-          ...filteredSampleCounts,
-        },
-      );
     });
   };
 

@@ -694,33 +694,10 @@ class PhyloTreeCreationModal extends React.Component<
       taxId: taxonId,
       pipelineRunIds,
     }).then(({ phylo_tree_id: phyloTreeId }) => {
-      const sharedAnalyticsPayload = {
-        treeName,
-        projectId,
-        taxonId,
-        pipelineRunIds,
-      };
       if (phyloTreeId) {
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-          {
-            treeId: phyloTreeId,
-            ...sharedAnalyticsPayload,
-          },
-        );
-
         showPhyloTreeNotification();
         onClose();
       } else {
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-          sharedAnalyticsPayload,
-        );
-
         // TODO: properly handle error
         // eslint-disable-next-line no-console
         console.error("Error creating tree");

@@ -76,26 +76,11 @@ export const ConsensusGenomeCreationModal = ({
   };
 
   const handleAccessionChange = (accessionIndex: number) => {
-    const accessionData = consensusGenomeData.accessionData;
     if (accessionIndex === selectedAccessionIndex) {
       return;
     }
 
     setSelectedAccessionIndex(accessionIndex);
-
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED,
-      {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        previousAccession:
-          accessionData.best_accessions[selectedAccessionIndex],
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        selectedAccession: accessionData.best_accessions[accessionIndex],
-        sampleId: sample.id,
-      },
-    );
   };
 
   const handleConsensusGenomeCreate = () => {

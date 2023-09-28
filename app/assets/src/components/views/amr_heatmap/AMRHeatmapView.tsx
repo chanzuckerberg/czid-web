@@ -256,12 +256,6 @@ export default class AMRHeatmapView extends React.Component<
     this.setState({
       selectedOptions: newOptions,
     });
-    trackEvent("AMRHeatmapView_options_changed", {
-      control: Object.keys(options)[0],
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      option: Object.values(options)[0],
-    });
   };
 
   onSampleLabelClick = (sampleId: $TSFixMe) => {

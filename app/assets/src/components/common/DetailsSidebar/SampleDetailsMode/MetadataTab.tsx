@@ -1,6 +1,5 @@
 import { mapValues } from "lodash/fp";
 import React, { useMemo, useState } from "react";
-import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
@@ -87,13 +86,6 @@ const MetadataTab = ({
       [section.name]: toggleValue,
     });
     setSectionEditing({ ...sectionEditing, [section.name]: false });
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-    trackEvent("MetadataTab_section_toggled", {
-      section: section.name,
-      sectionOpen: toggleValue,
-      ...additionalInfo,
-    });
   };
 
   const toggleSectionEdit = (section: Section) => {
@@ -105,13 +97,6 @@ const MetadataTab = ({
     });
     // The section being edited should be opened.
     setIsSectionOpen({ ...isSectionOpen, [section.name]: true });
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-    trackEvent("MetadataTab_section-edit_toggled", {
-      section: section.name,
-      sectionEditing: toggleValue,
-      ...additionalInfo,
-    });
   };
 
   const renderInput = (metadataType: MetadataType) => {

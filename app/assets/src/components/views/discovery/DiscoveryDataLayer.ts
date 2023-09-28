@@ -1,5 +1,4 @@
 import { findIndex, findLastIndex, range, slice } from "lodash/fp";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { ViewProps } from "~/interface/samplesView";
 import { MustHaveId } from "~/interface/shared";
 import {
@@ -117,11 +116,9 @@ class ObjectCollectionView<T extends MustHaveId> {
   reset = ({
     conditions,
     loadFirstPage = false,
-    logLoadTime = false,
   }: {
     conditions?: ObjectCollectionView<T>["_conditions"];
     loadFirstPage?: boolean;
-    logLoadTime?: boolean;
   } = {}) => {
     this._orderedIds = null;
     this._loading = true;
@@ -129,36 +126,16 @@ class ObjectCollectionView<T extends MustHaveId> {
     this._activePromises = {};
 
     if (loadFirstPage) {
-      this.loadPage(0, logLoadTime);
+      this.loadPage(0);
     }
   };
 
-  loadPage = async (pageNumber: number, logLoadTime = false) => {
+  loadPage = async (pageNumber: number) => {
     const indices = {
       startIndex: pageNumber,
       stopIndex: this._pageSize * (1 + pageNumber) - 1,
     };
-
-    const startLoad = new Date();
-    const objectRows = await this.handleLoadObjectRows(indices);
-    const endLoad = new Date();
-
-    if (logLoadTime) {
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_TABLE_PAGE_LOADED,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        {
-          domain: this._collection.domain,
-          displayName: this._displayName,
-          allIdsCount: this._orderedIds.length,
-          loadTimeInMilleseconds: endLoad.valueOf() - startLoad.valueOf(),
-          ...this._conditions,
-        },
-      );
-    }
-
-    return objectRows;
+    return this.handleLoadObjectRows(indices);
   };
 
   handleLoadObjectRows = async ({

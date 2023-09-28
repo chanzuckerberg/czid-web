@@ -1184,19 +1184,6 @@ class UploadSampleStep extends React.Component<
         medakaModel: selectedMedakaModel,
       });
     }
-
-    trackEvent("UploadSampleStep_continue-button_clicked", {
-      basespaceSamples: this.state.basespaceSamples.length,
-      technology: selectedTechnology,
-      currentTab: this.state.currentTab,
-      localSamples: this.state.localSamples.length,
-      remoteSamples: this.state.remoteSamples.length,
-      wetlabProtocol: selectedWetlabProtocol,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      workflows: selectedWorkflows,
-      ...this.getAnalyticsContext(),
-    });
   };
 
   // Change state for files

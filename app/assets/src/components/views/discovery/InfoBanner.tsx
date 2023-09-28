@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import ExternalLink from "~ui/controls/ExternalLink";
 import Link from "~ui/controls/Link";
 import { IconArrowRight } from "~ui/icons";
@@ -47,17 +46,7 @@ const InfoBanner = ({
   suggestion,
   title,
   titleClassName,
-  type,
 }: InfoBannerProps) => {
-  // This is a hack to associate the event with the parent component, DiscoveryView
-  trackEvent("DiscoveryView_no-results-banner_displayed", {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-    message,
-    title,
-    type,
-  });
-
   const renderListenerLink = () => {
     // listenerLink will look like a link but instead of having an href, it has an onClick
     return (

@@ -1567,11 +1567,6 @@ class SamplesHeatmapView extends React.Component<
         }
       },
     );
-    trackEvent("SamplesHeatmapView_taxon_added", {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      selected: currentAddedTaxa,
-    });
     this.updateHistoryState();
   };
 
@@ -1632,12 +1627,6 @@ class SamplesHeatmapView extends React.Component<
     this.setState({
       pinnedSampleIds: pendingPinnedSampleIds,
     });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      pendingPinnedSampleIds,
-    );
   };
 
   handlePinnedSampleChangeCancel = () => {
@@ -1645,12 +1634,6 @@ class SamplesHeatmapView extends React.Component<
     this.setState({
       pendingPinnedSampleIds: pinnedSampleIds,
     });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      pinnedSampleIds,
-    );
   };
 
   handleUnpinSample = (sampleId: $TSFixMe) => {

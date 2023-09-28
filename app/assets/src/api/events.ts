@@ -102,10 +102,6 @@ function EventDictionary() {
   this.COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED =
     "COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED";
 
-  /** The user changed their selected accession in the Consensus Genome Creation modal. */
-  this.CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED =
-    "CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED";
-
   this.ACCESSION_VIZ_MORE_READS_LINK_CLICKED =
     "ACCESSION_VIZ_MORE_READS_LINK_CLICKED";
 
@@ -205,10 +201,6 @@ function EventDictionary() {
   /** The user clicked the help button in an Metagenomics report page.  */
   this.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED =
     "SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED";
-
-  /** The user selected a new background model in a Sample Report */
-  this.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED =
-    "SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED";
 
   /** The user clicked the help button in the Consensus Genome report page. */
   this.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED =
@@ -359,17 +351,9 @@ function EventDictionary() {
   this.PHYLO_TREE_CREATION_MODAL_CREATION_SUCCESSFUL =
     "PHYLO_TREE_CREATION_MODAL_CREATION_SUCCESSFUL";
 
-  /** The user successfully created a PhyloTreeNg */
-  this.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL =
-    "PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL";
-
   /** PhyloTree creation failed */
   this.PHYLO_TREE_CREATION_MODAL_CREATION_FAILED =
     "PHYLO_TREE_CREATION_MODAL_CREATION_FAILED";
-
-  /** PhyloTreeNG creation failed */
-  this.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED =
-    "PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED";
 
   /** The user clicked on an existing old phylo tree in the PhyloTreeCreationModal list */
   this.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_LINK_CLICKED =
@@ -496,14 +480,6 @@ function EventDictionary() {
   this.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED =
     "SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED";
 
-  /** The user applied changes to their selected Pinned Samples in the dropdown on the SamplesHeatmapView. */
-  this.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED =
-    "SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED";
-
-  /** The user canceled changes to their selected Pinned Samples in the dropdown on the SamplesHeatmapView. */
-  this.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED =
-    "SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED";
-
   /** The user clicked the pin icon to unpin a sample on the taxon heatmap. */
   this.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED =
     "SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED";
@@ -568,13 +544,6 @@ function EventDictionary() {
   this.UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED =
     "UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED";
 
-  /** This user clicked the sortable column headers on a discovery view table. */
-  this.DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED =
-    "DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED";
-
-  /** One page of data is loaded onto the DiscoveryView table */
-  this.DISCOVERY_VIEW_TABLE_PAGE_LOADED = "DISCOVERY_VIEW_TABLE_PAGE_LOADED";
-
   /** The user clicked apply in the TaxonThresholdFilter. */
   this.TAXON_THRESHOLD_FILTER_APPLY_CLICKED =
     "TAXON_THRESHOLD_FILTER_APPLY_CLICKED";
@@ -592,9 +561,6 @@ function EventDictionary() {
     "SAMPLES_HEATMAP_BULK_DOWNLOAD_MODAL_CLICKED";
   this.SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESS =
     "SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESS";
-
-  this.SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED =
-    "SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED";
 
   /**  The user selected a file for upload that failed one or more pre-upload QC checks */
   this.PRE_UPLOAD_QC_CHECK_WARNING_TYPE = "PRE_UPLOAD_QC_CHECK_WARNING_TYPE";
