@@ -1261,6 +1261,6 @@ const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectIds };
 // Don't need mapStateToProps yet so pass in null
 const connectedComponent = connect(null, mapDispatchToProps)(SampleView);
 
-(connectedComponent.name as string) = "SampleViews";
+(connectedComponent.name as string) = "SampleView";
 
 export default connectedComponent;
