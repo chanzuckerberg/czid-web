@@ -228,6 +228,14 @@ export default class NextcladeModal extends React.Component<
             projectIds,
           },
         );
+        trackEvent(
+          ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED_ALLISON_TESTING,
+          {
+            workflowRunIds: JSON.stringify(Array.from(validWorkflowRunIds)),
+            selectedTreeType,
+            projectIds: JSON.stringify(projectIds),
+          },
+        );
       });
 
       await this.openExportLink();
