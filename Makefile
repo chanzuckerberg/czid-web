@@ -157,7 +157,7 @@ local-logs: ## Tail the logs of the dev env containers. ex: make local-logs CONT
 
 .PHONY: frontend-lint
 frontend-lint:
-	npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 48 --fix
-	npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 185
+	npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 44 --fix
+	npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 181
 	exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')
 	npx tsc -p ./app/assets/tsconfig.json --noemit

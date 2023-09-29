@@ -8,7 +8,10 @@ export interface WorkflowRun {
   executed_at: DateString;
   workflow: WorkflowType;
   status: string;
-  input_error: string;
+  input_error: {
+    label?: string;
+    message: string;
+  };
   inputs?: {
     accession_id: string;
     accession_name: string;

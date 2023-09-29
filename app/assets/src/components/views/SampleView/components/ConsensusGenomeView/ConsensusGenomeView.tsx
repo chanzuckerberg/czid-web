@@ -53,7 +53,7 @@ export const ConsensusGenomeView = ({
   useEffect(() => {
     if (
       workflowRun?.status !== SUCCEEDED_STATE ||
-      workflowRun?.workflow !== "consensus-genome"
+      workflowRun?.workflow !== WorkflowType.CONSENSUS_GENOME
     ) {
       return;
     }
@@ -73,30 +73,6 @@ export const ConsensusGenomeView = ({
   }, [workflowRun?.id, workflowRun?.status, workflowRun?.workflow]);
 
   const shouldRenderCGDropdown = size(consensusGenomeWorkflowRuns) > 1;
-
-  const renderResults = () => {
-    return (
-      <>
-        <div className={cs.resultsContainer}>
-          {workflowRunResults &&
-            !isEmpty(workflowRunResults.quality_metrics) && (
-              <ConsensusGenomeMetricsTable
-                helpLinkUrl={helpLinkUrl}
-                workflowRunResults={workflowRunResults}
-              />
-            )}
-          {workflowRunResults && !isEmpty(workflowRunResults.coverage_viz) && (
-            <ConsensusGenomeCoverageView
-              helpLinkUrl={helpLinkUrl}
-              sampleId={sample.id}
-              workflowRun={workflowRun}
-              workflowRunResults={workflowRunResults}
-            />
-          )}
-        </div>
-      </>
-    );
-  };
 
   return (
     <>
@@ -145,8 +121,25 @@ export const ConsensusGenomeView = ({
           error: "ConsensusGenomeView_sample-error-info-link_clicked",
           loading: "ConsensusGenomeView_consenus-genome-doc-link_clicked",
         }}
-        renderResults={renderResults}
-      />
+      >
+        <div className={cs.resultsContainer}>
+          {workflowRunResults &&
+            !isEmpty(workflowRunResults.quality_metrics) && (
+              <ConsensusGenomeMetricsTable
+                helpLinkUrl={helpLinkUrl}
+                workflowRunResults={workflowRunResults}
+              />
+            )}
+          {workflowRunResults && !isEmpty(workflowRunResults.coverage_viz) && (
+            <ConsensusGenomeCoverageView
+              helpLinkUrl={helpLinkUrl}
+              sampleId={sample.id}
+              workflowRun={workflowRun}
+              workflowRunResults={workflowRunResults}
+            />
+          )}
+        </div>
+      </SampleReportContent>
     </>
   );
 };

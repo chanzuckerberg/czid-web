@@ -39,10 +39,17 @@ export const BenchmarkView = ({ sample, workflowRun }: BenchmarkViewProps) => {
     };
 
     fetchResults();
-  }, []);
+  }, [workflowRun.id, workflowRun?.status]);
 
-  const renderResults = () => {
-    return (
+  return (
+    <SampleReportContent
+      loadingResults={loadingResults}
+      workflowRun={workflowRun}
+      sample={sample}
+      loadingInfo={{
+        message: "Your benchmarking results are being generated!",
+      }}
+    >
       <div>
         {additionalInfo && <BenchmarkSampleReportInfo info={additionalInfo} />}
         <div
@@ -51,18 +58,6 @@ export const BenchmarkView = ({ sample, workflowRun }: BenchmarkViewProps) => {
           dangerouslySetInnerHTML={{ __html: htmlReport }}
         />
       </div>
-    );
-  };
-
-  return (
-    <SampleReportContent
-      renderResults={renderResults}
-      loadingResults={loadingResults}
-      workflowRun={workflowRun}
-      sample={sample}
-      loadingInfo={{
-        message: "Your benchmarking results are being generated!",
-      }}
-    />
+    </SampleReportContent>
   );
 };

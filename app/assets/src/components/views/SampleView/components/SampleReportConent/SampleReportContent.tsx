@@ -1,6 +1,5 @@
 import React from "react";
-import { IconAlert, IconLoading } from "~/components/ui/icons";
-import { sampleErrorInfo } from "~/components/utils/sample";
+import { IconLoading } from "~/components/ui/icons";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import {
   CREATED_STATE,
@@ -8,11 +7,12 @@ import {
   SUCCEEDED_STATE,
 } from "~/components/views/SampleView/utils/";
 import Sample, { WorkflowRun } from "~/interface/sample";
+import { FailedMessage } from "./components/FailedMessage";
 import cs from "./sample_report_content.scss";
 
 export interface SampleReportContentProps {
   loadingResults: boolean;
-  renderResults: () => React.ReactNode;
+  children: React.ReactNode;
   workflowRun: WorkflowRun;
   sample: Sample;
   loadingInfo: {
@@ -28,32 +28,32 @@ export interface SampleReportContentProps {
 
 export const SampleReportContent = ({
   loadingResults,
-  renderResults,
+  children,
   workflowRun,
   sample,
   loadingInfo,
   eventNames,
 }: SampleReportContentProps) => {
-  const renderLoadingMessage = () => {
-    return (
-      <SampleMessage
-        icon={<IconLoading className={cs.icon} />}
-        message={"Loading report data."}
-        status={"Loading"}
-        type={"inProgress"}
-      />
-    );
-  };
-  const renderContent = () => {
-    if (workflowRun?.status === SUCCEEDED_STATE) {
-      return renderResults();
-    } else if (
-      !sample.upload_error &&
-      (!workflowRun ||
-        !workflowRun.status ||
-        workflowRun.status === RUNNING_STATE)
-    ) {
-      return (
+  const isInProgress =
+    !sample.upload_error &&
+    (!workflowRun ||
+      !workflowRun.status ||
+      workflowRun.status === RUNNING_STATE);
+  const isWaitingToStart =
+    !sample.upload_error && workflowRun.status === CREATED_STATE;
+  return (
+    <>
+      {" "}
+      {loadingResults ? (
+        <SampleMessage
+          icon={<IconLoading className={cs.icon} />}
+          message={"Loading report data."}
+          status={"Loading"}
+          type={"inProgress"}
+        />
+      ) : workflowRun?.status === SUCCEEDED_STATE ? (
+        children
+      ) : isInProgress ? (
         <SampleMessage
           icon={<IconLoading className={cs.icon} />}
           link={loadingInfo?.helpLink}
@@ -63,37 +63,20 @@ export const SampleReportContent = ({
           type={"inProgress"}
           analyticsEventName={eventNames?.loading}
         />
-      );
-    } else if (!sample.upload_error && workflowRun.status === CREATED_STATE) {
-      return (
+      ) : isWaitingToStart ? (
         <SampleMessage
           icon={<IconLoading className={cs.icon} />}
           message={"Waiting to Start or Receive Files"}
           status={"IN PROGRESS"}
           type={"inProgress"}
         />
-      );
-    } else {
-      // FAILED
-      const { link, linkText, subtitle, message, status, type } =
-        sampleErrorInfo({
-          sample,
-          // @ts-expect-error Type 'string' is not assignable to type 'Record<string, never> | { label?: string; message: string; }'
-          error: workflowRun.input_error || {},
-        });
-      return (
-        <SampleMessage
-          icon={<IconAlert className={cs.iconAlert} type={type} />}
-          link={link}
-          linkText={linkText}
-          subtitle={subtitle}
-          message={message}
-          status={status}
-          type={type}
+      ) : (
+        <FailedMessage
+          sample={sample}
+          workflowRun={workflowRun}
           analyticsEventName={eventNames?.error}
         />
-      );
-    }
-  };
-  return <>{loadingResults ? renderLoadingMessage() : renderContent()}</>;
+      )}{" "}
+    </>
+  );
 };

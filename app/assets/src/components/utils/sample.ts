@@ -84,7 +84,7 @@ export const sampleErrorInfo = ({
   error = {},
 }: {
   sample: Sample;
-  pipelineRun: PipelineRun | Record<string, never>;
+  pipelineRun?: PipelineRun | Record<string, never>;
   error?: { label?: string; message: string } | Record<string, never>;
 }) => {
   let status: SampleStatus,

@@ -1,5 +1,5 @@
 import { useReactiveVar } from "@apollo/client";
-import { forEach, get, trim } from "lodash/fp";
+import { forEach, trim } from "lodash/fp";
 import React, { useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
@@ -53,7 +53,6 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   useEffect(() => {
     if (
       workflowRun.status !== SUCCEEDED_STATE ||
-      loadingResults ||
       workflowRun.workflow !== WorkflowType.AMR
     ) {
       return;
@@ -69,20 +68,35 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     };
 
     fetchResults();
-  }, []);
+  }, [workflowRun?.id, workflowRun?.status, workflowRun?.workflow]);
 
   useEffect(() => {
     const loadedValidSample =
-      !loadingResults && get("status", workflowRun) === "SUCCEEDED";
+      !loadingResults && workflowRun?.status === "SUCCEEDED";
     const resultIsNull =
       reportTableData === null || Object.keys(reportTableData).length === 0;
     setShouldShowNullResult(loadedValidSample && resultIsNull);
-  }, [loadingResults, reportTableData]);
+  }, [loadingResults, reportTableData, workflowRun?.status]);
 
   const activeFilterSelections = useReactiveVar(activeAmrFiltersVar);
+
   useEffect(() => {
+    const generateReportWithAppliedFiltersDownloadLink = () => {
+      const numOfActiveAmrFilters = countActiveFilters(activeFilterSelections);
+      if (numOfActiveAmrFilters === 0) {
+        amrReportTableDownloadWithAppliedFiltersLinkVar(null);
+      } else {
+        const [csvHeaders, csvRows] = computeAmrReportTableValuesForCSV({
+          displayedRows,
+          activeFilters: activeFilterSelections,
+        });
+
+        const link = createCSVObjectURL(csvHeaders, csvRows);
+        amrReportTableDownloadWithAppliedFiltersLinkVar(link);
+      }
+    };
     generateReportWithAppliedFiltersDownloadLink();
-  }, [displayedRows]);
+  }, [displayedRows, activeFilterSelections]);
 
   const setDrugClassesReactiveVar = reportTableData => {
     const drugClasses = new Set<string>();
@@ -98,46 +112,11 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     amrDrugClassesVar(Array.from(drugClasses));
   };
 
-  const generateReportWithAppliedFiltersDownloadLink = () => {
-    const numOfActiveAmrFilters = countActiveFilters(activeFilterSelections);
-    if (numOfActiveAmrFilters === 0) {
-      amrReportTableDownloadWithAppliedFiltersLinkVar(null);
-    } else {
-      const [csvHeaders, csvRows] = computeAmrReportTableValuesForCSV({
-        displayedRows,
-        activeFilters: activeFilterSelections,
-      });
-
-      const link = createCSVObjectURL(csvHeaders, csvRows);
-      amrReportTableDownloadWithAppliedFiltersLinkVar(link);
-    }
-  };
-
-  const renderResults = () => {
-    return (
-      <div className={cs.resultsContainer}>
-        <AmrFiltersContainer
-          setDataFilterFunc={setDataFilterFunc}
-          hideFilters={hideFilters}
-          setHideFilters={setHideFilters}
-        />
-        <AmrSampleReport
-          reportTableData={displayedRows}
-          sample={sample}
-          workflowRun={workflowRun}
-          setDetailsSidebarGeneName={setDetailsSidebarGeneName}
-          hideFilters={hideFilters}
-        />
-      </div>
-    );
-  };
-
   return shouldShowNullResult ? (
     <AmrNullResult />
   ) : (
     <>
       <SampleReportContent
-        renderResults={renderResults}
         loadingResults={loadingResults}
         workflowRun={workflowRun}
         sample={sample}
@@ -150,7 +129,22 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
           error: "AmrView_sample-error-info-link_clicked",
           loading: "AmrView_amr-doc-link_clicked",
         }}
-      />
+      >
+        <div className={cs.resultsContainer}>
+          <AmrFiltersContainer
+            setDataFilterFunc={setDataFilterFunc}
+            hideFilters={hideFilters}
+            setHideFilters={setHideFilters}
+          />
+          <AmrSampleReport
+            reportTableData={displayedRows}
+            sample={sample}
+            workflowRun={workflowRun}
+            setDetailsSidebarGeneName={setDetailsSidebarGeneName}
+            hideFilters={hideFilters}
+          />
+        </div>
+      </SampleReportContent>
       <DetailsSidebar
         visible={Boolean(detailsSidebarGeneName)}
         mode="geneDetails"
