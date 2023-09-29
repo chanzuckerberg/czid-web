@@ -126,6 +126,14 @@ class PipelineRun < ApplicationRecord
   # ONT specific constants
   ONT_NONHOST_READS_NAME = 'sample.humanfiltered.fastq'.freeze
 
+  # files used to start AMR workflow
+  GSNAP_FILTERED_NAMES = ["gsnap_filter_1.fa", "gsnap_filter_2.fa"].freeze
+  SUBSAMPLED_NAMES = ["subsampled_1.fa", "subsampled_2.fa"].freeze
+  HISAT2_HOST_FILTERED_NAMES = ["hisat2_host_filtered1.fastq", "hisat2_host_filtered2.fastq"].freeze
+  HISAT2_HUMAN_FILTERED_NAMES = ["hisat2_human_filtered1.fastq", "hisat2_human_filtered2.fastq"].freeze
+  DUPLICATE_CLUSTERS_NAME = "clusters.csv".freeze
+  DUPLICATE_CLUSTER_SIZES_NAME = "duplicate_cluster_sizes.tsv".freeze
+
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
   # minimal number of reads mapped to the contig
   MIN_CONTIG_READS = {
@@ -1026,6 +1034,10 @@ class PipelineRun < ApplicationRecord
         "dag-#{pipeline_version}"
       )
     end
+  end
+
+  def s3_file_for_sfn_result(filename)
+    "#{sfn_results_path}/#{filename}"
   end
 
   def s3_file_for(output)

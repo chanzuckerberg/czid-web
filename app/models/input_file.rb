@@ -17,6 +17,7 @@ class InputFile < ApplicationRecord
   scope :fastq, -> { where(file_type: FILE_TYPE_FASTQ) }
   scope :primer_bed, -> { where(file_type: FILE_TYPE_PRIMER_BED) }
   scope :reference_sequence, -> { where(file_type: FILE_TYPE_REFERENCE_SEQUENCE) }
+  scope :by_type, ->(file_type) { where(file_type: file_type) }
 
   SOURCE_TYPE_LOCAL = 'local'.freeze
   SOURCE_TYPE_S3 = 's3'.freeze

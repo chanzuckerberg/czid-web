@@ -1191,8 +1191,9 @@ class Sample < ApplicationRecord
     UrlUtil.absolute_base_url + "/samples/#{id}/pipeline_runs"
   end
 
-  def input_file_s3_paths
-    input_files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
+  def input_file_s3_paths(file_type = nil)
+    files = file_type ? input_files.by_type(file_type) : input_files
+    files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
   end
 
   def self.search_by_name(query)

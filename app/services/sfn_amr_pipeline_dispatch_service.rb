@@ -44,6 +44,9 @@ class SfnAmrPipelineDispatchService
     # Get latest CARD versions and write them to inputs_json
     versions = @workflow_run.uses_modern_host_filtering? ? AmrWorkflowRun.latest_card_versions : AmrWorkflowRun::DEFAULT_CARD_VERSIONS
     @workflow_run.add_inputs(versions)
+
+    @start_from_mngs = strtrue(@workflow_run.get_input("start_from_mngs"))
+    @latest_pipeline_run = @start_from_mngs ? @sample.pipeline_runs.non_deprecated.first : nil
   end
 
   def call
@@ -101,21 +104,14 @@ class SfnAmrPipelineDispatchService
   end
 
   def host_filtering_parameters
+    hg = @sample.host_genome
     {
-      "raw_reads_0": strtrue(@workflow_run.get_input("start_from_mngs")) ? nil : @sample.input_file_s3_paths[0],
-      "raw_reads_1": if strtrue(@workflow_run.get_input("start_from_mngs"))
-                       nil
-                     else
-                       (
-                             @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil
-                           )
-                     end,
       "host_filtering_docker_image_id": retrieve_mngs_docker_image_id,
       "host_filter_stage.file_ext": @sample.fasta_input? ? "fasta" : "fastq",
       "host_filter_stage.nucleotide_type": @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
-      "host_filter_stage.host_genome": @sample.host_genome_name.downcase,
-      "host_filter_stage.star_genome": @sample.host_genome.s3_star_index_path,
-      "host_filter_stage.bowtie2_genome": @sample.host_genome.s3_bowtie2_index_path,
+      "host_filter_stage.host_genome": hg.name.downcase,
+      "host_filter_stage.star_genome": hg.s3_star_index_path,
+      "host_filter_stage.bowtie2_genome": hg.s3_bowtie2_index_path,
       "host_filter_stage.human_star_genome": HostGenome.find_by(name: "Human").s3_star_index_path,
       "host_filter_stage.human_bowtie2_genome": HostGenome.find_by(name: "Human").s3_bowtie2_index_path,
       "host_filter_stage.adapter_fasta": PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
@@ -127,14 +123,6 @@ class SfnAmrPipelineDispatchService
   def modern_host_filtering_parameters
     hg = @sample.host_genome
     {
-      "raw_reads_0": strtrue(@workflow_run.get_input("start_from_mngs")) ? nil : @sample.input_file_s3_paths[0],
-      "raw_reads_1": if strtrue(@workflow_run.get_input("start_from_mngs"))
-                       nil
-                     else
-                       (
-                             @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil
-                           )
-                     end,
       "host_filtering_docker_image_id": retrieve_mngs_docker_image_id,
       "host_filter_stage.adapter_fasta": PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
 
@@ -149,31 +137,6 @@ class SfnAmrPipelineDispatchService
       "host_filter_stage.max_subsample_fragments": PipelineRun::DEFAULT_SUBSAMPLING,
       "host_filter_stage.file_ext": @sample.fasta_input? ? "fasta" : "fastq",
     }
-  end
-
-  def modern_nonhost_reads
-    sfn_results_path = @sample.pipeline_runs.non_deprecated.first.sfn_results_path
-    [
-      "#{sfn_results_path}/subsampled_1.fa",
-      @sample.input_files[1] ? "#{sfn_results_path}/subsampled_2.fa" : nil,
-    ].compact
-  end
-
-  def nonhost_reads
-    sfn_results_path = @sample.pipeline_runs.non_deprecated.first.sfn_results_path
-    [
-      "#{sfn_results_path}/gsnap_filter_1.fa",
-      @sample.input_files[1] ? "#{sfn_results_path}/gsnap_filter_2.fa" : nil,
-    ].compact
-  end
-
-  def nonhost_reads_params
-    params = nil
-    if strtrue(@workflow_run.get_input("start_from_mngs"))
-      params = @workflow_run.uses_modern_host_filtering? ? modern_nonhost_reads : nonhost_reads
-    end
-
-    params
   end
 
   def card_params(uses_modern_host_filtering)
@@ -196,16 +159,76 @@ class SfnAmrPipelineDispatchService
     }
   end
 
+  # For samples uploaded directly to the AMR pipeline
+  def raw_reads
+    @sample.input_file_s3_paths(InputFile::FILE_TYPE_FASTQ)
+  end
+
+  def reduplicated_reads_input_files
+    # Samples with non-human hosts go through additional human filtering. Human samples will only have
+    # files from the hisat2 host filter step.
+    non_host_reads = if @sample.host_genome_name == "Human"
+                       PipelineRun::HISAT2_HOST_FILTERED_NAMES
+                     else
+                       PipelineRun::HISAT2_HUMAN_FILTERED_NAMES
+                     end
+    params = if @start_from_mngs
+               {
+                 filtered_sample: {
+                   subsampled_reads: PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) },
+                   non_host_reads: non_host_reads.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) },
+                   clusters: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::DUPLICATE_CLUSTERS_NAME),
+                   cluster_sizes: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::DUPLICATE_CLUSTER_SIZES_NAME),
+                   contigs: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::ASSEMBLED_CONTIGS_NAME),
+                 },
+               }
+             else
+               {
+                 raw_sample: {
+                   raw_reads: raw_reads,
+                 },
+               }
+             end
+    return params
+  end
+
+  def initial_version_input_files(non_host_reads)
+    params = if @start_from_mngs
+               {
+                 non_host_reads: non_host_reads,
+                 contigs: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::ASSEMBLED_CONTIGS_NAME),
+               }
+             else
+               {
+                 raw_reads_0: raw_reads[0],
+                 raw_reads_1: raw_reads[1], # will be nil for single-file samples
+               }
+             end
+    return params
+  end
+
+  def input_files_params
+    params = {}
+    if @workflow_run.workflow_version_at_least(AmrWorkflowRun::VERSION[:REDUPLICATED_READS])
+      params = reduplicated_reads_input_files
+    elsif @workflow_run.workflow_version_at_least(AmrWorkflowRun::VERSION[:MODERN_HOST_FILTERING])
+      params = initial_version_input_files(PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) })
+    elsif @workflow_run.workflow_version_at_least(AmrWorkflowRun::VERSION[:INITIAL])
+      params = initial_version_input_files(PipelineRun::GSNAP_FILTERED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) })
+    else
+      raise SfnVersionMissingError, @workflow_run.workflow
+    end
+    return params
+  end
+
   def generate_wdl_input
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
     host_filtering_params = @workflow_run.uses_modern_host_filtering? ? modern_host_filtering_parameters : host_filtering_parameters
     card_params = card_params(@workflow_run.uses_modern_host_filtering?)
     run_inputs = {
       docker_image_id: retrieve_docker_image_id,
-      non_host_reads: nonhost_reads_params,
-      contigs: strtrue(@workflow_run.get_input("start_from_mngs")) ? "#{@sample.pipeline_runs.non_deprecated.first.sfn_results_path}/contigs.fasta" : nil,
       sample_name: @workflow_run.sample.name,
-    }.merge(host_filtering_params).merge(card_params)
+    }.merge(input_files_params, host_filtering_params, card_params)
 
     sfn_pipeline_input_json = {
       RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@workflow_run.workflow_version_tag}/run.wdl.zip",

@@ -13,7 +13,6 @@
   #
   # * You can find all outputs of a particluar AMR workflow run in the AWS console
   #   by visiting the "Execution Input and Outputs" section of the SFN execution.
-  MODERN_HOST_FILTERING_VERSION = "0.3.1".freeze
   OUTPUT_ZIP = "amr.ZipOutputs.output_zip".freeze
   OUTPUT_REPORT = "amr.RunResultsPerSample.synthesized_report".freeze
   OUTPUT_CONTIGS = "amr.RunSpades.contigs".freeze
@@ -27,6 +26,12 @@
   DEFAULT_CARD_VERSIONS = {
     "card_version" => "3.2.3",
     "wildcard_version" => "3.1.0",
+  }.freeze
+
+  VERSION = {
+    REDUPLICATED_READS: "1.3.0-beta.1-51085e2",
+    MODERN_HOST_FILTERING: "0.3.1",
+    INITIAL: "0.1.0",
   }.freeze
 
   def self.latest_card_folder_path
@@ -121,6 +126,6 @@
   end
 
   def uses_modern_host_filtering?
-    workflow_version_at_least(MODERN_HOST_FILTERING_VERSION)
+    workflow_version_at_least(VERSION[:MODERN_HOST_FILTERING])
   end
 end
