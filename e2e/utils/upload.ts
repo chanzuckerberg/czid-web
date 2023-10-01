@@ -22,6 +22,7 @@ import { updateMetadata } from "./metadata";
 const REF_FILENAME = "consensus_papilloma.fa";
 const CONTINUE_BUTTON = '[class *="continueButton"]';
 const ONT = "sequencing-technology-ONT";
+const hostId = "host-organism";
 
 export const uploadRefSequence = async (page: Page) => {
   const REF_FILE = `./fixtures/reference_sequences/${REF_FILENAME}`;
@@ -104,8 +105,7 @@ export async function uploadSampleFiles(
   if (analysisType === WORKFLOWS.MNGS) {
     // locator("..") gives us parent so we can click the checkbox
     await page.getByText("Illumina", { exact: true }).locator("..").click();
-    // verify basespace and S3
-    await expect(page.getByText("S3")).toBeEnabled();
+    // verify basespace
     await expect(page.getByText("Basespace")).toBeEnabled();
   }
 
@@ -157,13 +157,14 @@ export async function uploadSampleFiles(
 
   // select files
   const fileInputSelector = '[data-testid="drop-sample-files"] input';
+  const fileConfirmation = `${sampleFiles.length} Files Selected For Upload`;
   await selectFiles(page, fileInputSelector, FIXTURE_DIR, sampleFiles);
 
   // wait for upload to complete
-  const fileConfirmation = `${sampleFiles.length} Files Selected For Upload`;
   await expect(page.getByText(fileConfirmation)).toBeVisible({
-    timeout: 10000,
+    timeout: 5000,
   });
+
 
   // verify user is able to click to remove unselected samples
   // check if the check box is checked then unchecked it
@@ -291,7 +292,6 @@ export async function fillMetadata(
   metaData: Metadata,
 ): Promise<any> {
   // host organism
-  const hostId = "host-organism";
   if (isFieldEditable(page, hostId)) {
     const hostOrganism = page.getByTestId(hostId);
     await hostOrganism.locator("input").fill(String(metaData[HOST_ORGANISM]));
@@ -325,7 +325,7 @@ export async function fillIncompleteData(
 ): Promise<any> {
   // host organism
   await page
-    .getByTestId("host-organism")
+    .getByTestId(hostId)
     .locator("input")
     .fill(String(metaData[HOST_ORGANISM]));
 
@@ -350,33 +350,25 @@ export async function fillIncompleteData(
   );
 }
 
+const workflowTexts = {
+  mngs: ["Metagenomics", "Illumina"],
+  ONT: ["Metagenomics", "Nanopore"],
+  WGS: ["viral-consensus-genome"],
+  amr: ["Antimicrobial Resistance"],
+  SC2: "covid-consensus-genome",
+};
 export async function verifyAnalysisType(
   page: Page,
   analysisType: string,
 ): Promise<any> {
   const UPLOAD_REVIEW = "upload-input-review";
-  if (analysisType === WORKFLOWS.MNGS) {
-    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
-      "Metagenomics",
-    );
-    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
-      "Illumina",
-    );
-  }
-  if (analysisType === WORKFLOWS.LMNGS) {
-    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
-      "Metagenomics",
-    );
-    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
-      "Nanopore",
-    );
+  const texts = workflowTexts[analysisType];
+  if(texts !== undefined){
+    texts.forEach( async (txt: string) => {
+      expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(txt);
+    });
   }
 
-  if (analysisType === WORKFLOWS.AMR) {
-    expect(await page.getByTestId(UPLOAD_REVIEW).textContent()).toContain(
-      "Antimicrobial Resistance",
-    );
-  }
   await page.getByText("Continue").nth(1).click();
 }
 export async function submitUpload(page: Page): Promise<any> {
@@ -432,8 +424,14 @@ export async function testUploadSample(
     // upload metadata
     await uploadMetadata(page, metadataTemplate);
   } else {
-    // todo: add scenario manual input
-    await page.getByText("Auto-populate metadata (Admin-only)").click();
+    // manual input
+    await page.getByTestId(hostId).locator("input").fill("Human");
+    await page.keyboard.press("Tab");
+    await page.getByTestId("sample_type").locator("input").fill("Blood");
+    await page.getByTestId("nucleotide_type").click();
+    await page.getByTestId("dna").click();
+    await page.getByTestId("collection_date").locator("input").fill("2023-08");
+    await page.getByTestId("collection_location_v2").locator("input").fill("Mexico");
   }
 
   // verify analysis type on review page

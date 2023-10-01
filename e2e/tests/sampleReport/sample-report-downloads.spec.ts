@@ -1,7 +1,7 @@
 import { chooseBackgroundModel, verifyDownload } from "@e2e/utils/report";
 import { test } from "@playwright/test";
 
-test.describe("Sample report downloand tests - Illumina", () => {
+test.describe("Sample report download tests - Illumina", () => {
   const stagingSampleId = 25983;
 
   test.beforeEach(async ({ page }) => {

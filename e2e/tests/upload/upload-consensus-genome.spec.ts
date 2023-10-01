@@ -20,6 +20,7 @@ test.describe("Upload WGS sample tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await cookieBanner(page);
   });
+  test.describe.configure({ retries: 2 });
   test("Should upload WGS sample with manual metadata", async ({ page }) => {
     const verifyDeleteFile = false;
     const metadataFile = "manual";

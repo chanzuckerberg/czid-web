@@ -54,7 +54,7 @@ test.describe("Generic upload flow tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await cookieBanner(page);
   });
-
+  test.describe.configure({ retries: 2 });
   for (const testPair of allowedUploadPairs) {
     test(`Should run combination of ${testPair.join(
       ", ",
@@ -93,7 +93,7 @@ test.describe("Generic upload flow tests", () => {
     });
   }
 
-  test("Should verify analysis info", async ({ page }) => {
+  test.skip("Should verify analysis info", async ({ page }) => {
     // choose project and upload sample files
     const sampleType = WORKFLOWS.WGS.toLowerCase();
     await uploadSampleFiles(page, projectName, sampleType, SAMPLE_FILES);

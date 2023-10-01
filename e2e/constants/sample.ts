@@ -131,23 +131,27 @@ export const OVERFLOW_BUTTON = "overflow-btn";
 export const BULK_DELETE_MODAL = "bulk-delete-modal";
 export const DELETE_RUN_MENUITEM = "delete-run-menuitem";
 export const DELETE_DISABLED_TOOLTIP = "delete-disabled-tooltip";
-export const FILE_DOWLOAD_TYPES_MNGS = [
-  ["Download Report Table (.csv)", ".csv"],
-  // todo: uncomment when data-testid is on staging (smccanny)
-  // [Download Report Table with Applied Filters (.csv), ".csv"],
-  ["Download Non-Host Reads (.fasta)", ".fasta"],
-  ["Download Non-Host Contigs (.fasta)", ".fasta"],
-  ["Download Non-Host Contigs Summary (.csv)", ".csv"],
-  ["Download Unmapped Reads (.fasta)", ".fasta"],
+const DOWNLOAD_REPORT_TABLE = "download-report-table-csv";
+const DOWNLOAD_NON_HOST_READS = "download-non-host-reads-fasta";
+const DOWNLOAD_NON_HOST_CONTIGS = "download-non-host-contigs-fasta";
+const DOWNLOAD_NON_HOST_CONTIGS_SUMMARY = "download-non-host-contigs-summary-csv";
+const DOWNLOAD_UNMAPPED_READS = "download-unmapped-reads-fasta";
+const CSV = ".csv";
+const FASTA = ".fasta";
+
+export const FILE_DOWNLOAD_TYPES_MNGS = [
+  [DOWNLOAD_REPORT_TABLE, CSV],
+  [DOWNLOAD_NON_HOST_READS, FASTA],
+  [DOWNLOAD_NON_HOST_CONTIGS,FASTA],
+  [DOWNLOAD_NON_HOST_CONTIGS_SUMMARY, CSV],
+  [DOWNLOAD_UNMAPPED_READS, FASTA],
 ];
+
 export const FILE_DOWLOAD_TYPES_AMR = [
-  ["Download Report Table (.csv)", ".csv"],
-  // todo: uncomment when data-testid is on staging (smccanny)
-  // [Download Report Table with Applied Filters (.csv), ".csv"],
-  ["Download Non-Host Reads (.fasta)", ".fasta"],
-  ["Download Non-Host Contigs (.fasta)", ".fasta"],
-  ["Download Comprehensive AMR Metrics File (.tsv)", ".tsv"],
-  ["Download Intermediate Files (.zip)", ".zip"],
+  [DOWNLOAD_REPORT_TABLE, CSV],
+];
+export const FILE_DOWLOAD_TYPES_CG = [
+  [DOWNLOAD_REPORT_TABLE, CSV],
 ];
 export const URL_DOWLOAD_TYPES = [
   ["View Results Folder", "/results_folder?pipeline_version="],

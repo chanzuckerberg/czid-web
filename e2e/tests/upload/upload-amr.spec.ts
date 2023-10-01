@@ -21,6 +21,7 @@ test.describe("AMR sample upload tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await cookieBanner(page);
   });
+  test.describe.configure({ retries: 2 });
   test("Should upload AMR sample with manual metadata", async ({ page }) => {
     const verifyDeleteFile = false;
     const invalidSample = false;

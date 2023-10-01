@@ -7,6 +7,7 @@
   "scripts": {
     "pw:staging": "NODE_ENV=staging DEBUG=pw:api playwright test --headed -c ./setup/staging.config.ts",
     "pw:local": "NODE_ENV=local DEBUG=pw:api npx playwright test --headed -c ./setup/local.config.ts",
+    "pw:local:ui": "NODE_ENV=local DEBUG=pw:api npx playwright test --ui --headed -c ./setup/local.config.ts",
     "pw:ci": "NODE_ENV=ci DEBUG=pw:api npx playwright test -c ./setup/ci.config.ts",
     "pw:staging:headless": "NODE_ENV=staging npx playwright test -c ./setup/staging.config.ts",
     "pw:staging:debug": "DEBUG=pw:browser*,pw:api NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
@@ -19,7 +20,7 @@
     "@playwright/test": "^1.35.1",
     "@types/lodash": "^4.14.182",
     "lodash": "^4.14.182",
-    "playwright": "^1.35.1",
+    "playwright": "^1.38.0",
     "playwright-chromium": "^1.35.1",
     "playwright-json-summary-reporter": "^1.0.0",
     "prettier": "^2.8.2",

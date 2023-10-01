@@ -4,6 +4,7 @@ import {
   PROJECT_NAME_NOT_AVAILABLE_ERROR,
 } from "@e2e/constants/upload";
 import { stubRequest } from "@e2e/utils/api";
+import { acceptCookies } from "@e2e/utils/page";
 import { expect, test } from "@playwright/test";
 
 const baseUrl = process.env.BASEURL;
@@ -50,6 +51,9 @@ test.describe("Sample project tests", () => {
     await page.getByTestId("create-project").click();
     // Create Project modal should be visible
     await expect(page.getByText("New Project")).toBeVisible();
+
+    // accept cookies
+    await acceptCookies(page);
   });
 
   test("Should create new project", async ({ page }) => {

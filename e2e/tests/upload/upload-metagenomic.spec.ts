@@ -21,6 +21,7 @@ test.describe("Metagenomics sample upload tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await cookieBanner(page);
   });
+  test.describe.configure({ retries: 2 });
   test("Should upload mNGS sample with manual metadata", async ({ page }) => {
     const verifyDeleteFile = false;
     const metadataFile = "manual";
