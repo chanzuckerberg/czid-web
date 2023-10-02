@@ -577,6 +577,13 @@ const SamplesView = forwardRef(function SamplesView(
         },
       );
 
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED_ALLISON_TESTING,
+        {
+          sampleIds: JSON.stringify(sampleIdsToKickoffAmr),
+        },
+      );
+
       handleNewWorkflowRunsCreated({
         numWorkflowRunsCreated: size(amrPipelineEligibility.eligible),
         workflow: WorkflowType.AMR,
