@@ -221,6 +221,13 @@ const LocalUploadProgressModal = ({
         sampleIds: map("id", samples),
       },
     );
+
+    trackEvent(
+      ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED_ALLISON_TESTING,
+      {
+        sampleIds: JSON.stringify(map("id", samples)),
+      },
+    );
   };
 
   const getS3Client = async (sample: $TSFixMe) => {
