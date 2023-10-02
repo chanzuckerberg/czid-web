@@ -44,7 +44,7 @@ const BackgroundModelFilter = React.memo(
     let disabled = props.disabled || false;
 
     const formatBackgroundOptions = (backgrounds: RawBackground[]): Option[] =>
-      backgrounds.map(background => {
+      backgrounds?.map(background => {
         const disabledOption =
           !enableMassNormalizedBackgrounds && background.mass_normalized;
         return {

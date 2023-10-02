@@ -170,8 +170,8 @@ const SampleView = ({
     workflowRunIdFromUrl || null,
   );
   const [backgrounds, setBackgrounds] = useState<Background[]>([]);
-  const [ownedBackgrounds, setOwnedBackgrounds] = useState<Background[]>(null);
-  const [otherBackgrounds, setOtherBackgrounds] = useState<Background[]>(null);
+  const [ownedBackgrounds, setOwnedBackgrounds] = useState<Background[]>([]);
+  const [otherBackgrounds, setOtherBackgrounds] = useState<Background[]>([]);
   const [hasPersistedBackground, setHasPersistedBackground] =
     useState<boolean>(null);
   const [sample, setSample] = useState<Sample | null>(null);
