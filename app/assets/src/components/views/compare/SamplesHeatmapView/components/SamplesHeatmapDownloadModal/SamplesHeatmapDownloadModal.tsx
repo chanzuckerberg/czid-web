@@ -74,6 +74,18 @@ export const SamplesHeatmapDownloadModal = ({
           ...selectedDownloadSubmission["validObjectIds"],
         },
       );
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESS_ALLISON_TESTING,
+        {
+          workflow: JSON.stringify(selectedDownloadSubmission["workflow"]),
+          downloadType: JSON.stringify(
+            selectedDownloadSubmission["downloadType"],
+          ),
+          validObjectIds: JSON.stringify(
+            selectedDownloadSubmission["validObjectIds"],
+          ),
+        },
+      );
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error("Samples heatmap bulk download creation failed! error:", e);
