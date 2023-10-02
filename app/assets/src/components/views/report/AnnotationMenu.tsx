@@ -34,6 +34,16 @@ const AnnotationMenu = ({
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (event: $TSFixMe) => {
+    withAnalytics(
+      ANALYTICS_EVENT_NAMES.REPORT_TABLE_ANNOTATION_MENU_OPENED,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
+      analyticsContext,
+    );
+    withAnalytics(
+      ANALYTICS_EVENT_NAMES.REPORT_TABLE_ANNOTATION_MENU_OPENED_ALLISON_TESTING,
+      JSON.stringify(analyticsContext),
+    );
     setAnchorEl(event.currentTarget);
   };
 
@@ -62,16 +72,7 @@ const AnnotationMenu = ({
 
   return (
     <>
-      <AnnotationLabel
-        type={currentLabelType}
-        onClick={withAnalytics(
-          handleClick,
-          ANALYTICS_EVENT_NAMES.REPORT_TABLE_ANNOTATION_MENU_OPENED,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-          analyticsContext,
-        )}
-      />
+      <AnnotationLabel type={currentLabelType} onClick={handleClick} />
       <Menu
         anchorEl={anchorEl}
         anchorOrigin={{

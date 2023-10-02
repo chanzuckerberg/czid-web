@@ -480,6 +480,10 @@ function EventDictionary() {
   this.REPORT_TABLE_ANNOTATION_MENU_OPENED =
     "REPORT_TABLE_ANNOTATION_MENU_OPENED";
 
+  /** Copy of REPORT_TABLE_ANNOTATION_MENU_OPENED without expanded tables bc it has a compliant type for the payload */
+  this.REPORT_TABLE_ANNOTATION_MENU_OPENED_ALLISON_TESTING =
+    "REPORT_TABLE_ANNOTATION_MENU_OPENED_ALLISON_TESTING";
+
   /** The user clicked the trigger to open the Pin Samples dropdown on the SamplesHeatmapVis. */
   this.SAMPLES_HEATMAP_VIS_PIN_SAMPLES_DROPDOWN_TRIGGER_CLICKED =
     "SAMPLES_HEATMAP_VIS_PIN_SAMPLES_DROPDOWN_TRIGGER_CLICKED";
