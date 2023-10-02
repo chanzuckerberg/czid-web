@@ -134,6 +134,11 @@ export const ReportFilters = ({
       value,
       sampleId,
     });
+    trackEvent("SampleView_filter_changed_allison_testing", {
+      key,
+      value: JSON.stringify(value),
+      sampleId,
+    });
     onFilterChanged({ key, value });
   };
 
