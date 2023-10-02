@@ -919,6 +919,16 @@ class SamplesHeatmapView extends React.Component<
       sampleIds,
       useHeatmapES,
     });
+
+    trackEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR_ALLISON_TESTING,
+      {
+        numSamples: size(sampleIds),
+        numTaxons: size(allTaxonIds),
+        sampleIds: JSON.stringify(sampleIds),
+        useHeatmapES,
+      },
+    );
   };
 
   extractData(rawData: $TSFixMe) {

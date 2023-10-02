@@ -258,6 +258,10 @@ function EventDictionary() {
   this.SAMPLES_HEATMAP_VIEW_LOADING_ERROR =
     "SAMPLES_HEATMAP_VIEW_LOADING_ERROR";
 
+  /** Copy of SAMPLES_HEATMAP_VIEW_LOADING_ERROR without expanded tables bc it has a compliant type for the payload */
+  this.SAMPLES_HEATMAP_VIEW_LOADING_ERROR_ALLISON_TESTING =
+    "SAMPLES_HEATMAP_VIEW_LOADING_ERROR_ALLISON_TESTING";
+
   /** The user clicked on the Learn More link in the error modal explaining why a matrix is shown when the samples are
    * too divergent to display a phylo tree.
    */
