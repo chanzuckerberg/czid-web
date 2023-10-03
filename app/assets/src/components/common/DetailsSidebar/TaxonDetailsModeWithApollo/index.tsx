@@ -1,1 +1,0 @@
-export { TaxonDetailsModeWithApollo } from "./TaxonDetailsModeWithApollo";

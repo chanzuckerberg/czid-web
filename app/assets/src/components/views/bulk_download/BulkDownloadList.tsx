@@ -9,14 +9,12 @@ import {
   withAnalytics,
 } from "~/api/analytics";
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
-import { selectedBulkDownloadVar } from "~/cache/initialCache";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
 import Label from "~/components/ui/labels/Label";
-import { APOLLO_CLIENT_STATE_MANAGEMENT } from "~/components/utils/features";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Table } from "~/components/visualizations/table";
 import { BulkDownloadDetails } from "~/interface/shared";
@@ -193,14 +191,6 @@ class BulkDownloadList extends React.Component {
     this.state.bulkDownloads && this.state.bulkDownloads.length === 0;
 
   handleStatusClick = (bulkDownload: BulkDownloadDetails) => {
-    const { allowedFeatures } = this.context || {};
-    const apolloClientEnabled = allowedFeatures.includes(
-      APOLLO_CLIENT_STATE_MANAGEMENT,
-    );
-
-    if (apolloClientEnabled) {
-      selectedBulkDownloadVar({ bulkDownload: bulkDownload });
-    }
     this.setState({
       selectedBulkDownload: bulkDownload,
       sidebarOpen: true,

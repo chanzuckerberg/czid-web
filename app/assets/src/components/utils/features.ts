@@ -29,6 +29,4 @@ export const HEATMAP_PATHOGEN_FLAGGING_FEATURE = "heatmap_pathogens";
 // add a new filter to the heatmap to filter to taxa with known pathogen flags
 export const HEATMAP_KNOWN_PATHOGEN_FILTER = "heatmap_pathogen_filter";
 export const BULK_DELETION_FEATURE = "bulk_deletion";
-// experimental feature to trial apollo client state management - not in use in production
-export const APOLLO_CLIENT_STATE_MANAGEMENT = "apollo_client";
 export const BENCHMARKING_FEATURE = "benchmarking";
