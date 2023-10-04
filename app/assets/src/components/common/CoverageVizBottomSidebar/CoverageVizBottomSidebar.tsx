@@ -6,11 +6,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 // Helper Functions and Constants
 import { getCoverageVizData } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
 // Components
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
@@ -278,7 +273,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
     alignedReads?: number;
     avgMismatchedPercent?: string;
   } => {
-    const { sampleId, params } = this.props;
     const { currentAccessionData, currentAccessionSummary } = this.state;
 
     if (!currentAccessionData) {
@@ -294,13 +288,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
               target="_blank"
               rel="noopener noreferrer"
               className={cs.ncbiLink}
-              onClick={() =>
-                trackEvent("CoverageVizBottomSidebar_ncbi-link_clicked", {
-                  accessionId: currentAccessionSummary.id,
-                  taxonId: params.taxonId,
-                  sampleId,
-                })
-              }
             >
               {currentAccessionSummary.id} - {currentAccessionSummary.name}
             </a>
@@ -369,21 +356,18 @@ export default class CoverageVizBottomSidebar extends React.Component<
           <ButtonIcon
             className={cs.iconButton}
             onClick={() =>
-              withAnalytics(
-                onBlastClick({
-                  context: {
-                    blastedFrom: "CoverageVizBottomSidebar",
-                  },
-                  pipelineVersion,
-                  sampleId,
-                  taxName: taxonName,
-                  taxId: taxonId,
-                  // shouldBlastContigs is only used by Blast V0 and will be removed after Blast V1 is launched
-                  shouldBlastContigs: true,
-                  taxonStatsByCountType,
-                }),
-                ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_BLAST_BUTTON_CLICKED,
-              )
+              onBlastClick({
+                context: {
+                  blastedFrom: "CoverageVizBottomSidebar",
+                },
+                pipelineVersion,
+                sampleId,
+                taxName: taxonName,
+                taxId: taxonId,
+                // shouldBlastContigs is only used by Blast V0 and will be removed after Blast V1 is launched
+                shouldBlastContigs: true,
+                taxonStatsByCountType,
+              })
             }
             sdsSize="large"
             sdsType="secondary"
@@ -429,11 +413,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
               </div>
             }
             onChange={(accessionId: string) => {
-              trackEvent("CoverageVizBottomSidebar_accession-select_changed", {
-                accessionId,
-                taxonId: params.taxonId,
-                sampleId,
-              });
               this.setCurrentAccession(accessionId);
             }}
             rounded
@@ -459,16 +438,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
                   href={params.alignmentVizUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() =>
-                    trackEvent(
-                      "CoverageVizBottomSidebar_alignment-viz-link_clicked",
-                      {
-                        accessionId: currentAccessionSummary.id,
-                        taxonId: params.taxonId,
-                        sampleId,
-                      },
-                    )
-                  }
                 >
                   View read-level visualization
                   <IconArrowRight />
@@ -487,15 +456,12 @@ export default class CoverageVizBottomSidebar extends React.Component<
                   <ButtonIcon
                     className={cs.iconButton}
                     onClick={() =>
-                      withAnalytics(
-                        openUrl(
-                          getDownloadContigUrl({
-                            pipelineVersion,
-                            sampleId,
-                            taxId: taxonId,
-                          }),
-                        ),
-                        ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_DOWNLOAD_CONTIG_BUTTON_CLICKED,
+                      openUrl(
+                        getDownloadContigUrl({
+                          pipelineVersion,
+                          sampleId,
+                          taxId: taxonId,
+                        }),
                       )
                     }
                     sdsSize="large"
@@ -532,20 +498,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
                 Sorry, we failed to load the coverage data due to an unexpected
                 error.
               </div>
-              <a
-                className={cs.linkWithArrow}
-                href="mailto:help@czid.org"
-                onClick={() =>
-                  trackEvent(
-                    "CoverageVizBottomSidebar_accession-data-invalid-contact-us_clicked",
-                    {
-                      accessionId: currentAccessionSummary.id,
-                      taxonId: params.taxonId,
-                      sampleId,
-                    },
-                  )
-                }
-              >
+              <a className={cs.linkWithArrow} href="mailto:help@czid.org">
                 Contact us for help
                 <IconArrowRight />
               </a>
@@ -603,16 +556,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
                 href={`https://www.ncbi.nlm.nih.gov/nuccore/${currentAccessionSummary.id}?report=genbank`}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() =>
-                  trackEvent(
-                    "CoverageVizBottomSidebar_ref-accession-viz-link_clicked",
-                    {
-                      accessionId: currentAccessionSummary.id,
-                      taxonId: params.taxonId,
-                      sampleId,
-                    },
-                  )
-                }
               >
                 <div
                   className={cs.genomeVizInner}
@@ -677,7 +620,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
   }
 
   renderNoDataContents() {
-    const { params, sampleId, snapshotShareId, workflow } = this.props;
+    const { params, snapshotShareId, workflow } = this.props;
 
     return (
       <NarrowContainer className={cs.contents}>
@@ -699,15 +642,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
                     href={params.alignmentVizUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() =>
-                      trackEvent(
-                        "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
-                        {
-                          taxonId: params.taxonId,
-                          sampleId,
-                        },
-                      )
-                    }
                   >
                     View read-level visualization
                     <IconArrowRight />
