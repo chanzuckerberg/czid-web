@@ -60,11 +60,11 @@ class MetricUtil
 
   def self.post_to_airtable(table_name, data)
     # Reference: https://airtable.com/api
-    if ENV["AIRTABLE_BASE_ID"] && ENV["AIRTABLE_API_KEY"]
+    if ENV["AIRTABLE_BASE_ID"] && ENV["AIRTABLE_ACCESS_TOKEN"]
       endpoint = "https://api.airtable.com/v0"
-      uri = URI.parse("#{endpoint}/#{ENV['AIRTABLE_BASE_ID']}/#{ERB::Util.url_encode(table_name)}?api_key=#{ENV['AIRTABLE_API_KEY']}")
+      uri = URI.parse("#{endpoint}/#{ENV['AIRTABLE_BASE_ID']}/#{ERB::Util.url_encode(table_name)}")
 
-      https_post(uri, data)
+      https_post(uri, data, ENV["AIRTABLE_ACCESS_TOKEN"])
     else
       Rails.logger.warn("Cannot send to Airtable. Check AIRTABLE_BASE_ID and AIRTABLE_API_KEY.")
     end
@@ -90,7 +90,7 @@ class MetricUtil
       }
     end
 
-    def https_post(uri, data)
+    def https_post(uri, data, access_token = nil)
       # Don't block the rest of the flow
       Thread.new do
         Rails.logger.info("Sending data: #{data}")
@@ -100,6 +100,8 @@ class MetricUtil
         req_options = {
           use_ssl: uri.scheme == "https",
         }
+
+        request['Authorization'] = "Bearer #{access_token}" if access_token.present?
 
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
           http.request(request)
