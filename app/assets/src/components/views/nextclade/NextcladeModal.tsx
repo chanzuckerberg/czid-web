@@ -192,21 +192,6 @@ export default class NextcladeModal extends React.Component<
   };
 
   handleConfirmationModalClose = () => {
-    const { projectIds, validWorkflowRunIds, selectedTreeType } = this.state;
-
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED,
-      {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        workflowRunIds: Array.from(validWorkflowRunIds),
-        selectedTreeType,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        projectIds,
-      },
-    );
-
     this.setState({ confirmationModalOpen: false });
   };
 
@@ -251,16 +236,6 @@ export default class NextcladeModal extends React.Component<
         },
         () => {
           console.error(error);
-          trackEvent(ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_UPLOAD_FAILED, {
-            error,
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            workflowRunIds: Array.from(validWorkflowRunIds),
-            selectedTreeType,
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            projectIds,
-          });
         },
       );
     }
@@ -268,37 +243,14 @@ export default class NextcladeModal extends React.Component<
 
   handleErrorModalRetry = async () => {
     const { onClose } = this.props;
-    const { projectIds, validWorkflowRunIds, selectedTreeType } = this.state;
 
     try {
       await this.openExportLink();
       this.setState({ errorModalOpen: false }, () => {
         onClose();
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED,
-          {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            workflowRunIds: Array.from(validWorkflowRunIds),
-            selectedTreeType,
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            projectIds,
-          },
-        );
       });
     } catch (error) {
       console.error(error);
-      trackEvent(ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED, {
-        error,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        workflowRunIds: Array.from(validWorkflowRunIds),
-        selectedTreeType,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        projectIds,
-      });
     }
   };
 

@@ -391,19 +391,11 @@ const SamplesView = forwardRef(function SamplesView(
               const params = getURLParamString({
                 sampleIds: Array.from(selectedIds),
               });
-              const log = () =>
-                trackEvent("SamplesView_heatmap-option_clicked", {
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-                  option,
-                  selectedIds: selectedIds.size,
-                });
               return (
                 <RouterLink
                   to={`${option.value}?${params}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={log}
                 >
                   <BareDropdown.Item key={option.text} text={option.text} />
                 </RouterLink>

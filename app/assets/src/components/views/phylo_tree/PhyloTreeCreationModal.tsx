@@ -482,31 +482,12 @@ class PhyloTreeCreationModal extends React.Component<
       newSelectedProjectPipelineRuns.delete(value);
     }
 
-    this.setState(
-      {
-        projectPipelineRunsSelectAllChecked:
-          selectableProjectPipelineRuns.size ===
-          newSelectedProjectPipelineRuns.size,
-        selectedProjectPipelineRuns: newSelectedProjectPipelineRuns,
-      },
-      () => {
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
-          {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            previousSelectedProjectPipelineRuns: Array.from(
-              previousSelectedProjectPipelineRuns,
-            ),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            newSelectedProjectPipelineRuns: Array.from(
-              newSelectedProjectPipelineRuns,
-            ),
-          },
-        );
-      },
-    );
+    this.setState({
+      projectPipelineRunsSelectAllChecked:
+        selectableProjectPipelineRuns.size ===
+        newSelectedProjectPipelineRuns.size,
+      selectedProjectPipelineRuns: newSelectedProjectPipelineRuns,
+    });
   };
 
   handleSelectOtherPipelineRunsRow = (value: $TSFixMe, checked: $TSFixMe) => {
@@ -525,100 +506,37 @@ class PhyloTreeCreationModal extends React.Component<
       newSelectedOtherPipelineRuns.delete(value);
     }
 
-    this.setState(
-      {
-        otherPipelineRunsSelectAllChecked:
-          otherPipelineRunIds.size === newSelectedOtherPipelineRuns.size,
-        selectedOtherPipelineRuns: newSelectedOtherPipelineRuns,
-      },
-      () => {
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
-          {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            previousSelectedOtherPipelineRuns: Array.from(
-              previousSelectedOtherPipelineRuns,
-            ),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            newSelectedOtherPipelineRuns: Array.from(
-              newSelectedOtherPipelineRuns,
-            ),
-          },
-        );
-      },
-    );
+    this.setState({
+      otherPipelineRunsSelectAllChecked:
+        otherPipelineRunIds.size === newSelectedOtherPipelineRuns.size,
+      selectedOtherPipelineRuns: newSelectedOtherPipelineRuns,
+    });
   };
 
   handleSelectAllProjectPipelineRuns = (checked: $TSFixMe) => {
-    const {
-      selectedProjectPipelineRuns: previousSelectedProjectPipelineRuns,
-      selectableProjectPipelineRuns,
-    } = this.state;
+    const { selectableProjectPipelineRuns } = this.state;
 
     const newSelectedProjectPipelineRuns: Set<number> = checked
       ? clone(selectableProjectPipelineRuns)
       : new Set();
 
-    this.setState(
-      {
-        projectPipelineRunsSelectAllChecked: checked,
-        selectedProjectPipelineRuns: newSelectedProjectPipelineRuns,
-      },
-      () => {
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
-          {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            previousSelectedProjectPipelineRuns: Array.from(
-              previousSelectedProjectPipelineRuns,
-            ),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            newSelectedProjectPipelineRuns: Array.from(
-              newSelectedProjectPipelineRuns,
-            ),
-          },
-        );
-      },
-    );
+    this.setState({
+      projectPipelineRunsSelectAllChecked: checked,
+      selectedProjectPipelineRuns: newSelectedProjectPipelineRuns,
+    });
   };
 
   handleSelectAllOtherPipelineRuns = (checked: $TSFixMe) => {
-    const {
-      selectedOtherPipelineRuns: previousSelectedOtherPipelineRuns,
-      otherPipelineRunIds,
-    } = this.state;
+    const { otherPipelineRunIds } = this.state;
 
     const newSelectedOtherPipelineRuns: Set<number> = checked
       ? clone(otherPipelineRunIds)
       : new Set();
 
-    this.setState(
-      {
-        otherPipelineRunsSelectAllChecked: checked,
-        selectedOtherPipelineRuns: newSelectedOtherPipelineRuns,
-      },
-      () => {
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
-          {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            previousSelectedOtherPipelineRuns: Array.from(
-              previousSelectedOtherPipelineRuns,
-            ),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            newSelectedOtherPipelineRuns: Array.from(
-              newSelectedOtherPipelineRuns,
-            ),
-          },
-        );
-      },
-    );
+    this.setState({
+      otherPipelineRunsSelectAllChecked: checked,
+      selectedOtherPipelineRuns: newSelectedOtherPipelineRuns,
+    });
   };
 
   handleFilterChange = (newFilter: $TSFixMe) => {
@@ -780,22 +698,8 @@ class PhyloTreeCreationModal extends React.Component<
   };
 
   canContinueWithTreeName = () => {
-    const { treeName, treeNameValid } = this.state;
-
     this.setState({ showErrorName: true });
-    const isTreeNameValid = this.isTreeNameValid();
-
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TREE_NAME_ENTERED,
-      {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        treeNameValid,
-        treeName,
-      },
-    );
-
-    return isTreeNameValid;
+    return this.isTreeNameValid();
   };
 
   getTotalPageRendering() {

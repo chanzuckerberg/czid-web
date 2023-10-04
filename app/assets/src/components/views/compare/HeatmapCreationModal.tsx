@@ -1,7 +1,6 @@
 import { isEqual, isNull, size, startCase } from "lodash/fp";
 import React from "react";
 import { getBackgrounds, getMassNormalizedBackgroundAvailability } from "~/api";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
@@ -324,14 +323,6 @@ export default class HeatmapCreationModal extends React.Component<
 
   render() {
     const { continueInNewTab, open, onClose } = this.props;
-    const {
-      selectedBackground,
-      selectedCategories,
-      selectedSpecificity,
-      selectedSubcategories,
-      selectedTaxonLevel,
-      selectedThresholdFilters,
-    } = this.state;
     const url = this.getHeatmapUrl();
 
     return (
@@ -343,24 +334,7 @@ export default class HeatmapCreationModal extends React.Component<
             className={cs.button}
             text="Continue"
             onClick={() => {
-              withAnalytics(
-                continueInNewTab ? openUrlInNewTab(url) : openUrl(url),
-                ANALYTICS_EVENT_NAMES.HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED,
-                {
-                  selectedBackground,
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-                  selectedCategories,
-                  selectedSpecificity,
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-                  selectedSubcategories,
-                  selectedTaxonLevel,
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-                  selectedThresholdFilters,
-                },
-              );
+              continueInNewTab ? openUrlInNewTab(url) : openUrl(url);
             }}
           />
           <SecondaryButton

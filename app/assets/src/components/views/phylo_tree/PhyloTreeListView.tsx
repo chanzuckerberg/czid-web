@@ -522,16 +522,7 @@ class PhyloTreeListView extends React.Component<
             <BasicPopup
               trigger={
                 <ShareButton
-                  onClick={withAnalytics(
-                    this.handleShareClick,
-                    ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SHARE_BUTTON_CLICKED,
-                    {
-                      treeName: currentTree.name,
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-                      treeId: currentTree.id,
-                    },
-                  )}
+                  onClick={this.handleShareClick}
                   className={cs.controlElement}
                 />
               }
@@ -540,16 +531,7 @@ class PhyloTreeListView extends React.Component<
               hideOnScroll
             />
             <SaveButton
-              onClick={withAnalytics(
-                this.handleSaveClick,
-                ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SAVE_BUTTON_CLICKED,
-                {
-                  treeName: currentTree.name,
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-                  treeId: currentTree.id,
-                },
-              )}
+              onClick={this.handleSaveClick}
               className={cs.controlElement}
             />
             {[STATUS_READY, NG_STATUS_SUCCEEDED].includes(
@@ -680,16 +662,7 @@ class PhyloTreeListView extends React.Component<
         <DetailsSidebar
           visible={this.state.sidebarVisible}
           mode={this.state.sidebarMode}
-          onClose={withAnalytics(
-            this.closeSidebar,
-            ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_DETAILS_SIDEBAR_CLOSED,
-            {
-              treeName: currentTree.name,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-              treeId: currentTree.id,
-            },
-          )}
+          onClose={this.closeSidebar}
           params={this.state.sidebarConfig}
         />
         <NarrowContainer>

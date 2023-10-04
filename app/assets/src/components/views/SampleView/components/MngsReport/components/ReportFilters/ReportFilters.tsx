@@ -151,14 +151,6 @@ export const ReportFilters = ({
     subpath?: string;
     value: unknown;
   }) => {
-    trackEvent("SampleView_filter_removed", {
-      key,
-      subpath,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      value,
-      sampleId,
-    });
     handleFilterRemove({ key, subpath, value });
   };
 

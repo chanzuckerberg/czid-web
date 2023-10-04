@@ -13,10 +13,6 @@
  * - This is in a JS function mostly so that JSDoc can parse it.<br>
  */
 function EventDictionary() {
-  /** The user clicked "Learn more" in the BLAST Contigs Modal */
-  this.BLAST_CONTIGS_MODAL_LEARN_MORE_CLICKED =
-    "BLAST_CONTIGS_MODAL_LEARN_MORE_CLICKED";
-
   /** The user clicked "Continue" in the BLAST Contigs Modal */
   this.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED =
     "BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED";
@@ -24,10 +20,6 @@ function EventDictionary() {
   /** The user clicked "Close" in the BLAST Contigs Modal */
   this.BLAST_CONTIGS_MODAL_CLOSE_BUTTON_CLICKED =
     "BLAST_CONTIGS_MODAL_CLOSE_BUTTON_CLICKED";
-
-  /** The user clicked "Learn more" in the Blast Reads Modal */
-  this.BLAST_READS_MODAL_LEARN_MORE_CLICKED =
-    "BLAST_READS_MODAL_LEARN_MORE_CLICKED";
 
   /** The user clicked "Continue" in the Blast Reads Modal */
   this.BLAST_READS_MODAL_CONTINUE_BUTTON_CLICKED =
@@ -75,10 +67,6 @@ function EventDictionary() {
   this.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL =
     "BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL";
 
-  /** The user closed the confirmation modal before sending their samples to Nextclade. */
-  this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED =
-    "NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED";
-
   /** The user clicked Confirm on the confirmation modal to send their samples to Nextclade. */
   this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED =
     "NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED";
@@ -86,17 +74,6 @@ function EventDictionary() {
   /** Copy of NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED without expanded tables bc it has a compliant type for the payload */
   this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED_ALLISON_TESTING =
     "NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED_ALLISON_TESTING";
-
-  /** The user clicked Retry after sending the samples to Nextclade failed. */
-  this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED =
-    "NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED";
-
-  /** The operation to send samples to Nextclade failed. */
-  this.NEXTCLADE_MODAL_UPLOAD_FAILED = "NEXTCLADE_MODAL_UPLOAD_FAILED";
-
-  /** There was a failure upon retrying the operation to send samples to Nextclade. */
-  this.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED =
-    "NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED";
 
   /** The user clicked the "contact us" link in the Nextclade error modal. */
   this.NEXTCLADE_MODAL_ERROR_MODAL_HELP_LINK_CLICKED =
@@ -331,18 +308,6 @@ function EventDictionary() {
   this.PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED =
     "PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED";
 
-  /** The user entered a name for their phylo tree during step 2 of the PhyloTreeCreationModal process */
-  this.PHYLO_TREE_CREATION_MODAL_TREE_NAME_ENTERED =
-    "PHYLO_TREE_CREATION_MODAL_TREE_NAME_ENTERED";
-
-  /** The user changed their selection of samples within the table containing samples from their project that contain the specified taxonName during step 2 of the PhyloTreeCreationModal process */
-  this.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED =
-    "PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED";
-
-  /** The user changed their selection of samples within the table containing all IDseq samples the specified taxonName during step 3 of the PhyloTreeCreationModal process */
-  this.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED =
-    "PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED";
-
   /** The user searched for a sample during step 3 of the PhyloTreeCreationModal process */
   this.PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED =
     "PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED";
@@ -408,17 +373,9 @@ function EventDictionary() {
   this.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED =
     "SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED";
 
-  /** The user clicked the Continue button in the HeatmapCreationModal to generate a heatmap, possibly with presets. */
-  this.HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED =
-    "HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED";
-
   /** The user hovered over the Duplicate Compression Ratio info icon on a QualityControl histogram. */
   this.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED =
     "QUALITY_CONTROL_DCR_INFO_ICON_HOVERED";
-
-  /** The user clicked a histogram bar on a QualityControl histogram. */
-  this.QUALITY_CONTROL_HISTOGRAM_BAR_CLICKED =
-    "QUALITY_CONTROL_HISTOGRAM_BAR_CLICKED";
 
   /** The user clicked the empty space on a QualityControl histogram. This unseelects previously-selected histogram bars. */
   this.QUALITY_CONTROL_HISTOGRAM_EMPTY_SPACE_CLICKED =
@@ -453,10 +410,6 @@ function EventDictionary() {
 
   this.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_HOVERED =
     "QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_HOVERED";
-
-  /** The user clicked the BarChartToggle on a Quality Control chart. */
-  this.QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED =
-    "QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED";
 
   /** The user hovered over the Total Reads info icon on a QualityControl chart. */
   this.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED =
@@ -664,9 +617,6 @@ function EventDictionary() {
 
   this.NEXTCLADE_MODAL_FOOTER_VIEW_QC_IN_NEXTCLADE_BUTTON_CLICKED =
     "NEXTCLADE_MODAL_FOOTER_VIEW_QC_IN_NEXTCLADE_BUTTON_CLICKED";
-
-  this.PHYLO_TREE_LIST_VIEW_SHARE_BUTTON_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_SHARE_BUTTON_CLICKED";
 
   this.PHYLO_TREE_LIST_VIEW_SAVE_BUTTON_CLICKED =
     "PHYLO_TREE_LIST_VIEW_SAVE_BUTTON_CLICKED";
