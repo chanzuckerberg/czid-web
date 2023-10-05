@@ -1,6 +1,5 @@
 import { compact, get, isString } from "lodash/fp";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import { LocationObject } from "~/interface/shared";
 import LiveSearchPopBox, { SearchResults } from "~ui/controls/LiveSearchPopBox";
@@ -101,18 +100,10 @@ const GeoSearchInputBox = ({
           }),
         };
       }
-      trackEvent("GeoSearchInputBox_location_queried", {
-        query: query,
-        numResults: serverSideSuggestions.length,
-      });
     } catch (e) {
       // In the case of an error (e.g. no API key in dev), just catch and show the plain text option.
       // eslint-disable-next-line no-console
       console.log(e);
-      trackEvent("GeoSearchInputBox_request_erred", {
-        query,
-        message: e.message,
-      });
     }
 
     // Let users select an unresolved plain text option
@@ -132,12 +123,6 @@ const GeoSearchInputBox = ({
   const handleResultSelected = ({ result }) => {
     // Wrap plain text submission
     if (isString(result) && result !== "") result = { name: result };
-
-    trackEvent("GeoSearchInputBox_result_selected", {
-      selected: result.name,
-      // Real results will have a description
-      isMatched: !!result.description,
-    });
 
     onResultSelect && onResultSelect({ result });
   };
