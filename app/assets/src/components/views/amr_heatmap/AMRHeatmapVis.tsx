@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -87,7 +86,7 @@ export default class AMRHeatmapVis extends React.Component<
     prevProps: AMRHeatmapVisProps,
     prevState: AMRHeatmapVisState,
   ) {
-    const { selectedMetadata, nodeHovered, metadataLabelHovered } = this.state;
+    const { selectedMetadata } = this.state;
     const { sampleLabels, selectedOptions } = this.props;
     if (
       selectedOptions !== prevProps.selectedOptions ||
@@ -100,12 +99,6 @@ export default class AMRHeatmapVis extends React.Component<
       sampleLabels !== prevProps.sampleLabels
     ) {
       this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
-    }
-    if (nodeHovered !== prevState.nodeHovered) {
-      trackEvent("AMRHeatmapVis_heatmap-node-hover_triggered");
-    }
-    if (metadataLabelHovered !== prevState.metadataLabelHovered) {
-      trackEvent("AMRHeatmapVis_heatmap-metadata-label-hover_triggered");
     }
   }
 
@@ -358,7 +351,6 @@ export default class AMRHeatmapVis extends React.Component<
       columnMetadataLegend: currentPair,
       tooltipLocation: this.heatmap.getCursorLocation(),
     });
-    trackEvent("AMRHeatmapVis_metadata-node_hovered", metadata);
   };
 
   onMetadataLabelOut = () => {
@@ -369,14 +361,10 @@ export default class AMRHeatmapVis extends React.Component<
     this.setState({
       addMetadataTrigger: trigger,
     });
-    trackEvent("AMRHeatmapVis_metadata-add-button_clicked");
   };
 
   onMetadataSelectionChange = (selectedMetadata: $TSFixMe) => {
     this.setState({
-      selectedMetadata,
-    });
-    trackEvent("AMRHeatmapVis_selected-metadata_changed", {
       selectedMetadata,
     });
   };
