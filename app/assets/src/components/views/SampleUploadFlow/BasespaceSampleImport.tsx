@@ -1,6 +1,5 @@
 import { find, get, head, isArray, isEmpty, map, set } from "lodash/fp";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import {
   getBasespaceProjects,
   getSamplesForBasespaceProject,
@@ -189,11 +188,7 @@ export default class BasespaceSampleImport extends React.Component<BasespaceSamp
         <PrimaryButton
           text="Connect to Basespace"
           rounded={false}
-          onClick={withAnalytics(
-            this.requestBasespaceBrowseGlobalPermissions,
-            ANALYTICS_EVENT_NAMES.BASESPACE_SAMPLE_IMPORT_CONNECT_BTN_CLICKED,
-            {},
-          )}
+          onClick={this.requestBasespaceBrowseGlobalPermissions}
         />
       </React.Fragment>
     );
@@ -233,11 +228,7 @@ export default class BasespaceSampleImport extends React.Component<BasespaceSamp
             disabled={isEmpty(basespaceProjects)} // disable if no projects found and also if projects are loading.
             text="Connect to Project"
             rounded={false}
-            onClick={withAnalytics(
-              this.fetchSamplesForBasespaceProject,
-              ANALYTICS_EVENT_NAMES.BASESPACE_SAMPLE_IMPORT_CONNECT_PROJECT_BTN_CLICKED,
-              {},
-            )}
+            onClick={this.fetchSamplesForBasespaceProject}
             className={cs.connectProjectButton}
           />
         </div>

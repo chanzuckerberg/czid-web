@@ -1,5 +1,4 @@
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import cs from "./basespace_integration.scss";
 
@@ -17,13 +16,6 @@ export default class BasespaceIntegration extends React.Component<BasespaceInteg
         },
         window.location.origin,
       );
-    }
-
-    // Log whether an access token was returned.
-    if (accessToken) {
-      trackEvent("BasespaceIntegration_authorization_succeeded");
-    } else {
-      trackEvent("BasespaceIntegration_authorization_failed");
     }
   }
 
