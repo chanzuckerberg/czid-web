@@ -1,6 +1,5 @@
 import { difference, find, get, map, pick } from "lodash/fp";
 import { markSampleUploaded } from "~/api";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { get as httpGet, postWithCSRF } from "./core";
 
 export const MAX_MARK_SAMPLE_RETRIES = 10;
@@ -161,14 +160,8 @@ const bulkUploadWithMetadata = async (
 
 // Local uploads go directly from the browser to S3, so we don't know if an upload was interrupted.
 // Ping a heartbeat periodically to say the browser is actively uploading the samples.
-export const startUploadHeartbeat = async (sampleIds: $TSFixMe) => {
-  const sendHeartbeat = () =>
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_SENT,
-      { sampleIds },
-    );
-
-  sendHeartbeat(); // Send first heartbeat immediately so we know it is working
+export const startUploadHeartbeat = async () => {
+  const sendHeartbeat = () => sendHeartbeat(); // Send first heartbeat immediately so we know it is working
 
   const minutes = 10; // Picked arbitrarily, adjust as needed.
   const milliseconds = minutes * 60 * 10000;

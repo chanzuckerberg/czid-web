@@ -1,6 +1,5 @@
 import { map, sum } from "lodash/fp";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import LoadingBar from "~/components/ui/controls/LoadingBar";
 import IconAlert from "~/components/ui/icons/IconAlert";
 import IconCheckSmall from "~/components/ui/icons/IconCheckSmall";
@@ -64,13 +63,7 @@ const UploadProgressModalSampleList = ({
                     Upload failed
                     <div className={cs.verticalDivider}> | </div>
                     <div
-                      onClick={withAnalytics(
-                        () => onRetryUpload([sample]),
-                        ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_CLICKED,
-                        {
-                          sampleName: sample.name,
-                        },
-                      )}
+                      onClick={() => onRetryUpload([sample])}
                       className={cs.sampleRetry}
                     >
                       Retry

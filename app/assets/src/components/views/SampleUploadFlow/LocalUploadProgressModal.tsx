@@ -14,11 +14,7 @@ import {
   zipObject,
 } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import {
   completeSampleUpload,
   getUploadCredentials,
@@ -179,7 +175,7 @@ const LocalUploadProgressModal = ({
 
   const uploadSamples = async (samples: $TSFixMe) => {
     // Ping a heartbeat periodically to say the browser is actively uploading the samples.
-    const heartbeatInterval = await startUploadHeartbeat(map("id", samples));
+    const heartbeatInterval = await startUploadHeartbeat();
 
     await Promise.all(
       samples.map(async (sample: $TSFixMe) => {
@@ -540,15 +536,7 @@ const LocalUploadProgressModal = ({
         <div className={cs.titleWithIcon}>{title}</div>
         {numFailedSamples === size(samples) && (
           <div className={cs.subtitle}>
-            <a
-              className={cs.helpLink}
-              href="mailto:help@czid.org"
-              onClick={() =>
-                trackEvent(
-                  ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
-                )
-              }
-            >
+            <a className={cs.helpLink} href="mailto:help@czid.org">
               Contact us for help
             </a>
           </div>
@@ -587,13 +575,7 @@ const LocalUploadProgressModal = ({
           </div>
           <div
             className={cx(cs.sampleRetry, cs.retryAll)}
-            onClick={withAnalytics(
-              () => retryFailedSampleUploads(localSamplesFailed),
-              ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_ALL_FAILED_CLICKED,
-              {
-                numberOfLocalSamplesFailed,
-              },
-            )}
+            onClick={() => retryFailedSampleUploads(localSamplesFailed)}
           >
             Retry all failed
           </div>
@@ -604,13 +586,6 @@ const LocalUploadProgressModal = ({
 
   const renderViewProjectButton = () => {
     const buttonCallback = () => {
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED,
-        {
-          projectId: project.id,
-          projectName: project.name,
-        },
-      );
       if (!isEmpty(getLocalSamplesFailed())) {
         setConfirmationModalOpen(true);
       } else {
