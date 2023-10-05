@@ -127,10 +127,6 @@ const SampleDetailsMode = ({
 
   const onTabChange = (tab: TabNames) => {
     setCurrentTab(tab);
-    trackEvent("SampleDetailsMode_tab_changed", {
-      sampleId,
-      tab,
-    });
   };
 
   const fetchMetadata = async () => {
@@ -192,13 +188,6 @@ const SampleDetailsMode = ({
     setMetadata(set(key, value, metadata));
     setMetadataChanged(set(key, !shouldSave, metadataChanged));
     setMetadataErrors(set(key, null, metadataErrors));
-
-    trackEvent("SampleDetailsMode_metadata_changed", {
-      sampleId,
-      key,
-      shouldSave,
-      metadataErrors: Object.keys(metadataErrors).length,
-    });
   };
 
   const handleMetadataSave = async (key: string) => {
@@ -208,11 +197,6 @@ const SampleDetailsMode = ({
 
       setMetadataChanged(set(key, false, metadataChanged));
       _save(sampleId, key, newValue);
-
-      trackEvent("SampleDetailsMode_metadata_saved", {
-        sampleId,
-        key,
-      });
     }
   };
 

@@ -3,11 +3,7 @@ import moment from "moment";
 import React, { ReactNode } from "react";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { Accordion } from "~/components/layout";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
@@ -158,20 +154,7 @@ const PipelineStepDetailsMode = ({
     return fileList.map((file, i) => {
       const cssClass = file.url ? cs.fileLink : cs.disabledFileLink;
       const content = file.url ? (
-        <a
-          href={file.url}
-          onClick={() =>
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.PIPELINE_STEP_DETAILS_MODE_FILE_LINK_CLICKED,
-              {
-                fileName: file.fileName,
-                url: file.url,
-              },
-            )
-          }
-        >
-          {file.fileName}
-        </a>
+        <a href={file.url}>{file.fileName}</a>
       ) : (
         file.fileName
       );

@@ -2,7 +2,6 @@ import cx from "classnames";
 import { filter, get, isEmpty, pick } from "lodash/fp";
 import React, { useEffect, useRef, useState } from "react";
 import { getSamplePipelineResults } from "~/api";
-import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -136,11 +135,6 @@ const PipelineTab = ({
   const toggleSection = (section: keyof typeof sectionOpen) => {
     const toggleValue = !sectionOpen[section];
     setSectionOpen({ ...sectionOpen, [section]: toggleValue });
-    trackEvent("PipelineTab_section_toggled", {
-      section: section,
-      sectionOpen: toggleValue,
-      sampleId: sampleId,
-    });
   };
 
   const getPipelineInfoField = (field: { name: string; key: string }) => {
@@ -156,12 +150,7 @@ const PipelineTab = ({
         text === undefined || text === null || text === "" ? (
           <div className={cs.emptyValue}>--</div>
         ) : (
-          <div
-            className={cs.metadataValue}
-            onClick={() =>
-              trackEvent("PipelineTab_pipeline-visualization-link_clicked")
-            }
-          >
+          <div className={cs.metadataValue}>
             <span className={cs.pipelineVersion}>{text}</span>
             <span className={cs.vizLink}>{metadataLink}</span>
           </div>
@@ -426,14 +415,6 @@ const PipelineTab = ({
                     href={option.path}
                     target={option.newPage ? "_blank" : "_self"}
                     rel="noopener noreferrer"
-                    onClick={() =>
-                      trackEvent("PipelineTab_download-link_clicked", {
-                        newPage: option.newPage,
-                        label: option.label,
-                        href: option.path,
-                        sampleId,
-                      })
-                    }
                   >
                     {option.label}
                   </a>

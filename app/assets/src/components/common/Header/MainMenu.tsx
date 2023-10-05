@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import {
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
@@ -27,7 +26,6 @@ const MainMenu = ({ adminUser, userSignedIn }: MainMenuProps) => {
           rel="noopener noreferrer"
           /* eslint-disable-next-line react/jsx-no-target-blank */
           target="_blank"
-          onClick={() => trackEvent("MainMenu_help_clicked")}
           data-testid="menu-item-help-center"
         >
           Help Center
@@ -73,7 +71,6 @@ const MainMenu = ({ adminUser, userSignedIn }: MainMenuProps) => {
       <a
         className={cx(cs.item, isSelected("samples/upload") && cs.selected)}
         href={"/samples/upload"}
-        onClick={() => trackEvent("Header_upload-link_clicked")}
         data-testid="menu-item-upload"
       >
         Upload

@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import { trackEvent } from "~/api/analytics";
 import { getBulkDownload } from "~/api/bulk_downloads";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -51,11 +50,6 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
 
   const onTabChange = (tab: TabNames) => {
     setCurrentTab(tab);
-
-    trackEvent("bulkDownloadDetailsMode_tab_changed", {
-      bulkDownloadId: bulkDownload.id,
-      tab,
-    });
   };
 
   const { download_name, error_message, execution_type, log_url, id, status } =

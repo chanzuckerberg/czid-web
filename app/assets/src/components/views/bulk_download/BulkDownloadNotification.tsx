@@ -1,5 +1,4 @@
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
@@ -24,9 +23,6 @@ export default class BulkDownloadNotification extends React.Component<BulkDownlo
               !admin
                 ? "/bulk_downloads"
                 : `/bulk_downloads?searchBy=${userName}&n=10`
-            }
-            onClick={() =>
-              trackEvent("BulkDownloadNotification_downloads-page-link-clicked")
             }
           >
             Downloads page
