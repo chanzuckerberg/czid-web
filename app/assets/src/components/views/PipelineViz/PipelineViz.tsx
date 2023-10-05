@@ -3,11 +3,6 @@ import { diff } from "deep-object-diff";
 import { groupBy } from "lodash/fp";
 import React from "react";
 import { PanZoom } from "react-easy-panzoom";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
 import { getGraph } from "~/api/pipelineViz";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -242,14 +237,6 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
       return;
     }
 
-    trackEvent("PipelineViz_step-node_clicked", {
-      stageName: this.stageNames[stageIndex],
-      stepName: this.getStepDataAtIndices({
-        stageIndex: stageIndex,
-        stepIndex: clickedNodeId,
-      }).name,
-    });
-
     this.graphs.forEach(
       (graph: $TSFixMe, i: $TSFixMe) => i !== stageIndex && graph.unselectAll(),
     );
@@ -355,14 +342,6 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
   }
 
   handleNodeHover(stageIndex: $TSFixMe, nodeId: $TSFixMe) {
-    trackEvent("PipelineViz_step-node_mouseovered", {
-      stageName: this.stageNames[stageIndex],
-      stepName: this.getStepDataAtIndices({
-        stageIndex: stageIndex,
-        stepIndex: nodeId,
-      }).name,
-    });
-
     const { inputEdgeColor, outputEdgeColor } = this.props;
     const graph = this.graphs[stageIndex];
     const updatedInterStageArrows = [...this.state.interStageArrows];
@@ -954,11 +933,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
         <div className={cs.graphLabel}>
           {stageNameAndIcon}
           <IconCloseSmall
-            onClick={withAnalytics(
-              () => this.toggleStage(i),
-              ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_STAGE_COLLAPSE_BUTTON_CLICKED,
-              { stage: this.stageNames[i] },
-            )}
+            onClick={() => this.toggleStage(i)}
             className={cs.closeIcon}
           />
         </div>
@@ -980,11 +955,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
             cs[jobStatus],
             !toggleable && cs.disabled,
           )}
-          onClick={withAnalytics(
-            () => this.toggleStage(i),
-            ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_STAGE_EXPAND_BUTTON_CLICKED,
-            { stage: this.stageNames[i] },
-          )}
+          onClick={() => this.toggleStage(i)}
         >
           {stageNameAndIcon}
         </div>
@@ -1069,14 +1040,8 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
           </PanZoom>
 
           <PlusMinusControl
-            onPlusClick={withAnalytics(
-              this.handleZoom(true),
-              ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_ZOOM_IN_CONTROL_CLICKED,
-            )}
-            onMinusClick={withAnalytics(
-              this.handleZoom(false),
-              ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_ZOOM_OUT_CONTROL_CLICKED,
-            )}
+            onPlusClick={() => this.handleZoom(true)}
+            onMinusClick={() => this.handleZoom(false)}
             className={cs.plusMinusControl}
           />
         </div>
@@ -1085,10 +1050,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
           mode="pipelineStepDetails"
           // @ts-expect-errors Type 'object' is not assignable to type
           params={sidebarParams}
-          onClose={withAnalytics(
-            this.closeSidebar,
-            ANALYTICS_EVENT_NAMES.PIPELINE_VIZ_SIDEBAR_CLOSE_BUTTON_CLICKED,
-          )}
+          onClose={this.closeSidebar}
         />
       </div>
     );
