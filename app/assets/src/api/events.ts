@@ -671,6 +671,9 @@ function EventDictionary() {
   /** The user clicked the creative commons license link at the bottom of the gene details sidebar */
   this.GENE_DETAILS_MODE_CREATIVE_COMMONS_LICENSE_CLICKED =
     "GENE_DETAILS_MODE_CREATIVE_COMMONS_LICENSE_CLICKED";
+
+  this.SAMPLE_DETAILS_MODE_SEE_REPORT_LINK_CLICKED =
+    "SAMPLE_DETAILS_MODE_SEE_REPORT_LINK_CLICKED";
 }
 
 const eventNames = new EventDictionary();

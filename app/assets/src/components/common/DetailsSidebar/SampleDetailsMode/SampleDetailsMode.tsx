@@ -2,7 +2,7 @@ import { some } from "lodash";
 import { find, get, isEmpty, set, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { getAllSampleTypes, saveSampleName, saveSampleNotes } from "~/api";
-import { trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import {
   getSampleMetadata,
   getSampleMetadataFields,
@@ -342,9 +342,12 @@ const SampleDetailsMode = ({
             target="_blank"
             rel="noreferrer noopener"
             onClick={() =>
-              trackEvent("SampleDetailsMode_see-report-link_clicked", {
-                withTempSelectedOptions: !isEmpty(tempSelectedOptions),
-              })
+              trackEvent(
+                ANALYTICS_EVENT_NAMES.SAMPLE_DETAILS_MODE_SEE_REPORT_LINK_CLICKED,
+                {
+                  withTempSelectedOptions: !isEmpty(tempSelectedOptions),
+                },
+              )
             }
           >
             See Report
