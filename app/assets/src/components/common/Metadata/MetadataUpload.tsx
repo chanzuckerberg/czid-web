@@ -13,11 +13,7 @@ import _fp, {
 } from "lodash/fp";
 import React from "react";
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
 import MetadataCSVLocationsMenu from "~/components/common/Metadata/MetadataCSVLocationsMenu";
 import MetadataCSVUpload from "~/components/common/Metadata/MetadataCSVUpload";
@@ -337,14 +333,8 @@ class MetadataUpload extends React.Component<
           <div>
             <button
               className={cx(cs.link, "noStyleButton")}
-              onClick={withAnalytics(
-                onShowCSVInstructions,
-                ANALYTICS_EVENT_NAMES.METADATA_UPLOAD_INSTRUCTION_LINK_CLICKED,
-              )}
-              onKeyDown={withAnalytics(
-                onShowCSVInstructions,
-                ANALYTICS_EVENT_NAMES.METADATA_UPLOAD_INSTRUCTION_LINK_CLICKED,
-              )}
+              onClick={() => onShowCSVInstructions}
+              onKeyDown={() => onShowCSVInstructions}
             >
               View CSV Upload Instructions
             </button>
@@ -362,23 +352,9 @@ class MetadataUpload extends React.Component<
             className={cx(cs.link, "noStyleButton")}
             onClick={() => {
               this.handleDownloadCSV();
-              trackEvent(
-                ANALYTICS_EVENT_NAMES.METADATA_UPLOAD_DOWNLOAD_CSV_TEMPLATE_CLICKED,
-                {
-                  projectId: project.id,
-                  projectName: project.name,
-                },
-              );
             }}
             onKeyDown={() => {
               this.handleDownloadCSV();
-              trackEvent(
-                ANALYTICS_EVENT_NAMES.METADATA_UPLOAD_DOWNLOAD_CSV_TEMPLATE_CLICKED,
-                {
-                  projectId: project.id,
-                  projectName: project.name,
-                },
-              );
             }}
           >
             Download Metadata CSV Template

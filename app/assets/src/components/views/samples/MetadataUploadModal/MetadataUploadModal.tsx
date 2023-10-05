@@ -2,11 +2,7 @@
 import { flow, get, keyBy, mapValues, omit } from "lodash/fp";
 import React from "react";
 import { getSamples } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { showToast } from "~/components/utils/toast";
 import { NameId } from "~/interface/shared";
@@ -172,10 +168,7 @@ class MetadataUploadModal extends React.Component<
         open
         tall
         wide
-        onClose={withAnalytics(
-          this.props.onClose,
-          ANALYTICS_EVENT_NAMES.METADATA_UPLOAD_MODAL_MODAL_CLOSED,
-        )}
+        onClose={() => this.props.onClose}
         className={cs.metadataUploadModal}
       >
         <Wizard onComplete={this.handleComplete}>{this.getPages()}</Wizard>
