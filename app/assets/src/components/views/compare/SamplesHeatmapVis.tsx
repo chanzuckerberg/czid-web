@@ -1,11 +1,6 @@
 import cx from "classnames";
 import { find, isEmpty, isEqual, keyBy, orderBy } from "lodash/fp";
 import React from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
@@ -419,10 +414,6 @@ class SamplesHeatmapVis extends React.Component<
       nodeHoverInfo: this.getTooltipData(node),
       tooltipLocation: this.heatmap.getCursorLocation(),
     });
-    trackEvent("SamplesHeatmapVis_node_hovered", {
-      nodeValue: node.value,
-      nodeId: node.id,
-    });
   };
 
   handleMetadataNodeHover = (node: $TSFixMe, metadata: $TSFixMe) => {
@@ -433,7 +424,6 @@ class SamplesHeatmapVis extends React.Component<
       columnMetadataLegend: currentPair,
       tooltipLocation: this.heatmap.getCursorLocation(),
     });
-    trackEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
   handleRowGroupEnter = (
@@ -450,10 +440,6 @@ class SamplesHeatmapVis extends React.Component<
         },
       },
     });
-    trackEvent("SamplesHeatmapVis_row-group_hovered", {
-      genusName: rowGroup.genusName,
-      genusId: rowGroup.sortKey,
-    });
   };
 
   handleNodeHoverOut = () => {
@@ -465,9 +451,6 @@ class SamplesHeatmapVis extends React.Component<
     this.setState({
       columnMetadataLegend: legend,
       tooltipLocation: this.heatmap.getCursorLocation(),
-    });
-    trackEvent("SamplesHeatmapVis_column-metadata_hovered", {
-      nodeValue: node.value,
     });
   };
 
@@ -612,17 +595,11 @@ class SamplesHeatmapVis extends React.Component<
       });
       // @ts-expect-error Expected 1 arguments, but got 2.
       openUrlInNewTab(url, currentEvent);
-      trackEvent("SamplesHeatmapVis_cell_clicked", {
-        sampleId,
-      });
     }
   };
 
   handleAddTaxonClick = (trigger: $TSFixMe) => {
     this.setState({
-      addTaxonTrigger: trigger,
-    });
-    trackEvent("SamplesHeatmapVis_add-taxon_clicked", {
       addTaxonTrigger: trigger,
     });
   };
@@ -631,12 +608,6 @@ class SamplesHeatmapVis extends React.Component<
     this.setState({
       pinSampleTrigger: trigger,
     });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIS_PIN_SAMPLES_DROPDOWN_TRIGGER_CLICKED,
-      {
-        pinSampleTrigger: trigger,
-      },
-    );
   };
 
   handlePinIconHover = () => {
@@ -677,9 +648,6 @@ class SamplesHeatmapVis extends React.Component<
     this.setState({
       addMetadataTrigger: trigger,
     });
-    trackEvent("SamplesHeatmapVis_column-metadata_clicked", {
-      addMetadataTrigger: trigger,
-    });
   };
 
   handleSelectedMetadataChange = (selectedMetadata: $TSFixMe) => {
@@ -698,10 +666,6 @@ class SamplesHeatmapVis extends React.Component<
       () => {
         this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
         onMetadataChange && onMetadataChange(selectedMetadata);
-        trackEvent("SamplesHeatmapVis_selected-metadata_changed", {
-          // @ts-expect-error ts-migrate(2339) FIXME: Property 'length' does not exist on type 'Set<any>... Remove this comment to see the full error message
-          selectedMetadata: current.length,
-        });
       },
     );
   };
@@ -769,14 +733,8 @@ class SamplesHeatmapVis extends React.Component<
     return (
       <div className={cs.samplesHeatmapVis}>
         <PlusMinusControl
-          onPlusClick={withAnalytics(
-            () => this.handleZoom(0.25),
-            ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIS_ZOOM_IN_CONTROL_CLICKED,
-          )}
-          onMinusClick={withAnalytics(
-            () => this.handleZoom(-0.25),
-            ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIS_ZOOM_OUT_CONTROL_CLICKED,
-          )}
+          onPlusClick={() => this.handleZoom(0.25)}
+          onMinusClick={() => this.handleZoom(-0.25)}
           className={cs.plusMinusControl}
         />
 
