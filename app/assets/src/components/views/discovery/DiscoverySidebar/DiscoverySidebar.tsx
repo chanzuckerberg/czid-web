@@ -2,11 +2,7 @@ import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
 import { DimensionsDetailed, DimensionValue } from "~/interface/discoveryView";
@@ -263,38 +259,17 @@ export default class DiscoverySidebar extends React.Component<
     return rows.map((entry, i) => {
       const { count, text, value } = entry;
       const percent = Math.round((100 * count) / total);
-      const onClick = () => onFilterClick && onFilterClick(field, value);
       return (
         <div className={cs.barChartRow} key={`${value}_row_${i}`}>
           <dt className={cs.barLabel} key={`${value}_label_${i}`}>
-            <a
-              onClick={withAnalytics(
-                onClick,
-                ANALYTICS_EVENT_NAMES.DISCOVERY_SIDEBAR_METADATA_LABEL_CLICKED,
-                {
-                  value,
-                  count,
-                  percent,
-                  rows: rows.length,
-                },
-              )}
-            >
+            <a onClick={() => onFilterClick && onFilterClick(field, value)}>
               {value === "not_set" ? <i>{text}</i> : text}
             </a>
           </dt>
           <dd key={`${value}_value_${i}`}>
             <span
               className={cs.bar}
-              onClick={withAnalytics(
-                onClick,
-                ANALYTICS_EVENT_NAMES.DISCOVERY_SIDEBAR_METADATA_BAR_CLICKED,
-                {
-                  value,
-                  count,
-                  percent,
-                  rows: rows.length,
-                },
-              )}
+              onClick={() => onFilterClick && onFilterClick(field, value)}
               style={{ width: percent * 1.4 + "px" }}
             />
             <span className={cs.count}>{count}</span>
