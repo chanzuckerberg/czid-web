@@ -3,11 +3,6 @@ import cx from "classnames";
 import { some } from "lodash/fp";
 import React from "react";
 import { SortDirection } from "react-virtualized";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -169,16 +164,10 @@ class BulkDownloadList extends React.Component {
       ...bulkDownload,
       // Add callback to be used in renderDownload table renderer.
       onStatusClick: () => {
-        trackEvent("BulkDownloadList_details-link_clicked", {
-          bulkDownloadId: bulkDownload.id,
-        });
         this.handleStatusClick(bulkDownload);
       },
       // Add callbacks to be used in renderStatus table renderer.
       onDownloadFileClick: () => {
-        trackEvent("BulkDownloadList_direct-download-link_clicked", {
-          bulkDownloadId: bulkDownload.id,
-        });
         this.handleDownloadFileClick(bulkDownload);
       },
       statusType: getStatusType(bulkDownload),
@@ -284,7 +273,7 @@ class BulkDownloadList extends React.Component {
 
   render() {
     const { admin } = this.context;
-    const { selectedBulkDownload, sidebarOpen } = this.state;
+    const { sidebarOpen } = this.state;
 
     return (
       <div
@@ -341,13 +330,7 @@ class BulkDownloadList extends React.Component {
         <DetailsSidebar
           visible={sidebarOpen}
           mode="bulkDownloadDetails"
-          onClose={withAnalytics(
-            this.handleSidebarClose,
-            ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_LIST_DETAILS_SIDEBAR_CLOSED,
-            {
-              bulkDownloadId: selectedBulkDownload && selectedBulkDownload.id,
-            },
-          )}
+          onClose={this.handleSidebarClose}
           params={this.getSidebarParams()}
         />
       </div>
