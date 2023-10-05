@@ -10,7 +10,6 @@ import {
   upperFirst,
 } from "lodash/fp";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import Tabs from "~/components/ui/controls/Tabs";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
@@ -273,29 +272,18 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
     this.referenceSelectId = value;
 
     onSelectionUpdate(newSelected);
-    trackEvent("MapPreviewSidebar_row_selected", {
-      selectedSampleIds: newSelected.size,
-    });
   };
 
   handleSampleRowClick = ({ event, rowData }: $TSFixMe) => {
     const { onSampleClicked, samples } = this.props;
     const sample = samples.get(rowData.id);
     onSampleClicked && onSampleClicked({ object: sample, currentEvent: event });
-    trackEvent("MapPreviewSidebar_sample-row_clicked", {
-      sampleId: sample.id,
-      sampleName: sample.name,
-    });
   };
 
   handleProjectRowClick = ({ rowData }: $TSFixMe) => {
     const { onProjectSelected, projects } = this.props;
     const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
-    trackEvent("MapPreviewSidebar_project-row_clicked", {
-      projectId: project.id,
-      projectName: project.name,
-    });
   };
 
   isSelectAllChecked = () => {
@@ -316,14 +304,11 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
         : difference(Array.from(selectedSampleIds), samples.getIds()),
     );
     onSelectionUpdate(newSelected);
-
-    trackEvent("MapPreviewSidebar_select-all-rows_clicked");
   };
 
   handleTabChange = (tab: $TSFixMe) => {
     const { onTabChange } = this.props;
     onTabChange && onTabChange(tab);
-    trackEvent("MapPreviewSidebar_tab_clicked", { tab });
   };
 
   computeTabs = () => {
