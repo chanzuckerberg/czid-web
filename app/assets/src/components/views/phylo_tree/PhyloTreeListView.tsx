@@ -8,11 +8,7 @@ import {
   retryPhyloTree,
   saveVisualization,
 } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { getPhyloTreeNg, rerunPhyloTreeNg } from "~/api/phylo_tree_ngs";
 import BasicPopup from "~/components/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -207,10 +203,6 @@ class PhyloTreeListView extends React.Component<
         `/phylo_tree_ngs/${newPhyloTreeId}?${matrixURLParam}`,
       );
       // NG isn't using the sessionStorage 'default tree' functionality
-
-      trackEvent("PhyloTreeListView_phylo-tree_changed", {
-        selectedPhyloTreeNgId: newPhyloTreeId,
-      });
     } else {
       // OLD TREE SELECTED
       const currentTree = await getPhyloTree(newPhyloTreeId);
@@ -229,10 +221,6 @@ class PhyloTreeListView extends React.Component<
       );
       // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
       window.sessionStorage.setItem("treeId", newPhyloTreeId);
-
-      trackEvent("PhyloTreeListView_phylo-tree_changed", {
-        selectedPhyloTreeId: newPhyloTreeId,
-      });
     }
   };
 
@@ -343,10 +331,6 @@ class PhyloTreeListView extends React.Component<
       this.setState({
         sidebarVisible: false,
       });
-      trackEvent("PhyloTreeListView_sample-details-sidebar_closed", {
-        sidebarMode: "sampleDetails",
-        selectedSampleId: sampleId,
-      });
     } else {
       this.setState({
         selectedSampleId: sampleId,
@@ -358,10 +342,6 @@ class PhyloTreeListView extends React.Component<
         },
         sidebarMode: "sampleDetails",
         sidebarVisible: true,
-      });
-      trackEvent("PhyloTreeListView_sample-details-sidebar_opened", {
-        sidebarMode: "sampleDetails",
-        selectedSampleId: sampleId,
       });
     }
   };
@@ -444,9 +424,6 @@ class PhyloTreeListView extends React.Component<
           message="Sorry, we were unable to compute a phylogenetic tree."
           status="Tree Failed"
           type="error"
-          analyticsEventName={
-            ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED
-          }
         />
       );
     } else if (
@@ -466,9 +443,6 @@ class PhyloTreeListView extends React.Component<
           status="Generating Tree"
           subtitle="Hang tight and grab a cup of coffee while we generate your tree!"
           type="inProgress"
-          analyticsEventName={
-            ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED
-          }
         />
       );
     } else {
@@ -606,24 +580,14 @@ class PhyloTreeListView extends React.Component<
           sdsType="static"
           className={cs.infoIcon}
         />
-        <ExternalLink
-          href={"https://github.com/simonrharris/SKA"}
-          analyticsEventName={
-            ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED
-          }
-        >
+        <ExternalLink href={"https://github.com/simonrharris/SKA"}>
           SKA v1.0
         </ExternalLink>
         {!onlyMatrixAvailable && (
           <span>
             {" "}
             and{" "}
-            <ExternalLink
-              href={"https://github.com/Cibiv/IQ-TREE"}
-              analyticsEventName={
-                ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IQTREE_LINK_CLICKED
-              }
-            >
+            <ExternalLink href={"https://github.com/Cibiv/IQ-TREE"}>
               IQTree v1.6.1
             </ExternalLink>
           </span>

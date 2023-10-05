@@ -247,30 +247,6 @@ function EventDictionary() {
   this.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED =
     "OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED";
 
-  /** The user had a failed phylo tree (either original or NG), and they clicked on the link on the report to get help with re-running the tree. */
-  this.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED";
-
-  /** The phylo tree is being generated and the user clicked on the link on the report to learn more about the creation process. */
-  this.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED";
-
-  /** The user clicked the help button on a phylo tree page. */
-  this.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED";
-
-  /** The user clicked the help button on a phylo tree page while the matrix was displayed. */
-  this.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED";
-
-  /** The user clicked the tools attribution link to view the SKA repo on a phylo tree page. */
-  this.PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED";
-
-  /** The user clicked the tools attribution link to view the IQTree repo on a phylo tree page. */
-  this.PHYLO_TREE_LIST_VIEW_IQTREE_LINK_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_IQTREE_LINK_CLICKED";
-
   /** The user hovered over a hoverAction in a mNGS sample report */
   this.SAMPLE_VIEW_HOVER_ACTION_HOVERED = "SAMPLE_VIEW_HOVER_ACTION_HOVERED";
 
@@ -585,11 +561,11 @@ function EventDictionary() {
   this.NEXTCLADE_MODAL_FOOTER_VIEW_QC_IN_NEXTCLADE_BUTTON_CLICKED =
     "NEXTCLADE_MODAL_FOOTER_VIEW_QC_IN_NEXTCLADE_BUTTON_CLICKED";
 
-  this.PHYLO_TREE_LIST_VIEW_SAVE_BUTTON_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_SAVE_BUTTON_CLICKED";
+  this.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED";
 
-  this.PHYLO_TREE_LIST_VIEW_DETAILS_SIDEBAR_CLOSED =
-    "PHYLO_TREE_LIST_VIEW_DETAILS_SIDEBAR_CLOSED";
+  this.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED";
 
   this.PIPELINE_VIZ_STAGE_COLLAPSE_BUTTON_CLICKED =
     "PIPELINE_VIZ_STAGE_COLLAPSE_BUTTON_CLICKED";
