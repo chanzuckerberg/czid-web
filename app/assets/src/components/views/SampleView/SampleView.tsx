@@ -619,7 +619,10 @@ const SampleView = ({
     if (!ignoreProjectBackground && hasPersistedBackground === null) {
       return;
     }
-    if (selectedOptions.background !== previousBackground.current) {
+    if (
+      selectedOptions.background !== previousBackground.current ||
+      prevPipelineVersion !== pipelineVersion
+    ) {
       fetchSampleReportData({
         backgroundId: selectedOptions.background,
       })
@@ -649,7 +652,10 @@ const SampleView = ({
     sample?.pipeline_runs,
     handleInvalidBackgroundSelection,
     previousBackground,
+    prevPipelineVersion,
+    pipelineVersion,
   ]);
+
   useEffect(() => {
     project?.id && updateDiscoveryProjectId(project.id);
   }, [project?.id, updateDiscoveryProjectId]);

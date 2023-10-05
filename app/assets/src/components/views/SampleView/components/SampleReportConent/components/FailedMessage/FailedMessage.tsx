@@ -7,8 +7,8 @@ import cs from "../../sample_report_content.scss";
 
 interface FailedMessageProps {
   sample: Sample;
-  workflowRun: WorkflowRun;
-  analyticsEventName: string;
+  workflowRun: WorkflowRun | null | undefined;
+  analyticsEventName: string | undefined;
 }
 
 export const FailedMessage = ({
@@ -18,7 +18,7 @@ export const FailedMessage = ({
 }: FailedMessageProps) => {
   const { link, linkText, subtitle, message, status, type } = sampleErrorInfo({
     sample,
-    error: workflowRun.input_error || {},
+    error: workflowRun?.input_error || {},
   });
   return (
     <SampleMessage

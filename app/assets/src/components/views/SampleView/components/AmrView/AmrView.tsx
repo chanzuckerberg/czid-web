@@ -27,7 +27,7 @@ import { AmrSampleReport } from "./components/AmrSampleReport";
 import { AmrResult } from "./components/AmrSampleReport/types";
 
 interface AmrViewProps {
-  workflowRun: WorkflowRun;
+  workflowRun: WorkflowRun | null;
   sample: Sample;
 }
 
@@ -35,7 +35,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   const [loadingResults, setLoadingResults] = useState(false);
   const [hideFilters, setHideFilters] = useState(true);
   const [reportTableData, setReportTableData] =
-    useState<IdMap<AmrResult>>(null);
+    useState<IdMap<AmrResult> | null>(null);
   const [dataFilterFunc, setDataFilterFunc] =
     useState<(data: AmrResult[]) => IdMap<AmrResult>>();
   const [detailsSidebarGeneName, setDetailsSidebarGeneName] = useState<
@@ -52,15 +52,15 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
 
   useEffect(() => {
     if (
-      workflowRun.status !== SUCCEEDED_STATE ||
-      workflowRun.workflow !== WorkflowType.AMR
+      workflowRun?.status !== SUCCEEDED_STATE ||
+      workflowRun?.workflow !== WorkflowType.AMR
     ) {
       return;
     }
     setLoadingResults(true);
 
     const fetchResults = async () => {
-      const reportDataRaw = await getWorkflowRunResults(workflowRun.id);
+      const reportDataRaw = await getWorkflowRunResults(workflowRun?.id);
       const reportData = camelize(reportDataRaw);
       setReportTableData(reportData?.reportTableData);
       setDrugClassesReactiveVar(reportData?.reportTableData);
@@ -130,20 +130,22 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
           loading: "AmrView_amr-doc-link_clicked",
         }}
       >
-        <div className={cs.resultsContainer}>
-          <AmrFiltersContainer
-            setDataFilterFunc={setDataFilterFunc}
-            hideFilters={hideFilters}
-            setHideFilters={setHideFilters}
-          />
-          <AmrSampleReport
-            reportTableData={displayedRows}
-            sample={sample}
-            workflowRun={workflowRun}
-            setDetailsSidebarGeneName={setDetailsSidebarGeneName}
-            hideFilters={hideFilters}
-          />
-        </div>
+        {workflowRun && (
+          <div className={cs.resultsContainer}>
+            <AmrFiltersContainer
+              setDataFilterFunc={setDataFilterFunc}
+              hideFilters={hideFilters}
+              setHideFilters={setHideFilters}
+            />
+            <AmrSampleReport
+              reportTableData={displayedRows}
+              sample={sample}
+              workflowRun={workflowRun}
+              setDetailsSidebarGeneName={setDetailsSidebarGeneName}
+              hideFilters={hideFilters}
+            />
+          </div>
+        )}
       </SampleReportContent>
       <DetailsSidebar
         visible={Boolean(detailsSidebarGeneName)}

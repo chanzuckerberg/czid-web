@@ -28,7 +28,7 @@ interface ConsensusGenomeViewProps {
   onWorkflowRunSelect?: $TSFixMeFunction;
   sample: Sample;
   test?: string;
-  workflowRun?: WorkflowRun;
+  workflowRun?: WorkflowRun | null;
 }
 
 export const ConsensusGenomeView = ({
@@ -40,7 +40,7 @@ export const ConsensusGenomeView = ({
   const [workflowRunResults, setWorkflowRunResults] =
     useState<ConsensusGenomeWorkflowRunResults | null>(null);
 
-  const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
+  const consensusGenomeWorkflowRuns = sample.workflow_runs?.filter(
     run => run.workflow === WorkflowType.CONSENSUS_GENOME,
   );
 
@@ -130,14 +130,16 @@ export const ConsensusGenomeView = ({
                 workflowRunResults={workflowRunResults}
               />
             )}
-          {workflowRunResults && !isEmpty(workflowRunResults.coverage_viz) && (
-            <ConsensusGenomeCoverageView
-              helpLinkUrl={helpLinkUrl}
-              sampleId={sample.id}
-              workflowRun={workflowRun}
-              workflowRunResults={workflowRunResults}
-            />
-          )}
+          {workflowRun &&
+            workflowRunResults &&
+            !isEmpty(workflowRunResults.coverage_viz) && (
+              <ConsensusGenomeCoverageView
+                helpLinkUrl={helpLinkUrl}
+                sampleId={sample.id}
+                workflowRun={workflowRun}
+                workflowRunResults={workflowRunResults}
+              />
+            )}
         </div>
       </SampleReportContent>
     </>

@@ -13,7 +13,7 @@ import cs from "./sample_report_content.scss";
 export interface SampleReportContentProps {
   loadingResults: boolean;
   children: React.ReactNode;
-  workflowRun: WorkflowRun;
+  workflowRun: WorkflowRun | null | undefined;
   sample: Sample;
   loadingInfo: {
     message: string;
@@ -40,10 +40,9 @@ export const SampleReportContent = ({
       !workflowRun.status ||
       workflowRun.status === RUNNING_STATE);
   const isWaitingToStart =
-    !sample.upload_error && workflowRun.status === CREATED_STATE;
+    !sample.upload_error && workflowRun?.status === CREATED_STATE;
   return (
     <>
-      {" "}
       {loadingResults ? (
         <SampleMessage
           icon={<IconLoading className={cs.icon} />}
@@ -76,7 +75,7 @@ export const SampleReportContent = ({
           workflowRun={workflowRun}
           analyticsEventName={eventNames?.error}
         />
-      )}{" "}
+      )}
     </>
   );
 };
