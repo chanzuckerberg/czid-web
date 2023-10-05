@@ -173,10 +173,12 @@ class PhyloTreeDownloadButton extends React.Component<PhyloTreeDownloadButtonPro
         ? this.getMatrixItems()
         : this.getPhyloTreeNgItems();
       return (
-        // @ts-expect-error ts-migrate(2739) FIXME: Type '{ children?: ReactNode; items: any; disabled... Remove this comment to see the full error message
         <DownloadButtonDropdown
           items={downloadItems}
           disabled={downloadItems.length === 0}
+          // this is broken, but alldoami found it while working on something unrelated
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          onClick={() => {}}
           {...props}
         />
       );

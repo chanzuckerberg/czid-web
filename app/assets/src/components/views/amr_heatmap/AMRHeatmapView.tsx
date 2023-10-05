@@ -2,7 +2,6 @@ import { Callout } from "@czi-sds/components";
 import React from "react";
 import { Sticky, StickyContainer } from "react-sticky";
 import { getAMRCounts } from "~/api/amr";
-import { trackEvent } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
@@ -276,10 +275,6 @@ export default class AMRHeatmapView extends React.Component<
         sidebarMode: SIDEBAR_SAMPLE_MODE,
         sidebarVisible: true,
       });
-      trackEvent("AMRHeatmapView_sample-details-sidebar_opened", {
-        sampleId: sampleId,
-        sidebarMode: "sampleDetails",
-      });
     }
   };
 
@@ -297,10 +292,6 @@ export default class AMRHeatmapView extends React.Component<
         selectedGene: geneName,
         sidebarMode: SIDEBAR_GENE_MODE,
         sidebarVisible: true,
-      });
-      trackEvent("AMRHeatmapView_gene-details-sidebar_opened", {
-        selectedGene: geneName,
-        sidebarMode: "geneDetails",
       });
     }
   };
@@ -388,7 +379,6 @@ export default class AMRHeatmapView extends React.Component<
         target="_blank"
         rel="noopener noreferrer"
         key={"Download_CSV_link"}
-        onClick={() => trackEvent("AMRHeatmapView_download-csv-table_clicked")}
       >
         Download CSV
       </a>
@@ -416,10 +406,10 @@ export default class AMRHeatmapView extends React.Component<
             <DownloadButtonDropdown
               className={cs.controlElement}
               options={this.getDownloadOptions()}
-              onClick={() =>
-                trackEvent("AMRHeatmapView_download-button-dropdown_clicked")
-              }
               disabled={loading}
+              // this is broken, but alldoami found it while working on something unrelated
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onClick={() => {}}
             />
           </ViewHeader.Controls>
         )}
