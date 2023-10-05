@@ -2,7 +2,6 @@ import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import React from "react";
 import { getBackgrounds } from "~/api";
-import { trackEvent } from "~/api/analytics";
 import {
   createSnapshot,
   deleteSnapshot,
@@ -140,39 +139,24 @@ class ViewOnlyLinkForm extends React.Component<
   };
 
   handleEnableSharing = async () => {
-    const { snapshotShareId } = this.state;
     const { project } = this.props;
     try {
       await createSnapshot(project.id);
       await this.fetchSnapshotInfo();
-      trackEvent("ViewOnlyLinkForm_on-toggle_clicked", {
-        snapshotShareId: snapshotShareId,
-        projectId: project.id,
-      });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      trackEvent("ViewOnlyLinkForm_snapshot_creation-failed", {
-        projectId: project.id,
-      });
     }
   };
 
   handleDisableSharing = async () => {
     const { snapshotShareId } = this.state;
-    const { project } = this.props;
     try {
       await deleteSnapshot(snapshotShareId);
       this.clearSnapshotInfo();
-      trackEvent("ViewOnlyLinkForm_off-toggle_clicked", {
-        projectId: project.id,
-      });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      trackEvent("ViewOnlyLinkForm_snapshot_deletion-failed", {
-        projectId: project.id,
-      });
     }
 
     this.setState({ disableSharingConfirmationModalOpen: false });
@@ -217,21 +201,12 @@ class ViewOnlyLinkForm extends React.Component<
 
   handleBackgroundChange = async backgroundId => {
     const { snapshotShareId } = this.state;
-    const { project } = this.props;
     this.setState({ backgroundId });
     try {
       await updateSnapshotBackground(snapshotShareId, backgroundId);
-      trackEvent("ViewOnlyLinkForm_background-select_changed", {
-        projectId: project.id,
-        backgroundId,
-      });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      trackEvent("ViewOnlyLinkForm_background-select_failed", {
-        projectId: project.id,
-        backgroundId,
-      });
     }
   };
 
@@ -274,7 +249,6 @@ class ViewOnlyLinkForm extends React.Component<
       snapshotShareId,
       snapshotTimestamp,
     } = this.state;
-    const { project } = this.props;
 
     const viewOnlyHelpText = (
       <React.Fragment>
@@ -391,10 +365,6 @@ class ViewOnlyLinkForm extends React.Component<
                       rounded={false}
                       onClick={() => {
                         copyUrlToClipboard(shareableLink);
-                        trackEvent("ViewOnlyLinkForm_copy-button_clicked", {
-                          snapshotShareId: snapshotShareId,
-                          projectId: project.id,
-                        });
                       }}
                     />
                   }
