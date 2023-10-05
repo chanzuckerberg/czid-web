@@ -1,9 +1,4 @@
 import React from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { postToUrlWithCSRF } from "~utils/links";
 import ExternalLink from "../../ui/controls/ExternalLink";
@@ -41,9 +36,6 @@ const UserMenuDropDown = ({
                 ? "/bulk_downloads"
                 : `/bulk_downloads?searchBy=${userName}&n=10`
             }
-            onClick={() =>
-              trackEvent("Header_dropdown-downloads-option_clicked")
-            }
           >
             Downloads
           </a>
@@ -56,13 +48,7 @@ const UserMenuDropDown = ({
         <BareDropdown.Item
           key="admin_settings"
           text={
-            <a
-              className={cs.option}
-              href="/admin_settings"
-              onClick={() =>
-                trackEvent("Header_dropdown-admin-settings-option_clicked")
-              }
-            >
+            <a className={cs.option} href="/admin_settings">
               Admin Settings
             </a>
           }
@@ -86,11 +72,7 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="help"
         text={
-          <ExternalLink
-            className={cs.option}
-            href="https://help.czid.org"
-            analyticsEventName={"Header_dropdown-help-option_clicked"}
-          >
+          <ExternalLink className={cs.option} href="https://help.czid.org">
             Help Center
           </ExternalLink>
         }
@@ -101,9 +83,6 @@ const UserMenuDropDown = ({
           <a
             className={cs.option}
             href={`mailto:${email}?Subject=Report%20Feedback`}
-            onClick={() =>
-              trackEvent("Header_dropdown-feedback-option_clicked")
-            }
           >
             Contact Us
           </a>
@@ -119,14 +98,7 @@ const UserMenuDropDown = ({
 
     userDropdownItems.push(
       <BareDropdown.Divider key="divider_two" />,
-      <BareDropdown.Item
-        key="logout"
-        text="Logout"
-        onClick={withAnalytics(
-          signOut,
-          ANALYTICS_EVENT_NAMES.HEADER_DROPDOWN_LOGOUT_OPTION_CLICKED,
-        )}
-      />,
+      <BareDropdown.Item key="logout" text="Logout" onClick={signOut} />,
     );
     return userDropdownItems;
   };
@@ -152,7 +124,6 @@ export const TermsDropdownItem = (
         target="_blank"
         rel="noopener noreferrer"
         href="/terms"
-        onClick={() => trackEvent("Header_dropdown-terms-option_clicked")}
       >
         Terms of Use
       </a>
@@ -169,9 +140,6 @@ export const PrivacyDropdownItem = (
         target="_blank"
         rel="noopener noreferrer"
         href="/privacy"
-        onClick={() =>
-          trackEvent("Header_dropdown-privacy-notice-option_clicked")
-        }
       >
         Privacy Policy
       </a>
