@@ -541,10 +541,6 @@ function EventDictionary() {
   this.LANDING_PAGE_REGISTER_NOW_BUTTON_CLICKED =
     "LANDING_PAGE_REGISTER_NOW_BUTTON_CLICKED";
 
-  /** The user has signed in for the first time */
-  this.DISCOVERY_VIEW_ROUTER_USER_FIRST_SIGN_IN =
-    "DISCOVERY_VIEW_ROUTER_USER_FIRST_SIGN_IN";
-
   /** The user has clicked the "Complete Setup" button on the UserProfileForm */
   this.USER_PROFILE_FORM_COMPLETE_SETUP_CLICKED =
     "USER_PROFILE_FORM_COMPLETE_SETUP_CLICKED";

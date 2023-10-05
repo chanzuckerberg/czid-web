@@ -1390,12 +1390,6 @@ class DiscoveryView extends React.Component<
         },
       );
     }
-    trackEvent("DiscoveryView_search_selected", {
-      key,
-      value,
-      text,
-      filtersChanged,
-    });
   };
 
   handleStringSearch = (search: string) => {
@@ -1406,9 +1400,6 @@ class DiscoveryView extends React.Component<
       this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
-        trackEvent("DiscoveryView_string-search_entered", {
-          search: parsedSearch,
-        });
       });
     }
   };
@@ -1416,18 +1407,12 @@ class DiscoveryView extends React.Component<
   handleFilterToggle = () => {
     this.setState({ showFilters: !this.state.showFilters }, () => {
       this.updateBrowsingHistory("replace");
-      trackEvent("DiscoveryView_show-filters_toggled", {
-        showFilters: this.state.showFilters,
-      });
     });
   };
 
   handleStatsToggle = () => {
     this.setState({ showStats: !this.state.showStats }, () => {
       this.updateBrowsingHistory("replace");
-      trackEvent("DiscoveryView_show-stats_toggled", {
-        showFilters: this.state.showStats,
-      });
     });
   };
 

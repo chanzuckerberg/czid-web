@@ -8,7 +8,6 @@
 
 import React, { useContext } from "react";
 import { Route, Switch } from "react-router-dom";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
@@ -50,13 +49,7 @@ const DiscoveryViewRouter = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
-  const { firstSignIn, userSignedIn, userId } = useContext(UserContext);
-
-  if (firstSignIn) {
-    trackEvent(ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_ROUTER_USER_FIRST_SIGN_IN, {
-      userId: userId,
-    });
-  }
+  const { userSignedIn } = useContext(UserContext);
 
   return (
     <Switch>
