@@ -83,7 +83,6 @@ class DiscoveryMap extends React.Component<
   handleMarkerClick = (locationId: $TSFixMe) => {
     const { onMarkerClick } = this.props;
     onMarkerClick && onMarkerClick(locationId);
-    trackEvent("DiscoveryMap_marker_clicked", { locationId });
   };
 
   handleMarkerMouseEnter = (locationInfo: $TSFixMe) => {
@@ -106,10 +105,6 @@ class DiscoveryMap extends React.Component<
       />
     );
     this.setState({ tooltip, tooltipShouldClose: false });
-
-    trackEvent("DiscoveryMap_marker_hovered", {
-      locationId: locationInfo.id,
-    });
   };
 
   handleMarkerMouseLeave = () => {
@@ -128,16 +123,11 @@ class DiscoveryMap extends React.Component<
   handleTooltipTitleClick = (locationInfo: $TSFixMe) => {
     const { onTooltipTitleClick } = this.props;
     onTooltipTitleClick && onTooltipTitleClick(locationInfo.id);
-
-    trackEvent("DiscoveryMap_tooltip-title_clicked", {
-      locationId: locationInfo.id,
-    });
   };
 
   handleMapClick = () => {
     const { onClick } = this.props;
     onClick && onClick();
-    trackEvent("DiscoveryMap_blank-area_clicked");
   };
 
   renderMarker = (locationInfo: $TSFixMe) => {
