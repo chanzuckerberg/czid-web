@@ -212,9 +212,15 @@ class SfnAmrPipelineDispatchService
     if @workflow_run.workflow_version_at_least(AmrWorkflowRun::VERSION[:REDUPLICATED_READS])
       params = reduplicated_reads_input_files
     elsif @workflow_run.workflow_version_at_least(AmrWorkflowRun::VERSION[:MODERN_HOST_FILTERING])
-      params = initial_version_input_files(PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) })
+      files = if @start_from_mngs
+                PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }
+              end
+      params = initial_version_input_files(files)
     elsif @workflow_run.workflow_version_at_least(AmrWorkflowRun::VERSION[:INITIAL])
-      params = initial_version_input_files(PipelineRun::GSNAP_FILTERED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) })
+      files = if @start_from_mngs
+                PipelineRun::GSNAP_FILTERED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }
+              end
+      params = initial_version_input_files(files)
     else
       raise SfnVersionMissingError, @workflow_run.workflow
     end
