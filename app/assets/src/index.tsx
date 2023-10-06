@@ -14,6 +14,7 @@ import { UserContext } from "~/components/common/UserContext";
 import store from "~/redux/store";
 import { initalCache, typeDefs } from "./cache";
 import "./loader.scss";
+import RelayEnvironment from "./relay/RelayEnvironment";
 import "./styles/appcues.scss";
 import "./styles/core.scss";
 
@@ -78,17 +79,19 @@ const react_component = (componentName, props, target, userContext) => {
       <Sentry.ErrorBoundary fallback={"An error has occured"}>
         <BrowserRouter>
           <ApolloProvider client={apolloClient}>
-            <UserContext.Provider value={userContext || {}}>
-              <Provider store={store}>
-                <StyledEngineProvider injectFirst>
-                  <EmotionThemeProvider theme={defaultTheme}>
-                    <ThemeProvider theme={defaultTheme}>
-                      {React.createElement(matchedComponent, props)}
-                    </ThemeProvider>
-                  </EmotionThemeProvider>
-                </StyledEngineProvider>
-              </Provider>
-            </UserContext.Provider>
+            <RelayEnvironment>
+              <UserContext.Provider value={userContext || {}}>
+                <Provider store={store}>
+                  <StyledEngineProvider injectFirst>
+                    <EmotionThemeProvider theme={defaultTheme}>
+                      <ThemeProvider theme={defaultTheme}>
+                        {React.createElement(matchedComponent, props)}
+                      </ThemeProvider>
+                    </EmotionThemeProvider>
+                  </StyledEngineProvider>
+                </Provider>
+              </UserContext.Provider>
+            </RelayEnvironment>
           </ApolloProvider>
         </BrowserRouter>
       </Sentry.ErrorBoundary>,

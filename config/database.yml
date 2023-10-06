@@ -8,6 +8,7 @@ default: &default
   collation: utf8_unicode_ci
   reconnect: true
   pool: <%= ENV['DB_CONNECTION_POOL'] || 5 %>
+  ssl_mode: 'REQUIRED'
 
 development:
   <<: *default

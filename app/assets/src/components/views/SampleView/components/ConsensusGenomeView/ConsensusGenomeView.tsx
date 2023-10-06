@@ -1,6 +1,8 @@
 import cx from "classnames";
 import { find, isEmpty, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
+// import { useLazyLoadQuery } from "react-relay";
+// import { graphql } from "relay-runtime";
 import { getWorkflowRunResults } from "~/api";
 import { WorkflowType } from "~/components/utils/workflows";
 import cs from "~/components/views/SampleView/components/ConsensusGenomeView/consensus_genome_view.scss";
@@ -30,12 +32,27 @@ interface ConsensusGenomeViewProps {
   test?: string;
   workflowRun?: WorkflowRun | null;
 }
+// TODO: (smccanny) delete this once relay is fully integrated
+// A Working GraphQL query that fetches the reference genome accession id
+// const ConsensusGenomeViewQuery = graphql`
+//   query ConsensusGenomeViewQuery {
+//     ConsensusGenomeWorkflowResults(workflowRunId: "2265"){
+//       reference_genome{
+//         accession_id
+//       }
+//     }
+// }`;
 
 export const ConsensusGenomeView = ({
   onWorkflowRunSelect,
   sample,
   workflowRun,
 }: ConsensusGenomeViewProps) => {
+  // TODO: (smccanny) delete this once relay is fully integrated
+  // Uncomment this to test relay query
+  // const data = useLazyLoadQuery(ConsensusGenomeViewQuery, {});
+  // console.log("hello relay", data);
+
   const [loadingResults, setLoadingResults] = useState(false);
   const [workflowRunResults, setWorkflowRunResults] =
     useState<ConsensusGenomeWorkflowRunResults | null>(null);

@@ -10,6 +10,7 @@
     "@babel/typescript"
   ],
   "plugins": [
+    "relay",
     [
       "@babel/plugin-proposal-class-properties",
       {
