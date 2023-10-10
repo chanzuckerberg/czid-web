@@ -31,8 +31,6 @@ prod:
 
 staging:
   <<: *deployed
-  ssl_mode: 'REQUIRED'
 
 sandbox:
   <<: *deployed
-  ssl_mode: 'REQUIRED'
