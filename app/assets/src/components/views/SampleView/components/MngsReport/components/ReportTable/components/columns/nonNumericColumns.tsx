@@ -2,8 +2,8 @@ import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSideb
 import cs from "~/components/views/SampleView/components/MngsReport/components/ReportTable/report_table.scss";
 import {
   BlastData,
+  ConsensusGenomeClick,
   CurrentTabSample,
-  PickConsensusGenomeData,
   SortFunctionsParams,
 } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
@@ -36,8 +36,8 @@ export const getNonNumericColumns = (
   ) => void,
   onAnnotationUpdate: () => void,
   onBlastClick: (params: BlastData) => void,
-  onConsensusGenomeClick: (options: PickConsensusGenomeData) => void,
-  onPreviousConsensusGenomeClick: (params: PickConsensusGenomeData) => void,
+  onConsensusGenomeClick: (options: ConsensusGenomeClick) => void,
+  onPreviousConsensusGenomeClick: (params: ConsensusGenomeClick) => void,
   toggleExpandAll: () => void,
   toggleExpandGenus: ({ taxonId }: { taxonId: number }) => void,
   onTaxonNameClick?: (clickedTaxonData: Taxon) => void,

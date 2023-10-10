@@ -21,9 +21,9 @@ import { Table } from "~/components/visualizations/table";
 import {
   BlastData,
   ColumnProps,
+  ConsensusGenomeClick,
   CurrentTabSample,
   DBType,
-  PickConsensusGenomeData,
 } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
 import { getIlluminaColumns } from "./components/columns/illuminaColumns";
@@ -64,9 +64,9 @@ interface ReportTableProps {
   isPhyloTreeAllowed: boolean;
   onAnnotationUpdate: () => void;
   onBlastClick: (params: BlastData) => void;
-  onConsensusGenomeClick: (params: PickConsensusGenomeData) => void;
+  onConsensusGenomeClick: (params: ConsensusGenomeClick) => void;
   onCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void;
-  onPreviousConsensusGenomeClick: (params: PickConsensusGenomeData) => void;
+  onPreviousConsensusGenomeClick: (params: ConsensusGenomeClick) => void;
   pipelineRunId?: number;
   pipelineVersion?: string;
   projectId?: number;

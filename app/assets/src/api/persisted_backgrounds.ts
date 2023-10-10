@@ -9,7 +9,7 @@ export const getPersistedBackground = (
 
 interface BackgroundParams {
   projectId: number;
-  backgroundId: number;
+  backgroundId: number | null;
 }
 
 export const updatePersistedBackground = ({

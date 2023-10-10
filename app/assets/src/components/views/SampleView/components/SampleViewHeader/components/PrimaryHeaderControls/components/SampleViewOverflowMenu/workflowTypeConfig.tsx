@@ -1,4 +1,4 @@
-import { get, isEmpty } from "lodash/fp";
+import { isEmpty } from "lodash/fp";
 import {
   WorkflowConfigType,
   WorkflowType,
@@ -22,14 +22,12 @@ export const SampleViewOverflowMenuConfig: WorkflowConfigType<SampleViewOverflow
     [WorkflowType.AMR]: ({ currentRun, sample }) => ({
       deleteId: currentRun?.id,
       isVisible: true,
-      readyToDelete:
-        get("status", currentRun) === "SUCCEEDED" || !!sample?.upload_error,
+      readyToDelete: !!currentRun || !!sample?.upload_error,
     }),
     [WorkflowType.CONSENSUS_GENOME]: ({ currentRun, sample }) => ({
       deleteId: currentRun?.id,
       isVisible: true,
-      readyToDelete:
-        get("status", currentRun) === "SUCCEEDED" || !!sample?.upload_error,
+      readyToDelete: !!currentRun || !!sample?.upload_error,
     }),
     [WorkflowType.SHORT_READ_MNGS]: ({
       reportMetadata,
@@ -49,8 +47,7 @@ export const SampleViewOverflowMenuConfig: WorkflowConfigType<SampleViewOverflow
     [WorkflowType.BENCHMARK]: ({ currentRun, sample }) => ({
       deleteId: currentRun?.id,
       isVisible: true,
-      readyToDelete:
-        get("status", currentRun) === "SUCCEEDED" || !!sample?.upload_error,
+      readyToDelete: !!currentRun || !!sample?.upload_error,
     }),
     [WorkflowType.AMR_DEPRECATED]: () => ({
       isVisible: false,

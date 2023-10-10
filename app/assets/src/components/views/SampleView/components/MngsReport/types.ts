@@ -1,5 +1,5 @@
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample from "~/interface/sample";
 import {
   BlastData,
@@ -12,16 +12,22 @@ import {
 import { Background, NumberId, PipelineRun, Taxon } from "~/interface/shared";
 
 export interface MngsReportProps {
-  backgrounds: Background[];
+  backgrounds: Background[] | undefined;
   currentTab: CurrentTabSample;
   clearAllFilters: () => void;
   enableMassNormalizedBackgrounds: boolean;
   filteredReportData: Taxon[];
   handleAnnotationUpdate: () => void;
   handleBlastClick: (x: BlastData) => void;
-  handleConsensusGenomeClick: (x: ConsensusGenomeClick) => void;
+  handleConsensusGenomeClick: (
+    params: ConsensusGenomeClick,
+    sample: Sample,
+  ) => void;
   handleCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void;
-  handlePreviousConsensusGenomeClick: (x: ConsensusGenomeClick) => void;
+  handlePreviousConsensusGenomeClick: (
+    params: ConsensusGenomeClick,
+    sample: Sample,
+  ) => void;
   handleOptionChanged: (x: { key: string; value: string }) => void;
   handleTaxonClick: (x: Taxon) => void;
   handleViewClick: (x: { view: SampleReportViewMode }) => void;
@@ -34,11 +40,11 @@ export interface MngsReportProps {
   ownedBackgrounds: Background[];
   otherBackgrounds: Background[];
   pipelineRun: PipelineRun;
-  project: NumberId;
+  project: NumberId | null;
   reportData: Taxon[];
   reportMetadata: ReportMetadata;
-  sample: Sample;
+  sample: Sample | null;
   selectedOptions: FilterSelections;
-  snapshotShareId: string;
+  snapshotShareId?: string;
   view: SampleReportViewMode;
 }

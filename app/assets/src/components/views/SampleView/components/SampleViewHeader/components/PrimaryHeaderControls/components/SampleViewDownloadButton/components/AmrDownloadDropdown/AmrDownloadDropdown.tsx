@@ -19,8 +19,8 @@ import {
 export interface AmrDownloadDropdownProps {
   readyToDownload?: boolean;
   className?: string;
-  workflowRun?: WorkflowRun;
-  sample?: Sample;
+  workflowRun: WorkflowRun;
+  sample: Sample;
 }
 
 export const AmrDownloadDropdown = ({
@@ -118,7 +118,7 @@ export const AmrDownloadDropdown = ({
   ];
 
   const getDownloadOptionItems = () => {
-    const options = [];
+    const options: JSX.Element[] = [];
     downloadOptions.forEach(({ text, value, disabled, tooltipText }) => {
       options.push(createDropdownOption(text, value, disabled, tooltipText));
     });
@@ -128,8 +128,8 @@ export const AmrDownloadDropdown = ({
   const createDropdownOption = (
     text: string,
     value: string,
-    disabled: boolean,
-    tooltipText: string,
+    disabled?: boolean,
+    tooltipText?: string,
   ) => {
     let dropdownItem = (
       <BaseDropdown.Item

@@ -30,7 +30,7 @@ export const SampleViewSaveButton = ({
   };
   const isVisible = SampleViewSaveButtonConfig[workflow];
   const { admin: userIsAdmin } = useContext(UserContext) || {};
-  if (!userIsAdmin || !isVisible) return;
+  if (!userIsAdmin || !isVisible) return <></>;
   return (
     <SaveButton
       className={className}

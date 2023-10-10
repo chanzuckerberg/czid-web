@@ -16,8 +16,8 @@ import {
 } from "~/components/views/SampleView/utils";
 import {
   BlastData,
+  ConsensusGenomeClick,
   CurrentTabSample,
-  PickConsensusGenomeData,
 } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
 import { PhyloTreeModalParamsType } from "../../../ReportTable";
@@ -44,8 +44,8 @@ export const getNameRenderer = (
   ) => void,
   onAnnotationUpdate: () => void,
   onBlastClick: (params: BlastData) => void,
-  onConsensusGenomeClick: (options: PickConsensusGenomeData) => void,
-  onPreviousConsensusGenomeClick: (params: PickConsensusGenomeData) => void,
+  onConsensusGenomeClick: (options: ConsensusGenomeClick) => void,
+  onPreviousConsensusGenomeClick: (params: ConsensusGenomeClick) => void,
   onTaxonNameClick?: (clickedTaxonData: Taxon) => void,
   snapshotShareId?: string,
 ) =>

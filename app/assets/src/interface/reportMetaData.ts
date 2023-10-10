@@ -3,18 +3,20 @@ export enum PipelineRunStatus {
   FAILED = "FAILED",
   WAITING = "WAITING",
 }
-export default interface ReportMetadata {
+interface ReportMetadataSuccess {
   knownUserError?: string;
   errorMessage?: string;
   alignVizAvailable?: boolean;
   hasByteRanges?: boolean;
   hasErrors?: boolean;
-  jobStatus?: string;
+  jobStatus: string;
   pipelineRunStatus?: PipelineRunStatus;
-  reportReady?: boolean;
+  reportReady: boolean;
   preSubsamplingCount?: number;
   postSubsamplingCount?: number;
   truncatedReadsCount?: number;
   taxonWhitelisted?: boolean;
-  backgroundId?: number;
+  backgroundId: number | null;
 }
+
+export type ReportMetadata = ReportMetadataSuccess | Record<string, never>;

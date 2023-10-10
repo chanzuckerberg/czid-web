@@ -64,7 +64,7 @@ export default interface Sample {
   error_message?: string;
   known_user_error?: string;
   pipeline_runs: PipelineRun[];
-  workflow_runs: WorkflowRun[] | undefined;
+  workflow_runs?: WorkflowRun[];
   id: number;
   name: string;
   created_at: DateString;

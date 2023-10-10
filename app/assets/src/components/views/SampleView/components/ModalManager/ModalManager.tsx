@@ -2,7 +2,12 @@ import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import { BlastData, ConsensusGenomeParams } from "~/interface/sampleView";
+import {
+  BlastData,
+  ConsensusGenomeClick,
+  ConsensusGenomeParams,
+  ModalsVisible,
+} from "~/interface/sampleView";
 import { ConsensusGenomeData } from "~/interface/shared";
 import {
   BlastContigsModal,
@@ -15,25 +20,20 @@ import {
   ConsensusGenomePreviousModal,
 } from "./components/ConsensusGenomeModals";
 
-type ConsensusGenomeTaxData = Pick<
-  ConsensusGenomeData,
-  "taxName" | "taxId" | "percentIdentity"
->;
-
 interface ModalManagerProps {
   blastData: BlastData | Record<string, never>;
   blastModalInfo: BlastModalInfo;
   consensusGenomeData: ConsensusGenomeData;
   consensusGenomePreviousParams: ConsensusGenomeData;
   handleBlastSelectionModalContinue: (blastModalInfo: BlastModalInfo) => void;
-  handleConsensusGenomeClick: (x: ConsensusGenomeTaxData) => void;
+  handleConsensusGenomeClick: (x: ConsensusGenomeClick) => void;
   handleConsensusGenomeErrorModalRetry: () => Promise<void>;
   handleModalAction: (modals: ["open" | "close", string][]) => void;
   handlePreviousConsensusGenomeReportClick: (x: {
     rowData: WorkflowRun;
   }) => void;
   onConsensusGenomeCreation: (x: ConsensusGenomeParams) => Promise<void>;
-  modalsVisible: Record<string, boolean>;
+  modalsVisible: ModalsVisible;
   sample: Sample;
 }
 

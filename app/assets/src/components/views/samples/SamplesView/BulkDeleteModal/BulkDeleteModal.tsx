@@ -24,7 +24,7 @@ interface BulkDeleteModalProps {
   redirectOnSuccess?: boolean;
   validateUserCanDeleteObjects: (selectedIds: number[]) => Promise<any>;
   workflowLabel: WorkflowLabelType;
-  isShortReadMngs: boolean;
+  isShortReadMngs?: boolean;
 }
 
 const BulkDeleteModal = ({
@@ -131,7 +131,7 @@ const BulkDeleteModal = ({
           onClick={handleDeleteSamples}
           data-testid="delete-samples-button"
           disabled={isDeleting}
-          startIcon={isDeleting ? "loading" : null}
+          startIcon={isDeleting ? "loading" : undefined}
         >
           {!isDeleting ? "Delete" : "Deleting"}
         </ErrorButton>

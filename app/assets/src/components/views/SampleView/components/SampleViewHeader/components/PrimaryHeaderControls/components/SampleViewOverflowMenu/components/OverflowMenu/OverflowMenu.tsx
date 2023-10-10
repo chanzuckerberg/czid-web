@@ -8,9 +8,9 @@ import { BulkDeleteModal } from "~/components/views/samples/SamplesView/BulkDele
 import cs from "./overflow_menu.scss";
 
 interface OverflowMenuProps {
-  readyToDelete: boolean;
+  readyToDelete?: boolean;
   className: string;
-  deleteId: number;
+  deleteId?: number;
   onDeleteRunSuccess: () => void;
   redirectOnSuccess?: boolean;
   runFinalized: boolean;
@@ -19,7 +19,7 @@ interface OverflowMenuProps {
   validateUserCanDeleteObjects: (selectedIds: number[]) => Promise<any>;
   workflowShorthand: string;
   workflowLabel: WorkflowLabelType;
-  isShortReadMngs: boolean;
+  isShortReadMngs?: boolean;
 }
 
 export const OverflowMenu = ({
@@ -36,7 +36,7 @@ export const OverflowMenu = ({
   workflowLabel,
   isShortReadMngs,
 }: OverflowMenuProps) => {
-  if (!readyToDelete) return null;
+  if (!readyToDelete || !deleteId) return null;
   const [menuAnchorEl, setMenuAnchorEl] =
     useState<PopoverProps["anchorEl"]>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);

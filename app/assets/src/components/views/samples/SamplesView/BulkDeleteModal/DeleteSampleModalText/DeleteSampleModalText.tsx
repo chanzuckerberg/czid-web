@@ -5,7 +5,7 @@ import cs from "./delete_sample_modal_text.scss";
 const DeleteSampleModalText = ({
   isShortReadMngs,
 }: {
-  isShortReadMngs: boolean;
+  isShortReadMngs?: boolean;
 }) => (
   <div>
     <div>

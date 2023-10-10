@@ -30,7 +30,13 @@ export const SampleViewHelpButton = ({
       size(sample?.workflow_runs) === 1);
   const { isVisible, flowId, analyticEventName } =
     SampleViewHelpButtonConfig[workflow];
-  if (!isVisible || shouldHideConsensusGenomeHelpButton) return;
+  if (
+    !isVisible ||
+    shouldHideConsensusGenomeHelpButton ||
+    !analyticEventName ||
+    !flowId
+  )
+    return null;
   return (
     <HelpButton
       className={className}

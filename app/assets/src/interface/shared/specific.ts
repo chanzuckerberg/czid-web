@@ -328,7 +328,7 @@ export interface Taxon {
     not_a_hit: number;
   };
   species_tax_ids?: number[];
-  taxId?: number;
+  taxId: number;
   taxLevel?: TaxonLevelType;
   pathogenFlag: string;
   pathogenFlags: string[];

@@ -32,7 +32,7 @@ export const ANALYTICS_EVENT_NAMES = eventNames;
  * we send for analytics should conform to this structure, however it winds
  * up being sent.
  */
-type EventValue = string | number | boolean | null;
+type EventValue = string | number | boolean | null | undefined;
 export type EventData = Record<string, EventValue>;
 
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06

@@ -321,9 +321,9 @@ export const computeMngsReportTableValuesForCSV = (
   backgrounds,
   currentTab,
   withMultiFlags = false,
-) => {
+): [string[], string[][]] => {
   const workflow = getWorkflowTypeFromLabel(currentTab);
-  const csvRows = [];
+  const csvRows: string[][] = [];
   const csvHeaders = [
     ...TAXON_GENERAL_FIELDS,
     ...(workflow === WorkflowType.SHORT_READ_MNGS ? BACKGROUND_FIELDS : []),

@@ -18,12 +18,12 @@ import Notification from "~ui/notifications/Notification";
 
 export interface MngsDownloadDropdownProps {
   readyToDownload?: boolean;
-  backgroundId?: number;
+  backgroundId: number | null;
   className?: string;
-  getDownloadReportTableWithAppliedFiltersLink?: () => string;
+  getDownloadReportTableWithAppliedFiltersLink: () => string;
   hasAppliedFilters?: boolean;
   pipelineRun?: PipelineRun;
-  sample?: Sample;
+  sample: Sample;
   view?: string;
 }
 

@@ -11,7 +11,7 @@ export type TaxonValuesType = {
   NR: { rpm: number | string };
 };
 export interface TaxonDetailsModeProps {
-  background?: Background;
+  background: Background | null;
   parentTaxonId?: number;
   taxonId: number;
   taxonName: string;

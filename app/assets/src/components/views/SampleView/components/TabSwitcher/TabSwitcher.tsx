@@ -13,7 +13,7 @@ import {
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
 import { getWorkflowCount } from "~/components/views/SampleView/utils";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import cs from "./tab_switcher.scss";
@@ -22,7 +22,7 @@ interface TabSwitcherProps {
   currentTab: CurrentTabSample;
   handleTabChange: (tab: CurrentTabSample) => void;
   reportMetadata: ReportMetadata;
-  sample: Sample;
+  sample: Sample | null;
 }
 
 export const TabSwitcher = ({
@@ -31,7 +31,7 @@ export const TabSwitcher = ({
   reportMetadata,
   sample,
 }: TabSwitcherProps) => {
-  const computeWorkflowTabs = () => {
+  const computeWorkflowTabs = (sample: Sample) => {
     const { allowedFeatures } = useContext(UserContext) || {};
 
     /* customLabel field was added for long read mNGS
@@ -91,10 +91,10 @@ export const TabSwitcher = ({
 
   return (
     <div className={cs.tabsContainer}>
-      {sample && computeWorkflowTabs().length ? (
+      {sample && computeWorkflowTabs(sample).length ? (
         <Tabs
           className={cs.tabs}
-          tabs={computeWorkflowTabs()}
+          tabs={computeWorkflowTabs(sample)}
           value={currentTab}
           onChange={handleTabChange}
         />

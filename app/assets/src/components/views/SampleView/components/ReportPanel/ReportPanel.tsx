@@ -77,7 +77,7 @@ export const ReportPanel = ({
       {currentTab === WORKFLOW_TABS.AMR_DEPRECATED && amrDeprecatedData && (
         <DeprecatedAmrView amr={amrDeprecatedData} />
       )}
-      {currentTab === WORKFLOW_TABS.AMR && sample && (
+      {currentTab === WORKFLOW_TABS.AMR && (
         <AmrView sample={sample} workflowRun={currentRun as WorkflowRun} />
       )}
       {currentTab === WORKFLOW_TABS.BENCHMARK && sample && (
@@ -86,7 +86,7 @@ export const ReportPanel = ({
           workflowRun={currentRun as WorkflowRun}
         />
       )}
-      {currentTab === WORKFLOW_TABS.CONSENSUS_GENOME && sample && (
+      {currentTab === WORKFLOW_TABS.CONSENSUS_GENOME && (
         <ConsensusGenomeView
           onWorkflowRunSelect={handleWorkflowRunSelect}
           sample={sample}

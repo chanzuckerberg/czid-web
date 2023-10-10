@@ -2,7 +2,7 @@ import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSideb
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import { WorkflowLabelType } from "~/components/utils/workflows";
 import { PathogenFlags } from "~/components/views/compare/SamplesHeatmapView/SamplesHeatmapView";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
   AccessionData,
@@ -19,7 +19,7 @@ import { ThresholdFilterData } from "./dropdown";
 export interface SampleViewProps {
   sampleId?: number;
   snapshotShareId?: string;
-  updateDiscoveryProjectId?(projectId: number): void;
+  updateDiscoveryProjectId(projectId: number): void;
 }
 
 export type CurrentTabSample = WorkflowLabelType;
@@ -66,7 +66,7 @@ export interface BlastData {
 export interface ConsensusGenomeParams {
   accessionId: string;
   accessionName: string;
-  taxonId: number;
+  taxonId: number | null;
   taxonName: string;
 }
 
@@ -129,7 +129,7 @@ export interface FilterSelections {
   metricShortReads: string;
   metricLongReads: string;
   readSpecificity: number;
-  background: number;
+  background: number | null;
   nameType: string;
   categories:
     | { categories: string[]; subcategories: { Viruses: string[] } }
@@ -207,14 +207,8 @@ export interface SortFunctionsParams {
   sortDirection: "asc" | "desc";
 }
 
-export type ConsensusGenomeClick = Pick<
-  SampleViewState["consensusGenomeData"],
-  "percentIdentity" | "taxId" | "taxName"
->;
-
-export type PickConsensusGenomeData = Pick<
-  ConsensusGenomeData,
-  "percentIdentity" | "taxId" | "taxName"
+export type ConsensusGenomeClick = Required<
+  Pick<ConsensusGenomeData, "percentIdentity" | "taxId" | "taxName">
 >;
 
 export type DBType = "nt" | "nr";
@@ -229,4 +223,13 @@ export interface BenchmarkWorkflowRunAdditionalInfoEntry {
   runId: number;
   pipelineVersion: string;
   ncbiIndexVersion: string;
+}
+
+export interface ModalsVisible {
+  consensusGenomeError: boolean;
+  consensusGenomeCreation: boolean;
+  consensusGenomePrevious: boolean;
+  blastSelection: boolean;
+  blastContigs: boolean;
+  blastReads: boolean;
 }

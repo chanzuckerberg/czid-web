@@ -5,7 +5,7 @@ import {
   FINALIZED_SAMPLE_UPLOAD_ERRORS,
   SampleUploadErrors,
 } from "~/components/views/samples/constants";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
@@ -38,9 +38,10 @@ export const SampleViewOverflowMenu = ({
       sample,
       currentTab,
     });
-  if (!isVisible) return;
+  if (!isVisible) return <></>;
+  const workflowRuns = sample?.workflow_runs || [];
   const redirectOnSuccess =
-    sample && [...sample.pipeline_runs, ...sample.workflow_runs].length === 1;
+    sample && [...sample.pipeline_runs, ...workflowRuns].length === 1;
   const runFinalized =
     currentRun?.run_finalized ||
     FINALIZED_SAMPLE_UPLOAD_ERRORS.includes(

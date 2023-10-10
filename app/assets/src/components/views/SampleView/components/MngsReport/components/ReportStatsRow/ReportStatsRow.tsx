@@ -1,6 +1,6 @@
 import { Button } from "@czi-sds/components";
 import React from "react";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
 import cs from "./report_stats_row.scss";

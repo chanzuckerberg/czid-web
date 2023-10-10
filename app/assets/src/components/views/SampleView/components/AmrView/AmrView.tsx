@@ -9,6 +9,7 @@ import {
   amrReportTableDownloadWithAppliedFiltersLinkVar,
 } from "~/cache/initialCache";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import { IconLoading } from "~/components/ui/icons";
 import {
   computeAmrReportTableValuesForCSV,
   createCSVObjectURL,
@@ -16,9 +17,11 @@ import {
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
 import { WorkflowType } from "~/components/utils/workflows";
+import { SampleMessage } from "~/components/views/components/SampleMessage";
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
+import csIcon from "~/components/views/SampleView/components/SampleReportConent/sample_report_content.scss";
 import { SUCCEEDED_STATE } from "~/components/views/SampleView/utils";
-import Sample, { WorkflowRun } from "~/interface/sample";
+import Sample, { SampleStatus, WorkflowRun } from "~/interface/sample";
 import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";
@@ -28,7 +31,7 @@ import { AmrResult } from "./components/AmrSampleReport/types";
 
 interface AmrViewProps {
   workflowRun: WorkflowRun | null;
-  sample: Sample;
+  sample: Sample | null;
 }
 
 export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
@@ -50,6 +53,12 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     return dataFilterFunc(Object.values(reportTableData));
   }, [dataFilterFunc, reportTableData]);
 
+  const isValidNullResult = (reportTableData: IdMap<AmrResult>) => {
+    return (
+      reportTableData === null || Object.keys(reportTableData).length === 0
+    );
+  };
+
   useEffect(() => {
     if (
       workflowRun?.status !== SUCCEEDED_STATE ||
@@ -64,19 +73,12 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
       const reportData = camelize(reportDataRaw);
       setReportTableData(reportData?.reportTableData);
       setDrugClassesReactiveVar(reportData?.reportTableData);
+      setShouldShowNullResult(isValidNullResult(reportData?.reportTableData));
       setLoadingResults(false);
     };
 
     fetchResults();
   }, [workflowRun?.id, workflowRun?.status, workflowRun?.workflow]);
-
-  useEffect(() => {
-    const loadedValidSample =
-      !loadingResults && workflowRun?.status === "SUCCEEDED";
-    const resultIsNull =
-      reportTableData === null || Object.keys(reportTableData).length === 0;
-    setShouldShowNullResult(loadedValidSample && resultIsNull);
-  }, [loadingResults, reportTableData, workflowRun?.status]);
 
   const activeFilterSelections = useReactiveVar(activeAmrFiltersVar);
 
@@ -112,52 +114,66 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     amrDrugClassesVar(Array.from(drugClasses));
   };
 
-  return shouldShowNullResult ? (
-    <AmrNullResult />
-  ) : (
-    <>
-      <SampleReportContent
-        loadingResults={loadingResults}
-        workflowRun={workflowRun}
-        sample={sample}
-        loadingInfo={{
-          message: "Your antimicrobial resistance results are being generated!",
-          linkText: "Learn More about our antimicrobial resistance pipeline",
-          helpLink: AMR_HELP_LINK,
-        }}
-        eventNames={{
-          error: "AmrView_sample-error-info-link_clicked",
-          loading: "AmrView_amr-doc-link_clicked",
-        }}
-      >
-        {workflowRun && (
-          <div className={cs.resultsContainer}>
-            <AmrFiltersContainer
-              setDataFilterFunc={setDataFilterFunc}
-              hideFilters={hideFilters}
-              setHideFilters={setHideFilters}
-            />
-            <AmrSampleReport
-              reportTableData={displayedRows}
-              sample={sample}
-              workflowRun={workflowRun}
-              setDetailsSidebarGeneName={setDetailsSidebarGeneName}
-              hideFilters={hideFilters}
-            />
-          </div>
-        )}
-      </SampleReportContent>
-      <DetailsSidebar
-        visible={Boolean(detailsSidebarGeneName)}
-        mode="geneDetails"
-        onClose={() =>
-          withAnalytics(
-            setDetailsSidebarGeneName(null),
-            ANALYTICS_EVENT_NAMES.AMR_VIEW_DETAILS_SIDEBAR_CLOSED,
-          )
-        }
-        params={{ geneName: detailsSidebarGeneName }}
+  if (sample && shouldShowNullResult) {
+    return <AmrNullResult />;
+  } else if (sample) {
+    return (
+      <>
+        <SampleReportContent
+          loadingResults={loadingResults}
+          workflowRun={workflowRun}
+          sample={sample}
+          loadingInfo={{
+            message:
+              "Your antimicrobial resistance results are being generated!",
+            linkText: "Learn More about our antimicrobial resistance pipeline",
+            helpLink: AMR_HELP_LINK,
+          }}
+          eventNames={{
+            error: "AmrView_sample-error-info-link_clicked",
+            loading: "AmrView_amr-doc-link_clicked",
+          }}
+        >
+          {workflowRun && (
+            <>
+              <div className={cs.resultsContainer}>
+                <AmrFiltersContainer
+                  setDataFilterFunc={setDataFilterFunc}
+                  hideFilters={hideFilters}
+                  setHideFilters={setHideFilters}
+                />
+                <AmrSampleReport
+                  reportTableData={displayedRows}
+                  sample={sample}
+                  workflowRun={workflowRun}
+                  setDetailsSidebarGeneName={setDetailsSidebarGeneName}
+                  hideFilters={hideFilters}
+                />
+              </div>
+            </>
+          )}
+        </SampleReportContent>
+        <DetailsSidebar
+          visible={Boolean(detailsSidebarGeneName)}
+          mode="geneDetails"
+          onClose={() =>
+            withAnalytics(
+              setDetailsSidebarGeneName(null),
+              ANALYTICS_EVENT_NAMES.AMR_VIEW_DETAILS_SIDEBAR_CLOSED,
+            )
+          }
+          params={{ geneName: detailsSidebarGeneName }}
+        />
+      </>
+    );
+  } else {
+    return (
+      <SampleMessage
+        icon={<IconLoading className={csIcon.icon} />}
+        message={"Loading report data."}
+        status={SampleStatus.LOADING}
+        type={"inProgress"}
       />
-    </>
-  );
+    );
+  }
 };

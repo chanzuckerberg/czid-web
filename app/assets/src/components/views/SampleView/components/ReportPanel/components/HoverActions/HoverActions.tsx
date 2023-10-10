@@ -32,8 +32,8 @@ import {
 } from "~/components/views/SampleView/utils";
 import {
   BlastData,
+  ConsensusGenomeClick,
   CurrentTabSample,
-  PickConsensusGenomeData,
 } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
 import { INVALID_CALL_BASE_TAXID } from "../../../MngsReport/components/ReportTable/ReportTable";
@@ -48,10 +48,10 @@ interface HoverActionsProps {
   isAlignVizAvailable: boolean;
   isPhyloTreeAllowed: boolean; // TODO: this name isn't very descriptive
   onBlastClick: (params: BlastData) => void;
-  onConsensusGenomeClick: (options: PickConsensusGenomeData) => void;
+  onConsensusGenomeClick: (options: ConsensusGenomeClick) => void;
   onCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void;
   onPhyloTreeModalOpened?: (options: object) => void;
-  onPreviousConsensusGenomeClick?: (params: PickConsensusGenomeData) => void;
+  onPreviousConsensusGenomeClick?: (params: ConsensusGenomeClick) => void;
   pipelineVersion?: string;
   previousConsensusGenomeRuns?: $TSFixMeUnknown[];
   projectId?: number;

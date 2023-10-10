@@ -27,12 +27,8 @@ export const getWorkflowCount = (sample: Sample): WorkflowCount => {
         break;
       case WORKFLOW_ENTITIES.WORKFLOW_RUNS:
         count[workflow] = size(
-          sample.workflow_runs.filter(
-            (run: $TSFixMe) => run.workflow === workflow,
-          ),
+          sample.workflow_runs?.filter(run => run.workflow === workflow),
         );
-        break;
-      default:
         break;
     }
   });
@@ -156,11 +152,15 @@ export const loadState = (
   store: Storage,
   key: string,
 ): {
-  selectedOptions?: { background: number; metric: string };
+  selectedOptions?: { background: number | null; metric: string };
   [x: string]: unknown;
 } => {
   try {
-    return JSON.parse(store.getItem(key)) || {};
+    const state = store.getItem(key);
+    if (!state) {
+      return {};
+    }
+    return JSON.parse(state) || {};
   } catch (e) {
     // Avoid possible bad transient state related crash
     // eslint-disable-next-line no-console

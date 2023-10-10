@@ -2,9 +2,9 @@ import React from "react";
 import { DownloadButton } from "~/components/ui/controls/buttons";
 
 export interface DownloadAllButtonProps {
-  readyToDownload: boolean;
+  readyToDownload?: boolean;
   className?: string;
-  handleDownloadAllClick: () => void;
+  handleDownloadAllClick?: () => void;
 }
 
 export const DownloadAllButton = ({
@@ -12,13 +12,12 @@ export const DownloadAllButton = ({
   handleDownloadAllClick,
   className,
 }: DownloadAllButtonProps) => {
+  if (!readyToDownload || !handleDownloadAllClick) return null;
   return (
-    readyToDownload && (
-      <DownloadButton
-        className={className}
-        text="Download All"
-        onClick={handleDownloadAllClick}
-      />
-    )
+    <DownloadButton
+      className={className}
+      text="Download All"
+      onClick={handleDownloadAllClick}
+    />
   );
 };

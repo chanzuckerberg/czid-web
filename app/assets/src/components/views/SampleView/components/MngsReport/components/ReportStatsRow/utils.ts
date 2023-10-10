@@ -1,6 +1,6 @@
 import { compact, map, sum, values } from "lodash/fp";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
 

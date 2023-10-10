@@ -40,7 +40,12 @@ export const MngsReport = ({
   snapshotShareId,
   view,
 }: MngsReportProps) => {
-  if (reportMetadata.reportReady && reportData?.length > 0 && !loadingReport) {
+  if (
+    reportMetadata.reportReady &&
+    reportData?.length > 0 &&
+    !loadingReport &&
+    sample
+  ) {
     return (
       <div className={cs.reportViewContainer}>
         <ReportFilters
@@ -79,9 +84,13 @@ export const MngsReport = ({
             isPhyloTreeAllowed={sample ? sample.editable : false}
             onAnnotationUpdate={handleAnnotationUpdate}
             onBlastClick={handleBlastClick}
-            onConsensusGenomeClick={handleConsensusGenomeClick}
+            onConsensusGenomeClick={params =>
+              handleConsensusGenomeClick(params, sample)
+            }
             onCoverageVizClick={handleCoverageVizClick}
-            onPreviousConsensusGenomeClick={handlePreviousConsensusGenomeClick}
+            onPreviousConsensusGenomeClick={params =>
+              handlePreviousConsensusGenomeClick(params, sample)
+            }
             onTaxonNameClick={withAnalytics(
               handleTaxonClick,
               ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_TAXON_SIDEBAR_LINK_CLICKED,

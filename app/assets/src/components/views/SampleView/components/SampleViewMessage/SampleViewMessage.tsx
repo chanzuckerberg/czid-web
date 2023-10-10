@@ -7,7 +7,7 @@ import { SampleMessage } from "~/components/views/components/SampleMessage";
 import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
 import { ONT_PIPELINE_RUNNING_STATUS_MESSAGE } from "~/components/views/SampleView/utils";
 import { IconAlertType } from "~/interface/icon";
-import ReportMetadata, { PipelineRunStatus } from "~/interface/reportMetaData";
+import { PipelineRunStatus, ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { SampleStatus } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
@@ -18,8 +18,8 @@ interface SampleViewMessageProps {
   hasZeroTaxons: boolean;
   pipelineRun: PipelineRun;
   reportMetadata: ReportMetadata;
-  sample: Sample;
-  snapshotShareId: string;
+  sample: Sample | null;
+  snapshotShareId?: string;
 }
 
 export const SampleViewMessage = ({

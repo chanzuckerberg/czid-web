@@ -1,5 +1,5 @@
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
   AmrDeprectatedData,
@@ -14,37 +14,40 @@ import {
 import { Background, NumberId, PipelineRun, Taxon } from "~/interface/shared";
 
 export interface ReportPanelProps {
-  amrDeprecatedData?: AmrDeprectatedData[];
+  amrDeprecatedData: AmrDeprectatedData[] | null;
   backgrounds?: Background[];
-  currentRun: PipelineRun | WorkflowRun;
+  currentRun?: PipelineRun | WorkflowRun | null;
   currentTab: CurrentTabSample;
-  clearAllFilters?: () => void;
-  enableMassNormalizedBackgrounds?: boolean;
-  filteredReportData?: Taxon[];
-  handleAnnotationUpdate?: () => void;
-  handleBlastClick?: (x: BlastData) => void;
-  handleConsensusGenomeClick?: (x: ConsensusGenomeClick) => void;
-  handleCoverageVizClick?: (newCoverageVizParams: CoverageVizParamsRaw) => void;
-  handlePreviousConsensusGenomeClick?: (x: ConsensusGenomeClick) => void;
-  handleOptionChanged?: (x: { key: string; value: string }) => void;
-  handleTaxonClick?: (x: Taxon) => void;
-  handleViewClick?: (x: { view: SampleReportViewMode }) => void;
-  handleWorkflowRunSelect?: (workflowRun: WorkflowRun) => void;
-  refreshDataFromOptionsChange?: (x: {
+  clearAllFilters: () => void;
+  enableMassNormalizedBackgrounds: boolean;
+  filteredReportData: Taxon[];
+  handleAnnotationUpdate: () => void;
+  handleBlastClick: (x: BlastData) => void;
+  handleConsensusGenomeClick: (x: ConsensusGenomeClick, sample: Sample) => void;
+  handleCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void;
+  handlePreviousConsensusGenomeClick: (
+    x: ConsensusGenomeClick,
+    sample: Sample,
+  ) => void;
+  handleOptionChanged: (x: { key: string; value: string }) => void;
+  handleTaxonClick: (x: Taxon) => void;
+  handleViewClick: (x: { view: SampleReportViewMode }) => void;
+  handleWorkflowRunSelect: (workflowRun: WorkflowRun) => void;
+  refreshDataFromOptionsChange: (x: {
     key: string;
     newSelectedOptions: FilterSelections;
   }) => void;
-  lineageData?: { [key: string]: Lineage };
-  loadingReport?: boolean;
-  ownedBackgrounds?: Background[];
-  otherBackgrounds?: Background[];
-  project?: NumberId;
-  reportData?: Taxon[];
-  reportMetadata?: ReportMetadata;
-  sample: Sample;
-  selectedOptions?: FilterSelections;
+  lineageData: { [key: string]: Lineage };
+  loadingReport: boolean;
+  ownedBackgrounds: Background[];
+  otherBackgrounds: Background[];
+  project: NumberId | null;
+  reportData: Taxon[];
+  reportMetadata: ReportMetadata;
+  sample: Sample | null;
+  selectedOptions: FilterSelections;
   snapshotShareId?: string;
-  view?: SampleReportViewMode;
+  view: SampleReportViewMode;
   workflowRunResults?:
     | Record<string, never>
     | ConsensusGenomeWorkflowRunResults;

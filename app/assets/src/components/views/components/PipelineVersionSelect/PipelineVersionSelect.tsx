@@ -14,7 +14,7 @@ interface PipelineVersionSelectProps {
   shouldIncludeDatabaseVersion: boolean;
   currentRun?: WorkflowRun | PipelineRun;
   allRuns?: WorkflowRun[] | PipelineRun[] | string[];
-  workflowType?: WorkflowType;
+  workflowType: WorkflowType;
   onVersionChange: (x: string) => void;
 }
 

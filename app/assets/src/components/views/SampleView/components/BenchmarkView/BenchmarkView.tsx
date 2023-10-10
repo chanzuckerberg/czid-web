@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
-import { camelize } from "~/components/utils/objectUtil";
+import { camelize, IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
+import { BenchmarkWorkflowRunAdditionalInfoEntry } from "~/interface/sampleView";
 import { SUCCEEDED_STATE } from "../../utils";
 import { SampleReportContent } from "../SampleReportConent";
 import { BenchmarkSampleReportInfo } from "./components/BenchmarkSampleReportInfo";
@@ -15,13 +16,14 @@ export interface BenchmarkWorkflowRunResults {
   benchmarkHtmlReport: string;
   benchmarkInfo: object;
   benchmarkMetrics: object;
-  additionalInfo: object;
+  additionalInfo: IdMap<BenchmarkWorkflowRunAdditionalInfoEntry>;
 }
 
 export const BenchmarkView = ({ sample, workflowRun }: BenchmarkViewProps) => {
   const [loadingResults, setLoadingResults] = useState(false);
-  const [htmlReport, setHtmlReport] = useState(null);
-  const [additionalInfo, setAdditionalInfo] = useState(null);
+  const [htmlReport, setHtmlReport] = useState<string>("");
+  const [additionalInfo, setAdditionalInfo] =
+    useState<IdMap<BenchmarkWorkflowRunAdditionalInfoEntry> | null>(null);
 
   useEffect(() => {
     if (workflowRun?.status !== SUCCEEDED_STATE) {

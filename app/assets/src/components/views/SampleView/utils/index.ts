@@ -106,11 +106,11 @@ export const initializeSelectedOptions = ({
 };
 
 type ACTIONTYPE =
-  | { type: "newBackground"; payload: { background: number } }
+  | { type: "newBackground"; payload: { background: number | null } }
   | {
       type: "revertToSampleViewFilters";
       payload: {
-        selectedOptionsFromLocal: {
+        selectedOptionsFromLocal?: {
           background: number | null;
           metric: string;
         };
@@ -118,7 +118,7 @@ type ACTIONTYPE =
     }
   | {
       type: "rawReportDataProcessed";
-      payload: { allTaxIds: number[]; backgroundIdUsed: number };
+      payload: { allTaxIds: number[]; backgroundIdUsed: number | null };
     }
   | {
       type: "optionChanged";
@@ -143,19 +143,21 @@ export const selectedOptionsReducer = (
 ): FilterSelections => {
   switch (action.type) {
     case "newBackground": {
-      return {
+      const newState: FilterSelections = {
         ...state,
         background: action.payload.background,
       };
+      return newState;
     }
     case "revertToSampleViewFilters": {
-      return {
+      const newState: FilterSelections = {
         ...getDefaultSelectedOptions(),
         ...action.payload.selectedOptionsFromLocal,
       };
+      return newState;
     }
     case "rawReportDataProcessed": {
-      return {
+      const newState: FilterSelections = {
         ...state,
         ...(!isEmpty(action.payload.allTaxIds) &&
           !isEmpty(state.taxa) && {
@@ -168,12 +170,13 @@ export const selectedOptionsReducer = (
           background: action.payload.backgroundIdUsed,
         }),
       };
+      return newState;
     }
     case "optionChanged": {
       if (deepEqual(state[action.payload.key], action.payload.value)) {
-        break;
+        return state;
       }
-      const newState = {
+      const newState: FilterSelections = {
         ...state,
         [action.payload.key]: action.payload.value,
       };

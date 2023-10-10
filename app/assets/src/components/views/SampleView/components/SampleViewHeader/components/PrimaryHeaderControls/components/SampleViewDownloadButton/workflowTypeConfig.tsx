@@ -1,6 +1,6 @@
 import { get, isEmpty } from "lodash/fp";
 import { WorkflowConfigType, WorkflowType } from "~/components/utils/workflows";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
@@ -21,14 +21,18 @@ import {
   MngsDownloadDropdownProps,
 } from "./components/MngsDownloadDropdown";
 
-type AmrDownloadDropdownType = (props: AmrDownloadDropdownProps) => JSX.Element;
+type AmrDownloadDropdownType = (
+  props: AmrDownloadDropdownProps,
+) => JSX.Element | null;
 type BenchmarkDownloadDropdownType = (
   props: BenchmarkDownloadDropdownProps,
-) => JSX.Element;
-type DownloadAllButtonType = (props: DownloadAllButtonProps) => JSX.Element;
+) => JSX.Element | null;
+type DownloadAllButtonType = (
+  props: DownloadAllButtonProps,
+) => JSX.Element | null;
 type MngsDownloadDropdownType = (
   props: MngsDownloadDropdownProps,
-) => JSX.Element;
+) => JSX.Element | null;
 
 type SampleViewDownloadButtonConfigType = (x: {
   currentRun: WorkflowRun | PipelineRun;

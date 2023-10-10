@@ -243,7 +243,7 @@ const getSample = ({
   snapshotShareId,
   sampleId,
 }: {
-  snapshotShareId: string;
+  snapshotShareId?: string;
   sampleId: number;
 }): Promise<Sample> =>
   get(

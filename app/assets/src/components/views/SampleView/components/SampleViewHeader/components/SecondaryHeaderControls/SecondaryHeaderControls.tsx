@@ -10,9 +10,9 @@ import { PipelineRunsButton } from "./components/PipelineRunsButton";
 import cs from "./secondary_header_controls.scss";
 
 interface SecondaryHeaderControlsProps {
-  sample: Sample;
-  currentRun: WorkflowRun | PipelineRun;
-  getAllRuns: () => WorkflowRun[] | PipelineRun[];
+  sample: Sample | null;
+  currentRun?: WorkflowRun | PipelineRun | null;
+  getAllRuns: () => WorkflowRun[] | PipelineRun[] | undefined;
   workflow: WorkflowType;
   onPipelineVersionChange: (newPipelineVersion: string) => void;
   onDetailsClick: () => void;
@@ -28,20 +28,23 @@ export const SecondaryHeaderControls = ({
 }: SecondaryHeaderControlsProps) => {
   return (
     <div className={cs.controlsTopRowContainer}>
-      <PipelineVersionSelect
-        sampleId={get("id", sample)}
-        currentRun={currentRun}
-        allRuns={getAllRuns()}
-        workflowType={workflow}
-        onVersionChange={onPipelineVersionChange}
-        shouldIncludeDatabaseVersion={workflow === "amr"}
-      />
-      <PipelineRunsButton sample={sample} workflow={workflow} />
+      {currentRun && (
+        <PipelineVersionSelect
+          sampleId={get("id", sample)}
+          currentRun={currentRun}
+          allRuns={getAllRuns()}
+          workflowType={workflow}
+          onVersionChange={onPipelineVersionChange}
+          shouldIncludeDatabaseVersion={workflow === "amr"}
+        />
+      )}
+      {sample && <PipelineRunsButton sample={sample} workflow={workflow} />}
       <Button
         data-testid="sample-details"
         sdsType="primary"
         sdsStyle="minimal"
         isAllCaps={true}
+        disabled={!sample}
         onClick={withAnalytics(
           onDetailsClick,
           ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAMPLE_DETAILS_LINK_CLICKED,

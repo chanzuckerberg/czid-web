@@ -12,7 +12,7 @@ interface SampleMessageProps {
   message?: string;
   status?: string;
   subtitle?: string;
-  type?: string;
+  type: string;
   analyticsEventName?: string;
   analyticsEventData?: object;
 }

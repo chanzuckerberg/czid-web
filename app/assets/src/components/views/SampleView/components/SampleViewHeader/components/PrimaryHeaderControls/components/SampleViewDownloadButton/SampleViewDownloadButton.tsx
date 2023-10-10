@@ -3,7 +3,7 @@ import { trackEvent } from "~/api/analytics";
 import { openUrl } from "~/components/utils/links";
 import { WorkflowType } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
@@ -18,7 +18,7 @@ interface SampleViewDownloadButtonProps {
   hasAppliedFilters: boolean;
   getDownloadReportTableWithAppliedFiltersLink: () => string;
   reportMetadata: ReportMetadata;
-  backgroundId: number;
+  backgroundId: number | null;
   currentTab: CurrentTabSample;
 }
 

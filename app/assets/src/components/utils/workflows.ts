@@ -140,7 +140,7 @@ export const workflowIsBeta = (
   workflow: WorkflowType,
   allowedFeatures: string[],
 ) => {
-  const betaWorkflows = [];
+  const betaWorkflows: WorkflowType[] = [];
   if (!allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE)) {
     betaWorkflows.push(WorkflowType.LONG_READ_MNGS);
   }

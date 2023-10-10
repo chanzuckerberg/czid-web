@@ -14,7 +14,7 @@ export interface CoverageVizBottomSidebarProps {
   sampleId: number;
   pipelineVersion: string;
   nameType: string;
-  snapshotShareId: string;
+  snapshotShareId?: string;
   workflow: string;
 }
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { WorkflowType } from "~/components/utils/workflows";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
@@ -11,15 +11,14 @@ import { SampleViewSaveButton } from "./components/SampleViewSaveButton";
 import { ShareButtonPopUp } from "./components/ShareButtonPopUp";
 import cs from "./primary_header_controls.scss";
 export interface PrimaryHeaderControlsProps {
-  backgroundId?: number;
-  currentRun: WorkflowRun | PipelineRun;
+  backgroundId: number | null;
+  currentRun?: WorkflowRun | PipelineRun | null;
   currentTab: CurrentTabSample;
-  getDownloadReportTableWithAppliedFiltersLink?: () => string;
+  getDownloadReportTableWithAppliedFiltersLink: () => string;
   hasAppliedFilters: boolean;
-  onShareClick: () => void;
-  onDeleteRunSuccess: () => void;
+  onDeleteRunSuccess: (sample: Sample) => void;
   reportMetadata: ReportMetadata;
-  sample: Sample;
+  sample: Sample | null;
   view: string;
   workflow: WorkflowType;
 }
@@ -30,7 +29,6 @@ export const PrimaryHeaderControls = ({
   currentTab,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
-  onShareClick,
   onDeleteRunSuccess,
   reportMetadata,
   sample,
@@ -39,41 +37,45 @@ export const PrimaryHeaderControls = ({
 }: PrimaryHeaderControlsProps): JSX.Element => {
   return (
     <div className={cs.controlsBottomRowContainer}>
-      <ShareButtonPopUp onShareClick={onShareClick} />
-      <SampleViewSaveButton
-        className={cs.controlElement}
-        sampleId={sample?.id}
-        view={view}
-        workflow={workflow}
-      />
-      <SampleViewDownloadButton
-        backgroundId={backgroundId}
-        className={cs.controlElement}
-        currentRun={currentRun}
-        currentTab={currentTab}
-        getDownloadReportTableWithAppliedFiltersLink={
-          getDownloadReportTableWithAppliedFiltersLink
-        }
-        hasAppliedFilters={hasAppliedFilters}
-        reportMetadata={reportMetadata}
-        sample={sample}
-        view={view}
-        workflow={workflow}
-      />
-      <SampleViewHelpButton
-        className={cs.controlElement}
-        sample={sample}
-        workflow={workflow}
-      />
-      <SampleViewOverflowMenu
-        className={cs.controlElement}
-        currentRun={currentRun}
-        currentTab={currentTab}
-        onDeleteRunSuccess={onDeleteRunSuccess}
-        reportMetadata={reportMetadata}
-        sample={sample}
-        workflow={workflow}
-      />
+      {sample && currentRun && (
+        <>
+          <ShareButtonPopUp sampleId={sample?.id} />
+          <SampleViewSaveButton
+            className={cs.controlElement}
+            sampleId={sample?.id}
+            view={view}
+            workflow={workflow}
+          />
+          <SampleViewDownloadButton
+            backgroundId={backgroundId}
+            className={cs.controlElement}
+            currentRun={currentRun}
+            currentTab={currentTab}
+            getDownloadReportTableWithAppliedFiltersLink={
+              getDownloadReportTableWithAppliedFiltersLink
+            }
+            hasAppliedFilters={hasAppliedFilters}
+            reportMetadata={reportMetadata}
+            sample={sample}
+            view={view}
+            workflow={workflow}
+          />
+          <SampleViewHelpButton
+            className={cs.controlElement}
+            sample={sample}
+            workflow={workflow}
+          />
+          <SampleViewOverflowMenu
+            className={cs.controlElement}
+            currentRun={currentRun}
+            currentTab={currentTab}
+            onDeleteRunSuccess={() => onDeleteRunSuccess(sample)}
+            reportMetadata={reportMetadata}
+            sample={sample}
+            workflow={workflow}
+          />
+        </>
+      )}
     </div>
   );
 };

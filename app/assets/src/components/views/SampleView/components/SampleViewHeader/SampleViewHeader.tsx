@@ -9,7 +9,7 @@ import {
   WorkflowType,
 } from "~/components/utils/workflows";
 import Project from "~/interface/project";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
@@ -19,22 +19,21 @@ import { SecondaryHeaderControls } from "./components/SecondaryHeaderControls";
 import cs from "./sample_view_header.scss";
 
 interface SampleViewHeaderProps {
-  backgroundId?: number;
-  currentRun: WorkflowRun | PipelineRun;
+  backgroundId: number | null;
+  currentRun?: WorkflowRun | PipelineRun | null;
   currentTab: CurrentTabSample;
-  getDownloadReportTableWithAppliedFiltersLink?: () => string;
+  getDownloadReportTableWithAppliedFiltersLink: () => string;
   hasAppliedFilters: boolean;
   onDetailsClick: () => void;
   onPipelineVersionChange: (newPipelineVersion: string) => void;
-  onShareClick: () => void;
   pipelineVersions?: string[];
-  project: Project;
+  project: Project | null;
   projectSamples: Pick<Sample, "id" | "name">[];
   reportMetadata: ReportMetadata;
-  sample: Sample;
+  sample: Sample | null;
   snapshotShareId?: string;
   view: string;
-  onDeleteRunSuccess: () => void;
+  onDeleteRunSuccess: (sample: Sample) => void;
 }
 
 export const SampleViewHeader = ({
@@ -51,7 +50,6 @@ export const SampleViewHeader = ({
   sample,
   snapshotShareId,
   view,
-  onShareClick,
   onDeleteRunSuccess,
 }: SampleViewHeaderProps) => {
   const getBreadcrumbLink = () => {
@@ -65,8 +63,8 @@ export const SampleViewHeader = ({
 
   const getAllRunsPerWorkflow = () => {
     const runsByType =
-      get("workflow_runs", sample) &&
-      get("workflow_runs", sample).filter(run => run.workflow === workflow);
+      sample?.workflow_runs &&
+      sample.workflow_runs.filter(run => run.workflow === workflow);
     return isMngsWorkflow(workflow) ? get("pipeline_runs", sample) : runsByType;
   };
 
@@ -77,25 +75,27 @@ export const SampleViewHeader = ({
           <ViewHeader.Pretitle breadcrumbLink={getBreadcrumbLink()}>
             {project ? project.name : ""}
           </ViewHeader.Pretitle>
-          <ViewHeader.Title
-            label={get("name", sample)}
-            id={sample && sample?.id}
-            options={projectSamples.map(sample => ({
-              label: sample?.name,
-              id: sample?.id,
-              onClick: () => {
-                openUrl(
-                  generateUrlToSampleView({
-                    sampleId: sample?.id,
-                    snapshotShareId,
-                  }),
-                );
-                trackEvent("SampleView_header-title_clicked", {
-                  sampleId: sample?.id,
-                });
-              },
-            }))}
-          />
+          {sample && (
+            <ViewHeader.Title
+              label={sample.name}
+              id={sample.id}
+              options={projectSamples.map(sample => ({
+                label: sample.name,
+                id: sample.id,
+                onClick: () => {
+                  openUrl(
+                    generateUrlToSampleView({
+                      sampleId: sample.id,
+                      snapshotShareId,
+                    }),
+                  );
+                  trackEvent("SampleView_header-title_clicked", {
+                    sampleId: sample.id,
+                  });
+                },
+              }))}
+            />
+          )}
         </ViewHeader.Content>
         {!snapshotShareId && (
           <ViewHeader.Controls>
@@ -115,7 +115,6 @@ export const SampleViewHeader = ({
                 getDownloadReportTableWithAppliedFiltersLink
               }
               hasAppliedFilters={hasAppliedFilters}
-              onShareClick={onShareClick}
               onDeleteRunSuccess={onDeleteRunSuccess}
               reportMetadata={reportMetadata}
               sample={sample}

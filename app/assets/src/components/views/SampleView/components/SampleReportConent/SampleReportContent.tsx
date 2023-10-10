@@ -13,7 +13,7 @@ import cs from "./sample_report_content.scss";
 export interface SampleReportContentProps {
   loadingResults: boolean;
   children: React.ReactNode;
-  workflowRun: WorkflowRun | null | undefined;
+  workflowRun?: WorkflowRun | null;
   sample: Sample;
   loadingInfo: {
     message: string;

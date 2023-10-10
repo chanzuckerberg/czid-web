@@ -56,8 +56,7 @@ import {
   getAllGeneraPathogenCounts,
   getGeneraPathogenCounts,
 } from "~/helpers/taxon";
-import { copyShortUrlToClipboard } from "~/helpers/url";
-import ReportMetadata from "~/interface/reportMetaData";
+import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
   AmrDeprectatedData,
@@ -67,6 +66,7 @@ import {
   CurrentTabSample,
   FilterSelections,
   Lineage,
+  ModalsVisible,
   RawReportData,
   SampleReportViewMode,
   SampleViewProps,
@@ -152,7 +152,7 @@ const SampleView = ({
   );
   const [currentTab, setCurrentTab] =
     useState<CurrentTabSample>(currentTabFromUrl);
-  // here we initially set the selected option taking into account the url and local storage
+  // initially set the selected options taking into account the url and local storage
   const [selectedOptions, dispatchSelectedOptions] = useReducer(
     selectedOptionsReducer,
     {
@@ -173,13 +173,13 @@ const SampleView = ({
   const [ownedBackgrounds, setOwnedBackgrounds] = useState<Background[]>([]);
   const [otherBackgrounds, setOtherBackgrounds] = useState<Background[]>([]);
   const [hasPersistedBackground, setHasPersistedBackground] =
-    useState<boolean>(null);
+    useState<boolean>(false);
   const [sample, setSample] = useState<Sample | null>(null);
   const [project, setProject] = useState<NumberId | null>(null);
   const [projectSamples, setProjectSamples] = useState<
     Pick<Sample, "id" | "name">[]
   >([]);
-  const [pipelineRun, setPipelineRun] = useState<PipelineRun>(null);
+  const [pipelineRun, setPipelineRun] = useState<PipelineRun | null>(null);
   const [enableMassNormalizedBackgrounds, setEnableMassNormalizedBackgrounds] =
     useState(false);
   const [lineageData, setLineageData] = useState<{ [key: string]: Lineage }>(
@@ -189,9 +189,10 @@ const SampleView = ({
   const [filteredReportData, setFilteredReportData] = useState<Taxon[]>([]);
   const [reportData, setReportData] = useState<Taxon[]>([]);
   const [reportMetadata, setReportMetadata] = useState<ReportMetadata>({});
-  const [workflowRun, setWorkflowRun] = useState<WorkflowRun>(null);
-  const [amrDeprecatedData, setAmrDeprecatedData] =
-    useState<AmrDeprectatedData[]>(null);
+  const [workflowRun, setWorkflowRun] = useState<WorkflowRun | null>(null);
+  const [amrDeprecatedData, setAmrDeprecatedData] = useState<
+    AmrDeprectatedData[] | null
+  >(null);
   const [blastData, setBlastData] = useState<BlastData | Record<string, never>>(
     {},
   );
@@ -214,7 +215,7 @@ const SampleView = ({
     CoverageVizParamsRaw | Record<string, never>
   >({});
   const [coverageVizVisible, setCoverageVizVisible] = useState(false);
-  const [modalsVisible, setModalsVisible] = useState({
+  const [modalsVisible, setModalsVisible] = useState<ModalsVisible>({
     consensusGenomeError: false,
     consensusGenomeCreation: false,
     consensusGenomePrevious: false,
@@ -223,10 +224,10 @@ const SampleView = ({
     blastReads: false,
   });
   const [sidebarMode, setSidebarMode] = useState<
-    "sampleDetails" | "taxonDetails" | null
-  >(null);
+    "sampleDetails" | "taxonDetails"
+  >("sampleDetails");
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [sidebarTaxonData, setSidebarTaxonData] = useState<Taxon>(null);
+  const [sidebarTaxonData, setSidebarTaxonData] = useState<Taxon | null>(null);
 
   const [ignoreProjectBackground] = useState<boolean>(
     !!(
@@ -314,7 +315,7 @@ const SampleView = ({
   }, []);
 
   useEffect(() => {
-    const fetchSample = async () => {
+    const fetchSample = async (sampleId: number) => {
       setLoadingReport(true);
       const sample = await getSample({ snapshotShareId, sampleId });
       sample.id = sampleId;
@@ -336,10 +337,11 @@ const SampleView = ({
 
       setCurrentTab(newCurrentTab);
     };
-
-    fetchSample().catch(error => {
-      console.error(error);
-    });
+    if (sampleId) {
+      fetchSample(sampleId).catch(error => {
+        console.error(error);
+      });
+    }
   }, [snapshotShareId, sampleId, pipelineVersion]);
 
   useEffect(() => {
@@ -354,12 +356,13 @@ const SampleView = ({
       currentTab === WORKFLOW_TABS.CONSENSUS_GENOME ||
       currentTab === WORKFLOW_TABS.AMR
     ) {
-      const newWorkflowRun = find(
-        { workflow: getWorkflowTypeFromLabel(currentTab) },
-        sample?.workflow_runs,
-      );
+      const newWorkflowRun =
+        find(
+          { workflow: getWorkflowTypeFromLabel(currentTab) },
+          sample?.workflow_runs,
+        ) || null;
       setWorkflowRun(newWorkflowRun);
-      setWorkflowRunId(newWorkflowRun?.id);
+      setWorkflowRunId(newWorkflowRun?.id || null);
     }
   }, [currentTab, sample?.workflow_runs]);
 
@@ -376,7 +379,7 @@ const SampleView = ({
 
   useEffect(() => {
     // define function to fetch all background data
-    const fetchBackgrounds = async snapshotShareId => {
+    const fetchBackgrounds = async (snapshotShareId?: string) => {
       setLoadingReport(true);
       const {
         owned_backgrounds: ownedBackgrounds,
@@ -443,7 +446,7 @@ const SampleView = ({
           let hasHighlightedChildren = false;
           const childrenSpecies =
             rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
-          const speciesData = childrenSpecies.map((speciesTaxId: number) => {
+          const speciesData = childrenSpecies?.map((speciesTaxId: number) => {
             const isHighlighted = highlightedTaxIds.has(speciesTaxId);
             hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
             const speciesInfo =
@@ -467,7 +470,7 @@ const SampleView = ({
           );
         });
       }
-      setDisplayName({ reportData, nameType: selectedOptions.nameType });
+      setDisplayName({ reportData, nameType: selectedOptions?.nameType });
       // filter report data based on selected options
       dispatchSelectedOptions({
         type: "filterReportData",
@@ -488,14 +491,15 @@ const SampleView = ({
         },
       });
     },
-    [allowedFeatures, currentTab, selectedOptions.nameType],
+    [allowedFeatures, currentTab, selectedOptions?.nameType],
   );
 
   const fetchSampleReportData = useCallback(
-    async ({ backgroundId }: { backgroundId?: number } = {}) => {
-      let selectedBackground = backgrounds.find(
-        background => selectedOptions.background === background.id,
-      );
+    async ({ backgroundId }: { backgroundId?: number | null } = {}) => {
+      let selectedBackground =
+        backgrounds.find(
+          background => selectedOptions.background === background.id,
+        ) || null;
       if (
         (!ignoreProjectBackground && isEmpty(selectedBackground)) ||
         (!enableMassNormalizedBackgrounds &&
@@ -545,7 +549,7 @@ const SampleView = ({
       enableMassNormalizedBackgrounds,
       sampleId,
       currentTab,
-      selectedOptions.background,
+      selectedOptions?.background,
       snapshotShareId,
       pipelineVersion,
       processRawSampleReportData,
@@ -553,25 +557,26 @@ const SampleView = ({
   );
 
   const persistNewBackgroundModelSelection = useCallback(
-    async ({ newBackgroundId }: { newBackgroundId: number }) => {
+    async ({ newBackgroundId }: { newBackgroundId: number | null }) => {
       const persistBackgroundApi = !hasPersistedBackground
         ? createPersistedBackground
         : updatePersistedBackground;
-      await persistBackgroundApi({
-        projectId: project?.id,
-        backgroundId: newBackgroundId,
-      }).catch((error: Error) => {
-        logError({
-          message: "SampleView: Failed to persist background model selection",
-          details: {
-            error,
-            projectId: project?.id,
-            backgroundId: newBackgroundId,
-            hasExistingPersistedBackground: hasPersistedBackground,
-          },
-        });
-        console.error(error);
-      });
+      project?.id &&
+        (await persistBackgroundApi({
+          projectId: project?.id,
+          backgroundId: newBackgroundId,
+        }).catch((error: Error) => {
+          logError({
+            message: "SampleView: Failed to persist background model selection",
+            details: {
+              error,
+              projectId: project?.id,
+              backgroundId: newBackgroundId,
+              hasExistingPersistedBackground: hasPersistedBackground,
+            },
+          });
+          console.error(error);
+        }));
     },
     [hasPersistedBackground, project?.id],
   );
@@ -593,7 +598,7 @@ const SampleView = ({
   );
 
   const handleInvalidBackgroundSelection = useCallback(
-    ({ invalidBackgroundId }: { invalidBackgroundId: number }) => {
+    ({ invalidBackgroundId }: { invalidBackgroundId: number | null }) => {
       const invalidBackground = backgrounds.find(
         background => invalidBackgroundId === background.id,
       );
@@ -608,7 +613,7 @@ const SampleView = ({
     [backgrounds, handleDeliberateOptionChanged],
   );
 
-  const previousBackground = useRef(undefined);
+  const previousBackground = useRef<number | null | undefined>(undefined);
 
   useEffect(() => {
     if (!sample?.pipeline_runs || sample?.pipeline_runs?.length === 0) {
@@ -620,31 +625,31 @@ const SampleView = ({
       return;
     }
     if (
-      selectedOptions.background !== previousBackground.current ||
+      selectedOptions?.background !== previousBackground.current ||
       prevPipelineVersion !== pipelineVersion
     ) {
       fetchSampleReportData({
-        backgroundId: selectedOptions.background,
+        backgroundId: selectedOptions?.background,
       })
         .then(successfullyFetchedSampleReportData => {
           // if project background is different than background
-          previousBackground.current = selectedOptions.background;
+          previousBackground.current = selectedOptions?.background || null;
           if (successfullyFetchedSampleReportData) {
             if (!ignoreProjectBackground) {
               persistNewBackgroundModelSelection({
-                newBackgroundId: selectedOptions.background,
+                newBackgroundId: selectedOptions?.background,
               });
             }
           } else {
             handleInvalidBackgroundSelection({
-              invalidBackgroundId: selectedOptions.background,
+              invalidBackgroundId: selectedOptions?.background,
             });
           }
         })
         .catch(err => console.error(err));
     }
   }, [
-    selectedOptions.background,
+    selectedOptions?.background,
     ignoreProjectBackground,
     fetchSampleReportData,
     hasPersistedBackground,
@@ -663,7 +668,7 @@ const SampleView = ({
   useEffect(() => {
     const fetchProjectSamples = async (
       projectId: number,
-      snapshotShareId: string,
+      snapshotShareId?: string,
     ) => {
       // only really need sample names and ids, so request the basic version without extra details
       const projectSamples: {
@@ -698,22 +703,24 @@ const SampleView = ({
       }),
     );
   }, [
-    selectedOptions.annotations,
-    selectedOptions.flags,
-    selectedOptions.taxa,
-    selectedOptions.categories,
-    selectedOptions.thresholdsShortReads,
-    selectedOptions.thresholdsLongReads,
-    selectedOptions.readSpecificity,
+    selectedOptions?.annotations,
+    selectedOptions?.flags,
+    selectedOptions?.taxa,
+    selectedOptions?.categories,
+    selectedOptions?.thresholdsShortReads,
+    selectedOptions?.thresholdsLongReads,
+    selectedOptions?.readSpecificity,
     currentTab,
     reportData,
   ]);
 
   const shouldShowCoverageViz =
-    isPipelineFeatureAvailable(
-      COVERAGE_VIZ_FEATURE,
-      get("pipeline_version", pipelineRun),
-    ) || currentTab === WORKFLOW_TABS.LONG_READ_MNGS;
+    (pipelineRun?.pipeline_version &&
+      isPipelineFeatureAvailable(
+        COVERAGE_VIZ_FEATURE,
+        pipelineRun?.pipeline_version,
+      )) ||
+    currentTab === WORKFLOW_TABS.LONG_READ_MNGS;
 
   useEffect(() => {
     const fetchCoverageVizData = async () => {
@@ -742,9 +749,12 @@ const SampleView = ({
     ) {
       const newRun = find(
         { pipeline_version: newPipelineVersion },
-        sample.pipeline_runs,
+        sample?.pipeline_runs,
       );
-
+      if (!newRun) {
+        console.error("No run found for the selected pipeline version");
+        return;
+      }
       setPipelineRun(newRun);
       setPipelineVersion(newPipelineVersion);
       setFilteredReportData([]);
@@ -756,14 +766,18 @@ const SampleView = ({
       const workflowVal: WorkflowType = getWorkflowTypeFromLabel(currentTab);
       const newRun = find(
         { wdl_version: newPipelineVersion, workflow: workflowVal },
-        sample.workflow_runs,
+        sample?.workflow_runs,
       );
+      if (!newRun) {
+        console.error("No run found for the selected pipeline version");
+        return;
+      }
       setWorkflowRun(newRun);
-      setPipelineVersion(newPipelineVersion);
+      setWorkflowRunId(newRun.id);
     }
   };
 
-  const handleDeleteCurrentRun = () => {
+  const handleDeleteCurrentRun = (sample: Sample) => {
     const workflowCount = getWorkflowCount(sample);
     const workflow = getWorkflowTypeFromLabel(currentTab);
 
@@ -797,13 +811,19 @@ const SampleView = ({
     const runType = isMngsWorkflow(workflow)
       ? "pipeline_runs"
       : "workflow_runs";
-    const runs: { id: number }[] = sample[runType];
+
+    const runs: { id: number }[] = sample[runType] || [];
 
     // filter out the current run
-    const newRuns = runs.filter(run => run.id !== getCurrentRun().id);
+    const currentRun = getCurrentRun();
+    const newRuns =
+      (currentRun && runs.filter(run => run.id !== currentRun.id)) || [];
 
     // update the workflowCount object
-    workflowCount[workflow] -= 1;
+    const count = workflowCount[workflow];
+    if (count) {
+      workflowCount[workflow] = count - 1;
+    }
 
     const nextTab = determineInitialTab({
       initialWorkflow: sample.initial_workflow,
@@ -812,7 +832,6 @@ const SampleView = ({
     });
 
     // update the state to remove the current run and change the tab
-
     setSample({
       ...sample,
       [runType]: newRuns,
@@ -841,9 +860,8 @@ const SampleView = ({
   };
 
   useEffect(() => {
-    setDisplayName({ reportData, nameType: selectedOptions.nameType });
+    setDisplayName({ reportData, nameType: selectedOptions?.nameType });
     setReportData([...reportData]);
-    // this should be removed when we don't have to also support the Class component of SampleView
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedOptions?.nameType]);
 
@@ -879,6 +897,7 @@ const SampleView = ({
 
   const handleConsensusGenomeKickoff = async (
     consensusGenomeParams: ConsensusGenomeParams,
+    sample: Sample,
   ) => {
     const workflowRuns = await kickoffConsensusGenome({
       sampleId: sample.id,
@@ -903,11 +922,11 @@ const SampleView = ({
     });
   };
 
-  const handleConsensusGenomeClick = ({
-    percentIdentity,
-    taxId,
-    taxName,
-  }: ConsensusGenomeClick) => {
+  const handleConsensusGenomeClick = (
+    params: ConsensusGenomeClick,
+    sample: Sample,
+  ) => {
+    const { percentIdentity, taxId, taxName } = params;
     const accessionData = get(taxId, coverageVizDataByTaxon);
     const usedAccessions = uniq(
       map("inputs.accession_id", get(taxId, getConsensusGenomeData(sample))),
@@ -924,11 +943,11 @@ const SampleView = ({
   };
 
   // Clicking the HoverAction to open the previous CG modal
-  const handlePreviousConsensusGenomeClick = ({
-    percentIdentity,
-    taxId,
-    taxName,
-  }: ConsensusGenomeClick) => {
+  const handlePreviousConsensusGenomeClick = (
+    params: ConsensusGenomeClick,
+    sample: Sample,
+  ) => {
+    const { percentIdentity, taxId, taxName } = params;
     const previousRuns = get(taxId, getConsensusGenomeData(sample));
     handleModalAction([["open", "consensusGenomePrevious"]]);
     setConsensusGenomePreviousParams({
@@ -941,18 +960,19 @@ const SampleView = ({
 
   const onConsensusGenomeCreation = async (
     consensusGenomeCreationParams: ConsensusGenomeParams,
+    sample: Sample,
   ) => {
     try {
       // Save the creation parameters if kickoff fails and we need to retry.
       setConsensusGenomeCreationParams(consensusGenomeCreationParams);
-      await handleConsensusGenomeKickoff(consensusGenomeCreationParams);
+      await handleConsensusGenomeKickoff(consensusGenomeCreationParams, sample);
     } catch (error) {
       console.error(error);
       trackEvent(
         ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_KICKOFF_FAILED,
         {
           error,
-          sampleId: sample.id,
+          sampleId: sample?.id,
           ...consensusGenomeCreationParams,
         },
       );
@@ -989,7 +1009,9 @@ const SampleView = ({
     setBlastModalInfo(blastModalInfo);
   };
 
-  const handleModalAction = (modals: ["close" | "open", string][]) => {
+  const handleModalAction = (
+    modals: ["close" | "open", keyof ModalsVisible][],
+  ) => {
     const newModalsVisible = { ...modalsVisible };
     modals.forEach(modal => {
       newModalsVisible[modal[1]] = modal[0] === "open";
@@ -997,14 +1019,14 @@ const SampleView = ({
     setModalsVisible(newModalsVisible);
   };
 
-  const handleConsensusGenomeErrorModalRetry = async () => {
+  const handleConsensusGenomeErrorModalRetry = async (sample: Sample) => {
     try {
-      await handleConsensusGenomeKickoff(consensusGenomeCreationParams);
+      await handleConsensusGenomeKickoff(consensusGenomeCreationParams, sample);
       trackEvent(
         ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_ERROR_MODAL_RETRY_BUTTON_CLICKED,
         {
           ...consensusGenomeCreationParams,
-          sampleId: sample.id,
+          sampleId: sample?.id,
         },
       );
     } catch (error) {
@@ -1013,14 +1035,14 @@ const SampleView = ({
         ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED,
         {
           error,
-          sampleId: sample.id,
+          sampleId: sample?.id,
           ...consensusGenomeCreationParams,
         },
       );
     }
   };
 
-  const handleMetadataUpdate = (key: string, value: string) => {
+  const handleMetadataUpdate = (key: string, value: string, sample: Sample) => {
     if (key === "name") {
       setSample({
         ...sample,
@@ -1030,7 +1052,7 @@ const SampleView = ({
   };
 
   const clearAllFilters = () => {
-    const newSelectedOptions = { ...selectedOptions };
+    const newSelectedOptions: FilterSelections = { ...selectedOptions };
     newSelectedOptions.categories = {};
     newSelectedOptions.taxa = [];
     // Only clear thresholds filters that apply to the current tab
@@ -1052,23 +1074,24 @@ const SampleView = ({
   };
 
   const getCurrentRun = () => {
-    if (PIPELINE_RUN_TABS.includes(currentTab)) {
+    // if the current tab is a pipeline run tab, return the pipeline run
+    if (PIPELINE_RUN_TABS.includes(currentTab) && pipelineRun) {
       return pipelineRun;
     }
-
-    if (sample && sample.workflow_runs.length > 0) {
+    // otherwise it will be a workflow run tab
+    if (sample && sample?.workflow_runs && sample?.workflow_runs?.length > 0) {
+      // if the workflow_runs and a workflowRunId is set, return that specific workflow run
       if (workflowRunId) {
         return find({ id: workflowRunId }, sample.workflow_runs);
       }
-
+      // if the workflowRun is set and is the same as the currentTab workflow run return it
       const workflowType = getWorkflowTypeFromLabel(currentTab);
-
       if (workflowRun && workflowRun.workflow === workflowType) {
         return workflowRun;
       }
-
+      // if there is a pipeline version, use that to choose which workflow run to return
       if (pipelineVersion) {
-        return sample.workflow_runs.find(run => {
+        return sample?.workflow_runs?.find(run => {
           if (run.workflow === workflowType && !!run.wdl_version) {
             return run.wdl_version === pipelineVersion;
           } else {
@@ -1076,11 +1099,14 @@ const SampleView = ({
           }
         });
       } else {
+        // otherwise return the first workflow run of the currentTab workflow type
         return head(
-          sample.workflow_runs.filter(run => run.workflow === workflowType),
+          sample?.workflow_runs?.filter(run => run.workflow === workflowType),
         );
       }
     }
+    // if there is no pipeline run or workflow run,
+    return null;
   };
 
   const handleViewClick = ({ view }: { view: SampleReportViewMode }) => {
@@ -1108,31 +1134,29 @@ const SampleView = ({
     setWorkflowRunId(workflowRun.id);
   };
 
-  const handleShareClick = () => {
-    copyShortUrlToClipboard();
-    trackEvent("SampleView_share-button_clicked", {
-      sampleId: sample && sample.id,
-    });
-  };
-
   const refreshDataFromOptionsChange = (x: {
     key: string;
     newSelectedOptions: FilterSelections;
   }) => {
-    // translation for cc to fc transition
     dispatchSelectedOptions({ type: "clear", payload: x.newSelectedOptions });
   };
 
+  const currentRun = getCurrentRun();
+  const background =
+    backgrounds.find(
+      background => selectedOptions?.background === background.id,
+    ) || null;
+
   return (
-    <React.Fragment>
+    <>
       <NarrowContainer className={cs.sampleViewContainer}>
         <SampleViewHeader
           backgroundId={
-            isNaN(selectedOptions.background)
+            isNaN(Number(selectedOptions?.background))
               ? null
-              : selectedOptions.background
+              : selectedOptions?.background
           }
-          currentRun={getCurrentRun()}
+          currentRun={currentRun}
           currentTab={currentTab}
           getDownloadReportTableWithAppliedFiltersLink={
             getDownloadReportTableWithAppliedFiltersLink
@@ -1140,7 +1164,6 @@ const SampleView = ({
           hasAppliedFilters={hasAppliedFilters(currentTab, selectedOptions)}
           onDetailsClick={toggleSampleDetailsSidebar}
           onPipelineVersionChange={handlePipelineVersionSelect}
-          onShareClick={handleShareClick}
           project={project}
           projectSamples={projectSamples}
           reportMetadata={reportMetadata}
@@ -1159,7 +1182,7 @@ const SampleView = ({
           amrDeprecatedData={amrDeprecatedData}
           backgrounds={backgrounds}
           currentTab={currentTab}
-          currentRun={getCurrentRun()}
+          currentRun={currentRun}
           clearAllFilters={clearAllFilters}
           enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
           filteredReportData={filteredReportData}
@@ -1188,68 +1211,74 @@ const SampleView = ({
           view={view}
         />
       </NarrowContainer>
-      <DetailsSidebarSwitcher
-        handleMetadataUpdate={handleMetadataUpdate}
-        handleWorkflowRunSelect={handleChangeWorkflowRun}
-        handleTabChange={setCurrentTab}
-        getCurrentRun={getCurrentRun}
-        closeSidebar={() => setSidebarVisible(false)}
-        currentTab={currentTab}
-        snapshotShareId={snapshotShareId}
-        sidebarVisible={sidebarVisible}
-        sidebarMode={sidebarMode}
-        sample={sample}
-        backgrounds={backgrounds}
-        selectedOptions={selectedOptions}
-        sidebarTaxonData={sidebarTaxonData}
-      />
-      {sample &&
-        (isPipelineFeatureAvailable(
-          COVERAGE_VIZ_FEATURE,
-          get("pipeline_version", pipelineRun),
-        ) ||
-          currentTab === WORKFLOW_TABS.LONG_READ_MNGS) && (
-          <CoverageVizBottomSidebar
-            nameType={selectedOptions.nameType}
-            onBlastClick={handleBlastClick}
-            onClose={withAnalytics(
-              () => setCoverageVizVisible(false),
-              "SampleView_coverage-viz-sidebar_closed",
-              {
-                sampleId: sample.id,
-                sampleName: sample.name,
-              },
-            )}
-            params={getCoverageVizParams(
-              coverageVizParams,
-              coverageVizDataByTaxon,
-            )}
-            pipelineVersion={pipelineRun.pipeline_version}
-            sampleId={sample.id}
+      {shouldShowCoverageViz && pipelineRun?.pipeline_version && sample && (
+        <CoverageVizBottomSidebar
+          nameType={selectedOptions?.nameType}
+          onBlastClick={handleBlastClick}
+          onClose={withAnalytics(
+            () => setCoverageVizVisible(false),
+            "SampleView_coverage-viz-sidebar_closed",
+            {
+              sampleId: sample.id,
+              sampleName: sample.name,
+            },
+          )}
+          params={getCoverageVizParams(
+            coverageVizParams,
+            coverageVizDataByTaxon,
+          )}
+          pipelineVersion={pipelineRun.pipeline_version}
+          sampleId={sample.id}
+          snapshotShareId={snapshotShareId}
+          visible={coverageVizVisible}
+          workflow={sample.initial_workflow}
+        />
+      )}
+      {sample && currentRun && (
+        <>
+          <DetailsSidebarSwitcher
+            handleMetadataUpdate={(key, value) =>
+              handleMetadataUpdate(key, value, sample)
+            }
+            handleWorkflowRunSelect={handleChangeWorkflowRun}
+            handleTabChange={setCurrentTab}
+            currentRun={currentRun}
+            closeSidebar={() => setSidebarVisible(false)}
+            currentTab={currentTab}
             snapshotShareId={snapshotShareId}
-            visible={coverageVizVisible}
-            workflow={sample.initial_workflow}
+            sidebarVisible={sidebarVisible}
+            sidebarMode={sidebarMode}
+            sample={sample}
+            background={background}
+            sidebarTaxonData={sidebarTaxonData}
           />
-        )}
-      <ModalManager
-        blastData={blastData}
-        blastModalInfo={blastModalInfo}
-        consensusGenomeData={consensusGenomeData}
-        consensusGenomePreviousParams={consensusGenomePreviousParams}
-        handleBlastSelectionModalContinue={handleBlastSelectionModalContinue}
-        handleConsensusGenomeClick={handleConsensusGenomeClick}
-        handleConsensusGenomeErrorModalRetry={
-          handleConsensusGenomeErrorModalRetry
-        }
-        handleModalAction={handleModalAction}
-        handlePreviousConsensusGenomeReportClick={
-          handlePreviousConsensusGenomeReportClick
-        }
-        onConsensusGenomeCreation={onConsensusGenomeCreation}
-        modalsVisible={modalsVisible}
-        sample={sample}
-      />
-    </React.Fragment>
+          <ModalManager
+            blastData={blastData}
+            blastModalInfo={blastModalInfo}
+            consensusGenomeData={consensusGenomeData}
+            consensusGenomePreviousParams={consensusGenomePreviousParams}
+            handleBlastSelectionModalContinue={
+              handleBlastSelectionModalContinue
+            }
+            handleConsensusGenomeClick={params =>
+              handleConsensusGenomeClick(params, sample)
+            }
+            handleConsensusGenomeErrorModalRetry={() =>
+              handleConsensusGenomeErrorModalRetry(sample)
+            }
+            handleModalAction={handleModalAction}
+            handlePreviousConsensusGenomeReportClick={
+              handlePreviousConsensusGenomeReportClick
+            }
+            onConsensusGenomeCreation={params =>
+              onConsensusGenomeCreation(params, sample)
+            }
+            modalsVisible={modalsVisible}
+            sample={sample}
+          />
+        </>
+      )}
+    </>
   );
 };
 

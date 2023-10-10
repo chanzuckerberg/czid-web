@@ -32,7 +32,7 @@ export type URL_FIELDS = {
   tempSelectedOptions?: object;
   view: string;
   currentTab: string;
-  workflowRunId: number;
+  workflowRunId: number | null;
 };
 
 export type LOCAL_STORAGE_FIELDS = {

@@ -10,7 +10,7 @@ import { TaxonValuesType } from "../TaxonDetailsMode";
 import cs from "./taxon_histogram.scss";
 
 interface TaxonHistogramProps {
-  background: Background;
+  background: Background | null;
   taxonId: number;
   taxonValues: TaxonValuesType;
 }
@@ -87,7 +87,7 @@ export const TaxonHistogram = ({
     if (!isLoading && shouldShowHistogram) renderHistogram();
   }, [isLoading]);
 
-  if (!shouldShowHistogram) return null;
+  if (!shouldShowHistogram || !background) return null;
 
   return (
     <>

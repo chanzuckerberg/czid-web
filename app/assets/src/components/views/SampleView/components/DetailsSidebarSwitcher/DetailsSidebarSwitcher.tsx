@@ -6,43 +6,43 @@ import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/Sampl
 import { TaxonDetailsModeProps } from "~/components/common/DetailsSidebar/TaxonDetailsMode";
 import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
+import { CurrentTabSample } from "~/interface/sampleView";
 import { Background, PipelineRun, Taxon } from "~/interface/shared";
 
 interface DetailsSidebarSwitcherProps {
   handleMetadataUpdate: (key: string, value: string) => void;
   handleWorkflowRunSelect: (workflowRun: WorkflowRun) => void;
   handleTabChange: (tab: CurrentTabSample) => void;
-  getCurrentRun: () => WorkflowRun | PipelineRun;
+  currentRun: WorkflowRun | PipelineRun;
   currentTab: CurrentTabSample;
-  snapshotShareId: string;
+  snapshotShareId?: string;
   closeSidebar: () => void;
   sidebarVisible: boolean;
   sidebarMode: "taxonDetails" | "sampleDetails";
   sample: Sample;
-  backgrounds: Background[];
-  selectedOptions: FilterSelections;
-  sidebarTaxonData: Taxon;
+  background: Background | null;
+  sidebarTaxonData: Taxon | null;
 }
 
 export const DetailsSidebarSwitcher = ({
+  background,
   handleMetadataUpdate,
   handleWorkflowRunSelect,
   handleTabChange,
-  getCurrentRun,
+  currentRun,
   currentTab,
   snapshotShareId,
   closeSidebar,
   sidebarVisible,
   sidebarMode,
   sample,
-  backgrounds,
-  selectedOptions,
   sidebarTaxonData,
 }: DetailsSidebarSwitcherProps) => {
-  const getTaxonSideBarParams = (): TaxonDetailsModeProps => {
+  const getTaxonSideBarParams = (
+    sidebarTaxonData: Taxon,
+  ): TaxonDetailsModeProps => {
     return {
-      background: find({ id: selectedOptions.background }, backgrounds),
+      background: background,
       parentTaxonId: (sidebarTaxonData.genus || {}).taxId,
       taxonId: sidebarTaxonData.taxId,
       taxonName: sidebarTaxonData.name,
@@ -62,7 +62,7 @@ export const DetailsSidebarSwitcher = ({
         WORKFLOW_TABS.AMR,
     ]);
     return {
-      currentRun: getCurrentRun(),
+      currentRun: currentRun,
       currentWorkflowTab: currentTab,
       handleWorkflowTabChange: handleTabChange,
       onWorkflowRunSelect: handleWorkflowRunSelect,
@@ -87,8 +87,8 @@ export const DetailsSidebarSwitcher = ({
         },
       )}
       params={
-        sidebarMode === "taxonDetails"
-          ? getTaxonSideBarParams()
+        sidebarMode === "taxonDetails" && sidebarTaxonData
+          ? getTaxonSideBarParams(sidebarTaxonData)
           : getSampleSideBarParams()
       }
     />
