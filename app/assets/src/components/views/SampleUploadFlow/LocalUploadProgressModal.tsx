@@ -96,12 +96,20 @@ const LocalUploadProgressModal = ({
   const [sampleFileCompleted, setSampleFileCompleted] = useState({});
 
   let sampleFilePercentages = {};
+  let wakeLock = null;
 
   const IN_PROGRESS_STATUS = "in progress";
   const ERROR_STATUS = "error";
 
   useEffect(() => {
     initiateLocalUpload();
+
+    // If navigate back to tab, re-acquire wake lock
+    document.addEventListener("visibilitychange", async () => {
+      if (wakeLock !== null && document.visibilityState === "visible") {
+        await acquireScreenLock();
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -110,6 +118,24 @@ const LocalUploadProgressModal = ({
 
     completeLocalUpload();
   }, [sampleUploadStatuses]);
+
+  // Try to prevent the computer going to sleep during upload; this can be rejected e.g. if the battery is low
+  const acquireScreenLock = async () => {
+    try {
+      if ("wakeLock" in navigator) {
+        wakeLock = await navigator.wakeLock.request("screen");
+        wakeLock.addEventListener("release", () => {
+          console.warn("Wake lock was released");
+        });
+      } else {
+        throw new Error("WakeLock API not supported in this browser");
+      }
+      console.warn("Acquired wake lock");
+    } catch (err) {
+      console.error("Failed to acquire wake lock");
+      console.error(err);
+    }
+  };
 
   const initiateLocalUpload = async () => {
     const samplesToUpload = addFlagsToSamples({
@@ -168,6 +194,9 @@ const LocalUploadProgressModal = ({
     });
 
     setLocallyCreatedSamples(createdSamples);
+
+    await acquireScreenLock();
+
     // For each sample, upload sample.input_files to s3
     // Also handles the upload progress bar for each sample
     await uploadSamples(createdSamples);
@@ -207,6 +236,13 @@ const LocalUploadProgressModal = ({
         }
       }),
     );
+
+    // Once the upload is done, release the wake lock
+    if (wakeLock !== null) {
+      console.warn("Releasing wake lock since upload completed...");
+      await wakeLock.release();
+      wakeLock = null;
+    }
 
     clearInterval(heartbeatInterval);
     trackEvent(
