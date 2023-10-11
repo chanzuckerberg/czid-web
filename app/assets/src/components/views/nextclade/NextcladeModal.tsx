@@ -1,11 +1,15 @@
 import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import { difference } from "lodash/fp";
-import React from "react";
+import React, { useContext } from "react";
 import { PopupProps } from "semantic-ui-react";
 import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
 import { validateWorkflowRunIds } from "~/api/access_control";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  TrackEventType,
+  useTrackEvent,
+} from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
 import List from "~/components/ui/List";
@@ -31,6 +35,12 @@ interface NextcladeModalProps {
   workflowEntity?: string;
 }
 
+interface NextcladeModalWithContextProps extends NextcladeModalProps {
+  admin: boolean;
+  userId: number;
+  trackEvent: TrackEventType;
+}
+
 interface NextcladeModalState {
   confirmationModalOpen: boolean;
   errorModalOpen: boolean;
@@ -47,8 +57,8 @@ interface NextcladeModalState {
   referenceTreeContents?: $TSFixMe;
 }
 
-export default class NextcladeModal extends React.Component<
-  NextcladeModalProps,
+class NextcladeModalCC extends React.Component<
+  NextcladeModalWithContextProps,
   NextcladeModalState
 > {
   constructor(props) {
@@ -196,7 +206,7 @@ export default class NextcladeModal extends React.Component<
   };
 
   handleConfirmationModalConfirm = async () => {
-    const { onClose } = this.props;
+    const { onClose, trackEvent } = this.props;
     const { projectIds, validWorkflowRunIds, selectedTreeType } = this.state;
 
     try {
@@ -372,4 +382,21 @@ export default class NextcladeModal extends React.Component<
   }
 }
 
-NextcladeModal.contextType = UserContext;
+// Using a function component wrapper provides a semi-hacky way to
+// access useContext from multiple providers without the class component to function component
+// conversion.
+const NextcladeModal = (props: NextcladeModalProps) => {
+  const { admin, userId } = useContext(UserContext);
+  const trackEvent = useTrackEvent();
+
+  return (
+    <NextcladeModalCC
+      {...props}
+      admin={admin}
+      userId={userId}
+      trackEvent={trackEvent}
+    />
+  );
+};
+
+export default NextcladeModal;

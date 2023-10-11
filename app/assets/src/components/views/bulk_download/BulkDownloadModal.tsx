@@ -14,8 +14,8 @@ import {
 } from "~/api/access_control";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  trackEventFromClassComponent,
+  withAnalyticsFromClassComponent,
 } from "~/api/analytics";
 import {
   createBulkDownload,
@@ -23,6 +23,7 @@ import {
   getBulkDownloadTypes,
 } from "~/api/bulk_downloads";
 import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
+import { GlobalContext } from "~/globalContext/reducer";
 import { getURLParamString } from "~/helpers/url";
 import { Entry } from "~/interface/samplesView";
 import { BulkDownloadType } from "~/interface/shared";
@@ -128,6 +129,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     createError: null,
     userIsCollaboratorOnAllSamples: false,
   };
+  static contextType = GlobalContext;
 
   componentDidMount() {
     this.fetchSampleOptionsAndValidateSelectedSamples();
@@ -285,14 +287,22 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   handleSelectDownloadType = (newSelectedDownloadTypeName: string) => {
     const { workflow } = this.props;
     const { selectedDownloadTypeName } = this.state;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     if (newSelectedDownloadTypeName === selectedDownloadTypeName) {
       return;
     }
 
-    trackEvent("BulkDownloadModal_radio-button-for-download-type_selected", {
-      downloadType: newSelectedDownloadTypeName,
-      workflow,
-    });
+    trackEventFromClassComponent(
+      globalAnalyticsContext,
+      "BulkDownloadModal_radio-button-for-download-type_selected",
+      {
+        downloadType: newSelectedDownloadTypeName,
+        workflow,
+      },
+    );
     this.setState({
       selectedDownloadTypeName: newSelectedDownloadTypeName,
     });
@@ -304,6 +314,10 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     const metric = selectedFields?.["biom_format"]?.["metric"];
     const sortMetric = METRIC_OPTIONS.includes(metric); // check heatmap is sortable on selected metric
     const presets = [];
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
 
     if (metricList) {
       presets.push("thresholdFilters");
@@ -328,8 +342,9 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       }),
     );
 
-    withAnalytics(
-      openUrlInNewTab(`/visualizations/heatmap?${params}`),
+    withAnalyticsFromClassComponent(
+      globalAnalyticsContext,
+      () => openUrlInNewTab(`/visualizations/heatmap?${params}`),
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_BULK_DOWNLOAD_MODAL_CLICKED,
       {
         params,
@@ -344,8 +359,13 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     displayName: string,
   ) => {
     const { workflow } = this.props;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     this.setState(prevState => {
-      trackEvent(
+      trackEventFromClassComponent(
+        globalAnalyticsContext,
         "BulkDownloadModal_dropdown-field-for-download-type_selected",
         {
           downloadType,
@@ -387,6 +407,10 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
   createBulkDownload = async (selectedDownload: $TSFixMe) => {
     const { onGenerate, workflow, workflowEntity } = this.props;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
 
     let objectIds;
 
@@ -407,7 +431,8 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
         createStatus: "error",
         createError: e.error || DEFAULT_CREATION_ERROR,
       });
-      trackEvent(
+      trackEventFromClassComponent(
+        globalAnalyticsContext,
         ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED,
         {
           workflow,
@@ -418,7 +443,8 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       return;
     }
 
-    trackEvent(
+    trackEventFromClassComponent(
+      globalAnalyticsContext,
       ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL,
       {
         workflow,

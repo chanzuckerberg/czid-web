@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
-import { withAnalytics } from "~/api/analytics";
+import { useWithAnalytics } from "~/api/analytics";
 import { WikipediaLicense } from "../WikipediaLicense";
 import cs from "./taxon_description.scss";
 
@@ -27,6 +27,7 @@ export const TaxonDescription = ({
   onExpandAnalyticsId,
   onExpandAnalyticsParams,
 }: TaxonDescriptionProps) => {
+  const withAnalytics = useWithAnalytics();
   const taxonDescriptionRef: LegacyRef<HTMLDivElement> = useRef(null);
 
   const [isTall, setIsTall] = useState<boolean>(false);

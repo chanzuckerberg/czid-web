@@ -1,6 +1,6 @@
 import { flatten, get, map, size, throttle, uniq, upperFirst } from "lodash/fp";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import { EventData, TrackEventType, useTrackEvent } from "~/api/analytics";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import MapBanner from "~/components/views/discovery/mapping/MapBanner";
@@ -30,19 +30,23 @@ interface DiscoveryMapProps {
   zoomBoundaryState?: number;
 }
 
+interface DiscoveryMapWithContextProps extends DiscoveryMapProps {
+  trackEvent: TrackEventType;
+}
+
 interface DiscoveryMapState {
   tooltip?: $TSFixMeUnknown;
   tooltipShouldClose: boolean;
   viewport?: $TSFixMeUnknown;
 }
 
-class DiscoveryMap extends React.Component<
-  DiscoveryMapProps,
+class DiscoveryMapCC extends React.Component<
+  DiscoveryMapWithContextProps,
   DiscoveryMapState
 > {
   onMapLevelChangeThrottled: $TSFixMe;
   trackEventThrottled: $TSFixMe;
-  constructor(props: DiscoveryMapProps) {
+  constructor(props: DiscoveryMapWithContextProps) {
     super(props);
     const { onMapLevelChange } = this.props;
 
@@ -52,7 +56,11 @@ class DiscoveryMap extends React.Component<
     };
 
     // By default throttle includes the trailing event
-    this.trackEventThrottled = throttle(DEFAULT_THROTTLE_MS, trackEvent);
+    this.trackEventThrottled = throttle(
+      DEFAULT_THROTTLE_MS,
+      (eventName: string, eventData: EventData) =>
+        this.props.trackEvent(eventName, eventData),
+    );
     if (onMapLevelChange) {
       this.onMapLevelChangeThrottled = throttle(
         DEFAULT_THROTTLE_MS,
@@ -210,10 +218,19 @@ class DiscoveryMap extends React.Component<
 
 // Zoom boundaries determined via eyeballing.
 // @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
-DiscoveryMap.defaultProps = {
+DiscoveryMapCC.defaultProps = {
   currentTab: "samples",
   zoomBoundaryCountry: 3.5,
   zoomBoundaryState: 5,
+};
+
+// Using a function component wrapper provides a semi-hacky way to
+// access useContext from multiple providers without the class component to function component
+// conversion.
+const DiscoveryMap = (props: DiscoveryMapProps) => {
+  const trackEvent = useTrackEvent();
+
+  return <DiscoveryMapCC {...props} trackEvent={trackEvent} />;
 };
 
 export default DiscoveryMap;

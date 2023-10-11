@@ -19,7 +19,6 @@ import { ThresholdFilterData } from "./dropdown";
 export interface SampleViewProps {
   sampleId?: number;
   snapshotShareId?: string;
-  updateDiscoveryProjectId(projectId: number): void;
 }
 
 export type CurrentTabSample = WorkflowLabelType;

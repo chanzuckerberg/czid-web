@@ -14,7 +14,7 @@ import {
   zipObject,
 } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   completeSampleUpload,
   getUploadCredentials,
@@ -80,6 +80,7 @@ const LocalUploadProgressModal = ({
   wetlabProtocol,
   workflows,
 }: LocalUploadProgressModalProps) => {
+  const trackEvent = useTrackEvent();
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 
   // State variables to manage download state
@@ -185,6 +186,7 @@ const LocalUploadProgressModal = ({
         }));
 
         logUploadStepError({
+          trackEvent,
           step: "createSamples",
           erroredSamples: erroredSampleNames.length,
           uploadType,
@@ -430,6 +432,7 @@ const LocalUploadProgressModal = ({
     });
 
     logUploadStepError({
+      trackEvent,
       step: "sampleUpload",
       erroredSamples: 1,
       uploadType,

@@ -3,16 +3,17 @@ import { Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import React from "react";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
+import { useTrackEvent } from "~/api/analytics";
 import { amrReportTableDownloadWithAppliedFiltersLinkVar } from "~/cache/initialCache";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
+import { logDownloadOption } from "~/components/views/report/utils/download";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import cs from "./amr_download_dropdown.scss";
 import {
   DownloadOptions,
   getAmrDownloadLink,
-  logDownloadOption,
   NONHOST_DOWNLOADS_TOOLTIP,
 } from "./amrDownloadUtils";
 
@@ -29,10 +30,11 @@ export const AmrDownloadDropdown = ({
   workflowRun,
   sample,
 }: AmrDownloadDropdownProps) => {
-  if (!readyToDownload) return null;
+  const trackEvent = useTrackEvent();
   const amrReportTableDownloadWithAppliedFiltersLink = useReactiveVar(
     amrReportTableDownloadWithAppliedFiltersLinkVar,
   );
+  if (!readyToDownload) return null;
 
   const downloadCSV = () => {
     location.href = `/workflow_runs/${workflowRun.id}/amr_report_downloads?downloadType=report_csv`;
@@ -73,6 +75,7 @@ export const AmrDownloadDropdown = ({
     }
 
     logDownloadOption({
+      trackEvent,
       component: "SampleViewControls/AmrDownloadDropdown",
       option,
       details: {

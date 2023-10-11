@@ -1,7 +1,11 @@
 import { Button } from "@czi-sds/components";
 import cx from "classnames";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEventFromClassComponent,
+} from "~/api/analytics";
+import { GlobalContext } from "~/globalContext/reducer";
 
 const WizardContext = React.createContext({
   currentPage: 0,
@@ -30,6 +34,7 @@ class Wizard extends React.Component<WizardProps, WizardState> {
   showPageInfo: boolean;
   skipPageInfoNPages: number;
   labels: Record<string, string>;
+  static contextType = GlobalContext;
   static Page: typeof Page;
   static Action: typeof Action;
   constructor(props) {
@@ -129,13 +134,22 @@ class Wizard extends React.Component<WizardProps, WizardState> {
   advancePage = () => {
     const { children, wizardType } = this.props;
     const { currentPage } = this.state;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
+
     if (currentPage < children.length - 1) {
       this.setState({ currentPage: currentPage + 1 }, () =>
-        trackEvent(ANALYTICS_EVENT_NAMES.WIZARD_PAGE_ADVANCED, {
-          wizard: wizardType,
-          previousPage: this.state.currentPage - 1,
-          currentPage: this.state.currentPage,
-        }),
+        trackEventFromClassComponent(
+          globalAnalyticsContext,
+          ANALYTICS_EVENT_NAMES.WIZARD_PAGE_ADVANCED,
+          {
+            wizard: wizardType,
+            previousPage: this.state.currentPage - 1,
+            currentPage: this.state.currentPage,
+          },
+        ),
       );
       this.resetPageState();
     }

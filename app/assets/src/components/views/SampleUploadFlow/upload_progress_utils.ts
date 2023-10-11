@@ -1,4 +1,4 @@
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, TrackEventType } from "~/api/analytics";
 import { TaxonOption } from "~/components/common/filters/types";
 import {
   NO_TECHNOLOGY_SELECTED,
@@ -160,11 +160,13 @@ export const addAdditionalInputFilesToSamples = ({
 };
 
 export const logUploadStepError = ({
+  trackEvent,
   step,
   erroredSamples,
   uploadType,
   errors,
 }: {
+  trackEvent: TrackEventType;
   step: $TSFixMeUnknown;
   erroredSamples: $TSFixMeUnknown;
   uploadType: $TSFixMeUnknown;

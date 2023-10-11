@@ -1,6 +1,6 @@
 import { get } from "lodash/fp";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import { useTrackEvent } from "~/api/analytics";
 import ViewHeader from "~/components/layout/ViewHeader";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import {
@@ -52,6 +52,7 @@ export const SampleViewHeader = ({
   view,
   onDeleteRunSuccess,
 }: SampleViewHeaderProps) => {
+  const trackEvent = useTrackEvent();
   const getBreadcrumbLink = () => {
     if (!project) return;
     return snapshotShareId

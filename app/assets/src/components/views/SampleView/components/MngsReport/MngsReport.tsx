@@ -1,6 +1,6 @@
 import { isNil } from "lodash";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import { SampleViewMessage } from "~/components/views/SampleView/components/SampleViewMessage";
 import { getConsensusGenomeData } from "~/components/views/SampleView/utils";
@@ -40,6 +40,7 @@ export const MngsReport = ({
   snapshotShareId,
   view,
 }: MngsReportProps) => {
+  const withAnalytics = useWithAnalytics();
   if (
     reportMetadata.reportReady &&
     reportData?.length > 0 &&

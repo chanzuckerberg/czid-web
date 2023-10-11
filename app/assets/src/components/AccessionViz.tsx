@@ -1,5 +1,9 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  useWithAnalytics,
+  WithAnalyticsType,
+} from "~/api/analytics";
 import ReadViz from "./ReadViz";
 
 interface AccessionVizProps {
@@ -14,6 +18,10 @@ interface AccessionVizProps {
   reads_count?: number;
 }
 
+interface AccessionVizWithAnalyticsProps extends AccessionVizProps {
+  withAnalytics: WithAnalyticsType;
+}
+
 interface AccessionVizState {
   reads: [
     string | undefined,
@@ -24,14 +32,14 @@ interface AccessionVizState {
   rendering: boolean;
 }
 
-class AccessionViz extends React.Component<
-  AccessionVizProps,
+class AccessionVizCC extends React.Component<
+  AccessionVizWithAnalyticsProps,
   AccessionVizState
 > {
   allReads: $TSFixMe;
   coverageSummary: $TSFixMe;
   readsPerPage: $TSFixMe;
-  constructor(props: AccessionVizProps) {
+  constructor(props: AccessionVizWithAnalyticsProps) {
     super(props);
     this.allReads = props.reads;
     this.readsPerPage = props.readsPerPage;
@@ -121,7 +129,7 @@ class AccessionViz extends React.Component<
       !this.state.rendering ? (
         <div style={{ textAlign: "right" }}>
           <a
-            onClick={withAnalytics(
+            onClick={this.props.withAnalytics(
               this.renderMoreReads,
               ANALYTICS_EVENT_NAMES.ACCESSION_VIZ_MORE_READS_LINK_CLICKED,
               {
@@ -168,5 +176,14 @@ class AccessionViz extends React.Component<
     );
   }
 }
+
+// Using a function component wrapper provides a semi-hacky way to
+// access useContext without the class component to function component
+// conversion.
+const AccessionViz = (props: AccessionVizProps) => {
+  const withAnalytics = useWithAnalytics();
+
+  return <AccessionVizCC {...props} withAnalytics={withAnalytics} />;
+};
 
 export default AccessionViz;

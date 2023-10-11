@@ -1,5 +1,5 @@
 import { compact } from "lodash/fp";
-import { trackEvent } from "~/api/analytics";
+import { EventData, TrackEventType } from "~/api/analytics";
 
 const NON_HOST_READS_LABEL = "Download Non-Host Reads (.fasta)";
 const NON_HOST_CONTIGS_LABEL = "Download Non-Host Contigs (.fasta)";
@@ -95,10 +95,16 @@ export const getWorkflowRunZipLink = (workflowRunId: number) => {
 };
 
 export const logDownloadOption = ({
+  trackEvent,
   component,
   option,
   details = {},
-}: $TSFixMe) => {
+}: {
+  trackEvent: TrackEventType;
+  component: string;
+  option: string;
+  details: EventData;
+}) => {
   trackEvent(
     // make names like:
     // SamplesHeatmapHeader_download-current-heatmap-view-csv_clicked

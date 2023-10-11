@@ -1,6 +1,6 @@
 import { filter, get, isUndefined, map, reject, size, some } from "lodash/fp";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
@@ -90,6 +90,7 @@ export default function BulkDownloadModalFooter({
   sampleHostGenomes,
   workflow,
 }: BulkDownloadModalFooterProps) {
+  const withAnalytics = useWithAnalytics();
   const samplesWithHumanHost = filter(
     { hostGenome: HOST_GENOME_NAMES.HUMAN },
     sampleHostGenomes,

@@ -1,4 +1,4 @@
-export default interface AllowedFeaturesProps {
+export default interface UserContextType {
   admin: boolean;
   firstSignIn: boolean;
   allowedFeatures: string[];

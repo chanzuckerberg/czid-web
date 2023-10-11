@@ -28,8 +28,8 @@ import {
 } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  useTrackEvent,
+  useWithAnalytics,
 } from "~/api/analytics";
 import {
   getSampleMetadataFields,
@@ -156,6 +156,8 @@ const SamplesView = forwardRef(function SamplesView(
   }: SamplesViewProps,
   ref: React.Ref<SamplesViewHandle>,
 ) {
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
   const userContext = useContext(UserContext);
   const { allowedFeatures, appConfig, admin } = userContext || {};
 

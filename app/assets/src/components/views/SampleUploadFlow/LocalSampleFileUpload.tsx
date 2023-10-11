@@ -12,8 +12,8 @@ import _fp, {
 } from "lodash/fp";
 import React from "react";
 import { FileWithPreview } from "react-dropzone";
-import { trackEvent } from "~/api/analytics";
-import { UserContext } from "~/components/common/UserContext";
+import { TrackEventType, useTrackEvent } from "~/api/analytics";
+import { useAllowedFeatures } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { CONCAT_FILES_HELP_LINK } from "~/components/utils/documentationLinks";
@@ -36,7 +36,13 @@ interface LocalSampleFileUploadProps {
   hasSamplesLoaded?: boolean;
 }
 
-class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> {
+interface LocalSampleFileUploadWithContextProps
+  extends LocalSampleFileUploadProps {
+  allowedFeatures: string[];
+  trackEvent: TrackEventType;
+}
+
+class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithContextProps> {
   state = {
     showInfo: false,
   };
@@ -111,16 +117,18 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
         showInfo: !this.state.showInfo,
       },
       () => {
-        trackEvent("LocalSampleFileUpload_more-info-toggle_clicked", {
-          showInfo: this.state.showInfo,
-        });
+        this.props.trackEvent(
+          "LocalSampleFileUpload_more-info-toggle_clicked",
+          {
+            showInfo: this.state.showInfo,
+          },
+        );
       },
     );
   };
 
   getFilePickerTitle = () => {
-    const { allowedFeatures } = this.context || {};
-    const { hasSamplesLoaded, samples } = this.props;
+    const { allowedFeatures, hasSamplesLoaded, samples } = this.props;
 
     const fileCount = sumBy(s => size(s.input_files_attributes), samples);
 
@@ -205,6 +213,20 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
   }
 }
 
-LocalSampleFileUpload.contextType = UserContext;
+// Using a function component wrapper provides a semi-hacky way to
+// access useContext from multiple providers without the class component to function component
+// conversion.
+const LocalSampleFileUpload = (props: LocalSampleFileUploadProps) => {
+  const allowedFeatures = useAllowedFeatures();
+  const trackEvent = useTrackEvent();
+
+  return (
+    <LocalSampleFileUploadCC
+      {...props}
+      allowedFeatures={allowedFeatures}
+      trackEvent={trackEvent}
+    />
+  );
+};
 
 export default LocalSampleFileUpload;

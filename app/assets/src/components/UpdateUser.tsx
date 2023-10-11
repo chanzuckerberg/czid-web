@@ -1,6 +1,6 @@
 import { includes } from "lodash/fp";
 import React, { useState } from "react";
-import { withAnalytics } from "~/api/analytics";
+import { useWithAnalytics } from "~/api/analytics";
 import { updateUser as userUpdater } from "~/api/user";
 import UserForm from "~/components/views/users/UserForm";
 import { openUrl } from "~utils/links";
@@ -29,6 +29,7 @@ interface UpdateUserProps {
 }
 
 function UpdateUser(props: UpdateUserProps = {}) {
+  const withAnalytics = useWithAnalytics();
   const user = props.selectedUser;
   const selectedUser = {
     email: user ? user.email : "",

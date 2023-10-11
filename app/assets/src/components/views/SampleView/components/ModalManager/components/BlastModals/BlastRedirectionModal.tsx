@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Image } from "semantic-ui-react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { NCBI_POLICIES_AND_DISCLAIMERS_LINK } from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
@@ -21,6 +21,7 @@ const BlastRedirectionModal = ({
   onContinue,
   shouldOpenMultipleTabs,
 }: BlastRedirectionModalProps) => {
+  const withAnalytics = useWithAnalytics();
   const [shouldRedirectBlast, setShouldRedirectBlast] = useState(false);
 
   const renderActions = () => {

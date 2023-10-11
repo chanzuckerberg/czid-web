@@ -1,7 +1,7 @@
 import cx from "classnames";
 import { find, get } from "lodash/fp";
 import React, { useState } from "react";
-import { trackEvent } from "~/api/analytics";
+import { useTrackEvent } from "~/api/analytics";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import { NAME_COLUMN } from "./constants";
@@ -16,6 +16,7 @@ const MetadataCSVLocationsMenu = ({
   hostGenomes,
   onMetadataChange,
 }: MetadataCSVLocationsMenuProps) => {
+  const trackEvent = useTrackEvent();
   // Which sample the "Apply to All" button should appear on.
   const [applyToAllSample, setApplyToAllSample] = useState<string | null>(null);
 

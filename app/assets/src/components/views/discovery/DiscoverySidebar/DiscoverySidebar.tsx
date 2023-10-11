@@ -2,9 +2,10 @@ import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import { trackEventFromClassComponent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
+import { GlobalContext } from "~/globalContext/reducer";
 import { DimensionsDetailed, DimensionValue } from "~/interface/discoveryView";
 import { FilterList } from "~/interface/samplesView";
 import { Optional, Project } from "~/interface/shared";
@@ -47,6 +48,7 @@ export default class DiscoverySidebar extends React.Component<
   DiscoverySidebarProps,
   DiscoverySidebarState
 > {
+  static contextType = GlobalContext;
   constructor(props: DiscoverySidebarProps) {
     super(props);
 
@@ -118,6 +120,10 @@ export default class DiscoverySidebar extends React.Component<
   buildDateHistogram(field) {
     const { currentTab } = this.props;
     const { metadata } = this.state;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
 
     let dates = metadata[field];
     // @ts-expect-error Property 'count' does not exist on type
@@ -151,12 +157,16 @@ export default class DiscoverySidebar extends React.Component<
                 key={entry.value}
                 style={{ height: percent + "px" }}
                 onClick={() => {
-                  trackEvent("DiscoverySidebar_date-filter_clicked", {
-                    dateValue: entry.value,
-                    dates: dates.length,
-                    count: entry.count,
-                    percent,
-                  });
+                  trackEventFromClassComponent(
+                    globalAnalyticsContext,
+                    "DiscoverySidebar_date-filter_clicked",
+                    {
+                      dateValue: entry.value,
+                      dates: dates.length,
+                      count: entry.count,
+                      percent,
+                    },
+                  );
                 }}
               >
                 &nbsp;
@@ -205,6 +215,10 @@ export default class DiscoverySidebar extends React.Component<
 
   buildMetadataRows(field: "host" | "tissue" | "time" | "locationV2") {
     const { metadata, expandedMetadataGroups } = this.state;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     const dataRows = metadata[field];
     // Sort by the value desc and then by the label alphabetically
     const sorted = orderBy(["count", "text"], ["desc", "asc"], dataRows);
@@ -228,11 +242,15 @@ export default class DiscoverySidebar extends React.Component<
             className={cs.showHide}
             onClick={() => {
               this.toggleExpandedMetadataGroup(field);
-              trackEvent("DiscoverySidebar_show-more-toggle_clicked", {
-                field,
-                extraRows: extraRows.length,
-                linkText,
-              });
+              trackEventFromClassComponent(
+                globalAnalyticsContext,
+                "DiscoverySidebar_show-more-toggle_clicked",
+                {
+                  field,
+                  extraRows: extraRows.length,
+                  linkText,
+                },
+              );
             }}
           >
             {linkText}

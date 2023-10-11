@@ -1,7 +1,7 @@
-import React from "react";
-import AllowedFeaturesProps from "~/interface/allowedFeatures";
+import React, { useContext } from "react";
+import UserContextType from "~/interface/allowedFeatures";
 
-const UserContextValues: AllowedFeaturesProps = {
+const UserContextValues: UserContextType = {
   admin: false,
   firstSignIn: false,
   allowedFeatures: [],
@@ -17,3 +17,9 @@ const UserContextValues: AllowedFeaturesProps = {
 export const UserContext = React.createContext(UserContextValues);
 // Name to show in DevTools
 UserContext.displayName = "UserContext";
+
+// hook for retrieving allowedFeatures from UserContext
+export const useAllowedFeatures = () => {
+  const { allowedFeatures } = useContext(UserContext);
+  return allowedFeatures;
+};

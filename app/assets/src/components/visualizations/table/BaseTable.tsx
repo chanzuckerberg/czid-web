@@ -12,9 +12,9 @@ import {
   TableCellProps,
 } from "react-virtualized";
 import "react-virtualized/styles.css";
-import { trackEvent } from "~/api/analytics";
+import { TrackEventType, useTrackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import { UserContext } from "~/components/common/UserContext";
+import { useAllowedFeatures } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { DRAGGABLE_COLUMNS_FEATURE } from "~/components/utils/features";
 import { humanize } from "~/helpers/strings";
@@ -76,6 +76,11 @@ interface BaseTableCalculatedProps extends BaseTableProps {
   rowGetter: $TSFixMeFunction;
 }
 
+interface BaseTableCalculatedPropsWithContext extends BaseTableCalculatedProps {
+  allowedFeatures: string[];
+  trackEvent: TrackEventType;
+}
+
 interface BaseTableState {
   activeColumns: string[];
   columns: BaseTableProps["columns"];
@@ -84,8 +89,8 @@ interface BaseTableState {
   mouseOverDraggableAreaForColumn: $TSFixMeUnknown;
 }
 
-class BaseTable extends React.Component<
-  BaseTableCalculatedProps,
+class BaseTableCC extends React.Component<
+  BaseTableCalculatedPropsWithContext,
   BaseTableState
 > {
   // This class is a wrapper class to React Virtualized Table.
@@ -94,12 +99,12 @@ class BaseTable extends React.Component<
   // TODO: - limitations -
   // - needs dynamic row height (dynamic required use of CellMeasurer)
 
-  constructor(props: BaseTableCalculatedProps, context) {
-    super(props, context);
+  constructor(props: BaseTableCalculatedPropsWithContext) {
+    super(props);
 
     this.state = {
       activeColumns: this.props.initialActiveColumns,
-      columns: BaseTable.setColumnDefaults(
+      columns: BaseTableCC.setColumnDefaults(
         this.props.columns,
         this.props.defaultColumnWidth,
       ),
@@ -115,7 +120,7 @@ class BaseTable extends React.Component<
     if (props.columns !== state.prevPropsColumns) {
       return {
         activeColumns: props.initialActiveColumns,
-        columns: BaseTable.setColumnDefaults(
+        columns: BaseTableCC.setColumnDefaults(
           props.columns,
           props.defaultColumnWidth,
         ),
@@ -344,7 +349,7 @@ class BaseTable extends React.Component<
   };
 
   handleColumnChange = selectedColumns => {
-    const { onActiveColumnsChange, protectedColumns } = this.props;
+    const { onActiveColumnsChange, protectedColumns, trackEvent } = this.props;
     this.setState(
       { activeColumns: concat(protectedColumns, selectedColumns) },
       () =>
@@ -441,8 +446,8 @@ class BaseTable extends React.Component<
   };
 
   render() {
-    const { allowedFeatures } = this.context || {};
     const {
+      allowedFeatures,
       cellClassName,
       defaultCellRenderer,
       defaultHeaderHeight,
@@ -608,7 +613,7 @@ class BaseTable extends React.Component<
 }
 
 // @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
-BaseTable.defaultProps = {
+BaseTableCC.defaultProps = {
   defaultColumnWidth: 60,
   defaultHeaderHeight: 50,
   defaultRowHeight: 30,
@@ -617,6 +622,20 @@ BaseTable.defaultProps = {
   draggableColumns: false,
 };
 
-BaseTable.contextType = UserContext;
+// Using a function component wrapper provides a semi-hacky way to
+// access useContext from multiple providers without the class component to function component
+// conversion.
+const BaseTable = (props: BaseTableCalculatedProps) => {
+  const allowedFeatures = useAllowedFeatures();
+  const trackEvent = useTrackEvent();
+
+  return (
+    <BaseTableCC
+      {...props}
+      allowedFeatures={allowedFeatures}
+      trackEvent={trackEvent}
+    />
+  );
+};
 
 export default BaseTable;

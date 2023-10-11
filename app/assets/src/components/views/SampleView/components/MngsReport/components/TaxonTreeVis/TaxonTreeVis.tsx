@@ -2,8 +2,8 @@ import { get, getOr, map } from "lodash/fp";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  useTrackEvent,
+  useWithAnalytics,
 } from "~/api/analytics";
 import {
   getWorkflowTypeFromLabel,
@@ -43,6 +43,8 @@ export const TaxonTreeVis = ({
   onTaxonClick,
   taxa,
 }: TaxonTreeVisProps) => {
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
   const metrics =
     TREE_VIZ_TOOLTIP_METRICS[getWorkflowTypeFromLabel(currentTab)];
 
