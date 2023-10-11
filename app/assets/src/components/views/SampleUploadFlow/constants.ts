@@ -412,6 +412,9 @@ export const PIPELINE_HELP_LINKS = {
   [WorkflowType.AMR]: AMR_PIPELINE_HELP_LINK,
 };
 
+// Limit file uploads to 35 GB; our pipelines can't handle larger files.
+export const MAX_FILE_SIZE = 35e9;
+
 // TYPES
 export type Technology = "Illumina" | "ONT";
 export type UploadWorkflows =

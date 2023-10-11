@@ -21,7 +21,7 @@ import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { Project, SampleFromApi } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
-import { INPUT_FILE_TYPES } from "./constants";
+import { INPUT_FILE_TYPES, MAX_FILE_SIZE } from "./constants";
 import cs from "./sample_upload_flow.scss";
 
 // @ts-expect-error working with Lodash types
@@ -82,13 +82,20 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
 
   onRejected = (rejectedFiles: FileWithPreview[]) => {
     const emptyFiles = rejectedFiles.filter((f: $TSFixMe) => f.size === 0);
+    const bigFiles = rejectedFiles.filter(f => f.size >= MAX_FILE_SIZE);
     const invalidFiles = rejectedFiles.filter(
-      (f: $TSFixMe) => f.size > 0 && f.size < 5e9,
+      (f: $TSFixMe) => f.size > 0 && f.size < MAX_FILE_SIZE,
     );
     const mapNames = _fp.compose(_fp.join(", "), _fp.map("name"));
     let msg = "Some of your files cannot be uploaded.\n";
     if (emptyFiles.length > 0) {
       msg += `- Empty files: ${mapNames(emptyFiles)}\n`;
+    }
+
+    if (bigFiles.length > 0) {
+      msg += `- Too large: ${mapNames(
+        bigFiles,
+      )}\nSize must be under 35 GB. Please try compressing and/or subsampling larger files before uploading.`;
     }
 
     if (invalidFiles.length > 0) {

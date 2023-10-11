@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 import Dropzone, { FileWithPreview } from "react-dropzone";
 import { UserContext } from "~/components/common/UserContext";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
+import { MAX_FILE_SIZE } from "~/components/views/SampleUploadFlow/constants";
 import Icon from "../icons/Icon";
 import cs from "./file_picker.scss";
 
@@ -74,6 +75,7 @@ const FilePicker = ({
     <Dropzone
       acceptClassName={cs.accepted}
       accept={accept}
+      maxSize={MAX_FILE_SIZE}
       minSize={1}
       onDrop={onChange || defaultOnChange}
       onDropRejected={onRejected || defaultOnRejected}
