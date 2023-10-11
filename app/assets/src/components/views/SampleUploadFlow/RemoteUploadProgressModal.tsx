@@ -15,6 +15,7 @@ import {
 } from "~/api/upload";
 import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { logError } from "~/components/utils/logUtil";
 import { Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
@@ -300,12 +301,14 @@ const RemoteUploadProgressModal = ({
           <div className={cs.subtitle}>
             <a
               className={cs.helpLink}
-              href="mailto:help@czid.org"
+              href={CONTACT_US_LINK}
               onClick={() =>
                 trackEvent(
                   ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
                 )
               }
+              target="_blank"
+              rel="noreferrer"
             >
               Contact us for help
             </a>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import cs from "./Accordion.scss";
 import AccordionItem from "./AccordionItem";
 
@@ -105,7 +106,10 @@ const Accordion = () => {
               Terms of Use
             </a>
             . You can request to delete your account at any time by{" "}
-            <a href="mailto:help@czid.org">contacting our team</a>.
+            <a href={CONTACT_US_LINK} target="_blank" rel="noopener noreferrer">
+              contacting our team
+            </a>
+            .
           </>
         }
       />

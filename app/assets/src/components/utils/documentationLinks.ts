@@ -103,3 +103,6 @@ export const INSERT_LENGTH_HELP_LINK = {
 
 export const READ_URL_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Reads-Lost";
+
+export const CONTACT_US_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/requests/new";

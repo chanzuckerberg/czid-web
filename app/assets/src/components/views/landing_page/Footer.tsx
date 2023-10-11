@@ -2,6 +2,7 @@ import cx from "classnames";
 import React from "react";
 import IconBiohubSFLogo from "~/components/ui/icons/IconBiohubSFLogo";
 import IconCziLogo from "~/components/ui/icons/IconCziLogo";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./Footer.scss";
 
@@ -61,7 +62,9 @@ const Footer = () => {
               Terms
             </a>
             <span>|</span>
-            <a href="mailto:help@czid.org">Contact us</a>
+            <a href={CONTACT_US_LINK} target="_blank" rel="noreferrer">
+              Contact us
+            </a>
             <span>|</span>
             <span
               aria-label="View the CZ ID cookie settings (opens in a modal)"

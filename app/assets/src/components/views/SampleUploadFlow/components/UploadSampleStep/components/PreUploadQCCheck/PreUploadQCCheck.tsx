@@ -585,7 +585,7 @@ const PreUploadQCCheck = ({
           )}
         {validateAllSamplesAreInvalid() && (
           <IssueGroup
-            caption={`There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at help@czid.org for assistance.`}
+            caption={`There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at our Help Center for assistance.`}
             headers={["File Name"]}
             rows={addAllFilesIntoArray().map(name => [name.name])}
             type="error"

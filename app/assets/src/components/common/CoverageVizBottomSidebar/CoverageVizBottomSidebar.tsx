@@ -10,6 +10,7 @@ import { getCoverageVizData } from "~/api";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WorkflowType } from "~/components/utils/workflows";
@@ -498,7 +499,12 @@ export default class CoverageVizBottomSidebar extends React.Component<
                 Sorry, we failed to load the coverage data due to an unexpected
                 error.
               </div>
-              <a className={cs.linkWithArrow} href="mailto:help@czid.org">
+              <a
+                className={cs.linkWithArrow}
+                href={CONTACT_US_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Contact us for help
                 <IconArrowRight />
               </a>

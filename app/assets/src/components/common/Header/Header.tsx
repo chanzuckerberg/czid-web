@@ -28,7 +28,6 @@ const Header = ({
   showLogOut,
   userSignedIn,
   emergencyBannerMessage,
-  email,
   signOutEndpoint,
   userName,
 }: HeaderProps) => {
@@ -89,7 +88,6 @@ const Header = ({
           (userSignedIn ? (
             <UserMenuDropDown
               adminUser={adminUser}
-              email={email}
               signOutEndpoint={signOutEndpoint}
               userName={userName}
             />

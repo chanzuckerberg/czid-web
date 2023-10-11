@@ -1,4 +1,5 @@
 import { isEmpty, last } from "lodash/fp";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import Sample, { SampleStatus } from "~/interface/sample";
 import { PipelineRun } from "../../interface/shared/specific";
 
@@ -75,7 +76,6 @@ function subtextError(message: string) {
 
 // String constants
 export const UPLOAD_URL = "/samples/upload";
-const MAILTO_LINK = "mailto:help@czid.org";
 const CONTACT_US = "Contact us for help.";
 
 export const sampleErrorInfo = ({
@@ -126,7 +126,7 @@ export const sampleErrorInfo = ({
           ? `?pipeline_version=${pipelineRun.pipeline_version}`
           : "";
       link = isEmpty(pipelineRun)
-        ? MAILTO_LINK
+        ? CONTACT_US_LINK
         : `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
       break;
     case "BrokenReadPairError":
@@ -144,21 +144,21 @@ export const sampleErrorInfo = ({
         "Oh no! There was an issue uploading your sample file from Basespace.";
       linkText = CONTACT_US;
       type = "error";
-      link = MAILTO_LINK;
+      link = CONTACT_US_LINK;
       break;
     case "S3_UPLOAD_FAILED":
       status = SampleStatus.SAMPLE_FAILED;
       message = "Oh no! There was an issue uploading your sample file from S3.";
       linkText = CONTACT_US;
       type = "error";
-      link = MAILTO_LINK;
+      link = CONTACT_US_LINK;
       break;
     case "LOCAL_UPLOAD_FAILED":
       status = SampleStatus.SAMPLE_FAILED;
       message = "Oh no! It took too long to upload your sample file.";
       linkText = CONTACT_US;
       type = "error";
-      link = MAILTO_LINK;
+      link = CONTACT_US_LINK;
       break;
     case "LOCAL_UPLOAD_STALLED":
       status = SampleStatus.INCOMPLETE_ISSUE;
@@ -166,7 +166,7 @@ export const sampleErrorInfo = ({
         "It looks like it is taking a long time to upload your sample file.";
       linkText = CONTACT_US;
       type = "warning";
-      link = MAILTO_LINK;
+      link = CONTACT_US_LINK;
       break;
     case "DO_NOT_PROCESS":
       status = SampleStatus.PROCESSING_SKIPPED;
@@ -210,7 +210,7 @@ export const sampleErrorInfo = ({
       message = "Oh no! There was an issue processing your sample.";
       linkText = "Contact us for help re-running your sample.";
       type = "error";
-      link = MAILTO_LINK;
+      link = CONTACT_US_LINK;
       break;
   }
 

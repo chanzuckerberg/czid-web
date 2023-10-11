@@ -1,5 +1,6 @@
 import { Link } from "@czi-sds/components";
 import React from "react";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { showToast } from "~/components/utils/toast";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import Notification from "~ui/notifications/Notification";
@@ -82,8 +83,8 @@ const renderSampleDeleteError = (
     >
       {params.sampleName ?? "Sample"} failed to delete. Please try again. If the
       problem persists, please contact us at{" "}
-      <Link sdsStyle="dashed" href="mailto:help@czid.org">
-        help@czid.org
+      <Link sdsStyle="dashed" href={CONTACT_US_LINK} target="_blank">
+        our Help Center
       </Link>
       .
     </Notification>

@@ -29,7 +29,6 @@
     <%= javascript_tag do %>
       react_component('Header', {
         adminUser: <%= current_user.admin %>,
-        email: "help@czid.org",
         signInEndpoint: '<%=new_user_session_path%>',
         signOutEndpoint: '<%=destroy_user_session_path%>',
         userName: '<%= current_user.name %>',

@@ -23,6 +23,7 @@ import {
 } from "~/api/upload";
 import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { logError } from "~/components/utils/logUtil";
 import { Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
@@ -575,7 +576,12 @@ const LocalUploadProgressModal = ({
         <div className={cs.titleWithIcon}>{title}</div>
         {numFailedSamples === size(samples) && (
           <div className={cs.subtitle}>
-            <a className={cs.helpLink} href="mailto:help@czid.org">
+            <a
+              className={cs.helpLink}
+              href={CONTACT_US_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Contact us for help
             </a>
           </div>

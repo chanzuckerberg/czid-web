@@ -1,6 +1,7 @@
 import { Icon } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import React from "react";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import LoadingBar from "~ui/controls/LoadingBar";
 import StatusLabel from "~ui/labels/StatusLabel";
@@ -90,7 +91,12 @@ export default class BulkDownloadTableRenderers extends React.Component {
       return (
         <div className={cs.statusCell}>
           <div className={cs.links}>
-            <a className={cs.link} href="mailto:help@czid.org">
+            <a
+              className={cs.link}
+              href={CONTACT_US_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Contact us
             </a>
           </div>

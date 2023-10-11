@@ -1,4 +1,5 @@
 import React from "react";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { postToUrlWithCSRF } from "~utils/links";
 import ExternalLink from "../../ui/controls/ExternalLink";
@@ -6,14 +7,12 @@ import cs from "./header.scss";
 
 interface UserMenuDropDownProps {
   adminUser?: boolean;
-  email: string;
   signOutEndpoint: string;
   userName: string;
 }
 
 const UserMenuDropDown = ({
   adminUser,
-  email,
   signOutEndpoint,
   userName,
 }: UserMenuDropDownProps) => {
@@ -82,7 +81,9 @@ const UserMenuDropDown = ({
         text={
           <a
             className={cs.option}
-            href={`mailto:${email}?Subject=Report%20Feedback`}
+            href={CONTACT_US_LINK}
+            target="_blank"
+            rel="noreferrer"
           >
             Contact Us
           </a>

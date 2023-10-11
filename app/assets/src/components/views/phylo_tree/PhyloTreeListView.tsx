@@ -26,7 +26,7 @@ import {
   showAppcue,
 } from "~/components/utils/appcues";
 import {
-  MAIL_TO_HELP_LINK,
+  CONTACT_US_LINK,
   PHYLO_TREE_LINK,
 } from "~/components/utils/documentationLinks";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
@@ -428,7 +428,7 @@ class PhyloTreeListViewCC extends React.Component<
       return (
         <SampleMessage
           icon={<IconAlert className={cs.iconAlert} type={"error"} />}
-          link={MAIL_TO_HELP_LINK}
+          link={CONTACT_US_LINK}
           linkText="Contact us for help."
           message="Sorry, we were unable to compute a phylogenetic tree."
           status="Tree Failed"

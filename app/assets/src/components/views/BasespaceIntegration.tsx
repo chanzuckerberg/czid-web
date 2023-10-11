@@ -1,5 +1,6 @@
 import React from "react";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import cs from "./basespace_integration.scss";
 
 interface BasespaceIntegrationProps {
@@ -41,7 +42,12 @@ export default class BasespaceIntegration extends React.Component<BasespaceInteg
           ) : (
             <div className={cs.error}>
               Something went wrong when trying to connect to Basespace. Please
-              <a className={cs.helpLink} href="mailto:help@czid.org">
+              <a
+                className={cs.helpLink}
+                href={CONTACT_US_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 &nbsp;contact us
               </a>{" "}
               for help.

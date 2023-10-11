@@ -6,6 +6,7 @@ import SectionNavigation from "~/components/common/AnchorMenu/SectionNavigation"
 import Sections from "~/components/common/AnchorMenu/Sections";
 import { NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import cs from "./pathogen_list_view.scss";
 
 const PathogenListView = () => {
@@ -50,9 +51,12 @@ const PathogenListView = () => {
           infection), and should be interpreted with respect to the literature.
         </p>
         <p>
-          Reach out to <a href="mailto:help@czid.org">help@czid.org</a> to help
-          us make the list better, or if there is any questions or comments. We
-          are excited to hear from you!
+          Reach out to{" "}
+          <a href={CONTACT_US_LINK} target="_blank" rel="noopener noreferrer">
+            our Help Center
+          </a>{" "}
+          to help us make the list better, or if there is any questions or
+          comments. We are excited to hear from you!
         </p>
       </div>
     </>

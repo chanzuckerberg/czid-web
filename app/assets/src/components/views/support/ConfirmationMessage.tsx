@@ -1,6 +1,7 @@
 import { Link } from "@czi-sds/components";
 import { isEmpty } from "lodash/fp";
 import React from "react";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import cs from "./confirmation_message.scss";
 interface ConfirmationMessageProps {
   errorType?: string;
@@ -33,8 +34,8 @@ const ConfirmationMessage = ({ errorType }: ConfirmationMessageProps) => {
         <div>
           There has been an error in creating your account. Please try again or
           contact us at{" "}
-          <Link sdsStyle="default" href="mailto:help@czid.org">
-            help@czid.org
+          <Link sdsStyle="default" href={CONTACT_US_LINK} target="_blank">
+            our Help Center
           </Link>{" "}
           for assistance.
         </div>

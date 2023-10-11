@@ -1,6 +1,7 @@
 import { Button } from "@czi-sds/components";
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
 import { IconAlert } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
@@ -36,7 +37,7 @@ const ErrorModal = ({
             If you continue to have issues, please {}
             <ExternalLink
               className={cs.actionLink}
-              href="mailto:help@czid.org"
+              href={CONTACT_US_LINK}
               analyticsEventName={helpLinkEvent}
             >
               contact us

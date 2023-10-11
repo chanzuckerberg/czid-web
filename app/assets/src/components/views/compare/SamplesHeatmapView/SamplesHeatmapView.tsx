@@ -43,7 +43,7 @@ import ErrorBoundary from "~/components/ErrorBoundary";
 import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
-import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import {
   HEATMAP_ELASTICSEARCH_FEATURE,
   HEATMAP_PATHOGEN_FLAGGING_FEATURE,
@@ -1907,7 +1907,7 @@ class SamplesHeatmapViewCC extends React.Component<
       return (
         <SampleMessage
           icon={<IconAlert className={cs.iconAlert} type="error" />}
-          link={MAIL_TO_HELP_LINK}
+          link={CONTACT_US_LINK}
           linkText={"Contact us for help."}
           message={
             "Oh no! Something went wrong. Please try again or contact us for help."

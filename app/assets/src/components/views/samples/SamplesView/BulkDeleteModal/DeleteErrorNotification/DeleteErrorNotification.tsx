@@ -1,5 +1,6 @@
 import { Link, Notification } from "@czi-sds/components";
 import React from "react";
+import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { pluralize } from "~/components/utils/stringUtil";
 import { WorkflowLabelType } from "~/components/utils/workflows";
 
@@ -30,8 +31,8 @@ const DeleteErrorNotification = ({
       delete.`
         : "One or more runs failed to delete."}{" "}
       Please try again. If the problem persists, please contact us at{" "}
-      <Link sdsStyle="dashed" href="mailto:help@czid.org">
-        help@czid.org
+      <Link sdsStyle="dashed" href={CONTACT_US_LINK} target="_blank">
+        our Help Center
       </Link>
       .
     </Notification>
