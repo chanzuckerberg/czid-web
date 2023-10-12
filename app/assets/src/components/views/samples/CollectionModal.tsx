@@ -9,11 +9,11 @@ import {
 import { validateSampleIds } from "~/api/access_control";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-  withAnalyticsFromClassComponent,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { GlobalContext } from "~/globalContext/reducer";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
@@ -69,7 +69,6 @@ class CollectionModal extends React.Component<
       modalOpen: false,
     };
   }
-  static contextType = GlobalContext;
 
   componentDidMount() {
     this.fetchBackgroundAvailability();
@@ -177,16 +176,11 @@ class CollectionModal extends React.Component<
   handleCreateBackground = async () => {
     const { selectedSampleIds } = this.props;
     const { backgroundName, backgroundDescription, appliedMethod } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     const normalizedBackgroundName = toLower(trim(backgroundName));
     if (PROHIBITED_BACKGROUND_MODEL_NAMES.has(normalizedBackgroundName)) {
       this.setState({ invalidBackgroundName: normalizedBackgroundName }, () => {
-        trackEventFromClassComponent(
-          globalAnalyticsContext,
+        trackEvent(
           ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED,
           {
             backgroundName,
@@ -237,10 +231,6 @@ class CollectionModal extends React.Component<
 
   renderForm = () => {
     const { numDescriptionRows } = this.props;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     const {
       appliedMethod,
@@ -315,8 +305,7 @@ class CollectionModal extends React.Component<
           // @ts-expect-error Types of property 'value' are incompatible.
           options={Object.values(dropdownOptions)}
           initialSelectedValue={appliedMethod}
-          onChange={withAnalyticsFromClassComponent(
-            globalAnalyticsContext,
+          onChange={withAnalytics(
             this.handleMethodChange,
             ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_APPLIED_CORRECTION_METHOD_CHANGED,
           )}
@@ -326,8 +315,7 @@ class CollectionModal extends React.Component<
         <div className={cs.buttons}>
           <PrimaryButton
             text="Create"
-            onClick={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
+            onClick={withAnalytics(
               this.handleCreateBackground,
               ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CREATE_COLLECTION_BUTTON_CLICKED,
               {
@@ -337,8 +325,7 @@ class CollectionModal extends React.Component<
           />
           <SecondaryButton
             text="Cancel"
-            onClick={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
+            onClick={withAnalytics(
               this.closeModal,
               ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CANCEL_BUTTON_CLICKED,
             )}
@@ -372,17 +359,12 @@ class CollectionModal extends React.Component<
   render() {
     const { trigger } = this.props;
     const { backgroundCreationResponse } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     return (
       <div>
         <button
           className="noStyleButton"
-          onClick={withAnalyticsFromClassComponent(
-            globalAnalyticsContext,
+          onClick={withAnalytics(
             this.openModal,
             ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_OPEN_LINK_CLICKED,
           )}
@@ -393,8 +375,7 @@ class CollectionModal extends React.Component<
           <Modal
             open
             narrow
-            onClose={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
+            onClose={withAnalytics(
               this.closeModal,
               ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CLOSE_LINK_CLICKED,
             )}
@@ -427,5 +408,7 @@ CollectionModal.defaultProps = {
   maxSamplesShown: 10,
   numDescriptionRows: 7,
 };
+
+CollectionModal.contextType = UserContext;
 
 export default CollectionModal;

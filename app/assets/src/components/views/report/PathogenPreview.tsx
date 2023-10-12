@@ -1,5 +1,5 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import Link from "~/components/ui/controls/Link";
 import Label from "~/components/ui/labels/Label";
@@ -10,7 +10,6 @@ interface PathogenPreviewProps {
 }
 
 const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
-  const trackEvent = useTrackEvent();
   const tags = Object.keys(tag2Count).sort();
   if (tags.length === 0) {
     return null;

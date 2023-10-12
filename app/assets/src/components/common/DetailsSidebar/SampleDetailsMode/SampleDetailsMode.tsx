@@ -2,7 +2,7 @@ import { some } from "lodash";
 import { find, get, isEmpty, set, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { getAllSampleTypes, saveSampleName, saveSampleNotes } from "~/api";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import {
   getSampleMetadata,
   getSampleMetadataFields,
@@ -82,7 +82,6 @@ const SampleDetailsMode = ({
   tempSelectedOptions,
   sampleWorkflowLabels,
 }: SampleDetailsModeProps) => {
-  const trackEvent = useTrackEvent();
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo | null>(
     null,
   );

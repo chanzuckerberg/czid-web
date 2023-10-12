@@ -25,11 +25,13 @@ import {
 } from "lodash/fp";
 import moment from "moment";
 import { nanoid } from "nanoid";
-import React, { useContext } from "react";
+import React from "react";
+import { connect } from "react-redux";
+import { withRouter } from "react-router";
 import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
-import { trackPageTransition } from "~/api/analytics";
-import { useAllowedFeatures } from "~/components/common/UserContext";
+import { trackEvent, trackPageTransition } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
@@ -70,11 +72,6 @@ import {
   NOTIFICATION_TYPES,
   showNotification,
 } from "~/components/views/SampleView/utils";
-import {
-  ActionType,
-  createAction,
-  GlobalContext,
-} from "~/globalContext/reducer";
 import { loadState } from "~/helpers/storage";
 import {
   Conditions,
@@ -95,6 +92,7 @@ import {
   SamplesViewHandle,
 } from "~/interface/samplesView";
 import { Project } from "~/interface/shared";
+import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
 import ImgVizSecondary from "~ui/illustrations/ImgVizSecondary";
@@ -164,8 +162,8 @@ const SAMPLES_UPLOAD_URL = "/samples/upload";
 //   - load (A) non-filtered dimensions, (B) filtered dimensions and (C) filtered stats
 //     (synchronous data not needed for now because we do not show projects and visualizations)
 
-class DiscoveryViewCC extends React.Component<
-  DiscoveryViewWithContextProps,
+class DiscoveryView extends React.Component<
+  DiscoveryViewProps,
   DiscoveryViewState
 > {
   amrWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
@@ -191,10 +189,13 @@ class DiscoveryViewCC extends React.Component<
   visualizations: ObjectCollectionView<Visualization>;
   visualizationsView: VisualizationsView;
   workflowEntity: string;
-  constructor(props: DiscoveryViewWithContextProps) {
-    super(props);
-    const { allowedFeatures, domain, projectId, updateDiscoveryProjectId } =
-      this.props;
+  constructor(
+    props: DiscoveryViewProps,
+    context: React.ContextType<typeof UserContext>,
+  ) {
+    super(props, context);
+    const { domain, projectId, updateDiscoveryProjectId } = this.props;
+    const allowedFeatures = context?.allowedFeatures || [];
 
     this.urlParser = new UrlQueryParser({
       filters: "object",
@@ -208,7 +209,6 @@ class DiscoveryViewCC extends React.Component<
     const localState = loadState(localStorage, KEY_DISCOVERY_VIEW_OPTIONS);
 
     const projectIdToUpdate = projectId || urlState.projectId;
-
     // If the projectId was passed as props or is in the URL, update the projectIds in the redux state via the updateProjectIds action creator
     updateDiscoveryProjectId(projectIdToUpdate || null);
 
@@ -1246,6 +1246,10 @@ class DiscoveryViewCC extends React.Component<
       },
       () => {
         this.updateBrowsingHistory("replace");
+        const name = currentTab.replace(/\W+/g, "-").toLowerCase();
+        trackEvent(`DiscoveryView_tab-${name}_clicked`, {
+          currentTab: currentTab,
+        });
       },
     );
 
@@ -1266,6 +1270,9 @@ class DiscoveryViewCC extends React.Component<
       this.updateBrowsingHistory("replace");
       this.resetDataFromFilterChange({
         refreshFilterStatsCallback: onFilterChangeCallback,
+      });
+      trackEvent(`DiscoveryView_filters_changed`, {
+        filters: this.getFilterCount(),
       });
     });
   };
@@ -2130,6 +2137,7 @@ class DiscoveryViewCC extends React.Component<
         this.resetWorkflowDataOnTabChange(workflow);
       },
     );
+    trackEvent(`DiscoveryView_${workflow}-tab_clicked`);
   };
 
   computeWorkflowTabs = () => {
@@ -2665,28 +2673,15 @@ class DiscoveryViewCC extends React.Component<
   }
 }
 
-// Using a function component wrapper provides a semi-hacky way to
-// access useContext without the class component to function component
-// conversion.  We should move this when we refactor DiscoveryView
-interface DiscoveryViewWithContextProps extends DiscoveryViewProps {
-  allowedFeatures: string[];
-  updateDiscoveryProjectId: (projectIds: number | null) => void;
-}
+DiscoveryView.contextType = UserContext;
 
-export const DiscoveryView = (props: DiscoveryViewProps) => {
-  const allowedFeatures = useAllowedFeatures();
-  const globalContext = useContext(GlobalContext);
-  const dispatch = globalContext.globalContextDispatch;
-
-  const updateDiscoveryProjectId = (projectId: number | null) => {
-    dispatch(createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectId));
-  };
-
-  return (
-    <DiscoveryViewCC
-      {...props}
-      allowedFeatures={allowedFeatures}
-      updateDiscoveryProjectId={updateDiscoveryProjectId}
-    />
-  );
+const mapDispatchToProps = {
+  updateDiscoveryProjectId: updateProjectIds,
 };
+
+// Don't need mapStateToProps yet so pass in null
+const connectedComponent = connect(null, mapDispatchToProps)(DiscoveryView);
+
+(connectedComponent.name as string) = "DiscoveryView";
+
+export default withRouter(connectedComponent);

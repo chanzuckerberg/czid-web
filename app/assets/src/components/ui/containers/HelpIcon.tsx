@@ -1,6 +1,6 @@
 import { Icon } from "@czi-sds/components";
 import React from "react";
-import { useTrackEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import ExternalLink from "../controls/ExternalLink";
 import cs from "./help_icon.scss";
@@ -26,7 +26,6 @@ const HelpIcon = ({
   text,
 }: HelpIconProps) => {
   const handleTriggerEnter = () => {
-    const trackEvent = useTrackEvent();
     if (analyticsEventName) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent

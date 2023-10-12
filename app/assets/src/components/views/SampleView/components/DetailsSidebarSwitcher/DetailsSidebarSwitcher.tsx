@@ -1,6 +1,6 @@
 import { compact, find, get, size } from "lodash/fp";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
 import { TaxonDetailsModeProps } from "~/components/common/DetailsSidebar/TaxonDetailsMode";
@@ -38,7 +38,6 @@ export const DetailsSidebarSwitcher = ({
   sample,
   sidebarTaxonData,
 }: DetailsSidebarSwitcherProps) => {
-  const withAnalytics = useWithAnalytics();
   const getTaxonSideBarParams = (
     sidebarTaxonData: Taxon,
   ): TaxonDetailsModeProps => {

@@ -1,4 +1,4 @@
-import { useWithAnalytics } from "~/api/analytics";
+import { withAnalytics } from "~/api/analytics";
 
 declare global {
   interface Window {
@@ -22,14 +22,12 @@ export const showAppcue = ({
   flowId: string;
   analyticEventName: string;
   analyticEventProperties?: Record<string, string>;
-}) => {
-  const withAnalytics = useWithAnalytics();
-  return withAnalytics(
+}) =>
+  withAnalytics(
     () => window.Appcues && window.Appcues.show(flowId),
     analyticEventName,
     analyticEventProperties,
   );
-};
 
 export const trackEventForAppcues = (eventName: string, eventData = {}) => {
   // Appcues only takes attributes as a flat object (not nested)

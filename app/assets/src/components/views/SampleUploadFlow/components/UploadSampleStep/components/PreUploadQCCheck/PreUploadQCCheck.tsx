@@ -1,7 +1,7 @@
 import { flatten, isEmpty } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React, { useEffect, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import {
   ILLUMINA,
@@ -45,7 +45,6 @@ const PreUploadQCCheck = ({
   handleSampleDeselect,
   sequenceTechnology,
 }: PreUploadQCCheckProps) => {
-  const trackEvent = useTrackEvent();
   // Set for files that did not pass validateFileType
   const [invalidFiles, setInvalidFiles] = useState<Set<File>>(new Set());
   // Set for files that did not pass validateFASTADuplicates

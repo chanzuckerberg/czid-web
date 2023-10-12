@@ -2,7 +2,7 @@ import { Button, Icon } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
@@ -26,7 +26,6 @@ export const ConsensusGenomePreviousModal = ({
   onRowClick,
   open,
 }: ConsensusGenomePreviousModalProps) => {
-  const withAnalytics = useWithAnalytics();
   const renderPrimaryCell = (cellData: {
     inputs: { accession_id: $TSFixMeUnknown; accession_name: $TSFixMeUnknown };
     parsed_cached_results: any;

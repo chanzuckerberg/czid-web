@@ -13,6 +13,7 @@ import _fp, {
 } from "lodash/fp";
 import React from "react";
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
+import { trackEvent } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
 import MetadataCSVLocationsMenu from "~/components/common/Metadata/MetadataCSVLocationsMenu";
 import MetadataCSVUpload from "~/components/common/Metadata/MetadataCSVUpload";
@@ -168,6 +169,11 @@ class MetadataUpload extends React.Component<
       issues: null,
       wasManual: tab === "Manual Input",
     });
+    trackEvent("MetadataUpload_tab_changed", {
+      tab,
+      projectId: this.props.project.id,
+      projectName: this.props.project.name,
+    });
   };
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
@@ -188,6 +194,13 @@ class MetadataUpload extends React.Component<
       validatingCSV,
     });
     if (!validatingCSV) {
+      // We only want to log on the second call when issues are present
+      trackEvent("MetadataUpload_csv-metadata_changed", {
+        errors: issues.errors.length,
+        warnings: issues.warnings.length,
+        projectId: this.props.project.id,
+        projectName: this.props.project.name,
+      });
       // Batch geosearch for locations for the interactive menu
       const hasErrors = issues && issues.errors.length > 0;
       if (!hasErrors) {
@@ -250,6 +263,10 @@ class MetadataUpload extends React.Component<
     }
     // wasManual will trigger another validation when the Continue button is clicked.
     this.props.onMetadataChange({ metadata, wasManual: true });
+    trackEvent("MetadataUpload_manual-metadata_changed", {
+      projectId: this.props.project.id,
+      projectName: this.props.project.name,
+    });
   };
 
   handleDownloadCSV = () => {

@@ -19,15 +19,14 @@ import _fp, {
   values,
   zipObject,
 } from "lodash/fp";
-import React, { useContext } from "react";
-import { TrackEventType, useTrackEvent } from "~/api/analytics";
+import React from "react";
+import { trackEvent } from "~/api/analytics";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import { DataHeaders } from "~/components/views/SampleUploadFlow/components/ReviewStep/components/SampleInfo/components/ReviewTable/types";
 import DataTable from "~/components/visualizations/table/DataTable";
-import UserContextType from "~/interface/allowedFeatures";
 import {
   LocationObject,
   MetadataValue,
@@ -43,13 +42,8 @@ import { MetadataManualInputProps, MetadataManualInputState } from "./types";
 // @ts-ignore
 const map = _fp.map.convert({ cap: false });
 
-interface MetadataManualInputWithContextProps extends MetadataManualInputProps {
-  trackEvent: TrackEventType;
-  userContext: UserContextType;
-}
-
-class MetadataManualInputCC extends React.Component<
-  MetadataManualInputWithContextProps,
+class MetadataManualInput extends React.Component<
+  MetadataManualInputProps,
   MetadataManualInputState
 > {
   state = {
@@ -300,7 +294,7 @@ class MetadataManualInputCC extends React.Component<
 
   handleColumnChange = selectedFieldNames => {
     this.setState({ selectedFieldNames });
-    this.props.trackEvent("MetadataManualInput_column-selector_changed", {
+    trackEvent("MetadataManualInput_column-selector_changed", {
       selectedFieldNames: selectedFieldNames.length,
     });
   };
@@ -363,7 +357,7 @@ class MetadataManualInputCC extends React.Component<
         onClick={() => {
           const newValue = this.getMetadataValue(sample, column);
           this.applyToAll(column, newValue);
-          this.props.trackEvent("MetadataManualInput_apply-all_clicked", {
+          trackEvent("MetadataManualInput_apply-all_clicked", {
             sampleName: sample.name,
             column,
           });
@@ -460,7 +454,7 @@ class MetadataManualInputCC extends React.Component<
                   metadataType={this.state.projectMetadataFields[column]}
                   onChange={(key, value) => {
                     this.updateMetadataField(key, value, sample);
-                    this.props.trackEvent("MetadataManualInput_input_changed", {
+                    trackEvent("MetadataManualInput_input_changed", {
                       key,
                       sampleName: sample.name,
                     });
@@ -563,20 +557,6 @@ class MetadataManualInputCC extends React.Component<
   }
 }
 
-// Using a function component wrapper provides a semi-hacky way to
-// access useContext without the class component to function component
-// conversion.
-const MetadataManualInput = (props: MetadataManualInputProps) => {
-  const trackEvent = useTrackEvent();
-  const userContext = useContext(UserContext);
-
-  return (
-    <MetadataManualInputCC
-      {...props}
-      trackEvent={trackEvent}
-      userContext={userContext}
-    />
-  );
-};
+MetadataManualInput.contextType = UserContext;
 
 export default MetadataManualInput;

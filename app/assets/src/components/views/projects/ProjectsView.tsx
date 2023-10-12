@@ -2,13 +2,13 @@ import { Button, Icon } from "@czi-sds/components";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";
-import { trackEventFromClassComponent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { GlobalContext } from "~/globalContext/reducer";
 import { Project } from "~/interface/shared";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import {
@@ -47,7 +47,6 @@ interface ProjectsViewProps {
 class ProjectsView extends React.Component<ProjectsViewProps> {
   columns: $TSFixMe;
   discoveryView: $TSFixMe;
-  static contextType = GlobalContext;
   constructor(props: ProjectsViewProps) {
     super(props);
 
@@ -146,6 +145,10 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
     const { onProjectSelected, projects } = this.props;
     const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
+    trackEvent("ProjectsView_row_clicked", {
+      projectId: project.id,
+      projectName: project.name,
+    });
   };
 
   renderFilteredCount = () => {
@@ -180,20 +183,13 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
 
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     const renderContent = () => (
       <div className={cs.toggleContainer}>
         <DiscoveryViewToggle
           currentDisplay={currentDisplay}
           onDisplaySwitch={(display: $TSFixMe) => {
             onDisplaySwitch(display);
-            trackEventFromClassComponent(
-              globalAnalyticsContext,
-              `ProjectsView_${display}-switch_clicked`,
-            );
+            trackEvent(`ProjectsView_${display}-switch_clicked`);
           }}
         />
       </div>
@@ -300,3 +296,4 @@ ProjectsView.defaultProps = {
 };
 
 export default ProjectsView;
+ProjectsView.contextType = UserContext;

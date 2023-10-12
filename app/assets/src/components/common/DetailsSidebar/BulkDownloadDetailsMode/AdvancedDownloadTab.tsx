@@ -3,7 +3,7 @@ import cx from "classnames";
 import copy from "copy-to-clipboard";
 import moment from "moment";
 import React, { useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { BulkDownloadDetails } from "~/interface/shared";
 import cs from "./bulk_download_details_mode.scss";
@@ -13,7 +13,6 @@ interface AdvancedDownloadTabProps {
 }
 
 const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
-  const withAnalytics = useWithAnalytics();
   const [tooltip, setTooltip] = useState("");
   const hasCLICommand = () => {
     return (

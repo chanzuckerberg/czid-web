@@ -1,14 +1,14 @@
 import { ButtonIcon, Icon } from "@czi-sds/components";
-import React from "react";
+import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
 import {
   ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import { updateHeatmapName } from "~/api/visualization";
 import BasicPopup from "~/components/BasicPopup";
-import { useAllowedFeatures } from "~/components/common/UserContext";
+import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader } from "~/components/layout";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
@@ -56,9 +56,8 @@ export const SamplesHeatmapHeader = ({
   onFilterToggleClick,
   filterPanelOpen,
 }: SamplesHeatmapHeaderProps) => {
-  const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
-  const allowedFeatures = useAllowedFeatures();
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
 
   const handleHeatmapRename = async (name: string) => {
     if (name === "heatmap") return "";

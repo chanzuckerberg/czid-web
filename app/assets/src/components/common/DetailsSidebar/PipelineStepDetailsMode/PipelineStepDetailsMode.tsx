@@ -3,7 +3,7 @@ import moment from "moment";
 import React, { ReactNode } from "react";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { Accordion } from "~/components/layout";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
@@ -36,7 +36,6 @@ const PipelineStepDetailsMode = ({
   outputFiles,
   resources,
 }: PSDProps) => {
-  const withAnalytics = useWithAnalytics();
   const renderStatusBox = () => {
     let statusTitle: string, statusDescription: ReactNode;
     switch (status) {

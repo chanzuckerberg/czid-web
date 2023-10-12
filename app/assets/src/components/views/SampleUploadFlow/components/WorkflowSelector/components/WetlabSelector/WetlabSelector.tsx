@@ -1,5 +1,5 @@
 import React from "react";
-import { useTrackEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { Dropdown } from "~/components/ui/controls/dropdowns";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import {
@@ -19,7 +19,6 @@ const WetlabSelector = ({
   selectedWetlabProtocol,
   technology,
 }: WetlabSelectorProps) => {
-  const trackEvent = useTrackEvent();
   const handleChange = (value: string) => {
     onWetlabProtocolChange(value);
     trackEvent("WorkflowSelector_wetlab-protocol_selected", {

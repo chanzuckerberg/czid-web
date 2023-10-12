@@ -1,5 +1,5 @@
 import React from "react";
-import { useTrackEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { openUrl } from "~/components/utils/links";
 import { WorkflowType } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
@@ -34,7 +34,6 @@ export const SampleViewDownloadButton = ({
   backgroundId,
   currentTab,
 }: SampleViewDownloadButtonProps) => {
-  const trackEvent = useTrackEvent();
   const onDownloadAll = (eventName: WorkflowType) => {
     openUrl(getWorkflowRunZipLink(currentRun?.id));
     trackEvent(`SampleViewHeader_${eventName}-download-all-button_clicked`, {

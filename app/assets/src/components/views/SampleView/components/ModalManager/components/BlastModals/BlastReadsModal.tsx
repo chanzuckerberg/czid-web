@@ -2,7 +2,7 @@ import { Tab, Tabs, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import { size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
@@ -42,7 +42,6 @@ export const BlastReadsModal = ({
   taxonLevel,
   taxonId,
 }: BlastReadsModalProps) => {
-  const trackEvent = useTrackEvent();
   const [shortestAlignmentLength, setShortestAlignmentLength] = useState();
   const [longestAlignmentLength, setLongestAlignmentLength] = useState();
   const [reads, setReads] = useState([]);

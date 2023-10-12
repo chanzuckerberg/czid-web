@@ -2,7 +2,7 @@ import { Button, Icon, Link, Tooltip } from "@czi-sds/components";
 import { isEmpty } from "lodash";
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import {
   postToAirtable as airtablePost,
   updateUserData as userUpdater,
@@ -27,7 +27,6 @@ import {
 import cs from "./user_profile_form.scss";
 
 export function UserProfileForm() {
-  const withAnalytics = useWithAnalytics();
   const currentUser = useContext(UserContext);
   const history = useHistory();
   const [firstName, setFirstName] = useState<string>("");

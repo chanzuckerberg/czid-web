@@ -21,7 +21,8 @@ import {
   uniq,
 } from "lodash/fp";
 import queryString from "query-string";
-import React, { useContext } from "react";
+import React from "react";
+import { connect } from "react-redux";
 import {
   getPathogenFlags,
   getSampleTaxons,
@@ -31,14 +32,12 @@ import {
 import { validateSampleIds } from "~/api/access_control";
 import {
   ANALYTICS_EVENT_NAMES,
-  TrackEventType,
-  useTrackEvent,
-  useWithAnalytics,
-  WithAnalyticsType,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
-import { useAllowedFeatures } from "~/components/common/UserContext";
+import { UserContext } from "~/components/common/UserContext";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
@@ -65,13 +64,9 @@ import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModa
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import { URL_FIELDS } from "~/components/views/SampleView/utils";
-import {
-  ActionType,
-  createAction,
-  GlobalContext,
-} from "~/globalContext/reducer";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
+import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
@@ -119,13 +114,6 @@ interface SamplesHeatmapViewProps {
   taxonLevels?: string[];
   thresholdFilters?: object;
   updateDiscoveryProjectIds?: $TSFixMeFunction;
-}
-
-interface SamplsHeatmapViewWithContextProps extends SamplesHeatmapViewProps {
-  allowedFeatures: string[];
-  trackEvent: TrackEventType;
-  updateDiscoveryProjectId: (projectIds: number | null) => void;
-  withAnalytics: WithAnalyticsType;
 }
 
 interface SamplesHeatmapViewState {
@@ -186,8 +174,8 @@ interface AllTaxonDetails {
   [key: string]: TaxonDetails;
 }
 
-class SamplesHeatmapViewCC extends React.Component<
-  SamplsHeatmapViewWithContextProps,
+class SamplesHeatmapView extends React.Component<
+  SamplesHeatmapViewProps,
   SamplesHeatmapViewState
 > {
   heatmapVis: $TSFixMe;
@@ -200,7 +188,7 @@ class SamplesHeatmapViewCC extends React.Component<
   s: $TSFixMe;
   urlParams: $TSFixMe;
   urlParser: $TSFixMe;
-  constructor(props: SamplsHeatmapViewWithContextProps) {
+  constructor(props: SamplesHeatmapViewProps) {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
@@ -348,11 +336,11 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   componentDidMount() {
-    const { allowedFeatures, projectIds, updateDiscoveryProjectIds } =
-      this.props;
+    const { projectIds, updateDiscoveryProjectIds } = this.props;
 
     // temporarily set includePathogens to true for all users with the
     // heatmap_pathogens feature flag. Later this will be togglable by the user.
+    const { allowedFeatures = [] } = this.context || {};
     const usePathogenFlagging = allowedFeatures.includes(
       HEATMAP_PATHOGEN_FLAGGING_FEATURE,
     );
@@ -697,7 +685,7 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   async fetchHeatmapData(sampleIds: $TSFixMe) {
-    const { allowedFeatures, heatmapTs } = this.props;
+    const { heatmapTs } = this.props;
     const {
       presets,
       species,
@@ -710,6 +698,7 @@ class SamplesHeatmapViewCC extends React.Component<
       background,
       taxonTags,
     } = this.state.selectedOptions;
+    const { allowedFeatures = [] } = this.context || {};
     const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
@@ -776,7 +765,7 @@ class SamplesHeatmapViewCC extends React.Component<
     // @ts-expect-error ts-migrate(2362) FIXME: The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
     const loadTimeInMilliseconds = fetchDataEnd - fetchDataStart;
 
-    this.props.trackEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
@@ -787,7 +776,7 @@ class SamplesHeatmapViewCC extends React.Component<
       },
     );
 
-    this.props.trackEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED_ALLISON_TESTING,
       {
         ...fetchHeatmapDataParamsCompliantTypes,
@@ -804,7 +793,8 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   async fetchViewData() {
-    const useHeatmapPathogensFeature = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapPathogensFeature = allowedFeatures.includes(
       HEATMAP_PATHOGEN_FLAGGING_FEATURE,
     );
     const { sampleIds } = this.state;
@@ -887,7 +877,8 @@ class SamplesHeatmapViewCC extends React.Component<
 
   handleLoadingFailure = (err: $TSFixMe) => {
     const { allTaxonIds, sampleIds } = this.state;
-    const useHeatmapES = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
 
@@ -920,19 +911,16 @@ class SamplesHeatmapViewCC extends React.Component<
       logSingleError(err);
     }
 
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR,
-      {
-        numSamples: size(sampleIds),
-        numTaxons: size(allTaxonIds),
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        sampleIds,
-        useHeatmapES,
-      },
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR, {
+      numSamples: size(sampleIds),
+      numTaxons: size(allTaxonIds),
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
+      sampleIds,
+      useHeatmapES,
+    });
 
-    this.props.trackEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR_ALLISON_TESTING,
       {
         numSamples: size(sampleIds),
@@ -1366,7 +1354,8 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   getTopTaxaPerSample(filteredTaxonIds: $TSFixMe, addedTaxonIds: $TSFixMe) {
-    const useHeatmapES = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
 
@@ -1596,7 +1585,7 @@ class SamplesHeatmapViewCC extends React.Component<
     const taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
 
-    this.props.trackEvent("SamplesHeatmapView_taxon_removed", {
+    trackEvent("SamplesHeatmapView_taxon_removed", {
       taxonId,
       taxonName,
     });
@@ -1614,7 +1603,7 @@ class SamplesHeatmapViewCC extends React.Component<
     this.setState({
       selectedMetadata: Array.from(metadataFields),
     });
-    this.props.trackEvent("SamplesHeatmapView_metadata_changed", {
+    trackEvent("SamplesHeatmapView_metadata_changed", {
       selected: metadataFields,
     });
     this.updateHistoryState();
@@ -1624,7 +1613,7 @@ class SamplesHeatmapViewCC extends React.Component<
     this.metadataSortField = field;
     this.metadataSortAsc = dir;
     this.updateHistoryState();
-    this.props.trackEvent("Heatmap_column-metadata-label_clicked", {
+    trackEvent("Heatmap_column-metadata-label_clicked", {
       columnMetadataSortField: field,
       sortDirection: dir ? "asc" : "desc",
     });
@@ -1637,7 +1626,7 @@ class SamplesHeatmapViewCC extends React.Component<
       ),
     );
     this.setState({ pendingPinnedSampleIds: selectedSampleIds });
-    this.props.trackEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED,
       selectedSamples,
     );
@@ -1664,7 +1653,7 @@ class SamplesHeatmapViewCC extends React.Component<
       pinnedSampleIds,
       pendingPinnedSampleIds: pinnedSampleIds,
     });
-    this.props.trackEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED,
       sampleId,
     );
@@ -1686,26 +1675,20 @@ class SamplesHeatmapViewCC extends React.Component<
       this.setState({
         sidebarVisible: false,
       });
-      this.props.trackEvent(
-        "SamplesHeatmapView_sample-details-sidebar_closed",
-        {
-          sampleId: sampleId,
-          sidebarMode: "sampleDetails",
-        },
-      );
+      trackEvent("SamplesHeatmapView_sample-details-sidebar_closed", {
+        sampleId: sampleId,
+        sidebarMode: "sampleDetails",
+      });
     } else {
       this.setState({
         selectedSampleId: sampleId,
         sidebarMode: "sampleDetails",
         sidebarVisible: true,
       });
-      this.props.trackEvent(
-        "SamplesHeatmapView_sample-details-sidebar_opened",
-        {
-          sampleId: sampleId,
-          sidebarMode: "sampleDetails",
-        },
-      );
+      trackEvent("SamplesHeatmapView_sample-details-sidebar_opened", {
+        sampleId: sampleId,
+        sidebarMode: "sampleDetails",
+      });
     }
   };
 
@@ -1727,7 +1710,7 @@ class SamplesHeatmapViewCC extends React.Component<
       this.setState({
         sidebarVisible: false,
       });
-      this.props.trackEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
+      trackEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
         parentTaxonId: taxonDetails.parentId,
         taxonId: taxonDetails.id,
         taxonName,
@@ -1743,7 +1726,7 @@ class SamplesHeatmapViewCC extends React.Component<
         },
         sidebarVisible: true,
       });
-      this.props.trackEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
+      trackEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
         parentTaxonId: taxonDetails.parentId,
         taxonId: taxonDetails.id,
         taxonName,
@@ -1806,7 +1789,8 @@ class SamplesHeatmapViewCC extends React.Component<
 
   handleSelectedOptionsChange = (newOptions: $TSFixMe) => {
     const { selectedOptions } = this.state;
-    const useHeatmapES = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
 
@@ -1870,7 +1854,8 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   updateFilters() {
-    const useHeatmapES = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
     if (useHeatmapES) {
@@ -2206,7 +2191,7 @@ class SamplesHeatmapViewCC extends React.Component<
         <DetailsSidebar
           visible={sidebarVisible}
           mode={sidebarMode}
-          onClose={this.props.withAnalytics(
+          onClose={withAnalytics(
             this.closeSidebar,
             ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_DETAILS_SIDEBAR_CLOSED,
             {
@@ -2220,7 +2205,7 @@ class SamplesHeatmapViewCC extends React.Component<
           <HeatmapCreationModal
             continueInNewTab={true}
             open
-            onClose={this.props.withAnalytics(
+            onClose={withAnalytics(
               this.handleHeatmapCreationModalClose,
               ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED,
             )}
@@ -2230,7 +2215,7 @@ class SamplesHeatmapViewCC extends React.Component<
         {downloadModalOpen && (
           <SamplesHeatmapDownloadModal
             open
-            onClose={this.props.withAnalytics(
+            onClose={withAnalytics(
               this.handleDownloadModalClose,
               ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_CLOSED,
             )}
@@ -2250,30 +2235,15 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 }
 
-// Using a function component wrapper provides a semi-hacky way to
-// access useContext without the class component to function component
-// conversion.
-const SamplesHeatmapView = (props: SamplesHeatmapViewProps) => {
-  const allowedFeatures = useAllowedFeatures();
-  const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
+SamplesHeatmapView.contextType = UserContext;
 
-  const globalContext = useContext(GlobalContext);
-  const dispatch = globalContext.globalContextDispatch;
+const mapDispatchToProps = { updateDiscoveryProjectIds: updateProjectIds };
 
-  const updateDiscoveryProjectId = (projectId: number | null) => {
-    dispatch(createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectId));
-  };
+// Don't need mapStateToProps yet so pass in null
+const connectedComponent = connect(
+  null,
+  mapDispatchToProps,
+)(SamplesHeatmapView);
+(connectedComponent.name as string) = "SamplesHeatmapView";
 
-  return (
-    <SamplesHeatmapViewCC
-      {...props}
-      allowedFeatures={allowedFeatures}
-      trackEvent={trackEvent}
-      withAnalytics={withAnalytics}
-      updateDiscoveryProjectId={updateDiscoveryProjectId}
-    />
-  );
-};
-
-export default SamplesHeatmapView;
+export default connectedComponent;

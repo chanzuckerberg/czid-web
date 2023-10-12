@@ -1,6 +1,6 @@
 import { Button } from "@czi-sds/components";
 import React, { useState } from "react";
-import { useTrackEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import MetadataUploadModal from "./MetadataUploadModal";
 import cs from "./project_upload_menu.scss";
@@ -18,7 +18,6 @@ const ProjectUploadMenu = ({
   project,
   workflow,
 }: ProjectUploadMenuProps) => {
-  const trackEvent = useTrackEvent();
   const [modalOpen, setModalOpen] = useState(false);
 
   const goToPage = path => {

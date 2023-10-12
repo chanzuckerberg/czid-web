@@ -2,7 +2,6 @@ import querystring from "querystring";
 import { isNull } from "lodash/fp";
 import React from "react";
 import SvgSaver from "svgsaver";
-import { useTrackEvent } from "~/api/analytics";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
@@ -38,7 +37,6 @@ export const MngsDownloadDropdown = ({
   sample,
   view,
 }: MngsDownloadDropdownProps) => {
-  const trackEvent = useTrackEvent();
   if (!readyToDownload) return null;
 
   const downloadCSV = () => {
@@ -98,7 +96,6 @@ export const MngsDownloadDropdown = ({
     }
 
     logDownloadOption({
-      trackEvent,
       component: "SampleViewControls/DownloadDropdown",
       option,
       details: {

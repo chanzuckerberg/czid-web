@@ -1,3 +1,4 @@
+import { trackEvent } from "~/api/analytics";
 import { getURLParamString } from "~/helpers/url";
 import Sample, { WorkflowRun } from "~/interface/sample";
 
@@ -51,6 +52,27 @@ export const getAmrDownloadLink = (
       break;
   }
   return { downloadUrl, fileName };
+};
+
+export const logDownloadOption = ({
+  component,
+  option,
+  details = {},
+}: {
+  component: string;
+  option: string;
+  details: $TSFixMe;
+}): void => {
+  trackEvent(
+    // make names like:
+    // SamplesHeatmapHeader_download-current-heatmap-view-csv_clicked
+    `${component}-download-${option
+      .replace(/\W+/g, "-")
+      .replace(/_/g, "-")
+      .replace("-_", "_")
+      .toLowerCase()}_clicked`,
+    details,
+  );
 };
 
 export const downloadAmrGeneLevelData = (

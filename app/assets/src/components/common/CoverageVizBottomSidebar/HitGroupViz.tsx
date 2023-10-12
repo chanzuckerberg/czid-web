@@ -5,11 +5,7 @@ import { get, map, size, sum } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
 import { getContigsSequencesByByteranges } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useWithAnalytics,
-  WithAnalyticsType,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import GenomeViz from "~/components/visualizations/GenomeViz";
@@ -36,10 +32,6 @@ interface HitGroupVizProps {
   snapshotShareId?: string;
 }
 
-interface HitGroupVizWithAnalyticsProps extends HitGroupVizProps {
-  withAnalytics: WithAnalyticsType;
-}
-
 interface HitGroupVizState {
   genomeVizTooltipLocation?: TooltipLocation;
   genomeVizTooltipData: {
@@ -51,8 +43,8 @@ interface HitGroupVizState {
   currentCopyIconMessage: string;
 }
 
-class HitGroupVizCC extends React.Component<
-  HitGroupVizWithAnalyticsProps,
+export default class HitGroupViz extends React.Component<
+  HitGroupVizProps,
   HitGroupVizState
 > {
   private hitGroupVizContainer: $TSFixMe;
@@ -237,7 +229,7 @@ class HitGroupVizCC extends React.Component<
   };
 
   renderContigDownloader = () => {
-    const { sampleId, taxonId, accessionData, withAnalytics } = this.props;
+    const { sampleId, taxonId, accessionData } = this.props;
     const { contigDownloaderLocation, contigDownloaderData } = this.state;
 
     return ReactDOM.createPortal(
@@ -338,14 +330,3 @@ class HitGroupVizCC extends React.Component<
     );
   }
 }
-
-// Using a function component wrapper provides a semi-hacky way to
-// access useContext without the class component to function component
-// conversion.
-const HitGroupViz = (props: HitGroupVizProps) => {
-  const withAnalytics = useWithAnalytics();
-
-  return <HitGroupVizCC {...props} withAnalytics={withAnalytics} />;
-};
-
-export default HitGroupViz;

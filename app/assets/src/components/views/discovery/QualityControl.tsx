@@ -18,7 +18,7 @@ import {
 import memoize from "memoize-one";
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { GET_SAMPLES_READS_STATS_QUERY } from "~/api/samples_reads_stats";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
@@ -105,7 +105,6 @@ function QualityControl({
   samples,
   handleBarClick,
 }: QualityControlProps) {
-  const trackEvent = useTrackEvent();
   const [loading, setLoading] = useState(true);
   const [showProcessingSamplesMessage, setShowProcessingSamplesMessage] =
     useState(true);

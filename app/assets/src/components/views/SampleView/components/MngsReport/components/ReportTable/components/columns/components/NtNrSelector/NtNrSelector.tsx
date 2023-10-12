@@ -1,5 +1,5 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { DBType } from "~/interface/sampleView";
 import { NtNrStack } from "../NtNrStack";
@@ -13,7 +13,6 @@ export const NtNrSelector = ({
   dbType,
   handleNtNrChange,
 }: NtNrSelectorProps) => {
-  const withAnalytics = useWithAnalytics();
   const selector = (
     <div>
       <NtNrStack

@@ -1,4 +1,3 @@
-import { WithAnalyticsType } from "~/api/analytics";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import cs from "~/components/views/SampleView/components/MngsReport/components/ReportTable/report_table.scss";
 import {
@@ -41,7 +40,6 @@ export const getNonNumericColumns = (
   onPreviousConsensusGenomeClick: (params: ConsensusGenomeClick) => void,
   toggleExpandAll: () => void,
   toggleExpandGenus: ({ taxonId }: { taxonId: number }) => void,
-  withAnalytics: WithAnalyticsType,
   onTaxonNameClick?: (clickedTaxonData: Taxon) => void,
   snapshotShareId?: string,
 ) => {
@@ -51,7 +49,6 @@ export const getNonNumericColumns = (
         // TODO: does not update icon on click
         expandedGenusIds,
         toggleExpandGenus,
-        withAnalytics,
       ),
       className: cs.expandHeader,
       dataKey: "expanded",
@@ -61,7 +58,6 @@ export const getNonNumericColumns = (
         // TODO: does not update icon on click
         isExpandAllOpened,
         toggleExpandAll,
-        withAnalytics,
       ),
       width: 20,
     },

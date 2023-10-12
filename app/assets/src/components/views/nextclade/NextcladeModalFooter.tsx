@@ -1,5 +1,5 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
@@ -27,8 +27,6 @@ const NextcladeModalFooter = ({
   samplesNotSentToNextclade,
   validationError,
 }: NextcladeModalFooterProps) => {
-  const withAnalytics = useWithAnalytics();
-
   const renderAccordionNotification = ({
     message,
     description,

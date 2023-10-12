@@ -2,8 +2,8 @@ import { Menu, MenuItem } from "@czi-sds/components";
 import React, { useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import { createAnnotation } from "~/api/blast";
 import AnnotationLabel from "~/components/ui/labels/AnnotationLabel";
@@ -31,8 +31,6 @@ const AnnotationMenu = ({
   currentLabelType,
   analyticsContext,
 }: AnnotationMenuProps) => {
-  const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (event: $TSFixMe) => {

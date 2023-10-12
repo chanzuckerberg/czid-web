@@ -23,16 +23,16 @@ import {
 } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-  withAnalyticsFromClassComponent,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import { chooseTaxon } from "~/api/phylo_tree_ngs";
 import ProjectSelect from "~/components/common/ProjectSelect";
+import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
 import { showPhyloTreeNotification } from "~/components/views/phylo_tree/PhyloTreeNotification";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import { GlobalContext } from "~/globalContext/reducer";
 import { Project } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import { SubtextDropdown } from "~ui/controls/dropdowns";
@@ -103,9 +103,8 @@ class PhyloTreeCreationModal extends React.Component<
   phyloTreeHeaders: $TSFixMe;
   skipSelectProjectAndTaxon: $TSFixMe;
   wizard: $TSFixMe;
-  static contextType = GlobalContext;
-  constructor(props: PhyloTreeCreationModalProps) {
-    super(props);
+  constructor(props: PhyloTreeCreationModalProps, context: $TSFixMe) {
+    super(props, context);
 
     this.state = {
       defaultPage: 0,
@@ -213,10 +212,6 @@ class PhyloTreeCreationModal extends React.Component<
   };
 
   parsePhyloTreeData = (phyloTreeData: $TSFixMe) => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     if (isEmpty(phyloTreeData)) {
       return [];
     }
@@ -227,8 +222,7 @@ class PhyloTreeCreationModal extends React.Component<
       view: row.nextGeneration ? (
         <RouterLink
           onClick={() => {
-            trackEventFromClassComponent(
-              globalAnalyticsContext,
+            trackEvent(
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_NG_LINK_CLICKED,
               { treeId: row.id },
             );
@@ -395,10 +389,6 @@ class PhyloTreeCreationModal extends React.Component<
     this.setState({ projectList, projectsLoaded: true });
 
   handleSelectProject = (result: $TSFixMe) => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     this.setState(
       {
         projectId: result.id,
@@ -419,8 +409,7 @@ class PhyloTreeCreationModal extends React.Component<
         otherSamplesFilter: "",
       },
       () =>
-        trackEventFromClassComponent(
-          globalAnalyticsContext,
+        trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SELECTED,
           {
             projectId: result.id,
@@ -437,10 +426,6 @@ class PhyloTreeCreationModal extends React.Component<
 
   handleSelectTaxon = (taxonId: $TSFixMe) => {
     const { taxonList } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     // @ts-expect-error Property 'title' does not exist on type 'unknown'.
     const taxonName = find({ value: taxonId }, taxonList).title;
 
@@ -464,8 +449,7 @@ class PhyloTreeCreationModal extends React.Component<
         otherSamplesFilter: "",
       },
       () =>
-        trackEventFromClassComponent(
-          globalAnalyticsContext,
+        trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED,
           {
             taxonId,
@@ -556,10 +540,6 @@ class PhyloTreeCreationModal extends React.Component<
   };
 
   handleFilterChange = (newFilter: $TSFixMe) => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     clearTimeout(this.inputTimeout);
     this.inputTimeout = setTimeout(() => {
       this.setState(
@@ -571,8 +551,7 @@ class PhyloTreeCreationModal extends React.Component<
         },
         () => {
           this.loadAdditionalPipelineRunIds();
-          trackEventFromClassComponent(
-            globalAnalyticsContext,
+          trackEvent(
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED,
             {
               sampleSearchString: newFilter,
@@ -598,10 +577,6 @@ class PhyloTreeCreationModal extends React.Component<
       taxonId,
     } = this.state;
     const { onClose } = this.props;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     const totalNumberOfSamplesSelected =
       selectedProjectPipelineRuns.size + selectedOtherPipelineRuns.size;
@@ -615,8 +590,7 @@ class PhyloTreeCreationModal extends React.Component<
           showErrorSamples: true,
         },
         () =>
-          trackEventFromClassComponent(
-            globalAnalyticsContext,
+          trackEvent(
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_INVALID_AMOUNT_OF_SAMPLES_SELECTED_FOR_CREATION,
             {
               totalNumberOfSamplesSelected,
@@ -820,10 +794,6 @@ class PhyloTreeCreationModal extends React.Component<
       otherPipelineRunsSelectAllChecked,
       selectedOtherPipelineRuns,
     } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     const options = {
       listTrees: (
@@ -849,8 +819,7 @@ class PhyloTreeCreationModal extends React.Component<
             <Wizard.Action
               action="continue"
               onAfterAction={() =>
-                trackEventFromClassComponent(
-                  globalAnalyticsContext,
+                trackEvent(
                   ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_NEW_TREE_BUTTON_CLICKED,
                 )
               }
@@ -1050,10 +1019,6 @@ class PhyloTreeCreationModal extends React.Component<
   render() {
     const { onClose } = this.props;
     const { defaultPage, phyloTreesLoaded, skipListTrees } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     return (
       <Modal open tall onClose={onClose} xlCloseIcon={true}>
@@ -1061,8 +1026,7 @@ class PhyloTreeCreationModal extends React.Component<
           <Wizard
             className="phylo-tree-creation-wizard"
             skipPageInfoNPages={skipListTrees ? 0 : 1}
-            onComplete={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
+            onComplete={withAnalytics(
               this.handleComplete,
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_TREE_BUTTON_CLICKED,
             )}
@@ -1088,5 +1052,7 @@ class PhyloTreeCreationModal extends React.Component<
 PhyloTreeCreationModal.defaultProps = {
   minCoverageBreadth: 25,
 };
+
+PhyloTreeCreationModal.contextType = UserContext;
 
 export default PhyloTreeCreationModal;

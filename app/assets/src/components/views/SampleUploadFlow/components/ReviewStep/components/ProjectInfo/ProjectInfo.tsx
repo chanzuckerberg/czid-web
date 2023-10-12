@@ -1,7 +1,7 @@
 import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import React, { useState } from "react";
-import { useTrackEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import { Project } from "~/interface/shared";
 import { UploadStepType } from "~/interface/upload";
@@ -28,7 +28,6 @@ const ProjectInfo = ({
   project,
   uploadType,
 }: ProjectTypeProps) => {
-  const trackEvent = useTrackEvent();
   const [shouldShowLessDescription, setShouldShowLessDescription] =
     useState<boolean>(true);
 

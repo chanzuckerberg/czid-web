@@ -7,9 +7,9 @@
 // - See https://reactrouter.com/web/api/match for the properties you can get from 'match' (params, isExact, path, and url).
 
 import React, { useContext } from "react";
-import { Route, Switch, useHistory, useLocation } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import { UserContext } from "~/components/common/UserContext";
-import { DiscoveryView } from "~/components/views/discovery/DiscoveryView";
+import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
 import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
@@ -50,8 +50,6 @@ const DiscoveryViewRouter = ({
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
   const { userSignedIn } = useContext(UserContext);
-  const history = useHistory();
-  const location = useLocation();
 
   return (
     <Switch>
@@ -101,9 +99,6 @@ const DiscoveryViewRouter = ({
             snapshotProjectDescription={snapshotProjectDescription}
             snapshotProjectName={snapshotProjectName}
             snapshotShareId={match.params.snapshotShareId}
-            history={history}
-            location={location}
-            match={match}
           />
         )}
       />
@@ -123,22 +118,17 @@ const DiscoveryViewRouter = ({
         <AdminSettings />
       </Route>
       {userSignedIn ? (
-        <Route
-          render={({ match }) => (
-            <DiscoveryView
-              admin={admin}
-              domain={domain}
-              mapTilerKey={mapTilerKey}
-              projectId={projectId}
-              snapshotProjectDescription={snapshotProjectDescription}
-              snapshotProjectName={snapshotProjectName}
-              snapshotShareId={snapshotShareId}
-              history={history}
-              location={location}
-              match={match}
-            />
-          )}
-        />
+        <Route>
+          <DiscoveryView
+            admin={admin}
+            domain={domain}
+            mapTilerKey={mapTilerKey}
+            projectId={projectId}
+            snapshotProjectDescription={snapshotProjectDescription}
+            snapshotProjectName={snapshotProjectName}
+            snapshotShareId={snapshotShareId}
+          />
+        </Route>
       ) : (
         <Route>
           <LandingV2

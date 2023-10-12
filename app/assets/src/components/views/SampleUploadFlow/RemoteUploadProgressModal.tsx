@@ -5,8 +5,8 @@ import { find, get, map, pick, size, take } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import {
   bulkUploadBasespace,
@@ -78,8 +78,6 @@ const RemoteUploadProgressModal = ({
   wetlabProtocol,
   workflows,
 }: RemoteUploadProgressModalProps) => {
-  const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const [uploadComplete, setUploadComplete] = useState(false);
   const [samplesToUpload, setSamplesToUpload] = useState([]);
   const [failedSampleNames, setFailedSampleNames] = useState([]);
@@ -357,16 +355,20 @@ const RemoteUploadProgressModal = ({
   };
 
   const renderViewProjectButton = () => {
-    const buttonCallback = withAnalytics(
-      () => redirectToProject(project.id),
-      ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED,
-      {
-        projectId: project.id,
-        projectName: project.name,
-      },
-    );
+    const buttonCallback = () => {
+      withAnalytics(
+        redirectToProject(project.id),
+        ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED,
+        {
+          projectId: project.id,
+          projectName: project.name,
+        },
+      );
+    };
 
-    return <PrimaryButton text="Go to Project" onClick={buttonCallback} />;
+    return (
+      <PrimaryButton text="Go to Project" onClick={() => buttonCallback()} />
+    );
   };
 
   return (

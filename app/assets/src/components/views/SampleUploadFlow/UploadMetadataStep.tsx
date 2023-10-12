@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React, { useState } from "react";
-import { useTrackEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { validateManualMetadataForNewSamples } from "~/api/metadata";
 import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
 import {
@@ -29,7 +29,6 @@ const UploadMetadataStep = ({
   workflows,
   onUploadMetadata,
 }: UploadMetadataStepProps) => {
-  const trackEvent = useTrackEvent();
   const [showInstructions, setShowInstructions] = useState(false);
   const [continueDisabled, setContinueDisabled] = useState(true);
   const [metadata, setMetadata] = useState(null);

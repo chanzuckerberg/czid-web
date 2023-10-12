@@ -5,8 +5,8 @@ import { filter, get, getOr, kebabCase, pick, size } from "lodash/fp";
 import React, { useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
@@ -79,8 +79,6 @@ export const HoverActions = ({
   sampleId,
   snapshotShareId,
 }: HoverActionsProps) => {
-  const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const [showHoverActions, setShowHoverActions] = useState(false);
 
   const {

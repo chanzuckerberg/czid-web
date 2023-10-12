@@ -1,14 +1,10 @@
-import { useContext } from "react";
 import eventNames from "~/api/events";
 import {
   trackAppcuesPageTransition,
   trackEventForAppcues,
 } from "~/components/utils/appcues";
-import { GlobalContext } from "~/globalContext/reducer";
-
-type GlobalAnalyticsContextType = {
-  projectIds: number | number[] | null;
-};
+import { getGlobalAnalyticsContext } from "~/redux/modules/discovery/selectors";
+import store from "~/redux/store";
 
 // This is exported from here as well for importing convenience.
 export const ANALYTICS_EVENT_NAMES = eventNames;
@@ -42,7 +38,6 @@ export type EventData = Record<string, EventValue>;
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
 const logAnalyticsEvent = async (
-  globalAnalyticsContext: GlobalAnalyticsContextType,
   eventName: string,
   eventData: EventData = {},
 ) => {
@@ -69,6 +64,9 @@ const logAnalyticsEvent = async (
       };
     }
 
+    // Get the global analytic context from the Redux global state tree using the getGlobalAnalyticsContext selector
+    const globalAnalyticsContext = getGlobalAnalyticsContext(store.getState());
+
     if (globalAnalyticsContext) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
@@ -92,9 +90,8 @@ const logAnalyticsEvent = async (
  *    )
  *
  **/
-const withAnalytics = (
-  globalAnalyticsContext: GlobalAnalyticsContextType,
-  handleEvent: (...args: any[]) => void,
+export const withAnalytics = (
+  handleEvent: $TSFixMe,
   eventName: string,
   eventData: EventData = {},
 ) => {
@@ -103,9 +100,9 @@ const withAnalytics = (
     console.error(`Missing event handler function "${handleEvent}"`);
   }
 
-  return (...args: any[]) => {
+  return (...args: $TSFixMe[]) => {
     const ret = handleEvent(...args);
-    trackEvent(globalAnalyticsContext, eventName, eventData);
+    trackEvent(eventName, eventData);
     return ret;
   };
 };
@@ -115,70 +112,7 @@ export const trackPageTransition = () => {
   trackAppcuesPageTransition();
 };
 
-const trackEvent = (
-  globalAnalyticsContext: GlobalAnalyticsContextType,
-  eventName: string,
-  eventData: EventData = {},
-) => {
-  logAnalyticsEvent(globalAnalyticsContext, eventName, eventData);
+export const trackEvent = (eventName: string, eventData: EventData = {}) => {
+  logAnalyticsEvent(eventName, eventData);
   trackEventForAppcues(eventName, eventData);
-};
-
-/* Hooks for getting helper functions that include globalContext */
-const useGlobalAnalyticsContext = () => {
-  const globalContext = useContext(GlobalContext);
-  return {
-    projectIds: globalContext.discoveryProjectIds,
-  };
-};
-
-export type TrackEventType = (eventName: string, eventData?: EventData) => void;
-
-export const useTrackEvent = (): TrackEventType => {
-  const globalAnalyticsContext = useGlobalAnalyticsContext();
-
-  return (eventName: string, eventData?: EventData) =>
-    trackEvent(globalAnalyticsContext, eventName, eventData);
-};
-
-export type WithAnalyticsType = (
-  handleEvent: (...args: any[]) => void,
-  eventName: string,
-  eventData?: EventData,
-) => (...args: any[]) => void;
-
-export const useWithAnalytics = (): WithAnalyticsType => {
-  const globalAnalyticsContext = useGlobalAnalyticsContext();
-
-  return (
-    handleEvent: $TSFixMe,
-    eventName: string,
-    eventData: EventData = {},
-  ) => withAnalytics(globalAnalyticsContext, handleEvent, eventName, eventData);
-};
-
-/*
-  Helpers for calling trackEvent and withAnalytics from a class component. Adding this ensures
-  that we don't forget to remove any trackEvent/withAnalytics imports from other files.
-*/
-export const trackEventFromClassComponent = (
-  globalAnalyticsContext: GlobalAnalyticsContextType,
-  eventName: string,
-  eventData: EventData = {},
-) => {
-  trackEvent(globalAnalyticsContext, eventName, eventData);
-};
-
-export const withAnalyticsFromClassComponent = (
-  globalAnalyticsContext: GlobalAnalyticsContextType,
-  handleEvent: (...args: any[]) => void,
-  eventName: string,
-  eventData: EventData = {},
-) => {
-  return withAnalytics(
-    globalAnalyticsContext,
-    handleEvent,
-    eventName,
-    eventData,
-  );
 };

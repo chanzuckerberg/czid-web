@@ -2,6 +2,7 @@
 import { flow, get, keyBy, mapValues, omit } from "lodash/fp";
 import React from "react";
 import { getSamples } from "~/api";
+import { trackEvent } from "~/api/analytics";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { showToast } from "~/components/utils/toast";
 import { NameId } from "~/interface/shared";
@@ -96,6 +97,12 @@ class MetadataUploadModal extends React.Component<
           listItems={response.errors}
         />
       ));
+
+      trackEvent("MetadataUploadModal_modal_error", {
+        projectId: this.props.project.id,
+        projectSamples: this.state.projectSamples.length,
+        errors: response.errors.length,
+      });
     } else {
       showToast(
         ({ closeToast }) => (
@@ -107,6 +114,11 @@ class MetadataUploadModal extends React.Component<
           autoClose: 3000,
         },
       );
+
+      trackEvent("MetadataUploadModal_modal_success", {
+        projectId: this.props.project.id,
+        projectSamples: this.state.projectSamples.length,
+      });
     }
 
     onComplete && onComplete();

@@ -2,7 +2,7 @@ import { Icon } from "@czi-sds/components";
 import axios from "axios";
 import cx from "classnames";
 import React, { useContext, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import Divider from "~/components/layout/Divider";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -33,7 +33,6 @@ const ProjectSettingsModal = ({
   project,
   users,
 }: ProjectSettingsModalProps) => {
-  const withAnalytics = useWithAnalytics();
   const [modalOpen, setModalOpen] = useState(false);
   const { allowedFeatures = [], userId } = useContext(UserContext) || {};
   const makeProjectPublic = () => {

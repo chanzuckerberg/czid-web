@@ -4,16 +4,15 @@ import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import * as Sentry from "@sentry/react";
 import "font-awesome/scss/font-awesome.scss";
-import React, { ComponentClass, FunctionComponent, useReducer } from "react";
+import React from "react";
 import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import "semantic-ui-css/semantic.min.css";
 import "url-search-params-polyfill";
 import { UserContext } from "~/components/common/UserContext";
+import store from "~/redux/store";
 import { initalCache, typeDefs } from "./cache";
-import { initialGlobalContextState } from "./globalContext/initialState";
-import { GlobalContext, globalContextReducer } from "./globalContext/reducer";
-import UserContextType from "./interface/allowedFeatures";
 import "./loader.scss";
 import RelayEnvironment from "./relay/RelayEnvironment";
 import "./styles/appcues.scss";
@@ -70,45 +69,6 @@ export const federationClient = new ApolloClient({
   typeDefs,
 });
 
-// Using a function component provides a way to access useReducer
-const ReactComponentWithGlobalContext = ({
-  matchedComponent,
-  props,
-  userContext,
-}: {
-  matchedComponent: string | FunctionComponent<any> | ComponentClass<any, any>;
-  props: any;
-  userContext: UserContextType;
-}) => {
-  const [globalContextState, globalContextDispatch] = useReducer(
-    globalContextReducer,
-    initialGlobalContextState,
-  );
-  return (
-    <Sentry.ErrorBoundary fallback={"An error has occured"}>
-      <BrowserRouter>
-        <ApolloProvider client={apolloClient}>
-          <RelayEnvironment>
-            <UserContext.Provider value={userContext}>
-              <GlobalContext.Provider
-                value={{ globalContextState, globalContextDispatch }}
-              >
-                <StyledEngineProvider injectFirst>
-                  <EmotionThemeProvider theme={defaultTheme}>
-                    <ThemeProvider theme={defaultTheme}>
-                      {React.createElement(matchedComponent, props)}
-                    </ThemeProvider>
-                  </EmotionThemeProvider>
-                </StyledEngineProvider>
-              </GlobalContext.Provider>
-            </UserContext.Provider>
-          </RelayEnvironment>
-        </ApolloProvider>
-      </BrowserRouter>
-    </Sentry.ErrorBoundary>
-  );
-};
-
 // Turn off camelcase rule
 /* eslint camelcase: 0 */
 const react_component = (componentName, props, target, userContext) => {
@@ -116,11 +76,25 @@ const react_component = (componentName, props, target, userContext) => {
   if (matchedComponent) {
     const root = createRoot(document.getElementById(target));
     root.render(
-      <ReactComponentWithGlobalContext
-        matchedComponent={matchedComponent}
-        props={props}
-        userContext={userContext}
-      />,
+      <Sentry.ErrorBoundary fallback={"An error has occured"}>
+        <BrowserRouter>
+          <ApolloProvider client={apolloClient}>
+            <RelayEnvironment>
+              <UserContext.Provider value={userContext || {}}>
+                <Provider store={store}>
+                  <StyledEngineProvider injectFirst>
+                    <EmotionThemeProvider theme={defaultTheme}>
+                      <ThemeProvider theme={defaultTheme}>
+                        {React.createElement(matchedComponent, props)}
+                      </ThemeProvider>
+                    </EmotionThemeProvider>
+                  </StyledEngineProvider>
+                </Provider>
+              </UserContext.Provider>
+            </RelayEnvironment>
+          </ApolloProvider>
+        </BrowserRouter>
+      </Sentry.ErrorBoundary>,
     );
     if (userContext && userContext.userId) {
       Sentry.setUser({ id: userContext.userId });

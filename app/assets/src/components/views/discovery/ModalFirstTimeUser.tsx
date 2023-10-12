@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import Modal from "~ui/containers/Modal";
@@ -17,14 +17,12 @@ interface ModalFirstTimeUserProps {
 
 const ModalFirstTimeUser = ({ onClose }: ModalFirstTimeUserProps) => {
   const { userId } = useContext(UserContext);
-  const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
 
   useEffect(() => {
     trackEvent(ANALYTICS_EVENT_NAMES.MODAL_FIRST_TIME_USER_SHOWN, {
       userId: userId,
     });
-  }, [trackEvent, userId]);
+  }, [userId]);
 
   return (
     <Modal

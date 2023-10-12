@@ -1,18 +1,14 @@
 import { ButtonIcon, Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import { find, isUndefined, set } from "lodash/fp";
-import React, { useContext } from "react";
+import React from "react";
 import {
   getPhyloTree,
   getPhyloTrees,
   retryPhyloTree,
   saveVisualization,
 } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useWithAnalytics,
-  WithAnalyticsType,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { getPhyloTreeNg, rerunPhyloTreeNg } from "~/api/phylo_tree_ngs";
 import BasicPopup from "~/components/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -64,11 +60,6 @@ interface PhyloTreeListViewProps {
   selectedPhyloTreeNgId?: number;
 }
 
-interface PhyloTreeListViewWithContextProps extends PhyloTreeListViewProps {
-  isAdmin: boolean;
-  withAnalytics: WithAnalyticsType;
-}
-
 interface PhyloTreeListViewState {
   adminToolsOpen: boolean;
   currentTree: {
@@ -99,12 +90,12 @@ interface PhyloTreeListViewState {
   treeContainer: $TSFixMeUnknown;
 }
 
-class PhyloTreeListViewCC extends React.Component<
-  PhyloTreeListViewWithContextProps,
+class PhyloTreeListView extends React.Component<
+  PhyloTreeListViewProps,
   PhyloTreeListViewState
 > {
   selectedMetadata: $TSFixMe;
-  constructor(props: PhyloTreeListViewWithContextProps) {
+  constructor(props: PhyloTreeListViewProps) {
     super(props);
 
     const urlParams = parseUrlParams();
@@ -616,6 +607,8 @@ class PhyloTreeListViewCC extends React.Component<
       showOldTreeWarning,
     } = this.state;
 
+    const { admin } = this.context || {};
+
     if (!selectedPhyloTreeId && !selectedPhyloTreeNgId) {
       return (
         <div className={cs.noTreeBanner}>
@@ -640,7 +633,7 @@ class PhyloTreeListViewCC extends React.Component<
           {showOldTreeWarning && this.renderOldTreeWarning()}
           {this.renderVisualization()}
           {selectedPhyloTreeNgId && this.renderToolsAttributionBanner()}
-          {this.props.isAdmin && (
+          {admin && (
             <Tooltip arrow sdsStyle="dark" placement="top" title="Admin Tools">
               <ButtonIcon
                 sdsSize="large"
@@ -657,7 +650,7 @@ class PhyloTreeListViewCC extends React.Component<
         {matrixErrorModalOpen && (
           <PairwiseDistanceMatrixErrorModal
             open
-            onContinue={this.props.withAnalytics(
+            onContinue={withAnalytics(
               this.handleCloseMatrixErrorModal,
               ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_CONTINUE_BUTTON_CLICKED,
             )}
@@ -669,20 +662,6 @@ class PhyloTreeListViewCC extends React.Component<
   }
 }
 
-// Using a function component wrapper provides a semi-hacky way to
-// access useContext from multiple providers without the class component to function component
-// conversion.
-const PhyloTreeListView = (props: PhyloTreeListViewProps) => {
-  const withAnalytics = useWithAnalytics();
-  const { admin: isAdmin } = useContext(UserContext);
-
-  return (
-    <PhyloTreeListViewCC
-      {...props}
-      isAdmin={isAdmin}
-      withAnalytics={withAnalytics}
-    />
-  );
-};
+PhyloTreeListView.contextType = UserContext;
 
 export default PhyloTreeListView;

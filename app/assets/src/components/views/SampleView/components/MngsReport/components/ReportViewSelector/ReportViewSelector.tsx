@@ -1,6 +1,6 @@
 import React from "react";
 import { Menu, Popup } from "semantic-ui-react";
-import { useTrackEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { IconTableSmall, IconTreeSmall } from "~ui/icons";
 import cs from "./report_view_selector.scss";
 
@@ -13,7 +13,6 @@ export const ReportViewSelector = ({
   view = "table",
   onViewClick,
 }: ReportViewSelectorProps) => {
-  const trackEvent = useTrackEvent();
   return (
     <div className={cs.reportViewSelector} data-testid={"report-view-selector"}>
       <Menu icon floated="right">
