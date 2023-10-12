@@ -95,7 +95,7 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
     if (bigFiles.length > 0) {
       msg += `- Too large: ${mapNames(
         bigFiles,
-      )}\nSize must be under 35 GB. Please try compressing and/or subsampling larger files before uploading.`;
+      )}\nSize must be under 35 GB. Please try compressing and/or subsampling larger files before uploading, or use our CLI.`;
     }
 
     if (invalidFiles.length > 0) {
