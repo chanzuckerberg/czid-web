@@ -53,6 +53,10 @@ const PreUploadQCCheck = ({
   const [truncatedFiles, setTruncatedFiles] = useState<Set<File>>(new Set());
   // Set for files that did not pass validateFASTQMatchingR1R2
   const [mismatchedFiles, setMismatchedFiles] = useState<Set<File>>(new Set());
+  // Set for uncompressed files
+  const [uncompressedFiles, setUncompressedFiles] = useState<Set<File>>(
+    new Set(),
+  );
 
   const FASTA_FILE_TYPE = "FASTA";
   const FASTQ_FILE_TYPE = "FASTQ";
@@ -114,6 +118,17 @@ const PreUploadQCCheck = ({
       () =>
         new Set(
           [...mismatchedFiles].filter(object1 => {
+            return samples.some(object2 => {
+              return object1.name in object2.files;
+            });
+          }),
+        ),
+    );
+
+    setUncompressedFiles(
+      () =>
+        new Set(
+          [...uncompressedFiles].filter(object1 => {
             return samples.some(object2 => {
               return object1.name in object2.files;
             });
@@ -381,6 +396,11 @@ const PreUploadQCCheck = ({
               }
             }
           }
+
+          // 6. Check if the file is compressed (warn-only, do not block user from uploading)
+          if (!file.name.includes(GZ_FILE_TYPE)) {
+            setUncompressedFiles(arr => new Set([...arr, file]));
+          }
         }
       }
       sample.finishedValidating = true;
@@ -582,6 +602,22 @@ const PreUploadQCCheck = ({
               type="warning"
             />
           )}
+        {uncompressedFiles.size > 0 && (
+          <IssueGroup
+            className={cs.issue}
+            caption={
+              <span>
+                {uncompressedFiles.size + " file"}
+                {uncompressedFiles.size > 1 ? "s are " : " is "}
+                uncompressed. We recommend compressing your files for faster
+                upload times.
+              </span>
+            }
+            headers={["File Name"]}
+            rows={[...uncompressedFiles].map(name => [name])}
+            type="warning"
+          />
+        )}
         {validateAllSamplesAreInvalid() && (
           <IssueGroup
             caption={`There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at our Help Center for assistance.`}
