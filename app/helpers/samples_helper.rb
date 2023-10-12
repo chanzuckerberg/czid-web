@@ -1211,6 +1211,9 @@ module SamplesHelper
                                   policy: JSON.dump(policy),
                                   role_arn: ENV['CLI_UPLOAD_ROLE_ARN'],
                                   role_session_name: session_name,
+                                  # Token expires in 1h (default). This can be increased to 12h, but not
+                                  # with role chaining, where role A assumes role B to generate a token.
+                                  duration_seconds: 3_600,
                                 })
   end
 

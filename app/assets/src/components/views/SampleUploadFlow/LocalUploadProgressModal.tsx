@@ -98,6 +98,7 @@ const LocalUploadProgressModal = ({
 
   let sampleFilePercentages = {};
   let wakeLock = null;
+  let heartbeatInterval = null;
 
   const IN_PROGRESS_STATUS = "in progress";
   const ERROR_STATUS = "error";
@@ -205,38 +206,14 @@ const LocalUploadProgressModal = ({
 
   const uploadSamples = async (samples: $TSFixMe) => {
     // Ping a heartbeat periodically to say the browser is actively uploading the samples.
-    const heartbeatInterval = await startUploadHeartbeat();
+    heartbeatInterval = await startUploadHeartbeat();
 
-    await Promise.all(
-      samples.map(async (sample: $TSFixMe) => {
-        try {
-          // Get the credentials for the sample
-          const s3ClientForSample = await getS3Client(sample);
-          // Set the upload percentage for the sample to 0
-          updateSampleUploadPercentage(sample.name, 0);
-
-          await Promise.all(
-            sample.input_files.map(async (inputFile: $TSFixMe) => {
-              // Upload the input file to s3
-              // Also updates the upload percentage for the sample
-              await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
-            }),
-          );
-
-          // Update the sample upload status (success or error)
-          await completeSampleUpload({
-            sample,
-            onSampleUploadSuccess: (sample: $TSFixMe) => {
-              updateSampleUploadStatus(sample.name, "success");
-            },
-            onMarkSampleUploadedError: handleSampleUploadError,
-          });
-        } catch (e) {
-          handleSampleUploadError(sample, e);
-          clearInterval(heartbeatInterval);
-        }
-      }),
-    );
+    // Upload each sample in serial, but upload each sample's input files and parts in parallel.
+    // if we upload samples in parallel, we fetch AWS credentials for many samples at once at
+    // the beginning, so by the time we get to the last sample, the credentials could have expired.
+    for (const sample of samples) {
+      await uploadSample(sample);
+    }
 
     // Once the upload is done, release the wake lock
     if (wakeLock !== null) {
@@ -261,6 +238,35 @@ const LocalUploadProgressModal = ({
         sampleIds: JSON.stringify(map("id", samples)),
       },
     );
+  };
+
+  const uploadSample = async (sample: $TSFixMe) => {
+    try {
+      // Get the credentials for the sample
+      const s3ClientForSample = await getS3Client(sample);
+      // Set the upload percentage for the sample to 0
+      updateSampleUploadPercentage(sample.name, 0);
+
+      await Promise.all(
+        sample.input_files.map(async (inputFile: $TSFixMe) => {
+          // Upload the input file to s3
+          // Also updates the upload percentage for the sample
+          await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
+        }),
+      );
+
+      // Update the sample upload status (success or error)
+      await completeSampleUpload({
+        sample,
+        onSampleUploadSuccess: (sample: $TSFixMe) => {
+          updateSampleUploadStatus(sample.name, "success");
+        },
+        onMarkSampleUploadedError: handleSampleUploadError,
+      });
+    } catch (e) {
+      handleSampleUploadError(sample, e);
+      clearInterval(heartbeatInterval);
+    }
   };
 
   const getS3Client = async (sample: $TSFixMe) => {
