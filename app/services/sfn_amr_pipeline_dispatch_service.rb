@@ -47,6 +47,7 @@ class SfnAmrPipelineDispatchService
 
     @start_from_mngs = strtrue(@workflow_run.get_input("start_from_mngs"))
     @latest_pipeline_run = @start_from_mngs ? @sample.pipeline_runs.non_deprecated.first : nil
+    @input_file_count = @sample.input_files.by_type(InputFile::FILE_TYPE_FASTQ).count
   end
 
   def call
@@ -172,11 +173,14 @@ class SfnAmrPipelineDispatchService
                      else
                        PipelineRun::HISAT2_HUMAN_FILTERED_NAMES
                      end
+    non_host_reads = non_host_reads.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }.take(@input_file_count)
+    subsampled_reads = PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }.take(@input_file_count)
+
     params = if @start_from_mngs
                {
                  filtered_sample: {
-                   subsampled_reads: PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) },
-                   non_host_reads: non_host_reads.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) },
+                   subsampled_reads: subsampled_reads,
+                   non_host_reads: non_host_reads,
                    clusters: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::DUPLICATE_CLUSTERS_NAME),
                    cluster_sizes: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::DUPLICATE_CLUSTER_SIZES_NAME),
                    contigs: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::ASSEMBLED_CONTIGS_NAME),
@@ -213,12 +217,12 @@ class SfnAmrPipelineDispatchService
       params = reduplicated_reads_input_files
     elsif @workflow_run.workflow_version_at_least(AmrWorkflowRun::VERSION[:MODERN_HOST_FILTERING])
       files = if @start_from_mngs
-                PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }
+                PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }.take(@input_file_count)
               end
       params = initial_version_input_files(files)
     elsif @workflow_run.workflow_version_at_least(AmrWorkflowRun::VERSION[:INITIAL])
       files = if @start_from_mngs
-                PipelineRun::GSNAP_FILTERED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }
+                PipelineRun::GSNAP_FILTERED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }.take(@input_file_count)
               end
       params = initial_version_input_files(files)
     else
