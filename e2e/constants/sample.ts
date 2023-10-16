@@ -147,12 +147,10 @@ export const FILE_DOWNLOAD_TYPES_MNGS = [
   [DOWNLOAD_UNMAPPED_READS, FASTA],
 ];
 
-export const FILE_DOWLOAD_TYPES_AMR = [
+export const FILE_DOWNLOAD_TYPES_AMR = [
   [DOWNLOAD_REPORT_TABLE, CSV],
 ];
-export const FILE_DOWLOAD_TYPES_CG = [
-  [DOWNLOAD_REPORT_TABLE, CSV],
-];
+
 export const URL_DOWLOAD_TYPES = [
   ["View Results Folder", "/results_folder?pipeline_version="],
   ["View Pipeline Visualization", "/pipeline_viz/"],

@@ -1,6 +1,7 @@
 import { useReactiveVar } from "@apollo/client";
 import { Tooltip } from "@czi-sds/components";
 import cx from "classnames";
+import { kebabCase } from "lodash/fp";
 import React from "react";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import { amrReportTableDownloadWithAppliedFiltersLinkVar } from "~/cache/initialCache";
@@ -133,6 +134,7 @@ export const AmrDownloadDropdown = ({
   ) => {
     let dropdownItem = (
       <BaseDropdown.Item
+        data-testid={`${kebabCase(text)}`}
         key={value}
         onClick={() => handleDownload(value)}
         className={cx(cs.item, disabled && cs.disabledItem)}

@@ -11,9 +11,8 @@ import {
   DELETE_RUN_MENUITEM,
   DOWNLOADS,
   ERCC,
-  FILE_DOWLOAD_TYPES_AMR,
-  FILE_DOWLOAD_TYPES_CG,
-  FILE_DOWLOAD_TYPES_MNGS,
+  FILE_DOWNLOAD_TYPES_AMR,
+  FILE_DOWNLOAD_TYPES_MNGS,
   HOST_INFO,
   INFECTION_INFO,
   OVERFLOW_BUTTON,
@@ -209,6 +208,7 @@ export async function goToUrl(page: Page, url) {
 
 export async function verifyDeleteAvailable(
   page: Page,
+  workflowShorthand: string,
 ) {
   // verify overflow button visible
   const overflowButton = page.getByTestId(OVERFLOW_BUTTON);
@@ -216,9 +216,7 @@ export async function verifyDeleteAvailable(
   await overflowButton.click();
 
   // dropdown text should be visible
-  // todo: This looks like regression issue: All delete tooltips refer to mNGS
-  // const dropdownText = page.getByText(`Delete ${workflowShorthand} run`);
-  const dropdownText = page.getByText(`Delete mNGS Run`);
+  const dropdownText = page.getByText(`Delete ${workflowShorthand} run`);
   await expect(dropdownText).toBeVisible();
   const dropdownItem = page.getByTestId(DELETE_RUN_MENUITEM);
   await expect(dropdownItem).toBeEnabled();
@@ -264,14 +262,14 @@ export async function verifyDownload(
   switch (workflowName) {
     case "Metagenomic":
     case "Nanopore":
-      await verifyDownloadFiles(page, FILE_DOWLOAD_TYPES_MNGS);
+      await verifyDownloadFiles(page, FILE_DOWNLOAD_TYPES_MNGS);
       await verifyDownloadUrls(page, sampleId);
       break;
     case "Antimicrobial Resistance":
-      await verifyDownloadFiles(page, FILE_DOWLOAD_TYPES_AMR);
+      await verifyDownloadFiles(page, FILE_DOWNLOAD_TYPES_AMR);
       break;
     case "Consensus Genome":
-      await verifyDownloadFiles(page, FILE_DOWLOAD_TYPES_CG);
+      await verifyDownloadAll(page);
       break;
   }
 }
@@ -301,6 +299,13 @@ async function verifyDownloadUrls(page: Page, sampleId: number) {
       `${process.env.BASEURL}/samples/${sampleId}${downloadType[1]}`,
     );
   }
+}
+
+async function verifyDownloadAll(page: Page) {
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download All" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toContain(".zip");
 }
 
 export async function chooseBackgroundModel(page: Page) {
