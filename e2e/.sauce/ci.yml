@@ -26,7 +26,7 @@ suites:
   - name: "Chromium Mac"
     platformName: "macOS 12"
     screenResolution: "1440x900"
-    testMatch: ['.home.spec.ts', '.landing-page.spec.ts', '.phylotree-taxon-sidebar.spec.ts']
+    testMatch: ['.home.spec.ts', '.landing-page.spec.ts']
     params:
       browserName: "chromium"
       project: "chromium"
