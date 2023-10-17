@@ -168,31 +168,31 @@ class SfnAmrPipelineDispatchService
   def reduplicated_reads_input_files
     # Samples with non-human hosts go through additional human filtering. Human samples will only have
     # files from the hisat2 host filter step.
-    non_host_reads = if @sample.host_genome_name == "Human"
-                       PipelineRun::HISAT2_HOST_FILTERED_NAMES
-                     else
-                       PipelineRun::HISAT2_HUMAN_FILTERED_NAMES
-                     end
-    non_host_reads = non_host_reads.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }.take(@input_file_count)
-    subsampled_reads = PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }.take(@input_file_count)
-
-    params = if @start_from_mngs
-               {
-                 filtered_sample: {
-                   subsampled_reads: subsampled_reads,
-                   non_host_reads: non_host_reads,
-                   clusters: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::DUPLICATE_CLUSTERS_NAME),
-                   cluster_sizes: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::DUPLICATE_CLUSTER_SIZES_NAME),
-                   contigs: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::ASSEMBLED_CONTIGS_NAME),
-                 },
-               }
-             else
-               {
-                 raw_sample: {
-                   raw_reads: raw_reads,
-                 },
-               }
-             end
+    params = {}
+    if @start_from_mngs
+      non_host_reads = if @sample.host_genome_name == "Human"
+                         PipelineRun::HISAT2_HOST_FILTERED_NAMES
+                       else
+                         PipelineRun::HISAT2_HUMAN_FILTERED_NAMES
+                       end
+      non_host_reads = non_host_reads.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }.take(@input_file_count)
+      subsampled_reads = PipelineRun::SUBSAMPLED_NAMES.map { |n| @latest_pipeline_run.s3_file_for_sfn_result(n) }.take(@input_file_count)
+      params = {
+        filtered_sample: {
+          subsampled_reads: subsampled_reads,
+          non_host_reads: non_host_reads,
+          clusters: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::DUPLICATE_CLUSTERS_NAME),
+          cluster_sizes: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::DUPLICATE_CLUSTER_SIZES_NAME),
+          contigs: @latest_pipeline_run.s3_file_for_sfn_result(PipelineRun::ASSEMBLED_CONTIGS_NAME),
+        },
+      }
+    else
+      params = {
+        raw_sample: {
+          raw_reads: raw_reads,
+        },
+      }
+    end
     return params
   end
 
