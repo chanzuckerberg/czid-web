@@ -9,3 +9,4 @@ playwright-report/
 html-reports/
 summary.json
 artifacts/
+testcases.csv

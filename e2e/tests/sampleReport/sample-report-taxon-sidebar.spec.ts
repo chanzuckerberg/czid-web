@@ -8,7 +8,7 @@ import { test } from "@playwright/test";
 const sampleId = 25307;
 
 // These tests currently verify the Taxon Sidebar on Sample Report
-test.describe("Taxon Sidebar on Sample Report", () => {
+test.describe("Taxon Sidebar on Sample Report tests", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);

@@ -15,7 +15,7 @@ const sampleType = WORKFLOWS.WGS.toLowerCase();
 const ENV = (process.env.NODE_ENV as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
 
-test.describe("Upload WGS sample tests", () => {
+test.describe("WGS sample upload tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
     await cookieBanner(page);

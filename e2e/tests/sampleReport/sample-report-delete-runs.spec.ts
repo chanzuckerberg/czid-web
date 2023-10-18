@@ -1,7 +1,7 @@
 import { verifyDeleteAvailable, verifyDeleteDisabled } from "@e2e/utils/report";
 import { test } from "@playwright/test";
 
-test.describe("My Illumina sample report pipeline run deletion tests", () => {
+test.describe("My Illumina sample report delete tests", () => {
   const stagingSampleId = 25983;
 
   test.beforeEach(async ({ page }) => {
@@ -12,7 +12,7 @@ test.describe("My Illumina sample report pipeline run deletion tests", () => {
   test("Should be able to delete run on short read mNGS tab", async ({
     page,
   }) => {
-    await verifyDeleteAvailable(page, "mNGS");
+    await verifyDeleteAvailable(page);
   });
 
   test("Should be able to delete run on Consensus Genome tab", async ({
@@ -20,12 +20,12 @@ test.describe("My Illumina sample report pipeline run deletion tests", () => {
   }) => {
     await page.getByTestId("consensus-genome").click();
     // verify overflow button visible
-    await verifyDeleteAvailable(page, "CG");
+    await verifyDeleteAvailable(page);
   });
 
   test("Should be able to delete run on AMR tab", async ({ page }) => {
     await page.getByTestId("antimicrobial-resistance").click();
-    await verifyDeleteAvailable(page, "AMR");
+    await verifyDeleteAvailable(page);
   });
 });
 
@@ -68,7 +68,7 @@ test.describe("My Nanopore sample report deletion tests", () => {
   test("Should be able to delete run on long read mNGS tab", async ({
     page,
   }) => {
-    await verifyDeleteAvailable(page, "mNGS");
+    await verifyDeleteAvailable(page);
   });
 });
 

@@ -8,7 +8,7 @@ import { test } from "@playwright/test";
 const phyloTreeId = 244;
 
 // These tests currently verify the Taxon Sidebar on Phylotree Page
-test.describe("Taxon Sidebar on Phylotree Page", () => {
+test.describe("Taxon Sidebar on Phylotree Page tests", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
     await page.goto(`${process.env.BASEURL}/phylo_tree_ngs/${phyloTreeId}`);

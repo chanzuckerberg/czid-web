@@ -29,19 +29,17 @@ test.describe("Sample report download tests - Illumina", () => {
     await page.getByTestId("consensus-genome").click();
     await verifyDownload(page, "Consensus Genome", stagingSampleId);
   });
-});
 
-test.describe("Sample Report Download Tests - Nanopore", () => {
-  const stagingSampleId = 26001;
+  const stagingSampleId2 = 26001;
 
   test.beforeEach(async ({ page }) => {
     // go to sample page
-    await page.goto(`${process.env.BASEURL}/samples/${stagingSampleId}`);
+    await page.goto(`${process.env.BASEURL}/samples/${stagingSampleId2}`);
   });
 
   test("Should be able to download outputs from long read mNGS tab", async ({
     page,
   }) => {
-    await verifyDownload(page, "Nanopore", stagingSampleId);
+    await verifyDownload(page, "Nanopore", stagingSampleId2);
   });
 });

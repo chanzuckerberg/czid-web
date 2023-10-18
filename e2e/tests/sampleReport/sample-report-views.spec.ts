@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 const sampleId = 25307;
 // These tests verify the ui displayed on the treeview for the sample report page
-test.describe("Sample report view test", () => {
+test.describe("Sample report view tests", () => {
   test(`Should verify content displayed on tree view page`, async ({
     page,
   }) => {

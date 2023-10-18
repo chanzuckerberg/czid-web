@@ -32,5 +32,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "type": "module",
+  "dependencies": {
+    "line-reader": "^0.4.0"
   }
 }

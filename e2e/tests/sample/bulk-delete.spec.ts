@@ -6,7 +6,7 @@ const samplesPage = `${process.env.BASEURL}/my_data?currentTab=samples`;
 const triggerTestId = "bulk-delete-trigger";
 const bulkDeleteApi = "samples/bulk_delete";
 
-test.describe("Bulk delete samples", () => {
+test.describe("Bulk sample delete tests", () => {
   // stub api response so we don't actually delete anything
   test.beforeEach(async ({ page }) => {
     const successResponse = {

@@ -11,7 +11,7 @@ const SAMPLE_ID = 25307;
 const IFRAME = "appcues-container iframe";
 
 // These tests verify the ui displayed on the Table  for the sample report page
-test.describe("Test Sample Report Header Functionality", () => {
+test.describe("Sample Report Header tests", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
     await page.goto(`${process.env.BASEURL}/samples/${SAMPLE_ID}`);

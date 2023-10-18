@@ -13,7 +13,7 @@ import { expect, test } from "@playwright/test";
 
 const projectName = "AMR beta test";
 const sampleName = "RNAEnr_10e4_viralcopies_RVOPv2_iSeq";
-test.describe("Search data tests", () => {
+test.describe("Search tests", () => {
   test("Should search projects", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}`);
     await page.getByTestId(PUBLIC_MENU_ITEM).click();
