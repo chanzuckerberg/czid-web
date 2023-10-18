@@ -30,3 +30,5 @@ export const HEATMAP_PATHOGEN_FLAGGING_FEATURE = "heatmap_pathogens";
 export const HEATMAP_KNOWN_PATHOGEN_FILTER = "heatmap_pathogen_filter";
 export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const BENCHMARKING_FEATURE = "benchmarking";
+// testing heatmap scrolling changes
+export const CZID_8194_HEATMAP_SCROLL = "czid_8194_heatmap_scroll";

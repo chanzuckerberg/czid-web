@@ -1,0 +1,14 @@
+@import "~@czi-sds/components/dist/variables";
+
+.metricDropdownWrapper {
+  width: calc(50% - #{$sds-spaces-xl * 0.5});
+
+  &:nth-child(odd) {
+    margin-right: $sds-spaces-xl;
+  }
+
+  .label {
+    font: $sds-font-header-xs-600-font;
+    margin-bottom: $sds-spaces-xxs;
+  }
+}

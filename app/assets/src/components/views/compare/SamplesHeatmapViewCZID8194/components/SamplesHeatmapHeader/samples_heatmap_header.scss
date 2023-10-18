@@ -1,0 +1,38 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.viewHeader {
+  padding: $sds-spaces-l;
+  border-bottom: 1px solid $sds-color-gray-200;
+  position: relative;
+  z-index: 3;
+  background: white;
+
+  .content {
+    display: flex;
+  }
+  .contentContainer {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .contentColumn {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .contentSpacer {
+    height: $sds-spaces-m;
+  }
+
+  .controls {
+    display: flex;
+
+    .controlElement {
+      margin-left: $sds-spaces-m;
+    }
+  }
+}

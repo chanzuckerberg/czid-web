@@ -204,7 +204,16 @@ export default class Heatmap {
     this.processData();
   }
 
-  processData(start?: $TSFixMe) {
+  processData(
+    start?:
+      | "setupContainers"
+      | "parse"
+      | "filter"
+      | "processMetadata"
+      | "cluster"
+      | "placeContainers"
+      | "update",
+  ) {
     // This function implements the pipeline for preparing data
     // and svg for heatmap display.
     // Starting point can be chosen given what data was changed.
@@ -237,7 +246,7 @@ export default class Heatmap {
     }
   }
 
-  updateZoom(zoom: $TSFixMe) {
+  updateZoom(zoom: number) {
     this.options.zoom = zoom;
     this.svg
       .attr("width", this.width * this.options.zoom)
@@ -646,8 +655,12 @@ export default class Heatmap {
     }
   }
 
-  scroll() {
-    this.pan(-d3.event.deltaX, -d3.event.deltaY);
+  scroll(event?: $TSFixMe) {
+    if (event) {
+      this.pan(-event.deltaX, -event.deltaY);
+    } else {
+      this.pan(-d3.event.deltaX, -d3.event.deltaY);
+    }
     d3.event.preventDefault(); // prevent browser from navigating away from page when scroll
     d3.event.stopPropagation(); // don't propagate the event to the element's parent
   }
@@ -1174,7 +1187,7 @@ export default class Heatmap {
     return Array.apply(null, { length: n }).map(Number.call, Number);
   }
 
-  download(filename: $TSFixMe) {
+  download(filename?: $TSFixMe) {
     this.svg.classed(cs.printMode, true);
     this.showPrintCaption();
     this.svgSaver.asSvg(this.svg.node(), filename || "heatmap.svg");
@@ -1182,7 +1195,7 @@ export default class Heatmap {
     this.hidePrintCaption();
   }
 
-  downloadAsPng(filename: $TSFixMe) {
+  downloadAsPng(filename?: $TSFixMe) {
     this.svg.classed(cs.printMode, true);
     this.showPrintCaption();
     this.svgSaver.asPng(this.svg.node(), filename || "heatmap.png");

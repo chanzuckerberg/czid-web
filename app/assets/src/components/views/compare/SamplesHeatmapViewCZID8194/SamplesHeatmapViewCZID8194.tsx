@@ -61,7 +61,7 @@ import {
 } from "~/components/utils/urls";
 import { WorkflowType } from "~/components/utils/workflows";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
-import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
+import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapViewCZID8194/components/SamplesHeatmapVis";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import { URL_FIELDS } from "~/components/views/SampleView/utils";
 import { copyShortUrlToClipboard } from "~/helpers/url";
@@ -97,7 +97,7 @@ const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
   return isNaN(parsed) ? defaultVal : parsed;
 };
 
-export interface SamplesHeatmapViewProps {
+interface SamplesHeatmapViewProps {
   addedTaxonIds?: $TSFixMeUnknown[];
   backgrounds?: { name?: string; value?: number }[];
   categories?: string[];
@@ -174,7 +174,7 @@ interface AllTaxonDetails {
   [key: string]: TaxonDetails;
 }
 
-class SamplesHeatmapView extends React.Component<
+class SamplesHeatmapViewCZID8194 extends React.Component<
   SamplesHeatmapViewProps,
   SamplesHeatmapViewState
 > {
@@ -2235,7 +2235,7 @@ class SamplesHeatmapView extends React.Component<
   }
 }
 
-SamplesHeatmapView.contextType = UserContext;
+SamplesHeatmapViewCZID8194.contextType = UserContext;
 
 const mapDispatchToProps = { updateDiscoveryProjectIds: updateProjectIds };
 
@@ -2243,7 +2243,7 @@ const mapDispatchToProps = { updateDiscoveryProjectIds: updateProjectIds };
 const connectedComponent = connect(
   null,
   mapDispatchToProps,
-)(SamplesHeatmapView);
-(connectedComponent.name as string) = "SamplesHeatmapView";
+)(SamplesHeatmapViewCZID8194);
+(connectedComponent.name as string) = "SamplesHeatmapViewCZID8194";
 
 export default connectedComponent;

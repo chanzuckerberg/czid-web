@@ -1,0 +1,71 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.panelContentsContainer {
+  padding: 0 $sds-spaces-l 0 $sds-spaces-l;
+  max-height: calc(100vh - 155px);
+}
+
+.topFilterSection {
+  // no top padding for the first section as this is taken care of by the container element
+  display: flex;
+  flex-direction: column;
+  margin-bottom: $sds-spaces-l;
+}
+
+.lowerFilterSection {
+  display: flex;
+  flex-direction: column;
+  margin-top: $sds-spaces-l;
+  margin-bottom: $sds-spaces-xl;
+}
+
+.sectionTitle {
+  font: $sds-font-header-xs-600-font;
+  color: $sds-color-gray-black;
+  padding-bottom: $sds-spaces-s;
+  padding-left: $sds-spaces-s;
+}
+
+.filterTitle {
+  font: $sds-font-caps-xxxs-600-font;
+  text-transform: $sds-font-caps-xxxs-600-text-transform;
+  letter-spacing: 1px;
+  color: $sds-color-gray-500;
+  margin-left: $sds-spaces-s;
+  margin-bottom: $sds-spaces-xxxs;
+  margin-top: $sds-spaces-xxs;
+}
+
+.taxonTagsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoIcon {
+  margin-left: $sds-spaces-xxs;
+  position: relative;
+}
+
+.categoryDropdownContainer {
+  margin-bottom: $sds-spaces-xxxs;
+}
+
+.viewOptionsDropdownContainer {
+  margin-bottom: $sds-spaces-xxs;
+}
+
+.backgroundDropdownContainer {
+  margin-bottom: $sds-spaces-xxs;
+}
+
+.thresholdDropdownContainer {
+  margin-bottom: $sds-spaces-xxxs;
+}
+
+.taxaPerSampleSlider {
+  width: 200px;
+  margin: $sds-spaces-m;
+}

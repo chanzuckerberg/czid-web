@@ -1,0 +1,8 @@
+@import "~@czi-sds/components/dist/variables";
+
+.label {
+  font: $sds-font-caps-xxxs-600-font;
+  color: $sds-color-gray-500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}

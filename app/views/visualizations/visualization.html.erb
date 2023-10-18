@@ -3,7 +3,7 @@
 
 <%= javascript_tag do %>
   react_component(
-    'SamplesHeatmapView',
+    'SamplesHeatmapViewWrapper',
     JSON.parse('<%= raw escape_json(@visualization_data) %>'),
     'SamplesHeatmapView_page',
     JSON.parse('<%= raw escape_json(user_context)%>')

@@ -1,0 +1,116 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.filtersAndHeatmapContainer {
+  display: flex;
+  border-left: 5px solid blue;
+}
+
+.heatmap {
+  margin-top: -$header-margin-bottom;
+  max-height: calc(100vh - 50px);
+  overflow: hidden;
+
+  .menu {
+    background-color: $sds-color-gray-white;
+
+    .filterRow {
+      margin-top: $sds-spaces-l;
+      margin-bottom: $sds-spaces-l;
+      height: $sds-spaces-xxl;
+
+      .filterControl {
+        float: left;
+        margin-left: auto;
+        padding: 0 $sds-spaces-default;
+        width: calc(100% / 6);
+      }
+    }
+
+    .filterTagsList {
+      margin-bottom: $sds-spaces-l;
+
+      .filterTag {
+        margin: 0;
+        margin-right: $sds-spaces-xs;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+
+    .statsRow {
+      @include font-body-xs;
+      color: $sds-color-gray-500;
+      height: $sds-spaces-xxl;
+      margin-left: $sds-spaces-xxs;
+      padding: 0 $sds-spaces-default;
+
+      .infoIcon {
+        margin-top: $sds-spaces-xxxs;
+        margin-left: $sds-spaces-xxxs;
+        margin-right: $sds-spaces-xxxs;
+        vertical-align: text-top;
+      }
+    }
+  }
+
+  .filterToggleContainer {
+    text-align: center;
+    position: relative;
+
+    .filterLine {
+      height: 0px;
+      border-bottom: 10px solid $sds-color-gray-white;
+      box-shadow: $sds-drop-shadows-shadow-m;
+    }
+
+    .arrowIcon {
+      @include font-header-xl;
+      line-height: unset;
+      display: inline-block;
+      cursor: pointer;
+      color: $sds-color-gray-500;
+      background-color: $sds-color-gray-white;
+      padding: 0 $sds-spaces-l;
+      border-radius: 0 0 $sds-corners-corner-m $sds-corners-corner-m;
+      box-shadow: $sds-drop-shadows-shadow-s;
+    }
+  }
+
+  .loadingIndicator,
+  .noDataMsg {
+    margin: 50px;
+    text-align: center;
+    color: $sds-color-gray-500;
+  }
+}
+
+.highlight {
+  @include font-header-xxs;
+}
+
+.listContainer {
+  background-color: $sds-color-warning-100;
+}
+
+.notificationContainer {
+  margin: $sds-spaces-l 0 $sds-spaces-l;
+}
+
+.messageLine {
+  @include font-body-xxs;
+  padding: $sds-spaces-xxs 0;
+  margin-right: $sds-spaces-xl;
+}
+
+.conditionList {
+  margin-left: $sds-spaces-xl;
+}
+
+.iconAlert {
+  width: $icon-l;
+}

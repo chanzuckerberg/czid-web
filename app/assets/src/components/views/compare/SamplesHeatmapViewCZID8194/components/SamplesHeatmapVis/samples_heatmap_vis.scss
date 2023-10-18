@@ -1,0 +1,110 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.samplesHeatmapVis {
+  width: 100%;
+
+  .plusMinusControl {
+    z-index: 1;
+    position: absolute;
+    // Offset from the viewport to line up with the filter controls. This will
+    // need to be adjusted if the position of the controls changes.
+    top: 360px;
+    right: 40px;
+    box-shadow: $sds-drop-shadows-shadow-m;
+
+    background-color: white;
+    svg:hover {
+      background-color: darken(white, 5%);
+    }
+  }
+
+  .heatmapContainer {
+    position: relative;
+    // the legend and 'showing x our of x taxa' text are 45px tall
+    top: 45px;
+    height: calc(100vh - 183px);
+    padding-left: $sds-spaces-l;
+    padding-top: $sds-spaces-l;
+    width: calc(100% - 14px);
+    min-width: 500px;
+
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
+  .tooltip {
+    position: absolute;
+    display: none;
+
+    &.visible {
+      display: block;
+    }
+
+    .data-tooltip__label {
+      min-width: 100px;
+    }
+
+    .warning {
+      display: flex;
+
+      .warningIcon {
+        height: 14px;
+        width: 14px;
+        margin-right: $sds-spaces-xs;
+        // Vertical-align the svg element with the text.
+        transform: translateY(1px);
+      }
+
+      .warningText {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+    }
+  }
+
+  .bannerContainer {
+    width: 500px;
+    bottom: $sds-spaces-m;
+    left: 50%;
+    margin-left: -250px;
+    text-align: center;
+    position: fixed;
+    transition: opacity 0.5s ease;
+
+    &.show {
+      opacity: 1;
+    }
+
+    &.hide {
+      opacity: 0;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .bannerText {
+      @include font-body-xxs;
+      color: $sds-color-gray-500;
+      background: $sds-color-gray-white;
+      border-radius: $sds-corners-corner-m;
+      box-shadow: $sds-drop-shadows-shadow-m;
+      cursor: default;
+      display: inline-block;
+      margin: $sds-spaces-s auto auto;
+      padding: $sds-spaces-xxs $sds-spaces-s;
+      text-align: center;
+    }
+
+    .removeIcon {
+      cursor: pointer;
+      height: 8px;
+      margin-left: $sds-spaces-xs;
+    }
+  }
+}
