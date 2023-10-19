@@ -9,7 +9,7 @@ x-web-variables: &web-variables
   ? S3_WORKFLOWS_BUCKET=idseq-workflows
   ? S3_AEGEA_ECS_EXECUTE_BUCKET=aegea-ecs-execute-development
   ? ES_ADDRESS=http://opensearch:9200
-  ? AIRTABLE_API_KEY
+  ? AIRTABLE_ACCESS_TOKEN
   ? AIRTABLE_BASE_ID
   ? AUTH_TOKEN_SECRET
   ? BASESPACE_CLIENT_ID

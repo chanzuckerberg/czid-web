@@ -66,7 +66,7 @@ class MetricUtil
 
       https_post(uri, data, ENV["AIRTABLE_ACCESS_TOKEN"])
     else
-      Rails.logger.warn("Cannot send to Airtable. Check AIRTABLE_BASE_ID and AIRTABLE_API_KEY.")
+      Rails.logger.warn("Cannot send to Airtable. Check AIRTABLE_BASE_ID and AIRTABLE_ACCESS_TOKEN.")
     end
   end
 
