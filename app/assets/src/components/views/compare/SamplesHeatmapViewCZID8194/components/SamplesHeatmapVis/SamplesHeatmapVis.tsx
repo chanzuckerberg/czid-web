@@ -134,6 +134,11 @@ export class SamplesHeatmapVis extends React.Component<
     } = this.props;
     const { allowedFeatures = [] } = this.context || {};
 
+    const firstLongLabel = this.extractSampleLabels()
+      ?.map(sample => sample?.label?.length)
+      .findIndex(labelLength => labelLength > 20);
+    const initialZoom = firstLongLabel !== -1 ? 0.5 : null;
+
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       {
@@ -183,6 +188,7 @@ export class SamplesHeatmapVis extends React.Component<
         shouldShowPathogenFlagsOutlines: allowedFeatures.includes(
           HEATMAP_PATHOGEN_FLAGGING_FEATURE,
         ),
+        startingZoom: initialZoom,
       },
     );
     this.heatmap.start();

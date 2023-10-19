@@ -178,6 +178,10 @@ export default class Heatmap {
       );
     }
 
+    if (this.options.startingZoom !== (undefined || null)) {
+      this.options.zoom = this.options.startingZoom;
+    }
+
     this.rowClusterWidth = this.options.maxRowClusterWidth;
     this.columnClusterHeight = this.options.maxRowClusterWidth;
     this.scaleType = this.getScaleType();
