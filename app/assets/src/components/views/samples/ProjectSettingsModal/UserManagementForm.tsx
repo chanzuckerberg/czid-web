@@ -1,7 +1,7 @@
 import axios from "axios";
 import cx from "classnames";
 import React, { useContext, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import StringHelper from "~/helpers/StringHelper";
 import { Input } from "~ui/controls";
@@ -25,6 +25,7 @@ const UserManagementForm = ({
   onUserAdded,
   project,
 }: UserManagementFormProps) => {
+  const withAnalytics = useWithAnalytics();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [statusMessage, setStatusMessage] = useState("");

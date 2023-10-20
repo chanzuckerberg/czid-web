@@ -6,7 +6,11 @@ import {
   SortDirection,
   TableRowProps,
 } from "react-virtualized";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  useTrackEvent,
+  useWithAnalytics,
+} from "~/api/analytics";
 import { getCsrfToken } from "~/api/utils";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { UserContext } from "~/components/common/UserContext";
@@ -98,6 +102,8 @@ export const ReportTable = ({
   sampleId,
   snapshotShareId,
 }: ReportTableProps) => {
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
   const [dbType, setDbType] = useState<DBType>("nt");
   const [expandedGenusIds, setExpandedGenusIds] = useState<Set<number>>(
     new Set(),
@@ -163,6 +169,7 @@ export const ReportTable = ({
     onPreviousConsensusGenomeClick,
     toggleExpandAllRows,
     toggleExpandGenus,
+    withAnalytics,
     onTaxonNameClick,
     snapshotShareId,
   );

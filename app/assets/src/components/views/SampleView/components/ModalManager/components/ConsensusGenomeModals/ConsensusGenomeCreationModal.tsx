@@ -3,8 +3,8 @@ import { isNull } from "lodash/fp";
 import React, { useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  useTrackEvent,
+  useWithAnalytics,
 } from "~/api/analytics";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -37,6 +37,8 @@ export const ConsensusGenomeCreationModal = ({
   open,
   sample,
 }: ConsensusGenomeCreationModalProps) => {
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
   const [selectedAccessionIndex, setSelectedAccessionIndex] = useState(null);
 
   const getReferenceAccessions = () => {

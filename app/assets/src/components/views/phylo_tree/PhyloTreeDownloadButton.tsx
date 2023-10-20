@@ -1,6 +1,5 @@
 import React from "react";
 import SvgSaver from "svgsaver";
-import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
 
@@ -80,13 +79,6 @@ class PhyloTreeDownloadButton extends React.Component<PhyloTreeDownloadButtonPro
       // eslint-disable-next-line no-console
       console.error(`Bad download option: ${option}`);
     }
-    trackEvent("PhyloTreeDownloadButton_option_clicked", {
-      option,
-      // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
-      treeName: this.props.tree.name,
-      // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
-      treeId: this.props.tree.id,
-    });
   }
 
   getPhyloTreeOptions = () => {

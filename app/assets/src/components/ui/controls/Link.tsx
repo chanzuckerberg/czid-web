@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import { useTrackEvent } from "~/api/analytics";
 import cs from "./link.scss";
 
 export interface LinkProps {
@@ -27,6 +27,7 @@ const Link = ({
   className,
   disabled,
 }: LinkProps) => {
+  const trackEvent = useTrackEvent();
   const onClick = () => {
     if (analyticsEventName) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

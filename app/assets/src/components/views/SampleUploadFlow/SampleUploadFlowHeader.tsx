@@ -1,9 +1,10 @@
 import cx from "classnames";
 import { find } from "lodash/fp";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import { trackEventFromClassComponent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { GlobalContext } from "~/globalContext/reducer";
 import { Project, SampleFromApi } from "~/interface/shared";
 import { UploadStepType } from "~/interface/upload";
 import Label from "~ui/labels/Label";
@@ -36,6 +37,7 @@ interface SampleUploadFlowHeaderProps {
 }
 
 class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps> {
+  static contextType = GlobalContext;
   isStepEnabled = (step: UploadStepType) => {
     return this.props.stepsEnabled[step];
   };
@@ -48,6 +50,10 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
 
   render() {
     const { currentStep } = this.props;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     const { title } = find(opt => currentStep === opt.step, MENU_OPTIONS);
 
     return (
@@ -94,10 +100,14 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
                   key={val.text}
                   onClick={() => {
                     this.onStepSelect(val.step);
-                    trackEvent("SampleUploadFlowHeader_step-option_clicked", {
-                      step: val.step,
-                      text: val.text,
-                    });
+                    trackEventFromClassComponent(
+                      globalAnalyticsContext,
+                      "SampleUploadFlowHeader_step-option_clicked",
+                      {
+                        step: val.step,
+                        text: val.text,
+                      },
+                    );
                   }}
                 >
                   <Label className={cs.circle} circular text={index + 1} />

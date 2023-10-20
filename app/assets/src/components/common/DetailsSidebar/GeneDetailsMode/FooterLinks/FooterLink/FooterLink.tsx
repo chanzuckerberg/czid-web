@@ -1,5 +1,5 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { OntologyType } from "../../GeneDetailsMode";
 import { generateLinkTo } from "../../utils";
 import cs from "./footer_link.scss";
@@ -11,6 +11,7 @@ interface FooterLinkProps {
 }
 
 export const FooterLink = ({ geneName, ontology, source }: FooterLinkProps) => {
+  const trackEvent = useTrackEvent();
   const href = generateLinkTo({ geneName, ontology, source });
   if (!href) return null;
   return (

@@ -2,7 +2,7 @@ import { Icon } from "@czi-sds/components";
 import { assign, find } from "lodash/fp";
 import React from "react";
 import { saveProjectName, validateProjectName } from "~/api";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
@@ -26,6 +26,7 @@ const ProjectHeader = ({
   onMetadataUpdated,
   workflow,
 }: ProjectHeaderProps) => {
+  const trackEvent = useTrackEvent();
   const handleProjectUserAdded = (username: string, email: string) => {
     const userFound = find({ email }, project.users);
     if (!userFound) {

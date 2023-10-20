@@ -2,7 +2,7 @@ import { useReactiveVar } from "@apollo/client";
 import { forEach, trim } from "lodash/fp";
 import React, { useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import {
   activeAmrFiltersVar,
   amrDrugClassesVar,
@@ -35,6 +35,7 @@ interface AmrViewProps {
 }
 
 export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
+  const withAnalytics = useWithAnalytics();
   const [loadingResults, setLoadingResults] = useState(false);
   const [hideFilters, setHideFilters] = useState(true);
   const [reportTableData, setReportTableData] =
@@ -158,7 +159,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
           mode="geneDetails"
           onClose={() =>
             withAnalytics(
-              setDetailsSidebarGeneName(null),
+              () => setDetailsSidebarGeneName(null),
               ANALYTICS_EVENT_NAMES.AMR_VIEW_DETAILS_SIDEBAR_CLOSED,
             )
           }

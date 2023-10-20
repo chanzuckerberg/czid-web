@@ -1,7 +1,11 @@
 import { Icon } from "@czi-sds/components";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  withAnalyticsFromClassComponent,
+} from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import { GlobalContext } from "~/globalContext/reducer";
 import cs from "./map_banner.scss";
 
 interface MapBannerProps {
@@ -11,8 +15,13 @@ interface MapBannerProps {
 }
 
 class MapBanner extends React.Component<MapBannerProps> {
+  static contextType = GlobalContext;
   render() {
     const { item, itemCount, onClearFilters } = this.props;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     if (!itemCount) {
       return (
         <div className={cs.bannerContainer}>
@@ -20,7 +29,8 @@ class MapBanner extends React.Component<MapBannerProps> {
             {`No ${item} with locations found. Try adjusting search or filters. `}
             <span
               className={cs.clearAll}
-              onClick={withAnalytics(
+              onClick={withAnalyticsFromClassComponent(
+                globalAnalyticsContext,
                 onClearFilters,
                 ANALYTICS_EVENT_NAMES.MAP_BANNER_CLEAR_FILTERS_LINK_CLICKED,
                 {

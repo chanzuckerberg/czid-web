@@ -1,5 +1,5 @@
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import { useTrackEvent } from "~/api/analytics";
 import Archetypes from "~/interface/archetypes";
 import Segments from "~/interface/segments";
 import Checkbox from "~ui/controls/Checkbox";
@@ -34,6 +34,7 @@ const UserForm = ({
   success,
   successMessage,
 }: UserFormProps) => {
+  const trackEvent = useTrackEvent();
   const displayError = (failedStatus, serverErrors, formattedError) => {
     if (failedStatus) {
       const ret =

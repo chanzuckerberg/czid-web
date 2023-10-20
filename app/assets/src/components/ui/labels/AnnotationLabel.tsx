@@ -1,7 +1,7 @@
 import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   ANNOTATION_HIT,
   ANNOTATION_INCONCLUSIVE,
@@ -17,6 +17,7 @@ const AnnotationLabel = ({
   hideTooltip = false,
   ...props
 }: AnnotationLabelProps) => {
+  const trackEvent = useTrackEvent();
   const icon = {
     [ANNOTATION_HIT]: "flagCheck",
     [ANNOTATION_NOT_A_HIT]: "flagXmark",

@@ -37,14 +37,16 @@ import React from "react";
 import { getProjects, validateSampleFiles, validateSampleNames } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  TrackEventType,
+  useTrackEvent,
+  useWithAnalytics,
+  WithAnalyticsType,
 } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { TaxonOption } from "~/components/common/filters/types";
 import ProjectCreationModal from "~/components/common/ProjectCreationModal";
 import ProjectSelect from "~/components/common/ProjectSelect";
-import { UserContext } from "~/components/common/UserContext";
+import { useAllowedFeatures } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import {
@@ -102,8 +104,14 @@ const BASESPACE_UPLOAD_LABEL = "Basespace";
 
 const UPLOADSAMPLESTEP_SAMPLE_CHANGED = "UploadSampleStep_sample_changed";
 
-class UploadSampleStep extends React.Component<
-  UploadSampleStepProps,
+interface UploadSampleStepWithContextProps extends UploadSampleStepProps {
+  allowedFeatures: string[];
+  trackEvent: TrackEventType;
+  withAnalytics: WithAnalyticsType;
+}
+
+class UploadSampleStepCC extends React.Component<
+  UploadSampleStepWithContextProps,
   UploadSampleStepState
 > {
   _window: $TSFixMeUnknown;
@@ -313,7 +321,7 @@ class UploadSampleStep extends React.Component<
     this.props.onDirty();
     const tab = this.getUploadTabs()[tabIndex].value;
     this.setState({ currentTab: tab });
-    trackEvent("UploadSampleStep_tab_changed", {
+    this.props.trackEvent("UploadSampleStep_tab_changed", {
       tab,
     });
   };
@@ -368,11 +376,11 @@ class UploadSampleStep extends React.Component<
       basespaceSamples: newBasespaceSamples,
     });
 
-    trackEvent("UploadSampleStep_project_created", {
+    this.props.trackEvent("UploadSampleStep_project_created", {
       localSamples: newLocalSamples.length,
       remoteSamples: newRemoteSamples.length,
       basespaceSamples: newBasespaceSamples.length,
-      ...this.getAnalyticsContext(),
+      ...this.getLocalAnalyticsContext(),
     });
   };
 
@@ -412,11 +420,11 @@ class UploadSampleStep extends React.Component<
       basespaceSamples: newBasespaceSamples,
     });
 
-    trackEvent("UploadSampleStep_project-selector_changed", {
+    this.props.trackEvent("UploadSampleStep_project-selector_changed", {
       localSamples: newLocalSamples.length,
       remoteSamples: newRemoteSamples.length,
       basespaceSamples: newBasespaceSamples.length,
-      ...this.getAnalyticsContext(),
+      ...this.getLocalAnalyticsContext(),
     });
   };
 
@@ -468,7 +476,7 @@ class UploadSampleStep extends React.Component<
       selectedWetlabProtocol: null,
     });
 
-    trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
+    this.props.trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
   };
 
   getPermittedSelectedWorkflows = ({
@@ -600,12 +608,12 @@ class UploadSampleStep extends React.Component<
         });
       }
 
-      trackEvent(
+      this.props.trackEvent(
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
         { technology },
       );
     } else if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value)) {
-      trackEvent(
+      this.props.trackEvent(
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_TECHNOLOGY_CLICKED,
         { technology },
       );
@@ -666,7 +674,7 @@ class UploadSampleStep extends React.Component<
   handleWetlabProtocolChange = (selected: string) => {
     this.props.onDirty();
     this.setState({ selectedWetlabProtocol: selected });
-    trackEvent(`UploadSampleStep_${selected}-protocol_selected`);
+    this.props.trackEvent(`UploadSampleStep_${selected}-protocol_selected`);
   };
 
   handleGuppyBasecallerSettingChange = (selected: string) => {
@@ -677,7 +685,7 @@ class UploadSampleStep extends React.Component<
   handleMedakaModelChange = (selected: string) => {
     this.props.onDirty();
     this.setState({ selectedMedakaModel: selected });
-    trackEvent(
+    this.props.trackEvent(
       ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED,
       { selected },
     );
@@ -695,7 +703,7 @@ class UploadSampleStep extends React.Component<
         ? DEFAULT_MEDAKA_MODEL_OPTION
         : this.state.selectedMedakaModel,
     });
-    trackEvent(
+    this.props.trackEvent(
       ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED,
       { usedClearLabs },
     );
@@ -948,7 +956,7 @@ class UploadSampleStep extends React.Component<
     checked: boolean,
     sampleType: SampleUploadType,
   ) => {
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures } = this.props;
     this.props.onDirty();
     const samplesKey = this.getSamplesKey(sampleType);
     const samples = this.state[samplesKey];
@@ -1005,7 +1013,7 @@ class UploadSampleStep extends React.Component<
   };
 
   handleAllSamplesSelect = (checked: $TSFixMe, sampleType: $TSFixMe) => {
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures } = this.props;
     this.props.onDirty();
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
     const samplesKey = this.getSamplesKey(sampleType);
@@ -1080,14 +1088,14 @@ class UploadSampleStep extends React.Component<
       files: this.state.files.concat(validatedNewSamples),
     });
 
-    trackEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
+    this.props.trackEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
       newSamples: validatedNewSamples.length,
       totalSamples: mergedSamples.length,
       sampleType,
       ...(sampleType === LOCAL_UPLOAD
         ? { removedLocalFiles: removedLocalFiles.length }
         : {}),
-      ...this.getAnalyticsContext(),
+      ...this.getLocalAnalyticsContext(),
     });
   };
 
@@ -1114,10 +1122,10 @@ class UploadSampleStep extends React.Component<
 
     this.setState(newState);
 
-    trackEvent("UploadSampleStep_samples_removed", {
+    this.props.trackEvent("UploadSampleStep_samples_removed", {
       sampleNames: sampleSelectIds.length,
       sampleType: this.state.currentTab,
-      ...this.getAnalyticsContext(),
+      ...this.getLocalAnalyticsContext(),
     });
   };
 
@@ -1205,7 +1213,7 @@ class UploadSampleStep extends React.Component<
       selectedWetlabProtocol,
       selectedWorkflows,
     } = this.state;
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures } = this.props;
     // Note: we currently only run validation checks on locally uploaded samples
     if (
       currentTab === LOCAL_UPLOAD &&
@@ -1305,7 +1313,7 @@ class UploadSampleStep extends React.Component<
       refSeqFile,
       selectedTaxon,
     } = this.state;
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures } = this.props;
 
     let isMNGSWorkflowValid = !this.isWorkflowSelected(
       UPLOAD_WORKFLOWS.MNGS.value,
@@ -1384,7 +1392,7 @@ class UploadSampleStep extends React.Component<
           areAllWorkflowsValid;
   };
 
-  getAnalyticsContext = () => {
+  getLocalAnalyticsContext = () => {
     const project = this.state.selectedProject;
     return {
       projectId: project && project.id,
@@ -1394,7 +1402,7 @@ class UploadSampleStep extends React.Component<
 
   getSequenceTechnology = () => {
     const { selectedTechnology } = this.state;
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures } = this.props;
 
     if (allowedFeatures.includes(ONT_V1_FEATURE)) {
       if (
@@ -1547,8 +1555,8 @@ class UploadSampleStep extends React.Component<
   };
 
   render() {
-    const { admin, biohubS3UploadEnabled, pipelineVersions } = this.props;
-    const { allowedFeatures } = this.context || {};
+    const { admin, allowedFeatures, biohubS3UploadEnabled, pipelineVersions } =
+      this.props;
     const {
       bedFile,
       refSeqFile,
@@ -1598,7 +1606,7 @@ class UploadSampleStep extends React.Component<
               <div className={cs.projectCreationContainer}>
                 <ProjectCreationModal
                   modalOpen
-                  onCancel={withAnalytics(
+                  onCancel={this.props.withAnalytics(
                     this.closeCreateProject,
                     ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED,
                   )}
@@ -1608,7 +1616,7 @@ class UploadSampleStep extends React.Component<
             ) : (
               <button
                 className={cx(cs.createProjectButton, "noStyleButton")}
-                onClick={withAnalytics(
+                onClick={this.props.withAnalytics(
                   this.openCreateProject,
                   ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CREATE_PROJECT_OPENED,
                 )}
@@ -1716,9 +1724,12 @@ class UploadSampleStep extends React.Component<
             <SecondaryButton
               text="Cancel"
               onClick={() =>
-                trackEvent("UploadSampleStep_cancel-button_clicked", {
-                  ...this.getAnalyticsContext(),
-                })
+                this.props.trackEvent(
+                  "UploadSampleStep_cancel-button_clicked",
+                  {
+                    ...this.getLocalAnalyticsContext(),
+                  },
+                )
               }
             />
           </a>
@@ -1728,6 +1739,22 @@ class UploadSampleStep extends React.Component<
   }
 }
 
-UploadSampleStep.contextType = UserContext;
+// Using a function component wrapper provides a semi-hacky way to
+// access useContext from multiple providers without the class component to function component
+// conversion.
+const UploadSampleStep = (props: UploadSampleStepProps) => {
+  const allowedFeatures = useAllowedFeatures();
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
+
+  return (
+    <UploadSampleStepCC
+      {...props}
+      allowedFeatures={allowedFeatures}
+      trackEvent={trackEvent}
+      withAnalytics={withAnalytics}
+    />
+  );
+};
 
 export default UploadSampleStep;

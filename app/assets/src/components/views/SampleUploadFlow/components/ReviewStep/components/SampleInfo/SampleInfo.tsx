@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React, { useContext } from "react";
-import { trackEvent } from "~/api/analytics";
+import { useTrackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import {
   HostGenome,
@@ -38,6 +38,7 @@ const SampleInfo = ({
   samples,
   uploadType,
 }: SampleInfoType) => {
+  const trackEvent = useTrackEvent();
   const { admin } = useContext(UserContext) || {};
 
   const { id, name } = project;

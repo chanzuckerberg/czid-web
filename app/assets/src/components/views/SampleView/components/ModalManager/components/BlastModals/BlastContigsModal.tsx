@@ -4,8 +4,8 @@ import { filter, map, reduce, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  useTrackEvent,
+  useWithAnalytics,
 } from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
@@ -50,6 +50,8 @@ export const BlastContigsModal = ({
   taxonName,
   taxonId,
 }: BlastContigsModalProps) => {
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
   const [contigs, setContigs] = useState<Contig[]>([]);
   const [selectedContigIds, setSelectedContigIds] = useState<Set<number>>(
     new Set(),

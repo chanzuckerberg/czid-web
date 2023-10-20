@@ -1,6 +1,6 @@
 import { cx } from "@emotion/css";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, WithAnalyticsType } from "~/api/analytics";
 import cs from "~/components/views/SampleView/components/MngsReport/components/ReportTable/report_table.scss";
 import { TAX_LEVEL_GENUS } from "~/components/views/SampleView/utils";
 import { CellRendererType } from "~/interface/sampleView";
@@ -12,7 +12,8 @@ import { Taxon } from "~/interface/shared";
 export const getExpandIconRenderer: (
   expandedGenusIds: Set<number>,
   toggleExpandGunus: ({ taxonId }: { taxonId: number }) => void,
-) => CellRendererType = (expandedGenusIds, toggleExpandGenus) =>
+  withAnalytics: WithAnalyticsType,
+) => CellRendererType = (expandedGenusIds, toggleExpandGenus, withAnalytics) =>
   function expandIconRenderer({ rowData }: { rowData: Taxon }) {
     return (
       // TODO: this should be a button not a div

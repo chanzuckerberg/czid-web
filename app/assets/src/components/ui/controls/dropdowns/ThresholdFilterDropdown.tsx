@@ -1,6 +1,7 @@
 import { get } from "lodash/fp";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import { trackEventFromClassComponent } from "~/api/analytics";
+import { GlobalContext } from "~/globalContext/reducer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { PrimaryButton, SecondaryButton } from "../buttons";
 import DropdownLabel from "./common/DropdownLabel";
@@ -44,6 +45,7 @@ class ThresholdFilterDropdown extends React.Component<
       thresholds: [],
     };
   }
+  static contextType = GlobalContext;
 
   static getDerivedStateFromProps(props: $TSFixMe, state: $TSFixMe) {
     const newThresholds = props.thresholds.filter(
@@ -127,6 +129,11 @@ class ThresholdFilterDropdown extends React.Component<
   }
 
   applyFilterUpdates = () => {
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
+
     const newThresholds = this.state.thresholds.filter(
       ThresholdFilterDropdown.isThresholdValid,
     );
@@ -134,16 +141,29 @@ class ThresholdFilterDropdown extends React.Component<
     this.setState({ popupIsOpen: false, thresholds: newThresholds });
     this.props.onApply(newThresholds);
 
-    trackEvent("ThresholdFilterDropdown_apply-button_clicked", {
-      thresholds: newThresholds.length,
-    });
+    trackEventFromClassComponent(
+      globalAnalyticsContext,
+      "ThresholdFilterDropdown_apply-button_clicked",
+      {
+        thresholds: newThresholds.length,
+      },
+    );
   };
 
   cancelFilterUpdates = () => {
     this.setState({ popupIsOpen: false, thresholds: this.props.thresholds });
-    trackEvent("ThresholdFilterDropdown_cancel-button_clicked", {
-      thresholds: this.props.thresholds.length,
-    });
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
+
+    trackEventFromClassComponent(
+      globalAnalyticsContext,
+      "ThresholdFilterDropdown_cancel-button_clicked",
+      {
+        thresholds: this.props.thresholds.length,
+      },
+    );
   };
 
   handleOpen = () => {

@@ -2,7 +2,7 @@ import { Button, Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import React, { useEffect, useState } from "react";
 import { createProject } from "~/api";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks";
@@ -40,6 +40,7 @@ const ProjectCreationModal = ({
   const [creatingProject, setCreatingProject] = useState(false);
   const [disableCreateButton, setDisableCreateButton] = useState(true);
 
+  const trackEvent = useTrackEvent();
   useEffect(() => {
     const anyFieldInvalid =
       name === "" ||

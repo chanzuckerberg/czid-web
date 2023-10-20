@@ -8,7 +8,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import {
   getBackgrounds,
@@ -21,8 +20,8 @@ import {
 import { getAmrDeprecatedData } from "~/api/amr";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  useTrackEvent,
+  useWithAnalytics,
 } from "~/api/analytics";
 import {
   createPersistedBackground,
@@ -51,6 +50,11 @@ import {
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
+import {
+  ActionType,
+  createAction,
+  GlobalContext,
+} from "~/globalContext/reducer";
 import { usePrevious } from "~/helpers/customHooks/usePrevious";
 import {
   getAllGeneraPathogenCounts,
@@ -79,7 +83,6 @@ import {
   PipelineRun,
   Taxon,
 } from "~/interface/shared";
-import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { DetailsSidebarSwitcher } from "./components/DetailsSidebarSwitcher";
 import { ModalManager } from "./components/ModalManager";
 import { BlastModalInfo } from "./components/ModalManager/components/BlastModals/constants";
@@ -129,12 +132,11 @@ import {
 //  4.  Whenever selectedOptions or other fields stored in the url change, the component needs to update the URL.
 //  5.  If the user manually changes selectedOptions (e.g. by clicking on a filter) then the component needs to update the local storage
 
-const SampleView = ({
-  snapshotShareId,
-  sampleId,
-  updateDiscoveryProjectId,
-}: SampleViewProps) => {
+const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
   const { allowedFeatures } = useContext(UserContext) || {};
+
   const {
     pipelineVersionFromUrl,
     viewFromUrl,
@@ -352,6 +354,9 @@ const SampleView = ({
         tab: currentTab,
       });
     }
+  }, [currentTab, trackEvent]);
+
+  useEffect(() => {
     if (
       currentTab === WORKFLOW_TABS.CONSENSUS_GENOME ||
       currentTab === WORKFLOW_TABS.AMR
@@ -547,6 +552,7 @@ const SampleView = ({
       backgrounds,
       ignoreProjectBackground,
       enableMassNormalizedBackgrounds,
+      trackEvent,
       sampleId,
       currentTab,
       selectedOptions?.background,
@@ -660,6 +666,18 @@ const SampleView = ({
     prevPipelineVersion,
     pipelineVersion,
   ]);
+
+  const globalContext = useContext(GlobalContext);
+  const dispatch = globalContext.globalContextDispatch;
+
+  const updateDiscoveryProjectId = useCallback(
+    (projectId: number | null) => {
+      dispatch(
+        createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectId),
+      );
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     project?.id && updateDiscoveryProjectId(project.id);
@@ -1282,11 +1300,4 @@ const SampleView = ({
   );
 };
 
-const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectIds };
-
-// Don't need mapStateToProps yet so pass in null
-const connectedComponent = connect(null, mapDispatchToProps)(SampleView);
-
-(connectedComponent.name as string) = "SampleView";
-
-export default connectedComponent;
+export default SampleView;

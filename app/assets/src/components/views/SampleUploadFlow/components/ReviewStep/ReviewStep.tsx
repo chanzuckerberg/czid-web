@@ -1,15 +1,18 @@
 import cx from "classnames";
 import { get, keyBy } from "lodash/fp";
-import React from "react";
+import React, { useContext } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  TrackEventType,
+  useTrackEvent,
+  useWithAnalytics,
+  WithAnalyticsType,
 } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { TaxonOption } from "~/components/common/filters/types";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import UserContextType from "~/interface/allowedFeatures";
 import {
   HostGenome,
   MetadataBasic,
@@ -56,6 +59,12 @@ interface ReviewStepProps {
   wetlabProtocol?: string;
 }
 
+interface ReviewStepWithContextProps extends ReviewStepProps {
+  userContext: UserContextType;
+  trackEvent: TrackEventType;
+  withAnalytics: WithAnalyticsType;
+}
+
 interface ReviewStepState {
   consentChecked: boolean;
   projectMetadataFields: $TSFixMeUnknown;
@@ -65,7 +74,10 @@ interface ReviewStepState {
   adminOptions: Record<string, string>;
 }
 
-class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
+class ReviewStepCC extends React.Component<
+  ReviewStepWithContextProps,
+  ReviewStepState
+> {
   state: ReviewStepState = {
     consentChecked: false,
     projectMetadataFields: null,
@@ -146,13 +158,16 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
       refSeqTaxon,
       project,
       samples,
+      trackEvent,
       uploadType,
+      userContext,
       visible,
       wetlabProtocol,
+      withAnalytics,
       workflows,
     } = this.props;
 
-    const { userSettings } = this.context || {};
+    const { userSettings } = userContext || {};
 
     const areLinksEnabled = !showUploadModal;
 
@@ -273,6 +288,22 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
   }
 }
 
-ReviewStep.contextType = UserContext;
+// Using a function component wrapper provides a semi-hacky way to
+// access useContext from multiple providers without the class component to function component
+// conversion.
+const ReviewStep = (props: ReviewStepProps) => {
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
+  const userContext = useContext(UserContext);
+
+  return (
+    <ReviewStepCC
+      {...props}
+      trackEvent={trackEvent}
+      withAnalytics={withAnalytics}
+      userContext={userContext}
+    />
+  );
+};
 
 export default ReviewStep;

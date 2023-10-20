@@ -11,7 +11,7 @@ import {
   values,
 } from "lodash/fp";
 import React, { useContext } from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { UserContext } from "~/components/common/UserContext";
 import {
@@ -87,6 +87,7 @@ export const ReportFilters = ({
   enableMassNormalizedBackgrounds,
   snapshotShareId,
 }: ReportFiltersProps) => {
+  const trackEvent = useTrackEvent();
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const showBackgroundFilter = currentTab === WORKFLOW_TABS.SHORT_READ_MNGS;

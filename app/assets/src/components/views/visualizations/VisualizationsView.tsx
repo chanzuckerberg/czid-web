@@ -2,9 +2,10 @@ import { Icon } from "@czi-sds/components";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";
-import { trackEvent } from "~/api/analytics";
+import { trackEventFromClassComponent } from "~/api/analytics";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { GlobalContext } from "~/globalContext/reducer";
 import { humanize } from "~/helpers/strings";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { openUrl } from "~utils/links";
@@ -54,6 +55,7 @@ interface VisualizationsViewProps {
 class VisualizationsView extends React.Component<VisualizationsViewProps> {
   columns: $TSFixMe;
   discoveryView: $TSFixMe;
+  static contextType = GlobalContext;
   constructor(props: VisualizationsViewProps) {
     super(props);
 
@@ -150,14 +152,22 @@ class VisualizationsView extends React.Component<VisualizationsViewProps> {
   }
 
   handleRowClick = ({ rowData }: $TSFixMe) => {
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     const url = `/visualizations/${rowData.visualization.visualization_type}/${rowData.id}`;
     // @ts-expect-error Type 'Event' is missing the following properties
     openUrl(url, event);
-    trackEvent("VisualizationsView_row_clicked", {
-      visualizationType: rowData.visualization.visualization_type,
-      visualizationId: rowData.id,
-      url,
-    });
+    trackEventFromClassComponent(
+      globalAnalyticsContext,
+      "VisualizationsView_row_clicked",
+      {
+        visualizationType: rowData.visualization.visualization_type,
+        visualizationId: rowData.id,
+        url,
+      },
+    );
   };
 
   handleLoadRowsAndFormat = async (args: $TSFixMe) => {

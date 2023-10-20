@@ -11,6 +11,7 @@ import {
 } from "~/components/views/compare/SamplesHeatmapView/constants";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { CATEGORIES } from "~/components/views/SampleView/utils";
+import { GlobalContext } from "~/globalContext/reducer";
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
 import {
@@ -57,6 +58,7 @@ export default class HeatmapCreationModal extends React.Component<
       selectedThresholdFilters: [],
     };
   }
+  static contextType = GlobalContext;
 
   componentDidMount() {
     this.fetchBackgrounds();

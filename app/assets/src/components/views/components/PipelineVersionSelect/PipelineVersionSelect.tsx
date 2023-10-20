@@ -1,6 +1,6 @@
 import moment from "moment";
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import { useTrackEvent } from "~/api/analytics";
 import { WorkflowType } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
@@ -26,6 +26,7 @@ export const PipelineVersionSelect = ({
   workflowType,
   onVersionChange,
 }: PipelineVersionSelectProps) => {
+  const trackEvent = useTrackEvent();
   const { timeKey, versionKey, workflowName, getDatabaseVersionString } =
     PipelineVersionSelectConfig[workflowType];
 

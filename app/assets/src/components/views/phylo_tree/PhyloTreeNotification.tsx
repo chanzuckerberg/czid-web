@@ -1,5 +1,5 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import cs from "./phylo_tree_notification.scss";
@@ -9,6 +9,7 @@ interface PhyloTreeNotificationProps {
 }
 
 const PhyloTreeNotification = ({ onClose }: PhyloTreeNotificationProps) => {
+  const trackEvent = useTrackEvent();
   const label = (
     <div className={cs.label}>
       <div className={cs.message}>

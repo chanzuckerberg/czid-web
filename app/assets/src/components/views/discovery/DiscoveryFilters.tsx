@@ -8,8 +8,8 @@ import { find, forEach, isEmpty, isEqual, pick, reject } from "lodash/fp";
 import React from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  trackEventFromClassComponent,
+  withAnalyticsFromClassComponent,
 } from "~/api/analytics";
 import {
   BaseMultipleFilter,
@@ -31,6 +31,7 @@ import {
   KEY_TAXON_SELECTED,
   KEY_TAXON_THRESHOLDS_SELECTED,
 } from "~/components/views/SampleView/utils";
+import { GlobalContext } from "~/globalContext/reducer";
 import { SelectedFilters } from "~/interface/discoveryView";
 import { ThresholdFilterData } from "~/interface/dropdown";
 import FilterTag from "~ui/controls/FilterTag";
@@ -112,6 +113,8 @@ class DiscoveryFilters extends React.Component<
 
     this.setupWorkflowConfigs();
   }
+
+  static contextType = GlobalContext;
 
   static getDerivedStateFromProps(props: $TSFixMe, state: $TSFixMe) {
     const newState = state;
@@ -199,12 +202,17 @@ class DiscoveryFilters extends React.Component<
 
   handleTaxonThresholdFilterChange = (taxa: $TSFixMe, thresholds: $TSFixMe) => {
     const { domain } = this.props;
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     const taxonFilterStateUpdate = {};
 
     // check if selected taxa changed
     if (!isEqual(this.state[KEY_TAXON_SELECTED], taxa)) {
       taxonFilterStateUpdate[KEY_TAXON_SELECTED] = taxa;
-      trackEvent(
+      trackEventFromClassComponent(
+        globalAnalyticsContext,
         `DiscoveryFilters_${KEY_TAXON_SELECTED.toLowerCase()}_changed`,
         {
           selectedKey: taxa,
@@ -215,7 +223,8 @@ class DiscoveryFilters extends React.Component<
     // check if selected taxon thresholds were changed
     if (!isEqual(this.state[KEY_TAXON_THRESHOLDS_SELECTED], thresholds)) {
       taxonFilterStateUpdate[KEY_TAXON_THRESHOLDS_SELECTED] = thresholds;
-      trackEvent(
+      trackEventFromClassComponent(
+        globalAnalyticsContext,
         `DiscoveryFilters_${KEY_TAXON_THRESHOLDS_SELECTED.toLowerCase()}_changed`,
         {
           selectedKey: thresholds,
@@ -224,12 +233,16 @@ class DiscoveryFilters extends React.Component<
     }
 
     const callback = (filteredSampleCount: number) => {
-      trackEvent(ANALYTICS_EVENT_NAMES.TAXON_THRESHOLD_FILTER_APPLY_CLICKED, {
-        domain,
-        selectedTaxa: taxa,
-        thresholds,
-        filteredSampleCount,
-      });
+      trackEventFromClassComponent(
+        globalAnalyticsContext,
+        ANALYTICS_EVENT_NAMES.TAXON_THRESHOLD_FILTER_APPLY_CLICKED,
+        {
+          domain,
+          selectedTaxa: taxa,
+          thresholds,
+          filteredSampleCount,
+        },
+      );
     };
 
     this.setState(taxonFilterStateUpdate, () =>
@@ -238,13 +251,21 @@ class DiscoveryFilters extends React.Component<
   };
 
   handleChange(selectedKey: $TSFixMe, selected: $TSFixMe) {
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     const newState = [];
     newState[selectedKey] = selected;
     // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'any[]' is not assignable to para... Remove this comment to see the full error message
     this.setState(newState, this.notifyFilterChangeHandler);
-    trackEvent(`DiscoveryFilters_${selectedKey.toLowerCase()}_changed`, {
-      selectedKey: selected,
-    });
+    trackEventFromClassComponent(
+      globalAnalyticsContext,
+      `DiscoveryFilters_${selectedKey.toLowerCase()}_changed`,
+      {
+        selectedKey: selected,
+      },
+    );
   }
 
   handleRemoveTag = ({ selectedKey, valueToRemove = "" }: $TSFixMe) => {
@@ -267,6 +288,10 @@ class DiscoveryFilters extends React.Component<
   };
 
   renderTags(optionsKey: $TSFixMe) {
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     const selectedKey = `${optionsKey}Selected`;
     let selectedOptions = this.state[selectedKey];
     const options = this.props[optionsKey];
@@ -292,7 +317,8 @@ class DiscoveryFilters extends React.Component<
             className={cs.filterTag}
             key={option.value}
             text={option.text}
-            onClose={withAnalytics(
+            onClose={withAnalyticsFromClassComponent(
+              globalAnalyticsContext,
               () =>
                 this.handleRemoveTag({
                   selectedKey,
@@ -314,6 +340,10 @@ class DiscoveryFilters extends React.Component<
   // Annotations filter options are hashes with { name: string }
   // Note: This function can be modified to render tags for any SDS Dropdown-based filter.
   renderAnnotationsFilterTags = () => {
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     const selectedOptions = this.state[KEY_ANNOTATIONS_SELECTED];
     if (isEmpty(selectedOptions)) return;
 
@@ -323,7 +353,8 @@ class DiscoveryFilters extends React.Component<
           className={cs.filterTag}
           key={option.name}
           text={option.name}
-          onClose={withAnalytics(
+          onClose={withAnalyticsFromClassComponent(
+            globalAnalyticsContext,
             () =>
               this.handleRemoveTag({
                 selectedKey: KEY_ANNOTATIONS_SELECTED,
@@ -342,6 +373,10 @@ class DiscoveryFilters extends React.Component<
   };
 
   renderTaxonFilterTags = () => {
+    const { discoveryProjectIds } = this.context;
+    const globalAnalyticsContext = {
+      projectIds: discoveryProjectIds,
+    };
     const selectedTaxa = this.state[KEY_TAXON_SELECTED];
     const thresholdFilterDisabled =
       this.configForWorkflow[this.props.workflow].disableTaxonThresholdFilter;
@@ -357,7 +392,8 @@ class DiscoveryFilters extends React.Component<
             className={cs.filterTag}
             key={`taxon_filter_tag_${selectedTaxon.id}`}
             text={selectedTaxon.name}
-            onClose={withAnalytics(
+            onClose={withAnalyticsFromClassComponent(
+              globalAnalyticsContext,
               () =>
                 this.handleRemoveTag({
                   selectedKey: KEY_TAXON_SELECTED,

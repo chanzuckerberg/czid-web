@@ -1,5 +1,5 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import BasicPopup from "../../BasicPopup";
 import Label from "./Label";
@@ -78,6 +78,7 @@ interface PathogenLabelProps {
 }
 
 const PathogenLabel = ({ type, isDimmed }: PathogenLabelProps) => {
+  const trackEvent = useTrackEvent();
   const label = (
     <span data-testid="pathogen-label">
       <Label
