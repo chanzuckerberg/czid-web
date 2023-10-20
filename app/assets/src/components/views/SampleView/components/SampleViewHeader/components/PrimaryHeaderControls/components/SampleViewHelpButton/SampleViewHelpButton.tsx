@@ -1,5 +1,6 @@
 import { isEmpty, size } from "lodash/fp";
 import React, { useContext } from "react";
+import { useWithAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { HelpButton } from "~/components/ui/controls/buttons";
 import { showAppcue } from "~/components/utils/appcues";
@@ -19,6 +20,7 @@ export const SampleViewHelpButton = ({
   sample,
 }: SampleViewHelpButtonProps) => {
   const { allowedFeatures } = useContext(UserContext) || {};
+  const withAnalytics = useWithAnalytics();
   const shouldHideConsensusGenomeHelpButton =
     // CG help button should only be shown if feature flag is on
     // unless the sample has 0 mNGS runs & exactly 1 CG run.
@@ -42,6 +44,7 @@ export const SampleViewHelpButton = ({
       className={className}
       onClick={showAppcue({
         flowId,
+        withAnalytics,
         analyticEventName,
       })}
     />

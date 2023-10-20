@@ -1,4 +1,4 @@
-import { useWithAnalytics } from "~/api/analytics";
+import { WithAnalyticsType } from "~/api/analytics";
 
 declare global {
   interface Window {
@@ -16,14 +16,15 @@ declare global {
 
 export const showAppcue = ({
   flowId,
+  withAnalytics,
   analyticEventName,
   analyticEventProperties = {},
 }: {
   flowId: string;
+  withAnalytics: WithAnalyticsType;
   analyticEventName: string;
   analyticEventProperties?: Record<string, string>;
 }) => {
-  const withAnalytics = useWithAnalytics();
   return withAnalytics(
     () => window.Appcues && window.Appcues.show(flowId),
     analyticEventName,

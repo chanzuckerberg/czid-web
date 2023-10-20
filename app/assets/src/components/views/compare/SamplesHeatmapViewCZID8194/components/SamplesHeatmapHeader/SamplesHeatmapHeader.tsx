@@ -196,6 +196,7 @@ export const SamplesHeatmapHeader = ({
             className={cs.controlElement}
             onClick={showAppcue({
               flowId: SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
+              withAnalytics,
               analyticEventName:
                 ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED,
             })}

@@ -534,6 +534,7 @@ class PhyloTreeListViewCC extends React.Component<
                 flowId: clustermapSvgUrl
                   ? PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR
                   : PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
+                withAnalytics: this.props.withAnalytics,
                 analyticEventName: clustermapSvgUrl
                   ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED
                   : ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
