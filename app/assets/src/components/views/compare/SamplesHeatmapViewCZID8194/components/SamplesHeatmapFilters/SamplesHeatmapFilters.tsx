@@ -1,6 +1,6 @@
 import { Icon, Tooltip } from "@czi-sds/components";
 import React, { useContext } from "react";
-import { trackEvent } from "~/api/analytics";
+import { useTrackEvent } from "~/api/analytics";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
@@ -73,6 +73,7 @@ const SamplesHeatmapFilters = ({
   selectedOptions,
   onSelectedOptionsChange,
 }: SamplesHeatmapFiltersPropsType) => {
+  const trackEvent = useTrackEvent();
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 

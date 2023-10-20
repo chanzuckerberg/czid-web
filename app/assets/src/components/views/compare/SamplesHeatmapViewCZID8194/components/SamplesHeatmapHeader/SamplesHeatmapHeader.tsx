@@ -3,8 +3,8 @@ import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
 import {
   ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
+  useTrackEvent,
+  useWithAnalytics,
 } from "~/api/analytics";
 import { updateHeatmapName } from "~/api/visualization";
 import BasicPopup from "~/components/BasicPopup";
@@ -56,6 +56,8 @@ export const SamplesHeatmapHeader = ({
   onFilterToggleClick,
   filterPanelOpen,
 }: SamplesHeatmapHeaderProps) => {
+  const trackEvent = useTrackEvent();
+  const withAnalytics = useWithAnalytics();
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 

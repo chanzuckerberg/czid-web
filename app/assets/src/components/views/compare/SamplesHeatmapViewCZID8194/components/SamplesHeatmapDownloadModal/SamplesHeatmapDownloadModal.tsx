@@ -1,6 +1,6 @@
 import { Button } from "@czi-sds/components";
 import React, { useState } from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { createBulkDownload } from "~/api/bulk_downloads";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { WorkflowType } from "~/components/utils/workflows";
@@ -48,6 +48,7 @@ export const SamplesHeatmapDownloadModal = ({
   onDownloadAllHeatmapMetricsCsv,
   onDownloadCurrentHeatmapViewCsv,
 }: SamplesHeatmapDownloadModalProps) => {
+  const trackEvent = useTrackEvent();
   const [selectedDownloadType, setSelectedDownloadType] = useState("");
   const [selectedMetrics, setSelectedMetrics] = useState({});
 
