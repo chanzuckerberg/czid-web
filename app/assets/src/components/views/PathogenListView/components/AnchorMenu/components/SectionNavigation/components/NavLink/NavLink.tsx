@@ -9,12 +9,10 @@ interface NavLinkProps {
   onClick: MouseEventHandler<HTMLAnchorElement>;
 }
 
-const NavLink = ({ id, isCurrent, name, onClick }: NavLinkProps) => (
+export const NavLink = ({ id, isCurrent, name, onClick }: NavLinkProps) => (
   <li className={cx(cs.navLink, isCurrent ? cs.currentNavItem : cs.navItem)}>
     <a href={id} onClick={onClick}>
       {name}
     </a>
   </li>
 );
-
-export default NavLink;

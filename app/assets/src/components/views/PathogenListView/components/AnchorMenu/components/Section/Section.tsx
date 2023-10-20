@@ -4,11 +4,11 @@ import cs from "./section.scss";
 interface SectionProps {
   id: string;
   name: string;
-  observer: IntersectionObserver;
+  observer: IntersectionObserver | null;
   children: React.ReactNode;
 }
 
-const Section = ({ children, id, name, observer }: SectionProps) => {
+export const Section = ({ children, id, name, observer }: SectionProps) => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
@@ -29,5 +29,3 @@ const Section = ({ children, id, name, observer }: SectionProps) => {
     </div>
   );
 };
-
-export default Section;

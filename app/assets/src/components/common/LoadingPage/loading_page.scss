@@ -3,17 +3,14 @@
 @import "~styles/themes/elements";
 @import "~@czi-sds/components/dist/variables";
 
-.loadingMessage {
+.loading {
+  @include font-body-s;
+  padding: 0 0 0 $sds-spaces-default;
   color: $sds-color-gray-500;
-  display: flex;
-  align-items: center;
-  fill: $sds-color-gray-500;
+  margin-top: 90px;
 
   .loadingIcon {
-    margin-right: $sds-spaces-xxs;
-  }
-
-  .text {
-    @include font-body-xxs;
+    width: $icon-s;
+    height: $icon-s;
   }
 }

@@ -4,10 +4,17 @@ import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import cs from "./pathogens.scss";
 
-const Pathogens = ({ pathogens }: PathogensProps) => {
+interface PathogensProps {
+  pathogensByHeader: {
+    name: string;
+    taxId: number;
+  }[];
+}
+
+export const Pathogens = ({ pathogensByHeader }: PathogensProps) => {
   return (
     <Grid className={cs.pathogensContainer} columns={3}>
-      {pathogens.map((pathogen, index) => (
+      {pathogensByHeader.map((pathogen, index) => (
         <Grid.Column className={cs.pathogen} key={index}>
           <div className={cs.pathogenName}>{pathogen.name}</div>
           <ExternalLink
@@ -24,12 +31,3 @@ const Pathogens = ({ pathogens }: PathogensProps) => {
     </Grid>
   );
 };
-
-interface PathogensProps {
-  pathogens: {
-    name: string;
-    taxId: number;
-  }[];
-}
-
-export default Pathogens;

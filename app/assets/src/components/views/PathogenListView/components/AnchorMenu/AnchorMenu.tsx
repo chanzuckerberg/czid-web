@@ -3,26 +3,54 @@ import React, {
   SetStateAction,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
-import Section from "~/components/common/AnchorMenu/Section";
-import Pathogens from "~/components/views/pathogen_list/Pathogens";
-import { getSectionId } from "./SectionNavigation";
-import cs from "./sections.scss";
-
-interface SectionsProps {
-  sectionContentByHeader: Record<string, any[]>;
+import { graphql, useFragment } from "react-relay";
+import { categorizeItems } from "../../utils";
+import { Pathogens } from "../Pathogens";
+import {
+  AnchorMenuFragment$data,
+  AnchorMenuFragment$key,
+} from "./__generated__/AnchorMenuFragment.graphql";
+import cs from "./anchor_menu.scss";
+import { Section } from "./components/Section";
+import { getSectionId } from "./components/SectionNavigation";
+interface AnchorMenuProps {
   setCurrentSectionIndex: Dispatch<SetStateAction<number>>;
+  pathogenData: any;
 }
 
-const Sections = ({
-  sectionContentByHeader,
-  setCurrentSectionIndex,
-}: SectionsProps) => {
-  const [observer, setObserver] = useState<IntersectionObserver | null>(null);
+export const AnchorMenuFragment = graphql`
+  fragment AnchorMenuFragment on PathogenList {
+    pathogens {
+      category
+      name
+      taxId
+    }
+  }
+`;
 
+interface Entry {
+  isIntersecting: boolean;
+  target?: { id: string };
+}
+
+export const AnchorMenu = ({
+  pathogenData,
+  setCurrentSectionIndex,
+}: AnchorMenuProps) => {
+  const data = useFragment<AnchorMenuFragment$key>(
+    AnchorMenuFragment,
+    pathogenData,
+  );
+  const [observer, setObserver] = useState<IntersectionObserver | null>(null);
+  const sectionContentByHeader = useMemo(
+    () => categorizeItems<AnchorMenuFragment$data["pathogens"]>(data.pathogens),
+    [data.pathogens],
+  );
   const setIndex = useCallback(
-    entries => {
+    (entries: Entry[]) => {
       const currentIntersections = entries.filter(
         entry => entry?.isIntersecting,
       );
@@ -40,7 +68,6 @@ const Sections = ({
     [setCurrentSectionIndex, sectionContentByHeader],
   );
 
-  // TODO: add comment clarifying rootMargin percentages
   useEffect(() => {
     const options = {
       root: null,
@@ -60,11 +87,9 @@ const Sections = ({
           name={header}
           observer={observer}
         >
-          <Pathogens pathogens={sectionContentByHeader[header]} />
+          <Pathogens pathogensByHeader={sectionContentByHeader[header]} />
         </Section>
       ))}
     </div>
   );
 };
-
-export default Sections;

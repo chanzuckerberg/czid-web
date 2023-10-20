@@ -6,15 +6,16 @@
 // - <Route> works from top-to-bottom, rendering whichever path matches first.
 // - See https://reactrouter.com/web/api/match for the properties you can get from 'match' (params, isExact, path, and url).
 
-import React, { useContext } from "react";
+import React, { Suspense, useContext } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
+import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
 import { DiscoveryView } from "~/components/views/discovery/DiscoveryView";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
 import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
 import MetadataDictionary from "~/components/views/metadata/MetadataDictionary";
-import PathogenListView from "~/components/views/pathogen_list/PathogenListView";
+import { PathogenListView } from "~/components/views/PathogenListView/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
 import SampleView from "~/components/views/SampleView/SampleView";
 import FAQPage from "~/components/views/support/FAQPage";
@@ -64,7 +65,9 @@ const DiscoveryViewRouter = ({
         <ImpactPage />
       </Route>
       <Route exact path="/pathogen_list">
-        <PathogenListView />
+        <Suspense fallback={<LoadingPage />}>
+          <PathogenListView />
+        </Suspense>
       </Route>
       <Route exact path="/privacy_notice_for_user_research">
         <PrivacyNoticeForUserResearch />

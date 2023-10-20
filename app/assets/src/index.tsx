@@ -111,7 +111,12 @@ const ReactComponentWithGlobalContext = ({
 
 // Turn off camelcase rule
 /* eslint camelcase: 0 */
-const react_component = (componentName, props, target, userContext) => {
+const react_component = (
+  componentName: string,
+  props: object,
+  target: string,
+  userContext,
+) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
     const root = createRoot(document.getElementById(target));
