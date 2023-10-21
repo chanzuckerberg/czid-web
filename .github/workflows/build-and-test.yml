@@ -2,8 +2,7 @@ name: idseq-web build-and-test
 
 on:
   pull_request:
-    branches:
-      - '**'
+    types: [opened, synchronize]
 
 env:
   AWS_DEFAULT_OUTPUT: json
@@ -22,9 +21,17 @@ jobs:
         with:
           access_token: ${{ github.token }}
   build_docker_image:
-    uses: ./.github/workflows/reusable-build_docker_image.yml
+    permissions: # these permissions must be set for AWS auth to work!
+    id-token: write
+    contents: read
+    actions: read
+    uses: ./.github/workflows/reusable-build-docker-image.yml
 
   e2e-tests:
+    permissions: # these permissions must be set for AWS auth to work!
+    id-token: write
+    contents: read
+    actions: read
     needs: build_docker_image
     uses: ./.github/workflows/reusable-e2e-tests.yml
    
