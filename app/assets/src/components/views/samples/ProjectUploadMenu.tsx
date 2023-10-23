@@ -1,6 +1,5 @@
 import { Button } from "@czi-sds/components";
 import React, { useState } from "react";
-import { useTrackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import MetadataUploadModal from "./MetadataUploadModal";
 import cs from "./project_upload_menu.scss";
@@ -18,7 +17,6 @@ const ProjectUploadMenu = ({
   project,
   workflow,
 }: ProjectUploadMenuProps) => {
-  const trackEvent = useTrackEvent();
   const [modalOpen, setModalOpen] = useState(false);
 
   const goToPage = path => {
@@ -38,7 +36,6 @@ const ProjectUploadMenu = ({
       text="Upload Samples"
       key="1"
       onClick={() => {
-        trackEvent("ProjectUploadMenu_upload-sample-btn_clicked");
         goToPage(`/samples/upload?projectId=${project.id}`);
       }}
     />,

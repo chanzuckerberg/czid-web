@@ -1,6 +1,5 @@
 import moment from "moment";
 import React from "react";
-import { useTrackEvent } from "~/api/analytics";
 import { WorkflowType } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
@@ -19,14 +18,12 @@ interface PipelineVersionSelectProps {
 }
 
 export const PipelineVersionSelect = ({
-  sampleId,
   shouldIncludeDatabaseVersion = false,
   currentRun,
   allRuns = [],
   workflowType,
   onVersionChange,
 }: PipelineVersionSelectProps) => {
-  const trackEvent = useTrackEvent();
   const { timeKey, versionKey, workflowName, getDatabaseVersionString } =
     PipelineVersionSelectConfig[workflowType];
 
@@ -57,11 +54,6 @@ export const PipelineVersionSelect = ({
   };
 
   const onPipelineVersionSelect = (version: string) => {
-    trackEvent("SampleView_pipeline-select_clicked", {
-      sampleId,
-      pipelineVersion: version,
-      workflowType,
-    });
     onVersionChange(version);
   };
 

@@ -34,7 +34,6 @@ import cs from "./upload_progress_modal.scss";
 import {
   addAdditionalInputFilesToSamples,
   addFlagsToSamples,
-  logUploadStepError,
   redirectToProject,
 } from "./upload_progress_utils";
 import UploadConfirmationModal from "./UploadConfirmationModal";
@@ -76,7 +75,6 @@ const LocalUploadProgressModal = ({
   samples,
   skipSampleProcessing,
   technology,
-  uploadType,
   useStepFunctionPipeline,
   wetlabProtocol,
   workflows,
@@ -186,14 +184,6 @@ const LocalUploadProgressModal = ({
           ...prevState,
           ...uploadStatuses,
         }));
-
-        logUploadStepError({
-          trackEvent,
-          step: "createSamples",
-          erroredSamples: erroredSampleNames.length,
-          uploadType,
-          errors,
-        });
       },
     });
 
@@ -436,14 +426,6 @@ const LocalUploadProgressModal = ({
         sample,
         error,
       },
-    });
-
-    logUploadStepError({
-      trackEvent,
-      step: "sampleUpload",
-      erroredSamples: 1,
-      uploadType,
-      errors: error,
     });
   };
 

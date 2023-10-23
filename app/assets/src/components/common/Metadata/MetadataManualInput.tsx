@@ -300,9 +300,6 @@ class MetadataManualInputCC extends React.Component<
 
   handleColumnChange = selectedFieldNames => {
     this.setState({ selectedFieldNames });
-    this.props.trackEvent("MetadataManualInput_column-selector_changed", {
-      selectedFieldNames: selectedFieldNames.length,
-    });
   };
 
   getHostGenomeOptions = () =>
@@ -363,10 +360,6 @@ class MetadataManualInputCC extends React.Component<
         onClick={() => {
           const newValue = this.getMetadataValue(sample, column);
           this.applyToAll(column, newValue);
-          this.props.trackEvent("MetadataManualInput_apply-all_clicked", {
-            sampleName: sample.name,
-            column,
-          });
         }}
       >
         Apply to All
@@ -460,10 +453,6 @@ class MetadataManualInputCC extends React.Component<
                   metadataType={this.state.projectMetadataFields[column]}
                   onChange={(key, value) => {
                     this.updateMetadataField(key, value, sample);
-                    this.props.trackEvent("MetadataManualInput_input_changed", {
-                      key,
-                      sampleName: sample.name,
-                    });
                   }}
                   withinModal={this.props.withinModal}
                   taxaCategory={hostGenome.taxa_category}

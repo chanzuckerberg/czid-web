@@ -1,4 +1,3 @@
-import { ANALYTICS_EVENT_NAMES, TrackEventType } from "~/api/analytics";
 import { TaxonOption } from "~/components/common/filters/types";
 import {
   NO_TECHNOLOGY_SELECTED,
@@ -157,38 +156,6 @@ export const addAdditionalInputFilesToSamples = ({
     });
   }
   return samples;
-};
-
-export const logUploadStepError = ({
-  trackEvent,
-  step,
-  erroredSamples,
-  uploadType,
-  errors,
-}: {
-  trackEvent: TrackEventType;
-  step: $TSFixMeUnknown;
-  erroredSamples: $TSFixMeUnknown;
-  uploadType: $TSFixMeUnknown;
-  errors: $TSFixMeUnknown;
-}) => {
-  trackEvent(
-    ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_STEP_ERROR,
-    {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      erroredSamples,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      step,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      uploadType,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      errors,
-    },
-  );
 };
 
 export const redirectToProject = (projectId: number) => {

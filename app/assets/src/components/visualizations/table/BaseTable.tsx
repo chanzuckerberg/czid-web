@@ -349,17 +349,13 @@ class BaseTableCC extends React.Component<
   };
 
   handleColumnChange = selectedColumns => {
-    const { onActiveColumnsChange, protectedColumns, trackEvent } = this.props;
+    const { onActiveColumnsChange, protectedColumns } = this.props;
     this.setState(
       { activeColumns: concat(protectedColumns, selectedColumns) },
       () =>
         onActiveColumnsChange &&
         onActiveColumnsChange(this.state.activeColumns),
     );
-    trackEvent("BaseTable_column-selector_changed", {
-      selectedColumns: selectedColumns.length,
-      protectedColumns: protectedColumns.length,
-    });
   };
 
   renderColumnSelector = () => {

@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React, { useContext } from "react";
-import { useTrackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import {
   HostGenome,
@@ -33,15 +32,11 @@ const SampleInfo = ({
   metadata,
   onAdminOptionsChanged,
   onLinkClick,
-  project,
   projectMetadataFields,
   samples,
   uploadType,
 }: SampleInfoType) => {
-  const trackEvent = useTrackEvent();
   const { admin } = useContext(UserContext) || {};
-
-  const { id, name } = project;
 
   return (
     <div className={cs.sectionContainer}>
@@ -52,11 +47,6 @@ const SampleInfo = ({
             className={cs.link}
             onClick={() => {
               onLinkClick(UploadStepType.SampleStep);
-              trackEvent("ReviewStep_edit-samples-link_clicked", {
-                projectId: id,
-                projectName: name,
-                uploadType,
-              });
             }}
           >
             Edit Samples
@@ -66,11 +56,6 @@ const SampleInfo = ({
             className={cs.link}
             onClick={() => {
               onLinkClick(UploadStepType.MetadataStep);
-              trackEvent("ReviewStep_edit-metadata-link_clicked", {
-                projectId: id,
-                projectName: name,
-                uploadType,
-              });
             }}
           >
             Edit Metadata

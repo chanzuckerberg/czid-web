@@ -521,7 +521,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       const backgroundIdUsed = backgroundId || selectedBackground?.id || null;
 
       setLoadingReport(true);
-      trackEvent("PipelineSampleReport_sample_viewed", {
+      trackEvent(ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_SAMPLE_VIEWED, {
         sampleId,
         workflow: currentTab,
       });
@@ -806,7 +806,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       status = workflowRun?.status ?? "no workflow run status";
     }
 
-    trackEvent("SampleView_single_run_deleted", {
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SINGLE_RUN_DELETED, {
       workflow: workflow,
       runStatus: status.toLowerCase(),
       projectId: project?.id,
@@ -1088,7 +1088,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
         filters: newSelectedOptions,
       }),
     );
-    trackEvent("PipelineSampleReport_clear-filters-link_clicked");
   };
 
   const getCurrentRun = () => {

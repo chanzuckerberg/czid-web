@@ -128,7 +128,7 @@ export const ReportFilters = ({
     key: string;
     value: unknown;
   }) => {
-    trackEvent("SampleView_filter_changed", {
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_FILTER_CHANGED, {
       key,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent

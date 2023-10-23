@@ -658,10 +658,7 @@ class PhyloTreeListViewCC extends React.Component<
         {matrixErrorModalOpen && (
           <PairwiseDistanceMatrixErrorModal
             open
-            onContinue={this.props.withAnalytics(
-              this.handleCloseMatrixErrorModal,
-              ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_CONTINUE_BUTTON_CLICKED,
-            )}
+            onContinue={this.handleCloseMatrixErrorModal}
             showLowCoverageWarning={showLowCoverageWarning}
           />
         )}

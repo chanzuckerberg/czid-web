@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React, { useState } from "react";
-import { useTrackEvent } from "~/api/analytics";
 import { validateManualMetadataForNewSamples } from "~/api/metadata";
 import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
 import {
@@ -29,7 +28,6 @@ const UploadMetadataStep = ({
   workflows,
   onUploadMetadata,
 }: UploadMetadataStepProps) => {
-  const trackEvent = useTrackEvent();
   const [showInstructions, setShowInstructions] = useState(false);
   const [continueDisabled, setContinueDisabled] = useState(true);
   const [metadata, setMetadata] = useState(null);
@@ -81,14 +79,6 @@ const UploadMetadataStep = ({
         newHostGenomes,
       });
     }
-    trackEvent("UploadMetadataStep_continue-button_clicked", {
-      wasManual: wasManual,
-      errors: result ? result.issues.errors.length : issues.errors.length,
-      warnings: result ? result.issues.warnings.length : issues.warnings.length,
-      samples: samples.length,
-      projectId: project.id,
-      projectName: project.name,
-    });
   };
 
   return (
@@ -127,12 +117,9 @@ const UploadMetadataStep = ({
           <a href="/home">
             <SecondaryButton
               text="Cancel"
-              onClick={() =>
-                trackEvent("UploadMetadataStep_cancel-button_clicked", {
-                  projectId: project.id,
-                  projectName: project.name,
-                })
-              }
+              // this is broken, but alldoami found it while working on something unrelated
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onClick={() => {}}
             />
           </a>
         </div>

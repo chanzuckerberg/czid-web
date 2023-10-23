@@ -39,7 +39,7 @@ export const PrimaryHeaderControls = ({
     <div className={cs.controlsBottomRowContainer}>
       {sample && currentRun && (
         <>
-          <ShareButtonPopUp sampleId={sample?.id} />
+          <ShareButtonPopUp />
           <SampleViewSaveButton
             className={cs.controlElement}
             sampleId={sample?.id}

@@ -290,14 +290,6 @@ const SamplesView = forwardRef(function SamplesView(
     setReferenceSelectId(value);
 
     onUpdateSelectedIds(newSelected);
-
-    trackEvent("SamplesView_row_selected", {
-      rowIsChecked: checked,
-      rowType: WORKFLOWS[workflow].entity,
-      selectedId: value,
-      numberOfSelectedIds: newSelected.size,
-      workflow,
-    });
   };
 
   const handleSelectAllRows = (checked: boolean) => {
@@ -322,7 +314,7 @@ const SamplesView = forwardRef(function SamplesView(
 
   const onBulkDeleteSuccess = () => {
     const statusCounts = getStatusCounts(selectedObjects, workflowEntity);
-    trackEvent("SamplesView_runs_bulk_deleted", {
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_RUNS_BULK_DELETED, {
       workflow: workflow,
       uploadFailedCount: statusCounts[UPLOAD_FAILED],
       succeededCount: statusCounts[PipelineRunStatuses.Complete],
@@ -1087,7 +1079,7 @@ const SamplesView = forwardRef(function SamplesView(
     const object = objects.get(rowData.id);
     onObjectSelected && onObjectSelected({ object, currentEvent: event });
 
-    trackEvent("SamplesView_row_clicked", {
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_ROW_CLICKED, {
       sampleId: object.id,
       sampleName: object?.sample?.name,
       workflowEntity,

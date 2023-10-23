@@ -321,9 +321,6 @@ class UploadSampleStepCC extends React.Component<
     this.props.onDirty();
     const tab = this.getUploadTabs()[tabIndex].value;
     this.setState({ currentTab: tab });
-    this.props.trackEvent("UploadSampleStep_tab_changed", {
-      tab,
-    });
   };
 
   // Modify the project_id in our samples, and validate the sample names again.
@@ -375,13 +372,6 @@ class UploadSampleStepCC extends React.Component<
       remoteSamples: newRemoteSamples,
       basespaceSamples: newBasespaceSamples,
     });
-
-    this.props.trackEvent("UploadSampleStep_project_created", {
-      localSamples: newLocalSamples.length,
-      remoteSamples: newRemoteSamples.length,
-      basespaceSamples: newBasespaceSamples.length,
-      ...this.getLocalAnalyticsContext(),
-    });
   };
 
   handleProjectChange = async (project: $TSFixMe) => {
@@ -418,13 +408,6 @@ class UploadSampleStepCC extends React.Component<
       localSamples: newLocalSamples,
       remoteSamples: newRemoteSamples,
       basespaceSamples: newBasespaceSamples,
-    });
-
-    this.props.trackEvent("UploadSampleStep_project-selector_changed", {
-      localSamples: newLocalSamples.length,
-      remoteSamples: newRemoteSamples.length,
-      basespaceSamples: newBasespaceSamples.length,
-      ...this.getLocalAnalyticsContext(),
     });
   };
 
@@ -1121,12 +1104,6 @@ class UploadSampleStepCC extends React.Component<
     } as SamplesRecord & SelectedSampleIdsRecord;
 
     this.setState(newState);
-
-    this.props.trackEvent("UploadSampleStep_samples_removed", {
-      sampleNames: sampleSelectIds.length,
-      sampleType: this.state.currentTab,
-      ...this.getLocalAnalyticsContext(),
-    });
   };
 
   // *** Miscellaneous functions ***

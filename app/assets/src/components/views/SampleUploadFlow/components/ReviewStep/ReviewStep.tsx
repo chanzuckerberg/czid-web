@@ -158,7 +158,6 @@ class ReviewStepCC extends React.Component<
       refSeqTaxon,
       project,
       samples,
-      trackEvent,
       uploadType,
       userContext,
       visible,
@@ -235,15 +234,9 @@ class ReviewStepCC extends React.Component<
           <TermsAgreement
             checked={consentChecked}
             onChange={() =>
-              this.setState(
-                {
-                  consentChecked: !consentChecked,
-                },
-                () =>
-                  trackEvent("ReviewStep_consent-checkbox_checked", {
-                    consentChecked: consentChecked,
-                  }),
-              )
+              this.setState({
+                consentChecked: !consentChecked,
+              })
             }
           />
           {!showUploadModal && (

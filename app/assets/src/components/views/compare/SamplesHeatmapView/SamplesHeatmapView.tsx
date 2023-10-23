@@ -1596,11 +1596,6 @@ class SamplesHeatmapViewCC extends React.Component<
     const taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
 
-    this.props.trackEvent("SamplesHeatmapView_taxon_removed", {
-      taxonId,
-      taxonName,
-    });
-
     // Only update state if something changed (slightly faster not to update state when not necessary)
     if (addedTaxonIds.has(taxonId)) {
       addedTaxonIds.delete(taxonId);
@@ -1614,9 +1609,12 @@ class SamplesHeatmapViewCC extends React.Component<
     this.setState({
       selectedMetadata: Array.from(metadataFields),
     });
-    this.props.trackEvent("SamplesHeatmapView_metadata_changed", {
-      selected: metadataFields,
-    });
+    this.props.trackEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_METADATA_CHANGED,
+      {
+        selected: metadataFields,
+      },
+    );
     this.updateHistoryState();
   };
 
@@ -1624,10 +1622,13 @@ class SamplesHeatmapViewCC extends React.Component<
     this.metadataSortField = field;
     this.metadataSortAsc = dir;
     this.updateHistoryState();
-    this.props.trackEvent("Heatmap_column-metadata-label_clicked", {
-      columnMetadataSortField: field,
-      sortDirection: dir ? "asc" : "desc",
-    });
+    this.props.trackEvent(
+      ANALYTICS_EVENT_NAMES.HEATMAP_COLUMN_METADATA_LABEL_CLICKED,
+      {
+        columnMetadataSortField: field,
+        sortDirection: dir ? "asc" : "desc",
+      },
+    );
   };
 
   handlePinnedSampleChange = (_event: $TSFixMe, selectedSamples: $TSFixMe) => {
@@ -1727,12 +1728,6 @@ class SamplesHeatmapViewCC extends React.Component<
       this.setState({
         sidebarVisible: false,
       });
-      this.props.trackEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
-        parentTaxonId: taxonDetails.parentId,
-        taxonId: taxonDetails.id,
-        taxonName,
-        sidebarMode: "taxonDetails",
-      });
     } else {
       this.setState({
         sidebarMode: "taxonDetails",
@@ -1742,12 +1737,6 @@ class SamplesHeatmapViewCC extends React.Component<
           taxonName,
         },
         sidebarVisible: true,
-      });
-      this.props.trackEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
-        parentTaxonId: taxonDetails.parentId,
-        taxonId: taxonDetails.id,
-        taxonName,
-        sidebarMode: "taxonDetails",
       });
     }
   };

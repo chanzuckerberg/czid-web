@@ -1,10 +1,6 @@
 import { get, getOr, map } from "lodash/fp";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import {
   getWorkflowTypeFromLabel,
   WorkflowLabelType,
@@ -43,7 +39,6 @@ export const TaxonTreeVis = ({
   onTaxonClick,
   taxa,
 }: TaxonTreeVisProps) => {
-  const trackEvent = useTrackEvent();
   const withAnalytics = useWithAnalytics();
   const metrics =
     TREE_VIZ_TOOLTIP_METRICS[getWorkflowTypeFromLabel(currentTab)];
@@ -125,22 +120,12 @@ export const TaxonTreeVis = ({
 
   const handleNodeHover = (node: $TSFixMe) => {
     setActiveNode(node);
-    trackEvent("TaxonTreeVis_node_hovered", {
-      id: node.id,
-      scientificName: node.data.scientificName,
-      commonName: node.data.commonName,
-    });
   };
 
   const handleNodeLabelClick = (node: { data: Taxon }) => {
     if (["genus", "species"].includes(node.data.lineageRank)) {
       onTaxonClick(node.data);
     }
-    trackEvent("TaxonTreeVis_node-label_clicked", {
-      taxonId: node.data.taxId,
-      taxonName: node.data.name,
-      taxLevel: node.data.lineageRank,
-    });
   };
 
   const getNodeValues = nodeData => {

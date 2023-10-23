@@ -1,7 +1,6 @@
 import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import React, { useState } from "react";
-import { useTrackEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import { Project } from "~/interface/shared";
 import { UploadStepType } from "~/interface/upload";
@@ -26,15 +25,12 @@ const ProjectInfo = ({
   areLinksEnabled,
   onLinkClick,
   project,
-  uploadType,
 }: ProjectTypeProps) => {
-  const trackEvent = useTrackEvent();
   const [shouldShowLessDescription, setShouldShowLessDescription] =
     useState<boolean>(true);
 
   const {
     description,
-    id,
     name,
     number_of_samples: numberOfSamples,
     public_access: publicAccess,
@@ -52,11 +48,6 @@ const ProjectInfo = ({
             className={cs.link}
             onClick={() => {
               onLinkClick(UploadStepType.SampleStep);
-              trackEvent("ReviewStep_edit-project-link_clicked", {
-                projectId: id,
-                projectName: name,
-                uploadType,
-              });
             }}
           >
             Edit Project

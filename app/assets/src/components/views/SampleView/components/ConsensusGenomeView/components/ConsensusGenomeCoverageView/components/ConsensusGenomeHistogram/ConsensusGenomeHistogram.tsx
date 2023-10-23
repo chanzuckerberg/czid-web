@@ -1,7 +1,6 @@
 import { isNil } from "lodash/fp";
 import memoize from "memoize-one";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useTrackEvent } from "~/api/analytics";
 import { TooltipVizTable } from "~/components/ui/containers";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -26,7 +25,6 @@ export const ConsensusGenomeHistogram = ({
   workflowRun,
   workflowRunResults,
 }: ConsensusGenomeHistogramProps) => {
-  const trackEvent = useTrackEvent();
   const coverageVizContainerRef = useRef();
 
   const [histogramTooltipData, setHistogramTooltipData] = useState(null);
@@ -161,13 +159,7 @@ export const ConsensusGenomeHistogram = ({
 
   return (
     <>
-      <div
-        className={cs.coverageVizHistogram}
-        ref={coverageVizContainerRef}
-        onMouseEnter={() =>
-          trackEvent("ConsensusGenomeView_coverage-viz-histogram_hovered")
-        }
-      />
+      <div className={cs.coverageVizHistogram} ref={coverageVizContainerRef} />
       {histogramTooltipLocation && histogramTooltipData && (
         <div
           style={getTooltipStyle(histogramTooltipLocation)}
