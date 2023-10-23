@@ -134,16 +134,24 @@ export class SamplesHeatmapVis extends React.Component<
     } = this.props;
     const { allowedFeatures = [] } = this.context || {};
 
-    const firstLongLabel = this.extractSampleLabels()
-      ?.map(sample => sample?.label?.length)
-      .findIndex(labelLength => labelLength > 20);
-    const initialZoom = firstLongLabel !== -1 ? 0.5 : null;
+    const truncatedSampleLabels = this.extractSampleLabels().map(
+      (sample, i) => {
+        const { label } = sample;
+        return {
+          ...sample,
+          label:
+            label.length > 20
+              ? `${label.slice(0, 9)}...${label.slice(-7)}${i}`
+              : label,
+        };
+      },
+    );
 
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       {
         rowLabels: this.extractTaxonLabels(),
-        columnLabels: this.extractSampleLabels(), // Also includes column metadata.
+        columnLabels: truncatedSampleLabels, // Also includes column metadata.
         values: this.props.data[this.props.metric],
         pathogenFlags: this.props.pathogenFlagsData,
         taxonFilterState: taxonFilterState,
@@ -188,7 +196,7 @@ export class SamplesHeatmapVis extends React.Component<
         shouldShowPathogenFlagsOutlines: allowedFeatures.includes(
           HEATMAP_PATHOGEN_FLAGGING_FEATURE,
         ),
-        startingZoom: initialZoom,
+        // startingZoom: initialZoom,
       },
     );
     this.heatmap.start();
@@ -757,7 +765,6 @@ export class SamplesHeatmapVis extends React.Component<
           onMinusClick={() => this.handleZoom(-0.25)}
           className={cs.plusMinusControl}
         />
-
         <div
           className={cs.heatmapContainer}
           ref={container => {

@@ -23,8 +23,7 @@
 
   .heatmapContainer {
     position: relative;
-    // the legend and 'showing x our of x taxa' text are 45px tall
-    top: 45px;
+    top: -15px;
     height: calc(100vh - 183px);
     padding-left: $sds-spaces-l;
     padding-top: $sds-spaces-l;
