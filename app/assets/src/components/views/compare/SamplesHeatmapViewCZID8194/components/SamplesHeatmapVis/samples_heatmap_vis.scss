@@ -31,8 +31,7 @@
   .heatmapContainer {
     position: relative;
     top: 45px;
-    // height: calc(100vh - 183px);
-    height: 100vh;
+    height: calc(100vh - 183px);
     padding-left: $sds-spaces-l;
     padding-top: $sds-spaces-l;
     width: calc(100% - 14px);
