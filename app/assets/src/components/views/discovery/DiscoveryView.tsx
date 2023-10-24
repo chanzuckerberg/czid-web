@@ -2584,7 +2584,6 @@ class DiscoveryViewCC extends React.Component<
     const displayFilters = onBenchmarkingTab
       ? false
       : showFilters && !!dimensions;
-
     return (
       <div className={cs.layout}>
         <div className={cs.headerContainer}>

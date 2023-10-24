@@ -25,8 +25,8 @@ const HelpIcon = ({
   learnMoreLinkAnalyticsEventName,
   text,
 }: HelpIconProps) => {
+  const trackEvent = useTrackEvent();
   const handleTriggerEnter = () => {
-    const trackEvent = useTrackEvent();
     if (analyticsEventName) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent

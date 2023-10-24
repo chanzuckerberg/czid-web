@@ -128,7 +128,7 @@ const trackEvent = (
 const useGlobalAnalyticsContext = () => {
   const globalContext = useContext(GlobalContext);
   return {
-    projectIds: globalContext.discoveryProjectIds,
+    projectIds: globalContext?.globalContextState?.discoveryProjectIds,
   };
 };
 
