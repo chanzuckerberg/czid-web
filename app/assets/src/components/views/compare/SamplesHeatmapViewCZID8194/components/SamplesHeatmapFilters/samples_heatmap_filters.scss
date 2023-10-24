@@ -5,7 +5,8 @@
 
 .panelContentsContainer {
   padding: 0 $sds-spaces-l 0 $sds-spaces-l;
-  max-height: calc(100vh - 155px);
+  // max-height: calc(100vh - 155px);
+  max-height: 100vh;
 }
 
 .topFilterSection {

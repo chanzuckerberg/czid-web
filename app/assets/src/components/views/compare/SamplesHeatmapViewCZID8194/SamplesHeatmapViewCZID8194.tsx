@@ -80,7 +80,6 @@ import { SamplesHeatmapDownloadModal } from "./components/SamplesHeatmapDownload
 import SamplesHeatmapFilters from "./components/SamplesHeatmapFilters";
 import { OptionsType } from "./components/SamplesHeatmapFilters/SamplesHeatmapFilters";
 import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
-import SamplesHeatmapLegend from "./components/SamplesHeatmapLegend";
 import {
   APPLIED_FILTERS,
   BACKGROUND_METRICS,
@@ -658,12 +657,10 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
   };
 
   handleDownloadSvg = () => {
-    // TODO (gdingle): pass in filename per sample?
     this.heatmapVis.download();
   };
 
   handleDownloadPng = () => {
-    // TODO (gdingle): pass in filename per sample?
     this.heatmapVis.downloadAsPng();
   };
 
@@ -1955,6 +1952,8 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}
           onTaxonLabelClick={this.handleTaxonLabelClick}
+          options={this.getControlOptions()}
+          loading={this.state.loading}
           ref={(vis: $TSFixMe) => {
             this.heatmapVis = vis;
           }}
@@ -2173,12 +2172,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
         />
         {/* render visualization */}
         <div className="visualization-content">
-          <SamplesHeatmapLegend
-            loading={loading}
-            data={this.state.data}
-            selectedOptions={selectedOptions}
-            options={this.getControlOptions()}
-          />
           {/* render filters */}
           <div className={cs.filtersAndHeatmapContainer}>
             <FilterPanel

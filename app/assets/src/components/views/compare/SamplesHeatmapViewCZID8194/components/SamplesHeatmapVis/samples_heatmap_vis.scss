@@ -21,10 +21,18 @@
     }
   }
 
+  .toggleNamesButton {
+    position: absolute;
+    top: 133px;
+    right: 10px;
+    z-index: 1;
+  }
+
   .heatmapContainer {
     position: relative;
-    top: -15px;
-    height: calc(100vh - 183px);
+    top: 45px;
+    // height: calc(100vh - 183px);
+    height: 100vh;
     padding-left: $sds-spaces-l;
     padding-top: $sds-spaces-l;
     width: calc(100% - 14px);

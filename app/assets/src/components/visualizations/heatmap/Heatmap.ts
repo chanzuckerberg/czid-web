@@ -30,6 +30,24 @@ d3.selection.prototype.lower = function() {
   });
 };
 
+interface dProps {
+  columnIndex: number;
+  duplicateLabel: boolean;
+  filterStateColumn: number;
+  id: number;
+  label: string;
+  metadata: {
+    collection_date: string;
+    collection_location_v2: string;
+    nucleotide_type: string;
+    sample_type: string;
+    water_control: string;
+  };
+  pinned: boolean;
+  pos: number;
+  shaded: boolean;
+}
+
 export interface HeatmapData {
   rowLabels: {
     genusName: string;
@@ -1873,11 +1891,7 @@ export default class Heatmap {
   }
 
   renderColumnLabels() {
-    const applyFormat = (nodes: $TSFixMe) => {
-      nodes.attr("transform", (d: $TSFixMe) => {
-        return `translate(${d.pos * this.cell.width},-${this.options.spacing})`;
-      });
-    };
+    this.gColumnLabels.selectAll("*").remove();
 
     const columnLabel = this.gColumnLabels
       .selectAll(`.${cs.columnLabel}`)
@@ -1886,6 +1900,13 @@ export default class Heatmap {
     const columnLabelUpdate = columnLabel
       .transition()
       .duration(this.options.transitionDuration);
+
+    const applyFormat = (nodes: $TSFixMe) => {
+      nodes.attr("transform", (d: $TSFixMe) => {
+        return `translate(${d.pos * this.cell.width},-${this.options.spacing})`;
+      });
+    };
+
     applyFormat(columnLabelUpdate);
 
     const columnLabelEnter = columnLabel
@@ -1913,7 +1934,7 @@ export default class Heatmap {
       .on("mouseleave", this.options.onColumnLabelOut)
       .on(
         "click",
-        (d: $TSFixMe) =>
+        (d: dProps) =>
           this.options.onColumnLabelClick &&
           this.options.onColumnLabelClick(d.id, d3.event),
       );
