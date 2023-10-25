@@ -1,0 +1,53 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.content {
+  @include scrollable;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  overflow: scroll;
+  padding-left: $sds-spaces-l;
+
+  .histogramSection {
+    min-height: min-content;
+    width: 100%;
+  }
+
+  .readsLostSection {
+    min-height: min-content;
+    width: 100%;
+  }
+}
+
+// see discovery_view.scss
+.noDataBannerFlexContainer {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+
+  // The following before and after attributes center
+  // the div on the available space, while keeping a max-height.
+  &::before {
+    content: "";
+    flex: 1 0 auto;
+    max-height: 250px;
+  }
+
+  &::after {
+    content: "";
+    flex: 1 0 auto;
+  }
+
+  .noDataBannerContainer {
+    flex: 0 0 auto;
+  }
+}
+
+.hoverTooltip {
+  position: fixed;
+  z-index: 1;
+  transform: translateY(-100%);
+}

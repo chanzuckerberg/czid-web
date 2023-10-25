@@ -1,0 +1,66 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.chartsContainer {
+  display: flex;
+  flex-flow: row wrap;
+
+  .halfPageChart {
+    color: $sds-color-gray-black;
+    padding-right: $sds-spaces-xl;
+    padding-bottom: $sds-spaces-xl;
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 50%;
+
+    .title {
+      @include font-header-l;
+      margin-bottom: $sds-spaces-l;
+      margin-top: $sds-spaces-l;
+    }
+
+    .histogramContainer {
+      padding: $sds-spaces-xl;
+      border: $sds-borders-gray-300;
+      border-radius: $sds-corners-corner-m;
+      width: 100%;
+      min-height: calc(#{$img-l} * 2.5);
+      min-width: calc(#{$img-l} * 2.5);
+      box-shadow: 0 2px 4px 0 $sds-color-gray-300;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+
+      .subtitle {
+        @include font-header-s;
+        margin-bottom: $sds-spaces-l;
+
+        .message {
+          @include font-body-xxs;
+        }
+
+        .information {
+          @include font-body-xs;
+          margin-top: $sds-spaces-xxl;
+          color: $sds-color-gray-500;
+        }
+
+        &.messageIncluded {
+          margin-bottom: $sds-spaces-xl;
+        }
+
+        .infoIcon {
+          margin: $sds-spaces-xxxs $sds-spaces-xxs 0 $sds-spaces-xxs;
+          vertical-align: text-top;
+        }
+      }
+
+      .d3Container {
+        height: 80%;
+        width: 90%;
+      }
+    }
+  }
+}

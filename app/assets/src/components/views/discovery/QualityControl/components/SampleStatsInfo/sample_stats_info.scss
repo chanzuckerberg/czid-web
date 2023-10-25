@@ -1,0 +1,31 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.notification {
+  margin-bottom: $sds-spaces-s;
+  margin-right: $sds-spaces-xl;
+
+  &.show {
+    display: flex;
+  }
+
+  &.hide {
+    display: none;
+  }
+}
+
+.statsRow {
+  @include font-body-xxs;
+  color: $sds-color-gray-500;
+
+  .infoIcon {
+    margin: $sds-spaces-xxxs $sds-spaces-xxs 0 $sds-spaces-xxs;
+    vertical-align: text-top;
+  }
+}
+
+.statusList {
+  margin: 0 0 0 $sds-spaces-l; // override list margins and move bullets inside tooltip
+}
