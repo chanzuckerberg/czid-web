@@ -15,7 +15,7 @@
   #   by visiting the "Execution Input and Outputs" section of the SFN execution.
   OUTPUT_ZIP = "amr.ZipOutputs.output_zip".freeze
   OUTPUT_REPORT = "amr.RunResultsPerSample.synthesized_report".freeze
-  OUTPUT_CONTIGS = "amr.RunSpades.contigs".freeze
+  OUTPUT_CONTIGS = "amr.ZipOutputs.contigs".freeze
   OUTPUT_NON_HOST_READS = "amr.ZipOutputs.non_host_reads".freeze
   OUTPUT_NON_HOST_CONTIGS = "amr.ZipOutputs.contigs".freeze
   OUTPUT_READS_BAM = "amr.RunRgiBwtKma.output_sorted_length_100".freeze
