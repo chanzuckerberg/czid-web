@@ -780,21 +780,21 @@ export class SamplesHeatmapVis extends React.Component<
     );
 
     return (
-      <div className={cs.samplesHeatmapVis} ref={this.wheelRef}>
-        <div className={cs.rightSideOverlay}></div>
-        <PlusMinusControl
-          onPlusClick={() => this.handleZoom(0.25)}
-          onMinusClick={() => this.handleZoom(-0.25)}
-          className={cs.plusMinusControl}
-        />
-        <Tooltip
-          arrow
-          sdsStyle={"dark"}
-          title={`${
-            this.state.showingFullNames ? "Truncate" : "Expand"
-          } Sample Names`}
-        >
-          <span>
+      <>
+        <div className={cs.samplesHeatmapVis} ref={this.wheelRef}>
+          <div className={cs.rightSideOverlay}></div>
+          <PlusMinusControl
+            onPlusClick={() => this.handleZoom(0.25)}
+            onMinusClick={() => this.handleZoom(-0.25)}
+            className={cs.plusMinusControl}
+          />
+          <Tooltip
+            arrow
+            sdsStyle={"dark"}
+            title={`${
+              this.state.showingFullNames ? "Truncate" : "Expand"
+            } Sample Names`}
+          >
             <ButtonIcon
               on={this.state.showingFullNames}
               sdsSize="small"
@@ -811,28 +811,42 @@ export class SamplesHeatmapVis extends React.Component<
                 ).length === 0
               }
             />
-          </span>
-        </Tooltip>
-        <div
-          className={cs.heatmapContainer}
-          ref={container => {
-            this.heatmapContainer = container;
-          }}
-        />
-
-        {nodeHoverInfo && tooltipLocation && (
+          </Tooltip>
           <div
-            className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}
-            style={getTooltipStyle(tooltipLocation, {
-              buffer: 20,
-              below: true,
-              // so we can show the tooltip above the cursor if need be
-              height: nodeHoverInfo.nodeHasData ? 300 : 180,
-            })}
+            className={cs.heatmapContainer}
+            ref={container => {
+              this.heatmapContainer = container;
+            }}
+          />
+          <div
+            className={cx(
+              cs.bannerContainer,
+              this.state.displayControlsBanner ? cs.show : cs.hide,
+            )}
           >
-            <TooltipVizTable {...nodeHoverInfo} />
+            <div className={cs.bannerText}>
+              Hold SHIFT to scroll horizontally and SPACE BAR to pan.
+              <IconCloseSmall
+                className={cs.removeIcon}
+                onClick={this.hideControlsBanner}
+              />
+            </div>
           </div>
-        )}
+          {nodeHoverInfo && tooltipLocation && (
+            <div
+              className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}
+              style={getTooltipStyle(tooltipLocation, {
+                buffer: 20,
+                below: true,
+                // so we can show the tooltip above the cursor if need be
+                height: nodeHoverInfo.nodeHasData ? 300 : 180,
+              })}
+            >
+              <TooltipVizTable {...nodeHoverInfo} />
+            </div>
+          )}
+        </div>
+
         {columnMetadataLegend && tooltipLocation && (
           <MetadataLegend
             metadataColors={columnMetadataLegend}
@@ -898,21 +912,7 @@ export class SamplesHeatmapVis extends React.Component<
             selectSampleTrigger={pinSampleTrigger}
           />
         )}
-        <div
-          className={cx(
-            cs.bannerContainer,
-            this.state.displayControlsBanner ? cs.show : cs.hide,
-          )}
-        >
-          <div className={cs.bannerText}>
-            Hold SHIFT to scroll horizontally and SPACE BAR to pan.
-            <IconCloseSmall
-              className={cs.removeIcon}
-              onClick={this.hideControlsBanner}
-            />
-          </div>
-        </div>
-      </div>
+      </>
     );
   }
 }
