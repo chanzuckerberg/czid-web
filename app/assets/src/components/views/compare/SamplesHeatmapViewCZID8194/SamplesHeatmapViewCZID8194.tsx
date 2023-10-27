@@ -793,6 +793,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
         useHeatmapES,
       },
     );
+
     return heatmapData;
   }
 
@@ -1597,10 +1598,13 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
     const taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
 
-    this.props.trackEvent("SamplesHeatmapView_taxon_removed", {
-      taxonId,
-      taxonName,
-    });
+    this.props.trackEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_TAXON_REMOVED,
+      {
+        taxonId,
+        taxonName,
+      },
+    );
 
     // Only update state if something changed (slightly faster not to update state when not necessary)
     if (addedTaxonIds.has(taxonId)) {
@@ -1615,9 +1619,12 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
     this.setState({
       selectedMetadata: Array.from(metadataFields),
     });
-    this.props.trackEvent("SamplesHeatmapView_metadata_changed", {
-      selected: metadataFields,
-    });
+    this.props.trackEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_METADATA_CHANGED,
+      {
+        selected: metadataFields,
+      },
+    );
     this.updateHistoryState();
   };
 
@@ -1625,10 +1632,13 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
     this.metadataSortField = field;
     this.metadataSortAsc = dir;
     this.updateHistoryState();
-    this.props.trackEvent("Heatmap_column-metadata-label_clicked", {
-      columnMetadataSortField: field,
-      sortDirection: dir ? "asc" : "desc",
-    });
+    this.props.trackEvent(
+      ANALYTICS_EVENT_NAMES.HEATMAP_COLUMN_METADATA_LABEL_CLICKED,
+      {
+        columnMetadataSortField: field,
+        sortDirection: dir ? "asc" : "desc",
+      },
+    );
   };
 
   handlePinnedSampleChange = (_event: $TSFixMe, selectedSamples: $TSFixMe) => {
@@ -1638,10 +1648,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       ),
     );
     this.setState({ pendingPinnedSampleIds: selectedSampleIds });
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED,
-      selectedSamples,
-    );
   };
 
   handlePinnedSampleChangeApply = () => {
@@ -1665,10 +1671,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       pinnedSampleIds,
       pendingPinnedSampleIds: pinnedSampleIds,
     });
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED,
-      sampleId,
-    );
   };
 
   handleSampleLabelClick = (sampleId: $TSFixMe) => {
@@ -1688,7 +1690,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
         sidebarVisible: false,
       });
       this.props.trackEvent(
-        "SamplesHeatmapView_sample-details-sidebar_closed",
+        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_DETAILS_SIDEBAR_CLOSED,
         {
           sampleId: sampleId,
           sidebarMode: "sampleDetails",
@@ -1701,7 +1703,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
         sidebarVisible: true,
       });
       this.props.trackEvent(
-        "SamplesHeatmapView_sample-details-sidebar_opened",
+        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_DETAILS_SIDEBAR_OPENED,
         {
           sampleId: sampleId,
           sidebarMode: "sampleDetails",
@@ -1728,12 +1730,15 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       this.setState({
         sidebarVisible: false,
       });
-      this.props.trackEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
-        parentTaxonId: taxonDetails.parentId,
-        taxonId: taxonDetails.id,
-        taxonName,
-        sidebarMode: "taxonDetails",
-      });
+      this.props.trackEvent(
+        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_TAXON_DETAILS_SIDEBAR_CLOSED,
+        {
+          parentTaxonId: taxonDetails.parentId,
+          taxonId: taxonDetails.id,
+          taxonName,
+          sidebarMode: "taxonDetails",
+        },
+      );
     } else {
       this.setState({
         sidebarMode: "taxonDetails",
@@ -1744,12 +1749,15 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
         },
         sidebarVisible: true,
       });
-      this.props.trackEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
-        parentTaxonId: taxonDetails.parentId,
-        taxonId: taxonDetails.id,
-        taxonName,
-        sidebarMode: "taxonDetails",
-      });
+      this.props.trackEvent(
+        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_TAXON_DETAILS_SIDEBAR_OPENED,
+        {
+          parentTaxonId: taxonDetails.parentId,
+          taxonId: taxonDetails.id,
+          taxonName,
+          sidebarMode: "taxonDetails",
+        },
+      );
     }
   };
 
@@ -2140,7 +2148,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       loading,
       sampleIds,
       selectedOptions,
-      selectedSampleId,
       sidebarMode,
       sidebarVisible,
       taxonIds,
@@ -2208,34 +2215,21 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
         <DetailsSidebar
           visible={sidebarVisible}
           mode={sidebarMode}
-          onClose={this.props.withAnalytics(
-            this.closeSidebar,
-            ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_DETAILS_SIDEBAR_CLOSED,
-            {
-              sampleId: selectedSampleId,
-              sidebarMode: sidebarMode,
-            },
-          )}
+          onClose={this.closeSidebar}
           params={this.getSidebarParams()}
         />
         {heatmapCreationModalOpen && (
           <HeatmapCreationModal
             continueInNewTab={true}
             open
-            onClose={this.props.withAnalytics(
-              this.handleHeatmapCreationModalClose,
-              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED,
-            )}
+            onClose={this.handleHeatmapCreationModalClose}
             selectedIds={sampleIds}
           />
         )}
         {downloadModalOpen && (
           <SamplesHeatmapDownloadModal
             open
-            onClose={this.props.withAnalytics(
-              this.handleDownloadModalClose,
-              ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_CLOSED,
-            )}
+            onClose={this.handleDownloadModalClose}
             onGenerateBulkDownload={this.handleGenerateBulkDownload}
             sampleIds={sampleIds}
             heatmapParams={selectedOptions}

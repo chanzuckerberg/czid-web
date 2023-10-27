@@ -2,7 +2,6 @@ import { Button, Icon } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
@@ -26,7 +25,6 @@ export const ConsensusGenomePreviousModal = ({
   onRowClick,
   open,
 }: ConsensusGenomePreviousModalProps) => {
-  const withAnalytics = useWithAnalytics();
   const renderPrimaryCell = (cellData: {
     inputs: { accession_id: $TSFixMeUnknown; accession_name: $TSFixMeUnknown };
     parsed_cached_results: any;
@@ -82,10 +80,7 @@ export const ConsensusGenomePreviousModal = ({
       narrow
       open={open}
       minimumHeight
-      onClose={withAnalytics(
-        onClose,
-        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED,
-      )}
+      onClose={onClose}
       data-testid="previous-consensus-genome-modal"
     >
       <div className={cs.title}>Consensus Genome</div>
@@ -101,10 +96,7 @@ export const ConsensusGenomePreviousModal = ({
           headerHeight={32}
           headerLabelClassName={cs.headerLabel}
           rowClassName={cs.row}
-          onRowClick={withAnalytics(
-            onRowClick,
-            ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_ROW_CLICKED,
-          )}
+          onRowClick={onRowClick}
         />
       </div>
       <Button
@@ -113,10 +105,7 @@ export const ConsensusGenomePreviousModal = ({
         sdsStyle="minimal"
         isAllCaps={true}
         startIcon={<Icon sdsIcon="plus" sdsSize="xs" sdsType="button" />}
-        onClick={withAnalytics(
-          () => onNew && onNew(consensusGenomeData),
-          ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED,
-        )}
+        onClick={() => onNew && onNew(consensusGenomeData)}
       >
         Create a New Consensus Genome
       </Button>

@@ -1,7 +1,10 @@
 import cx from "classnames";
 import { find } from "lodash/fp";
 import React from "react";
-import { trackEventFromClassComponent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEventFromClassComponent,
+} from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { GlobalContext } from "~/globalContext/reducer";
@@ -102,7 +105,7 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
                     this.onStepSelect(val.step);
                     trackEventFromClassComponent(
                       globalAnalyticsContext,
-                      "SampleUploadFlowHeader_step-option_clicked",
+                      ANALYTICS_EVENT_NAMES.SAMPLE_UPLOAD_FLOW_HEADER_STEP_OPTION_CLICKED,
                       {
                         step: val.step,
                         text: val.text,

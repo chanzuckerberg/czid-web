@@ -986,14 +986,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       await handleConsensusGenomeKickoff(consensusGenomeCreationParams, sample);
     } catch (error) {
       console.error(error);
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_KICKOFF_FAILED,
-        {
-          error,
-          sampleId: sample?.id,
-          ...consensusGenomeCreationParams,
-        },
-      );
       handleModalAction([["open", "consensusGenomeError"]]);
     }
   };
@@ -1040,23 +1032,8 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   const handleConsensusGenomeErrorModalRetry = async (sample: Sample) => {
     try {
       await handleConsensusGenomeKickoff(consensusGenomeCreationParams, sample);
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_ERROR_MODAL_RETRY_BUTTON_CLICKED,
-        {
-          ...consensusGenomeCreationParams,
-          sampleId: sample?.id,
-        },
-      );
     } catch (error) {
       console.error(error);
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED,
-        {
-          error,
-          sampleId: sample?.id,
-          ...consensusGenomeCreationParams,
-        },
-      );
     }
   };
 
@@ -1234,7 +1211,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
           onBlastClick={handleBlastClick}
           onClose={withAnalytics(
             () => setCoverageVizVisible(false),
-            "SampleView_coverage-viz-sidebar_closed",
+            ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_COVERAGE_VIZ_SIDEBAR_CLOSED,
             {
               sampleId: sample.id,
               sampleName: sample.name,

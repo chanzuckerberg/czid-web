@@ -2,7 +2,6 @@ import { Button, Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import React, { useEffect, useState } from "react";
 import { createProject } from "~/api";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks";
@@ -40,7 +39,6 @@ const ProjectCreationModal = ({
   const [creatingProject, setCreatingProject] = useState(false);
   const [disableCreateButton, setDisableCreateButton] = useState(true);
 
-  const trackEvent = useTrackEvent();
   useEffect(() => {
     const anyFieldInvalid =
       name === "" ||
@@ -50,14 +48,9 @@ const ProjectCreationModal = ({
     setDisableCreateButton(anyFieldInvalid);
   }, [name, accessLevel, description]);
 
-  useEffect(() => {
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.PROJECT_CREATION_MODAL_MORE_INFO_TOGGLE_CLICKED,
-      {
-        showInfo,
-      },
-    );
-  }, [showInfo]);
+  // this is broken, but alldoami found it while working on something unrelated
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  useEffect(() => {}, [showInfo]);
 
   const handleCreateProject = async () => {
     setError("");

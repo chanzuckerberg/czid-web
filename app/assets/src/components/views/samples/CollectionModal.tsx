@@ -7,11 +7,6 @@ import {
   getMassNormalizedBackgroundAvailability,
 } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-  withAnalyticsFromClassComponent,
-} from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { GlobalContext } from "~/globalContext/reducer";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -177,22 +172,10 @@ class CollectionModal extends React.Component<
   handleCreateBackground = async () => {
     const { selectedSampleIds } = this.props;
     const { backgroundName, backgroundDescription, appliedMethod } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     const normalizedBackgroundName = toLower(trim(backgroundName));
     if (PROHIBITED_BACKGROUND_MODEL_NAMES.has(normalizedBackgroundName)) {
-      this.setState({ invalidBackgroundName: normalizedBackgroundName }, () => {
-        trackEventFromClassComponent(
-          globalAnalyticsContext,
-          ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED,
-          {
-            backgroundName,
-          },
-        );
-      });
+      this.setState({ invalidBackgroundName: normalizedBackgroundName });
       return;
     }
 
@@ -237,10 +220,6 @@ class CollectionModal extends React.Component<
 
   renderForm = () => {
     const { numDescriptionRows } = this.props;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     const {
       appliedMethod,
@@ -315,34 +294,13 @@ class CollectionModal extends React.Component<
           // @ts-expect-error Types of property 'value' are incompatible.
           options={Object.values(dropdownOptions)}
           initialSelectedValue={appliedMethod}
-          onChange={withAnalyticsFromClassComponent(
-            globalAnalyticsContext,
-            this.handleMethodChange,
-            ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_APPLIED_CORRECTION_METHOD_CHANGED,
-          )}
+          onChange={this.handleMethodChange}
         />
         {this.renderSampleList()}
         {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
         <div className={cs.buttons}>
-          <PrimaryButton
-            text="Create"
-            onClick={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
-              this.handleCreateBackground,
-              ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CREATE_COLLECTION_BUTTON_CLICKED,
-              {
-                selectedSampleIds: this.props.selectedSampleIds.size,
-              },
-            )}
-          />
-          <SecondaryButton
-            text="Cancel"
-            onClick={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
-              this.closeModal,
-              ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CANCEL_BUTTON_CLICKED,
-            )}
-          />
+          <PrimaryButton text="Create" onClick={this.handleCreateBackground} />
+          <SecondaryButton text="Cancel" onClick={() => this.closeModal} />
         </div>
         <div className={cs.details}>
           A large number of samples may increase the processing time.
@@ -372,33 +330,18 @@ class CollectionModal extends React.Component<
   render() {
     const { trigger } = this.props;
     const { backgroundCreationResponse } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     return (
       <div>
-        <button
-          className="noStyleButton"
-          onClick={withAnalyticsFromClassComponent(
-            globalAnalyticsContext,
-            this.openModal,
-            ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_OPEN_LINK_CLICKED,
-          )}
-        >
+        <button className="noStyleButton" onClick={this.openModal}>
           {trigger}
         </button>
         {this.state.modalOpen && (
           <Modal
             open
             narrow
-            onClose={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
-              this.closeModal,
-              ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_CLOSE_LINK_CLICKED,
-            )}
             className={cs.collectionModal}
+            onClose={this.closeModal}
           >
             <div className={cs.title}>Create a Background Model</div>
             <div className={cs.description}>

@@ -16,20 +16,22 @@ declare global {
 
 export const showAppcue = ({
   flowId,
-  withAnalytics,
-  analyticEventName,
+  withAnalytics = null,
+  analyticEventName = null,
   analyticEventProperties = {},
 }: {
   flowId: string;
-  withAnalytics: WithAnalyticsType;
-  analyticEventName: string;
+  withAnalytics?: WithAnalyticsType;
+  analyticEventName?: string;
   analyticEventProperties?: Record<string, string>;
 }) => {
-  return withAnalytics(
-    () => window.Appcues && window.Appcues.show(flowId),
-    analyticEventName,
-    analyticEventProperties,
-  );
+  return withAnalytics
+    ? withAnalytics(
+        () => window.Appcues && window.Appcues.show(flowId),
+        analyticEventName,
+        analyticEventProperties,
+      )
+    : () => window.Appcues && window.Appcues.show(flowId);
 };
 
 export const trackEventForAppcues = (eventName: string, eventData = {}) => {

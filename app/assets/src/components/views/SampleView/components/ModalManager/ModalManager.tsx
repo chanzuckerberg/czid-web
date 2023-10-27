@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
@@ -130,9 +129,6 @@ export const ModalManager = ({
             return (
               <ErrorModal
                 key={modalName}
-                helpLinkEvent={
-                  ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_ERROR_MODAL_HELP_LINK_CLICKED
-                }
                 labelText="Failed"
                 open={modalsVisible.consensusGenomeError}
                 onCancel={() =>

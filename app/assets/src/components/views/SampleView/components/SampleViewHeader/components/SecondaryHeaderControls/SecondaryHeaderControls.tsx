@@ -1,7 +1,6 @@
 import { Button } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import { WorkflowType } from "~/components/utils/workflows";
 import { PipelineVersionSelect } from "~/components/views/components/PipelineVersionSelect";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -26,7 +25,6 @@ export const SecondaryHeaderControls = ({
   onPipelineVersionChange,
   onDetailsClick,
 }: SecondaryHeaderControlsProps) => {
-  const withAnalytics = useWithAnalytics();
   return (
     <div className={cs.controlsTopRowContainer}>
       {currentRun && (
@@ -46,13 +44,7 @@ export const SecondaryHeaderControls = ({
         sdsStyle="minimal"
         isAllCaps={true}
         disabled={!sample}
-        onClick={withAnalytics(
-          onDetailsClick,
-          ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAMPLE_DETAILS_LINK_CLICKED,
-          {
-            sampleId: sample?.id,
-          },
-        )}
+        onClick={onDetailsClick}
       >
         Sample Details
       </Button>

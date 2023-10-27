@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
@@ -16,13 +15,7 @@ export const BlastNotification = ({ onClose }: { onClose?: () => void }) => {
       <div className={cs.message}>
         Your sequences were successfuly sent to NCBI. If you encounter issues
         once the sequences have left CZ ID, please check out the{" "}
-        <ExternalLink
-          analyticsEventName={
-            ANALYTICS_EVENT_NAMES.BLAST_NOTIFICATION_NCBI_SUPPORT_CENTER_LINK_CLICKED
-          }
-          coloredBackground
-          href={NCBI_SUPPORT_CENTER_LINK}
-        >
+        <ExternalLink coloredBackground href={NCBI_SUPPORT_CENTER_LINK}>
           NCBI Support Center
         </ExternalLink>
         .

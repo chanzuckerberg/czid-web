@@ -365,9 +365,6 @@ class NextcladeModalCC extends React.Component<
         )}
         {errorModalOpen && (
           <ErrorModal
-            helpLinkEvent={
-              ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_ERROR_MODAL_HELP_LINK_CLICKED
-            }
             labelText="Failed to send"
             open
             onCancel={this.handleErrorModalClose}

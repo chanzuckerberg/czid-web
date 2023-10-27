@@ -104,19 +104,9 @@ export const BlastReadsModal = ({
       // "Automatically redirect in the future." option. Instead, automatically
       // redirect them to the BLAST page.
       openUrlInNewTab(blastUrl);
-      logBlastEvent({
-        analyticsEventName:
-          ANALYTICS_EVENT_NAMES.BLAST_READS_MODAL_CONTINUE_BUTTON_CLICKED,
-        automaticallyRedirectedToNCBI: true,
-      });
       showBlastNotification();
       onClose();
     } else {
-      logBlastEvent({
-        analyticsEventName:
-          ANALYTICS_EVENT_NAMES.BLAST_READS_MODAL_CONTINUE_BUTTON_CLICKED,
-        automaticallyRedirectedToNCBI: false,
-      });
       setShowBlastRedirectModal(true);
     }
   };

@@ -280,21 +280,7 @@ class HitGroupVizCC extends React.Component<
           trigger={
             <div
               className={cx(cs.icon)}
-              onClick={withAnalytics(
-                this.handleContigCopy,
-                ANALYTICS_EVENT_NAMES.HIT_GROUP_VIZ_CONTIG_COPY_BUTTON_CLICKED,
-                {
-                  numBytes: totalByterangeLength(
-                    get("contigByteranges", contigDownloaderData),
-                  ),
-                  numContigs: size(
-                    get("contigByteranges", contigDownloaderData),
-                  ),
-                  accessionId: accessionData.id,
-                  taxonId,
-                  sampleId,
-                },
-              )}
+              onClick={this.handleContigCopy}
               onMouseEnter={this.restoreCopyIconMessage}
             >
               <Icon sdsIcon="copy" sdsSize="s" sdsType="button" />

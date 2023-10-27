@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import { saveVisualization } from "~/api";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { SaveButton } from "~/components/ui/controls/buttons";
 import { WorkflowType } from "~/components/utils/workflows";
@@ -21,7 +20,6 @@ export const SampleViewSaveButton = ({
   className,
   workflow,
 }: SampleViewSaveButtonProps) => {
-  const withAnalytics = useWithAnalytics();
   const onSaveClick = async () => {
     if (view) {
       const params = parseUrlParams();
@@ -32,14 +30,5 @@ export const SampleViewSaveButton = ({
   const isVisible = SampleViewSaveButtonConfig[workflow];
   const { admin: userIsAdmin } = useContext(UserContext) || {};
   if (!userIsAdmin || !isVisible) return <></>;
-  return (
-    <SaveButton
-      className={className}
-      onClick={withAnalytics(
-        onSaveClick,
-        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAVE_BUTTON_CLICKED,
-        { sampleId },
-      )}
-    />
-  );
+  return <SaveButton className={className} onClick={onSaveClick} />;
 };

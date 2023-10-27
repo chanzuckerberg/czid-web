@@ -12,7 +12,11 @@ import _fp, {
 } from "lodash/fp";
 import React from "react";
 import { FileWithPreview } from "react-dropzone";
-import { TrackEventType, useTrackEvent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  TrackEventType,
+  useTrackEvent,
+} from "~/api/analytics";
 import { useAllowedFeatures } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
@@ -118,7 +122,7 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
       },
       () => {
         this.props.trackEvent(
-          "LocalSampleFileUpload_more-info-toggle_clicked",
+          ANALYTICS_EVENT_NAMES.LOCAL_SAMPLE_FILE_UPLOAD_MORE_INFO_TOGGLE_CLICKED,
           {
             showInfo: this.state.showInfo,
           },

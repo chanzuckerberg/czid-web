@@ -1,5 +1,5 @@
 import React from "react";
-import { useTrackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import FilterTag from "~/components/ui/controls/FilterTag";
 import { SelectedOptions } from "~/interface/shared/specific";
 import { SDSFormattedOption } from "../../../../SamplesHeatmapFilters";
@@ -58,7 +58,7 @@ export const SamplesHeatmapCategoryFilterTags = ({
                 onClose={() => {
                   handleRemoveCategoryFromTags(category);
                   trackEvent(
-                    "SamplesHeatmapControl_categories-filter_removed",
+                    ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROL_CATEGORIES_FILTER_REMOVED,
                     {
                       category,
                     },

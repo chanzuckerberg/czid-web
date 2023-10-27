@@ -1,7 +1,6 @@
 import cx from "classnames";
 import { filter, get } from "lodash/fp";
 import React, { useContext } from "react";
-import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
@@ -351,9 +350,6 @@ const BulkDownloadModalOptions = ({
             {downloadType.type in BULK_DOWNLOAD_DOCUMENTATION_LINKS ? (
               <ExternalLink
                 href={BULK_DOWNLOAD_DOCUMENTATION_LINKS[downloadType.type]}
-                analyticsEventName={
-                  ANALYTICS_EVENT_NAMES.CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED
-                }
               >
                 Learn More
               </ExternalLink>

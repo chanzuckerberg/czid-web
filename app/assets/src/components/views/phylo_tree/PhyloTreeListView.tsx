@@ -8,11 +8,7 @@ import {
   retryPhyloTree,
   saveVisualization,
 } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useWithAnalytics,
-  WithAnalyticsType,
-} from "~/api/analytics";
+import { useWithAnalytics, WithAnalyticsType } from "~/api/analytics";
 import { getPhyloTreeNg, rerunPhyloTreeNg } from "~/api/phylo_tree_ngs";
 import BasicPopup from "~/components/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -534,10 +530,6 @@ class PhyloTreeListViewCC extends React.Component<
                 flowId: clustermapSvgUrl
                   ? PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR
                   : PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
-                withAnalytics: this.props.withAnalytics,
-                analyticEventName: clustermapSvgUrl
-                  ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED
-                  : ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
               })}
             />
           </ViewHeader.Controls>
@@ -564,13 +556,7 @@ class PhyloTreeListViewCC extends React.Component<
           </span>{" "}
           Please create a new tree from these samples to use our new module,
           which uses SKA, for continued analysis.{" "}
-          <ExternalLink
-            coloredBackground={true}
-            href={PHYLO_TREE_LINK}
-            analyticsEventName={
-              ANALYTICS_EVENT_NAMES.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED
-            }
-          >
+          <ExternalLink coloredBackground={true} href={PHYLO_TREE_LINK}>
             Learn more
           </ExternalLink>
           .

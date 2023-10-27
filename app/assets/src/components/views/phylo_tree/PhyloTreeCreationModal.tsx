@@ -395,39 +395,24 @@ class PhyloTreeCreationModal extends React.Component<
     this.setState({ projectList, projectsLoaded: true });
 
   handleSelectProject = (result: $TSFixMe) => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
-    this.setState(
-      {
-        projectId: result.id,
-        projectName: result.name,
-        // Reset sample lists (in case user went back and changed project selection after they had been loaded)
-        projectPipelineRunsLoaded: false,
-        projectPipelineRunIds: new Set(),
-        selectableProjectPipelineRuns: new Set(),
-        selectedProjectPipelineRuns: new Set(),
-        projectPipelineRunsSelectAllChecked: false,
-        projectCoverageBreadths: null,
+    this.setState({
+      projectId: result.id,
+      projectName: result.name,
+      // Reset sample lists (in case user went back and changed project selection after they had been loaded)
+      projectPipelineRunsLoaded: false,
+      projectPipelineRunIds: new Set(),
+      selectableProjectPipelineRuns: new Set(),
+      selectedProjectPipelineRuns: new Set(),
+      projectPipelineRunsSelectAllChecked: false,
+      projectCoverageBreadths: null,
 
-        otherPipelineRunsLoaded: false,
-        otherPipelineRunIds: new Set(),
-        selectedOtherPipelineRuns: new Set(),
-        otherPipelineRunsSelectAllChecked: false,
-        otherCoverageBreadths: null,
-        otherSamplesFilter: "",
-      },
-      () =>
-        trackEventFromClassComponent(
-          globalAnalyticsContext,
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SELECTED,
-          {
-            projectId: result.id,
-            projectName: result.name,
-          },
-        ),
-    );
+      otherPipelineRunsLoaded: false,
+      otherPipelineRunIds: new Set(),
+      selectedOtherPipelineRuns: new Set(),
+      otherPipelineRunsSelectAllChecked: false,
+      otherCoverageBreadths: null,
+      otherSamplesFilter: "",
+    });
 
     if (this.wizard.current) {
       const taxonSelected = !isUndefined(this.state.taxonId);
@@ -437,42 +422,27 @@ class PhyloTreeCreationModal extends React.Component<
 
   handleSelectTaxon = (taxonId: $TSFixMe) => {
     const { taxonList } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     // @ts-expect-error Property 'title' does not exist on type 'unknown'.
     const taxonName = find({ value: taxonId }, taxonList).title;
 
-    this.setState(
-      {
-        taxonId,
-        taxonName,
-        // Reset sample lists (in case user went back and changed taxon selection after they had been loaded)
-        projectPipelineRunsLoaded: false,
-        projectPipelineRunIds: new Set(),
-        selectableProjectPipelineRuns: new Set(),
-        selectedProjectPipelineRuns: new Set(),
-        projectPipelineRunsSelectAllChecked: false,
-        projectCoverageBreadths: null,
+    this.setState({
+      taxonId,
+      taxonName,
+      // Reset sample lists (in case user went back and changed taxon selection after they had been loaded)
+      projectPipelineRunsLoaded: false,
+      projectPipelineRunIds: new Set(),
+      selectableProjectPipelineRuns: new Set(),
+      selectedProjectPipelineRuns: new Set(),
+      projectPipelineRunsSelectAllChecked: false,
+      projectCoverageBreadths: null,
 
-        otherPipelineRunsLoaded: false,
-        otherPipelineRunIds: new Set(),
-        selectedOtherPipelineRuns: new Set(),
-        otherPipelineRunsSelectAllChecked: false,
-        otherCoverageBreadths: null,
-        otherSamplesFilter: "",
-      },
-      () =>
-        trackEventFromClassComponent(
-          globalAnalyticsContext,
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED,
-          {
-            taxonId,
-            taxonName,
-          },
-        ),
-    );
+      otherPipelineRunsLoaded: false,
+      otherPipelineRunIds: new Set(),
+      selectedOtherPipelineRuns: new Set(),
+      otherPipelineRunsSelectAllChecked: false,
+      otherCoverageBreadths: null,
+      otherSamplesFilter: "",
+    });
 
     if (this.wizard.current) {
       const projectSelected = !isUndefined(this.state.projectId);
@@ -556,10 +526,6 @@ class PhyloTreeCreationModal extends React.Component<
   };
 
   handleFilterChange = (newFilter: $TSFixMe) => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     clearTimeout(this.inputTimeout);
     this.inputTimeout = setTimeout(() => {
       this.setState(
@@ -571,13 +537,6 @@ class PhyloTreeCreationModal extends React.Component<
         },
         () => {
           this.loadAdditionalPipelineRunIds();
-          trackEventFromClassComponent(
-            globalAnalyticsContext,
-            ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED,
-            {
-              sampleSearchString: newFilter,
-            },
-          );
         },
       );
     }, this.inputDelay);
@@ -598,10 +557,6 @@ class PhyloTreeCreationModal extends React.Component<
       taxonId,
     } = this.state;
     const { onClose } = this.props;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     const totalNumberOfSamplesSelected =
       selectedProjectPipelineRuns.size + selectedOtherPipelineRuns.size;
@@ -610,21 +565,9 @@ class PhyloTreeCreationModal extends React.Component<
     );
 
     if (!numberOfSamplesIsValid) {
-      this.setState(
-        {
-          showErrorSamples: true,
-        },
-        () =>
-          trackEventFromClassComponent(
-            globalAnalyticsContext,
-            ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_INVALID_AMOUNT_OF_SAMPLES_SELECTED_FOR_CREATION,
-            {
-              totalNumberOfSamplesSelected,
-              maxSamplesAllowed: PhyloTreeChecks.MAX_SAMPLES,
-              minSamplesNeeded: PhyloTreeChecks.MIN_SAMPLES,
-            },
-          ),
-      );
+      this.setState({
+        showErrorSamples: true,
+      });
       return false;
     }
 
@@ -790,13 +733,7 @@ class PhyloTreeCreationModal extends React.Component<
           Some of the samples you have selected have low coverage breadth, under{" "}
           {minCoverageBreadth}%. This may reduce the quality of the output
           results.{" "}
-          <ExternalLink
-            coloredBackground={true}
-            href={PHYLO_TREE_LINK}
-            analyticsEventName={
-              ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_LOW_COVERAGE_WARNING_BANNER_HELP_LINK_CLICKED
-            }
-          >
+          <ExternalLink coloredBackground={true} href={PHYLO_TREE_LINK}>
             Learn more
           </ExternalLink>
         </Notification>

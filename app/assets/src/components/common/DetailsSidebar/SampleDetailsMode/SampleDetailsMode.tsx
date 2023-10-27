@@ -1,8 +1,7 @@
 import { some } from "lodash";
-import { find, get, isEmpty, set, size } from "lodash/fp";
+import { find, get, set, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { getAllSampleTypes, saveSampleName, saveSampleNotes } from "~/api";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   getSampleMetadata,
   getSampleMetadataFields,
@@ -82,7 +81,6 @@ const SampleDetailsMode = ({
   tempSelectedOptions,
   sampleWorkflowLabels,
 }: SampleDetailsModeProps) => {
-  const trackEvent = useTrackEvent();
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo | null>(
     null,
   );
@@ -342,14 +340,9 @@ const SampleDetailsMode = ({
             })}
             target="_blank"
             rel="noreferrer noopener"
-            onClick={() =>
-              trackEvent(
-                ANALYTICS_EVENT_NAMES.SAMPLE_DETAILS_MODE_SEE_REPORT_LINK_CLICKED,
-                {
-                  withTempSelectedOptions: !isEmpty(tempSelectedOptions),
-                },
-              )
-            }
+            // this is broken, but alldoami found it while working on something unrelated
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            onClick={() => {}}
           >
             See Report
           </a>

@@ -587,16 +587,6 @@ class UploadSampleStepCC extends React.Component<
           selectedWetlabProtocol: null,
         });
       }
-
-      this.props.trackEvent(
-        ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
-        { technology },
-      );
-    } else if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value)) {
-      this.props.trackEvent(
-        ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_TECHNOLOGY_CLICKED,
-        { technology },
-      );
     }
 
     this.updateAllowedWorkflows(workflow, technology);
@@ -665,10 +655,6 @@ class UploadSampleStepCC extends React.Component<
   handleMedakaModelChange = (selected: string) => {
     this.props.onDirty();
     this.setState({ selectedMedakaModel: selected });
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED,
-      { selected },
-    );
   };
 
   handleClearLabsChange = (usedClearLabs: boolean) => {
@@ -683,10 +669,6 @@ class UploadSampleStepCC extends React.Component<
         ? DEFAULT_MEDAKA_MODEL_OPTION
         : this.state.selectedMedakaModel,
     });
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED,
-      { usedClearLabs },
-    );
   };
 
   // *** Sample-related functions ***
@@ -1546,20 +1528,14 @@ class UploadSampleStepCC extends React.Component<
               <div className={cs.projectCreationContainer}>
                 <ProjectCreationModal
                   modalOpen
-                  onCancel={this.props.withAnalytics(
-                    this.closeCreateProject,
-                    ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED,
-                  )}
+                  onCancel={this.closeCreateProject}
                   onCreate={this.handleProjectCreate}
                 />
               </div>
             ) : (
               <button
                 className={cx(cs.createProjectButton, "noStyleButton")}
-                onClick={this.props.withAnalytics(
-                  this.openCreateProject,
-                  ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CREATE_PROJECT_OPENED,
-                )}
+                onClick={this.openCreateProject}
                 data-testid="create-project"
               >
                 + Create Project
@@ -1665,7 +1641,7 @@ class UploadSampleStepCC extends React.Component<
               text="Cancel"
               onClick={() =>
                 this.props.trackEvent(
-                  "UploadSampleStep_cancel-button_clicked",
+                  ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CANCEL_BUTTON_CLICKED,
                   {
                     ...this.getLocalAnalyticsContext(),
                   },

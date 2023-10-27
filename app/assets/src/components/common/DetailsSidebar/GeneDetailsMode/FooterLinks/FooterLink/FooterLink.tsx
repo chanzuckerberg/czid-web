@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { OntologyType } from "../../GeneDetailsMode";
 import { generateLinkTo } from "../../utils";
 import cs from "./footer_link.scss";
@@ -11,7 +10,6 @@ interface FooterLinkProps {
 }
 
 export const FooterLink = ({ geneName, ontology, source }: FooterLinkProps) => {
-  const trackEvent = useTrackEvent();
   const href = generateLinkTo({ geneName, ontology, source });
   if (!href) return null;
   return (
@@ -20,15 +18,9 @@ export const FooterLink = ({ geneName, ontology, source }: FooterLinkProps) => {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() =>
-          trackEvent(
-            ANALYTICS_EVENT_NAMES.GENE_DETAILS_MODE_FOOTER_LINK_CLICKED,
-            {
-              destination: source,
-              geneName,
-            },
-          )
-        }
+        // this is broken, but alldoami found it while working on something unrelated
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        onClick={() => {}}
       >
         {source}
       </a>

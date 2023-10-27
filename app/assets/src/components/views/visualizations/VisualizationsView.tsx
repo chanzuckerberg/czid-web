@@ -2,7 +2,10 @@ import { Icon } from "@czi-sds/components";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";
-import { trackEventFromClassComponent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEventFromClassComponent,
+} from "~/api/analytics";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { GlobalContext } from "~/globalContext/reducer";
@@ -161,7 +164,7 @@ class VisualizationsView extends React.Component<VisualizationsViewProps> {
     openUrl(url, event);
     trackEventFromClassComponent(
       globalAnalyticsContext,
-      "VisualizationsView_row_clicked",
+      ANALYTICS_EVENT_NAMES.VISUALIZATIONS_VIEW_ROW_CLICKED,
       {
         visualizationType: rowData.visualization.visualization_type,
         visualizationId: rowData.id,

@@ -2,11 +2,7 @@ import { Tab, Tabs, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import { filter, map, reduce, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
@@ -51,7 +47,6 @@ export const BlastContigsModal = ({
   taxonId,
 }: BlastContigsModalProps) => {
   const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const [contigs, setContigs] = useState<Contig[]>([]);
   const [selectedContigIds, setSelectedContigIds] = useState<Set<number>>(
     new Set(),
@@ -346,16 +341,7 @@ export const BlastContigsModal = ({
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={withAnalytics(
-        onClose,
-        ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CLOSE_BUTTON_CLICKED,
-      )}
-      tall
-      narrow
-      xlCloseIcon
-    >
+    <Modal open={open} onClose={onClose} tall narrow xlCloseIcon>
       <div className={cs.blastContigsModal}>
         <div className={cs.header}>{blastModalInfo?.selectedBlastType}</div>
         <div className={cs.taxonName}>{taxonName}</div>

@@ -1,6 +1,5 @@
 import { get, getOr, map } from "lodash/fp";
 import React, { useEffect, useRef, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import {
   getWorkflowTypeFromLabel,
   WorkflowLabelType,
@@ -39,7 +38,6 @@ export const TaxonTreeVis = ({
   onTaxonClick,
   taxa,
 }: TaxonTreeVisProps) => {
-  const withAnalytics = useWithAnalytics();
   const metrics =
     TREE_VIZ_TOOLTIP_METRICS[getWorkflowTypeFromLabel(currentTab)];
 
@@ -60,10 +58,7 @@ export const TaxonTreeVis = ({
       onNodeLabelClick: handleNodeLabelClick,
       onCreatedTree: fillNodeValues,
       tooltipContainer: treeTooltipRef.current,
-      onCollapsedStateChange: withAnalytics(
-        persistCollapsedInUrl,
-        ANALYTICS_EVENT_NAMES.TAXON_TREE_VIS_NODE_COLLAPSED_STATE_CHANGED,
-      ),
+      onCollapsedStateChange: persistCollapsedInUrl,
       collapsed: getCollapsedInUrl() || new Set(),
     });
     treeVis.update();

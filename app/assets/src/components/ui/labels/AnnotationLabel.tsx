@@ -1,7 +1,6 @@
 import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   ANNOTATION_HIT,
   ANNOTATION_INCONCLUSIVE,
@@ -17,7 +16,6 @@ const AnnotationLabel = ({
   hideTooltip = false,
   ...props
 }: AnnotationLabelProps) => {
-  const trackEvent = useTrackEvent();
   const icon = {
     [ANNOTATION_HIT]: "flagCheck",
     [ANNOTATION_NOT_A_HIT]: "flagXmark",
@@ -32,12 +30,7 @@ const AnnotationLabel = ({
         [ANNOTATION_INCONCLUSIVE]: "Contains species marked as inconclusive.",
       }[type];
   const label = (
-    <span
-      {...props}
-      onMouseEnter={() =>
-        trackEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_LABEL_HOVERED)
-      }
-    >
+    <span {...props}>
       <Icon
         className={cx(cs[icon], isStatic ? cs.staticFlag : cs.interactiveFlag)}
         // @ts-expect-error Type 'string' is not assignable to type 'keyof IconNameToSizes'

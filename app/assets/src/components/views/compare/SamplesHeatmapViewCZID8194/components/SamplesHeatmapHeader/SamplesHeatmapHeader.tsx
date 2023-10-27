@@ -1,11 +1,6 @@
 import { ButtonIcon, Icon } from "@czi-sds/components";
 import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
 import { updateHeatmapName } from "~/api/visualization";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
@@ -63,8 +58,6 @@ export const SamplesHeatmapHeader = ({
   selectedOptions,
   options,
 }: SamplesHeatmapHeaderProps) => {
-  const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -76,10 +69,6 @@ export const SamplesHeatmapHeader = ({
 
     try {
       await updateHeatmapName(heatmapId, name);
-      trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_NAME_RENAMED, {
-        id: heatmapId,
-        heatmapName: name,
-      });
     } catch (e) {
       error = "There was an error renaming your heatmap";
     }
@@ -162,10 +151,7 @@ export const SamplesHeatmapHeader = ({
                       sdsType="static"
                     />
                   }
-                  onClick={withAnalytics(
-                    onNewPresetsClick,
-                    ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_NEW_PRESETS_BUTTON_CLICKED,
-                  )}
+                  onClick={onNewPresetsClick}
                 />
               }
               content="Create a new heatmap for the same sample set."
@@ -175,13 +161,7 @@ export const SamplesHeatmapHeader = ({
             trigger={
               <ShareButton
                 className={cs.controlElement}
-                onClick={withAnalytics(
-                  onShareClick,
-                  ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_SHARE_BUTTON_CLICKED,
-                  {
-                    sampleIds: sampleIds.length,
-                  },
-                )}
+                onClick={onShareClick}
                 primary={!showNewPresetsButton}
               />
             }
@@ -189,17 +169,7 @@ export const SamplesHeatmapHeader = ({
             on="click"
             hideOnScroll
           />
-          <SaveButton
-            onClick={withAnalytics(
-              onSaveClick,
-              ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_SAVE_BUTTON_CLICKED,
-              {
-                sampleIds: sampleIds.length,
-                path: window.location.pathname,
-              },
-            )}
-            className={cs.controlElement}
-          />
+          <SaveButton onClick={onSaveClick} className={cs.controlElement} />
           <DownloadButton
             className={cs.controlElement}
             onClick={onDownloadClick}
@@ -209,9 +179,6 @@ export const SamplesHeatmapHeader = ({
             className={cs.controlElement}
             onClick={showAppcue({
               flowId: SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
-              withAnalytics,
-              analyticEventName:
-                ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED,
             })}
           />
         </ViewHeader.Controls>{" "}

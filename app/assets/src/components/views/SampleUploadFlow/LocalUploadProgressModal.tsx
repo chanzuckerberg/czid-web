@@ -663,24 +663,9 @@ const LocalUploadProgressModal = ({
         <UploadConfirmationModal
           numberOfFailedSamples={size(getLocalSamplesFailed())}
           onCancel={() => {
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED,
-              {
-                numberOfTotalSamples: size(samples),
-                numberOfFailedSamples: size(getLocalSamplesFailed),
-              },
-            );
             setConfirmationModalOpen(false);
           }}
           onConfirm={() => {
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.UPLOAD_CONFIRMATION_MODAL_LEAVE_UPLOAD_BUTTON_CLICKED,
-              {
-                numberOfTotalSamples: size(samples),
-                numberOfFailedSamples: size(getLocalSamplesFailed),
-              },
-            );
-
             redirectToProject(project.id);
           }}
           open

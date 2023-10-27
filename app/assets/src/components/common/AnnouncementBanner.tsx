@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React, { useEffect, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { IconAlert, IconCloseSmall } from "~ui/icons";
 import cs from "./announcement_banner.scss";
@@ -19,7 +18,6 @@ const AnnouncementBanner = ({
   id,
 }: AnnouncementBannerProps) => {
   const [showAnnouncementBanner, setShowAnnouncmentBanner] = useState(false);
-  const withAnalytics = useWithAnalytics();
 
   useEffect(() => {
     if (visible) {
@@ -54,10 +52,7 @@ const AnnouncementBanner = ({
       />
       <IconCloseSmall
         className={cx(cs.close, inverted && cs.inverted)}
-        onClick={withAnalytics(
-          handleAnnouncementBannerClose,
-          ANALYTICS_EVENT_NAMES.ANNOUNCEMENT_BANNER_CLOSE_CLICKED,
-        )}
+        onClick={handleAnnouncementBannerClose}
       />
     </div>
   );

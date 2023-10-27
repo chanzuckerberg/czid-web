@@ -1,11 +1,7 @@
 import { Icon } from "@czi-sds/components";
 import { isNull } from "lodash/fp";
 import React, { useState } from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { VIRAL_CONSENSUS_GENOME_DOC_LINK } from "~/components/utils/documentationLinks";
@@ -38,7 +34,6 @@ export const ConsensusGenomeCreationModal = ({
   sample,
 }: ConsensusGenomeCreationModalProps) => {
   const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const [selectedAccessionIndex, setSelectedAccessionIndex] = useState(null);
 
   const getReferenceAccessions = () => {
@@ -115,10 +110,7 @@ export const ConsensusGenomeCreationModal = ({
       narrow
       open={open}
       minimumHeight
-      onClose={withAnalytics(
-        onClose,
-        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_CLOSED,
-      )}
+      onClose={onClose}
       data-testid="create-consensus-genome-modal"
     >
       <div className={cs.title}>Generate Consensus Genome</div>
@@ -126,12 +118,7 @@ export const ConsensusGenomeCreationModal = ({
         Align non-host reads to the reference accession of choice to generate a
         consensus genome for this taxon. This pipeline should not be used on
         samples using enrichment protocols such as MSSPE.{" "}
-        <ExternalLink
-          href={VIRAL_CONSENSUS_GENOME_DOC_LINK}
-          analyticsEventName={
-            ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_HELP_LINK_CLICKED
-          }
-        >
+        <ExternalLink href={VIRAL_CONSENSUS_GENOME_DOC_LINK}>
           Learn more.
         </ExternalLink>
       </div>

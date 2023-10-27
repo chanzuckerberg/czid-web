@@ -192,21 +192,15 @@ function UpdateUser(props: UpdateUserProps = {}) {
         institution={institution}
         isAdmin={isAdmin}
         name={name}
-        onAdminChange={withAnalytics(() => {
+        onAdminChange={() => {
           setIsAdmin(prevState => !prevState);
-        }, "UpdateUser_admin_changed")}
+        }}
         onAfricaCDCChange={() => setIsAfricaCDC(prevState => !prevState)}
         onBiohubChange={() => setIsBiohub(prevState => !prevState)}
         onDPHChange={() => setIsDPH(prevState => !prevState)}
-        onEmailChange={withAnalytics(
-          handleEmailChange,
-          "UpdateUser_email_changed",
-        )}
+        onEmailChange={handleEmailChange}
         onGCEChange={() => setIsGCE(prevState => !prevState)}
-        onInstitutionChange={withAnalytics(
-          handleInstitutionChange,
-          "UpdateUser_institution_changed",
-        )}
+        onInstitutionChange={handleInstitutionChange}
         onLandscapeExplorerChange={() =>
           setIsLandscapeExplorer(prevState => !prevState)
         }
@@ -217,10 +211,7 @@ function UpdateUser(props: UpdateUserProps = {}) {
         onMicrobiomeInvestigatorChange={() =>
           setIsMicrobiomeInvestigator(prevState => !prevState)
         }
-        onNameChange={withAnalytics(
-          handleNameChange,
-          "UpdateUser_name_changed",
-        )}
+        onNameChange={handleNameChange}
         onOutbreakSurveyorChange={() =>
           setIsOutbreakSurveyor(prevState => !prevState)
         }

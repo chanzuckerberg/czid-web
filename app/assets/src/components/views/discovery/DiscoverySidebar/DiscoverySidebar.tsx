@@ -2,7 +2,10 @@ import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import { trackEventFromClassComponent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEventFromClassComponent,
+} from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
 import { GlobalContext } from "~/globalContext/reducer";
@@ -159,7 +162,7 @@ export default class DiscoverySidebar extends React.Component<
                 onClick={() => {
                   trackEventFromClassComponent(
                     globalAnalyticsContext,
-                    "DiscoverySidebar_date-filter_clicked",
+                    ANALYTICS_EVENT_NAMES.DISCOVERY_SIDEBAR_DATE_FILTER_CLICKED,
                     {
                       dateValue: entry.value,
                       dates: dates.length,
@@ -244,7 +247,7 @@ export default class DiscoverySidebar extends React.Component<
               this.toggleExpandedMetadataGroup(field);
               trackEventFromClassComponent(
                 globalAnalyticsContext,
-                "DiscoverySidebar_show-more-toggle_clicked",
+                ANALYTICS_EVENT_NAMES.DISCOVERY_SIDEBAR_SHOW_MORE_TOGGLE_CLICKED,
                 {
                   field,
                   extraRows: extraRows.length,

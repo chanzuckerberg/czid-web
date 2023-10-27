@@ -41,9 +41,6 @@ const MetagenomicsWithNanopore = ({
         <React.Fragment>
           <span>You can check out the Nanopore pipeline on Github </span>
           <ExternalLink
-            analyticsEventName={
-              ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_NANOPORE_PIPELINE_LINK_CLICKED
-            }
             href={MNGS_NANOPORE_PIPELINE_GITHUB_LINK}
             disabled={isDisabled}
           >

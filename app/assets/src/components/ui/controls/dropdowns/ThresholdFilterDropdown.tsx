@@ -1,6 +1,9 @@
 import { get } from "lodash/fp";
 import React from "react";
-import { trackEventFromClassComponent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEventFromClassComponent,
+} from "~/api/analytics";
 import { GlobalContext } from "~/globalContext/reducer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { PrimaryButton, SecondaryButton } from "../buttons";
@@ -143,7 +146,7 @@ class ThresholdFilterDropdown extends React.Component<
 
     trackEventFromClassComponent(
       globalAnalyticsContext,
-      "ThresholdFilterDropdown_apply-button_clicked",
+      ANALYTICS_EVENT_NAMES.THRESHOLD_FILTER_DROPDOWN_APPLY_BUTTON_CLICKED,
       {
         thresholds: newThresholds.length,
       },
@@ -159,7 +162,7 @@ class ThresholdFilterDropdown extends React.Component<
 
     trackEventFromClassComponent(
       globalAnalyticsContext,
-      "ThresholdFilterDropdown_cancel-button_clicked",
+      ANALYTICS_EVENT_NAMES.THRESHOLD_FILTER_DROPDOWN_CANCEL_BUTTON_CLICKED,
       {
         thresholds: this.props.thresholds.length,
       },

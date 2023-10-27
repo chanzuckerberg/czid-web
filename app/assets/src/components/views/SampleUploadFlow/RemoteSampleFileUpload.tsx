@@ -1,7 +1,10 @@
 import { compact } from "lodash/fp";
 import React from "react";
 import { bulkImportRemoteSamples } from "~/api";
-import { trackEventFromClassComponent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEventFromClassComponent,
+} from "~/api/analytics";
 import List from "~/components/ui/List";
 import { GlobalContext } from "~/globalContext/reducer";
 import { Project } from "~/interface/shared";
@@ -59,7 +62,7 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
       () => {
         trackEventFromClassComponent(
           globalAnalyticsContext,
-          "RemoteSampleFileUpload_more-info-toggle_clicked",
+          ANALYTICS_EVENT_NAMES.REMOTE_SAMPLE_FILE_UPLOAD_MORE_INFO_TOGGLE_CLICKED,
           {
             showInfo: this.state.showInfo,
           },
@@ -110,7 +113,7 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
 
       trackEventFromClassComponent(
         globalAnalyticsContext,
-        "RemoteSampleFileUpload_connect_succeeded",
+        ANALYTICS_EVENT_NAMES.REMOTE_SAMPLE_FILE_UPLOAD_CONNECT_SUCCEEDED,
         {
           projectId: this.props.project.id,
           bulkPath: this.state.remoteS3Path,
@@ -132,7 +135,7 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
 
       trackEventFromClassComponent(
         globalAnalyticsContext,
-        "RemoteSampleFileUpload_connect_failed",
+        ANALYTICS_EVENT_NAMES.REMOTE_SAMPLE_FILE_UPLOAD_CONNECT_FAILED,
         {
           projectId: this.props.project.id,
           bulkPath: this.state.remoteS3Path,

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Image } from "semantic-ui-react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { NCBI_POLICIES_AND_DISCLAIMERS_LINK } from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
@@ -21,7 +20,6 @@ const BlastRedirectionModal = ({
   onContinue,
   shouldOpenMultipleTabs,
 }: BlastRedirectionModalProps) => {
-  const withAnalytics = useWithAnalytics();
   const [shouldRedirectBlast, setShouldRedirectBlast] = useState(false);
 
   const renderActions = () => {
@@ -35,14 +33,7 @@ const BlastRedirectionModal = ({
           />
         </div>
         <div className={cs.item}>
-          <SecondaryButton
-            text="Cancel"
-            rounded
-            onClick={withAnalytics(
-              onClose,
-              ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CANCEL_BUTTON_CLICKED,
-            )}
-          />
+          <SecondaryButton text="Cancel" rounded onClick={onClose} />
         </div>
       </div>
     );
@@ -58,12 +49,7 @@ const BlastRedirectionModal = ({
           sequencing data to NCBI{"'"}s BLAST service, and that you understand
           this may make the data accessible to others. NCBI is a separate
           service from CZ ID. Your data will be subject to their{" "}
-          <ExternalLink
-            analyticsEventName={
-              ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED
-            }
-            href={NCBI_POLICIES_AND_DISCLAIMERS_LINK}
-          >
+          <ExternalLink href={NCBI_POLICIES_AND_DISCLAIMERS_LINK}>
             Policies and Disclaimers
           </ExternalLink>
           .
@@ -71,10 +57,7 @@ const BlastRedirectionModal = ({
         <div className={cs.autoRedirect}>
           <Checkbox
             checked={shouldRedirectBlast}
-            onChange={withAnalytics(
-              () => setShouldRedirectBlast(true),
-              ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_AUTO_REDIRECT_CHECKBOX_CHECKED,
-            )}
+            onChange={() => setShouldRedirectBlast(true)}
           />
           Automatically redirect in the future.
         </div>

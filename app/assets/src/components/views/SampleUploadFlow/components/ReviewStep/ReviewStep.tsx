@@ -2,7 +2,6 @@ import cx from "classnames";
 import { get, keyBy } from "lodash/fp";
 import React, { useContext } from "react";
 import {
-  ANALYTICS_EVENT_NAMES,
   TrackEventType,
   useTrackEvent,
   useWithAnalytics,
@@ -162,7 +161,6 @@ class ReviewStepCC extends React.Component<
       userContext,
       visible,
       wetlabProtocol,
-      withAnalytics,
       workflows,
     } = this.props;
 
@@ -243,14 +241,7 @@ class ReviewStepCC extends React.Component<
             <PrimaryButton
               text="Start Upload"
               disabled={!consentChecked}
-              onClick={withAnalytics(
-                this.uploadSamplesAndMetadata,
-                ANALYTICS_EVENT_NAMES.REVIEW_STEP_START_UPLOAD_BUTTON_CLICKED,
-                {
-                  samples: samples.length,
-                  uploadType: uploadType,
-                },
-              )}
+              onClick={this.uploadSamplesAndMetadata}
             />
           )}
           {showUploadModal && (

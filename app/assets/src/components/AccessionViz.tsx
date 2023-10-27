@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useWithAnalytics,
-  WithAnalyticsType,
-} from "~/api/analytics";
+import { useWithAnalytics, WithAnalyticsType } from "~/api/analytics";
 import ReadViz from "./ReadViz";
 
 interface AccessionVizProps {
@@ -128,17 +124,7 @@ class AccessionVizCC extends React.Component<
       this.state.reads.length < this.allReads.length &&
       !this.state.rendering ? (
         <div style={{ textAlign: "right" }}>
-          <a
-            onClick={this.props.withAnalytics(
-              this.renderMoreReads,
-              ANALYTICS_EVENT_NAMES.ACCESSION_VIZ_MORE_READS_LINK_CLICKED,
-              {
-                reads: this.state.reads.length,
-                allReads: this.allReads.length,
-              },
-            )}
-            style={{ cursor: "pointer" }}
-          >
+          <a onClick={this.renderMoreReads} style={{ cursor: "pointer" }}>
             View more reads
           </a>
         </div>

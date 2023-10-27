@@ -1,13 +1,9 @@
 // These are the buttons that appear on a Report table row when hovered.
 import { ButtonIcon, IconNameToSizes } from "@czi-sds/components";
 import cx from "classnames";
-import { filter, get, getOr, kebabCase, pick, size } from "lodash/fp";
+import { filter, get, getOr, kebabCase, size } from "lodash/fp";
 import React, { useState } from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
@@ -79,7 +75,6 @@ export const HoverActions = ({
   sampleId,
   snapshotShareId,
 }: HoverActionsProps) => {
-  const trackEvent = useTrackEvent();
   const withAnalytics = useWithAnalytics();
   const [showHoverActions, setShowHoverActions] = useState(false);
 
@@ -147,16 +142,12 @@ export const HoverActions = ({
     analyticsContext,
   );
 
-  const handlePreviousConsensusGenomeClick = withAnalytics(
-    () =>
-      onPreviousConsensusGenomeClick({
-        percentIdentity,
-        taxId: taxonId,
-        taxName: taxonName,
-      }),
-    ANALYTICS_EVENT_NAMES.REPORT_TABLE_PREVIOUS_CONSENSUS_GENOME_HOVER_ACTION_CLICKED,
-    analyticsContext,
-  );
+  const handlePreviousConsensusGenomeClick = () =>
+    onPreviousConsensusGenomeClick({
+      percentIdentity,
+      taxId: taxonId,
+      taxName: taxonName,
+    });
 
   // If there are contigs, then BLAST contigs, otherwise BLAST reads.
   const handleBlastClick = withAnalytics(
@@ -200,12 +191,6 @@ export const HoverActions = ({
     location.href = `/samples/${sampleId}/fasta/${taxonLevelIndex}/${taxonId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
-  const handleFastaActionClick = withAnalytics(
-    downloadFastaByUrl,
-    ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_TAXON_FASTA_LINK_CLICKED,
-    analyticsContext,
-  );
-
   const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxonLevel}_${taxonId}?pipeline_version=${pipelineVersion}`;
   const openCoverageViz = () => {
     onCoverageVizClick({
@@ -228,12 +213,6 @@ export const HoverActions = ({
   const openAlignmentVizUrl = () => {
     window.open(alignmentVizUrl);
   };
-
-  const handleAlignmentVizClick = withAnalytics(
-    openAlignmentVizUrl,
-    ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_COVERAGE_VIZ_LINK_CLICKED,
-    analyticsContext,
-  );
 
   const downloadContigByUrl = () => {
     location.href = getDownloadContigUrl({
@@ -272,7 +251,7 @@ export const HoverActions = ({
           key: `alignment_viz_${params.taxId}`,
           message: "Alignment Visualization",
           iconName: "linesHorizontal",
-          handleClick: handleAlignmentVizClick,
+          handleClick: openAlignmentVizUrl,
           enabled: coverageVizEnabled,
           disabledMessage:
             "Alignment Visualization Not Available - requires reads in NT",
@@ -342,7 +321,7 @@ export const HoverActions = ({
       ],
       onChange: (value: typeof DOWNLOAD_CONTIGS | typeof DOWNLOAD_READS) => {
         if (value === DOWNLOAD_CONTIGS) handleContigVizClick();
-        else if (value === DOWNLOAD_READS) handleFastaActionClick();
+        else if (value === DOWNLOAD_READS) downloadFastaByUrl();
         else console.error("Unexpected dropdown value:", value);
       },
       enabled: contigVizEnabled || fastaEnabled,
@@ -461,23 +440,7 @@ export const HoverActions = ({
         inverted={hoverAction.enabled}
         position="top center"
         key={hoverAction.key}
-        trigger={React.cloneElement(trigger, {
-          onMouseEnter: () => {
-            const { enabled, key, params } = hoverAction;
-
-            trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HOVER_ACTION_HOVERED, {
-              enabled,
-              key,
-              sampleId,
-              ...(params
-                ? pick(
-                    ["taxId", "taxLevel", "taxName", "pipelineVersion"],
-                    params,
-                  )
-                : {}),
-            });
-          },
-        })}
+        trigger={React.cloneElement(trigger)}
         content={tooltipMessage}
       />
     );

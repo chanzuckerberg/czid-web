@@ -4,11 +4,6 @@ import cx from "classnames";
 import { find, get, map, pick, size, take } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
-import {
   bulkUploadBasespace,
   bulkUploadRemote,
   getUploadCredentials,
@@ -78,8 +73,6 @@ const RemoteUploadProgressModal = ({
   wetlabProtocol,
   workflows,
 }: RemoteUploadProgressModalProps) => {
-  const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const [uploadComplete, setUploadComplete] = useState(false);
   const [samplesToUpload, setSamplesToUpload] = useState([]);
   const [failedSampleNames, setFailedSampleNames] = useState([]);
@@ -166,15 +159,6 @@ const RemoteUploadProgressModal = ({
 
       setUploadComplete(true);
       setFailedSampleNames(map("name", samples));
-
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
-        {
-          erroredSamples: samplesWithFlags.length,
-          createdSamples: 0,
-          uploadType,
-        },
-      );
       return;
     }
 
@@ -182,25 +166,6 @@ const RemoteUploadProgressModal = ({
     setFailedSampleNames(response.errored_sample_names || []);
 
     onUploadComplete();
-
-    if (response.errors.length > 0) {
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
-        {
-          erroredSamples: response.errored_sample_names.length,
-          createdSamples: response.sample_ids.length,
-          uploadType,
-        },
-      );
-    } else {
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
-        {
-          createdSamples: response.sample_ids.length,
-          uploadType,
-        },
-      );
-    }
   };
 
   const uploadSamples = async (samples: $TSFixMe) => {
@@ -302,11 +267,6 @@ const RemoteUploadProgressModal = ({
             <a
               className={cs.helpLink}
               href={CONTACT_US_LINK}
-              onClick={() =>
-                trackEvent(
-                  ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
-                )
-              }
               target="_blank"
               rel="noreferrer"
             >
@@ -357,14 +317,7 @@ const RemoteUploadProgressModal = ({
   };
 
   const renderViewProjectButton = () => {
-    const buttonCallback = withAnalytics(
-      () => redirectToProject(project.id),
-      ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED,
-      {
-        projectId: project.id,
-        projectName: project.name,
-      },
-    );
+    const buttonCallback = () => redirectToProject(project.id);
 
     return <PrimaryButton text="Go to Project" onClick={buttonCallback} />;
   };

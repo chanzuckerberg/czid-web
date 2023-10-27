@@ -97,9 +97,6 @@ export const SamplesHeatmapDownloadModal = ({
     workflow = WorkflowType.SHORT_READ_MNGS,
     workflowEntity = "Samples",
   ) => {
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_DOWNLOAD_CLICKED,
-    );
     const metric = selectedMetrics[HeatmapDownloadType.BIOM_FORMAT];
     const selectedDownloadSubmission = {
       downloadType: selectedDownloadType,

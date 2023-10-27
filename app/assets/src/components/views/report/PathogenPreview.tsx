@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import Link from "~/components/ui/controls/Link";
 import Label from "~/components/ui/labels/Label";
@@ -10,7 +9,6 @@ interface PathogenPreviewProps {
 }
 
 const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
-  const trackEvent = useTrackEvent();
   const tags = Object.keys(tag2Count).sort();
   if (tags.length === 0) {
     return null;
@@ -32,10 +30,7 @@ const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
     return (
       <BasicPopup
         className="pathogen-preview-popup"
-        trigger={React.cloneElement(display, {
-          onMouseEnter: () =>
-            trackEvent(ANALYTICS_EVENT_NAMES.PATHOGEN_PREVIEW_HOVERED),
-        })}
+        trigger={React.cloneElement(display)}
         content={
           <span>
             Contains species with known human pathogenicity based on{" "}

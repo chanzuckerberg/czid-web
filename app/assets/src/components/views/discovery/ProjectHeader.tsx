@@ -2,7 +2,6 @@ import { Icon } from "@czi-sds/components";
 import { assign, find } from "lodash/fp";
 import React from "react";
 import { saveProjectName, validateProjectName } from "~/api";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
@@ -26,7 +25,6 @@ const ProjectHeader = ({
   onMetadataUpdated,
   workflow,
 }: ProjectHeaderProps) => {
-  const trackEvent = useTrackEvent();
   const handleProjectUserAdded = (username: string, email: string) => {
     const userFound = find({ email }, project.users);
     if (!userFound) {
@@ -60,10 +58,6 @@ const ProjectHeader = ({
     try {
       await saveProjectName(project.id, sanitizedName);
       onMetadataUpdated();
-      trackEvent(ANALYTICS_EVENT_NAMES.PROJECT_HEADER_PROJECT_RENAMED, {
-        projectId: project.id,
-        projectName: sanitizedName,
-      });
     } catch (e) {
       error = "There was an error renaming your project.";
     }

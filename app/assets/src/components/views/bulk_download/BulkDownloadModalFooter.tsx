@@ -1,6 +1,5 @@
 import { filter, get, isUndefined, map, reject, size, some } from "lodash/fp";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
@@ -88,9 +87,7 @@ export default function BulkDownloadModalFooter({
   createError,
   onDownloadRequest,
   sampleHostGenomes,
-  workflow,
 }: BulkDownloadModalFooterProps) {
-  const withAnalytics = useWithAnalytics();
   const samplesWithHumanHost = filter(
     { hostGenome: HOST_GENOME_NAMES.HUMAN },
     sampleHostGenomes,
@@ -256,13 +253,7 @@ export default function BulkDownloadModalFooter({
       <PrimaryButton
         disabled={!isSelectedDownloadValid()}
         text="Start Generating Download"
-        onClick={withAnalytics(
-          () => onDownloadRequest(getValidSampleIds()),
-          ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_FOOTER_START_GENERATING_BUTTON_CLICKED,
-          {
-            workflow,
-          },
-        )}
+        onClick={() => onDownloadRequest(getValidSampleIds())}
       />
     );
   };

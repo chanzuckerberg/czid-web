@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { IconAlert, IconLoading } from "~/components/ui/icons";
 import { sampleErrorInfo, UPLOAD_URL } from "~/components/utils/sample";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
@@ -112,9 +111,6 @@ export const SampleViewMessage = ({
       status={status}
       type={type}
       analyticsEventData={{ status }}
-      analyticsEventName={
-        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED
-      }
     />
   );
 };

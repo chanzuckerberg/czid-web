@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { DBType } from "~/interface/sampleView";
 import { NtNrStack } from "../NtNrStack";
@@ -13,28 +12,12 @@ export const NtNrSelector = ({
   dbType,
   handleNtNrChange,
 }: NtNrSelectorProps) => {
-  const withAnalytics = useWithAnalytics();
   const selector = (
     <div>
       <NtNrStack
         cellData={["NT", "NR"]}
         dbType={dbType}
-        onClick={[
-          withAnalytics(
-            () => handleNtNrChange("nt"),
-            ANALYTICS_EVENT_NAMES.REPORT_TABLE_COUNT_TYPE_CLICKED,
-            {
-              countType: "nt",
-            },
-          ),
-          withAnalytics(
-            () => handleNtNrChange("nr"),
-            ANALYTICS_EVENT_NAMES.REPORT_TABLE_COUNT_TYPE_CLICKED,
-            {
-              countType: "nr",
-            },
-          ),
-        ]}
+        onClick={[() => handleNtNrChange("nt"), () => handleNtNrChange("nr")]}
       />
     </div>
   );

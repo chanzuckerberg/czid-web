@@ -1,6 +1,6 @@
 import { cx } from "@emotion/css";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, WithAnalyticsType } from "~/api/analytics";
+import { WithAnalyticsType } from "~/api/analytics";
 import cs from "~/components/views/SampleView/components/MngsReport/components/ReportTable/report_table.scss";
 import { TAX_LEVEL_GENUS } from "~/components/views/SampleView/utils";
 import { CellRendererType } from "~/interface/sampleView";
@@ -13,7 +13,7 @@ export const getExpandIconRenderer: (
   expandedGenusIds: Set<number>,
   toggleExpandGunus: ({ taxonId }: { taxonId: number }) => void,
   withAnalytics: WithAnalyticsType,
-) => CellRendererType = (expandedGenusIds, toggleExpandGenus, withAnalytics) =>
+) => CellRendererType = (expandedGenusIds, toggleExpandGenus) =>
   function expandIconRenderer({ rowData }: { rowData: Taxon }) {
     return (
       // TODO: this should be a button not a div
@@ -26,11 +26,7 @@ export const getExpandIconRenderer: (
                 ? "fa-angle-down"
                 : "fa-angle-right",
             )}
-            onClick={withAnalytics(
-              () => toggleExpandGenus({ taxonId: rowData.taxId }),
-              ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_EXPAND_GENUS_CLICKED,
-              { tax_id: rowData.taxId },
-            )}
+            onClick={() => toggleExpandGenus({ taxonId: rowData.taxId })}
           />
         ) : (
           ""

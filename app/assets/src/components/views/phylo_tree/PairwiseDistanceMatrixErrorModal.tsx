@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import AccordionNotification from "~/components/ui/notifications/AccordionNotification";
 import {
@@ -31,13 +30,7 @@ const PairwiseDistanceMatrixErrorModal = ({
   const notificationMessage = (
     <>
       {showLowCoverageWarning ? lowCoverageWarning : defaultWarning}{" "}
-      <ExternalLink
-        analyticsEventName={
-          ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED
-        }
-        coloredBackground={true}
-        href={PHYLO_TREE_LINK}
-      >
+      <ExternalLink coloredBackground={true} href={PHYLO_TREE_LINK}>
         Learn more.
       </ExternalLink>
     </>
@@ -68,12 +61,7 @@ const PairwiseDistanceMatrixErrorModal = ({
           The pairwise distance matrix provides kmer-based estimates of genomic
           distance that can be used to show general relationships between the
           samples.{" "}
-          <ExternalLink
-            analyticsEventName={
-              ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_HELP_LINK_CLICKED
-            }
-            href={PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK}
-          >
+          <ExternalLink href={PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK}>
             Learn more.
           </ExternalLink>
         </div>

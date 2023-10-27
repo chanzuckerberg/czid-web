@@ -1,9 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import Modal from "~ui/containers/Modal";
 import Link from "~ui/controls/Link";
@@ -18,7 +14,6 @@ interface ModalFirstTimeUserProps {
 const ModalFirstTimeUser = ({ onClose }: ModalFirstTimeUserProps) => {
   const { userId } = useContext(UserContext);
   const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
 
   useEffect(() => {
     trackEvent(ANALYTICS_EVENT_NAMES.MODAL_FIRST_TIME_USER_SHOWN, {
@@ -27,16 +22,7 @@ const ModalFirstTimeUser = ({ onClose }: ModalFirstTimeUserProps) => {
   }, [trackEvent, userId]);
 
   return (
-    <Modal
-      open
-      narrow
-      tall
-      className={cs.emptyStateModal}
-      onClose={withAnalytics(
-        onClose,
-        ANALYTICS_EVENT_NAMES.EMPTY_STATES_MODAL_CLOSE_MODAL_CLICKED,
-      )}
-    >
+    <Modal open narrow tall className={cs.emptyStateModal} onClose={onClose}>
       <InfoBanner
         className={cs.emptyStateBanner}
         contentClassName={cs.content}

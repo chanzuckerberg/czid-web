@@ -3,7 +3,6 @@ import moment from "moment";
 import React, { ReactNode } from "react";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import { Accordion } from "~/components/layout";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
@@ -36,7 +35,6 @@ const PipelineStepDetailsMode = ({
   outputFiles,
   resources,
 }: PSDProps) => {
-  const withAnalytics = useWithAnalytics();
   const renderStatusBox = () => {
     let statusTitle: string, statusDescription: ReactNode;
     switch (status) {
@@ -178,12 +176,9 @@ const PipelineStepDetailsMode = ({
               href={linkInfo.url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={withAnalytics(
-                // eslint-disable-next-line @typescript-eslint/no-empty-function
-                () => {},
-                ANALYTICS_EVENT_NAMES.PIPELINE_STEP_DETAILS_MODE_RESOURCE_LINK_CLICKED,
-                { linkName: linkInfo.name, linkUrl: linkInfo.url },
-              )}
+              // this is broken, but alldoami found it while working on something unrelated
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onClick={() => {}}
             >
               {linkInfo.name}
             </a>

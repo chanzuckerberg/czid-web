@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { WorkflowRun } from "~/interface/sample";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 import cs from "./consensus_genome_dropdown.scss";
@@ -19,7 +18,6 @@ export const ConsensusGenomeDropdown = ({
   onConsensusGenomeSelection,
   ...props
 }: ConsensusGenomeDropdownProps) => {
-  const trackEvent = useTrackEvent();
   const options = workflowRuns.map(wr => {
     const {
       accession_id: accessionId,
@@ -41,10 +39,6 @@ export const ConsensusGenomeDropdown = ({
       initialSelectedValue={initialSelectedValue}
       onChange={(workflowRunId: number) => {
         onConsensusGenomeSelection(workflowRunId);
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_DROPDOWN_CONSENSUS_GENOME_SELECTED,
-          { workflowRunId },
-        );
       }}
       {...props}
     />

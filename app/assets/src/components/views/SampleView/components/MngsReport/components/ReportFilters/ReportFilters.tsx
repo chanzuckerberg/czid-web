@@ -135,11 +135,14 @@ export const ReportFilters = ({
       value,
       sampleId,
     });
-    trackEvent("SampleView_filter_changed_allison_testing", {
-      key,
-      value: JSON.stringify(value),
-      sampleId,
-    });
+    trackEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_FILTER_CHANGED_ALLISON_TESTING,
+      {
+        key,
+        value: JSON.stringify(value),
+        sampleId,
+      },
+    );
     onFilterChanged({ key, value });
   };
 
@@ -317,11 +320,9 @@ export const ReportFilters = ({
           <div className={cs.filterListElement} data-testid="background-filter">
             <BackgroundModelFilter
               allBackgrounds={backgrounds}
-              onClick={() =>
-                trackEvent(
-                  ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED,
-                )
-              }
+              // this is broken, but alldoami found it while working on something unrelated
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onClick={() => {}}
               categorizeBackgrounds
               ownedBackgrounds={ownedBackgrounds}
               otherBackgrounds={otherBackgrounds}

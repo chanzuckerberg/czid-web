@@ -1,6 +1,6 @@
 import { cx } from "@emotion/css";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, WithAnalyticsType } from "~/api/analytics";
+import { WithAnalyticsType } from "~/api/analytics";
 import cs from "~/components/views/SampleView/components/MngsReport/components/ReportTable/report_table.scss";
 import { HeaderRendererType } from "~/interface/sampleView";
 
@@ -11,7 +11,7 @@ export const getExpandIconHeaderRenderer: (
   isExpandAllOpened: boolean,
   toggleExpandAll: () => void,
   withAnalytics: WithAnalyticsType,
-) => HeaderRendererType = (isExpandAllOpened, toggleExpandAll, withAnalytics) =>
+) => HeaderRendererType = (isExpandAllOpened, toggleExpandAll) =>
   function expandIconHeaderRenderer() {
     return (
       <div className={cs.expandIcon} data-testid="expand-taxon-parent-all">
@@ -20,10 +20,7 @@ export const getExpandIconHeaderRenderer: (
             "fa",
             isExpandAllOpened ? "fa-angle-down" : "fa-angle-right",
           )}
-          onClick={withAnalytics(
-            () => toggleExpandAll(),
-            ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_EXPAND_ALL_CLICKED,
-          )}
+          onClick={() => toggleExpandAll()}
         />
       </div>
     );

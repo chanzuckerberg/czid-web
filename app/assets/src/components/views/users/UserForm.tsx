@@ -1,5 +1,5 @@
 import React from "react";
-import { useTrackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import Archetypes from "~/interface/archetypes";
 import Segments from "~/interface/segments";
 import Checkbox from "~ui/controls/Checkbox";
@@ -49,7 +49,7 @@ const UserForm = ({
         ) : (
           <span>{formattedError}</span>
         );
-      trackEvent(`UpdateUser_update-errors_displayed`, {
+      trackEvent(ANALYTICS_EVENT_NAMES.UPDATE_USER_UPDATE_ERRORS_DISPLAYED, {
         serverErrors,
         formattedError,
       });

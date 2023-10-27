@@ -1638,10 +1638,6 @@ class SamplesHeatmapViewCC extends React.Component<
       ),
     );
     this.setState({ pendingPinnedSampleIds: selectedSampleIds });
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED,
-      selectedSamples,
-    );
   };
 
   handlePinnedSampleChangeApply = () => {
@@ -1665,10 +1661,6 @@ class SamplesHeatmapViewCC extends React.Component<
       pinnedSampleIds,
       pendingPinnedSampleIds: pinnedSampleIds,
     });
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED,
-      sampleId,
-    );
   };
 
   handleSampleLabelClick = (sampleId: $TSFixMe) => {
@@ -2209,20 +2201,14 @@ class SamplesHeatmapViewCC extends React.Component<
           <HeatmapCreationModal
             continueInNewTab={true}
             open
-            onClose={this.props.withAnalytics(
-              this.handleHeatmapCreationModalClose,
-              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED,
-            )}
+            onClose={this.handleHeatmapCreationModalClose}
             selectedIds={sampleIds}
           />
         )}
         {downloadModalOpen && (
           <SamplesHeatmapDownloadModal
             open
-            onClose={this.props.withAnalytics(
-              this.handleDownloadModalClose,
-              ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_CLOSED,
-            )}
+            onClose={this.handleDownloadModalClose}
             onGenerateBulkDownload={this.handleGenerateBulkDownload}
             sampleIds={sampleIds}
             heatmapParams={selectedOptions}

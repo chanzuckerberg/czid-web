@@ -2,7 +2,6 @@ import { Icon } from "@czi-sds/components";
 import axios from "axios";
 import cx from "classnames";
 import React, { useContext, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import Divider from "~/components/layout/Divider";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -33,7 +32,6 @@ const ProjectSettingsModal = ({
   project,
   users,
 }: ProjectSettingsModalProps) => {
-  const withAnalytics = useWithAnalytics();
   const [modalOpen, setModalOpen] = useState(false);
   const { allowedFeatures = [], userId } = useContext(UserContext) || {};
   const makeProjectPublic = () => {
@@ -49,28 +47,12 @@ const ProjectSettingsModal = ({
 
   return (
     <div>
-      <ShareButton
-        onClick={withAnalytics(
-          () => setModalOpen(true),
-          ANALYTICS_EVENT_NAMES.PROJECT_SETTINGS_MODAL_OPEN_LINK_CLICK,
-          {
-            projectId: project.id,
-            projectName: project.name,
-          },
-        )}
-      />
+      <ShareButton onClick={() => setModalOpen(true)} />
       {modalOpen && (
         <Modal
           open
           narrow
-          onClose={withAnalytics(
-            () => setModalOpen(false),
-            ANALYTICS_EVENT_NAMES.PROJECT_SETTINGS_MODAL_CLOSE_MODAL_CLICKED,
-            {
-              projectId: project.id,
-              projectName: project.name,
-            },
-          )}
+          onClose={() => setModalOpen(false)}
           className={cs.projectSettingsModal}
         >
           <div className={cs.projectSettingsContent}>
@@ -110,14 +92,7 @@ const ProjectSettingsModal = ({
                       <div className={cs.label}>Private Project</div>
                       <div className={cs.toggle}>
                         <PublicProjectConfirmationModal
-                          onConfirm={withAnalytics(
-                            makeProjectPublic,
-                            ANALYTICS_EVENT_NAMES.PROJECT_SETTINGS_MODAL_PUBLIC_BUTTON_CONFIRMED,
-                            {
-                              projectId: project.id,
-                              projectName: project.name,
-                            },
-                          )}
+                          onConfirm={makeProjectPublic}
                           project={project}
                           trigger={
                             <ColumnHeaderTooltip

@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import cs from "../../gene_details_mode.scss";
 import { OntologyType } from "../../GeneDetailsMode";
 import { generateLinkTo, Sources } from "../../utils";
@@ -10,7 +9,6 @@ interface CARDFooterProps {
 }
 
 const CARDFooter = ({ geneName, ontology }: CARDFooterProps) => {
-  const trackEvent = useTrackEvent();
   return (
     <div className={cs.cardFooter}>
       <div>
@@ -24,11 +22,9 @@ const CARDFooter = ({ geneName, ontology }: CARDFooterProps) => {
           className={cs.cardLink}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() =>
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.GENE_DETAILS_MODE_CARD_ONTOLOGY_ATTRIBUTION_CLICKED,
-            )
-          }
+          // this is broken, but alldoami found it while working on something unrelated
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          onClick={() => {}}
         >
           CARD Antibiotic Resistance Ontology
         </a>
@@ -38,11 +34,9 @@ const CARDFooter = ({ geneName, ontology }: CARDFooterProps) => {
           className={cs.cardLink}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() =>
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.GENE_DETAILS_MODE_CREATIVE_COMMONS_LICENSE_CLICKED,
-            )
-          }
+          // this is broken, but alldoami found it while working on something unrelated
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          onClick={() => {}}
         >
           Creative Commons CC-BY license version 4.0
         </a>{" "}

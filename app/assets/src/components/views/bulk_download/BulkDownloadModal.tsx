@@ -15,7 +15,6 @@ import {
 import {
   ANALYTICS_EVENT_NAMES,
   trackEventFromClassComponent,
-  withAnalyticsFromClassComponent,
 } from "~/api/analytics";
 import {
   createBulkDownload,
@@ -297,7 +296,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
     trackEventFromClassComponent(
       globalAnalyticsContext,
-      "BulkDownloadModal_radio-button-for-download-type_selected",
+      ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_RADIO_BUTTON_FOR_DOWNLOAD_TYPE_SELECTED,
       {
         downloadType: newSelectedDownloadTypeName,
         workflow,
@@ -314,10 +313,6 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     const metric = selectedFields?.["biom_format"]?.["metric"];
     const sortMetric = METRIC_OPTIONS.includes(metric); // check heatmap is sortable on selected metric
     const presets = [];
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
 
     if (metricList) {
       presets.push("thresholdFilters");
@@ -342,14 +337,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       }),
     );
 
-    withAnalyticsFromClassComponent(
-      globalAnalyticsContext,
-      () => openUrlInNewTab(`/visualizations/heatmap?${params}`),
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_BULK_DOWNLOAD_MODAL_CLICKED,
-      {
-        params,
-      },
-    );
+    openUrlInNewTab(`/visualizations/heatmap?${params}`);
   };
 
   handleFieldSelect = (
@@ -366,7 +354,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     this.setState(prevState => {
       trackEventFromClassComponent(
         globalAnalyticsContext,
-        "BulkDownloadModal_dropdown-field-for-download-type_selected",
+        ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_DROPDOWN_FIELD_FOR_DOWNLOAD_TYPE_SELECTED,
         {
           downloadType,
           fieldType,
@@ -431,15 +419,6 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
         createStatus: "error",
         createError: e.error || DEFAULT_CREATION_ERROR,
       });
-      trackEventFromClassComponent(
-        globalAnalyticsContext,
-        ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED,
-        {
-          workflow,
-          downloadType: selectedDownload.downloadType,
-          ...objectIds,
-        },
-      );
       return;
     }
 

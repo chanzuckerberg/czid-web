@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
@@ -27,8 +26,6 @@ const NextcladeModalFooter = ({
   samplesNotSentToNextclade,
   validationError,
 }: NextcladeModalFooterProps) => {
-  const withAnalytics = useWithAnalytics();
-
   const renderAccordionNotification = ({
     message,
     description,
@@ -102,10 +99,7 @@ const NextcladeModalFooter = ({
       <PrimaryButton
         disabled={loading || !hasValidIds}
         text="View QC in Nextclade"
-        onClick={withAnalytics(
-          onClick,
-          ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_FOOTER_VIEW_QC_IN_NEXTCLADE_BUTTON_CLICKED,
-        )}
+        onClick={onClick}
       />
     );
   };

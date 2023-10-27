@@ -2,7 +2,6 @@ import { Icon, Menu, MenuItem, Tooltip } from "@czi-sds/components";
 import { PopoverProps } from "@mui/material";
 import cx from "classnames";
 import React, { useContext, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { BENCHMARKING_FEATURE } from "~/components/utils/features";
 import { BenchmarkSamplesMenuItem } from "./BenchmarkSamplesMenuItem";
@@ -22,7 +21,6 @@ const BulkSamplesActionsMenu = ({
   handleClickPhyloTree,
   handleClickBenchmark,
 }: BulkSamplesActionsMenuProps) => {
-  const withAnalytics = useWithAnalytics();
   const { admin, allowedFeatures = [] } = useContext(UserContext) || {};
   const [menuAnchorEl, setMenuAnchorEl] =
     useState<PopoverProps["anchorEl"]>(null);
@@ -77,10 +75,10 @@ const BulkSamplesActionsMenu = ({
   const renderKickoffPhyloTree = () => {
     return (
       <MenuItem
-        onClick={withAnalytics(() => {
+        onClick={() => {
           closeActionsMenu();
           handleClickPhyloTree();
-        }, ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_PHYLO_TREE_MODAL_OPEN_CLICKED)}
+        }}
       >
         <div data-testid="create-phylogenetic-tree" className={cs.itemWrapper}>
           <div className={cs.bulkActionsIcon}>

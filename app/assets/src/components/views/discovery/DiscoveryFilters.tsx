@@ -6,11 +6,7 @@ import {
 import cx from "classnames";
 import { find, forEach, isEmpty, isEqual, pick, reject } from "lodash/fp";
 import React from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-  withAnalyticsFromClassComponent,
-} from "~/api/analytics";
+import { trackEventFromClassComponent } from "~/api/analytics";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
@@ -201,7 +197,6 @@ class DiscoveryFilters extends React.Component<
   };
 
   handleTaxonThresholdFilterChange = (taxa: $TSFixMe, thresholds: $TSFixMe) => {
-    const { domain } = this.props;
     const { discoveryProjectIds } = this.context;
     const globalAnalyticsContext = {
       projectIds: discoveryProjectIds,
@@ -232,22 +227,7 @@ class DiscoveryFilters extends React.Component<
       );
     }
 
-    const callback = (filteredSampleCount: number) => {
-      trackEventFromClassComponent(
-        globalAnalyticsContext,
-        ANALYTICS_EVENT_NAMES.TAXON_THRESHOLD_FILTER_APPLY_CLICKED,
-        {
-          domain,
-          selectedTaxa: taxa,
-          thresholds,
-          filteredSampleCount,
-        },
-      );
-    };
-
-    this.setState(taxonFilterStateUpdate, () =>
-      this.notifyFilterChangeHandler(callback),
-    );
+    this.setState(taxonFilterStateUpdate);
   };
 
   handleChange(selectedKey: $TSFixMe, selected: $TSFixMe) {
@@ -288,10 +268,6 @@ class DiscoveryFilters extends React.Component<
   };
 
   renderTags(optionsKey: $TSFixMe) {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     const selectedKey = `${optionsKey}Selected`;
     let selectedOptions = this.state[selectedKey];
     const options = this.props[optionsKey];
@@ -317,19 +293,12 @@ class DiscoveryFilters extends React.Component<
             className={cs.filterTag}
             key={option.value}
             text={option.text}
-            onClose={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
-              () =>
-                this.handleRemoveTag({
-                  selectedKey,
-                  valueToRemove: option.value,
-                }),
-              ANALYTICS_EVENT_NAMES.DISCOVERY_FILTERS_TAG_REMOVED,
-              {
-                value: option.value,
-                text: option.text,
-              },
-            )}
+            onClose={() =>
+              this.handleRemoveTag({
+                selectedKey,
+                valueToRemove: option.value,
+              })
+            }
           />
         );
       });
@@ -340,10 +309,6 @@ class DiscoveryFilters extends React.Component<
   // Annotations filter options are hashes with { name: string }
   // Note: This function can be modified to render tags for any SDS Dropdown-based filter.
   renderAnnotationsFilterTags = () => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     const selectedOptions = this.state[KEY_ANNOTATIONS_SELECTED];
     if (isEmpty(selectedOptions)) return;
 
@@ -353,19 +318,12 @@ class DiscoveryFilters extends React.Component<
           className={cs.filterTag}
           key={option.name}
           text={option.name}
-          onClose={withAnalyticsFromClassComponent(
-            globalAnalyticsContext,
-            () =>
-              this.handleRemoveTag({
-                selectedKey: KEY_ANNOTATIONS_SELECTED,
-                valueToRemove: option.name,
-              }),
-            ANALYTICS_EVENT_NAMES.DISCOVERY_FILTERS_TAG_REMOVED,
-            {
-              value: option.name,
-              text: option.name,
-            },
-          )}
+          onClose={() =>
+            this.handleRemoveTag({
+              selectedKey: KEY_ANNOTATIONS_SELECTED,
+              valueToRemove: option.name,
+            })
+          }
         />
       );
     });
@@ -373,10 +331,6 @@ class DiscoveryFilters extends React.Component<
   };
 
   renderTaxonFilterTags = () => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     const selectedTaxa = this.state[KEY_TAXON_SELECTED];
     const thresholdFilterDisabled =
       this.configForWorkflow[this.props.workflow].disableTaxonThresholdFilter;
@@ -392,19 +346,12 @@ class DiscoveryFilters extends React.Component<
             className={cs.filterTag}
             key={`taxon_filter_tag_${selectedTaxon.id}`}
             text={selectedTaxon.name}
-            onClose={withAnalyticsFromClassComponent(
-              globalAnalyticsContext,
-              () =>
-                this.handleRemoveTag({
-                  selectedKey: KEY_TAXON_SELECTED,
-                  valueToRemove: selectedTaxon.id,
-                }),
-              ANALYTICS_EVENT_NAMES.DISCOVERY_FILTERS_TAG_REMOVED,
-              {
-                value: selectedTaxon.id,
-                text: selectedTaxon.name,
-              },
-            )}
+            onClose={() =>
+              this.handleRemoveTag({
+                selectedKey: KEY_TAXON_SELECTED,
+                valueToRemove: selectedTaxon.id,
+              })
+            }
           />
         ))}
       </div>

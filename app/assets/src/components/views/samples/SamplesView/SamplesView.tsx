@@ -26,11 +26,7 @@ import {
   bulkKickoffWorkflowRuns,
   validateUserCanDeleteObjects,
 } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   getSampleMetadataFields,
   getWorkflowRunMetadataFields,
@@ -157,7 +153,6 @@ const SamplesView = forwardRef(function SamplesView(
   ref: React.Ref<SamplesViewHandle>,
 ) {
   const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const userContext = useContext(UserContext);
   const { allowedFeatures, appConfig, admin } = userContext || {};
 
@@ -375,10 +370,7 @@ const SamplesView = forwardRef(function SamplesView(
                 <BareDropdown.Item
                   key={option.text}
                   text={option.text}
-                  onClick={withAnalytics(
-                    () => setHeatmapCreationModalOpen(true),
-                    ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_OPENED,
-                  )}
+                  onClick={() => setHeatmapCreationModalOpen(true)}
                 />
               );
             } else {
@@ -426,11 +418,7 @@ const SamplesView = forwardRef(function SamplesView(
         popupText={bulkDownloadButtonTempTooltip || "Download"}
         popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
         disabled={selectedIds.size === 0}
-        onClick={withAnalytics(
-          handleBulkDownloadModalOpen,
-          ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_DOWNLOAD_MODAL_OPEN_CLICKED,
-          { workflow },
-        )}
+        onClick={handleBulkDownloadModalOpen}
       />
     );
   };
@@ -496,10 +484,7 @@ const SamplesView = forwardRef(function SamplesView(
           sendToNextcladeCount === 0 ||
           sendToNextcladeCount > MAX_NEXTCLADE_SAMPLES
         }
-        onClick={withAnalytics(
-          () => setNextcladeModalOpen(true),
-          ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_NEXTCLADE_MODAL_OPEN_CLICKED,
-        )}
+        onClick={() => setNextcladeModalOpen(true)}
       />
     );
   };
@@ -868,7 +853,11 @@ const SamplesView = forwardRef(function SamplesView(
             circular
             className={cs.counter}
             // Log this no-op so we know if users want a way to view their selected samples
-            onClick={() => trackEvent(`SamplesView_sample-counter_clicked`)}
+            onClick={() =>
+              trackEvent(
+                ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_SAMPLE_COUNTER_CLICKED,
+              )
+            }
             text={`${selectedIds.size}`}
           />
           <span className={cs.label}>Selected</span>
@@ -966,10 +955,7 @@ const SamplesView = forwardRef(function SamplesView(
           loadingClassName={csTableRenderer.loading}
           onActiveColumnsChange={onActiveColumnsChange}
           onLoadRows={onLoadRows}
-          onSelectAllRows={withAnalytics(
-            handleSelectAllRows,
-            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_SELECT_ALL_ROWS_CLICKED,
-          )}
+          onSelectAllRows={handleSelectAllRows}
           onSelectRow={handleSelectRow}
           onRowClick={handleRowClick}
           onSortColumn={handleSortColumn}
@@ -1100,10 +1086,7 @@ const SamplesView = forwardRef(function SamplesView(
           // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
           // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
           csrf={document.getElementsByName("csrf-token")[0].content}
-          onClose={withAnalytics(
-            () => setPhyloCreationModalOpen(false),
-            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_PHYLO_TREE_MODAL_CLOSED,
-          )}
+          onClose={() => setPhyloCreationModalOpen(false)}
         />
       )}
       {benchmarkModalOpen && (
@@ -1120,10 +1103,7 @@ const SamplesView = forwardRef(function SamplesView(
       {bulkDownloadModalOpen && (
         <BulkDownloadModal
           open
-          onClose={withAnalytics(
-            () => setBulkDownloadModalOpen(false),
-            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_DOWNLOAD_MODAL_CLOSED,
-          )}
+          onClose={() => setBulkDownloadModalOpen(false)}
           onGenerate={handleBulkDownloadGenerate}
           selectedObjects={selectedObjects}
           selectedIds={selectedIds}
@@ -1148,20 +1128,14 @@ const SamplesView = forwardRef(function SamplesView(
       {heatmapCreationModalOpen && (
         <HeatmapCreationModal
           open
-          onClose={withAnalytics(
-            () => setHeatmapCreationModalOpen(false),
-            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED,
-          )}
+          onClose={() => setHeatmapCreationModalOpen(false)}
           selectedIds={selectedIds}
         />
       )}
       {nextcladeModalOpen && (
         <NextcladeModal
           open
-          onClose={withAnalytics(
-            () => setNextcladeModalOpen(false),
-            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_NEXTCLADE_MODAL_CLOSED,
-          )}
+          onClose={() => setNextcladeModalOpen(false)}
           selectedIds={selectedIds}
           workflowEntity={workflowEntity}
         />

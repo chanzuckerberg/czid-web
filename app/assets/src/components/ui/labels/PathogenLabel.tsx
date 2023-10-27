@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import BasicPopup from "../../BasicPopup";
 import Label from "./Label";
@@ -14,14 +13,7 @@ export const CATEGORIES = {
     tooltip: (
       <>
         {"Organism with known human pathogenicity. See the "}
-        <ExternalLink
-          href={"/pathogen_list"}
-          analyticsEventName={
-            ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
-          }
-        >
-          full list
-        </ExternalLink>
+        <ExternalLink href={"/pathogen_list"}>full list</ExternalLink>
         {" of pathogens."}
       </>
     ),
@@ -39,9 +31,6 @@ export const CATEGORIES = {
         <ExternalLink
           href={
             "https://docs.google.com/document/d/1bhG7tEVBN8IFrRddw4CiCw0tZLMf8NPzxi1ZghcsvvM/edit?usp=sharing"
-          }
-          analyticsEventName={
-            ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
           }
         >
           here.
@@ -61,9 +50,6 @@ export const CATEGORIES = {
           href={
             "https://docs.google.com/document/d/1bhG7tEVBN8IFrRddw4CiCw0tZLMf8NPzxi1ZghcsvvM/edit?usp=sharing"
           }
-          analyticsEventName={
-            ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
-          }
         >
           here.
         </ExternalLink>
@@ -78,7 +64,6 @@ interface PathogenLabelProps {
 }
 
 const PathogenLabel = ({ type, isDimmed }: PathogenLabelProps) => {
-  const trackEvent = useTrackEvent();
   const label = (
     <span data-testid="pathogen-label">
       <Label
@@ -92,10 +77,7 @@ const PathogenLabel = ({ type, isDimmed }: PathogenLabelProps) => {
   return (
     <BasicPopup
       className={cs.pathogenLabelPopup}
-      trigger={React.cloneElement(label, {
-        onMouseEnter: () =>
-          trackEvent(ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_HOVERED),
-      })}
+      trigger={React.cloneElement(label)}
       content={CATEGORIES[type]["tooltip"]}
       basic={false}
       hoverable={true}
