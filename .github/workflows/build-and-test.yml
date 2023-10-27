@@ -20,18 +20,15 @@ jobs:
         uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
+  
   build_docker_image:
-    permissions: # these permissions must be set for AWS auth to work!
-    id-token: write
-    contents: read
-    actions: read
     uses: ./.github/workflows/reusable-build-docker-image.yml
+    secrets: inherit
 
   e2e-tests:
-    permissions: # these permissions must be set for AWS auth to work!
-    id-token: write
-    contents: read
-    actions: read
     needs: build_docker_image
     uses: ./.github/workflows/reusable-e2e-tests.yml
+    secrets: inherit
+    with:
+      environment: 'ci'
    

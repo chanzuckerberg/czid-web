@@ -16,7 +16,7 @@ import {
 import { Metadata } from "@e2e/types/metadata";
 import { fileChooser } from "@e2e/utils/page";
 import { expect, Page } from "@playwright/test";
-import { kebabCase } from "lodash/fp";
+import { kebabCase } from "lodash";
 import { updateMetadata } from "./metadata";
 
 const REF_FILENAME = "consensus_papilloma.fa";

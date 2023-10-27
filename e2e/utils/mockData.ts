@@ -1,5 +1,5 @@
 import fs from "fs";
-import { sample } from "lodash/fp";
+import { sample } from "lodash";
 import { AnalysisTypes } from "../types/analysisTypes";
 import { Filter } from "../types/filter";
 import { Metadata } from "../types/metadata";

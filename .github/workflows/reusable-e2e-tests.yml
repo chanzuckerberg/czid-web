@@ -71,6 +71,25 @@ jobs:
             SLACK, czid-slack         
           parse-json-secrets: true 
 
+      - name: Configuring services
+        run: |
+          bash ${GITHUB_WORKSPACE}/bin/setup-ci
+          docker pull ${{ secrets.DEV_ECR_REPO }}/idseq-web:sha-${GITHUB_SHA::8}
+          docker swarm init
+
+      - name: Initialize dev DB
+        run: |
+          docker-compose run web rails db:create db:migrate
+          docker-compose run web rails db:migrate:with_data
+          docker-compose run web rake seed:migrate
+      
+      - name: Starting services
+        run: |
+          docker-compose up -d web web-proxy
+
+      - name: Check app is running
+        run: wget --retry-connrefused --waitretry=1 --read-timeout=30 --timeout=15 -t 300 -O /dev/null http://127.0.0.1:3001/
+      
       - name: Git references
         shell: bash
         run: |
