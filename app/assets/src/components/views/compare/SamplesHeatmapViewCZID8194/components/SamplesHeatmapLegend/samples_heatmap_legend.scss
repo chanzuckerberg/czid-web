@@ -4,15 +4,9 @@
 @import "~@czi-sds/components/dist/variables";
 
 .samplesHeatmapLegend {
-  margin-top: $sds-spaces-l;
+  margin-top: -7px;
   padding-top: $sds-spaces-l;
   padding-bottom: $sds-spaces-l;
-  // Offset from the viewport to line up with the plus and minus controls. This will
-  // need to be adjusted if the position of the controls changes.
-  position: absolute;
-  top: 110px;
-  left: 295px;
   width: 125px;
   height: 20px;
-  z-index: 3;
 }

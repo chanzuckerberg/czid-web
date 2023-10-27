@@ -27,6 +27,7 @@ import {
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
+import SamplesHeatmapLegend from "../SamplesHeatmapLegend";
 import cs from "./samples_heatmap_header.scss";
 
 interface SamplesHeatmapHeaderProps {
@@ -41,6 +42,9 @@ interface SamplesHeatmapHeaderProps {
   onSaveClick: $TSFixMeFunction;
   onFilterToggleClick: $TSFixMeFunction;
   filterPanelOpen: boolean;
+  data: $TSFixMeUnknown;
+  selectedOptions: $TSFixMeUnknown;
+  options: $TSFixMeUnknown;
 }
 
 export const SamplesHeatmapHeader = ({
@@ -55,6 +59,9 @@ export const SamplesHeatmapHeader = ({
   onSaveClick,
   onFilterToggleClick,
   filterPanelOpen,
+  data,
+  selectedOptions,
+  options,
 }: SamplesHeatmapHeaderProps) => {
   const trackEvent = useTrackEvent();
   const withAnalytics = useWithAnalytics();
@@ -137,6 +144,12 @@ export const SamplesHeatmapHeader = ({
           </div>
         </ViewHeader.Content>
         <ViewHeader.Controls className={cs.controls}>
+          <SamplesHeatmapLegend
+            loading={loading}
+            data={data}
+            selectedOptions={selectedOptions}
+            options={options}
+          />
           {showNewPresetsButton && (
             <ColumnHeaderTooltip
               trigger={

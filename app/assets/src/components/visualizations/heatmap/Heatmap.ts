@@ -80,7 +80,7 @@ export default class Heatmap {
   columnClustering: $TSFixMe;
   columnLabels: $TSFixMe;
   columnLabelsBackground: $TSFixMe;
-  columnLabelsHeight: $TSFixMe;
+  columnLabelsHeight: number;
   columnMetadataSortAsc: $TSFixMe;
   columnMetadataSortField: $TSFixMe;
   container: $TSFixMe;
@@ -106,7 +106,7 @@ export default class Heatmap {
   mouseDown: $TSFixMe;
   mouseX: $TSFixMe;
   mouseY: $TSFixMe;
-  options: $TSFixMe;
+  options: { zoom: number; [x: string]: any };
   overlays: $TSFixMe;
   overlaysDebounce: $TSFixMe;
   pinColumnTrigger: $TSFixMe;
@@ -118,6 +118,7 @@ export default class Heatmap {
   rowLabelsWidth: $TSFixMe;
   scaleLimits: $TSFixMe;
   scaleType: $TSFixMe;
+  scrollToRowInProgess: $TSFixMe;
   spacePressed: $TSFixMe;
   svg: $TSFixMe;
   svgSaver: $TSFixMe;
@@ -236,7 +237,6 @@ export default class Heatmap {
     // and svg for heatmap display.
     // Starting point can be chosen given what data was changed.
     if (!start) start = "setupContainers";
-
     switch (start) {
       case "setupContainers":
         this.setupContainers();
@@ -567,22 +567,26 @@ export default class Heatmap {
     this.metadataLabelsBackground
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
       .attr("height", totalColumnLabelsHeight + this.options.marginTop);
-    this.placeColumnLabelAndMetadataContainers(this.columnLabelsHeight);
-    this.placePinColumnLinkContainer(this.columnLabelsHeight);
+    if (!this.scrollToRowInProgess) {
+      this.placeColumnLabelAndMetadataContainers(this.columnLabelsHeight);
+      this.placePinColumnLinkContainer(this.columnLabelsHeight);
 
-    this.addRowBackground
-      .attr(
-        "width",
-        this.rowLabelsWidth +
-          totalCellWidth +
-          totalRowClusterWidth +
-          this.options.marginRight,
-      )
-      .attr(
-        "height",
-        this.totalRowAddLinkHeight + this.options.metadataAddLinkHeight,
-      );
-    this.placeAddRowLinkContainer(this.columnLabelsHeight);
+      this.addRowBackground
+        .attr(
+          "width",
+          this.rowLabelsWidth +
+            totalCellWidth +
+            totalRowClusterWidth +
+            this.options.marginRight,
+        )
+        .attr(
+          "height",
+          this.totalRowAddLinkHeight + this.options.metadataAddLinkHeight,
+        );
+      this.placeAddRowLinkContainer(this.columnLabelsHeight);
+    } else {
+      this.scrollToRowInProgess = false;
+    }
 
     this.gCells.attr(
       "transform",
@@ -692,11 +696,12 @@ export default class Heatmap {
     if (row) {
       const rowIndex = row.rowIndex;
 
-      const containerHeight = this.container[0][0].offsetHeight;
-      const metadataHeight =
+      const containerHeight: number = this.container[0][0].offsetHeight;
+      const metadataHeight: number =
         this.totalMetadataHeight + this.totalRowAddLinkHeight;
       const rowOffset =
         containerHeight / 4 - (this.cellYPosition(row) + metadataHeight);
+      this.scrollToRowInProgess = true;
       this.pan(0, rowOffset, true);
 
       // Briefly highlight the focused row.
@@ -723,13 +728,12 @@ export default class Heatmap {
     // Define the scrolling boundaries for the svg.
     // Upper limits are determined by the difference between the container and svg sizes,
     // scaled by the zoom factor.
-    const containerWidth = this.container[0][0].offsetWidth;
-    const containerHeight = this.container[0][0].offsetHeight;
+    const containerWidth: number = this.container[0][0].offsetWidth;
+    const containerHeight: number = this.container[0][0].offsetHeight;
     const xScrollMax =
-      (containerWidth - this.svg.attr("width")) / this.options.zoom;
+      (containerWidth - Number(this.svg.attr("width"))) / this.options.zoom;
     const yScrollMax =
-      (containerHeight - this.svg.attr("height")) / this.options.zoom;
-
+      (containerHeight - Number(this.svg.attr("height"))) / this.options.zoom;
     // Translating the svg:
     const gCurrentTranslate = d3.transform(this.g.attr("transform")).translate;
     // Limit translation by the boundaries set for the svg.
@@ -803,7 +807,7 @@ export default class Heatmap {
     this.metadataLabelsBackground.attr("x", x - this.options.marginLeft);
   }
 
-  placeColumnLabelAndMetadataContainers(y: $TSFixMe, transition = false) {
+  placeColumnLabelAndMetadataContainers(y: number, transition = false) {
     this.gColumnLabels
       .transition()
       .duration(transition ? this.options.transitionDuration : 0)
@@ -824,7 +828,7 @@ export default class Heatmap {
       .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
   }
 
-  placeAddRowLinkContainer(y: $TSFixMe, transition = false) {
+  placeAddRowLinkContainer(y: number, transition = false) {
     this.gAddRow
       .transition()
       .duration(transition ? this.options.transitionDuration : 0)
@@ -838,7 +842,7 @@ export default class Heatmap {
       );
   }
 
-  placePinColumnLinkContainer(y: $TSFixMe, transition = false) {
+  placePinColumnLinkContainer(y: number, transition = false) {
     this.gPinColumn
       .transition()
       .duration(transition ? this.options.transitionDuration : 0)
@@ -1205,20 +1209,30 @@ export default class Heatmap {
     return Array.apply(null, { length: n }).map(Number.call, Number);
   }
 
-  download(filename?: $TSFixMe) {
-    this.svg.classed(cs.printMode, true);
-    this.showPrintCaption();
-    this.svgSaver.asSvg(this.svg.node(), filename || "heatmap.svg");
-    this.svg.classed(cs.printMode, false);
-    this.hidePrintCaption();
+  download(toggleFullNames: (status?: "truncated") => void) {
+    this.expandColumnLabels();
+    // pausing to let the svg rerender
+    setTimeout(() => {
+      this.svg.classed(cs.printMode, true);
+      this.showPrintCaption();
+      this.svgSaver.asSvg(this.svg.node(), "heatmap.svg");
+      this.svg.classed(cs.printMode, false);
+      toggleFullNames("truncated");
+      this.hidePrintCaption();
+    }, 100);
   }
 
-  downloadAsPng(filename?: $TSFixMe) {
-    this.svg.classed(cs.printMode, true);
-    this.showPrintCaption();
-    this.svgSaver.asPng(this.svg.node(), filename || "heatmap.png");
-    this.svg.classed(cs.printMode, false);
-    this.hidePrintCaption();
+  downloadAsPng(toggleFullNames: (status?: "truncated") => void) {
+    this.expandColumnLabels();
+    // pausing to let the svg rerender
+    setTimeout(() => {
+      this.svg.classed(cs.printMode, true);
+      this.showPrintCaption();
+      this.svgSaver.asPng(this.svg.node(), "heatmap.png");
+      this.svg.classed(cs.printMode, false);
+      toggleFullNames("truncated");
+      this.hidePrintCaption();
+    }, 100);
   }
 
   computeCurrentHeatmapViewValuesForCSV({ headers = [] }) {
@@ -1284,6 +1298,18 @@ export default class Heatmap {
 
     // Remove all captions.
     this.gCaption.selectAll(`.${cs.caption}`).remove();
+
+    // if we modified the column labels to show the full names for the printing process
+    // revert them back to the truncated names
+  };
+
+  expandColumnLabels = () => {
+    // get the full names from the printLabel key and updateData with the full names
+    this.updateData({
+      columnLabels: this.columnLabels.map(columnLabel => {
+        return { ...columnLabel, label: columnLabel.printLabel };
+      }),
+    });
   };
 
   removeRow = (row: $TSFixMe) => {
@@ -1895,7 +1921,7 @@ export default class Heatmap {
 
     const columnLabel = this.gColumnLabels
       .selectAll(`.${cs.columnLabel}`)
-      .data(this.columnLabels, (d: $TSFixMe) => d.label);
+      .data(this.columnLabels, (d: $TSFixMe) => d.id);
 
     const columnLabelUpdate = columnLabel
       .transition()
@@ -2154,7 +2180,7 @@ export default class Heatmap {
           )}`,
         )
         .selectAll(".columnMetadataCell")
-        .data(this.columnLabels, (d: $TSFixMe) => d.label);
+        .data(this.columnLabels, (d: $TSFixMe) => d.id);
 
       columnMetadataCell
         .exit()

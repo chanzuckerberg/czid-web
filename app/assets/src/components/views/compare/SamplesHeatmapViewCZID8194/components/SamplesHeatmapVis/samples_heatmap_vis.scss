@@ -12,7 +12,7 @@
     // Offset from the viewport to line up with the filter controls. This will
     // need to be adjusted if the position of the controls changes.
     top: 360px;
-    right: 40px;
+    right: 18px;
     box-shadow: $sds-drop-shadows-shadow-m;
 
     background-color: white;
@@ -24,22 +24,40 @@
   .toggleNamesButton {
     position: absolute;
     top: 133px;
-    right: 10px;
+    right: 23px;
+    z-index: 1;
+    transition: all 0.3s ease;
+    transform: rotate(90deg);
+    :hover {
+      color: black;
+      fill: black;
+    }
+    &.open {
+      transform: rotate(270deg);
+    }
+  }
+
+  .rightSideOverlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 52px;
+    background: white;
     z-index: 1;
   }
 
   .heatmapContainer {
     position: relative;
-    top: 45px;
     height: calc(100vh - 183px);
-    padding-left: $sds-spaces-l;
-    padding-top: $sds-spaces-l;
-    width: calc(100% - 14px);
+    padding-left: $sds-spaces-s;
+    width: calc(100% - 50px);
     min-width: 500px;
 
     svg {
       display: block;
       margin: 0 auto;
+      position: absolute;
     }
   }
 

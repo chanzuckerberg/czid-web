@@ -2169,6 +2169,9 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
           onSaveClick={this.handleSaveClick}
           onFilterToggleClick={this.toggleDisplayFilters}
           filterPanelOpen={!this.state.hideFilters}
+          data={this.state.data}
+          selectedOptions={selectedOptions}
+          options={this.getControlOptions()}
         />
         {/* render visualization */}
         <div className="visualization-content">

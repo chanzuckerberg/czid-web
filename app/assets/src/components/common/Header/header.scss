@@ -31,6 +31,7 @@
   .userDropdown {
     flex: 0 0 auto;
     color: $sds-color-gray-white;
+    margin-right: $sds-spaces-s;
 
     .userName {
       @include font-body-xs;

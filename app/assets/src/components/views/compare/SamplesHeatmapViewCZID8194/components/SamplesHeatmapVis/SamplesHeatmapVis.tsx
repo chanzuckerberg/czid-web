@@ -1,4 +1,4 @@
-import { Button } from "@czi-sds/components";
+import { ButtonIcon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import d3 from "d3";
 import { find, isEmpty, isEqual, keyBy, orderBy } from "lodash/fp";
@@ -22,8 +22,8 @@ import { TooltipVizTable } from "~ui/containers";
 import { IconAlertSmall, IconCloseSmall } from "~ui/icons";
 import { openUrlInNewTab } from "~utils/links";
 import { SPECIFICITY_OPTIONS } from "../../constants";
+import { getTruncatedLabel, throttle } from "../../utils";
 import { OptionsType } from "../SamplesHeatmapFilters/SamplesHeatmapFilters";
-import SamplesHeatmapLegend from "../SamplesHeatmapLegend";
 import cs from "./samples_heatmap_vis.scss";
 
 const CAPTION_LINE_WIDTH = 180;
@@ -141,24 +141,11 @@ export class SamplesHeatmapVis extends React.Component<
     } = this.props;
     const { allowedFeatures = [] } = this.context || {};
 
-    const truncatedSampleLabels = this.extractSampleLabels().map(
-      (sample, i) => {
-        const { label } = sample;
-        return {
-          ...sample,
-          label:
-            label.length > 20
-              ? `${label.slice(0, 9)}...${label.slice(-7)}${i}`
-              : label,
-        };
-      },
-    );
-
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       {
         rowLabels: this.extractTaxonLabels(),
-        columnLabels: truncatedSampleLabels, // Also includes column metadata.
+        columnLabels: this.extractSampleLabels(), // Also includes column metadata.
         values: this.props.data[this.props.metric],
         pathogenFlags: this.props.pathogenFlagsData,
         taxonFilterState: taxonFilterState,
@@ -203,7 +190,6 @@ export class SamplesHeatmapVis extends React.Component<
         shouldShowPathogenFlagsOutlines: allowedFeatures.includes(
           HEATMAP_PATHOGEN_FLAGGING_FEATURE,
         ),
-        // startingZoom: initialZoom,
       },
     );
     this.heatmap.start();
@@ -211,7 +197,12 @@ export class SamplesHeatmapVis extends React.Component<
     if (this.props.newTaxon) {
       this.scrollToRow();
     }
-    d3.select(this.wheelRef.current).on("wheel", this.scroll, true);
+
+    d3.select(this.wheelRef.current).on(
+      "wheel",
+      throttle(this.scroll, 10),
+      true,
+    );
     document.addEventListener("keydown", this.handleKeyDown, false);
     document.addEventListener("keyup", this.handleKeyUp, false);
   }
@@ -270,11 +261,11 @@ export class SamplesHeatmapVis extends React.Component<
     return this.props.sampleIds.map(id => {
       const sampleDetail = this.props.sampleDetails[id];
       const { name, metadata, duplicate } = sampleDetail;
-      const truncLabel =
-        name.length > 20 ? `${name.slice(0, 9)}...${name.slice(-7)}` : name;
+      const truncLabel = getTruncatedLabel(name);
       return {
         label: format === "full" ? name : truncLabel,
         metadata: metadata,
+        printLabel: name,
         id,
         duplicateLabel: duplicate,
         pinned: this.props.pinnedSampleIds.includes(id),
@@ -513,11 +504,11 @@ export class SamplesHeatmapVis extends React.Component<
   }
 
   download() {
-    this.heatmap.download();
+    this.heatmap.download(this.toggleFullNames);
   }
 
   downloadAsPng() {
-    this.heatmap.downloadAsPng();
+    this.heatmap.downloadAsPng(this.toggleFullNames);
   }
 
   computeCurrentHeatmapViewValuesForCSV({ headers }: $TSFixMe) {
@@ -741,7 +732,14 @@ export class SamplesHeatmapVis extends React.Component<
     this.heatmap.scroll(d3.event);
   };
 
-  toggleFullNames = () => {
+  toggleFullNames = (status?: "truncated") => {
+    if (status === "truncated") {
+      this.setState({ showingFullNames: false });
+      this.heatmap.updateData({
+        columnLabels: this.extractSampleLabels("truncated"),
+      });
+      return;
+    }
     if (this.state.showingFullNames) {
       this.setState({ showingFullNames: false });
       this.heatmap.updateData({
@@ -783,26 +781,38 @@ export class SamplesHeatmapVis extends React.Component<
 
     return (
       <div className={cs.samplesHeatmapVis} ref={this.wheelRef}>
+        <div className={cs.rightSideOverlay}></div>
         <PlusMinusControl
           onPlusClick={() => this.handleZoom(0.25)}
           onMinusClick={() => this.handleZoom(-0.25)}
           className={cs.plusMinusControl}
         />
-        <Button
-          sdsStyle={"rounded"}
-          sdsType={"secondary"}
-          className={cs.toggleNamesButton}
-          onClick={this.toggleFullNames}
-          size={"small"}
+        <Tooltip
+          arrow
+          sdsStyle={"dark"}
+          title={`${
+            this.state.showingFullNames ? "Truncate" : "Expand"
+          } Sample Names`}
         >
-          Show {this.state.showingFullNames ? "Truncated" : "Full"} Sample Names
-        </Button>
-        <SamplesHeatmapLegend
-          loading={this.props.loading}
-          data={this.props.data}
-          selectedOptions={this.props.selectedOptions}
-          options={this.props.options}
-        />
+          <span>
+            <ButtonIcon
+              on={this.state.showingFullNames}
+              sdsSize="small"
+              sdsType="secondary"
+              sdsIcon="chevronRight2"
+              className={cx(
+                cs.toggleNamesButton,
+                this.state.showingFullNames && cs.open,
+              )}
+              onClick={() => this.toggleFullNames()}
+              disabled={
+                this.extractSampleLabels("truncated").filter(
+                  columnLabel => columnLabel.printLabel.length > 20,
+                ).length === 0
+              }
+            />
+          </span>
+        </Tooltip>
         <div
           className={cs.heatmapContainer}
           ref={container => {
