@@ -3,7 +3,7 @@ import {
   SEQUENCING_TECHNOLOGY_OPTIONS,
   Technology,
 } from "~/components/views/SampleUploadFlow/constants";
-import cs from "~/components/views/SampleUploadFlow/sample_upload_flow.scss";
+import cs from "../../analyses_sections.scss";
 
 interface MNGSAnalysisSectionType {
   technology: Technology;
