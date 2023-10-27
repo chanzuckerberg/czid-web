@@ -1,12 +1,10 @@
-import React, { useContext } from "react";
+import React from "react";
 import { TaxonOption } from "~/components/common/filters/types";
-import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import {
   AMR_PINNED_PIPELINE_VERSION_HELP_LINK,
   AMR_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
-import { ONT_V1_FEATURE } from "~/components/utils/features";
 import {
   AMR_MODERN_HOST_FILTERING_FEATURE,
   isPipelineFeatureAvailable,
@@ -104,9 +102,6 @@ const WorkflowSelector = ({
   s3UploadEnabled,
   usedClearLabs,
 }: WorkflowSelectorProps) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
-
   const shouldDisableWorkflow = (workflow: UploadWorkflows) => {
     return !enabledWorkflows.includes(workflow);
   };
@@ -123,9 +118,7 @@ const WorkflowSelector = ({
       <div className={cs.header}>Analysis Type</div>
       <AnalysisType
         description={
-          allowedFeatures.includes(ONT_V1_FEATURE)
-            ? "Run your samples through our metagenomics pipeline. Our pipeline supports Illumina and Nanopore technologies."
-            : "Run your samples through our metagenomics pipeline. Our pipeline only supports Illumina."
+          "Run your samples through our metagenomics pipeline. Our pipeline supports Illumina and Nanopore technologies."
         }
         isDisabled={shouldDisableWorkflow(UPLOAD_WORKFLOWS.MNGS.value)}
         onClick={() => onWorkflowToggle(UPLOAD_WORKFLOWS.MNGS.value)}

@@ -1,13 +1,9 @@
 import { Icon } from "@czi-sds/components";
 import { compact, map } from "lodash/fp";
-import React, { useContext } from "react";
-import { UserContext } from "~/components/common/UserContext";
-import StatusLabel from "~/components/ui/labels/StatusLabel";
-import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
+import React from "react";
 import {
   NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
-  SEQUENCING_TECHNOLOGY_OPTIONS,
   Technology,
   UploadWorkflows,
   UPLOAD_WORKFLOWS,
@@ -61,9 +57,6 @@ const AnalysesSections = ({
   wetlabProtocol,
   workflows,
 }: AnalysesSectionsType) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext ?? {};
-
   return (
     <div data-testid="upload-input-review">
       {map(workflow => {
@@ -73,11 +66,6 @@ const AnalysesSections = ({
           icon,
           label: workflowDisplayName,
         } = UPLOAD_WORKFLOWS[workflowKey];
-
-        const sequencingPlatformIsBeta =
-          !allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE) &&
-          workflow === UPLOAD_WORKFLOWS.MNGS.value &&
-          technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 
         const technologyForUpload =
           workflow === UPLOAD_WORKFLOWS.AMR.value
@@ -109,9 +97,6 @@ const AnalysesSections = ({
                     <div className={cs.description}>
                       {SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[technology] ||
                         "Illumina"}
-                      {sequencingPlatformIsBeta && (
-                        <StatusLabel inline status="Beta" type="beta" />
-                      )}
                     </div>
                   </div>
                 )}

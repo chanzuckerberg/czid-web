@@ -84,14 +84,6 @@
 
     .workflowTabs {
       overflow-x: clip;
-
-      .betaTag {
-        display: inline-flex;
-        margin-left: $sds-spaces-xs;
-        // Undo xxs right margin and xs bottom margin included in SDS Tag component
-        margin-right: -$sds-spaces-xxs;
-        margin-bottom: -$sds-spaces-xs;
-      }
     }
   }
 

@@ -2,7 +2,6 @@ import { InputRadio, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import React, { ReactNode } from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import StatusLabel from "~/components/ui/labels/StatusLabel";
 import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { PipelineVersionIndicator } from "../PipelineVersionIndicator";
 import cs from "./sequencing_platform_option.scss";
@@ -11,7 +10,6 @@ interface SequencingPlatformOptionProps {
   analyticsEventName: string;
   customDescription?: string | ReactNode;
   githubLink: string;
-  isBeta?: boolean;
   isDisabled?: boolean;
   isPinnedVersion?: boolean;
   isSelected: boolean;
@@ -29,7 +27,6 @@ const SequencingPlatformOption = ({
   analyticsEventName,
   customDescription,
   githubLink,
-  isBeta = false,
   isDisabled = false,
   isPinnedVersion,
   isSelected,
@@ -71,17 +68,7 @@ const SequencingPlatformOption = ({
     >
       {radioButton}
       <div className={commonStyles.optionText}>
-        <div className={commonStyles.title}>
-          {technologyName}
-          {isBeta && (
-            <StatusLabel
-              className={isDisabled && cs.disabledStatus}
-              inline
-              status="Beta"
-              type="beta"
-            />
-          )}
-        </div>
+        <div className={commonStyles.title}>{technologyName}</div>
         <div
           className={cx(
             cs.technologyDescription,

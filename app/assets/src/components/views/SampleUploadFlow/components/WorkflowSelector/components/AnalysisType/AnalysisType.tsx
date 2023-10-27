@@ -6,7 +6,6 @@ import {
 } from "@czi-sds/components";
 import cx from "classnames";
 import React, { ReactNode } from "react";
-import StatusLabel from "~/components/ui/labels/StatusLabel";
 import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { UploadWorkflows } from "~/components/views/SampleUploadFlow/constants";
 import cs from "./analysis_type.scss";
@@ -14,7 +13,6 @@ import cs from "./analysis_type.scss";
 interface AnalysisTypeProps {
   description: ReactNode;
   customIcon?: ReactNode;
-  isBeta?: boolean;
   isDisabled: boolean;
   isSelected: boolean;
   onClick(): void;
@@ -27,7 +25,6 @@ interface AnalysisTypeProps {
 const AnalysisType = ({
   description,
   customIcon,
-  isBeta = false,
   isDisabled,
   isSelected,
   onClick,
@@ -83,18 +80,8 @@ const AnalysisType = ({
         )}
       </div>
       <div className={commonStyles.optionText}>
-        <div className={cx(commonStyles.title, isBeta && cs.alignBetaIcon)}>
+        <div className={cx(commonStyles.title)}>
           <span>{title}</span>
-          {isBeta && (
-            <span className={cs.statusLabel}>
-              <StatusLabel
-                className={isDisabled && cs.disabledStatus}
-                inline
-                status="Beta"
-                type={isDisabled ? "default" : "beta"}
-              />
-            </span>
-          )}
         </div>
         <div className={cs.description}>{description}</div>
         {isSelected && sequencingPlatformOptions}

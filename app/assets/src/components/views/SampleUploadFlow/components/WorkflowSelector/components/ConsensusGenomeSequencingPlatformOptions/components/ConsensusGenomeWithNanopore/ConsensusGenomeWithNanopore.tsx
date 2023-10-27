@@ -47,7 +47,6 @@ const ConsensusGenomeWithNanopore = ({
       }
       customDescription="We are using the ARTIC network’s nCoV-2019 novel coronavirus bioinformatics protocol for nanopore sequencing, which can be found "
       githubLink={ARTIC_PIPELINE_LINK}
-      isBeta={false}
       isDisabled={isDisabled}
       isSelected={isSelected}
       onClick={onClick}

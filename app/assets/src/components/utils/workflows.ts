@@ -1,5 +1,3 @@
-import { ONT_V1_HARD_LAUNCH_FEATURE } from "./features";
-
 // Pipeline workflow options
 export const WORKFLOW_ENTITIES = {
   SAMPLES: "Samples" as const,
@@ -135,17 +133,6 @@ export const WORKFLOW_ORDER = [
   WorkflowType.AMR,
   WorkflowType.BENCHMARK,
 ];
-
-export const workflowIsBeta = (
-  workflow: WorkflowType,
-  allowedFeatures: string[],
-) => {
-  const betaWorkflows: WorkflowType[] = [];
-  if (!allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE)) {
-    betaWorkflows.push(WorkflowType.LONG_READ_MNGS);
-  }
-  return betaWorkflows.includes(workflow);
-};
 
 export const getShorthandFromWorkflow = (workflowValue: WorkflowType) => {
   return WORKFLOWS[workflowValue].shorthand;

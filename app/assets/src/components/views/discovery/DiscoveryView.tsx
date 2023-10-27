@@ -1,4 +1,4 @@
-import { Tab, Tabs, Tag } from "@czi-sds/components";
+import { Tab, Tabs } from "@czi-sds/components";
 import {
   capitalize,
   clone,
@@ -34,7 +34,6 @@ import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
   BENCHMARKING_FEATURE,
-  ONT_V1_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
   SORTING_V0_ADMIN_FEATURE,
@@ -51,7 +50,6 @@ import {
 } from "~/components/utils/urls";
 import {
   WorkflowCount,
-  workflowIsBeta,
   workflowIsWorkflowRunEntity,
   WORKFLOWS,
   WorkflowType,
@@ -193,8 +191,7 @@ class DiscoveryViewCC extends React.Component<
   workflowEntity: string;
   constructor(props: DiscoveryViewWithContextProps) {
     super(props);
-    const { allowedFeatures, domain, projectId, updateDiscoveryProjectId } =
-      this.props;
+    const { domain, projectId, updateDiscoveryProjectId } = this.props;
 
     this.urlParser = new UrlQueryParser({
       filters: "object",
@@ -318,18 +315,16 @@ class DiscoveryViewCC extends React.Component<
         displayName: WorkflowType.BENCHMARK,
       }) as ObjectCollectionView<Entry>;
 
-    if (allowedFeatures.includes(ONT_V1_FEATURE)) {
-      this.longReadMngsSamples = this.dataLayer.longReadMngsSamples.createView({
-        conditions: this.getConditionsFor(
-          TAB_SAMPLES,
-          WorkflowType.LONG_READ_MNGS,
-        ),
-        onViewChange: () => {
-          this.refreshSampleData(WorkflowType.LONG_READ_MNGS);
-        },
-        displayName: WorkflowType.LONG_READ_MNGS,
-      });
-    }
+    this.longReadMngsSamples = this.dataLayer.longReadMngsSamples.createView({
+      conditions: this.getConditionsFor(
+        TAB_SAMPLES,
+        WorkflowType.LONG_READ_MNGS,
+      ),
+      onViewChange: () => {
+        this.refreshSampleData(WorkflowType.LONG_READ_MNGS);
+      },
+      displayName: WorkflowType.LONG_READ_MNGS,
+    });
 
     this.projects = this.dataLayer.projects.createView({
       conditions: this.getConditionsFor(TAB_PROJECTS),
@@ -361,10 +356,7 @@ class DiscoveryViewCC extends React.Component<
       this.cgWorkflowRuns.loadPage(0);
       this.visualizations.loadPage(0);
       this.amrWorkflowRuns.loadPage(0);
-
-      if (allowedFeatures.includes(ONT_V1_FEATURE)) {
-        this.longReadMngsSamples.loadPage(0);
-      }
+      this.longReadMngsSamples.loadPage(0);
     }
 
     this.updateBrowsingHistory("replace");
@@ -440,7 +432,6 @@ class DiscoveryViewCC extends React.Component<
     initialWorkflow: WorkflowType,
     countByWorkflow: WorkflowCount,
   ) => {
-    const { allowedFeatures } = this.props;
     // If default workflow does not have any samples, switch to a tab with samples
     // Order to check tabs is SHORT_READ_MNGS, LONG_READ_MNGS, CONSENSUS_GENOME, then AMR
     const initialWorkflowCount = countByWorkflow?.[initialWorkflow] || 0;
@@ -457,10 +448,7 @@ class DiscoveryViewCC extends React.Component<
 
     if (numOfShortReadMngsSamples > 0) {
       return WorkflowType.SHORT_READ_MNGS;
-    } else if (
-      numOfLongReadMngsSamples > 0 &&
-      allowedFeatures.includes(ONT_V1_FEATURE)
-    ) {
+    } else if (numOfLongReadMngsSamples > 0) {
       return WorkflowType.LONG_READ_MNGS;
     } else if (numOfCgSamples > 0) {
       return WorkflowType.CONSENSUS_GENOME;
@@ -2135,9 +2123,6 @@ class DiscoveryViewCC extends React.Component<
     const { allowedFeatures, isAdmin, snapshotShareId } = this.props;
     const { filteredSampleCountsByWorkflow } = this.state;
     let workflows = WORKFLOW_ORDER;
-    if (!allowedFeatures.includes(ONT_V1_FEATURE)) {
-      workflows = pull(WorkflowType.LONG_READ_MNGS, workflows);
-    }
 
     if (!isAdmin && !allowedFeatures.includes(BENCHMARKING_FEATURE)) {
       workflows = pull(WorkflowType.BENCHMARK, workflows);
@@ -2147,7 +2132,6 @@ class DiscoveryViewCC extends React.Component<
 
     return workflows.map(name => {
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
-      const isBeta = workflowIsBeta(name, allowedFeatures);
 
       let workflowCount: number | string = filteredSampleCountsByWorkflow[name];
 
@@ -2168,17 +2152,6 @@ class DiscoveryViewCC extends React.Component<
                   .replace(/ /g, "-")}-count`}
               >
                 {workflowCount || "0"}
-                {isBeta && (
-                  <span className={cs.betaTag}>
-                    <Tag
-                      sdsStyle="rounded"
-                      sdsType="secondary"
-                      label="BETA"
-                      color="beta"
-                      hover={false}
-                    />
-                  </span>
-                )}
               </span>
             }
           />
@@ -2257,9 +2230,7 @@ class DiscoveryViewCC extends React.Component<
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
     const amrHasLoaded = !this.amrWorkflowRuns.isLoading();
     const benchmarkHasLoaded = !this.benchmarkWorkflowRuns.isLoading();
-    const longReadSamplesHaveLoaded = allowedFeatures.includes(ONT_V1_FEATURE)
-      ? !this.longReadMngsSamples.isLoading()
-      : true;
+    const longReadSamplesHaveLoaded = !this.longReadMngsSamples.isLoading();
 
     const tableHasLoaded =
       amrHasLoaded &&

@@ -49,10 +49,7 @@ import ProjectSelect from "~/components/common/ProjectSelect";
 import { useAllowedFeatures } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import {
-  ONT_V1_FEATURE,
-  PRE_UPLOAD_CHECK_FEATURE,
-} from "~/components/utils/features";
+import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { SampleUploadType } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import BasespaceSampleImport from "../../BasespaceSampleImport";
@@ -1208,7 +1205,6 @@ class UploadSampleStepCC extends React.Component<
 
     if (
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value) &&
-      allowedFeatures.includes(ONT_V1_FEATURE) &&
       selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE &&
       !selectedGuppyBasecallerSetting
     ) {
@@ -1304,24 +1300,18 @@ class UploadSampleStepCC extends React.Component<
     );
 
     if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value)) {
-      // If ont_v1 is enabled, the user must select either Illumina or Nanopore before proceeding.
+      // The user must select either Illumina or Nanopore before proceeding.
       // If they select Nanopore, they must additionally select their Guppy Basecaller Setting.
-      if (allowedFeatures.includes(ONT_V1_FEATURE)) {
-        switch (selectedTechnology) {
-          case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
-            isMNGSWorkflowValid = true;
-            break;
-          case SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE:
-            isMNGSWorkflowValid = !!selectedGuppyBasecallerSetting;
-            break;
-          default:
-            isMNGSWorkflowValid = false;
-            break;
-        }
-      } else {
-        // If ont_v1 is not enabled, then metagenomics will automatically use Illumina as the sequencing platform,
-        // so no additional selections are required.
-        isMNGSWorkflowValid = true;
+      switch (selectedTechnology) {
+        case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
+          isMNGSWorkflowValid = true;
+          break;
+        case SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE:
+          isMNGSWorkflowValid = !!selectedGuppyBasecallerSetting;
+          break;
+        default:
+          isMNGSWorkflowValid = false;
+          break;
       }
     }
 
@@ -1379,40 +1369,13 @@ class UploadSampleStepCC extends React.Component<
 
   getSequenceTechnology = () => {
     const { selectedTechnology } = this.state;
-    const { allowedFeatures } = this.props;
-
-    if (allowedFeatures.includes(ONT_V1_FEATURE)) {
-      if (
-        selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA ||
-        this.isWorkflowSelected(UPLOAD_WORKFLOWS.AMR.value)
-      )
-        return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
-      else if (selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE)
-        return SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
-    } else {
-      // TODO: We currently assume all metagenomics samples are Illumina by default.
-      // Remove this block of logic after the metagenomics ONT pipeline has been
-      // released to all users.
-      if (
-        this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value) ||
-        this.isWorkflowSelected(UPLOAD_WORKFLOWS.AMR.value) ||
-        this.isWorkflowSelected(
-          UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
-        ) ||
-        (this.isWorkflowSelected(
-          UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
-        ) &&
-          selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA)
-      )
-        return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
-      else if (
-        this.isWorkflowSelected(
-          UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
-        ) &&
-        selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE
-      )
-        return SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
-    }
+    if (
+      selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA ||
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.AMR.value)
+    )
+      return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
+    else if (selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE)
+      return SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
   };
 
   validateCorrectFormat = (file: $TSFixMe) => {

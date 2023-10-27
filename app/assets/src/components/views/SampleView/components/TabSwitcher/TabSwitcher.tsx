@@ -2,11 +2,7 @@ import { compact, isEmpty } from "lodash";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import Tabs from "~/components/ui/controls/Tabs";
-import StatusLabel from "~/components/ui/labels/StatusLabel";
-import {
-  AMR_DEPRECATED_FEATURE,
-  ONT_V1_FEATURE,
-} from "~/components/utils/features";
+import { AMR_DEPRECATED_FEATURE } from "~/components/utils/features";
 import {
   WORKFLOWS,
   WorkflowType,
@@ -34,35 +30,6 @@ export const TabSwitcher = ({
   const computeWorkflowTabs = (sample: Sample) => {
     const { allowedFeatures } = useContext(UserContext) || {};
 
-    /* customLabel field was added for long read mNGS
-    because the display name does not match the label field passed in the URL
-    from DiscoveryView. If another tab is added that needs a customized display name,
-    we should think about adding a config to handle tab logic and rendering. */
-    const customTab = (
-      value: string,
-      status: string,
-      customLabel?: string,
-    ) => ({
-      value: value,
-      label: (
-        <>
-          {customLabel || value}
-          <StatusLabel
-            className={cs.statusLabel}
-            inline
-            status={status}
-            type="beta"
-          />
-        </>
-      ),
-    });
-
-    const ontTab = customTab(
-      WORKFLOW_TABS.LONG_READ_MNGS,
-      "Beta",
-      WORKFLOWS[WorkflowType.LONG_READ_MNGS].pluralizedLabel,
-    );
-
     const {
       [WorkflowType.SHORT_READ_MNGS]: shortReadMngs,
       [WorkflowType.LONG_READ_MNGS]: longReadMngs,
@@ -77,7 +44,7 @@ export const TabSwitcher = ({
 
     const workflowTabs = compact([
       shortReadMngs && WORKFLOW_TABS.SHORT_READ_MNGS,
-      longReadMngs && allowedFeatures.includes(ONT_V1_FEATURE) && ontTab,
+      longReadMngs && WORKFLOW_TABS.LONG_READ_MNGS,
       shortReadMngs && deprecatedAmrLabel,
       amr && WORKFLOW_TABS.AMR,
       cg && WORKFLOW_TABS.CONSENSUS_GENOME,
