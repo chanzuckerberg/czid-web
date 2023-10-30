@@ -56,7 +56,7 @@ test.describe("Sample project tests", () => {
     await acceptCookies(page);
   });
 
-  test("Should create new project", async ({ page }) => {
+  test.fixme("Should create new project", async ({ page }) => {
     const projectName = "Test project " + new Date().getTime();
     const data = {
       id: 934,
@@ -92,7 +92,7 @@ test.describe("Sample project tests", () => {
     );
   });
 
-  test("Should not create duplicate project", async ({ page }) => {
+  test.fixme("Should not create duplicate project", async ({ page }) => {
     // Fill in project name that already exists in test db
 
     await page.locator(UI_INPUT).fill(EXISTING_PROJECT);

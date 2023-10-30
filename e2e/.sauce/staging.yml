@@ -13,6 +13,9 @@ sauce:
       - czid
       - staging
     build: COMMIT $CI_COMMIT_SHORT_SHA
+  # comment out when running locally  
+  # tunnel:
+  #   name: czid-github-sauce-connect 
 playwright:
   version: package.json 
   configFile: ./staging.config.ts 
@@ -30,3 +33,10 @@ suites:
       browserName: "chromium"
       project: "chromium"
     shard: concurrency
+artifacts:
+  cleanup: true
+  download:
+    when: always
+    match:
+      - "*"
+    directory: ./artifacts/    

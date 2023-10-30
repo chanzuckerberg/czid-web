@@ -1,5 +1,4 @@
 # This file instructs saucectl to not package any files mentioned here.
-
 node_modules/
 .git/
 .github/
@@ -8,4 +7,4 @@ node_modules/
 .idea/
 .gitignore
 .npmrc
-\*.gif
+*.gif
