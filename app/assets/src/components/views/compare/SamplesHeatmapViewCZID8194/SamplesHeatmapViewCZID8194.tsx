@@ -1,4 +1,5 @@
 import { Notification } from "@czi-sds/components";
+import { cx } from "@emotion/css";
 import axios from "axios";
 import DeepEqual from "fast-deep-equal";
 import {
@@ -2144,7 +2145,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       downloadModalOpen,
       // enableMassNormalizedBackgrounds,
       heatmapCreationModalOpen,
-      // hideFilters,
+      hideFilters,
       loading,
       sampleIds,
       selectedOptions,
@@ -2184,30 +2185,37 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
         <div className="visualization-content">
           {/* render filters */}
           <div className={cs.filtersAndHeatmapContainer}>
-            <FilterPanel
-              hideFilters={this.state.hideFilters}
-              content={
-                <SamplesHeatmapFilters
-                  options={this.getControlOptions()}
-                  selectedOptions={selectedOptions}
-                  onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                  loading={loading}
-                  data={this.state.data}
-                  filteredTaxaCount={shownTaxa.size}
-                  totalTaxaCount={
-                    selectedOptions.species
-                      ? this.state.allSpeciesIds.length
-                      : this.state.allGeneraIds.length
-                  }
-                  prefilterConstants={this.props.prefilterConstants}
-                  enableMassNormalizedBackgrounds={
-                    this.state.enableMassNormalizedBackgrounds
-                  }
-                />
-              }
-              anchorPosition={"left"}
-              customDrawerWidth={200}
-            />
+            <div
+              className={cx(
+                cs.filterPanelContainer,
+                hideFilters && cs.hideFilterPanel,
+              )}
+            >
+              <FilterPanel
+                hideFilters={hideFilters}
+                content={
+                  <SamplesHeatmapFilters
+                    options={this.getControlOptions()}
+                    selectedOptions={selectedOptions}
+                    onSelectedOptionsChange={this.handleSelectedOptionsChange}
+                    loading={loading}
+                    data={this.state.data}
+                    filteredTaxaCount={shownTaxa.size}
+                    totalTaxaCount={
+                      selectedOptions.species
+                        ? this.state.allSpeciesIds.length
+                        : this.state.allGeneraIds.length
+                    }
+                    prefilterConstants={this.props.prefilterConstants}
+                    enableMassNormalizedBackgrounds={
+                      this.state.enableMassNormalizedBackgrounds
+                    }
+                  />
+                }
+                anchorPosition={"left"}
+                customDrawerWidth={200}
+              />
+            </div>
             {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
           </div>
         </div>
