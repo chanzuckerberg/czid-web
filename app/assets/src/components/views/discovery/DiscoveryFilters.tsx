@@ -227,7 +227,7 @@ class DiscoveryFilters extends React.Component<
       );
     }
 
-    this.setState(taxonFilterStateUpdate);
+    this.setState(taxonFilterStateUpdate, this.notifyFilterChangeHandler);
   };
 
   handleChange(selectedKey: $TSFixMe, selected: $TSFixMe) {
