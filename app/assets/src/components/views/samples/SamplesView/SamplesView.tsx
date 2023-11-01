@@ -852,12 +852,9 @@ const SamplesView = forwardRef(function SamplesView(
           <Label
             circular
             className={cs.counter}
-            // Log this no-op so we know if users want a way to view their selected samples
-            onClick={() =>
-              trackEvent(
-                ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_SAMPLE_COUNTER_CLICKED,
-              )
-            }
+            // this is broken, but alldoami found it while working on something unrelated
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            onClick={() => {}}
             text={`${selectedIds.size}`}
           />
           <span className={cs.label}>Selected</span>

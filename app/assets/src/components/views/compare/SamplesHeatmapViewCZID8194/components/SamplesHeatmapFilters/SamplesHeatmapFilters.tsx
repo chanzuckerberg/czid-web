@@ -1,6 +1,5 @@
 import { Icon, Tooltip } from "@czi-sds/components";
 import React, { useContext } from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
@@ -73,7 +72,6 @@ const SamplesHeatmapFilters = ({
   selectedOptions,
   onSelectedOptionsChange,
 }: SamplesHeatmapFiltersPropsType) => {
-  const trackEvent = useTrackEvent();
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -84,12 +82,6 @@ const SamplesHeatmapFilters = ({
     }
 
     onSelectedOptionsChange({ species: value });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_TAXON_LEVEL_SELECT_CHANGED,
-      {
-        value,
-      },
-    );
   };
 
   const renderTaxonLevelSelect = () => {
@@ -121,12 +113,6 @@ const SamplesHeatmapFilters = ({
     }
 
     onSelectedOptionsChange({ metric: value });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_METRIC_SELECT_CHANGED,
-      {
-        value,
-      },
-    );
   };
 
   const renderMetricSelect = () => {
@@ -148,12 +134,6 @@ const SamplesHeatmapFilters = ({
     }
 
     onSelectedOptionsChange({ background });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_BACKGROUND_SELECT_CHANGED,
-      {
-        background,
-      },
-    );
   };
 
   const renderBackgroundSelect = () => {
@@ -179,12 +159,6 @@ const SamplesHeatmapFilters = ({
 
   const onThresholdFilterApply = (thresholdFilters: $TSFixMe) => {
     onSelectedOptionsChange({ thresholdFilters });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_THRESHOLD_FILTER_SELECT_APPLIED,
-      {
-        filters: thresholdFilters.length,
-      },
-    );
   };
 
   const renderThresholdFilterSelect = () => {
@@ -240,12 +214,6 @@ const SamplesHeatmapFilters = ({
     }
 
     onSelectedOptionsChange({ readSpecificity: value });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_SPECIFICITY_FILTER_CHANGED,
-      {
-        readSpecificity: value,
-      },
-    );
   };
 
   const renderSpecificityFilter = () => {
@@ -277,12 +245,6 @@ const SamplesHeatmapFilters = ({
     }
 
     onSelectedOptionsChange({ sampleSortType: value });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_SORT_SAMPLES_SELECT_CHANGED,
-      {
-        sampleSortType: value,
-      },
-    );
   };
 
   const renderSortSamplesSelect = () => {
@@ -305,12 +267,6 @@ const SamplesHeatmapFilters = ({
     }
 
     onSelectedOptionsChange({ taxaSortType: value });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_SORT_TAXA_SELECT_CHANGED,
-      {
-        taxaSortType: value,
-      },
-    );
   };
 
   const renderSortTaxaSelect = () => {
@@ -333,12 +289,6 @@ const SamplesHeatmapFilters = ({
     }
 
     onSelectedOptionsChange({ dataScaleIdx: value });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_DATA_SCALE_SELECT_CHANGED,
-      {
-        dataScaleIdx: value,
-      },
-    );
   };
 
   const renderScaleSelect = () => {
@@ -364,12 +314,6 @@ const SamplesHeatmapFilters = ({
 
   const onTaxonsPerSampleEnd = (newValue: $TSFixMe) => {
     onSelectedOptionsChange({ taxonsPerSample: newValue });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_TAXONS_PER_SAMPLE_SLIDER_CHANGED,
-      {
-        taxonsPerSample: newValue,
-      },
-    );
   };
 
   const renderTaxonsPerSampleSlider = () => {

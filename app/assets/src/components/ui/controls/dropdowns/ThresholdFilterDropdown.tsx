@@ -1,9 +1,5 @@
 import { get } from "lodash/fp";
 import React from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-} from "~/api/analytics";
 import { GlobalContext } from "~/globalContext/reducer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { PrimaryButton, SecondaryButton } from "../buttons";
@@ -132,41 +128,16 @@ class ThresholdFilterDropdown extends React.Component<
   }
 
   applyFilterUpdates = () => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
-
     const newThresholds = this.state.thresholds.filter(
       ThresholdFilterDropdown.isThresholdValid,
     );
 
     this.setState({ popupIsOpen: false, thresholds: newThresholds });
     this.props.onApply(newThresholds);
-
-    trackEventFromClassComponent(
-      globalAnalyticsContext,
-      ANALYTICS_EVENT_NAMES.THRESHOLD_FILTER_DROPDOWN_APPLY_BUTTON_CLICKED,
-      {
-        thresholds: newThresholds.length,
-      },
-    );
   };
 
   cancelFilterUpdates = () => {
     this.setState({ popupIsOpen: false, thresholds: this.props.thresholds });
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
-
-    trackEventFromClassComponent(
-      globalAnalyticsContext,
-      ANALYTICS_EVENT_NAMES.THRESHOLD_FILTER_DROPDOWN_CANCEL_BUTTON_CLICKED,
-      {
-        thresholds: this.props.thresholds.length,
-      },
-    );
   };
 
   handleOpen = () => {

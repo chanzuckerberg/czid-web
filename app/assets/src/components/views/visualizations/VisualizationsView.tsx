@@ -2,10 +2,6 @@ import { Icon } from "@czi-sds/components";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-} from "~/api/analytics";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { GlobalContext } from "~/globalContext/reducer";
@@ -155,22 +151,9 @@ class VisualizationsView extends React.Component<VisualizationsViewProps> {
   }
 
   handleRowClick = ({ rowData }: $TSFixMe) => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     const url = `/visualizations/${rowData.visualization.visualization_type}/${rowData.id}`;
     // @ts-expect-error Type 'Event' is missing the following properties
     openUrl(url, event);
-    trackEventFromClassComponent(
-      globalAnalyticsContext,
-      ANALYTICS_EVENT_NAMES.VISUALIZATIONS_VIEW_ROW_CLICKED,
-      {
-        visualizationType: rowData.visualization.visualization_type,
-        visualizationId: rowData.id,
-        url,
-      },
-    );
   };
 
   handleLoadRowsAndFormat = async (args: $TSFixMe) => {

@@ -1,10 +1,6 @@
 import { compact } from "lodash/fp";
 import React from "react";
 import { bulkImportRemoteSamples } from "~/api";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-} from "~/api/analytics";
 import List from "~/components/ui/List";
 import { GlobalContext } from "~/globalContext/reducer";
 import { Project } from "~/interface/shared";
@@ -51,24 +47,9 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
   }
 
   toggleInfo = () => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
-    this.setState(
-      {
-        showInfo: !this.state.showInfo,
-      },
-      () => {
-        trackEventFromClassComponent(
-          globalAnalyticsContext,
-          ANALYTICS_EVENT_NAMES.REMOTE_SAMPLE_FILE_UPLOAD_MORE_INFO_TOGGLE_CLICKED,
-          {
-            showInfo: this.state.showInfo,
-          },
-        );
-      },
-    );
+    this.setState({
+      showInfo: !this.state.showInfo,
+    });
   };
 
   handleRemotePathChange = (remoteS3Path: string) => {
@@ -78,10 +59,6 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
   };
 
   handleConnect = async () => {
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     if (!this.props.project) {
       this.setState({
         error: NO_TARGET_PROJECT_ERROR,
@@ -110,16 +87,6 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
       }));
 
       this.props.onChange(newSamples);
-
-      trackEventFromClassComponent(
-        globalAnalyticsContext,
-        ANALYTICS_EVENT_NAMES.REMOTE_SAMPLE_FILE_UPLOAD_CONNECT_SUCCEEDED,
-        {
-          projectId: this.props.project.id,
-          bulkPath: this.state.remoteS3Path,
-          newSamples: newSamples.length,
-        },
-      );
     } catch (e) {
       if (e.data && e.data.status) {
         // Use error message provided by the backend if it exists
@@ -132,16 +99,6 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
         // Otherwise fallback to a generic error message
         this.setState({ error: NO_VALID_SAMPLES_FOUND_ERROR });
       }
-
-      trackEventFromClassComponent(
-        globalAnalyticsContext,
-        ANALYTICS_EVENT_NAMES.REMOTE_SAMPLE_FILE_UPLOAD_CONNECT_FAILED,
-        {
-          projectId: this.props.project.id,
-          bulkPath: this.state.remoteS3Path,
-          error: e.status || e.message || e,
-        },
-      );
     }
   };
 

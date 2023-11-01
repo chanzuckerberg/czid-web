@@ -36,7 +36,6 @@ import QueryString from "query-string";
 import React from "react";
 import { getProjects, validateSampleFiles, validateSampleNames } from "~/api";
 import {
-  ANALYTICS_EVENT_NAMES,
   TrackEventType,
   useTrackEvent,
   useWithAnalytics,
@@ -1639,14 +1638,9 @@ class UploadSampleStepCC extends React.Component<
           <a href="/home">
             <SecondaryButton
               text="Cancel"
-              onClick={() =>
-                this.props.trackEvent(
-                  ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CANCEL_BUTTON_CLICKED,
-                  {
-                    ...this.getLocalAnalyticsContext(),
-                  },
-                )
-              }
+              // this is broken, but alldoami found it while working on something unrelated
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onClick={() => {}}
             />
           </a>
         </div>

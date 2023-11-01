@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import FilterTag from "~/components/ui/controls/FilterTag";
 import { SelectedOptions } from "~/interface/shared/specific";
 import { SDSFormattedOption } from "../../../../SamplesHeatmapFilters";
@@ -19,7 +18,6 @@ export const SamplesHeatmapCategoryFilterTags = ({
   handleRemoveCategoryFromTags,
   convertSelectedOptionsToSdsFormattedOptions,
 }: SamplesHeatmapCategoryFilterTagsPropsType) => {
-  const trackEvent = useTrackEvent();
   const VIRUSES_PHAGE = "Viruses - Phage";
 
   // The filter tag should show "Phage" instead of "Viruses - Phage"
@@ -57,12 +55,6 @@ export const SamplesHeatmapCategoryFilterTags = ({
                 disabled={disabled}
                 onClose={() => {
                   handleRemoveCategoryFromTags(category);
-                  trackEvent(
-                    ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROL_CATEGORIES_FILTER_REMOVED,
-                    {
-                      category,
-                    },
-                  );
                 }}
               />
             )}

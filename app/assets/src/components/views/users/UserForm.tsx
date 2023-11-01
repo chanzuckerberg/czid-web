@@ -1,5 +1,4 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import Archetypes from "~/interface/archetypes";
 import Segments from "~/interface/segments";
 import Checkbox from "~ui/controls/Checkbox";
@@ -34,26 +33,19 @@ const UserForm = ({
   success,
   successMessage,
 }: UserFormProps) => {
-  const trackEvent = useTrackEvent();
   const displayError = (failedStatus, serverErrors, formattedError) => {
     if (failedStatus) {
-      const ret =
-        serverErrors && serverErrors.length ? (
-          serverErrors.map((error, i) => {
-            return (
-              <p className="error center-align" key={i}>
-                {error}
-              </p>
-            );
-          })
-        ) : (
-          <span>{formattedError}</span>
-        );
-      trackEvent(ANALYTICS_EVENT_NAMES.UPDATE_USER_UPDATE_ERRORS_DISPLAYED, {
-        serverErrors,
-        formattedError,
-      });
-      return ret;
+      return serverErrors && serverErrors.length ? (
+        serverErrors.map((error, i) => {
+          return (
+            <p className="error center-align" key={i}>
+              {error}
+            </p>
+          );
+        })
+      ) : (
+        <span>{formattedError}</span>
+      );
     } else {
       return null;
     }

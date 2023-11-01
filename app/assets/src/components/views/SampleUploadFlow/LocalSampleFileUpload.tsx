@@ -12,11 +12,7 @@ import _fp, {
 } from "lodash/fp";
 import React from "react";
 import { FileWithPreview } from "react-dropzone";
-import {
-  ANALYTICS_EVENT_NAMES,
-  TrackEventType,
-  useTrackEvent,
-} from "~/api/analytics";
+import { TrackEventType, useTrackEvent } from "~/api/analytics";
 import { useAllowedFeatures } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
@@ -116,19 +112,9 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
   };
 
   toggleInfo = () => {
-    this.setState(
-      {
-        showInfo: !this.state.showInfo,
-      },
-      () => {
-        this.props.trackEvent(
-          ANALYTICS_EVENT_NAMES.LOCAL_SAMPLE_FILE_UPLOAD_MORE_INFO_TOGGLE_CLICKED,
-          {
-            showInfo: this.state.showInfo,
-          },
-        );
-      },
-    );
+    this.setState({
+      showInfo: !this.state.showInfo,
+    });
   };
 
   getFilePickerTitle = () => {

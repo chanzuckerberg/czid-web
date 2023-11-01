@@ -284,24 +284,11 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   };
 
   handleSelectDownloadType = (newSelectedDownloadTypeName: string) => {
-    const { workflow } = this.props;
     const { selectedDownloadTypeName } = this.state;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     if (newSelectedDownloadTypeName === selectedDownloadTypeName) {
       return;
     }
 
-    trackEventFromClassComponent(
-      globalAnalyticsContext,
-      ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_RADIO_BUTTON_FOR_DOWNLOAD_TYPE_SELECTED,
-      {
-        downloadType: newSelectedDownloadTypeName,
-        workflow,
-      },
-    );
     this.setState({
       selectedDownloadTypeName: newSelectedDownloadTypeName,
     });
@@ -346,23 +333,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     value: $TSFixMe,
     displayName: string,
   ) => {
-    const { workflow } = this.props;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     this.setState(prevState => {
-      trackEventFromClassComponent(
-        globalAnalyticsContext,
-        ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_DROPDOWN_FIELD_FOR_DOWNLOAD_TYPE_SELECTED,
-        {
-          downloadType,
-          fieldType,
-          fieldValue: value,
-          displayName,
-          workflow,
-        },
-      );
       // If the value is undefined, delete it from selectedFields.
       // This allows us to support cases where certain fields are conditionally required;
       // if the field becomes no longer required, we can unset it.

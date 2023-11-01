@@ -1599,14 +1599,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
     const taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
 
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_TAXON_REMOVED,
-      {
-        taxonId,
-        taxonName,
-      },
-    );
-
     // Only update state if something changed (slightly faster not to update state when not necessary)
     if (addedTaxonIds.has(taxonId)) {
       addedTaxonIds.delete(taxonId);
@@ -1620,12 +1612,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
     this.setState({
       selectedMetadata: Array.from(metadataFields),
     });
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_METADATA_CHANGED,
-      {
-        selected: metadataFields,
-      },
-    );
     this.updateHistoryState();
   };
 
@@ -1633,13 +1619,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
     this.metadataSortField = field;
     this.metadataSortAsc = dir;
     this.updateHistoryState();
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.HEATMAP_COLUMN_METADATA_LABEL_CLICKED,
-      {
-        columnMetadataSortField: field,
-        sortDirection: dir ? "asc" : "desc",
-      },
-    );
   };
 
   handlePinnedSampleChange = (_event: $TSFixMe, selectedSamples: $TSFixMe) => {
@@ -1690,26 +1669,12 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       this.setState({
         sidebarVisible: false,
       });
-      this.props.trackEvent(
-        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_DETAILS_SIDEBAR_CLOSED,
-        {
-          sampleId: sampleId,
-          sidebarMode: "sampleDetails",
-        },
-      );
     } else {
       this.setState({
         selectedSampleId: sampleId,
         sidebarMode: "sampleDetails",
         sidebarVisible: true,
       });
-      this.props.trackEvent(
-        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_DETAILS_SIDEBAR_OPENED,
-        {
-          sampleId: sampleId,
-          sidebarMode: "sampleDetails",
-        },
-      );
     }
   };
 
@@ -1731,15 +1696,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       this.setState({
         sidebarVisible: false,
       });
-      this.props.trackEvent(
-        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_TAXON_DETAILS_SIDEBAR_CLOSED,
-        {
-          parentTaxonId: taxonDetails.parentId,
-          taxonId: taxonDetails.id,
-          taxonName,
-          sidebarMode: "taxonDetails",
-        },
-      );
     } else {
       this.setState({
         sidebarMode: "taxonDetails",
@@ -1750,15 +1706,6 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
         },
         sidebarVisible: true,
       });
-      this.props.trackEvent(
-        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_TAXON_DETAILS_SIDEBAR_OPENED,
-        {
-          parentTaxonId: taxonDetails.parentId,
-          taxonId: taxonDetails.id,
-          taxonName,
-          sidebarMode: "taxonDetails",
-        },
-      );
     }
   };
 

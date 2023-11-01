@@ -1609,12 +1609,6 @@ class SamplesHeatmapViewCC extends React.Component<
     this.setState({
       selectedMetadata: Array.from(metadataFields),
     });
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_METADATA_CHANGED,
-      {
-        selected: metadataFields,
-      },
-    );
     this.updateHistoryState();
   };
 
@@ -1622,13 +1616,6 @@ class SamplesHeatmapViewCC extends React.Component<
     this.metadataSortField = field;
     this.metadataSortAsc = dir;
     this.updateHistoryState();
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.HEATMAP_COLUMN_METADATA_LABEL_CLICKED,
-      {
-        columnMetadataSortField: field,
-        sortDirection: dir ? "asc" : "desc",
-      },
-    );
   };
 
   handlePinnedSampleChange = (_event: $TSFixMe, selectedSamples: $TSFixMe) => {

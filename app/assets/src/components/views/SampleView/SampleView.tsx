@@ -18,11 +18,7 @@ import {
   kickoffConsensusGenome,
 } from "~/api";
 import { getAmrDeprecatedData } from "~/api/amr";
-import {
-  ANALYTICS_EVENT_NAMES,
-  useTrackEvent,
-  useWithAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   createPersistedBackground,
   getPersistedBackground,
@@ -134,7 +130,6 @@ import {
 
 const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   const trackEvent = useTrackEvent();
-  const withAnalytics = useWithAnalytics();
   const { allowedFeatures } = useContext(UserContext) || {};
 
   const {
@@ -1209,14 +1204,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
         <CoverageVizBottomSidebar
           nameType={selectedOptions?.nameType}
           onBlastClick={handleBlastClick}
-          onClose={withAnalytics(
-            () => setCoverageVizVisible(false),
-            ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_COVERAGE_VIZ_SIDEBAR_CLOSED,
-            {
-              sampleId: sample.id,
-              sampleName: sample.name,
-            },
-          )}
+          onClose={() => setCoverageVizVisible(false)}
           params={getCoverageVizParams(
             coverageVizParams,
             coverageVizDataByTaxon,

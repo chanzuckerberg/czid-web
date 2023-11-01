@@ -1,10 +1,6 @@
 import cx from "classnames";
 import { find } from "lodash/fp";
 import React from "react";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-} from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { GlobalContext } from "~/globalContext/reducer";
@@ -53,10 +49,6 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
 
   render() {
     const { currentStep } = this.props;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
     const { title } = find(opt => currentStep === opt.step, MENU_OPTIONS);
 
     return (
@@ -103,14 +95,6 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
                   key={val.text}
                   onClick={() => {
                     this.onStepSelect(val.step);
-                    trackEventFromClassComponent(
-                      globalAnalyticsContext,
-                      ANALYTICS_EVENT_NAMES.SAMPLE_UPLOAD_FLOW_HEADER_STEP_OPTION_CLICKED,
-                      {
-                        step: val.step,
-                        text: val.text,
-                      },
-                    );
                   }}
                 >
                   <Label className={cs.circle} circular text={index + 1} />
