@@ -61,6 +61,7 @@ const MetagenomicsSequencingPlatformOptions = ({
       <div className={cs.technologyOptions}>
         <IlluminaSequencingPlatformOption
           isCg={false}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           isPinnedVersion={isPinnedVersion}
           isSelected={selectedTechnology === ILLUMINA}
           onClick={() => onTechnologyToggle(MNGS, ILLUMINA)}

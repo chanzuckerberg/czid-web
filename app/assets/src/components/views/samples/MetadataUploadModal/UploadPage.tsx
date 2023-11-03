@@ -1,10 +1,9 @@
 import React from "react";
 import { validateManualMetadataForProject } from "~/api/metadata";
 import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
-import { NameId } from "~/interface/shared";
+import { NameId, SampleFromApi } from "~/interface/shared";
 import Instructions from "./Instructions";
 import cs from "./metadata_upload_modal.scss";
-import { ProjectSample } from "./MetadataUploadModal";
 
 interface UploadPageProps {
   onMetadataChange: $TSFixMeFunction;
@@ -12,7 +11,7 @@ interface UploadPageProps {
   wizardEnableContinue?: $TSFixMeFunction;
   wizardSetOnContinueValidation?: $TSFixMeFunction;
   wizardSetOverlay?: $TSFixMeFunction;
-  samples?: ProjectSample[];
+  samples?: SampleFromApi[];
   workflow?: string;
   title?: JSX.Element;
 }
@@ -42,6 +41,7 @@ class UploadPage extends React.Component<UploadPageProps> {
       });
 
       const result = await validateManualMetadataForProject(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         this.props.project.id,
         this.state.metadata,
       );
@@ -75,6 +75,7 @@ class UploadPage extends React.Component<UploadPageProps> {
   showInstructions = () => {
     if (this.props.wizardSetOverlay) {
       this.props.wizardSetOverlay(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         <Instructions onClose={() => this.props.wizardSetOverlay(null)} />,
       );
     }
@@ -85,8 +86,8 @@ class UploadPage extends React.Component<UploadPageProps> {
 
     return (
       <div className={cs.uploadPage}>
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769 */}
         <MetadataUpload
-          // @ts-expect-error Type 'ProjectSample[]' is not assignable to type 'SampleFromApi[]'
           samples={this.props.samples}
           project={this.props.project}
           onMetadataChange={this.handleMetadataChange}

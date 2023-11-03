@@ -51,11 +51,14 @@ const MetadataInput = ({
           onChange(metadataType.key, result.name || result, true);
         }}
         taxaCategory={taxaCategory}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         sampleTypes={sampleTypes}
       />
     );
   } else if (metadataType.isBoolean) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2533
     const onLabel = metadataType.options[0];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2533
     const offLabel = metadataType.options[1];
     return (
       <Toggle

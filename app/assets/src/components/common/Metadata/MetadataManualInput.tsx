@@ -52,6 +52,7 @@ class MetadataManualInputCC extends React.Component<
   MetadataManualInputWithContextProps,
   MetadataManualInputState
 > {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2416
   state = {
     selectedFieldNames: [],
     projectMetadataFields: null,
@@ -102,6 +103,7 @@ class MetadataManualInputCC extends React.Component<
 
     this.setState(
       {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         projectMetadataFields: projectMetadataFields,
         // Default to the required fields.
         selectedFieldNames: map(
@@ -148,9 +150,12 @@ class MetadataManualInputCC extends React.Component<
 
     // For each sample, merge auto-populate fields into existing fields (which may be empty).
     // Existing fields take precedence.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     samples.forEach(sample => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       newMetadataFieldsToEdit[sample.name] = merge(
         AUTO_POPULATE_FIELDS,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         metadataFieldsToEdit[sample.name] || {},
       );
     });
@@ -161,7 +166,9 @@ class MetadataManualInputCC extends React.Component<
       metadataFieldsToEdit: newMetadataFieldsToEdit,
       headersToEdit: newHeadersToEdit,
       applyToAllCell: {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         sampleName: null,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         column: null,
       },
     });
@@ -177,14 +184,17 @@ class MetadataManualInputCC extends React.Component<
   ) => {
     const newHeaders = union<string>([key], this.state.headersToEdit);
     const newFields = set(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       [sample.name, key],
       value,
       this.state.metadataFieldsToEdit,
     );
     this.setState({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       metadataFieldsToEdit: newFields,
       headersToEdit: newHeaders,
       applyToAllCell: {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         sampleName: sample.name,
         column: key,
       },
@@ -200,6 +210,7 @@ class MetadataManualInputCC extends React.Component<
   ) => {
     let newFields = this.state.metadataFieldsToEdit;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     this.props.samples.forEach(curSample => {
       // Only change the metadata value for samples where that field is valid.
       if (
@@ -208,12 +219,14 @@ class MetadataManualInputCC extends React.Component<
           column,
         ) &&
           overrideExistingValue) ||
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         get([curSample.name, column], newFields) === undefined
       ) {
         let value = newValue;
         // If the field is location-type, return a less-specific location if necessary.
         if (
           column !== DataHeaders.HOST_ORGANISM &&
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
           this.state.projectMetadataFields[column].dataType === "location"
         ) {
           const isHuman =
@@ -222,6 +235,7 @@ class MetadataManualInputCC extends React.Component<
           value = processLocationSelection(newValue, isHuman);
         }
 
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         newFields = set([curSample.name, column], value, newFields);
       }
     });
@@ -231,7 +245,9 @@ class MetadataManualInputCC extends React.Component<
       metadataFieldsToEdit: newFields,
       headersToEdit: newHeaders,
       applyToAllCell: {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         sampleName: null,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         column: null,
       },
     });
@@ -306,6 +322,7 @@ class MetadataManualInputCC extends React.Component<
     orderBy(
       "count",
       "desc",
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       this.props.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
         value: hostGenome.id,
@@ -434,6 +451,7 @@ class MetadataManualInputCC extends React.Component<
                   }}
                   hostGenomes={this.props.hostGenomes || []}
                 />
+                {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
                 {this.props.samples.length > 1 &&
                   this.renderApplyToAll(sample, column)}
               </div>
@@ -450,6 +468,7 @@ class MetadataManualInputCC extends React.Component<
                   key={column}
                   className={inputClasses}
                   value={this.getMetadataValue(sample, column)}
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
                   metadataType={this.state.projectMetadataFields[column]}
                   onChange={(key, value) => {
                     this.updateMetadataField(key, value, sample);
@@ -459,6 +478,7 @@ class MetadataManualInputCC extends React.Component<
                   isHuman={sampleHostGenomeId === 1}
                   sampleTypes={this.props.sampleTypes}
                 />
+                {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
                 {this.props.samples.length > 1 &&
                   this.renderApplyToAll(sample, column)}
               </div>
@@ -503,6 +523,7 @@ class MetadataManualInputCC extends React.Component<
               trigger={<span className={cs.label}>{label}</span>}
               title={label}
               content={content}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               link={showLink ? "/metadata/dictionary" : null}
               wide={true}
               popperModifiers={[
@@ -533,6 +554,7 @@ class MetadataManualInputCC extends React.Component<
               className={cs.inputTable}
               headers={this.getColumnHeaders(columns)}
               columns={columns}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               data={this.getManualInputData()}
               getColumnWidth={this.getColumnWidth}
             />

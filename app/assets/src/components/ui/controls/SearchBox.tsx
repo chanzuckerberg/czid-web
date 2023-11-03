@@ -52,7 +52,9 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
     this.waitHandleSearchChange = 200;
     this.minChars = 2;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.placeholder = this.props.placeholder;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.handleEnter = this.props.onEnter;
     this.handleResultSelect = this.handleResultSelect.bind(this);
     this.blankState = {
@@ -74,6 +76,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
       isLoading: false,
       results: [],
       value: this.props.initialValue,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       selectedResult: null,
     };
   }
@@ -91,6 +94,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
       isLoading: false,
       results: [],
       value: this.state.value, // necessary for closing dropdown but keeping text entered in input
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       selectedResult: null,
     });
   };
@@ -98,6 +102,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
   handleResultSelect(e: unknown, { result }: { result: { title: unknown } }) {
     const { clearOnSelect } = this.props;
     this.setState({ value: clearOnSelect ? "" : result.title });
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     this.props.onResultSelect(e, { result });
   }
 
@@ -126,6 +131,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
   handleSearchChange = (_: unknown, { value }: { value: string }) => {
     const { serverSearchAction, clientSearchSource } = this.props;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.setState({ isLoading: true, selectedResult: null, value });
 
     if (value.length === 0) {

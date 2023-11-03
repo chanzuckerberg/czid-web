@@ -16,6 +16,7 @@ export class CategoricalColormap {
   hexToDec(hexColor) {
     const decColors = [];
     for (let j = 0; j < 3; j++) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       decColors.push(parseInt(hexColor.slice(j * 2, j * 2 + 2), 16));
     }
     return decColors;
@@ -72,6 +73,7 @@ export class CategoricalColormap {
     const decColor = [];
     for (let j = 0; j < 3; j++) {
       decColor.push(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         Math.floor(startColor[j] + k * (endColor[j] - startColor[j])),
       );
     }

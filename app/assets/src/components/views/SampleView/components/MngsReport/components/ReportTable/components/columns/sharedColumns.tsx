@@ -12,6 +12,7 @@ import { getCellValueRenderer } from "./renderers/cellValueRenderer";
 import { getNtNrSelectorRenderer } from "./renderers/ntNrSelectorRenderer";
 import { getCountTypeValuesFromDataRow, nestedNtNrSortFunction } from "./utils";
 
+// @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
 export const getSharedColumns: (
   dbType: DBType,
   handleNtNrChange: (selectedDbType: "nr" | "nt") => void,

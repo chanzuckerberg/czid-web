@@ -46,6 +46,7 @@ export const AnchorMenu = ({
   );
   const [observer, setObserver] = useState<IntersectionObserver | null>(null);
   const sectionContentByHeader = useMemo(
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2344
     () => categorizeItems<AnchorMenuFragment$data["pathogens"]>(data.pathogens),
     [data.pathogens],
   );
@@ -57,6 +58,7 @@ export const AnchorMenu = ({
 
       if (currentIntersections.length > 0) {
         // Use the section id to find the index in the ordered list of sections
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         const orderedSections = Object.keys(sectionContentByHeader);
         const index = orderedSections.findIndex(
           section =>
@@ -80,6 +82,7 @@ export const AnchorMenu = ({
 
   return (
     <div className={cs.sections}>
+      {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769 */}
       {Object.keys(sectionContentByHeader).map(header => (
         <Section
           id={getSectionId(header)}
@@ -87,6 +90,7 @@ export const AnchorMenu = ({
           name={header}
           observer={observer}
         >
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531 */}
           <Pathogens pathogensByHeader={sectionContentByHeader[header]} />
         </Section>
       ))}

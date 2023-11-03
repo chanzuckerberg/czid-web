@@ -177,6 +177,7 @@ const SampleDetailsMode = ({
   ) => {
     /* Sample name and note are special cases */
     if (key === "name" || key === "notes") {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       setAdditionalInfo(set(key, value, additionalInfo));
       setMetadataChanged(set(key, true, metadataChanged));
       return;
@@ -184,6 +185,7 @@ const SampleDetailsMode = ({
     if (shouldSave) {
       setSingleKeyValueToSave([key, value]);
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     setMetadata(set(key, value, metadata));
     setMetadataChanged(set(key, !shouldSave, metadataChanged));
     setMetadataErrors(set(key, null, metadataErrors));
@@ -192,9 +194,11 @@ const SampleDetailsMode = ({
   const handleMetadataSave = async (key: string) => {
     if (metadataChanged[key]) {
       const newValue =
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         key === "name" || key === "notes" ? additionalInfo[key] : metadata[key];
 
       setMetadataChanged(set(key, false, metadataChanged));
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       _save(sampleId, key, newValue);
     }
   };
@@ -223,8 +227,10 @@ const SampleDetailsMode = ({
         // If the save fails, immediately revert to the last valid metadata value.
         if (response.status === "failed") {
           _metadataErrors = set(key, response.message, _metadataErrors);
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
           _metadata = set(key, _lastValidMetadata[key], _metadata);
         } else {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
           _lastValidMetadata = set(key, value, _lastValidMetadata);
         }
       });
@@ -242,15 +248,20 @@ const SampleDetailsMode = ({
     if (currentTab === "Metadata") {
       return (
         <MetadataTab
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           metadata={metadata}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           additionalInfo={additionalInfo}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           metadataTypes={metadataTypes}
           onMetadataChange={handleMetadataChange}
           onMetadataSave={handleMetadataSave}
           savePending={savePending}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           metadataErrors={metadataErrors}
           sampleTypes={sampleTypes || []}
           snapshotShareId={snapshotShareId}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           currentWorkflowTab={currentWorkflowTab}
         />
       );
@@ -260,8 +271,10 @@ const SampleDetailsMode = ({
         <Tabs
           className={cs.workflowTabs}
           tabStyling={cs.tabLabels}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           tabs={sampleWorkflowLabels}
           value={currentWorkflowTab}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           onChange={handleWorkflowTabChange}
           hideBorder
         />
@@ -269,6 +282,7 @@ const SampleDetailsMode = ({
 
       const consensusGenomeWorkflowRuns =
         sample &&
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         sample.workflow_runs.filter(
           run => run.workflow === WorkflowType.CONSENSUS_GENOME,
         );
@@ -279,8 +293,10 @@ const SampleDetailsMode = ({
           <div className={cs.dropdownContainer}>
             <ConsensusGenomeDropdown
               workflowRuns={consensusGenomeWorkflowRuns}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               initialSelectedValue={currentRun.id}
               onConsensusGenomeSelection={workflowRunId =>
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
                 onWorkflowRunSelect(
                   find({ id: workflowRunId }, consensusGenomeWorkflowRuns),
                 )
@@ -289,6 +305,7 @@ const SampleDetailsMode = ({
           </div>
         );
 
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       let pipelineInfoForTab: PipelineInfo = pipelineInfo;
       if (currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME) {
         pipelineInfoForTab = processCGWorkflowRunInfo(currentRun);
@@ -302,7 +319,9 @@ const SampleDetailsMode = ({
           {consensusGenomeDropdown}
           <PipelineTab
             pipelineInfo={pipelineInfoForTab}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
             erccComparison={additionalInfo.ercc_comparison}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             pipelineRun={pipelineRun}
             sampleId={sampleId}
             snapshotShareId={snapshotShareId}
@@ -313,7 +332,9 @@ const SampleDetailsMode = ({
     if (currentTab === "Notes") {
       return (
         <NotesTab
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
           notes={additionalInfo.notes}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
           editable={additionalInfo.editable}
           onNoteChange={val => handleMetadataChange("notes", val)}
           onNoteSave={() => handleMetadataSave("notes")}
@@ -329,6 +350,7 @@ const SampleDetailsMode = ({
       {loading ? (
         <div className={cs.loadingMsg}>Loading...</div>
       ) : (
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         <div className={cs.title}>{additionalInfo.name}</div>
       )}
       {!loading && showReportLink && (

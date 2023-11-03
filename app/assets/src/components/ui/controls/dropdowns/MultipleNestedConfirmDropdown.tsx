@@ -48,6 +48,7 @@ class MultipleNestedConfirmDropdown extends React.Component<
     };
 
     this.suboptionsToOptionMap = {};
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     this.props.options.forEach((option: $TSFixMe) => {
       (option.suboptions || []).forEach((suboption: $TSFixMe) => {
         this.suboptionsToOptionMap[suboption.value] = option.value;
@@ -64,6 +65,7 @@ class MultipleNestedConfirmDropdown extends React.Component<
       props.selectedOptions !== state.oldSelectedOptions ||
       !ArrayUtils.equal(props.selectedOptions, state.oldSelectedOptions)
     ) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       newState = Object.assign(
         {},
         {
@@ -80,6 +82,7 @@ class MultipleNestedConfirmDropdown extends React.Component<
         state.oldSelectedSuboptions,
       )
     ) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       newState = Object.assign(newState || {}, {
         selectedSuboptions: props.selectedSuboptions,
         oldSelectedSuboptions: props.selectedSuboptions,
@@ -106,6 +109,7 @@ class MultipleNestedConfirmDropdown extends React.Component<
         const stateUpdate = {
           selectedOptions: [...prevState.selectedOptions, optionValue],
         };
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         const optionClicked = this.props.options.find(
           (option: $TSFixMe) => option.value === optionValue,
         );
@@ -163,6 +167,7 @@ class MultipleNestedConfirmDropdown extends React.Component<
 
   getNumberOfSelectedOptions() {
     let suboptionCount = 0;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     this.props.options.forEach((option: $TSFixMe) => {
       suboptionCount += (this.state.selectedSuboptions[option.value] || [])
         .length;
@@ -205,6 +210,7 @@ class MultipleNestedConfirmDropdown extends React.Component<
     this.setState({
       popupIsOpen: false,
     });
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     this.props.onChange(
       this.state.selectedOptions,
       this.state.selectedSuboptions,
@@ -213,7 +219,9 @@ class MultipleNestedConfirmDropdown extends React.Component<
 
   cancelApplyCategories = () => {
     this.setState({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       selectedOptions: this.props.selectedOptions,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       selectedSuboptions: this.props.selectedSuboptions,
       popupIsOpen: false,
     });
@@ -221,6 +229,7 @@ class MultipleNestedConfirmDropdown extends React.Component<
 
   renderItems() {
     const items: $TSFixMe = [];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     this.props.options.forEach((option: $TSFixMe) => {
       items.push(
         this.renderItem(

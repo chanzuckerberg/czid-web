@@ -22,8 +22,10 @@ const getOrderKeysForSamplesTab = () => {
   const orderKeys = [];
   const workflowKeys = Object.keys(WORKFLOWS);
   workflowKeys.forEach(workflowKey => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     orderKeys.push(getOrderByKeyFor(TAB_SAMPLES, WORKFLOWS[workflowKey].value));
     orderKeys.push(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       getOrderDirKeyFor(TAB_SAMPLES, WORKFLOWS[workflowKey].value),
     );
   });

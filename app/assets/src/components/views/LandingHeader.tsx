@@ -61,16 +61,19 @@ const LandingHeader = ({ browserInfo }: LandingHeaderProps) => {
             GitHub
           </ExternalLink>
         </div>
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {browserInfo.supported ? (
           <div className="sign-in" data-testid="home-top-nav-login">
             <TransparentButton
               text="Sign In"
               onClick={signInLink}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               disabled={!browserInfo.supported}
             />
           </div>
         ) : (
           <div className="alert-browser-support">
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             {browserInfo.browser} is not currently supported. Please sign in
             from a different browser.
           </div>

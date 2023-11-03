@@ -33,6 +33,7 @@ const LoadingBar = ({
           showHint && cs.showHint,
           error && cs.error,
         )}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         style={{ width: `${clamp(0, 1, percentage) * 100}%` }}
       />
     </div>

@@ -72,6 +72,7 @@ const AnalysisType = ({
         {/* use a custom icon if one is given, otherwise generate an SDS icon */}
         {customIcon ?? (
           <Icon
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             sdsIcon={sdsIcon}
             sdsSize="xl"
             sdsType="static"

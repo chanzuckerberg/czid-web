@@ -22,6 +22,7 @@ const CheckboxItem = ({
   <BareDropdown.Item
     onClick={(e: $TSFixMe) => {
       e.stopPropagation();
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       onOptionClick(value, !checked);
     }}
   >

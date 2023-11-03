@@ -129,6 +129,7 @@ class BareDropdown extends React.Component<
       option.customNode ? (
         <div
           key={option.value}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onClick={() => this.props.onChange(option.value)}
           className={cx(
             cs.item,
@@ -141,6 +142,7 @@ class BareDropdown extends React.Component<
         <BaseDropdown.Item
           data-testid={`${kebabCase(option.text)}`}
           key={option.value}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onClick={() => this.props.onChange(option.value)}
           active={this.props.value === option.value}
           className={cs.item}
@@ -196,6 +198,7 @@ class BareDropdown extends React.Component<
         : items;
 
       // Use the separate itemSearchStrings array to filter the items.
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       const pairs = zip(itemSearchStrings, itemsToZip);
       const filteredPairs = filter(
         pair => this.matchesFilter(pair[0], filterString),
@@ -212,6 +215,7 @@ class BareDropdown extends React.Component<
           this.categorizeSearchResults(sortedPairs)
         : map(nth(1), sortedPairs);
     } else {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const filteredOptions = options.filter((option: $TSFixMe) =>
         this.matchesFilter(option.text, filterString),
       );
@@ -227,10 +231,12 @@ class BareDropdown extends React.Component<
     const { sections } = this.props;
     const categorizedItems: $TSFixMe = [];
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     Object.entries(sections).forEach(([sectionName, itemStringsInSection]) => {
       const sectionItems = compact(
         uncategorizedItemPairs.map(
           ([itemSearchResultString, item]) =>
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
             itemStringsInSection.has(itemSearchResultString) && item,
         ),
       );
@@ -394,6 +400,7 @@ class BareDropdown extends React.Component<
             className={cs.searchContainer}
           >
             <Input
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
               data-testid={kebabCase(menuLabel)}
               fluid
               className={cs.searchInput}
@@ -425,6 +432,7 @@ class BareDropdown extends React.Component<
 
     if (this.props.usePortal) {
       return (
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         <PortalDropdown
           arrowInsideTrigger={arrowInsideTrigger}
           floating={this.props.floating}

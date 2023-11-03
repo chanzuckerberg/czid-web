@@ -27,7 +27,9 @@ const Tabs = ({
 }: TabsProps) => {
   const _tabs: object = useRef(null);
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
   const [indicatorLeft, setIndicatorLeft] = useState<number>(null);
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
   const [indicatorWidth, setIndicatorWidth] = useState<number>(null);
 
   useEffect(() => {
@@ -41,6 +43,7 @@ const Tabs = ({
   }, [value, tabs]);
 
   const adjustIndicator = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
     const tab = _tabs[value];
     if (tab) {
       setIndicatorLeft(tab.offsetLeft);

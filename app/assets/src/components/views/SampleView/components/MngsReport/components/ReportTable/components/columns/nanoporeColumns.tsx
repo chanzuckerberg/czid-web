@@ -12,6 +12,7 @@ import { NUMBER_NULL_VALUES } from "../../ReportTable";
 import { getCellValueRenderer } from "./renderers/cellValueRenderer";
 import { getCountTypeValuesFromDataRow, nestedNtNrSortFunction } from "./utils";
 
+// @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
 export const getNanoporeColumns: (
   dbType: DBType,
 ) => Array<ColumnProps> = dbType => {

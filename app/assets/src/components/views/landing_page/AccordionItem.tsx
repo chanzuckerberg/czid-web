@@ -58,6 +58,7 @@ const AccordionItem = (props: AccordionItemProps) => {
       )}
       <span
         className={cs.accordionTitle}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         style={props.isOpen ? { color: "#3867FA" } : null}
       >
         {props.accordionTitle}

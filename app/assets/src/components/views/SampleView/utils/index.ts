@@ -41,6 +41,7 @@ export const addSampleDeleteFlagToSessionStorage = (sampleName: string) => {
     sampleName.length > 37 ? `${sampleName.slice(0, 37)}...` : sampleName;
 
   const discoverySessionState = JSON.parse(
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     sessionStorage.getItem(KEY_DISCOVERY_VIEW_OPTIONS),
   );
   sessionStorage.setItem(
@@ -287,6 +288,7 @@ const overwriteAggregatescoreMetric = selectedOptionsFromLocal => {
     // If the user does not have a background and has metric 'aggregatescore', overwrite the selected option
     // 'metric' from 'aggregatescore' to 'NT r (total reads)' because the aggregatescore
     // is computed once the user selects a background.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     selectedOptionsFromLocal["metricShortReads"] = find(
       { value: "nt_r" },
       TREE_METRICS[WorkflowType.SHORT_READ_MNGS],

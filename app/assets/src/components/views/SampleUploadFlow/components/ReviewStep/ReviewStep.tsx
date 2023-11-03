@@ -66,7 +66,7 @@ interface ReviewStepWithContextProps extends ReviewStepProps {
 
 interface ReviewStepState {
   consentChecked: boolean;
-  projectMetadataFields: $TSFixMeUnknown;
+  projectMetadataFields: object | null;
   showUploadModal: boolean;
   skipSampleProcessing: boolean;
   useStepFunctionPipeline: boolean;
@@ -92,6 +92,7 @@ class ReviewStepCC extends React.Component<
 
   loadProjectMetadataFields = async () => {
     const { project } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const projectMetadataFields = await getProjectMetadataFields(project.id);
     this.setState({
       projectMetadataFields: keyBy("key", projectMetadataFields),
@@ -101,6 +102,7 @@ class ReviewStepCC extends React.Component<
   uploadSamplesAndMetadata = () => {
     const { onUploadStatusChange } = this.props;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onUploadStatusChange(true);
 
     this.setState({
@@ -114,6 +116,7 @@ class ReviewStepCC extends React.Component<
     const areLinksEnabled = !this.state.showUploadModal;
 
     if (areLinksEnabled) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       this.props.onStepSelect(link);
     }
   };
@@ -177,26 +180,38 @@ class ReviewStepCC extends React.Component<
             areLinksEnabled={areLinksEnabled}
             onLinkClick={this.onLinkClick}
             uploadType={uploadType}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             project={project}
           />
           <div className={cs.sectionContainer}>
             <ReviewHeader
               areLinksEnabled={areLinksEnabled}
               onLinkClick={this.onLinkClick}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               project={project}
               uploadType={uploadType}
             />
             <AnalysesSections
               pipelineVersions={pipelineVersions}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               project={project}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               workflows={workflows}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               technology={technology}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               clearlabs={clearlabs}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               medakaModel={medakaModel}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               wetlabProtocol={wetlabProtocol}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               guppyBasecallerSetting={guppyBasecallerSetting}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               refSeqTaxon={refSeqTaxon?.name}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               refSeqFile={refSeqFile?.name}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               bedFile={bedFile?.name}
             />
           </div>
@@ -205,16 +220,20 @@ class ReviewStepCC extends React.Component<
             areLinksEnabled={areLinksEnabled}
             onAdminOptionsChanged={this.handleAdminOptionsChanged}
             onLinkClick={this.onLinkClick}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             project={project}
             uploadType={uploadType}
             hostGenomes={hostGenomes}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             metadata={metadata}
             projectMetadataFields={projectMetadataFields}
             samples={samples}
           />
         </div>
         <div className={cs.controls}>
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           {workflows.has(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value) || ( // TODO (mlila): should be with viral cg as well?
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
             <HostOrganismMessage
               hostGenomes={originalHostGenomes}
               samples={samples}
@@ -249,6 +268,7 @@ class ReviewStepCC extends React.Component<
               adminOptions={adminOptions}
               bedFile={bedFile}
               clearlabs={clearlabs}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               guppyBasecallerSetting={guppyBasecallerSetting}
               technology={technology}
               medakaModel={medakaModel}

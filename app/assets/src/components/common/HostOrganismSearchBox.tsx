@@ -52,6 +52,7 @@ const HostOrganismSearchBox = ({
       return {
         title: result.name,
         name: result.id,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         description: hostGenome.ercc_only
           ? "Host will not be subtracted"
           : null,

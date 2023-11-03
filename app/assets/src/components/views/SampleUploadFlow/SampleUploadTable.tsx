@@ -77,6 +77,9 @@ export interface SampleForUploadTable {
   file_names_R1?: string[];
   file_names_R2?: string[];
   basespace_project_name?: string;
+  finishedValidating?: Record<string, $TSFixMeUnknown>;
+  isValid?: Record<string, $TSFixMeUnknown>;
+  error?: Record<string, $TSFixMeUnknown>;
   _selectId?: string;
 }
 
@@ -111,7 +114,9 @@ export default class SampleUploadTable extends React.Component<SampleUploadTable
   removeUnselectedSamples = () => {
     const { samples, onSamplesRemove, selectedSampleIds } = this.props;
     const unselectedSampleIds = difference(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       flatten(map(sample => sample[SELECT_ID_KEY].split(","), samples)),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       Array.from(selectedSampleIds),
     );
 
@@ -123,6 +128,7 @@ export default class SampleUploadTable extends React.Component<SampleUploadTable
     // Support rows that contain multiple selection IDs
     const sampleSelectIds = rowData[SELECT_ID_KEY].split(",");
     sampleSelectIds.forEach((sampleSelectId: string) => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       onSampleSelect(sampleSelectId, !selectedSampleIds.has(sampleSelectId));
     });
   };
@@ -168,12 +174,15 @@ export default class SampleUploadTable extends React.Component<SampleUploadTable
     if (isEmpty(samples)) return null;
 
     // Map each sampleId (e.g. "1") to its concatenation group (e.g. "1,2")
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     samples.forEach(sample =>
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       sample._selectId.split(",").forEach(selectId => {
         mapSampleToConcatGroup[selectId] = sample._selectId;
       }),
     );
     // Convert selected sample IDs (e.g. ["1", "2"]) to the concatenated equivalent (["1,2"])
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     selectedSampleIds.forEach(sampleId => {
       selectedSampleIdsConcat.add(mapSampleToConcatGroup[sampleId]);
     });
@@ -195,6 +204,7 @@ export default class SampleUploadTable extends React.Component<SampleUploadTable
         </div>
         <Table
           className={cs.table}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           columns={this.getColumns()}
           data={samples}
           // Default to 40px for non-local (i.e. BaseSpace) uploads
@@ -212,6 +222,7 @@ export default class SampleUploadTable extends React.Component<SampleUploadTable
           }
           onSelectAllRows={onAllSamplesSelect}
           selected={selectedSampleIdsConcat}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           selectableCellRenderer={
             localUpload ? SampleUploadTableRenderers.renderSelectableCell : null
           }

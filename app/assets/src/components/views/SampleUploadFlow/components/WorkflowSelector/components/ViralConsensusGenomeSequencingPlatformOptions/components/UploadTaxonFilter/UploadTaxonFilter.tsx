@@ -47,8 +47,11 @@ const UploadTaxonFilter = ({
   useEffect(() => {
     // ensure the "unknown" taxon option is always available
     if (!options) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       setOptions([UNKNOWN_TAXON_OPTION]);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     } else if (!options.includes(UNKNOWN_TAXON_OPTION)) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       setOptions([...options, UNKNOWN_TAXON_OPTION]);
     }
   }, [options]);
@@ -100,6 +103,7 @@ const UploadTaxonFilter = ({
         // are inefficient and not very helpful, so don't run a query in those cases
         if (query?.length >= MIN_SEARCH_LENGTH) {
           noOptionsText = NO_SEARCH_RESULTS_TEXT;
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           newOptions = await getTaxaOptionsForQuery(query);
         }
 

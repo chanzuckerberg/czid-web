@@ -17,6 +17,7 @@ class StatusLabel extends React.Component<StatusLabelProps> {
     const { status, type, className, tooltipText, inline } = this.props;
     const label = (
       <div
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         className={cx(className, cs.statusLabel, inline && cs.inline, cs[type])}
         data-testid={status}
       >

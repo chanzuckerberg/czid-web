@@ -249,6 +249,7 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
 
     const newSelected = new Set(selectedSampleIds);
     if (event.shiftKey && referenceSelectId) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const ids = samples.getIntermediateIds({
         id1: referenceSelectId,
         id2: value,
@@ -276,12 +277,14 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
 
   handleSampleRowClick = ({ event, rowData }: $TSFixMe) => {
     const { onSampleClicked, samples } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sample = samples.get(rowData.id);
     onSampleClicked && onSampleClicked({ object: sample, currentEvent: event });
   };
 
   handleProjectRowClick = ({ rowData }: $TSFixMe) => {
     const { onProjectSelected, projects } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
   };
@@ -289,7 +292,9 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
   isSelectAllChecked = () => {
     const { samples, selectedSampleIds } = this.props;
     return (
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !isEmpty(samples.getIds()) &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       isEmpty(difference(samples.getIds(), Array.from(selectedSampleIds)))
     );
   };
@@ -300,8 +305,10 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
     this.referenceSelectId = null;
     const newSelected = new Set(
       checked
-        ? union(Array.from(selectedSampleIds), samples.getIds())
-        : difference(Array.from(selectedSampleIds), samples.getIds()),
+        ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+          union(Array.from(selectedSampleIds), samples.getIds())
+        : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+          difference(Array.from(selectedSampleIds), samples.getIds()),
     );
     onSelectionUpdate(newSelected);
   };
@@ -328,6 +335,7 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
         label: (
           <div>
             <span data-testid="sample-tablabel" className={cs.tabLabel}>
+              {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345 */}
               {upperFirst(tab)}
             </span>
             {count > 0 && (
@@ -361,6 +369,7 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
             headerClassName={cs.tableHeader}
             initialActiveColumns={["sample"]}
             loadingClassName={csTableRenderer.loading}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             onLoadRows={samples.handleLoadObjectRows}
             onRowClick={this.handleSampleRowClick}
             onSelectAllRows={this.handleSelectAllRows}
@@ -396,6 +405,7 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
       <DiscoverySidebar
         allowedFeatures={allowedFeatures}
         className={cs.summaryInfo}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         currentTab={discoveryCurrentTab}
         loading={loading}
         onFilterClick={onFilterClick}
@@ -409,6 +419,7 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
 
   handleLoadRowsAndFormat = async (args: $TSFixMe) => {
     const { projects } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const loadedProjects = await projects.handleLoadObjectRows(args);
 
     return loadedProjects.map((project: $TSFixMe) => {
@@ -464,6 +475,7 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
           className={cs.tabs}
           hideBorder
           onChange={this.handleTabChange}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           tabs={this.computeTabs()}
           value={currentTab}
         />

@@ -92,13 +92,16 @@ const DiscoveryHeader = ({
       | Record<string, never> = {};
     switch (category) {
       case "taxon": {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         value = result.taxid;
         // eslint-disable-next-line  no-undef
         const { taxid: id, level, title: name } = result;
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         sdsTaxonFilterData = { id, level, name };
         break;
       }
       case "sample": {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         value = result.sample_id;
         break;
       }
@@ -134,8 +137,10 @@ const DiscoveryHeader = ({
         <FilterButtonWithCounter
           isDisabled={disableSidebars}
           filterCounter={filterCount}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           onFilterToggle={onFilterToggle}
           popupDisabledSubtitle="Not available on this tab"
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           showFilters={showFilters}
         />
       </div>
@@ -155,6 +160,7 @@ const DiscoveryHeader = ({
         <Tabs
           sdsSize="large"
           value={findIndex({ value: currentTab }, tabs)}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onChange={(_, selectedTabIndex) => onTabChange(selectedTabIndex)}
         >
           {tabs.map(tab => tab.label)}

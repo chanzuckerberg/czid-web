@@ -13,8 +13,10 @@ export class SequentialColormap {
     const step = baseScale.length / n;
     const sampledScale = [];
     for (let i = 0; i < n - 1; i++) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       sampledScale.push(baseScale[Math.round(i * step)]);
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     sampledScale.push(baseScale[baseScale.length - 1]);
     return sampledScale;
   }

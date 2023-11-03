@@ -50,11 +50,13 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
   onDrop = (acceptedFiles: SampleFromApi[]) => {
     // Group files by sample name.
     const sampleNamesToFiles = flow(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       groupBy((file: SampleFromApi) => sampleNameFromFileName(file.name)),
       // Make sure R1 comes before R2 and there are at most 2 files.
       // Sort files by lower case file name, then take the first two.
       mapValues(
         flow(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           sortBy(file => file.name.toLowerCase()),
           slice(0, 2),
         ),
@@ -125,11 +127,14 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
     if (fileCount) {
       if (
         allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         !samples.every(element => element.finishedValidating)
       ) {
         return `Validating ${
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           samples.filter(element => !element.finishedValidating).length
         } File${
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           samples.filter(element => !element.finishedValidating).length > 1
             ? "s"
             : ""
@@ -149,6 +154,7 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
 
   render() {
     const { samples } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const finishedValidating = samples.every(
       element => element.finishedValidating,
     );
@@ -192,6 +198,7 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
         <FilePicker
           accept=".fastq, .fq, .gz"
           className={cx(cs.localFilePicker, !filePickerTitle && cs.short)}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           title={filePickerTitle}
           onChange={this.onDrop}
           onRejected={this.onRejected}

@@ -47,6 +47,7 @@ export const ThresholdFilterSDS = ({
 
   const handleCancel = () => {
     setAnchorEl(null);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setThresholds(null);
   };
 
@@ -100,6 +101,7 @@ export const ThresholdFilterSDS = ({
   const handleApply = () => {
     setAnchorEl(null);
     onApply(thresholds);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setThresholds(null);
   };
 

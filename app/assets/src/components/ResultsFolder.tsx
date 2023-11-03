@@ -17,18 +17,23 @@ interface OutputFileProps {
 const OutputFile = ({ file }: OutputFileProps) => {
   const conditionalOpenUrl = (url: $TSFixMe) => {
     if (url) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       openUrl(file.url);
     }
   };
 
   return (
     <tr
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       className={`${file.url ? "" : "disabled-"}file-link`}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       onClick={() => conditionalOpenUrl(file.url)}
     >
       <td className={cs.tableData}>
         <i className="fa fa-file" />
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {file["displayName"]}
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         <span className="size-tag"> -- {file["size"]}</span>
       </td>
     </tr>
@@ -43,6 +48,7 @@ const ConfigFile = ({ stageDagJson }: ConfigFileProps) => {
   return (
     <tr
       className="file-link"
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       onClick={() => downloadStringToFile(stageDagJson)}
     >
       <td className={cs.tableData}>
@@ -77,9 +83,13 @@ const ResultsFolderStep = ({
   const { stepDescriptionKey, readsAfterKey, filesKey, stepNameKey } =
     RESULTS_FOLDER_STEP_KEYS;
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const description = step[stepDescriptionKey];
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const readsAfter = step[readsAfterKey];
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const fileList = step[filesKey];
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const stepName = step[stepNameKey];
 
   return (
@@ -124,6 +134,7 @@ const ResultsFolder = ({
   rawResultsUrl,
   pipelineTechnology,
 }: ResultsFolderProps) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const filePath = escapedFilePath.split("/");
 
   const {
@@ -151,9 +162,12 @@ const ResultsFolder = ({
         </span>
       </div>
       <div className="header">
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769 */}
         {!Object.keys(fileList).length
           ? "No files to show"
-          : Object.keys(fileList).map((stageKey, k) => {
+          : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+            Object.keys(fileList).map((stageKey, k) => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               const stage = fileList[stageKey];
               const stageDescription = stage[stageDescriptionKey];
               const stageDagJson = stage[stageDagJsonKey] || "None";

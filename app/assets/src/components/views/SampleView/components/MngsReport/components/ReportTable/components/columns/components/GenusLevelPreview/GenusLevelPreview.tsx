@@ -16,8 +16,11 @@ interface GenusLevelPreviewProps {
 export const GenusLevelPreview = ({ rowData }: GenusLevelPreviewProps) => {
   const displayAnnotationPreviews =
     "species_annotations" in rowData &&
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     (rowData.species_annotations[ANNOTATION_HIT] > 0 ||
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       rowData.species_annotations[ANNOTATION_NOT_A_HIT] > 0 ||
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       rowData.species_annotations[ANNOTATION_INCONCLUSIVE] > 0);
 
   const hasPathogens = !isEmpty(rowData.pathogens);
@@ -29,6 +32,7 @@ export const GenusLevelPreview = ({ rowData }: GenusLevelPreviewProps) => {
         {(hasPathogens || displayAnnotationPreviews) && <span>:</span>}
       </span>
       {/* Show pathogen and annotation counts */}
+      {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322 */}
       {hasPathogens && <PathogenPreview tag2Count={rowData.pathogens} />}
       {displayAnnotationPreviews && (
         <AnnotationPreview tag2Count={rowData.species_annotations} />

@@ -13,6 +13,7 @@ import { GENE_FAMILY_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const geneFamilyColumn: ColumnDef<AmrResult, any> = {
   id: "geneFamily",
   accessorFn: function geneFamilyAccessor(row): string {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     return getFormattedCompoundString(row.geneFamily);
   },
   sortingFn: sortStringOrFallback,

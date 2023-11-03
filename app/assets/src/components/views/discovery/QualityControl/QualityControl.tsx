@@ -33,6 +33,7 @@ function QualityControlWrapper(props: QualityControlWrapperProps) {
     variables: {
       projectId: props.projectId,
       workflow: WorkflowType.SHORT_READ_MNGS,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       hostIds: props.filters.host,
       ...props.filters,
     },
@@ -68,6 +69,7 @@ function QualityControl({
   const [loading, setLoading] = useState(true);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarParams, setSidebarParams] = useState<SampleDetailsModeProps>({
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     sampleId: null,
   });
   const [failedSamples, setFailedSamples] = useState(null);
@@ -91,10 +93,15 @@ function QualityControl({
       data.runningSamples.length +
       data.failedSamples.length;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setValidSamples(data.validSamples);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setRunningSamples(data.runningSamples);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setFailedSamples(data.failedSamples);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setSamplesDict(data.samplesDict);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setTotalSampleCount(totalSampleCount);
     setLoading(false);
   };
@@ -119,14 +126,17 @@ function QualityControl({
           runInfo.resultStatusDescription === "COMPLETE - ISSUE" ||
           runInfo.resultStatusDescription === "COMPLETE*"
         ) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           failedSamples.push(sample);
         } else if (
           runInfo.reportReady &&
           sample.details.derivedSampleOutput.summaryStats
         ) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           validSamples.push(sample);
           samplesDict[sample.id] = sample;
         } else {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           runningSamples.push(sample);
         }
       }
@@ -148,6 +158,7 @@ function QualityControl({
     trackEvent(
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED,
     );
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setTooltipLocation(tooltipLocation);
   };
 
@@ -171,6 +182,7 @@ function QualityControl({
   }
 
   function renderVisualization() {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     const showBlankState = !loading && validSamples.length === 0;
 
     return showBlankState ? (
@@ -191,14 +203,20 @@ function QualityControl({
       <div className={cs.content}>
         <div className={cs.histogramSection}>
           <SampleStatsInfo
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             runningSamples={runningSamples}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             failedSamples={failedSamples}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             validSamples={validSamples}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             totalSampleCount={totalSampleCount}
           />
           <Histograms
             filters={filters}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             validSamples={validSamples}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             samplesDict={samplesDict}
             loading={loading}
             fetchProjectData={fetchProjectData}
@@ -210,10 +228,12 @@ function QualityControl({
         </div>
         <div className={cs.readsLostSection}>
           <ReadsLostChart
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             validSamples={validSamples}
             handleChartElementHover={handleChartElementHover}
             handleChartElementExit={handleChartElementExit}
             setChartTooltipData={setChartTooltipData}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             setTooltipClass={setTooltipClass}
             setSidebarVisible={setSidebarVisible}
             setSidebarParams={setSidebarParams}

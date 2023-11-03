@@ -52,6 +52,7 @@ export const TaxonDetailsMode = ({
     try {
       const response = await getTaxonDescriptions(taxonList);
       const taxonInfo = response[taxonId];
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       const parentTaxonInfo = response[parentTaxonId];
 
       if (taxonInfo) {
@@ -106,6 +107,7 @@ export const TaxonDetailsMode = ({
           name={taxonName}
           wikiUrl={wikiUrl}
           onExpandAnalyticsId="TaxonDetailsMode_show-more-description-link_clicked"
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           onExpandAnalyticsParams={onExpandAnalyticsParams}
         />
         {/* Then describe parent second */}
@@ -115,15 +117,18 @@ export const TaxonDetailsMode = ({
           name={taxonParentName}
           wikiUrl={parentWikiUrl}
           onExpandAnalyticsId="TaxonDetailsMode_show-more-parent-description-link_clicked"
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           onExpandAnalyticsParams={onExpandAnalyticsParams}
         />
         <TaxonHistogram
           background={background}
           taxonId={taxonId}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           taxonValues={taxonValues}
         />
         <TaxonLinks
           taxonId={taxonId}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           parentTaxonId={parentTaxonId}
           taxonName={taxonName}
           wikiUrl={wikiUrl}

@@ -12,8 +12,11 @@ interface AnnotationPreviewProps {
 }
 
 const AnnotationPreview = ({ tag2Count }: AnnotationPreviewProps) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const hitCount = tag2Count[ANNOTATION_HIT];
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const notAHitCount = tag2Count[ANNOTATION_NOT_A_HIT];
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const inconclusiveCount = tag2Count[ANNOTATION_INCONCLUSIVE];
 
   return (

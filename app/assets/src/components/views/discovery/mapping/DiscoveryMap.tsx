@@ -35,7 +35,7 @@ interface DiscoveryMapWithContextProps extends DiscoveryMapProps {
 }
 
 interface DiscoveryMapState {
-  tooltip?: $TSFixMeUnknown;
+  tooltip?: React.ReactNode;
   tooltipShouldClose: boolean;
   viewport?: $TSFixMeUnknown;
 }
@@ -77,9 +77,11 @@ class DiscoveryMapCC extends React.Component<
 
     if (this.onMapLevelChangeThrottled) {
       const level =
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         viewport.zoom < zoomBoundaryCountry
           ? "country"
-          : viewport.zoom < zoomBoundaryState
+          : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+          viewport.zoom < zoomBoundaryState
           ? "state"
           : "city";
       this.onMapLevelChangeThrottled(level);
@@ -161,6 +163,7 @@ class DiscoveryMapCC extends React.Component<
     const pointCount = locationInfo[idsField].length;
     const rectangular =
       MAP_CLUSTER_ENABLED_LEVELS.includes(geoLevel) &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       indexOfMapLevel(geoLevel) < indexOfMapLevel(mapLevel);
 
     return (
@@ -203,6 +206,7 @@ class DiscoveryMapCC extends React.Component<
     return (
       <BaseMap
         banner={this.renderBanner()}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapTilerKey={mapTilerKey}
         markers={
           mapLocationData &&

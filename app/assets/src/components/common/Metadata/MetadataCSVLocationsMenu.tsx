@@ -21,6 +21,7 @@ const MetadataCSVLocationsMenu = ({
   const renderApplyToAll = () => (
     <button
       className={cx(cs.applyToAll, "noStyleButton")}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       onClick={() => applyToAll(applyToAllSample)}
     >
       Apply to All
@@ -29,13 +30,16 @@ const MetadataCSVLocationsMenu = ({
 
   const applyToAll = (sample: string) => {
     // eslint-disable-next-line standard/computed-property-even-spacing
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const newValue = (find({ [NAME_COLUMN]: sample }, metadata.rows) || {})[
       locationMetadataType.name
     ];
     const newMetadata = metadata;
 
     // Set all the rows to the newValue
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     newMetadata.rows.forEach(row => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       const result = processLocationSelection(newValue, isRowHuman(row));
       row[locationMetadataType.name] = result;
     });
@@ -48,15 +52,18 @@ const MetadataCSVLocationsMenu = ({
 
   // Populate the data table cells
   const getManualInputData = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return metadata.rows.map((row, rowIndex) => {
       const sampleName = row[NAME_COLUMN];
 
       const onChange = (_, value: any) => {
         const newMetadata = metadata;
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         newMetadata.rows[rowIndex][locationMetadataType.name] = value;
         onMetadataChange({
           metadata: newMetadata,
         });
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         setApplyToAllSample(sampleName);
       };
 
@@ -73,6 +80,7 @@ const MetadataCSVLocationsMenu = ({
             taxaCategory={get("taxa_category", getHostGenomeForRow(row))}
           />
           {applyToAllSample === sampleName &&
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             metadata.rows.length > 1 &&
             renderApplyToAll()}
         </div>,

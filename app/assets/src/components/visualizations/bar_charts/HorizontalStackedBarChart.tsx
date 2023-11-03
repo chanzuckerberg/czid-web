@@ -162,6 +162,7 @@ export default class HorizontalStackedBarChart extends React.Component<
     const stateData = normalize ? this.normalizedData : this.data;
 
     // Create stack generator
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const dataKeys = keys.filter((key: $TSFixMe) => key !== yAxisKey);
     this.stackGenerator = stack().keys(dataKeys);
 
@@ -261,6 +262,7 @@ export default class HorizontalStackedBarChart extends React.Component<
 
     y.domain(
       stateData.map((d: $TSFixMe) => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         return d[yAxisKey];
       }),
     );
@@ -297,10 +299,13 @@ export default class HorizontalStackedBarChart extends React.Component<
     const { data, options, measurements } = this.state;
 
     const xAxisHeight =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       options.x.tickSize *
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         Number(options.x.ticksVisible || options.x.pathVisible) +
       measurements.xTextHeight;
     const barCanvasHeight =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       data.length * (options.bars.height + options.bars.padding);
 
     return { barCanvasHeight, xAxisHeight };
@@ -310,7 +315,9 @@ export default class HorizontalStackedBarChart extends React.Component<
     const { measurements } = this.state;
 
     const truncatedLabels: $TSFixMe = [];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
     const longestLabel = maxBy(measurements.yTextWidthPairs, pair => pair[1]);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
     const longestLabelLength = longestLabel[1];
 
     // Since x-axis labels are centered on their tick mark, we need to make sure
@@ -351,6 +358,7 @@ export default class HorizontalStackedBarChart extends React.Component<
   createDimensions(barCanvasWidth: $TSFixMe, barCanvasHeight: $TSFixMe) {
     const { options } = this.state;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const paddingScalar = options.bars.padding / options.bars.height;
 
     const x = scaleLinear().range([0, barCanvasWidth]);
@@ -370,6 +378,7 @@ export default class HorizontalStackedBarChart extends React.Component<
     const { data, options } = this.state;
 
     const elements = data.map((datum: $TSFixMe) => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       const yAttribute = datum[yAxisKey];
       return (
         <div
@@ -407,6 +416,7 @@ export default class HorizontalStackedBarChart extends React.Component<
         {"W"}
       </div>,
       <div
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         className={cx(cs.test, options.x.textClassName, cs.xAxisText)}
         key={"x-axis-text"}
         ref={ref => {
@@ -452,6 +462,7 @@ export default class HorizontalStackedBarChart extends React.Component<
     const { events } = this.props;
     const { data } = this.state;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     events.onYAxisLabelClick(yAttribute, data[index]);
   };
 
@@ -459,6 +470,7 @@ export default class HorizontalStackedBarChart extends React.Component<
     const { events } = this.props;
     const { data } = this.state;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     events.onYAxisLabelEnter(yAttribute, data[index]);
   };
 
@@ -482,15 +494,19 @@ export default class HorizontalStackedBarChart extends React.Component<
       z,
     } = this.state;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const strokeWidth = normalize ? 0 : options.bars.strokeWidth;
 
     const coloredBars = dataKeys.map((key: $TSFixMe, keyIndex: $TSFixMe) => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       const color = z(key);
       const colorStackComponent = stackedData[keyIndex].map(
         (stackPieceRange: $TSFixMe, stackIndex: $TSFixMe) => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
           const yAttribute = data[stackIndex][yAxisKey];
           const xLeft = stackPieceRange[0];
           const xRight = stackPieceRange[1];
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           const yPosition = y(yAttribute);
           const xPosition = x(xLeft);
           let width = x(xRight - xLeft) - strokeWidth;
@@ -500,6 +516,7 @@ export default class HorizontalStackedBarChart extends React.Component<
             width = 1;
           }
 
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
           const valueForStackPiece = data[stackIndex][key];
 
           const visibility =
@@ -515,10 +532,13 @@ export default class HorizontalStackedBarChart extends React.Component<
                 width={width}
                 height={barHeight}
                 key={`${yAttribute}+${keyIndex}`}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                 className={cx(options.bars.stackPieceClassName, visibility)}
                 onMouseEnter={() =>
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
                   events.onBarStackEnter(key, valueForStackPiece)
                 }
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
                 onMouseLeave={() => events.onChartElementExit()}
               />
             </g>
@@ -563,20 +583,24 @@ export default class HorizontalStackedBarChart extends React.Component<
     // just pieces of the stack.
     const invisibleStackComponents = stackedData[stackedData.length - 1].map(
       (stackPieceRange: $TSFixMe, stackIndex: $TSFixMe) => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
         const yAttribute = data[stackIndex][yAxisKey];
         const xLeft = 0;
         const xMid = stackPieceRange[1];
         const xRight = barCanvasWidth;
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         const yPosition = y(yAttribute);
 
         const fullXPosition = x(xLeft);
         const emptyXPosition = x(xMid);
 
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         let fullWidth = x(xMid - xLeft) - options.bars.strokeWidth;
         if (fullWidth < 1) {
           fullWidth = 1;
         }
 
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         let emptyWidth = xRight - x(xMid);
         if (emptyWidth < 1) {
           emptyWidth = 1;
@@ -592,6 +616,7 @@ export default class HorizontalStackedBarChart extends React.Component<
               width={emptyWidth}
               height={barHeight}
               key={`${yAttribute}+emptybar`}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               className={cx(options.bars.emptySpaceClassName, cs.emptyBarSpace)}
               onMouseEnter={() =>
                 this.setState(
@@ -615,6 +640,7 @@ export default class HorizontalStackedBarChart extends React.Component<
                 width={fullWidth}
                 height={barHeight}
                 key={`${yAttribute}+fullbar`}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                 className={cx(options.bars.fullBarClassName, cs.fullBar)}
               />
             )}
@@ -627,6 +653,7 @@ export default class HorizontalStackedBarChart extends React.Component<
       <g
         key={"invisibleStack"}
         fillOpacity={0}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         strokeWidth={options.bars.strokeWidth}
       >
         {invisibleStackComponents}
@@ -639,8 +666,10 @@ export default class HorizontalStackedBarChart extends React.Component<
     const { normalize } = this.props;
 
     const tickCount = normalize
-      ? round(barCanvasWidth / options.x.tickSpacing, -1)
-      : Math.floor(barCanvasWidth / options.x.tickSpacing);
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        round(barCanvasWidth / options.x.tickSpacing, -1)
+      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        Math.floor(barCanvasWidth / options.x.tickSpacing);
     const xOffsets = x.ticks(tickCount, "s").map((value: $TSFixMe) => x(value));
 
     return xOffsets.map((xOffset: $TSFixMe) => {
@@ -648,6 +677,7 @@ export default class HorizontalStackedBarChart extends React.Component<
         <path
           d={`M ${xOffset} 0 v ${barCanvasHeight}`}
           key={`${xOffset}-grid-path`}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           className={cx(options.x.gridClassName, cs.xGrid)}
         />
       );
@@ -671,21 +701,27 @@ export default class HorizontalStackedBarChart extends React.Component<
     } = this.state;
 
     const xAxisTitle =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       (normalize ? "Percentage" : "Number") + " of " + options.x.axisTitle;
     const tickFormat = normalize ? numberWithPercent : numberWithSiPrefix;
     const tickCount = normalize
-      ? round(barCanvasWidth / options.x.tickSpacing, -1)
-      : Math.floor(barCanvasWidth / options.x.tickSpacing);
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        round(barCanvasWidth / options.x.tickSpacing, -1)
+      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        Math.floor(barCanvasWidth / options.x.tickSpacing);
 
     if (!redrawNeeded) {
       return (
         <div
           className={cx(className, cs.chart)}
           onMouseMove={event =>
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
             events.onChartHover(event.clientX, event.clientY)
           }
           onMouseLeave={event => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
             events.onChartHover(event.clientX, event.clientY);
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
             events.onChartElementExit();
           }}
           ref={ref => (this.references.container = ref)}
@@ -696,12 +732,17 @@ export default class HorizontalStackedBarChart extends React.Component<
             height={xAxisHeight}
             marginLeft={yAxisWidth}
             title={xAxisTitle}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             tickSize={options.x.tickSize}
             tickCount={tickCount}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             ticksVisible={options.x.ticksVisible}
             tickFormat={(d: number) => tickFormat(d)}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             pathVisible={options.x.pathVisible}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             titleClassName={cx(options.x.axisTitleClassName, cs.xAxisTitle)}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             textClassName={cx(options.x.textClassName, cs.xAxisText)}
           />
           <div className={cx(options.canvasClassName, cs.canvas)}>
@@ -718,16 +759,19 @@ export default class HorizontalStackedBarChart extends React.Component<
                 textClassName={cx(options.y.textClassName, cs.yAxisText)}
                 onYAxisLabelClick={this.handleYAxisLabelClick}
                 onYAxisLabelEnter={this.handleYAxisLabelEnter}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                 onYAxisLabelExit={events.onChartElementExit}
               />
             </div>
             <div data-testid="read-lost-canvas" className={cs.barCanvas}>
               <svg
                 data-testid="read-lost-bar"
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                 width={width - yAxisWidth}
                 height={barCanvasHeight}
               >
                 <g>
+                  {/* @ts-expect-error CZID-8698 expect strictNullCheck error:error TS2532 */}
                   {options.x.gridVisible && this.renderXGrid()}
                   {this.renderVisibleStackedBars()}
                   {this.renderInvisibleStackedBars()}

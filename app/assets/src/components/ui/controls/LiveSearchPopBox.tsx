@@ -59,6 +59,7 @@ const LiveSearchPopBox = ({
   // If the value has changed, reset the input value.
   // Store the prevValue to detect whether the value has changed.
   useEffect(() => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setInputValue(value);
   }, [value]);
 
@@ -85,6 +86,7 @@ const LiveSearchPopBox = ({
 
   const triggerSearch = async () => {
     const timerId = latestTimerId;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     const results = await onSearchTriggered(inputValue);
 
     if (timerId === latestTimerId) {
@@ -180,8 +182,10 @@ const LiveSearchPopBox = ({
     const uncappedForEach = forEach.convert({ cap: false });
     const items = [];
     uncappedForEach((category, key) => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       items.push(buildSectionHeader(category.name));
       uncappedForEach((result, index) => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         items.push(buildItem(key, result, index));
       }, category.results);
     }, results);

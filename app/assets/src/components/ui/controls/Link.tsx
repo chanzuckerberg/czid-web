@@ -43,6 +43,7 @@ const Link = ({
         disabled && cs.linkDisabled,
         className,
       )}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       target={external ? "_blank" : null}
       rel="noopener noreferrer"
       onClick={onClick}

@@ -50,6 +50,7 @@ class TaxonHitSelect extends React.Component<TaxonHitSelectProps> {
 
     const searchResults = await suggestionsEndpoint(
       query,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       Array.from(sampleIds),
     );
 
@@ -94,6 +95,7 @@ class TaxonHitSelect extends React.Component<TaxonHitSelectProps> {
           <div className={cs.option}>
             <div className={cs.taxonName}>All taxa</div>
             <div className={cs.fill} />
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             <div className={cs.sampleCount}>{sampleIds.size}</div>
           </div>
         ),
@@ -116,6 +118,7 @@ class TaxonHitSelect extends React.Component<TaxonHitSelectProps> {
         fluid
         placeholder="Select taxon"
         options={dropdownOptions}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         onChange={onChange}
         value={value}
         optionsHeader={optionsHeader}

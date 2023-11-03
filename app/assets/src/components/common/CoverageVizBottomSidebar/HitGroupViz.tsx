@@ -60,9 +60,13 @@ class HitGroupVizCC extends React.Component<
   private hitGroupViz: GenomeVizShape;
 
   state: HitGroupVizState = {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     genomeVizTooltipLocation: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     genomeVizTooltipData: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     contigDownloaderLocation: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     contigDownloaderData: null,
     currentCopyIconMessage: DEFAULT_CONTIG_COPY_MESSAGE,
   };
@@ -90,8 +94,10 @@ class HitGroupVizCC extends React.Component<
     if (
       !(
         this.hitGroupVizContainer &&
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         this.hitGroupVizContainer.contains(event.target)
       ) &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !(this._contigDownloader && this._contigDownloader.contains(event.target))
     ) {
       this.handleGenomeVizBarClick(null);
@@ -128,7 +134,9 @@ class HitGroupVizCC extends React.Component<
     const { hitGroups } = this.props;
     if (dataIndex === null) {
       this.setState({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         contigDownloaderData: null,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         contigDownloaderLocation: null,
       });
     } else {
@@ -141,13 +149,17 @@ class HitGroupVizCC extends React.Component<
           },
           contigDownloaderLocation: {
             // We apply a translate 100% in CSS to move the tooltip to the correct location.
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             left: barRight,
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             top: barTop,
           },
         });
       } else {
         this.setState({
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           contigDownloaderData: null,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           contigDownloaderLocation: null,
         });
       }
@@ -156,7 +168,9 @@ class HitGroupVizCC extends React.Component<
 
   handleGenomeVizBarExit = () => {
     this.setState({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       genomeVizTooltipLocation: null,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       genomeVizTooltipData: null,
     });
   };
@@ -227,6 +241,7 @@ class HitGroupVizCC extends React.Component<
 
     return ReactDOM.createPortal(
       <div
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         style={getTooltipStyle(genomeVizTooltipLocation)}
         className={cs.hoverTooltip}
       >
@@ -243,7 +258,9 @@ class HitGroupVizCC extends React.Component<
     return ReactDOM.createPortal(
       <div
         style={{
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           left: contigDownloaderLocation.left,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           top: contigDownloaderLocation.top - 5,
         }}
         className={cs.contigDownloader}

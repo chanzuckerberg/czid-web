@@ -40,6 +40,7 @@ export function splitIntoMultipleLines(string: string, maxChars: number) {
   words.forEach(word => {
     // If adding the next word overflows the line, start a new line.
     if (curLine.length + 1 + word.length > maxChars && curLine.length > 0) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       lines.push(curLine);
       curLine = "";
     }
@@ -53,6 +54,7 @@ export function splitIntoMultipleLines(string: string, maxChars: number) {
 
   // Add the last line if it's non-empty.
   if (curLine.length > 0) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     lines.push(curLine);
   }
 

@@ -76,6 +76,7 @@ export const ConsensusGenomeMetricsTable = ({
 
     for (const col of columns) {
       if (!col["cellRenderer"]) {
+        // @ts-expect-error CZID-8698 enable strictNullChecks: error TS2322
         col["cellRenderer"] = renderRowCell;
       }
       col["flexGrow"] = 1;

@@ -13,6 +13,7 @@ export const FeatureFlagControls = () => {
   const [launchedFeatureList, setLaunchedFeatureList] = useState<string[]>([]);
   const [allowedFeatureList, setAllowedFeatureList] = useState<string[]>([]);
   const [featureFlagUsersList, setFeatureFlagUsersList] = useState<Set<string>>(
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     new Set([userEmail]),
   );
   const [featureFlag, setFeatureFlag] = useState<string>("");

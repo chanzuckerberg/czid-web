@@ -39,6 +39,7 @@ export const DrugClassFilter = ({
       <ComplexFilter
         options={drugClassOptions}
         onChange={selectedDrugClassOptions =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           handleDrugClassChange(selectedDrugClassOptions)
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

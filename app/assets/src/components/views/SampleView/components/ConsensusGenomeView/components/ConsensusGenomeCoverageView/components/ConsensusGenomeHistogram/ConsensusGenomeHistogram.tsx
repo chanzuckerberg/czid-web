@@ -63,6 +63,7 @@ export const ConsensusGenomeHistogram = ({
           hoverData[1],
         );
 
+        // @ts-expect-error CZID-8698 enable strictNullChecks: error TS2345
         setHistogramTooltipData(tooltipData);
       }
     },
@@ -71,6 +72,7 @@ export const ConsensusGenomeHistogram = ({
 
   const handleHistogramBarHover = (clientX: $TSFixMe, clientY: $TSFixMe) => {
     setHistogramTooltipLocation({
+      // @ts-expect-error CZID-8698 enable strictNullChecks: error TS2345
       left: clientX,
       top: clientY,
     });
@@ -85,7 +87,9 @@ export const ConsensusGenomeHistogram = ({
     if (coverageVizContainerRef.current !== null) {
       const coverageVizData = workflowRunResults.coverage_viz.coverage.map(
         valueArr => ({
+          // @ts-expect-error CZID-8698 enable strictNullChecks: error TS18046
           x0: valueArr[0] * workflowRunResults.coverage_viz.coverage_bin_size,
+          // @ts-expect-error CZID-8698 enable strictNullChecks: error TS18046
           length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
         }),
       );
@@ -159,6 +163,7 @@ export const ConsensusGenomeHistogram = ({
 
   return (
     <>
+      {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322 */}
       <div className={cs.coverageVizHistogram} ref={coverageVizContainerRef} />
       {histogramTooltipLocation && histogramTooltipData && (
         <div

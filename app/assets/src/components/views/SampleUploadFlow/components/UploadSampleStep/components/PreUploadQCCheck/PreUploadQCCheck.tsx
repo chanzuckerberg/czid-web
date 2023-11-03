@@ -69,6 +69,7 @@ const PreUploadQCCheck = ({
   // Add libraries to CLI and mount each file
   const initializeCLI = async () => {
     // For each sample, extract all the files the user wants to upload, and mount them
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     const files = flatten(samples.map(s => Object.values(s.files)));
     await CLI.mount(files);
   };
@@ -86,7 +87,9 @@ const PreUploadQCCheck = ({
       () =>
         new Set(
           [...invalidFiles].filter(object1 => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             return samples.some(object2 => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               return object1.name in object2.files;
             });
           }),
@@ -97,7 +100,9 @@ const PreUploadQCCheck = ({
       () =>
         new Set(
           [...duplicateIds].filter(object1 => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             return samples.some(object2 => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               return object1.name in object2.files;
             });
           }),
@@ -108,7 +113,9 @@ const PreUploadQCCheck = ({
       () =>
         new Set(
           [...truncatedFiles].filter(object1 => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             return samples.some(object2 => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               return object1.name in object2.files;
             });
           }),
@@ -119,7 +126,9 @@ const PreUploadQCCheck = ({
       () =>
         new Set(
           [...mismatchedFiles].filter(object1 => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             return samples.some(object2 => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               return object1.name in object2.files;
             });
           }),
@@ -130,7 +139,9 @@ const PreUploadQCCheck = ({
       () =>
         new Set(
           [...uncompressedFiles].filter(object1 => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             return samples.some(object2 => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               return object1.name in object2.files;
             });
           }),
@@ -276,8 +287,10 @@ const PreUploadQCCheck = ({
 
   // Validate if all samples are invalid, also handles analytics for mismatch sequence check
   const validateAllSamplesAreInvalid = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (samples.every(element => element.finishedValidating === true)) {
       let result = true;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       samples.forEach(element => {
         if (element.isValid) {
           // File is FASTA or FASTQ file does not have format
@@ -330,10 +343,12 @@ const PreUploadQCCheck = ({
   const runAllValidationChecks = async () => {
     let cumulativeInvalidFileSizes = 0;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     for (const sample of samples) {
       // Skip validation if already done on this sample
       if (sample.finishedValidating === true) {
         if (!sample.isValid) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
           Object.values(sample.files).forEach(
             f => (cumulativeInvalidFileSizes += f.size),
           );
@@ -407,10 +422,12 @@ const PreUploadQCCheck = ({
       sample.finishedValidating = true;
       sample.isValid = sampleIsValid;
       if (!sampleIsValid) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         Object.values(sample.files).forEach(
           f => (cumulativeInvalidFileSizes += f.size),
         );
       }
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       changeState(samples);
       handleCheckbox(sample);
     }
@@ -428,15 +445,18 @@ const PreUploadQCCheck = ({
   // Delete samples from selected IDs if file is invalid
   const handleCheckbox = (sample: Sample) => {
     if (!sample.isValid) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       handleSampleDeselect(sample._selectId, false, "local");
     } else if (sample.format) {
       if (sample.format === ILLUMINA)
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         handleSampleDeselect(
           sample._selectId,
           sample.format === ILLUMINA && sequenceTechnology !== NANOPORE,
           "local",
         );
       else if (sample.format === NANOPORE)
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         handleSampleDeselect(
           sample._selectId,
           sample.format === NANOPORE && sequenceTechnology !== ILLUMINA,
@@ -448,6 +468,7 @@ const PreUploadQCCheck = ({
   // Get all files of the given sequence technology
   const getFiles = (sequenceTechnologyType: string) => {
     const allFiles: $TSFixMe = [];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const filteredArrayOfSequenceTechnolgy = samples.filter(
       element => element.format === sequenceTechnologyType,
     );
@@ -466,7 +487,9 @@ const PreUploadQCCheck = ({
   // Adds every file into array
   const addAllFilesIntoArray = () => {
     const allFiles: File[] = [];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     samples.forEach(element =>
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       Object.values(element.files).forEach(val => allFiles.push(val)),
     );
     return allFiles;
@@ -574,6 +597,7 @@ const PreUploadQCCheck = ({
           />
         )}
         {sequenceTechnology === ILLUMINA &&
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           samples.some(element => element.format === NANOPORE) && (
             <IssueGroup
               className={cs.issue}
@@ -588,6 +612,7 @@ const PreUploadQCCheck = ({
             />
           )}
         {sequenceTechnology === NANOPORE &&
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           samples.some(element => element.format === ILLUMINA) && (
             <IssueGroup
               className={cs.issue}

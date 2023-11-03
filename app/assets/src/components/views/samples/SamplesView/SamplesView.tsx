@@ -195,9 +195,11 @@ const SamplesView = forwardRef(function SamplesView(
 
   // This tooltip is reset whenever the selectedIds changes.
   const [bulkDownloadButtonTempTooltip, setBulkDownloadButtonTempTooltip] =
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     useState<string>(null);
 
   useEffect(() => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setBulkDownloadButtonTempTooltip(null);
   }, [selectedIds]);
 
@@ -251,6 +253,7 @@ const SamplesView = forwardRef(function SamplesView(
     fetchMetadataFieldsBySampleIds();
   }, []);
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   const selectedObjects = getSelectedObjects({ selectedIds, objects });
 
   const handleSelectRow = (
@@ -261,6 +264,7 @@ const SamplesView = forwardRef(function SamplesView(
     // If the user is holding shift, we want to select all the rows between the last selected row and the current row.
     const newSelected = new Set(selectedIds);
     if (event.shiftKey && referenceSelectId) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const ids = objects.getIntermediateIds({
         id1: referenceSelectId,
         id2: value,
@@ -282,18 +286,24 @@ const SamplesView = forwardRef(function SamplesView(
         newSelected.delete(value);
       }
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setReferenceSelectId(value);
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onUpdateSelectedIds(newSelected);
   };
 
   const handleSelectAllRows = (checked: boolean) => {
     setReferenceSelectId(null);
     const newSelected = new Set(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       checked
-        ? union(Array.from(selectedIds), selectableIds)
-        : difference(Array.from(selectedIds), selectableIds),
+        ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+          union(Array.from(selectedIds), selectableIds)
+        : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+          difference(Array.from(selectedIds), selectableIds),
     );
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onUpdateSelectedIds(newSelected);
   };
 
@@ -304,10 +314,12 @@ const SamplesView = forwardRef(function SamplesView(
     sortBy: string;
     sortDirection: SortDirectionType;
   }) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onSortColumn({ sortBy, sortDirection });
   };
 
   const onBulkDeleteSuccess = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     const statusCounts = getStatusCounts(selectedObjects, workflowEntity);
     trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_RUNS_BULK_DELETED, {
       workflow: workflow,
@@ -317,12 +329,14 @@ const SamplesView = forwardRef(function SamplesView(
       projectId: projectId,
     });
     onDeleteSample();
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onUpdateSelectedIds(new Set());
   };
 
   const isSelectAllChecked = () => {
     return (
       !isEmpty(selectableIds) &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       isEmpty(difference(selectableIds, Array.from(selectedIds)))
     );
   };
@@ -348,8 +362,10 @@ const SamplesView = forwardRef(function SamplesView(
       />
     );
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (selectedIds.size < 2) {
       return disabledToolbarIcon("Select at least 2 samples");
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     } else if (selectedIds.size > MAX_TAXON_HEATMAP_SAMPLES) {
       return disabledToolbarIcon(
         `Select at most ${MAX_TAXON_HEATMAP_SAMPLES} samples`,
@@ -363,6 +379,7 @@ const SamplesView = forwardRef(function SamplesView(
             if (
               allowedFeatures.includes("taxon_heatmap_presets") &&
               option.text === "Taxon Heatmap" &&
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               selectedIds.size > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM &&
               !allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE)
             ) {
@@ -375,6 +392,7 @@ const SamplesView = forwardRef(function SamplesView(
               );
             } else {
               const params = getURLParamString({
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
                 sampleIds: Array.from(selectedIds),
               });
               return (
@@ -416,7 +434,9 @@ const SamplesView = forwardRef(function SamplesView(
         icon="download"
         popperDependencies={[bulkDownloadButtonTempTooltip]}
         popupText={bulkDownloadButtonTempTooltip || "Download"}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         disabled={selectedIds.size === 0}
         onClick={handleBulkDownloadModalOpen}
       />
@@ -424,8 +444,10 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderCollectionTrigger = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const targetSamples = objects.loaded;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return selectedIds.size < 2 ? (
       <ToolbarButtonIcon
         testId="background-model-icon"
@@ -446,6 +468,7 @@ const SamplesView = forwardRef(function SamplesView(
         }
         selectedSampleIds={selectedIds}
         fetchedSamples={targetSamples.filter(sample =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           selectedIds.has(sample.id),
         )}
         workflow={workflow}
@@ -555,6 +578,7 @@ const SamplesView = forwardRef(function SamplesView(
         },
       );
 
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       handleNewWorkflowRunsCreated({
         numWorkflowRunsCreated: size(amrPipelineEligibility.eligible),
         workflow: WorkflowType.AMR,
@@ -658,6 +682,7 @@ const SamplesView = forwardRef(function SamplesView(
       });
       renderBenchmarkKickedOffNotification();
 
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       handleNewWorkflowRunsCreated({
         numWorkflowRunsCreated: size(benchmarkEligibility.eligible),
         workflow: WorkflowType.BENCHMARK,
@@ -810,6 +835,7 @@ const SamplesView = forwardRef(function SamplesView(
       onClick={() => setIsBulkDeleteModalOpen(true)}
       selectedObjects={selectedObjects}
       workflow={workflow}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       workflowEntity={workflowEntity}
     />
   );
@@ -817,6 +843,7 @@ const SamplesView = forwardRef(function SamplesView(
   const renderBulkSamplesActionsMenu = () => (
     <BulkSamplesActionsMenu
       noObjectsSelected={size(selectedObjects) === 0}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       handleBulkKickoffAmr={
         domain !== DISCOVERY_DOMAIN_PUBLIC ? handleBulkKickoffAmr : null
       }
@@ -855,6 +882,7 @@ const SamplesView = forwardRef(function SamplesView(
             // this is broken, but alldoami found it while working on something unrelated
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             onClick={() => {}}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             text={`${selectedIds.size}`}
           />
           <span className={cs.label}>Selected</span>
@@ -881,6 +909,7 @@ const SamplesView = forwardRef(function SamplesView(
   const renderFilteredCount = () => {
     if (!isEmpty(userDataCounts)) {
       const totalNumberOfObjects =
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         userDataCounts.sampleCountByWorkflow[workflow];
 
       const workflowConfig = configForWorkflow[workflow];
@@ -933,6 +962,7 @@ const SamplesView = forwardRef(function SamplesView(
     // Note: If the specified sortBy column (ie. a custom metadata field) is not available on this view,
     // we expect the fetched samples to be sorted by the default column and we will bold the default column header.
     // This will not overwrite the sortBy in session storage.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sortByNotAvailable = !columns.some(c => c.dataKey === sortBy);
     const sortedColumn = sortByNotAvailable
       ? DEFAULT_SORTED_COLUMN_BY_TAB["samples"]
@@ -944,6 +974,7 @@ const SamplesView = forwardRef(function SamplesView(
     return (
       <div className={cs.table}>
         <InfiniteTable
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           ref={childInfiniteTable => (infiniteTable = childInfiniteTable)}
           columns={columns}
           defaultRowHeight={rowHeight}
@@ -958,6 +989,7 @@ const SamplesView = forwardRef(function SamplesView(
           onSortColumn={handleSortColumn}
           protectedColumns={protectedColumns}
           rowClassName={cs.tableDataRow}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           selectableKey={hideAllTriggers ? null : "id"}
           selected={selectedIds}
           selectAllChecked={selectAllChecked}
@@ -975,6 +1007,7 @@ const SamplesView = forwardRef(function SamplesView(
       <DiscoveryViewToggle
         currentDisplay={currentDisplay}
         onDisplaySwitch={(display: string) => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onDisplaySwitch(display);
           trackEvent(`SamplesView_${display}-switch_clicked`);
         }}
@@ -1006,6 +1039,7 @@ const SamplesView = forwardRef(function SamplesView(
     return (
       <QualityControl
         projectId={projectId}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         handleBarClick={onPLQCHistogramBarClick}
         filters={filters}
         filtersSidebarOpen={filtersSidebarOpen}
@@ -1030,6 +1064,7 @@ const SamplesView = forwardRef(function SamplesView(
       setBulkDownloadButtonTempTooltip(
         "Unexpected issue. Please contact us for help.",
       );
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     } else if (selectedIds.size > appConfig.maxObjectsBulkDownload && !admin) {
       // This check ensures that the # of selected objects does not surpass our max object limit that we allow in bulk downloads.
       // There is a separate check in BulkDownloadModal that looks for a max number of objects allowed and disables the
@@ -1059,6 +1094,7 @@ const SamplesView = forwardRef(function SamplesView(
     event: React.MouseEvent<HTMLDivElement, MouseEvent>;
     rowData: { id: number };
   }) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const object = objects.get(rowData.id);
     onObjectSelected && onObjectSelected({ object, currentEvent: event });
 
@@ -1112,6 +1148,7 @@ const SamplesView = forwardRef(function SamplesView(
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
         onSuccess={onBulkDeleteSuccess}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         selectedIds={Array.from(selectedIds)}
         isShortReadMngs={workflow === WorkflowType.SHORT_READ_MNGS}
         workflowLabel={WORKFLOWS[workflow]?.label}

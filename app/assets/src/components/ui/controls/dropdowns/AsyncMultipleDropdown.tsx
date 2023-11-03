@@ -73,6 +73,7 @@ class AsyncMultipleDropdown extends React.Component<AsyncMultipleDropdownProps> 
     const { onFilterChange } = this.props;
     // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
     const { selectedOptions } = this.state;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     const options = await onFilterChange(query);
 
     // If the query has since changed, discard the response (don't do anything).

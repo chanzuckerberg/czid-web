@@ -18,10 +18,14 @@ export const ConsensusGenomeDropdown = ({
   onConsensusGenomeSelection,
   ...props
 }: ConsensusGenomeDropdownProps) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const options = workflowRuns.map(wr => {
     const {
+      // @ts-expect-error CZID-8698 enable strictNullChecks: error TS2339
       accession_id: accessionId,
+      // @ts-expect-error CZID-8698 enable strictNullChecks: error TS2339
       accession_name: accessionName,
+      // @ts-expect-error CZID-8698 enable strictNullChecks: error TS2339
       taxon_name: taxonName,
     } = wr.inputs;
 

@@ -12,6 +12,7 @@ import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
 import Label from "~/components/ui/labels/Label";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Table } from "~/components/visualizations/table";
+import { ColumnProps } from "~/interface/sampleView";
 import { BulkDownloadDetails } from "~/interface/shared";
 import ImgDownloadPrimary from "~ui/illustrations/ImgDownloadPrimary";
 import Notification from "~ui/notifications/Notification";
@@ -115,7 +116,7 @@ class BulkDownloadList extends React.Component {
     }
   };
 
-  getTableColumns = () => {
+  getTableColumns = (): ColumnProps[] => {
     const { admin } = this.context || {};
 
     return [
@@ -177,6 +178,7 @@ class BulkDownloadList extends React.Component {
 
   isLoading = () => this.state.bulkDownloads === null;
   isEmpty = () =>
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     this.state.bulkDownloads && this.state.bulkDownloads.length === 0;
 
   handleStatusClick = (bulkDownload: BulkDownloadDetails) => {
@@ -261,6 +263,7 @@ class BulkDownloadList extends React.Component {
           headerClassName={cs.tableHeader}
           className={cs.table}
           columns={this.getTableColumns()}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           data={this.state.bulkDownloads}
           defaultRowHeight={70}
           sortable
@@ -331,6 +334,7 @@ class BulkDownloadList extends React.Component {
           visible={sidebarOpen}
           mode="bulkDownloadDetails"
           onClose={this.handleSidebarClose}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           params={this.getSidebarParams()}
         />
       </div>

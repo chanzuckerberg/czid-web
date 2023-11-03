@@ -106,11 +106,15 @@ export const ReportFilters = ({
       case "thresholdsShortReads":
       case "thresholdsLongReads":
       case "annotations":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         newSelectedOptions[key] = pull(value, newSelectedOptions[key]);
         break;
       case "categories":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         newSelectedOptions.categories = set(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
           subpath,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
           pull(value, get(subpath, newSelectedOptions.categories)),
           newSelectedOptions.categories,
         );
@@ -118,6 +122,7 @@ export const ReportFilters = ({
       default:
         return;
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     refreshDataFromOptionsChange({ key, newSelectedOptions });
   };
 
@@ -143,6 +148,7 @@ export const ReportFilters = ({
         sampleId,
       },
     );
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onFilterChanged({ key, value });
   };
 
@@ -171,6 +177,7 @@ export const ReportFilters = ({
     value: string | object;
     idx?: string | number;
   }) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     label = label || (typeof value === "string" && value);
     return (
       <FilterTag
@@ -216,9 +223,11 @@ export const ReportFilters = ({
       map("name", CATEGORIES).map((category, i) => {
         const categoryTags = [];
         if (
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           getOr([], ["categories", "categories"], selected).includes(category)
         ) {
           categoryTags.push(
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
             renderFilterTag({
               key: "categories",
               subpath: "categories",
@@ -230,6 +239,7 @@ export const ReportFilters = ({
         getOr([], ["categories", "subcategories", category], selected).map(
           (subcategory: string, j: number) => {
             categoryTags.push(
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
               renderFilterTag({
                 key: "categories",
                 subpath: `subcategories.${category}`,
@@ -246,6 +256,7 @@ export const ReportFilters = ({
 
   // Only show aggregate score metric as a selectable option if the user has a background selected.
   // The aggregate score is computed by having background model applied.
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const treeMetrics = !selected.background
     ? filter(
         metric => metric.value !== "aggregatescore",
@@ -256,13 +267,17 @@ export const ReportFilters = ({
   // Display reads OR bases metrics based on the sample's workflow
   const selectedTreeMetric =
     currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
-      ? selected.metricShortReads
-      : selected.metricLongReads;
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        selected.metricShortReads
+      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        selected.metricLongReads;
 
   const selectedThresholds =
     currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
-      ? selected.thresholdsShortReads
-      : selected.thresholdsLongReads;
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        selected.thresholdsShortReads
+      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        selected.thresholdsLongReads;
 
   return (
     <div className={cs.reportFilters}>
@@ -306,6 +321,7 @@ export const ReportFilters = ({
         )}
         <div className={cs.filterListElement}>
           <NameTypeFilter
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             value={selected.nameType}
             onChange={(value: unknown) =>
               handleFilterChange({
@@ -326,6 +342,7 @@ export const ReportFilters = ({
               categorizeBackgrounds
               ownedBackgrounds={ownedBackgrounds}
               otherBackgrounds={otherBackgrounds}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               value={selected.background}
               onChange={(value: number) =>
                 handleFilterChange({
@@ -396,6 +413,7 @@ export const ReportFilters = ({
         </div>
         <div className={cs.filterListElement}>
           <SpecificityFilter
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             value={selected.readSpecificity}
             onChange={(value: string) =>
               handleFilterChange({
@@ -409,6 +427,7 @@ export const ReportFilters = ({
           allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) && (
             <div className={cs.filterListElement}>
               <AnnotationFilter
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                 selectedAnnotations={selected.annotations}
                 onChange={(value: string) =>
                   handleFilterChange({
@@ -423,6 +442,7 @@ export const ReportFilters = ({
           allowedFeatures.includes(PATHOGEN_FLAG_FILTER_FEATURE) && (
             <div className={cs.filterListElement}>
               <FlagFilter
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                 selectedFlags={selected.flags}
                 onChange={(value: string) =>
                   handleFilterChange({
@@ -453,6 +473,7 @@ export const ReportFilters = ({
       </div>
       {!loadingReport && (
         <div className={cs.tagList}>
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           {selected.taxa.map(taxon =>
             renderFilterTag({
               key: "taxa",
@@ -464,6 +485,7 @@ export const ReportFilters = ({
             renderThresholdFilterTag({ threshold, idx: i }),
           )}
           {renderCategoryFilterTags()}
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           {selected.annotations.map((annotation, i) =>
             renderFilterTag({
               key: "annotations",

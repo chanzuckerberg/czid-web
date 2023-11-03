@@ -95,6 +95,7 @@ class MultipleDropdown extends React.Component<
             includes(optionValue, checkedOptions),
           ),
         );
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const unchecked = options
         .filter((option: $TSFixMe) => !includes(option.value, valueOnOpen))
         .map((option: $TSFixMe) =>
@@ -103,6 +104,7 @@ class MultipleDropdown extends React.Component<
 
       return checked.concat(unchecked);
     } else {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       return options.map((option: $TSFixMe) =>
         this.renderMenuItem(option, includes(option.value, checkedOptions)),
       );

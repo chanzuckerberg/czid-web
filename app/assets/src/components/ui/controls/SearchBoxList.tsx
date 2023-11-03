@@ -80,6 +80,7 @@ class SearchBoxList extends React.Component<
       if (selected.has(option.value)) {
         selectedOptions[option.value] = option;
       } else {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         unselectedOptions.push(option);
       }
     });
@@ -104,6 +105,7 @@ class SearchBoxList extends React.Component<
       <div className={cs.searchBoxList}>
         {this.props.title && <div className={cs.title}>{this.props.title}</div>}
         <div
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           data-testid={`search-${this.props.title
             .replace(/ /g, "-")
             .toLocaleLowerCase()}`}
@@ -172,7 +174,9 @@ class SearchBoxList extends React.Component<
 
 SearchBoxList.defaultProps = {
   selected: [],
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   labelTitle: null,
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   countTitle: null,
 };
 

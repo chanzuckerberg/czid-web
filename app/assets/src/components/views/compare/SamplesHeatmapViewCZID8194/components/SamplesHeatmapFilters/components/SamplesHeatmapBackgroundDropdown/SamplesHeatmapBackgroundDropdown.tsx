@@ -40,6 +40,7 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
     const formatBackgroundOptions = (
       backgrounds: RawBackground[],
     ): SDSFormattedOption[] => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       return backgrounds.map(background => {
         const disabledOption =
           !enableMassNormalizedBackgrounds && background.mass_normalized;
@@ -59,6 +60,7 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
     };
 
     let backgroundOptions: SDSFormattedOption[] =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       formatBackgroundOptions(allBackgrounds);
     if (backgroundOptions.length === 0) {
       backgroundOptions = [
@@ -91,6 +93,7 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
           sdsStyle: "minimal",
           sdsType: "label",
           disabled: disabled,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           value: valueToName(value, backgroundOptions),
         }}
         options={backgroundOptions}

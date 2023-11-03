@@ -88,6 +88,7 @@ export const AmrSampleReport = ({
           contigPercentIdColumn,
           contigSpeciesColumn,
         ],
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         table,
       ),
       getReadsColumnGroup(
@@ -99,6 +100,7 @@ export const AmrSampleReport = ({
           readDepthPerMillionColumn,
           readSpeciesColumn,
         ],
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         table,
       ),
     ],

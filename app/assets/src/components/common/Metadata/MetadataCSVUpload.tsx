@@ -20,10 +20,13 @@ class MetadataCSVUpload extends React.Component<
   // MetadataCSVUpload stores each row as arrays of strings,
   // but converts the row to objects before calling onMetadataChange.
   state: MetadataCSVUploadState = {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     metadata: null,
     validatingCSV: false,
     // Keep track of the last sample names and project id validated so we can re-validate if the samples changed.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     lastSampleNamesValidated: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     lastProjectIdValidated: null,
   };
 
@@ -37,6 +40,7 @@ class MetadataCSVUpload extends React.Component<
         map("name", this.props.samples),
         this.state.lastSampleNamesValidated,
       ) ||
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         this.props.project.id !== this.state.lastProjectIdValidated)
     ) {
       this.validateCSV(this.state.metadata);
@@ -68,7 +72,9 @@ class MetadataCSVUpload extends React.Component<
     if (this.props.samplesAreNew) {
       // We assume that all samples are being uploaded to this.props.project.
       this.setState({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         lastSampleNamesValidated: map("name", this.props.samples),
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         lastProjectIdValidated: this.props.project.id,
       });
 
@@ -79,6 +85,7 @@ class MetadataCSVUpload extends React.Component<
       // For uploading metadata to existing samples in a project.
     } else {
       serverResponse = await validateMetadataCSVForProject(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         this.props.project.id,
         csv,
       );

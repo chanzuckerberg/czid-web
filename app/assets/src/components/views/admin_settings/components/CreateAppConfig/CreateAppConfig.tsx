@@ -10,8 +10,11 @@ interface CreateAppConfigProps {
 export const CreateAppConfig = ({
   handleSetAppConfig,
 }: CreateAppConfigProps) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
   const [newAppConfigName, setNewAppConfigName] = useState<string>(null);
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
   const [newAppConfigValue, setNewAppConfigValue] = useState<string>(null);
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
   const [requestStatus, setRequestStatus] = useState<string>(null);
 
   const onSubmitAppConfig = async ({ key, value }: AppConfigParams) => {

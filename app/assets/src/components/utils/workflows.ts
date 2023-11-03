@@ -82,6 +82,7 @@ export const WORKFLOWS: WorkflowConfigType<WorkflowStrings> = {
   [WorkflowType.AMR_DEPRECATED]: {
     label: AMR_DEPRECATED,
     pluralizedLabel: AMR_DEPRECATED,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     entity: null,
     pipelineName: AMR_DEPRECATED,
     shorthand: "AMR (Deprecated)",

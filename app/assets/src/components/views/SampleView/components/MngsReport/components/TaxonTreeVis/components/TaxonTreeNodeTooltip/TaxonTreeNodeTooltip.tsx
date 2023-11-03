@@ -23,6 +23,7 @@ export const TaxonTreeNodeTooltip = ({
   const rows = [];
   for (const metric in metrics) {
     rows.push(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       <span
         key={`tt_${metric}`}
         className={cx(

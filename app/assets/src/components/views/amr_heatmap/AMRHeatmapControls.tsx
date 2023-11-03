@@ -32,22 +32,27 @@ const AMRHeatmapControls = ({
   maxValueForLegend,
 }: AMRHeatmapControlsProps) => {
   const handleOptionChange = (control: string, option: $TSFixMe) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (option !== selectedOptions[control]) {
       onSelectedOptionsChange({ [control]: option });
     }
   };
 
   const renderControlDropdowns = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return controls.map(control => {
       return (
         <div className={cs.filterControl} key={control.key}>
           <Dropdown
             fluid
             rounded
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             options={control.options}
             onChange={(option: $TSFixMe) =>
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
               handleOptionChange(control.key, option)
             }
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
             value={selectedOptions[control.key]}
             label={control.label}
             disabled={!isDataReady}
@@ -67,6 +72,7 @@ const AMRHeatmapControls = ({
         <SequentialLegendVis
           min={0}
           max={maxValueForLegend}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           scale={selectedOptions.scale}
         />
       </div>

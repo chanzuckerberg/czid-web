@@ -77,6 +77,7 @@ const SamplesHeatmapFilters = ({
 
   const onTaxonLevelChange = (taxonLevel: SDSFormattedOption) => {
     const value = taxonLevel.value;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (selectedOptions.species === value) {
       return;
     }
@@ -85,6 +86,7 @@ const SamplesHeatmapFilters = ({
   };
 
   const renderTaxonLevelSelect = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const isPreset = selectedOptions.presets.includes("species");
     const disabled = loading || !data || isPreset;
 
@@ -93,6 +95,7 @@ const SamplesHeatmapFilters = ({
         disabled={disabled}
         label="Taxon Level"
         onChange={onTaxonLevelChange}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         options={optionsToSDSFormat(options.taxonLevels)}
         selectedOptions={selectedOptions}
         selectedOptionsKey="species"
@@ -108,6 +111,7 @@ const SamplesHeatmapFilters = ({
 
   const onMetricChange = (metric: SDSFormattedOption) => {
     const value = metric.value;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (value === selectedOptions.metric) {
       return;
     }
@@ -121,6 +125,7 @@ const SamplesHeatmapFilters = ({
         disabled={loading || !data}
         label="Metric"
         onChange={onMetricChange}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         options={optionsToSDSFormat(options.metrics)}
         selectedOptions={selectedOptions}
         selectedOptionsKey="metric"
@@ -129,6 +134,7 @@ const SamplesHeatmapFilters = ({
   };
 
   const onBackgroundChange = (background: number) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (background === selectedOptions.background) {
       return;
     }
@@ -137,15 +143,18 @@ const SamplesHeatmapFilters = ({
   };
 
   const renderBackgroundSelect = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const isPreset = selectedOptions.presets.includes("background");
     const disabled = loading || !data || isPreset;
 
     const backgroundSelect = (
       <SamplesHeatmapBackgroundDropdown
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         allBackgrounds={options.backgrounds}
         disabled={disabled}
         enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
         onChange={onBackgroundChange}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         value={selectedOptions.background}
       />
     );
@@ -162,6 +171,7 @@ const SamplesHeatmapFilters = ({
   };
 
   const renderThresholdFilterSelect = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const isPreset = selectedOptions.presets.includes("thresholdFilters");
     const disabled = loading || !data || isPreset;
 
@@ -171,6 +181,7 @@ const SamplesHeatmapFilters = ({
           isDisabled={disabled}
           // @ts-expect-error Type 'TextValueString' is not assignable to type 'MetricOption'. Property 'text' is optional in type 'TextValueString' but required in type 'MetricOption'.ts(2322)
           metricOptions={options.thresholdFilters.targets}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           selectedThresholds={selectedOptions["thresholdFilters"]}
           onApply={onThresholdFilterApply}
         />
@@ -186,16 +197,20 @@ const SamplesHeatmapFilters = ({
 
   const renderCategoryFilter = () => {
     const isPreset =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       selectedOptions.presets.includes("categories") ||
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       selectedOptions.presets.includes("subcategories");
 
     const disabled = loading || !data || isPreset;
 
     const categorySelect = (
       <SamplesHeatmapCategoryDropdown
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         selectedOptions={selectedOptions}
         disabled={disabled}
         onSelectedOptionsChange={onSelectedOptionsChange}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         options={options}
       />
     );
@@ -209,6 +224,7 @@ const SamplesHeatmapFilters = ({
 
   const onSpecificityChange = (specificity: SDSFormattedOption) => {
     const value = specificity.value;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (value === selectedOptions.readSpecificity) {
       return;
     }
@@ -217,6 +233,7 @@ const SamplesHeatmapFilters = ({
   };
 
   const renderSpecificityFilter = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const isPreset = selectedOptions.presets.includes("readSpecificity");
     const disabled = loading || !data || isPreset;
 
@@ -225,6 +242,7 @@ const SamplesHeatmapFilters = ({
         disabled={disabled}
         label="Read Specificity"
         onChange={onSpecificityChange}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         options={optionsToSDSFormat(options.specificityOptions)}
         selectedOptions={selectedOptions}
         selectedOptionsKey="readSpecificity"
@@ -240,6 +258,7 @@ const SamplesHeatmapFilters = ({
 
   const onSortSamplesChange = (selectedSortType: SDSFormattedOption) => {
     const value = selectedSortType.value;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (value === selectedOptions.sampleSortType) {
       return;
     }
@@ -253,6 +272,7 @@ const SamplesHeatmapFilters = ({
         disabled={loading || !data}
         label="Sort Samples"
         onChange={onSortSamplesChange}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         options={optionsToSDSFormat(options.sampleSortTypeOptions)}
         selectedOptions={selectedOptions}
         selectedOptionsKey="sampleSortType"
@@ -262,6 +282,7 @@ const SamplesHeatmapFilters = ({
 
   const onSortTaxaChange = (selectedSortType: SDSFormattedOption) => {
     const value = selectedSortType.value;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (value === selectedOptions.taxaSortType) {
       return;
     }
@@ -275,6 +296,7 @@ const SamplesHeatmapFilters = ({
         disabled={loading || !data}
         label="Sort Taxa"
         onChange={onSortTaxaChange}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         options={optionsToSDSFormat(options.taxaSortTypeOptions)}
         selectedOptions={selectedOptions}
         selectedOptionsKey="taxaSortType"
@@ -284,6 +306,7 @@ const SamplesHeatmapFilters = ({
 
   const onDataScaleChange = (scaleIdx: SDSFormattedOption) => {
     const value = scaleIdx.value;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (value === selectedOptions.dataScaleIdx) {
       return;
     }
@@ -295,6 +318,7 @@ const SamplesHeatmapFilters = ({
     const formatScaleOptions = (option: [string, string], idx: number) => {
       return { name: option[0], value: idx };
     };
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const scaleOptions = options.scales.map(formatScaleOptions);
 
     return (
@@ -306,6 +330,7 @@ const SamplesHeatmapFilters = ({
         selectedOptions={selectedOptions}
         selectedOptionsKey="dataScaleIdx"
         customValueToNameFunction={(value: number, options) =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           options[value].name
         }
       />
@@ -320,9 +345,12 @@ const SamplesHeatmapFilters = ({
     return (
       <SamplesHeatmapTaxonSlider
         isDisabled={loading || !data}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         max={options.taxonsPerSample.max}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         min={options.taxonsPerSample.min}
         onChangeCommitted={onTaxonsPerSampleEnd}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         value={selectedOptions.taxonsPerSample}
       />
     );
@@ -373,6 +401,7 @@ const SamplesHeatmapFilters = ({
             <SamplesHeatmapTaxonTagCheckbox
               label={"Known Pathogens Only"}
               value={"known_pathogens"}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               selectedOptions={selectedOptions}
               onSelectedOptionsChange={onSelectedOptionsChange}
               showInfoIcon={true}

@@ -180,12 +180,13 @@ export type CellRendererType = ({
 }: {
   cellData?: Array<number> | number | string;
   rowData?: Taxon;
-}) => JSX.Element | string;
+}) => JSX.Element | string | null;
 
 export type HeaderRendererType = () => JSX.Element;
 
 export interface ColumnProps {
-  dataKey?: string;
+  dataKey: string;
+  sortKey?: string;
   cellRenderer?: CellRendererType;
   className?: string;
   columnData?: { [key: string]: any };

@@ -14,6 +14,7 @@ const CARDFooter = ({ geneName, ontology }: CARDFooterProps) => {
       <div>
         This article uses material from the{" "}
         <a
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           href={generateLinkTo({
             geneName,
             ontology,

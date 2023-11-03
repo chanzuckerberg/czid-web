@@ -31,6 +31,7 @@ interface generateUrlOptions {
 const generateUrlToSampleView = ({
   sampleId,
   snapshotShareId = null,
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   tempSelectedOptions = null,
   workflow = null,
   workflowRunId = null,
@@ -44,6 +45,7 @@ const generateUrlToSampleView = ({
   */
   const defaultBackgroundId = 26;
   if (tempSelectedOptions?.background === defaultBackgroundId) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     tempSelectedOptions.background = null;
   }
 
@@ -118,6 +120,7 @@ const getTempSelectedOptions = ({
     }
   }
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   return sampleViewFormattedSelectedOptions;
 };
 

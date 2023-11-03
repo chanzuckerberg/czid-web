@@ -149,6 +149,7 @@ export default class AMRHeatmapView extends React.Component<
         // plus the drug class.
         // Only needed for samples run on pipeline 3.8 or earlier.
         const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
         amrCount.gene = geneName;
       });
@@ -339,6 +340,7 @@ export default class AMRHeatmapView extends React.Component<
             },${amrCount.total_reads || "N/A"}`,
           ];
 
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           csvRows.push(row);
         });
       },
@@ -374,6 +376,7 @@ export default class AMRHeatmapView extends React.Component<
     const [csvHeaders, csvRows] = this.computeHeatmapValuesForCSV();
     return (
       <a
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         href={createCSVObjectURL(csvHeaders, csvRows)}
         download="idseq_amr_heatmap_values.csv"
         target="_blank"
@@ -490,6 +493,7 @@ export default class AMRHeatmapView extends React.Component<
         visible={sidebarVisible}
         mode={sidebarMode}
         onClose={this.closeSidebar}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         params={this.getSidebarParams()}
       />
     );

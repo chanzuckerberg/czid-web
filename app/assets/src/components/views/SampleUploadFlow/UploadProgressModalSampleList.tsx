@@ -32,6 +32,7 @@ const UploadProgressModalSampleList = ({
   onRetryUpload,
 }: UploadProgressModalSampleListProps) => {
   const getUploadPercentageForSample = (sample: SampleFromApi) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
     return sampleUploadPercentages[sample.name];
   };
 
@@ -50,6 +51,7 @@ const UploadProgressModalSampleList = ({
   return (
     <div className={cs.uploadProgressModalSampleList}>
       {samples.map(sample => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         const status = sampleUploadStatuses[sample.name];
 
         return (

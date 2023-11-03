@@ -110,9 +110,12 @@ const MetadataTab = ({
           onSave={onMetadataSave}
           isHuman={additionalInfo.host_genome_taxa_category === "human"}
           sampleTypes={sampleTypes}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           taxaCategory={additionalInfo.host_genome_taxa_category}
         />
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {metadataErrors[metadataType.key] && (
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           <div className={cs.error}>{metadataErrors[metadataType.key]}</div>
         )}
       </div>

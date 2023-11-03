@@ -36,6 +36,7 @@ const ForgotPassword = () => {
             <div>
               <Input
                 className={cs.inputField}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 onChange={setEmail}
                 placeholder="Enter your registered email"
                 type="email"

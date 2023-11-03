@@ -91,6 +91,7 @@ class MetadataDictionary extends React.Component {
     if (!this.state.officialFields) return null;
 
     const fieldsForHostGenome = filter(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
       field => field.host_genome_ids.includes(this.state.currentHostGenome),
       this.state.officialFields,
     );
@@ -115,6 +116,7 @@ class MetadataDictionary extends React.Component {
   getHostGenomeOptions = () =>
     sortBy(
       "text",
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
       this.state.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
         value: hostGenome.id,
@@ -136,6 +138,7 @@ class MetadataDictionary extends React.Component {
               className={cs.hostGenome}
               label="Host Organism"
               options={this.getHostGenomeOptions()}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               value={this.state.currentHostGenome}
               onChange={this.handleHostGenomeChange}
               rounded

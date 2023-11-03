@@ -7,6 +7,7 @@ import QuoteSliderItem from "./QuoteSliderItem";
 
 const QuoteSlider = () => {
   useEffect(() => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     document.querySelector<HTMLElement>(".slick-dots").style.transform =
       "translateY(-40px)";
     const slickArrows = document.querySelectorAll(".slick-arrow");

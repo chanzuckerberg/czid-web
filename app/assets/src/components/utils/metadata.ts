@@ -20,9 +20,11 @@ export const processMetadata = ({
   );
   // If flatten, simplify objects (e.g. location objects) to .name
   if (flatten) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     return mapValues(val => (isObject(val) ? val.name : val), newMetadata);
   }
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   return newMetadata;
 };
 

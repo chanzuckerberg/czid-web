@@ -220,7 +220,9 @@ export default class Histogram {
     for (let i = 0; i < this.data.length; i++) {
       const series = this.data[i];
       const minMax = extent(series);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       mins.push(minMax[0]);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       maxs.push(minMax[1]);
 
       // make the chart is large enough to hold reference lines
@@ -228,7 +230,9 @@ export default class Histogram {
         const values = this.options.refValues.map((v: $TSFixMe) =>
           parseFloat(v.values[i]),
         );
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         mins.push(min(values));
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         maxs.push(max(values));
       }
     }
@@ -251,6 +255,7 @@ export default class Histogram {
 
     const bins = [];
     for (let i = 0; i < this.data.length; i++) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       bins[i] = bin().domain(x.domain()).thresholds(x.ticks())(this.data[i]);
     }
     return bins;
@@ -351,8 +356,10 @@ export default class Histogram {
     let closestX = null;
 
     if (closestBarCenters.length === 1) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       closestX = closestBarCenters[0];
     } else {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       closestX =
         Math.abs(closestBarCenters[0] - svgX) <
         Math.abs(closestBarCenters[1] - svgX)
@@ -364,8 +371,10 @@ export default class Histogram {
     const buffer = this.barWidth / 2 + this.options.hoverBuffer;
 
     const dataIndices =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
       Math.abs(closestX - svgX) < buffer
-        ? this.barCentersToIndices[closestX]
+        ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
+          this.barCentersToIndices[closestX]
         : null;
 
     const lastDataIndices = this.lastHoveredBarX

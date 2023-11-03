@@ -52,6 +52,7 @@ export const ToggleAllButton = ({
       };
     });
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setPendingOptions([...otherSectionOptions, ...sectionOptions]);
   };
 

@@ -56,17 +56,23 @@ class BaseMap extends React.Component<BaseMapProps, BaseMapState> {
     viewport.height = height;
     viewport.latitude = limitToRange(
       viewport.latitude,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       viewBounds.minLatitude,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       viewBounds.maxLatitude,
     );
     viewport.longitude = limitToRange(
       viewport.longitude,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       viewBounds.minLongitude,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       viewBounds.maxLongitude,
     );
     viewport.zoom = limitToRange(
       viewport.zoom,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       viewBounds.minZoom,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       viewBounds.maxZoom,
     );
 

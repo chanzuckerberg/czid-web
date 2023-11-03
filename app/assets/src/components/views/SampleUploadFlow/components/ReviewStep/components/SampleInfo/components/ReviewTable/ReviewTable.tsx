@@ -10,7 +10,7 @@ import { DataHeaders } from "./types";
 interface ReviewTableType {
   hostGenomes?: HostGenome[];
   metadata: MetadataBasic;
-  projectMetadataFields: $TSFixMeUnknown;
+  projectMetadataFields: object | null;
   samples?: SampleFromApi[];
   uploadType: string;
 }
@@ -59,6 +59,7 @@ const getDataRows = ({
 
   const assembleDataForSample = (sample: SampleFromApi) => {
     const sampleHostName = get("name", hostGenomesById[sample.host_genome_id]);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
     const sampleMetadata = metadataBySample[sample.name];
 
     if (sampleHostName === "Human" && "Host Age" in sampleMetadata) {
@@ -80,6 +81,7 @@ const getDataRows = ({
     if (uploadType !== "basespace") {
       // Display the concatenated file names here too
       const files = flatten(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         sample.input_files_attributes.map(pair => pair.concatenated),
       );
       sampleData["Input Files"] = (
@@ -92,6 +94,7 @@ const getDataRows = ({
         </div>
       );
     } else {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       sampleData["File Size"] = formatFileSize(sample.file_size);
       sampleData["File Type"] = sample.file_type;
       sampleData["Basespace Project"] = sample.basespace_project_name;

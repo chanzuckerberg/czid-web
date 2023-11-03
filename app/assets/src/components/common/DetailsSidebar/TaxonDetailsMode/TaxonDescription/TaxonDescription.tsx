@@ -35,6 +35,7 @@ export const TaxonDescription = ({
 
   useEffect(() => {
     if (
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       taxonDescriptionRef?.current?.clientHeight > COLLAPSED_HEIGHT &&
       !isTall
     ) {

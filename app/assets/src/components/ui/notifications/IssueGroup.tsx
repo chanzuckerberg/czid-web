@@ -25,10 +25,12 @@ const IssueGroup = ({
   rows,
   type,
 }: IssueGroupProps) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
   const rowObject = rows.map(row => zipObject(headers, row));
 
   return (
     <Accordion
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       className={cx(cs.issueGroup, cs[type], className)}
       bottomContentPadding
       header={
@@ -36,6 +38,7 @@ const IssueGroup = ({
           {type === "info" ? (
             <IconSuccess className={cx(cs.icon, cs[type])} />
           ) : (
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
             <IconAlert className={cx(cs.icon, cs[type])} />
           )}
           {caption}

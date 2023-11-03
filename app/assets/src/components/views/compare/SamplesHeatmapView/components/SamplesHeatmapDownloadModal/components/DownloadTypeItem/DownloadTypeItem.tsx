@@ -55,8 +55,10 @@ export const DownloadTypeItem = ({
             <div className={cs.fields}>
               <MetricDropdown
                 downloadType={downloadType}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 handleSelectMetric={handleSelectMetric}
                 metricOptions={metricOptions}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 selectedMetricValue={selectedMetricValue}
               />
             </div>

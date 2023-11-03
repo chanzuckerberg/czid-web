@@ -36,6 +36,7 @@ const ProjectUploadMenu = ({
       text="Upload Samples"
       key="1"
       onClick={() => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         goToPage(`/samples/upload?projectId=${project.id}`);
       }}
     />,

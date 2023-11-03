@@ -42,6 +42,12 @@ interface HistogramsProps {
   setChartTooltipData: $TSFixMeFunction;
 }
 
+interface DataBin {
+  x0: number;
+  x1: number;
+  length: number;
+}
+
 const NUMBER_OF_SAMPLES = "Number of Samples";
 
 export const Histograms = ({
@@ -58,14 +64,14 @@ export const Histograms = ({
   const trackEvent = useTrackEvent();
 
   const filtersRef = useRef(filters);
-  const samplesByTotalReads = useRef([]);
-  const samplesByQCPercent = useRef([]);
-  const samplesByDCR = useRef([]);
-  const samplesByInsertSize = useRef([]);
-  const meanInsertSizeBins = useRef([]);
-  const totalReadsBins = useRef([]);
-  const dcrBins = useRef([]);
-  const qcPercentBins = useRef([]);
+  const samplesByTotalReads = useRef<string[][]>([]);
+  const samplesByQCPercent = useRef<string[][]>([]);
+  const samplesByDCR = useRef<string[][]>([]);
+  const samplesByInsertSize = useRef<string[][]>([]);
+  const meanInsertSizeBins = useRef<DataBin[]>([]);
+  const totalReadsBins = useRef<DataBin[]>([]);
+  const dcrBins = useRef<DataBin[]>([]);
+  const qcPercentBins = useRef<DataBin[]>([]);
   const totalReadsHistogramContainer = useRef(null);
   const qualityReadsHistogramContainer = useRef(null);
   const meanInsertSizeHistogramContainer = useRef(null);
@@ -140,6 +146,7 @@ export const Histograms = ({
           labelX: "Base pairs",
           labelY: NUMBER_OF_SAMPLES,
         });
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         setMeanInsertSizeHistogram(_meanInsertSizeHistogram);
       }
     }
@@ -227,13 +234,14 @@ export const Histograms = ({
     }[];
     numBins: number;
     minBinWidth: number;
-  }) => {
+  }): [DataBin[], string[][]] => {
     if (!data.length) {
       return [[], []];
     }
     // data is an array of {id, value} pairs, sorted by value
     const minVal = 0;
     const maxVal = ceil(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       max([last(data).value, minVal + numBins * minBinWidth]),
     );
     let binWidth = (maxVal - minVal) / numBins;
@@ -242,15 +250,15 @@ export const Histograms = ({
       binWidth = ceil(binWidth * 2) / 2;
     }
 
-    const dataBins = [];
-    const sampleBins = [];
+    const dataBins: DataBin[] = [];
+    const sampleBins: string[][] = [];
     let x0 = minVal;
     let x1 = minVal + binWidth;
     let sampleIndex = 0;
 
     for (let i = 0; i < numBins; i++) {
       let binLength = 0;
-      const sampleBin = [];
+      const sampleBin: string[] = [];
       while (sampleIndex < data.length) {
         const value = data[sampleIndex].value;
         const sampleId = data[sampleIndex].id;
@@ -286,7 +294,7 @@ export const Histograms = ({
   /** callback functions **/
 
   const handleHistogramBarClick = (data, binIndex) => {
-    let bin = [];
+    let bin: string[] = [];
     if (data === totalReadsBins.current) {
       bin = samplesByTotalReads.current[binIndex];
     } else if (data === qcPercentBins.current) {
@@ -302,6 +310,7 @@ export const Histograms = ({
   const handleHistogramBarEnter = (bin, data) => {
     let histogramTooltipData = null;
     if (data === totalReadsBins.current) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Total Reads",
@@ -314,17 +323,20 @@ export const Histograms = ({
         },
       });
     } else if (data === qcPercentBins.current) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Passed QC",
         format: d => numberWithPercent(d),
       });
     } else if (data === dcrBins.current) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Ratio Number",
       });
     } else if (data === meanInsertSizeBins.current) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Base Pairs",
@@ -377,10 +389,12 @@ export const Histograms = ({
     tickFormat?: $TSFixMeFunction;
   }) => {
     const tickValues = data.map(d => d.x0);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     tickValues.push(last(data).x1);
 
     const histogram = new Histogram(container, data, {
       skipBins: true,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       domain: [0, last(data).x1],
       tickValues: tickValues,
       labelX: labelX,
@@ -459,6 +473,7 @@ export const Histograms = ({
             data-testid="total-read-histogram"
             className={cs.d3Container}
             ref={histogramContainer => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               totalReadsHistogramContainer.current = histogramContainer;
             }}
           />
@@ -504,6 +519,7 @@ export const Histograms = ({
             data-testid="passed-qc-histogram"
             className={cs.d3Container}
             ref={histogramContainer => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               qualityReadsHistogramContainer.current = histogramContainer;
             }}
           />
@@ -558,6 +574,7 @@ export const Histograms = ({
             data-testid="duplicate-compression-histogram"
             className={cs.d3Container}
             ref={histogramContainer => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               dcrHistogramContainer.current = histogramContainer;
             }}
           />
@@ -646,6 +663,7 @@ export const Histograms = ({
             data-testid="mean-insert-size-histogram"
             className={cs.d3Container}
             ref={histogramContainer => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               meanInsertSizeHistogramContainer.current = histogramContainer;
             }}
           />

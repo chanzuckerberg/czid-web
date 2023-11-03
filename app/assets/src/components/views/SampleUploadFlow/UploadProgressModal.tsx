@@ -64,9 +64,11 @@ const UploadProgressModal = ({
           guppyBasecallerSetting={guppyBasecallerSetting}
           technology={technology}
           medakaModel={medakaModel}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           metadata={processMetadataRows(metadata.rows)}
           onUploadComplete={onUploadComplete}
           project={project}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           refSeqAccession={refSeqAccession}
           refSeqFile={refSeqFile}
           refSeqTaxon={refSeqTaxon}
@@ -84,6 +86,7 @@ const UploadProgressModal = ({
           clearlabs={clearlabs}
           technology={technology}
           medakaModel={medakaModel}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           metadata={processMetadataRows(metadata.rows)}
           onUploadComplete={onUploadComplete}
           project={project}

@@ -41,6 +41,7 @@ const ProjectSettingsModal = ({
         authenticity_token: csrf,
       })
       .then(() => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         onProjectPublished();
       });
   };

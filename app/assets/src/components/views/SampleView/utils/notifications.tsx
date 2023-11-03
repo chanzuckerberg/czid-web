@@ -138,10 +138,12 @@ const renderConsensusGenomeCreated = (
       <div
         className={cs.consensusGenomeLink}
         onClick={() => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           handleTabChange(WORKFLOW_TABS.CONSENSUS_GENOME);
           closeToast();
         }}
         onKeyDown={() => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           handleTabChange(WORKFLOW_TABS.CONSENSUS_GENOME);
           closeToast();
         }}
@@ -168,10 +170,12 @@ const renderPersistedDiscoveryViewThresholds = (
     <div
       className={cs.revertFiltersLink}
       onClick={() => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         revertToSampleViewFilters();
         closeToast();
       }}
       onKeyDown={() => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         revertToSampleViewFilters();
         closeToast();
       }}

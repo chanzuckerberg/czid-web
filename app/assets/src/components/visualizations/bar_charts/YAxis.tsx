@@ -4,7 +4,7 @@ import cs from "./y_axis.scss";
 
 interface YAxisProps {
   y?;
-  labels?: unknown[];
+  labels?: string[];
   width?: number;
   height?: number;
   barHeight?: number;
@@ -33,17 +33,21 @@ export default function YAxis({
 }: YAxisProps) {
   const renderText = () => {
     const textOffset = `translate(-${
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       7 + tickSize * Number(ticksVisible || pathVisible)
     }, 0)`;
 
     return y.domain().map((yAttribute, index) => {
       const yPosition = y(yAttribute);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const displayName = labels[index];
       return (
         <g
           key={yAttribute}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           transform={`translate(0, ${yPosition + barHeight / 2})`}
         >
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           {ticksVisible && <line x1={-1 * tickSize} stroke={"currentColor"} />}
           <text
             className={cx(textClassName, cs.text)}
@@ -52,8 +56,11 @@ export default function YAxis({
             alignmentBaseline={"middle"}
             dominantBaseline={"middle"}
             transform={textOffset}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
             onClick={() => onYAxisLabelClick(yAttribute, index)}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
             onMouseEnter={() => onYAxisLabelEnter(yAttribute)}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
             onMouseLeave={() => onYAxisLabelExit()}
           >
             {displayName}

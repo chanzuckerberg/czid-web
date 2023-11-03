@@ -104,11 +104,14 @@ export default class AMRHeatmapVis extends React.Component<
 
   getMetadataTypes() {
     const { samplesMetadataTypes } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     return Object.keys(samplesMetadataTypes)
       .sort()
       .map(type => {
         return {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           label: samplesMetadataTypes[type].name,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           value: samplesMetadataTypes[type].key,
         };
       });
@@ -122,21 +125,28 @@ export default class AMRHeatmapVis extends React.Component<
       selectedOptions,
       metrics,
     } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleName = sampleLabels[node.columnIndex].label;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
 
     const amrCountForNode = this.findAMRCountForName(rowLabel, sampleForColumn);
 
     let gene = "";
     let allele = "";
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     switch (selectedOptions.viewLevel) {
       case VIEW_LEVEL_ALLELES: {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         allele = rowLabel;
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         gene = alleleToGeneMap[allele];
         break;
       }
       case VIEW_LEVEL_GENES: {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         gene = rowLabel;
         allele = amrCountForNode ? amrCountForNode.allele : "---";
         break;
@@ -146,13 +156,16 @@ export default class AMRHeatmapVis extends React.Component<
       }
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const values = metrics.map(metric => {
       // If sample is too old to have evaluated the new metrics, give "N/A"
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       let value = amrCountForNode ? amrCountForNode[metric.value] || "N/A" : 0;
 
       if (
         metric.value !== "coverage" &&
         metric.value !== "depth" &&
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         sampleForColumn.amrCounts.length > 0
       ) {
         // If sample is too old to have evaluated the new metrics,
@@ -169,6 +182,7 @@ export default class AMRHeatmapVis extends React.Component<
 
       return [
         metric.text,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         metric.value === selectedOptions.metric ? <b>{value}</b> : value,
       ];
     });
@@ -191,6 +205,7 @@ export default class AMRHeatmapVis extends React.Component<
 
   getHeatmapLabels() {
     const { alleleLabels, geneLabels, selectedOptions } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     switch (selectedOptions.viewLevel) {
       case VIEW_LEVEL_ALLELES: {
         return alleleLabels;
@@ -209,6 +224,7 @@ export default class AMRHeatmapVis extends React.Component<
 
   findAMRCountForName(rowName: $TSFixMe, sample: $TSFixMe) {
     const { selectedOptions } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     switch (selectedOptions.viewLevel) {
       case VIEW_LEVEL_ALLELES: {
         return sample.amrCounts.find(
@@ -235,9 +251,11 @@ export default class AMRHeatmapVis extends React.Component<
     rows.forEach((label: $TSFixMe) => {
       const rowValues: $TSFixMe = [];
       const rowName = label.label;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       samplesWithAMRCounts.forEach(sample => {
         const amrCountForRow = this.findAMRCountForName(rowName, sample);
         if (amrCountForRow !== undefined) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           rowValues.push(amrCountForRow[selectedOptions.metric] || 0);
         } else {
           rowValues.push(0);
@@ -259,6 +277,7 @@ export default class AMRHeatmapVis extends React.Component<
         columnLabels: columns,
         values: values,
       });
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       this.heatmap.updateScale(selectedOptions.scale);
     } else {
       this.initializeHeatmap(rows, columns, values);
@@ -280,6 +299,7 @@ export default class AMRHeatmapVis extends React.Component<
       },
       // Custom options:
       {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         scale: selectedOptions.scale,
         scaleMin: 0,
         customColorCallback: this.colorFilter,
@@ -328,7 +348,9 @@ export default class AMRHeatmapVis extends React.Component<
   onRowLabelClick = (rowLabel: $TSFixMe) => {
     const { alleleToGeneMap, selectedOptions, onGeneLabelClick } = this.props;
     let geneName = rowLabel;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (selectedOptions.viewLevel === VIEW_LEVEL_ALLELES) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       geneName = alleleToGeneMap[rowLabel];
     }
     onGeneLabelClick(geneName);
@@ -380,6 +402,7 @@ export default class AMRHeatmapVis extends React.Component<
     return Array.from(selectedMetadata)
       .map(metadatum => {
         return {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           label: samplesMetadataTypes[metadatum].name,
           value: metadatum,
         };

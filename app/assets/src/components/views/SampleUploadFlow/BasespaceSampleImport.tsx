@@ -166,6 +166,7 @@ export default class BasespaceSampleImport extends React.Component<BasespaceSamp
     }
 
     // Add the current project id to each sample.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     samples = map(set("project_id", project.id), samples);
 
     if (isEmpty(samples)) {
@@ -240,6 +241,7 @@ export default class BasespaceSampleImport extends React.Component<BasespaceSamp
         )}
         {this.state.error && (
           <Notification
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             type={errorType}
             displayStyle="flat"
             className={cs.notification}

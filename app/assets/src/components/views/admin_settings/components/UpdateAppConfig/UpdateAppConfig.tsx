@@ -13,16 +13,21 @@ export const UpdateAppConfig = ({
   handleSetAppConfig,
 }: UpdateAppConfigProps) => {
   const [selectedAppConfig, setSelectedAppConfig] =
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     useState<AppConfigType>(null);
   const [selectedAppConfigNewValue, setSelectedAppConfigNewValue] =
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     useState<string>(null);
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
   const [requestStatus, setRequestStatus] = useState<string>(null);
 
   const onSelectAppConfig = (appConfigKey: string) => {
     const appConfig = appConfigs.find(
       appConfig => appConfig.key === appConfigKey,
     );
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setSelectedAppConfig(appConfig);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     setSelectedAppConfigNewValue(appConfig.value);
   };
 

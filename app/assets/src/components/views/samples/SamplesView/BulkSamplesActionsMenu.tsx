@@ -119,6 +119,7 @@ const BulkSamplesActionsMenu = ({
         onClose={closeActionsMenu}
       >
         {renderKickoffPhyloTree()}
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2774 */}
         {handleBulkKickoffAmr && renderBulkKickoffAmr()}
         {hasAccessToBenchmark && (
           <BenchmarkSamplesMenuItem

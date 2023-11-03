@@ -38,6 +38,7 @@ export const BenchmarkModal = ({
   workflow,
 }: BenchmarkModalProps) => {
   const [selectedGroundTruthFileOption, setSelectedGroundTruthFileOption] =
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     useState<{ id: number; name: string }>(null);
   const [s3BucketPath, setS3BucketPath] = useState<string>("");
 
@@ -77,6 +78,7 @@ export const BenchmarkModal = ({
           sdsStyle="rounded"
           text="Kickoff Benchmark"
           onClick={() => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onConfirm({ fullGroundTruthFilePath, samplesToBenchmark });
             onClose();
           }}

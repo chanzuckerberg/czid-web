@@ -138,9 +138,13 @@ class PhyloTreeCreationModal extends React.Component<
       projectsLoaded: false,
       projectList: [],
 
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       taxonId: this.props.taxonId,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       taxonName: this.props.taxonName,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       projectId: this.props.projectId,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       projectName: this.props.projectName,
       showErrorTaxonAndProject: false,
       showErrorName: false,
@@ -583,6 +587,7 @@ class PhyloTreeCreationModal extends React.Component<
     }).then(({ phylo_tree_id: phyloTreeId }) => {
       if (phyloTreeId) {
         showPhyloTreeNotification();
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         onClose();
       } else {
         // TODO: properly handle error
@@ -612,6 +617,7 @@ class PhyloTreeCreationModal extends React.Component<
     if (isEmpty(taxonQuery)) {
       this.setState({
         taxonList: [],
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         taxonId: null,
       });
       return;
@@ -693,8 +699,11 @@ class PhyloTreeCreationModal extends React.Component<
 
     let showLowCoverageWarning = false;
     for (const runId of selectedProjectPipelineRuns) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
       if (!isEmpty(projectCoverageBreadths) && projectCoverageBreadths[runId]) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
         const coverageBreadth = projectCoverageBreadths[runId] * 100;
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         if (coverageBreadth < minCoverageBreadth) {
           showLowCoverageWarning = true;
           break;
@@ -703,8 +712,11 @@ class PhyloTreeCreationModal extends React.Component<
     }
     if (!showLowCoverageWarning) {
       for (const runId of selectedOtherPipelineRuns) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
         if (!isEmpty(otherCoverageBreadths) && otherCoverageBreadths[runId]) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
           const coverageBreadth = otherCoverageBreadths[runId] * 100;
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           if (coverageBreadth < minCoverageBreadth) {
             showLowCoverageWarning = true;
             break;
@@ -873,6 +885,7 @@ class PhyloTreeCreationModal extends React.Component<
             {projectPipelineRunsLoaded && projectPipelineRunIds.size > 0 ? (
               <InfiniteTable
                 headerLabelClassName={cs.columnHeaderLabel}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 columns={COLUMNS.slice(1)} // Exclude the project column
                 onLoadRows={this.handleLoadProjectPipelineRunRows}
                 onSelectAllRows={this.handleSelectAllProjectPipelineRuns}
@@ -932,6 +945,7 @@ class PhyloTreeCreationModal extends React.Component<
             {otherPipelineRunsLoaded && otherPipelineRunIds.size > 0 ? (
               <InfiniteTable
                 headerLabelClassName={cs.columnHeaderLabel}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 columns={COLUMNS}
                 onLoadRows={this.handleLoadOtherPipelineRunRows}
                 onSelectAllRows={this.handleSelectAllOtherPipelineRuns}
@@ -972,12 +986,15 @@ class PhyloTreeCreationModal extends React.Component<
   getPages = () => {
     const chosenPages = [];
     if (!this.state.skipListTrees) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       chosenPages.push(this.page("listTrees"));
     }
     if (!this.skipSelectProjectAndTaxon) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       chosenPages.push(this.page("selectTaxonAndProject"));
     }
     chosenPages.push(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       this.page("selectNameAndProjectSamples"),
       this.page("addIdseqSamples"),
     );

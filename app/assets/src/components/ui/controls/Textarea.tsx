@@ -10,6 +10,7 @@ interface TextAreaInternalProps extends Omit<TextAreaProps, "onChange"> {
 const Textarea = ({ className, onChange, ...props }: TextAreaInternalProps) => {
   const handleChange = (_: unknown, inputProps: TextAreaProps) => {
     if (onChange) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       onChange(inputProps.value.toString());
     }
   };

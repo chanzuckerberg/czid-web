@@ -17,14 +17,18 @@ interface NoSearchResultsBannerProps {
 }
 
 const NoSearchResultsBanner = ({
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   className = null,
   icon,
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   link = null,
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   listenerLink = null,
   searchType,
 }: NoSearchResultsBannerProps) => {
   return (
     <InfoBanner
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       className={!!className && className}
       icon={icon}
       link={!!link && link}

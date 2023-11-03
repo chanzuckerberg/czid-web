@@ -44,6 +44,7 @@ const EditableInput = ({
 
   const saveEdits = () => {
     // onDoneEditing returns an error message if an error occurs, and an empty string otherwise
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     onDoneEditing(inputText).then(response => {
       const [error, sanitizedText] = response;
       setError(error);
@@ -57,6 +58,7 @@ const EditableInput = ({
   };
 
   const onClickOutside = e => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     if (inputRef.current && !inputRef.current.contains(e.target)) {
       saveEdits();
     }
@@ -90,6 +92,7 @@ const EditableInput = ({
   const handleInputTextChange = (val: string) => {
     setInputText(val);
     setError("");
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     setWarning(getWarningMessage(val));
   };
 

@@ -28,6 +28,7 @@ export const TaxonTreePathogenLabels = ({
           );
         });
       }
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       genusData.filteredSpecies.forEach(speciesData => {
         if (speciesData.pathogenFlags) {
           speciesData.pathogenFlags.forEach(pathogenFlag => {
@@ -51,6 +52,7 @@ export const TaxonTreePathogenLabels = ({
           />,
         );
       }
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       genusData.filteredSpecies.forEach(speciesData => {
         if (speciesData.pathogenFlag) {
           labels.push(

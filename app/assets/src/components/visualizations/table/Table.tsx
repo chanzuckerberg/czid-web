@@ -5,6 +5,7 @@ import {
   SortDirectionType,
   TableRowProps,
 } from "react-virtualized";
+import { ColumnProps } from "~/interface/sampleView";
 import BaseTable, { BaseTableProps } from "./BaseTable";
 
 interface Column {
@@ -19,7 +20,7 @@ interface Column {
   }) => $TSFixMe[];
 }
 interface TableProps extends BaseTableProps {
-  columns: Column[];
+  columns: ColumnProps[];
   data?: $TSFixMeUnknown[];
   draggableColumns?: boolean;
   // This is supplemental to sortFunction since sortFunction is in render() and may be called without a user click.
@@ -112,6 +113,7 @@ const Table = ({
   return (
     <BaseTable
       columns={columns}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       defaultRowHeight={handleGetRowHeight}
       onSelectAllRows={onSelectAllRows}
       onSelectRow={onSelectRow}

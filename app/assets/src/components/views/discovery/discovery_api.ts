@@ -265,6 +265,7 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
   } else if (workflowRun.workflow === WorkflowType.AMR) {
     workflowRunFields = processAmrWorkflowRun(workflowRun);
   } else if (workflowRun.workflow === WorkflowType.BENCHMARK) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     workflowRunFields = processBenchmarkWorkflowRun(workflowRun);
   }
 
@@ -281,6 +282,7 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
       project: getSampleField(["project_name"]),
       publicAccess: !!getSampleField(["info", "public"]),
       uploadError: toLower(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         getSampleField(["info", "result_status_description"]),
       ),
       user: getSampleField(["uploader", "name"]),
@@ -292,6 +294,7 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
     notes: getSampleField(["info", "sample_notes"]),
     privateUntil: getSampleField(["info", "private_until"]),
     projectId: getSampleField(["info", "project_id"]),
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2698
     ...workflowRunFields,
     // @ts-expect-error ts-migrate(2698) FIXME: Spread types may only be created from object types... Remove this comment to see the full error message
     ...getSampleField(["metadata"]),

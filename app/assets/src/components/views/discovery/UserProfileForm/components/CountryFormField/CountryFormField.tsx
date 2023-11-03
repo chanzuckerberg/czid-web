@@ -62,6 +62,7 @@ export function CountryFormField({
     if (countries.includes(countryName)) {
       setInputValue(countryName);
     } else {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       setInputValue(null);
     }
   };

@@ -23,6 +23,7 @@ const PipelineVizHeader = ({
 
   const handlePipelineVersionSelect = (version: string) => {
     const win: Window = window;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     win.location = `${location.protocol}//${location.host}/samples/${sample.id}/pipeline_viz/${version}`;
   };
 
@@ -38,6 +39,7 @@ const PipelineVizHeader = ({
         <ViewHeader.Content>
           <div className={cs.pipelineInfo}>
             <PipelineVersionSelect
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               sampleId={sample.id}
               shouldIncludeDatabaseVersion={true}
               currentRun={pipelineRun}
@@ -46,7 +48,9 @@ const PipelineVizHeader = ({
               workflowType={workflowType}
             />
           </div>
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           <ViewHeader.Pretitle breadcrumbLink={`/samples/${sample.id}`}>
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             {sample.name}
           </ViewHeader.Pretitle>
           <ViewHeader.Title label="Pipeline Visualization" />

@@ -61,29 +61,37 @@ export const getGenomeVizTooltipData = memoize(
     const multipleHits = numContigs + numReads > 1;
 
     // Determine which names and counts we display based on the composition of the hit group.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     let name: string = null;
     let counts = [];
 
     if (numContigs > 0 && numReads > 0) {
       name = "Aggregated NT Contigs and NT Reads";
       counts = [
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         ["# NT Contigs", numContigs],
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         ["# Loose NT Reads", numReads],
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         [NT_CONTIG_READ_COUNT, hitObj[2]],
       ];
     } else if (numReads > 1) {
       name = "Aggregated Loose NT Reads";
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       counts = [["# Loose NT Reads", numReads]];
     } else if (numReads === 1) {
       name = "Loose NT Read";
     } else if (numContigs > 1) {
       name = "Aggregated Contigs";
       counts = [
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         ["# NT Contigs", numContigs],
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         [NT_CONTIG_READ_COUNT, hitObj[2]],
       ];
     } else if (numContigs === 1) {
       name = "NT Contig";
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       counts = [[NT_CONTIG_READ_COUNT, hitObj[2]]];
     }
 
@@ -210,6 +218,7 @@ export const getCoverageVizParams = (
 
   // For genus-level taxons, we aggregate all the available species-level taxons for that genus.
   if (coverageVizParams.taxLevel === "genus") {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     accessionData = getCombinedAccessionDataForSpecies(
       coverageVizParams.taxSpecies,
       coverageVizDataByTaxon,
@@ -223,6 +232,7 @@ export const getCoverageVizParams = (
     taxonCommonName: coverageVizParams.taxCommonName,
     taxonLevel: coverageVizParams.taxLevel,
     alignmentVizUrl: coverageVizParams.alignmentVizUrl,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     accessionData,
     taxonStatsByCountType: coverageVizParams.taxonStatsByCountType,
   };

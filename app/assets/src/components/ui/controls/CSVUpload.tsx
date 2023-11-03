@@ -49,6 +49,7 @@ class CSVUpload extends React.Component<CSVUploadProps> {
         className={this.props.className}
         title={title}
         onChange={this.onChange}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         file={this.state.file}
       />
     );

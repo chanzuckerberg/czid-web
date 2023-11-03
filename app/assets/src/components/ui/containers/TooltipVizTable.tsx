@@ -17,6 +17,7 @@ const TooltipVizTable = ({
   subtitle,
   title,
 }: TooltipVizTableProps) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const shouldCompactLabel = data.length === 1;
 
   const renderLabel = label => {
@@ -55,6 +56,7 @@ const TooltipVizTable = ({
   };
 
   const renderSections = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return data.map(section => renderSection(section));
   };
 

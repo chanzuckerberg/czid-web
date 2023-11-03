@@ -19,6 +19,9 @@ interface BackgroundModelFilterProps {
   rounded?: boolean;
   value?: string | number;
   className?: string;
+  fluid?: boolean;
+  usePortal?: boolean;
+  withinModal?: boolean;
 }
 
 export interface RawBackground {
@@ -44,6 +47,7 @@ const BackgroundModelFilter = React.memo(
     let disabled = props.disabled || false;
 
     const formatBackgroundOptions = (backgrounds: RawBackground[]): Option[] =>
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       backgrounds?.map(background => {
         const disabledOption =
           !enableMassNormalizedBackgrounds && background.mass_normalized;
@@ -60,6 +64,7 @@ const BackgroundModelFilter = React.memo(
         };
       });
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     let backgroundOptions: Option[] = formatBackgroundOptions(allBackgrounds);
     if (backgroundOptions.length === 0) {
       backgroundOptions = [
@@ -72,11 +77,13 @@ const BackgroundModelFilter = React.memo(
       const backgroundSections = {
         MY_BACKGROUNDS: {
           displayName: "My Backgrounds",
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           options: formatBackgroundOptions(ownedBackgrounds),
           emptySectionMessage: "You haven't created any backgrounds yet.",
         },
         OTHER_BACKGROUNDS: {
           displayName: "Other Backgrounds",
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           options: formatBackgroundOptions(otherBackgrounds),
         },
       };
@@ -84,6 +91,7 @@ const BackgroundModelFilter = React.memo(
       // Creates mapping between the value (id) of the background model and name.
       // This is needed so the dropdown trigger can properly render the background's name and not just the ID.
       const backgroundIdToName = [
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2488
         ...ownedBackgrounds,
         ...otherBackgrounds,
       ].reduce((result, bg) => {
@@ -95,7 +103,6 @@ const BackgroundModelFilter = React.memo(
         <SectionsDropdown
           categories={backgroundSections}
           disabled={disabled}
-          fluid
           shouldIncludeNoneOption
           itemIdToName={backgroundIdToName}
           onChange={onChange}

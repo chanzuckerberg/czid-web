@@ -18,6 +18,7 @@ export const valueToName = (
   const matchingNames = options.filter(option => option.value === value);
   if (matchingNames.length === 1) {
     // 1:1 value:name mapping, as expected
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     return matchingNames[0].text;
   } else if (matchingNames.length > 1) {
     // error condition: multiple names for the same value
@@ -25,6 +26,7 @@ export const valueToName = (
       `Heatmap filter state bug: multiple options found for value ${value}!`,
       options,
     );
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     return matchingNames[0].text;
   } else {
     // error condition: no names for the given value

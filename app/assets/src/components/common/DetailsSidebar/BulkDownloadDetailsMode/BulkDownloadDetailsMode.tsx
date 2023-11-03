@@ -119,11 +119,14 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
       />
       {currentTab === "Details" && (
         <DetailsTab
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           bulkDownload={bulkDownloadDetails}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           downloadType={downloadType}
         />
       )}
       {currentTab === "Advanced Download" && (
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         <AdvancedDownloadTab bulkDownload={bulkDownloadDetails} />
       )}
     </div>

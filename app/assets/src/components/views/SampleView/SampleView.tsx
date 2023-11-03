@@ -663,11 +663,13 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   ]);
 
   const globalContext = useContext(GlobalContext);
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
   const dispatch = globalContext.globalContextDispatch;
 
   const updateDiscoveryProjectId = useCallback(
     (projectId: number | null) => {
       dispatch(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectId),
       );
     },

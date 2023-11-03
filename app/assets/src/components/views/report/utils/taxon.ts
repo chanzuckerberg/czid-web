@@ -25,6 +25,7 @@ export const computeThresholdedTaxons = (
     } else {
       // species
       if (ThresholdMap.taxonPassThresholdFilter(taxon, activeThresholds)) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         matchedTaxons.push(taxon);
       }
     }

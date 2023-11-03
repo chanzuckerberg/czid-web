@@ -63,6 +63,7 @@ class PhyloTreeVis extends React.Component<
     super(props);
 
     this.state = {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       hoveredNode: null,
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
@@ -106,6 +107,7 @@ class PhyloTreeVis extends React.Component<
     });
     this.treeVis.update();
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onNewTreeContainer(this.treeContainer);
 
     this.fetchMetadataTypes();
@@ -160,6 +162,7 @@ class PhyloTreeVis extends React.Component<
       // @ts-expect-error ts-migrate(2345) FIXME: Argument of type '"noreferrer"' is not assignable ... Remove this comment to see the full error message
       window.open(url, "_blank", "noopener", "noreferrer");
     } else if (node.data.sample_id) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       this.props.onSampleNodeClick(
         node.data.sample_id,
         node.data.pipeline_run_id,
@@ -191,6 +194,7 @@ class PhyloTreeVis extends React.Component<
       colorGroupLegendTitle: name,
       colorGroupAbsentName: getAbsentName(selectedMetadataType),
     });
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     this.props.afterSelectedMetadataChange(selectedMetadataType);
   };
 

@@ -107,15 +107,19 @@ function UpdateUser(props: UpdateUserProps = {}) {
   const getArchetypes = () => {
     const archetypes = [];
     if (isMedicalDetective) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       archetypes.push(MEDICAL_DETECTIVE);
     }
     if (isLandscapeExplorer) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       archetypes.push(LANDSCAPE_EXPLORER);
     }
     if (isOutbreakSurveyor) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       archetypes.push(OUTBREAK_SURVEYOR);
     }
     if (isMicrobiomeInvestigator) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       archetypes.push(MICROBIOME_INVESTIGATOR);
     }
     return JSON.stringify(archetypes);
@@ -124,18 +128,23 @@ function UpdateUser(props: UpdateUserProps = {}) {
   const getSegments = () => {
     const segments = [];
     if (isAfricaCDC) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       segments.push(AFRICA_CDC);
     }
     if (isBiohub) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       segments.push(BIOHUB);
     }
     if (isDPH) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       segments.push(DPH);
     }
     if (isGCE) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       segments.push(GCE);
     }
     if (isLMIC) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       segments.push(LMIC);
     }
     return JSON.stringify(segments);
@@ -146,6 +155,7 @@ function UpdateUser(props: UpdateUserProps = {}) {
     const segments = getSegments();
     try {
       await userUpdater({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         userId: id,
         name,
         email,

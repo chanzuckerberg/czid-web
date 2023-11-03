@@ -54,12 +54,14 @@ class MetadataUpload extends React.Component<
       errors: [],
       warnings: [],
     },
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     projectMetadataFields: null,
     hostGenomes: [],
     sampleTypes: [],
     validatingCSV: false,
     fetchingCSVLocationMatches: false,
     showMetadataCSVLocationsMenu: false,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     allProjectMetadataFields: null,
   };
 
@@ -79,6 +81,7 @@ class MetadataUpload extends React.Component<
   async componentDidMount() {
     const [projectMetadataFields, hostGenomes, sampleTypes] = await Promise.all(
       [
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         getProjectMetadataFields(this.props.project.id),
         getAllHostGenomes(),
         getAllSampleTypes(),
@@ -86,6 +89,7 @@ class MetadataUpload extends React.Component<
     );
     this.setState({
       allProjectMetadataFields: projectMetadataFields,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       projectMetadataFields: this.processProjectMetadataFields(
         projectMetadataFields,
       ),
@@ -95,19 +99,24 @@ class MetadataUpload extends React.Component<
   }
 
   async componentDidUpdate(prevProps: MetadataUploadProps) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (prevProps.project.id !== this.props.project.id) {
       // Set the projectMetadataFields to null while fetching the new fields.
       // This forces the MetadataManualInput to re-mount which is necessary for correct behavior.
       this.setState({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         projectMetadataFields: null,
       });
 
       const projectMetadataFields: MetadataUploadState["allProjectMetadataFields"] =
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         await getProjectMetadataFields(this.props.project.id);
 
       this.setState({
         allProjectMetadataFields: projectMetadataFields,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         projectMetadataFields: this.processProjectMetadataFields(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           projectMetadataFields,
         ),
       });
@@ -120,6 +129,7 @@ class MetadataUpload extends React.Component<
       !isEqual(prevProps.workflows, this.props.workflows)
     ) {
       this.setState({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         projectMetadataFields: this.processProjectMetadataFields(
           this.state.allProjectMetadataFields,
         ),
@@ -135,6 +145,7 @@ class MetadataUpload extends React.Component<
 
     const metadataFieldsToRemove = new Set(
       flatten(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         Array.from(workflows).map(
           workflow => METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW[workflow],
         ),
@@ -161,10 +172,12 @@ class MetadataUpload extends React.Component<
   };
 
   handleTabChange = (tab: string) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.setState({ currentTab: tab, issues: null });
     // When the tab changes, reset state.
     this.props.onMetadataChange({
       metadata: null,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       issues: null,
       wasManual: tab === "Manual Input",
     });
@@ -219,6 +232,7 @@ class MetadataUpload extends React.Component<
       onMetadataChange({
         metadata: newMetadata,
         wasManual: true,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         issues: null,
       });
       this.setState({
@@ -257,6 +271,7 @@ class MetadataUpload extends React.Component<
       ...(this.props.samplesAreNew
         ? { new_sample_names: map("name", this.props.samples) }
         : {}),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       project_id: this.props.project.id,
     };
 
@@ -272,6 +287,7 @@ class MetadataUpload extends React.Component<
     (): MetadataCSVLocationsMenuProps["locationMetadataType"] => {
       const { projectMetadataFields } = this.state;
       // Use the first required location MetadataField
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       return find(
         { dataType: "location", is_required: 1 },
         Object.values(projectMetadataFields),
@@ -462,7 +478,9 @@ class MetadataUpload extends React.Component<
                 className={cs.link}
                 analyticsEventName="MetadataUpload_full-dictionary-link_clicked"
                 analyticsEventData={{
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                   projectId: this.props.project.id,
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                   projectName: this.props.project.name,
                 }}
               >
@@ -474,6 +492,7 @@ class MetadataUpload extends React.Component<
               <span className={cs.label}>
                 {"Available organisms for host subtraction: "}
               </span>
+              {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
               {workflows.has(WorkflowType.CONSENSUS_GENOME)
                 ? "Human only"
                 : hostGenomes &&
@@ -493,7 +512,9 @@ class MetadataUpload extends React.Component<
                 className={cs.link}
                 analyticsEventName="MetadataUpload_dictionary-link_clicked"
                 analyticsEventData={{
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                   projectId: this.props.project.id,
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                   projectName: this.props.project.name,
                 }}
               >

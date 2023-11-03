@@ -38,6 +38,7 @@ const Toggle = ({
 
   const handleChange = (_: unknown, inputProps: CheckboxProps) => {
     const checked = isChecked ?? inputProps.checked;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setInternalChecked(checked);
     onChange && onChange(checked ? onLabel : offLabel);
   };

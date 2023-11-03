@@ -21,6 +21,7 @@ class Sidebar extends React.Component<SidebarProps> {
       <SemanticSidebar
         {...props}
         animation="overlay"
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         className={cx(cs.sidebar, className, cs[this.props.direction])}
       >
         {children}

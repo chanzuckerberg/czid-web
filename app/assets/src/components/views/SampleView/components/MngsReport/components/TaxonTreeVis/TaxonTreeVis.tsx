@@ -62,9 +62,11 @@ export const TaxonTreeVis = ({
       collapsed: getCollapsedInUrl() || new Set(),
     });
     treeVis.update();
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setTreeVis(treeVis);
   }, [treeTooltipRef, treeContainerRef]);
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const isCommonNameActive = nameType.toLowerCase() === "common name";
 
   const persistCollapsedInUrl = (node: $TSFixMe) => {
@@ -106,10 +108,12 @@ export const TaxonTreeVis = ({
       useCommonName: isCommonNameActive,
       attribute: metric,
     };
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     if (treeVis) treeVis.setOptions(options);
   }, [metric, nameType]);
 
   useEffect(() => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     if (treeVis) treeVis.setTree(createTree());
   }, [taxa]);
 
@@ -118,6 +122,7 @@ export const TaxonTreeVis = ({
   };
 
   const handleNodeLabelClick = (node: { data: Taxon }) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     if (["genus", "species"].includes(node.data.lineageRank)) {
       onTaxonClick(node.data);
     }
@@ -208,12 +213,15 @@ export const TaxonTreeVis = ({
       nodes.push(formattedNode);
     };
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     taxa.forEach(genusData => {
       // loading the genus id from the species lineage handles
       // cases where genus id is negative
       let genusIdFromLineage: $TSFixMe = null;
 
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       genusData.filteredSpecies.forEach(speciesData => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         const speciesLineage = lineage[speciesData.taxId] || {};
         // due to data inconsistencies, we try to infer the genus from the underlying species
         // lineage this value will be used if there is no lineage for the genus
@@ -225,7 +233,9 @@ export const TaxonTreeVis = ({
         }
       });
 
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       genusData.filteredSpecies.forEach(speciesData => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         const speciesLineage = lineage[speciesData.taxId] || {};
         formatAndAddNode({
           nodeData: speciesData,
@@ -238,6 +248,7 @@ export const TaxonTreeVis = ({
           // this guarantees that lineage is defined for the genus node
           parentId:
             speciesLineage.parent ||
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             (lineage[genusData.taxId] && genusData.taxId) ||
             genusIdFromLineage ||
             ROOT_ID,
@@ -245,6 +256,7 @@ export const TaxonTreeVis = ({
       });
 
       const genusLineage =
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         lineage[genusData.taxId] || lineage[genusIdFromLineage] || {};
       formatAndAddNode({
         nodeData: genusData,
@@ -271,13 +283,16 @@ export const TaxonTreeVis = ({
   return (
     <div className="taxon-tree-vis">
       <div className={"taxon-tree-vis__container"} ref={treeContainerRef}>
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322 */}
         <TaxonTreePathogenLabels taxa={taxa} />
       </div>
       <div className={"taxon-tree-vis__tooltip"} ref={treeTooltipRef}>
         <TaxonTreeNodeTooltip
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           activeMetric={metric}
           isCommonNameActive={isCommonNameActive}
           metrics={metrics}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           node={activeNode}
         />
       </div>

@@ -42,10 +42,12 @@ export const getDefaultSelectedOptions = (): FilterSelections => {
     background: null,
     categories: { categories: [], subcategories: { Viruses: [] } },
     // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     metricShortReads: find(
       { value: "nt_r" },
       TREE_METRICS[WorkflowType.SHORT_READ_MNGS],
     ).value,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     metricLongReads: find(
       { value: "nt_b" },
       TREE_METRICS[WorkflowType.LONG_READ_MNGS],
@@ -74,6 +76,7 @@ export const determineInitialTab = ({
     [WorkflowType.AMR]: amr,
     [WorkflowType.BENCHMARK]: benchmark,
   } = workflowCount;
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   if (currentTab && workflowCount[getWorkflowTypeFromLabel(currentTab)] > 0) {
     return currentTab;
   } else if (shortReadMngs) {

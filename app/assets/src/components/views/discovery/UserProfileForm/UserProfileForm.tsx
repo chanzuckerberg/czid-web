@@ -89,6 +89,7 @@ export function UserProfileForm() {
 
   async function updateUser() {
     await userUpdater({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       userId: currentUser.userId,
       name: `${firstName} ${lastName}`,
       userProfileFormVersion: USER_PROFILE_FORM_VERSION,
@@ -97,6 +98,7 @@ export function UserProfileForm() {
 
   async function postToAirtable() {
     await airtablePost({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       userId: currentUser.userId,
       profileFormVersion: USER_PROFILE_FORM_VERSION,
       firstName: firstName,
@@ -107,6 +109,7 @@ export function UserProfileForm() {
       worldBankIncome: worldBankIncome,
       czidUsecases: selectedUsecaseCheckboxes,
       referralSource: selectedReferralCheckboxes,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       expertiseLevel: selectedSequencingExpertise,
       newsletterConsent: newsletterConsent,
     });
@@ -194,6 +197,7 @@ export function UserProfileForm() {
           setSelectedUsecaseCheckboxes={setSelectedUsecaseCheckboxes}
         />
         <SequencingExpertiseFormField
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           selectedSequencingExpertise={selectedSequencingExpertise}
           setSelectedSequencingExpertise={setSelectedSequencingExpertise}
         />

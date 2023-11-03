@@ -37,6 +37,7 @@ export const ConsensusGenomeCreationModal = ({
   const [selectedAccessionIndex, setSelectedAccessionIndex] = useState(null);
 
   const getReferenceAccessions = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     const { accessionData, percentIdentity, usedAccessions } =
       consensusGenomeData;
 
@@ -77,10 +78,12 @@ export const ConsensusGenomeCreationModal = ({
       return;
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setSelectedAccessionIndex(accessionIndex);
   };
 
   const handleConsensusGenomeCreate = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     const { accessionData, taxId, taxName } = consensusGenomeData;
     const selectedAccession =
       accessionData.best_accessions[selectedAccessionIndex];
@@ -124,6 +127,7 @@ export const ConsensusGenomeCreationModal = ({
       </div>
       <div className={cs.label}>
         Taxon:{" "}
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         <span className={cs.taxonName}>{consensusGenomeData.taxName}</span>
       </div>
       <div className={cs.label}>

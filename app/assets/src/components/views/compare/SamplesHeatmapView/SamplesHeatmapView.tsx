@@ -221,6 +221,7 @@ class SamplesHeatmapViewCC extends React.Component<
         subcategories: this.urlParams.subcategories || {},
         background: parseAndCheckInt(
           this.urlParams.background,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           this.props.backgrounds[0].value,
         ),
         species: parseAndCheckInt(this.urlParams.species, 1),
@@ -306,6 +307,7 @@ class SamplesHeatmapViewCC extends React.Component<
       metric: "NT.rpm",
       categories: [],
       subcategories: {},
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       background: backgrounds[0].value,
       species: 1,
       sampleSortType: "cluster",
@@ -320,9 +322,11 @@ class SamplesHeatmapViewCC extends React.Component<
 
   // For converting legacy URLs
   getSelectedMetric() {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (this.props.metrics.map(m => m.value).includes(this.urlParams.metric)) {
       return this.urlParams.metric;
     } else {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       return (this.props.metrics[0] || {}).value;
     }
   }
@@ -387,6 +391,7 @@ class SamplesHeatmapViewCC extends React.Component<
     } else if (typeof urlParams.addedTaxonIds === "object") {
       // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
       urlParams.addedTaxonIds = new Set(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         urlParams.addedTaxonIds.map(id => parseInt(id)),
       );
     }
@@ -398,6 +403,7 @@ class SamplesHeatmapViewCC extends React.Component<
     } else if (typeof urlParams.removedTaxonIds === "object") {
       // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
       urlParams.removedTaxonIds = new Set(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         urlParams.removedTaxonIds.map(id => parseInt(id)),
       );
     }
@@ -525,6 +531,7 @@ class SamplesHeatmapViewCC extends React.Component<
     const { selectedOptions } = this.state;
     const { metric, background } = selectedOptions;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const selectedBackgroundName = find(
       { value: background },
       backgrounds,
@@ -579,6 +586,7 @@ class SamplesHeatmapViewCC extends React.Component<
         case "readSpecificity": {
           filterRow.push(
             `Read Specificity:, "${
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               find({ value: val }, SPECIFICITY_OPTIONS).text
             }"`,
           );
@@ -608,6 +616,7 @@ class SamplesHeatmapViewCC extends React.Component<
         : `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`;
     // Insert filterStatement after Metric and Background
     filterRow.splice(2, 0, filterStatement);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return [sanitizeCSVRow(filterRow).join()];
   };
 
@@ -619,7 +628,9 @@ class SamplesHeatmapViewCC extends React.Component<
       "NA: Not Applicable; sample did not meet thresholds set";
 
     if (!this.heatmapVis) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       csvHeaders = ['"Current heatmap view did not render any data"'];
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       csvRows = [['"Please try adjusting the filters or samples selected"']];
     } else {
       [csvHeaders, csvRows] =
@@ -628,7 +639,9 @@ class SamplesHeatmapViewCC extends React.Component<
         });
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     csvRows.push(this.createCSVRowForSelectedOptions());
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     csvRows.push([naExplanation]);
     return createCSVObjectURL(csvHeaders, csvRows);
   };
@@ -763,6 +776,7 @@ class SamplesHeatmapViewCC extends React.Component<
     };
 
     if (useHeatmapES) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       fetchHeatmapDataParams.addedTaxonIds = Array.from(
         this.state.addedTaxonIds,
       );
@@ -854,6 +868,7 @@ class SamplesHeatmapViewCC extends React.Component<
     pipelineVersions = compact(property("pipeline_version"), heatmapData);
     const pipelineMajorVersionsSet = new Set(
       map(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
         pipelineVersion => `${pipelineVersion.split(".")[0]}.x`,
         pipelineVersions,
       ),
@@ -961,6 +976,7 @@ class SamplesHeatmapViewCC extends React.Component<
 
     for (let i = 0; i < rawData.length; i++) {
       const sample = rawData[i];
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       sampleIds.push(sample.sample_id);
 
       enableMassNormalizedBackgrounds =
@@ -1004,11 +1020,14 @@ class SamplesHeatmapViewCC extends React.Component<
             allTaxonDetails[taxon.tax_id].sampleCount += 1;
           } else {
             taxonIndex = allTaxonIds.length;
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
             allTaxonIds.push(taxon.tax_id);
 
             if (taxon.tax_level === TAXON_LEVEL_OPTIONS["species"]) {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
               allSpeciesIds.push(taxon.tax_id);
             } else {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
               allGeneraIds.push(taxon.tax_id);
             }
 
@@ -1029,6 +1048,7 @@ class SamplesHeatmapViewCC extends React.Component<
 
           sampleDetails[sample.sample_id].taxa.push(taxon.tax_id);
 
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           this.props.metrics.forEach(metric => {
             const [metricType, metricName] = metric.value.split(".");
             allData[metric.value] = allData[metric.value] || [];
@@ -1053,6 +1073,7 @@ class SamplesHeatmapViewCC extends React.Component<
           if (pathogenFlagsForSampleAndTaxon) {
             allPathogenFlagData[taxonIndex][i] =
               allPathogenFlagData[taxonIndex][i] || [];
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             allPathogenFlagData[taxonIndex][i].push(
               ...pathogenFlagsForSampleAndTaxon,
             );
@@ -1154,6 +1175,7 @@ class SamplesHeatmapViewCC extends React.Component<
       if (
         !taxonIds.has(taxonId) &&
         this.taxonPassesSelectedFilters(taxon) &&
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         taxonPassesThresholdFilters[taxon["index"]]
       ) {
         taxonIds.add(taxon["id"]);
@@ -1229,6 +1251,7 @@ class SamplesHeatmapViewCC extends React.Component<
         // rebuilding the filteredData manually seems to be the easiest way
         // to filter
         const taxon = allTaxonDetails[taxId];
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         metrics.forEach(metric => {
           filteredData[metric.value] = filteredData[metric.value] || [];
           filteredData[metric.value].push(
@@ -1237,6 +1260,7 @@ class SamplesHeatmapViewCC extends React.Component<
         });
 
         // rebuild the filteredPathogenFlagData as well
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         filteredPathogenFlagData.push(allPathogenFlagData[taxon["index"]]);
       }
     }
@@ -1283,6 +1307,7 @@ class SamplesHeatmapViewCC extends React.Component<
     data: $TSFixMe,
   ) {
     const { thresholdFilters } = this.state.selectedOptions;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     for (const filter of thresholdFilters) {
       // Convert metric name format from "NT_zscore" to "NT.zscore"
       const metric = filter["metric"].split("_").join(".");
@@ -1315,6 +1340,7 @@ class SamplesHeatmapViewCC extends React.Component<
       // taxonTags,
     } = this.state.selectedOptions;
     const phageSelected =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
 
     if (
@@ -1343,6 +1369,7 @@ class SamplesHeatmapViewCC extends React.Component<
       // Be Decided: https://app.clubhouse.io/idseq/story/135993
       return false;
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (categories.length) {
       if (!phageSelected && taxonDetails["phage"]) {
         return false;
@@ -1351,6 +1378,7 @@ class SamplesHeatmapViewCC extends React.Component<
         // Consider using the regular array includes function,
         // once we guarantee that all data is lower case
         !ArrayUtils.caseInsensitiveIncludes(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           categories,
           taxonDetails["category"],
         ) &&
@@ -1389,20 +1417,25 @@ class SamplesHeatmapViewCC extends React.Component<
 
       filteredTaxaInSample.sort(
         (taxId1: $TSFixMe, taxId2: $TSFixMe) =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           allData[metric][allTaxonDetails[taxId2].index][sample.index] -
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           allData[metric][allTaxonDetails[taxId1].index][sample.index],
       );
 
       let count = 0;
       for (const taxId of filteredTaxaInSample) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         if (count >= taxonsPerSample) {
           break;
         } else if (!topTaxIds.has(taxId) && !this.removedTaxonIds.has(taxId)) {
           const taxon = allTaxonDetails[taxId];
           topTaxIds.add(taxId);
           topTaxonDetails[taxId] = allTaxonDetails[taxId];
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
 
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           metrics.forEach(metric => {
             filteredData[metric.value] = filteredData[metric.value] || [];
             filteredData[metric.value].push(
@@ -1421,8 +1454,10 @@ class SamplesHeatmapViewCC extends React.Component<
         const taxon = allTaxonDetails[taxId];
         topTaxIds.add(taxId);
         topTaxonDetails[taxId] = allTaxonDetails[taxId];
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
 
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         metrics.forEach(metric => {
           filteredData[metric.value] = filteredData[metric.value] || [];
           filteredData[metric.value].push(
@@ -1489,12 +1524,16 @@ class SamplesHeatmapViewCC extends React.Component<
 
     extractedData.allTaxonIds.forEach(taxonId => {
       const taxon = extractedData.allTaxonDetails[taxonId];
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       const tempTaxonIndex = taxon.index;
       const taxonIndex = allTaxonIds.length;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       taxon.index = taxonIndex;
 
       allTaxonIds.push(taxonId);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       allTaxonDetails[taxon.id] = taxon;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       allTaxonDetails[taxon.name] = taxon;
 
       // eslint-disable-next-line
@@ -1503,6 +1542,7 @@ class SamplesHeatmapViewCC extends React.Component<
         const sampleIndex = sample.index;
         const tempSampleIndex = extractedData.sampleDetails[sampleId].index;
 
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         this.props.metrics.forEach(metric => {
           allData[metric.value][taxonIndex] =
             allData[metric.value][taxonIndex] || [];
@@ -1753,12 +1793,14 @@ class SamplesHeatmapViewCC extends React.Component<
 
   getControlOptions = (): OptionsType => ({
     // Server side options
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     metrics: this.props.metrics.filter(metric =>
       METRIC_OPTIONS.includes(metric.value),
     ),
     categories: this.props.categories || [],
     subcategories: this.props.subcategories || {},
     backgrounds: this.props.backgrounds,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     taxonLevels: this.props.taxonLevels.map((taxonLevelName, index) => ({
       text: taxonLevelName,
       value: index,
@@ -1798,6 +1840,7 @@ class SamplesHeatmapViewCC extends React.Component<
     let frontendFilters = [];
     let backendFilters = ["background"];
     if (useHeatmapES) backendFilters = backendFilters.concat(HEATMAP_FILTERS);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     else frontendFilters = HEATMAP_FILTERS;
 
     const shouldRefetchData =
@@ -1808,11 +1851,14 @@ class SamplesHeatmapViewCC extends React.Component<
     // Infer which function to use to either fetch the data or filter it in the front-end
     let callbackFn = null;
     if (!useHeatmapES) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       if (shouldRefetchData) callbackFn = this.updateBackground;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       else if (shouldRefilterData) callbackFn = this.updateFilters;
       // Slightly more verbose but should make it easier to remove the feature flag in the future
     } else {
       if (shouldRefetchData)
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         callbackFn = async () => {
           // TODO: We can remove this notification once we pre-compute custom backgrounds or speed up Spark jobs
           if (newOptions?.background)
@@ -1829,6 +1875,7 @@ class SamplesHeatmapViewCC extends React.Component<
         // Don't re-notify the user if their manually selected taxa do not pass the new filters.
         notifiedFilteredOutTaxonIds: this.state.addedTaxonIds,
       },
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       callbackFn,
     );
   };
@@ -1887,6 +1934,7 @@ class SamplesHeatmapViewCC extends React.Component<
     } else if (
       this.state.loading ||
       !this.state.data ||
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       !(this.state.data[this.state.selectedOptions.metric] || []).length ||
       !this.state.metadataTypes ||
       !this.state.taxonIds.length
@@ -1922,10 +1970,12 @@ class SamplesHeatmapViewCC extends React.Component<
           }}
           sampleIds={this.state.sampleIds}
           sampleDetails={this.state.sampleDetails}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           scale={SCALE_OPTIONS[scaleIndex][1]}
           selectedTaxa={this.state.addedTaxonIds}
           selectedOptions={this.state.selectedOptions}
           // this.state.selectedOptions.species is 1 if species is selected, 0 otherwise.
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           taxLevel={TAXON_LEVEL_SELECTED[this.state.selectedOptions.species]}
           tempSelectedOptions={getTempSelectedOptions({
             selectedOptions: this.state.selectedOptions,
@@ -1946,6 +1996,7 @@ class SamplesHeatmapViewCC extends React.Component<
           // appliedFilters and background are for the heatmap image caption
           appliedFilters={this.getAppliedFilters()}
           backgroundName={
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             find(
               { value: this.state.selectedOptions.background },
               this.props.backgrounds,
@@ -2221,9 +2272,11 @@ const SamplesHeatmapView = (props: SamplesHeatmapViewProps) => {
   const withAnalytics = useWithAnalytics();
 
   const globalContext = useContext(GlobalContext);
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
   const dispatch = globalContext.globalContextDispatch;
 
   const updateDiscoveryProjectId = (projectIds: number[] | null) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     dispatch(createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectIds));
   };
 

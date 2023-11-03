@@ -11,7 +11,7 @@ interface DetailsTabProps {
 }
 
 const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
-  const fields = [];
+  const fields: { label: string; value: number | string }[] = [];
 
   const allRuns = bulkDownload.pipeline_runs.concat(bulkDownload.workflow_runs);
 

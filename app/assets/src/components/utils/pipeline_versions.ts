@@ -43,6 +43,7 @@ const isPipelineVersionAtLeast = (
   const toInt = (versionPart: string | undefined): number => {
     if (versionPart === "alpha") return -2;
     if (versionPart === "beta") return -1;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return +versionPart || 0;
   };
 

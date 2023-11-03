@@ -48,7 +48,9 @@ contextKeys.forEach(key => {
   } else if (typeof context(key) === "object") {
     a = context(key).default;
   }
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
   if (a && a.name) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     foundComponents[a.name] = a;
   }
 });
@@ -80,6 +82,7 @@ const ReactComponentWithGlobalContext = ({
   props: any;
   userContext: UserContextType;
 }) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
   const [globalContextState, globalContextDispatch] = useReducer(
     globalContextReducer,
     initialGlobalContextState,
@@ -91,6 +94,7 @@ const ReactComponentWithGlobalContext = ({
           <RelayEnvironment>
             <UserContext.Provider value={userContext}>
               <GlobalContext.Provider
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 value={{ globalContextState, globalContextDispatch }}
               >
                 <StyledEngineProvider injectFirst>
@@ -119,6 +123,7 @@ const react_component = (
 ) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     const root = createRoot(document.getElementById(target));
     root.render(
       <ReactComponentWithGlobalContext

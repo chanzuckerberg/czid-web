@@ -186,6 +186,7 @@ const PakistanSvg = () => (
 
 const ImpactCountryShowcase = props => {
   useEffect(() => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     document
       .querySelector(".active-country-item")
       .scrollIntoView({ behavior: "smooth", block: "nearest" });

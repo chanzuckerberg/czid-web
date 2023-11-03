@@ -58,7 +58,7 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
     return newState;
   }
 
-  static prepareFilter(filter: unknown) {
+  static prepareFilter(filter: string | undefined | null) {
     if (filter === undefined || filter === null) {
       return "";
     } else {
@@ -130,6 +130,7 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
     }
 
     this.setState(stateUpdate, () =>
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       this.props.onSelectedRowsChanged(this.state.selectedRows),
     );
   }
@@ -175,6 +176,7 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
                 />
               </th>
             )}
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             {this.props.columns.map((column: string, idx) => (
               <th
                 className={`data-table__header column-${column}`}
@@ -201,6 +203,7 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
             );
 
             const columnTooltips = get("columnTooltips", row);
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             const columns = this.props.columns.map((column: string, colIdx) => {
               const col = (
                 <td

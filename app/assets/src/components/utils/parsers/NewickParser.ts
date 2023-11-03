@@ -59,6 +59,7 @@ class NewickParser {
             // @ts-expect-error ts-migrate(2554) FIXME: Expected 1-2 arguments, but got 0.
             const newNode = this.createNode();
             currentNode.children.push(newNode);
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
             predecessors.push(currentNode);
             currentNode = newNode;
             break;
@@ -67,6 +68,7 @@ class NewickParser {
             this.editNodeWithToken(currentNode, token);
             // @ts-expect-error ts-migrate(2554) FIXME: Expected 1-2 arguments, but got 0.
             currentNode = this.createNode();
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             predecessors[predecessors.length - 1].children.push(currentNode);
             break;
           case ")":

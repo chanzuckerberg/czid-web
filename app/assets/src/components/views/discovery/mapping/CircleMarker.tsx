@@ -19,6 +19,7 @@ class CircleMarker extends React.Component<CircleMarkerProps> {
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         // Place the viewBox over the point
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
       >
         <circle
@@ -30,6 +31,7 @@ class CircleMarker extends React.Component<CircleMarkerProps> {
           // Circle in the center of the viewBox
           cx="50%"
           cy="50%"
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           r={size / 2}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}

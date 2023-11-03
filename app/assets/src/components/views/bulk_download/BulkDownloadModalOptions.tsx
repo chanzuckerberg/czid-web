@@ -61,7 +61,9 @@ const BulkDownloadModalOptions = ({
     downloadType: BulkDownloadType,
     field: BulkDownloadTypeField,
   ) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     const selectedField = get(field.type, selectedFieldsForType);
     let dropdownOptions = null;
     let placeholder = "";
@@ -113,10 +115,12 @@ const BulkDownloadModalOptions = ({
                 isChecked ? "Yes" : "No" /* display name */,
               )
             }
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             checked={selectedField}
           />
         );
       case "file_format":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         dropdownOptions = field.options.map(option => ({
           text: option,
           value: option,
@@ -138,6 +142,7 @@ const BulkDownloadModalOptions = ({
                   displayName,
                 );
               }}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
               value={selectedField}
               hitType="read"
             />
@@ -157,17 +162,20 @@ const BulkDownloadModalOptions = ({
                   displayName,
                 );
               }}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
               value={selectedField}
               hitType="contig"
             />
           </div>
         );
       case "background":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         dropdownOptions = backgroundOptions || [];
         placeholder = backgroundOptions ? "Select background" : "Loading...";
         break;
       case "metric":
         // if download type is biom_format, only return RPM and r for NT and NR
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         dropdownOptions =
           (downloadType.type === "biom_format"
             ? MICROBIOME_DOWNLOAD_METRIC_OPTIONS
@@ -185,6 +193,7 @@ const BulkDownloadModalOptions = ({
           </div>
         );
       case "download_format":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         dropdownOptions = field.options.map(option => ({
           text: option,
           value: option,
@@ -202,7 +211,6 @@ const BulkDownloadModalOptions = ({
         <div className={cs.label}>{field.display_name}:</div>
         {field.type === "background" ? (
           <BackgroundModelFilter
-            // @ts-expect-error Property 'fluid' does not exist on BackgroundModelFilter
             fluid
             placeholder={placeholder}
             allBackgrounds={dropdownOptions}
@@ -212,6 +220,7 @@ const BulkDownloadModalOptions = ({
               // Reset conditional fields if they are no longer needed.
               CONDITIONAL_FIELDS.forEach(conditionalField => {
                 if (
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
                   conditionalField.dependentFields.includes(field.type) &&
                   downloadType.type === conditionalField.downloadType &&
                   !conditionalField.triggerValues.includes(value)
@@ -226,6 +235,7 @@ const BulkDownloadModalOptions = ({
               });
             }}
             enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             value={selectedField}
             usePortal
             withinModal
@@ -243,6 +253,7 @@ const BulkDownloadModalOptions = ({
               // Reset conditional fields if they are no longer needed.
               CONDITIONAL_FIELDS.forEach(conditionalField => {
                 if (
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
                   conditionalField.dependentFields.includes(field.type) &&
                   downloadType.type === conditionalField.downloadType &&
                   !conditionalField.triggerValues.includes(value)
@@ -309,6 +320,7 @@ const BulkDownloadModalOptions = ({
           disabled && cs.disabled,
         )}
         key={downloadType.type}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         onClick={() => !disabled && onSelect(downloadType.type)}
       >
         <RadioButton
@@ -347,8 +359,10 @@ const BulkDownloadModalOptions = ({
             ) : (
               ""
             )}
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             {downloadType.type in BULK_DOWNLOAD_DOCUMENTATION_LINKS ? (
               <ExternalLink
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
                 href={BULK_DOWNLOAD_DOCUMENTATION_LINKS[downloadType.type]}
               >
                 Learn More
@@ -420,7 +434,9 @@ const BulkDownloadModalOptions = ({
     ) {
       visibleTypes.sort(
         (typeA, typeB) =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           designatedOrder.indexOf(typeA.category) -
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           designatedOrder.indexOf(typeB.category),
       );
       return (
@@ -434,8 +450,10 @@ const BulkDownloadModalOptions = ({
       ...new Set(visibleTypes.map(type => type.category)),
     ];
     const additionalCategories = backendCategories.filter(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       category => !designatedOrder.includes(category),
     );
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     const categories = designatedOrder.concat(additionalCategories);
 
     const computedDownloadTypes = categories.map(category => {

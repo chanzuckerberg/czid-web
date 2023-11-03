@@ -34,12 +34,14 @@ export const geosearchCSVLocations = async (
   metadata: MetadataPreLocationSearch,
   locationMetadataType: MetadataCSVLocationsMenuProps["locationMetadataType"],
 ): Promise<MetadataTable> => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   if (!(metadata && metadata.rows)) return;
 
   // For each unique plain text value, get the #1 search result, if any.
   const rawNames = uniq(metadata.rows.map(r => r[locationMetadataType.name]));
   const matchedLocations = {};
   const requests = rawNames.map(async query => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     const res = await getGeoSearchSuggestions(query, 1);
     if (res.length > 0) matchedLocations[query] = res[0];
   });
@@ -64,6 +66,7 @@ export const geosearchCSVLocations = async (
     const result = processLocationSelection(
       (typeof locationName === "string" && matchedLocations[locationName]) ||
         locationName,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       isRowHuman(row),
     );
     if (typeof locationName === "string" && locationName in matchedLocations) {
@@ -82,6 +85,7 @@ export const processCSVMetadata = (csv: CSV): MetadataPreLocationSearch => {
   return {
     headers,
     // Remove empty values, and convert rows from array of strings to object.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     rows: map(
       // It's possible to have two different MetadataFields with the same name, but for different host genomes.
       // In this case, only one of the two fields will have a value for any given sample
@@ -91,6 +95,7 @@ export const processCSVMetadata = (csv: CSV): MetadataPreLocationSearch => {
       // The below code makes sure this case is handled correctly by filtering before converting to an object.
       row =>
         Object.fromEntries(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
           filter((pair: string[]) => pair[1] !== "", zip(headers, row)),
         ),
       rows,
@@ -125,6 +130,7 @@ export const ensureDefinedValue = ({
       typeof value === "string" ? Number.parseInt(value) : value;
     if (!isNaN(parsedValue)) {
       // Do not let the user select values less than 0
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       safeValue = max([parsedValue, 0]);
     }
 

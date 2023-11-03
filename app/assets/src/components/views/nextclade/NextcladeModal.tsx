@@ -90,6 +90,7 @@ class NextcladeModalCC extends React.Component<
     const { validIds, invalidSampleNames, error } =
       await validateWorkflowRunIds({
         basic: false,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         workflowRunIds: Array.from(selectedIds),
         workflow: WorkflowType.CONSENSUS_GENOME,
       });
@@ -167,6 +168,7 @@ class NextcladeModalCC extends React.Component<
   renderTooltip = ({
     content,
     link,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     iconStyle = null,
     offset = [0, 0],
     position = "top center",
@@ -284,6 +286,7 @@ class NextcladeModalCC extends React.Component<
     } = this.state;
 
     const sentToNextcladeCount =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       selectedIds.size - samplesNotSentToNextclade.length;
 
     return (
@@ -390,6 +393,7 @@ const NextcladeModal = (props: NextcladeModalProps) => {
     <NextcladeModalCC
       {...props}
       admin={admin}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       userId={userId}
       trackEvent={trackEvent}
     />

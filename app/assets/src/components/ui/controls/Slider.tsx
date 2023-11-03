@@ -20,9 +20,11 @@ class Slider extends React.Component<SliderProps, SliderState> {
   onChangeParent: $TSFixMeFunction;
   constructor(props) {
     super(props);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.onChangeParent = this.props.onChange;
 
     this.state = {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       value: this.props.value,
     };
 

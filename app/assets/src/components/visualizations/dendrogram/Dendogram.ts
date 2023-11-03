@@ -435,6 +435,7 @@ export default class Dendogram {
         ticks.push({
           id: i + 1,
           y: yMin + i * stepSize,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           multiplier: i % 2 ? undefined : (i * multiplier) / 2,
         });
       }

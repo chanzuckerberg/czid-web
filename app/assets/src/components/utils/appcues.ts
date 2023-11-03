@@ -16,7 +16,9 @@ declare global {
 
 export const showAppcue = ({
   flowId,
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
   withAnalytics = null,
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
   analyticEventName = null,
   analyticEventProperties = {},
 }: {

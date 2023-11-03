@@ -93,6 +93,7 @@ const SequencingPlatformOption = ({
             <div className={commonStyles.technologyContent}>
               {technologyDetails}
               <PipelineVersionIndicator
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 isPinnedVersion={isPinnedVersion}
                 pipelineHelpLink={pipelineHelpLink}
                 version={pipelineVersion}

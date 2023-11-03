@@ -88,6 +88,7 @@ const Dropdown = ({
   useEffect(() => {
     // Guard against NaN values
     if (!Number.isNaN(propsValue)) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       setValue(propsValue);
     }
   }, [propsValue]);
@@ -95,12 +96,14 @@ const Dropdown = ({
   const buildLabels = () => {
     setLabels(
       options.reduce((labelMap, option) => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         labelMap[option.value.toString()] = option.text;
         return labelMap;
       }, {}),
     );
     setSubtexts(
       options.reduce((subtextMap, option) => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         subtextMap[option.value.toString()] = option.subtext;
         return subtextMap;
       }, {}),
@@ -121,6 +124,7 @@ const Dropdown = ({
       text = nullLabel;
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
     const labelText = label && text ? `${label}:` : label;
     const itemSubtext =
       showSelectedItemSubtext && !isNil(value)
@@ -130,6 +134,7 @@ const Dropdown = ({
       <DropdownTrigger
         label={labelText}
         itemSubtext={itemSubtext}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
         value={text}
         rounded={rounded}
         className={cs.dropdownTrigger}

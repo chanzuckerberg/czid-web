@@ -19,6 +19,7 @@ export function InstitutionFormField({
   useEffect(() => {
     if (rorResponseData.length > 0) {
       const institutionNameToInfo = rorResponseData.reduce((acc, item) => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         acc[item["name"]] = {
           id: item["id"],
           country: item["country"],
@@ -26,6 +27,7 @@ export function InstitutionFormField({
         };
         return acc;
       }, {});
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       setRORInstitutions(Object.keys(institutionNameToInfo));
       setInstitution(inputValue?.trim());
       setRORId(""); // clear previous value

@@ -30,6 +30,7 @@ class MapBanner extends React.Component<MapBannerProps> {
       return (
         <div className={cs.bannerContainer}>
           <div className={cs.banner}>
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             <span className={cs.emphasis}>{`${itemCount} ${item.slice(0, -1)}${
               itemCount > 1 ? "s" : ""
             }`}</span>{" "}

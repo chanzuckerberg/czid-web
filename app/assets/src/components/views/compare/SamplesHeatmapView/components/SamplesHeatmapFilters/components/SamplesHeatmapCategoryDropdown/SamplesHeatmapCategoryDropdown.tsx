@@ -60,6 +60,7 @@ export const SamplesHeatmapCategoryDropdown = ({
     );
   }, [selectedOptions.categories, selectedOptions.subcategories]);
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const categoryOptions = options.categories.map((category: string) => {
     const name = category !== "Viruses" ? category : VIRUSES_NON_PHAGE;
     return { name };

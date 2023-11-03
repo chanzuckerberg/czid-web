@@ -50,7 +50,9 @@ const InfoBanner = ({
   const renderListenerLink = () => {
     // listenerLink will look like a link but instead of having an href, it has an onClick
     return (
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       <span className={cs.link} onClick={listenerLink.onClick}>
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {listenerLink.text} <IconArrowRight />
       </span>
     );

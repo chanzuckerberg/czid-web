@@ -4,7 +4,7 @@ import React from "react";
 import { getSamples } from "~/api";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { showToast } from "~/components/utils/toast";
-import { NameId } from "~/interface/shared";
+import { NameId, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import Wizard from "~ui/containers/Wizard";
 import ListNotification from "~ui/notifications/ListNotification";
@@ -26,7 +26,7 @@ interface MetadataUploadModalState {
     headers: string[];
   };
   issues?: $TSFixMeUnknown;
-  projectSamples?: ProjectSample[];
+  projectSamples?: SampleFromApi[];
 }
 
 export interface ProjectSample {
@@ -40,8 +40,10 @@ class MetadataUploadModal extends React.Component<
   MetadataUploadModalState
 > {
   state: MetadataUploadModalState = {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     metadata: null,
     issues: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     projectSamples: null,
   };
 
@@ -49,6 +51,7 @@ class MetadataUploadModal extends React.Component<
     const { project } = this.props;
 
     const { samples: projectSamples } = await getSamples({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       projectId: project.id,
     });
 
@@ -72,16 +75,20 @@ class MetadataUploadModal extends React.Component<
 
   handleComplete = async () => {
     const { onClose, onComplete } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onClose();
 
     const response = await uploadMetadataForProject(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       this.props.project.id,
       flow(
         keyBy(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
           (row: MetadataUploadModalState["metadata"]["rows"][0]) =>
             row.sample_name || row["Sample Name"],
         ),
         mapValues(omit(["sample_name", "Sample Name"])),
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       )(this.state.metadata.rows),
     );
 
@@ -117,12 +124,14 @@ class MetadataUploadModal extends React.Component<
     const uploadTitle = (
       <span>
         Edit Metadata for{" "}
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         <span className={cs.projectName}>{this.props.project.name}</span>
       </span>
     );
     const reviewTitle = (
       <span>
         Review Metadata for{" "}
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         <span className={cs.projectName}>{this.props.project.name}</span>
       </span>
     );

@@ -305,11 +305,13 @@ export class TidyTree {
         tspan.text(words[0]);
       } else {
         while ((word = words.pop())) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           line.unshift(word);
           tspan.text(line.join(" "));
           if (tspan.node().getComputedTextLength() > width) {
             line.shift();
             tspan.text(line.join(" "));
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             line = [word];
             tspan = text
               .append("tspan")

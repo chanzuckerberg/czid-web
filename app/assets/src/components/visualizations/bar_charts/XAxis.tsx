@@ -34,6 +34,7 @@ export default function XAxis({
   const renderAxis = () => {
     const ticks = x.ticks(tickCount, "s").map(value => ({
       value,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       formatted: tickFormat(value),
       xOffset: x(value),
     }));
@@ -43,6 +44,7 @@ export default function XAxis({
         <g key={value} transform={`translate(${xOffset}, 0)`}>
           <g key={`tick-at-${value}`} transform={`translate(0, ${height})`}>
             {ticksVisible && (
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
               <line y2={-1 * tickSize} stroke={"currentColor"} />
             )}
           </g>
@@ -51,6 +53,7 @@ export default function XAxis({
             key={value}
             textAnchor={"middle"}
             dominantBaseline={"middle"}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             transform={`translate(0, ${height / 2})`}
           >
             {formatted}
@@ -65,6 +68,7 @@ export default function XAxis({
   return (
     <div className={cs.xAxis}>
       <div className={titleClassName} style={{ width: width }}>
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         <div style={{ width: width - marginLeft, marginLeft: marginLeft }}>
           {title}
         </div>

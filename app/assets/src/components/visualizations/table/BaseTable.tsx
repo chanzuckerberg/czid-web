@@ -55,7 +55,7 @@ export interface BaseTableProps {
   rowHeight?: number | ((params: Index) => number);
   rowRenderer?: $TSFixMeFunction;
   selectableCellClassName?: string;
-  selectableCellRenderer?: $TSFixMeFunction;
+  selectableCellRenderer?: (x: $TSFixMeUnknown) => React.ReactNode;
   selectableColumnClassName?: string;
   sortable?: boolean;
   sortBy?: string;
@@ -83,7 +83,7 @@ interface BaseTableCalculatedPropsWithContext extends BaseTableCalculatedProps {
 
 interface BaseTableState {
   activeColumns: string[];
-  columns: BaseTableProps["columns"];
+  columns: ColumnProps[];
   columnWidthPercentages: Record<string, number>;
   columnCurrentlyDragged: $TSFixMeUnknown;
   mouseOverDraggableAreaForColumn: $TSFixMeUnknown;
@@ -103,8 +103,10 @@ class BaseTableCC extends React.Component<
     super(props);
 
     this.state = {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       activeColumns: this.props.initialActiveColumns,
       columns: BaseTableCC.setColumnDefaults(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         this.props.columns,
         this.props.defaultColumnWidth,
       ),
@@ -121,6 +123,7 @@ class BaseTableCC extends React.Component<
       return {
         activeColumns: props.initialActiveColumns,
         columns: BaseTableCC.setColumnDefaults(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           props.columns,
           props.defaultColumnWidth,
         ),
@@ -290,13 +293,15 @@ class BaseTableCC extends React.Component<
           // calculate the percentage based on the column width / totalTableWidth.
             (prevColumnWidthPercentages[dataKey]
               ? prevColumnWidthPercentages[dataKey]
-              : find({ dataKey }, columns).width / totalTableWidth) +
+              : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+                find({ dataKey }, columns).width / totalTableWidth) +
             percentDelta,
           // Compute the nextDataKey's width percentage as well since dragging a column affects the next column.
           [nextDataKey]:
             (prevColumnWidthPercentages[nextDataKey]
               ? prevColumnWidthPercentages[nextDataKey]
-              : find({ dataKey: nextDataKey }, columns).width /
+              : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+                find({ dataKey: nextDataKey }, columns).width /
                 totalTableWidth) - percentDelta,
         },
       };
@@ -369,6 +374,7 @@ class BaseTableCC extends React.Component<
         text: column.label,
       }));
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     const value = difference(activeColumns, protectedColumns);
 
     return (
@@ -393,6 +399,7 @@ class BaseTableCC extends React.Component<
                 className={cs.plusIcon}
               />
             }
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2740
             value={value}
           />
         }
@@ -421,6 +428,7 @@ class BaseTableCC extends React.Component<
     return (
       <Checkbox
         className={selectableCellClassName}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         checked={selected.has(cellData)}
         onChange={onSelectRow}
         value={disabled ? -1 : cellData}
@@ -435,6 +443,7 @@ class BaseTableCC extends React.Component<
     return (
       <Checkbox
         checked={selectAllChecked}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         onChange={(_value, checked) => onSelectAllRows(checked)}
         value={"all"}
       />
@@ -482,6 +491,7 @@ class BaseTableCC extends React.Component<
       >
         <AutoSizer>
           {({ width, height }) => (
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
             <VirtualizedTable
               gridClassName={cx(cs.grid, gridClassName)}
               headerClassName={cx(cs.header, headerClassName)}
@@ -513,6 +523,7 @@ class BaseTableCC extends React.Component<
                   cellDataGetter={selectRowDataGetter}
                   cellRenderer={this.renderSelectableCell}
                   disableSort={true}
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
                   width={defaultSelectColumnWidth}
                 />
               )}
@@ -559,11 +570,15 @@ class BaseTableCC extends React.Component<
                 }
 
                 return (
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore (TODO - remove this - TS would like pxWidth to be a number but it could be undefined)
                   <Column
                     className={cx(cs.cell, cellClassName, className)}
                     columnData={columnProps.columnData}
                     key={dataKey}
                     // If the width percentage has not been calculated yet, use the default column width
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore (TODO - remove this - TS would like pxWidth to be a number but it could be undefined)
                     width={
                       columnWidthPercentages[dataKey]
                         ? columnWidthPercentages[dataKey] * width

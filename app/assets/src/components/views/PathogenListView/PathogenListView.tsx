@@ -54,11 +54,13 @@ export const PathogenListView = () => {
       <div className={cs.content}>
         <div className={cs.marginLeft} />
         <NarrowContainer size="small">
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531 */}
           <PathogenIntro numOfCitations={pathogenData.citations.length} />
           <AnchorMenu
             pathogenData={pathogenData}
             setCurrentSectionIndex={throttledSetCurrentIndex}
           />
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322 */}
           <PathogenCitations citations={pathogenData.citations} />
         </NarrowContainer>
         <div className={cs.marginRight}>

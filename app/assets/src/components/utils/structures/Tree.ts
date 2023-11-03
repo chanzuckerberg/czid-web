@@ -9,7 +9,9 @@ export default class Tree {
       const nodes = this.bfs();
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
         if (nodeData[node.name]) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
           Object.assign(node, nodeData[node.name]);
         }
       }
@@ -73,6 +75,7 @@ export default class Tree {
 
     while (stack.length > 0) {
       const node = stack.shift();
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       order.push(node);
       stack = stack.concat(node.children);
     }

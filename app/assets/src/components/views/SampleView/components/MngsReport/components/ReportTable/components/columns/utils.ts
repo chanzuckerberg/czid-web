@@ -15,6 +15,7 @@ export function getCountTypeValuesFromDataRow({
 }): (number | string)[] {
   return reduce(
     (result, countType) => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       result.push(getOr(defaultValue, [countType, field], rowData));
       return result;
     },
@@ -44,6 +45,7 @@ export const nestedSortFunction = ({
       // 1st value: value defined by path for the genus (guarantees all genus together)
       // note: a species row has a field .genus that points to their genus
       rowData =>
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
         rowData.genus
           ? getOr(nullValue, [TAX_LEVEL_GENUS].concat(path), rowData)
           : getOr(nullValue, path, rowData),
@@ -51,6 +53,7 @@ export const nestedSortFunction = ({
       // this value guarantees that we keep species within their genus, even if the first value is duplicated
       // e.g. if two genus have 2 reads they would be together on top and they species after them,
       // adding tax id guarantees all the species are below their respective genus
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       rowData => (rowData.genus ? rowData.genus.taxId : rowData.taxId),
       // 3rd value: value defined by path for the species if species row;
       // using the limit value for genus based on direction guarantees that genus are always on top of their species.
@@ -60,12 +63,16 @@ export const nestedSortFunction = ({
       // without tax id, the ascending order would be A: [2, -], B: [2, -], A1: [2, 1], A2 [2, 1] B1: [2, 2]
       // with tax id, the ascending order would be A: [2, 1001, -], A1: [2, 1001, 1], A2: [2, 1001, 1], B: [2, 1002, -], B1: [2, 1002, 2]
       rowData =>
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
         rowData.genus
           ? getOr(nullValue, path, rowData)
           : sortDirection === "asc"
-          ? limits[0]
-          : limits[1],
+          ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+            limits[0]
+          : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+            limits[1],
     ],
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     [sortDirection, sortDirection, sortDirection],
     data,
   );

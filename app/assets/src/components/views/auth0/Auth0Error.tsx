@@ -15,6 +15,7 @@ class Auth0Error extends React.Component<Auth0ErrorProps> {
     return (
       <div className={cs.auth0Error}>
         <BlankScreenMessage
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           message={upperFirst(message)}
           textWidth={300}
           tagline={

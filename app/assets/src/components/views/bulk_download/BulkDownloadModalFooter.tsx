@@ -99,13 +99,16 @@ export default function BulkDownloadModalFooter({
       return null;
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return downloadTypes.find(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
       item => item["type"] === selectedDownloadTypeName,
     ) as BulkDownloadType;
   };
 
   // Get all the fields we need to validate for the selected download type.
   const getRequiredFieldsForSelectedType = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType = getSelectedDownloadType();
 
@@ -132,6 +135,7 @@ export default function BulkDownloadModalFooter({
   };
 
   const isSelectedDownloadValid = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType: BulkDownloadType = getSelectedDownloadType();
 
@@ -274,6 +278,7 @@ export default function BulkDownloadModalFooter({
   return (
     <div className={cs.footer}>
       <div className={cs.notifications}>
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {invalidSampleNames.length > 0 && renderInvalidSamplesWarning()}
         {numNonHumanHostSamples > 0 &&
           selectedDownloadTypeName === BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS &&

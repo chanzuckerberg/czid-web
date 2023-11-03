@@ -85,6 +85,7 @@ const TaxonFilterSDS = ({
         if (query?.length >= MIN_SEARCH_LENGTH) {
           // setSearchQueryInProgress(true);
           noOptionsText = NO_SEARCH_RESULTS_TEXT;
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           newOptions = await getTaxaOptionsForQuery(query);
         }
 

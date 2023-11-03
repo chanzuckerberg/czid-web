@@ -93,9 +93,11 @@ class InfiniteTable extends React.Component<
     this.rows = [];
     this.loadedRowsMap = [];
     this.state = {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       rowCount: this.props.rowCount,
     };
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.cancelableLoadRowsPromise = null;
   }
 
@@ -117,6 +119,7 @@ class InfiniteTable extends React.Component<
     }
 
     this.cancelableLoadRowsPromise = makeCancelable(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       onLoadRows({ startIndex, stopIndex }),
     );
     this.cancelableLoadRowsPromise.promise
@@ -127,12 +130,14 @@ class InfiniteTable extends React.Component<
         if (requestedNumberOfRows !== newRows.length) {
           this.setState({ rowCount: this.rows.length });
         } else {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           this.setState({ rowCount: this.rows.length + minimumBatchSize });
         }
 
         for (let i = startIndex; i <= stopIndex; i++) {
           this.loadedRowsMap[i] = STATUS_LOADED;
         }
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         this.cancelableLoadRowsPromise = null;
         return true;
       })
@@ -189,6 +194,7 @@ class InfiniteTable extends React.Component<
     this.rows = [];
     this.loadedRowsMap = [];
     this.setState(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       { rowCount },
       // reset infinite loader cache with autoReload
       () => this.infiniteLoader.resetLoadMoreRowsCache(true),
@@ -215,6 +221,7 @@ class InfiniteTable extends React.Component<
     const { rowCount } = this.state;
     return (
       <InfiniteLoader
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         ref={infiniteLoader => (this.infiniteLoader = infiniteLoader)}
         isRowLoaded={this.isRowLoadingOrLoaded}
         loadMoreRows={this.loadMoreRows}
@@ -237,6 +244,7 @@ class InfiniteTable extends React.Component<
               onSort={onSortColumn}
               rowCount={rowCount}
               rowGetter={this.getRow}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               rowHeight={this.handleGetRowHeight}
               rowRenderer={this.rowRenderer}
               sortable={sortable}

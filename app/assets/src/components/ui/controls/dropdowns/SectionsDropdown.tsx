@@ -102,9 +102,12 @@ const SectionsDropdown = ({
     Object.entries(categories).forEach(([category, categoryDetails]) => {
       const categoryName = categoryDetails.displayName;
       // Creates a mapping between the section and the itemsSearchStrings in that section.
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       sections[categoryName] = new Set([]);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const sectionItems = categoryDetails.options.map((option: $TSFixMe) => {
         if (search) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           sections[categoryName].add(option.text);
           itemSearchStrings.push(option.text);
         }
@@ -144,6 +147,7 @@ const SectionsDropdown = ({
         value: NONE_BACKGROUND_VALUE,
       }),
     ];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     itemIdToName[NONE_BACKGROUND_VALUE] = "None";
 
     if (includeDivider) {
@@ -168,6 +172,7 @@ const SectionsDropdown = ({
     if (!isNil(selectedValue)) {
       const value = selectedValue.toString();
       // If there is a mapping from the item's id to its name, lookup the name - otherwise use the value itself.
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       text = !isEmpty(itemIdToName) ? itemIdToName[value] : value;
     } else if (nullLabel) {
       text = nullLabel;

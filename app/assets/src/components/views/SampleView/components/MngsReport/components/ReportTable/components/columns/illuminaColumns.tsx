@@ -19,6 +19,7 @@ import {
   nestedSortFunction,
 } from "./utils";
 
+// @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
 export const getIlluminaColumns: (
   dbType: DBType,
   displayNoBackground: boolean,
@@ -27,6 +28,7 @@ export const getIlluminaColumns: (
   const countTypes = ["nt", "nr"];
   const assemblyEnabled = isPipelineFeatureAvailable(
     ASSEMBLY_FEATURE,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     pipelineVersion,
   );
 

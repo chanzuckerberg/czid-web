@@ -42,6 +42,7 @@ class Checkbox extends React.Component<CheckboxProps, CheckboxState> {
 
     event.stopPropagation();
     this.setState({ isChecked: !this.state.isChecked }, () => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       onChange(value, this.state.isChecked, event);
     });
   }
@@ -53,6 +54,7 @@ class Checkbox extends React.Component<CheckboxProps, CheckboxState> {
     return (
       <div
         className={cx(cs.checkbox, className, disabled && cs.disabled)}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         onClick={disabled ? null : this.handleClick}
         data-testid={testId}
       >

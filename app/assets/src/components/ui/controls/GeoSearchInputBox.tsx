@@ -84,6 +84,7 @@ const GeoSearchInputBox = ({
     const categories: SearchResults = {};
     let serverSideSuggestions = [];
     try {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       serverSideSuggestions = await getGeoSearchSuggestions(query);
       // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
       if (serverSideSuggestions.length > 0) {
@@ -92,9 +93,13 @@ const GeoSearchInputBox = ({
           name: locationsCategory,
           // Format title/description for the text box.
           results: serverSideSuggestions.map(r => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             const nameParts = r.name.split(", ");
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             r.title = nameParts[0];
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             r.description = nameParts.slice(1).join(", ");
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             r.key = `loc-${r.locationiq_id}`;
             return r;
           }),

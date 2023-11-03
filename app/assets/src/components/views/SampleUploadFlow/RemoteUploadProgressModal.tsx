@@ -103,16 +103,23 @@ const RemoteUploadProgressModal = ({
     const samplesWithFlags = addFlagsToSamples({
       adminOptions,
       bedFileName: bedFile?.name,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       clearlabs,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       medakaModel,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       useStepFunctionPipeline,
       refSeqAccession,
       refSeqFileName: refSeqFile?.name,
       refSeqTaxon,
       samples: samplesToFlag,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       skipSampleProcessing,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       technology,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       workflows,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       wetlabProtocol,
     });
 
@@ -125,6 +132,7 @@ const RemoteUploadProgressModal = ({
       });
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setSamplesToUpload(samplesWithFlags);
 
     let response: {
@@ -158,11 +166,13 @@ const RemoteUploadProgressModal = ({
       });
 
       setUploadComplete(true);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       setFailedSampleNames(map("name", samples));
       return;
     }
 
     setUploadComplete(true);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setFailedSampleNames(response.errored_sample_names || []);
 
     onUploadComplete();
@@ -282,6 +292,7 @@ const RemoteUploadProgressModal = ({
     <>
       <div className={cs.titleWithIcon}>
         <IconSuccess className={cs.checkmarkIcon} />
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {samples.length} samples successfully created
       </div>
       <div className={cs.instructions}>
@@ -295,7 +306,9 @@ const RemoteUploadProgressModal = ({
   const uploadInProgressTitle = () => (
     <>
       <div className={cs.title}>
-        Creating {samples.length} sample{samples.length !== 1 && "s"} in{" "}
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
+        Creating {samples.length} sample{samples.length !== 1 && "s"} in //
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {project.name}
       </div>
       <div className={cs.subtitle}>
@@ -317,9 +330,11 @@ const RemoteUploadProgressModal = ({
   };
 
   const renderViewProjectButton = () => {
-    const buttonCallback = () => redirectToProject(project.id);
-
-    return <PrimaryButton text="Go to Project" onClick={buttonCallback} />;
+    if (project) {
+      const buttonCallback = () => redirectToProject(project.id);
+      return <PrimaryButton text="Go to Project" onClick={buttonCallback} />;
+    }
+    return null;
   };
 
   return (

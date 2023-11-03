@@ -92,6 +92,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
     this.state = {
       // Set stages that can be rendered to open, and others to closed.
       stagesOpened: this.stageNames.map(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         (_: $TSFixMe, i: $TSFixMe) => i < this.props.graphData.stages.length,
       ),
       interStageArrows: ["", "", ""],
@@ -123,7 +124,9 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
     const oldGraphData = graphData;
     const newGraphData = await getGraph(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       sample.id,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       pipelineRun.version.pipeline,
     );
     this.setState(
@@ -132,6 +135,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
       },
       () => this.pipelineIsFinished() && clearInterval(this.updateLoop),
     );
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     const updates = diff(oldGraphData, newGraphData);
     // @ts-expect-error ts-migrate(2339) FIXME: Property 'stages' does not exist on type 'object'.
     if (updates.stages) {
@@ -179,6 +183,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
   pipelineIsFinished() {
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { status },
     } = this.state;
     return ["finished", "userErrored", "pipelineErrored"].includes(status);
@@ -186,6 +191,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
   getStepDataAtIndices({ stageIndex, stepIndex }: $TSFixMe) {
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { stages },
     } = this.state;
     return stages[stageIndex].steps[stepIndex];
@@ -197,6 +203,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
     direction: $TSFixMe,
   ) {
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { edges },
     } = this.state;
     const stepData = this.getStepDataAtIndices({
@@ -306,6 +313,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
       Math.pow(x - this.lastMouseMoveInfo.x, 2) +
         Math.pow(y - this.lastMouseMoveInfo.y, 2),
     );
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return distance >= minMouseMoveUpdateDistance;
   }
 
@@ -482,6 +490,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
     updateHistory &&
       history.replaceState(
         updatedStagesOpened,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         null,
         this.urlWithStagesOpenedState(updatedStagesOpened),
       );
@@ -497,6 +506,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
   generateNodeData(stageIndex: $TSFixMe, edgeData: $TSFixMe) {
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { stages },
     } = this.state;
     const stepData = stages[stageIndex].steps;
@@ -569,9 +579,12 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
     while (bfs.length) {
       const currentNode = bfs.shift();
       // End node should have no children, so skip.
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       if (currentNode > END_NODE_ID) {
         // Update children and add to back of bfs queue
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         const newLevel = nodeToCurrentLevel[currentNode] + 1;
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         fromToToEdgeMap[currentNode].forEach((edge: $TSFixMe) => {
           if (edge.color) {
             const toNodeId = edge.to;
@@ -593,6 +606,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
     // @ts-expect-error ts-migrate(2550) FIXME: Property 'values' does not exist on type 'ObjectCo... Remove this comment to see the full error message
     const maxLevel = Math.max(...Object.values(nodeToCurrentLevel));
     nodeData.forEach((node: $TSFixMe) => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       node.x = (nodeToCurrentLevel[node.id] - maxLevel / 2.0) * xLayoutInterval;
       node.level = nodeToCurrentLevel[node.id];
     });
@@ -623,13 +637,16 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
       });
 
       let direction = nodes.length % 2 ? -1 : 1;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       let offsetAmount = nodes.length % 2 ? 0 : yLayoutInterval / 2;
       nodes.forEach((node: $TSFixMe) => {
         node.y =
           offsetAmount *
           direction *
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           (applyStaggerNodesMultiplier ? staggerLayoutMultiplier : 1);
         if (direction === -1) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           offsetAmount += yLayoutInterval;
         }
         direction *= -1;
@@ -642,6 +659,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
   generateEdgeData(stageIndex: $TSFixMe) {
     const { edgeColor } = this.props;
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { stages },
     } = this.state;
     const stepData = stages[stageIndex].steps;
@@ -722,6 +740,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
   generateHiddenEdges(stageIndex: $TSFixMe) {
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { stages },
     } = this.state;
     const hiddenEdgeColorOption = {
@@ -754,6 +773,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
   setInitialOpenedStages() {
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { stages },
     } = this.state;
 
@@ -768,6 +788,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
     history.replaceState(
       this.state.stagesOpened,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       null,
       this.urlWithStagesOpenedState(this.state.stagesOpened),
     );
@@ -778,6 +799,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
     const pipelineVersion =
       pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
     return `${location.protocol}//${location.host}/samples/${
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       sample.id
     }/pipeline_viz${
       pipelineVersion ? `/${pipelineVersion}` : ""
@@ -786,6 +808,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
   drawGraphs() {
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { stages },
     } = this.state;
     stages.forEach((_: $TSFixMe, i: $TSFixMe) => {
@@ -912,6 +935,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
   renderStageContainer(stageName: $TSFixMe, i: $TSFixMe) {
     const {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       graphData: { stages },
     } = this.state;
     const { stagesOpened, hovered } = this.state;

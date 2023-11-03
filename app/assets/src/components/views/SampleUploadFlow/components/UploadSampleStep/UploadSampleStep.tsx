@@ -111,7 +111,7 @@ class UploadSampleStepCC extends React.Component<
   UploadSampleStepState
 > {
   _window: $TSFixMeUnknown;
-  state = {
+  state: UploadSampleStepState = {
     basespaceAccessToken: null,
     basespaceSamples: [],
     basespaceSelectedSampleIds: new Set() as Set<string>,
@@ -518,11 +518,13 @@ class UploadSampleStepCC extends React.Component<
       // (for example, if the technologies conflict)
       newSelectedWorkflows = new Set(
         filter(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           w => workflowsForNewSelection.includes(w),
           Array.from(selectedWorkflows),
         ),
       );
 
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       permittedWorkflows = this.getPermittedSelectedWorkflows({
         workflowsForNewSelection,
         selectedWorkflows: newSelectedWorkflows,
@@ -536,12 +538,14 @@ class UploadSampleStepCC extends React.Component<
       // if this action is a deselection, then start off with all workflows allowed before
       // narrowing the list, since no technology needs priority order -- you can't become
       // more restrictive when you choose fewer workflows
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       workflowsForNewSelection = map(w => w.value, UPLOAD_WORKFLOWS);
       newTechnology =
         selectedWorkflows.size > 0
           ? selectedTechnology
           : NO_TECHNOLOGY_SELECTED;
       newSelectedWorkflows = selectedWorkflows;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       permittedWorkflows = this.getPermittedSelectedWorkflows({
         workflowsForNewSelection,
         selectedWorkflows,
@@ -593,6 +597,7 @@ class UploadSampleStepCC extends React.Component<
 
   handleBedFileChanged = (newFile?: File) => {
     this.props.onDirty();
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.setState({ bedFile: newFile });
   };
 
@@ -695,6 +700,7 @@ class UploadSampleStepCC extends React.Component<
   // Get fields for display in the SampleUploadTable.
   getSampleDataForUploadTable = (
     sampleType: SampleUploadType,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2366
   ): SampleForUploadTable[] | Record<string, unknown> => {
     if (sampleType === BASESPACE_UPLOAD)
       // Show how lanes will be concatenated
@@ -710,7 +716,7 @@ class UploadSampleStepCC extends React.Component<
       // For local uploads, show how lanes will be concatenated
       // If applicable, also add information from the preupload QC checks.
       if (sampleType === LOCAL_UPLOAD) {
-        const sampleInfo = [];
+        const sampleInfo: SampleForUploadTable[] = [];
         const groups = groupSamplesByLane({
           samples,
           sampleType: LOCAL_UPLOAD,
@@ -1556,13 +1562,18 @@ class UploadSampleStepCC extends React.Component<
             onWorkflowToggle={this.handleWorkflowToggle}
             currentTab={currentTab}
             projectPipelineVersions={pipelineVersions[selectedProject?.id]}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             bedFileName={bedFile?.name}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             refSeqFileName={refSeqFile?.name}
             selectedMedakaModel={selectedMedakaModel}
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedTaxon={selectedTaxon}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedTechnology={selectedTechnology}
             selectedWorkflows={selectedWorkflows}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedWetlabProtocol={selectedWetlabProtocol}
             s3UploadEnabled={admin || biohubS3UploadEnabled}
             usedClearLabs={usedClearLabs}

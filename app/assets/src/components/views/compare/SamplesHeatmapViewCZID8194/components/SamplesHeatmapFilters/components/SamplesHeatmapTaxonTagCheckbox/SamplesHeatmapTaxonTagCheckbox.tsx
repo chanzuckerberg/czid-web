@@ -25,13 +25,16 @@ export const SamplesHeatmapTaxonTagCheckbox = ({
   disabled,
 }: SamplesHeatmapTaxonTagCheckboxProps) => {
   const onTaxonTagChange = value => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (selectedOptions.taxonTags.includes(value)) {
       onSelectedOptionsChange({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         taxonTags: selectedOptions.taxonTags.filter(tag => tag !== value),
       });
     } else {
+      const taxonTags = selectedOptions.taxonTags || [];
       onSelectedOptionsChange({
-        taxonTags: [...selectedOptions.taxonTags, value],
+        taxonTags: [...taxonTags, value],
       });
     }
   };
@@ -40,6 +43,7 @@ export const SamplesHeatmapTaxonTagCheckbox = ({
     <div className={cs.checkboxContainer}>
       <InputCheckbox
         disabled={disabled}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         checked={selectedOptions.taxonTags.includes(value)}
         onChange={() => onTaxonTagChange(value)}
         className={cs.checkbox}

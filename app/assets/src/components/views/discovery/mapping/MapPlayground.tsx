@@ -27,7 +27,7 @@ interface MapPlaygroundProps {
 interface MapPlaygroundState {
   locationsToItems: $TSFixMeUnknown;
   viewport: $TSFixMeUnknown;
-  tooltip?: $TSFixMeUnknown;
+  tooltip?: React.ReactNode;
   tooltipShouldClose: boolean;
   searchResult?: $TSFixMeUnknown;
 }
@@ -42,6 +42,7 @@ class MapPlayground extends React.Component<
 
     // Load demo data as location objects with list of sample entry items
     const locationsToItems = {};
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     results.forEach(result => {
       const locData = result.location_validated_value;
       const locId = locData.id;
@@ -150,9 +151,11 @@ class MapPlayground extends React.Component<
         <div className={cs.container}>
           <div className={cs.title}>Map display demo:</div>
           <BaseMap
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             mapTilerKey={mapTilerKey}
             updateViewport={this.updateViewport}
             tooltip={tooltip}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
             markers={Object.entries(locationsToItems).map(this.renderMarker)}
             width={1250}
             height={1000}

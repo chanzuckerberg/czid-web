@@ -147,8 +147,10 @@ export const ReportTable = ({
     setDbType(selectedDbType);
   };
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   const nonNumericColumns: Array<ColumnProps> = getNonNumericColumns(
     allowedFeatures,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     consensusGenomeData,
     currentTab,
     expandedGenusIds,
@@ -176,6 +178,7 @@ export const ReportTable = ({
 
   const illuminaColumns = getIlluminaColumns(
     dbType,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     shouldDisplayNoBackground,
     pipelineVersion,
   );
@@ -195,6 +198,7 @@ export const ReportTable = ({
 
   const columns = compact(
     nonNumericColumns.concat(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       currentTab === WORKFLOW_TABS.SHORT_READ_MNGS && illuminaColumns,
       currentTab === WORKFLOW_TABS.LONG_READ_MNGS && nanoporeColumns,
       sharedColumns,
@@ -239,6 +243,7 @@ export const ReportTable = ({
       tableRows.push(genusData);
 
       if (expandedGenusIds.has(genusData.taxId)) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         genusData.filteredSpecies.forEach(speciesData => {
           // Add a pointer to the genus data for sorting purposes
           speciesData.genus = genusData;

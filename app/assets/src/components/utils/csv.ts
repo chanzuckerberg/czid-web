@@ -105,6 +105,7 @@ export const createCSVRowForAppliedFilters = (
       { id: selectedOptions.background },
       backgrounds,
     ).name;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     filterRow.push(`\nBackground:, "${selectedBackgroundName}"`);
   }
 
@@ -118,6 +119,7 @@ export const createCSVRowForAppliedFilters = (
 
         if (has("categories", optionVal)) {
           const categories = get("categories", optionVal);
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           categoryFilters.push(categories);
           numberOfFilters += categories.length;
         }
@@ -129,10 +131,12 @@ export const createCSVRowForAppliedFilters = (
           )) {
             if (!isEmpty(subcategoryVal)) {
               subcategories.push(
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
                 `${subcategoryName} - ${subcategoryVal.join()}`,
               );
             }
           }
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           categoryFilters.push(subcategories);
           numberOfFilters += subcategories.length;
         }
@@ -140,6 +144,7 @@ export const createCSVRowForAppliedFilters = (
         const flattenedCategoryFilters = flatten(categoryFilters).join();
         if (!isEmpty(flattenedCategoryFilters)) {
           // Explicitly add commas to create blank cells for formatting purposes
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           filterRow.push(`Categories:, ${flattenedCategoryFilters}`);
         }
 
@@ -147,6 +152,7 @@ export const createCSVRowForAppliedFilters = (
       }
       case "taxa": {
         optionVal.forEach((taxon: $TSFixMe) => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           filterRow.push(`Taxon Name:, ${get("name", taxon)}`);
           numberOfFilters += 1;
         });
@@ -165,6 +171,7 @@ export const createCSVRowForAppliedFilters = (
         );
 
         if (!isEmpty(thresholdFilters)) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
           numberOfFilters += thresholdFilters.length;
         }
@@ -177,12 +184,14 @@ export const createCSVRowForAppliedFilters = (
         };
 
         filterRow.push(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           `Read Specificity:, "${readSpecificityOptions[optionVal]}"`,
         );
         numberOfFilters += 1;
         break;
       }
       case "flags": {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         filterRow.push(`Pathogen Flags:, ${optionVal.join(",")}`);
         numberOfFilters += 1;
         break;
@@ -201,9 +210,11 @@ export const createCSVRowForAppliedFilters = (
   filterRow.splice(
     selectedOptions.background ? 1 : 0,
     0,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`,
   );
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   return [sanitizeCSVRow(filterRow).join()];
 };
 
@@ -312,6 +323,7 @@ const generateCSVRowForActiveFilters = (activeFilters: AmrFilterSelections) => {
     }
   }
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   return [sanitizeCSVRow(filterRow).join()];
 };
 
@@ -346,6 +358,7 @@ export const computeMngsReportTableValuesForCSV = (
       // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
       genusRow.push(val.includes(",") ? `"${val}"` : val);
     });
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     csvRows.push([sanitizeCSVRow(genusRow).join()]);
 
     if (has("filteredSpecies", datum)) {
@@ -358,6 +371,7 @@ export const computeMngsReportTableValuesForCSV = (
           // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
           speciesRow.push(val.includes(",") ? `"${val}"` : val);
         });
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         csvRows.push([sanitizeCSVRow(speciesRow).join()]);
       });
     }

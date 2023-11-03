@@ -41,6 +41,7 @@ export const SamplesHeatmapCategoryFilterTags = ({
             className={cs.filterTagContainer}
             key={`category-filter-tag-container-${i}`}
           >
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             {selectedOptions.presets.includes("categories") ? (
               <SamplesHeatmapPresetTooltip
                 component={<FilterTag text={category} />}

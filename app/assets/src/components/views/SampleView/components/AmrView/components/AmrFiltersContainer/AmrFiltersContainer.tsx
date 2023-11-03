@@ -36,6 +36,7 @@ const THRESHOLD_FILTER_INIT = thresholdFilterOptionColumnIds.reduce(
     } else if (item === ColumnId.READ_DEPTH_PER_MILLION) {
       transform = (d: AmrResult) => d.dpm;
     } else {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       transform = (d: AmrResult) => parseFloat(d[item]);
     }
 
@@ -167,6 +168,7 @@ export const AmrFiltersContainer = ({
         lowerBound,
         upperBound,
       };
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       filtersList.push({ filterKey, params });
     }
     updateDataFilters(filtersList);
@@ -206,10 +208,12 @@ export const AmrFiltersContainer = ({
         <div className={hideFilters && cs.hideFilters}>
           <div className={cs.filters}>
             <h2 className={cs.sectionTitle}>Filters</h2>
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2786 */}
             <AmrThresholdFilters
               hideFilters={hideFilters}
               updateThresholdFilters={updateThresholdFilters}
             />
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2786 */}
             <DrugClassFilter
               hideFilters={hideFilters}
               drugClassOptions={

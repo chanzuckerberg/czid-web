@@ -15,6 +15,7 @@ const UploadButton = ({
   const inputRef = useRef(null);
 
   const openFileChooser = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     inputRef.current.click();
   };
 

@@ -63,8 +63,10 @@ const BlastContigsTable = ({
       columns={CONTIG_COLUMNS}
       onSelectRow={onContigSelection}
       onRowClick={({ rowData }) =>
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         onContigSelection(
           rowData.contig_id,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           !selectedContigs.has(rowData.contig_id),
         )
       }

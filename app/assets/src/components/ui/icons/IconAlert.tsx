@@ -6,6 +6,7 @@ import cs from "./icon_alert.scss";
 
 const IconAlert = ({ className, type }: IconAlertProps) => {
   return (
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
     <svg className={cx(className, cs[type])} viewBox="0 0 24 24">
       <g stroke="none" strokeWidth="1" fillRule="evenodd">
         <g transform="translate(-484.000000, -784.000000)" fillRule="nonzero">

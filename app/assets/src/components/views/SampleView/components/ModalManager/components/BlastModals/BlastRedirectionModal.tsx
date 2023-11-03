@@ -29,6 +29,7 @@ const BlastRedirectionModal = ({
           <PrimaryButton
             text="Continue"
             rounded
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
             onClick={() => onContinue(shouldRedirectBlast)}
           />
         </div>

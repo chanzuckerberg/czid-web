@@ -138,6 +138,7 @@ class Wizard extends React.Component<WizardProps, WizardState> {
   };
 
   handleFinishClick() {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     this.props.onComplete();
   }
 
@@ -155,6 +156,7 @@ class Wizard extends React.Component<WizardProps, WizardState> {
       this.showPageInfo &&
       this.state.currentPage >= this.skipPageInfoNPages
     ) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       pageInfo = `${this.state.currentPage - this.skipPageInfoNPages + 1} of ${
         this.props.children.length - this.skipPageInfoNPages
       }`;
@@ -278,6 +280,7 @@ const Action = ({ action, onAfterAction, children }: ActionProps) => {
         return (
           <div
             className={`wizard__action wizard__action--${action}`}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
             onClick={() => handleOnClick(actions[action])}
           >
             {children}

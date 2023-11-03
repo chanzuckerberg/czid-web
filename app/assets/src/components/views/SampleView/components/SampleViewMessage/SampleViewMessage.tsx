@@ -93,6 +93,7 @@ export const SampleViewMessage = ({
         pipelineRun,
       }));
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
     icon = <IconAlert className={csSampleMessage.icon} type={type} />;
   }
   // Hide sample message links on snapshot pages.
@@ -103,13 +104,21 @@ export const SampleViewMessage = ({
 
   return (
     <SampleMessage
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       icon={icon}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       link={link}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       linkText={linkText}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       message={message}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       subtitle={subtitle}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       status={status}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       type={type}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       analyticsEventData={{ status }}
     />
   );

@@ -14,6 +14,7 @@ export const baseName = (str: string) => {
   }
 
   // Get the last piece
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   base = last(base.split(separator));
 
   if (base.includes(".")) {

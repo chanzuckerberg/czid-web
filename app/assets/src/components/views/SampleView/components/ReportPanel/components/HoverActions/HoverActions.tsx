@@ -123,6 +123,7 @@ export const HoverActions = ({
 
   const handlePhyloModalOpen = withAnalytics(
     () =>
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       onPhyloTreeModalOpened({
         taxId: taxonId,
         taxName: taxonName,
@@ -143,6 +144,7 @@ export const HoverActions = ({
   );
 
   const handlePreviousConsensusGenomeClick = () =>
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onPreviousConsensusGenomeClick({
       percentIdentity,
       taxId: taxonId,
@@ -156,7 +158,9 @@ export const HoverActions = ({
         context: {
           blastedFrom: "HoverActions",
         },
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         pipelineVersion,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         sampleId,
         // shouldBlastContigs is only used by the BLAST v0 feature. It will be removed after BLAST v1 is launched
         shouldBlastContigs: ntContigs >= 0,
@@ -197,8 +201,10 @@ export const HoverActions = ({
       taxId: taxonId,
       taxName: taxonName,
       taxCommonName: taxonCommonName,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       taxLevel: taxonLevel,
       alignmentVizUrl,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       taxSpecies: taxonSpecies,
       taxonStatsByCountType,
     });
@@ -216,7 +222,9 @@ export const HoverActions = ({
 
   const downloadContigByUrl = () => {
     location.href = getDownloadContigUrl({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       pipelineVersion,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       sampleId,
       taxId: taxonId,
     });
@@ -231,6 +239,7 @@ export const HoverActions = ({
   // Metadata for each of the hover actions.
   const getHoverActions = () => {
     const hasCoverageViz =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) ||
       currentTab === WORKFLOW_TABS.LONG_READ_MNGS;
 
@@ -283,6 +292,7 @@ export const HoverActions = ({
     let HOVER_ACTIONS_CONSENSUS = null;
     if (consensusGenomeEnabled) {
       if (previousConsensusGenomeRuns) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         HOVER_ACTIONS_CONSENSUS = {
           key: `consensus_genome_${params.taxId}`,
           message: `Consensus Genome`,
@@ -292,6 +302,7 @@ export const HoverActions = ({
           enabled: true,
         };
       } else {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         HOVER_ACTIONS_CONSENSUS = {
           key: `consensus_genome_${params.taxId}`,
           message: "Consensus Genome",
@@ -333,14 +344,21 @@ export const HoverActions = ({
     // Build up the list of hover actions
     let hoverActions = [];
     if (currentTab === WORKFLOW_TABS.LONG_READ_MNGS) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       hoverActions = [HOVER_ACTIONS_VIZ, HOVER_ACTIONS_DOWNLOAD];
     } else {
       hoverActions = [
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         HOVER_ACTIONS_VIZ,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         HOVER_ACTIONS_BLAST,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         { divider: true },
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         HOVER_ACTIONS_PHYLO,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         HOVER_ACTIONS_CONSENSUS,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         HOVER_ACTIONS_DOWNLOAD,
       ];
     }
@@ -354,6 +372,7 @@ export const HoverActions = ({
 
   const getConsensusGenomeError = () => {
     if (
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       !isPipelineFeatureAvailable(CONSENSUS_GENOME_FEATURE, pipelineVersion)
     ) {
       return `Consensus genome pipeline not available for mNGS pipeline versions < ${MINIMUM_VERSIONS[CONSENSUS_GENOME_FEATURE]}`;
@@ -404,6 +423,7 @@ export const HoverActions = ({
           sdsSize="small"
           sdsType="primary"
           sdsIcon={hoverAction.iconName}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           onClick={onClickFunction}
           disabled={!hoverAction.enabled}
           data-testid={`hover-action-${kebabCase(hoverAction.key)}`}

@@ -174,6 +174,7 @@ class DiscoveryFilters extends React.Component<
   };
 
   notifyFilterChangeHandler = (
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     callback: (filteredSampleCount: number) => void = null,
   ) => {
     const { onFilterChange } = this.props;
@@ -236,6 +237,7 @@ class DiscoveryFilters extends React.Component<
       projectIds: discoveryProjectIds,
     };
     const newState = [];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     newState[selectedKey] = selected;
     // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'any[]' is not assignable to para... Remove this comment to see the full error message
     this.setState(newState, this.notifyFilterChangeHandler);
@@ -312,6 +314,7 @@ class DiscoveryFilters extends React.Component<
     const selectedOptions = this.state[KEY_ANNOTATIONS_SELECTED];
     if (isEmpty(selectedOptions)) return;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const tags = selectedOptions.map(option => {
       return (
         <FilterTag
@@ -333,6 +336,7 @@ class DiscoveryFilters extends React.Component<
   renderTaxonFilterTags = () => {
     const selectedTaxa = this.state[KEY_TAXON_SELECTED];
     const thresholdFilterDisabled =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       this.configForWorkflow[this.props.workflow].disableTaxonThresholdFilter;
     if (isEmpty(selectedTaxa)) return;
 
@@ -341,19 +345,20 @@ class DiscoveryFilters extends React.Component<
         {!thresholdFilterDisabled && (
           <div className={cs.descriptor}>Has at least one:</div>
         )}
-        {selectedTaxa.map((selectedTaxon: $TSFixMe) => (
-          <FilterTag
-            className={cs.filterTag}
-            key={`taxon_filter_tag_${selectedTaxon.id}`}
-            text={selectedTaxon.name}
-            onClose={() =>
-              this.handleRemoveTag({
-                selectedKey: KEY_TAXON_SELECTED,
-                valueToRemove: selectedTaxon.id,
-              })
-            }
-          />
-        ))}
+        {selectedTaxa &&
+          selectedTaxa.map((selectedTaxon: $TSFixMe) => (
+            <FilterTag
+              className={cs.filterTag}
+              key={`taxon_filter_tag_${selectedTaxon.id}`}
+              text={selectedTaxon.name}
+              onClose={() =>
+                this.handleRemoveTag({
+                  selectedKey: KEY_TAXON_SELECTED,
+                  valueToRemove: selectedTaxon.id,
+                })
+              }
+            />
+          ))}
       </div>
     );
   };
@@ -376,6 +381,7 @@ class DiscoveryFilters extends React.Component<
     return (
       <div className={cs.tags}>
         <div className={cs.descriptor}>Meets all:</div>
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {selectedThresholds.map((threshold, i) => (
           <ThresholdFilterTag
             className={cs.filterTag}
@@ -433,6 +439,7 @@ class DiscoveryFilters extends React.Component<
       <TaxonThresholdFilter
         disabled={disabled}
         thresholdFilterEnabled={!disableThreshold}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         domain={domain}
         onFilterApply={(taxa: $TSFixMe, thresholds: $TSFixMe) => {
           const validThresholds = thresholds?.filter(
@@ -440,7 +447,9 @@ class DiscoveryFilters extends React.Component<
           );
           this.handleTaxonThresholdFilterChange(taxa, validThresholds);
         }}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         selectedOptions={taxonSelected}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         selectedThresholds={taxonThresholdsSelected}
       />
     );
@@ -488,10 +497,12 @@ class DiscoveryFilters extends React.Component<
       workflow,
     } = this.props;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const hasTaxonThresholdFilterFeature = allowedFeatures.includes(
       TAXON_THRESHOLD_FILTERING_FEATURE,
     );
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const hasAnnotationsFilter = allowedFeatures.includes(
       ANNOTATION_FILTER_FEATURE,
     );
@@ -499,12 +510,15 @@ class DiscoveryFilters extends React.Component<
     // Taxon threshold and annotations filters are not available for some workflows
     const taxonFilterDisabled =
       currentTab === TAB_SAMPLES &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       this.configForWorkflow[workflow].disableTaxonFilter;
     const annotationFilterDisabled =
       currentTab === TAB_SAMPLES &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       this.configForWorkflow[workflow].disableAnnotationFilter;
     const disableTaxonThreshold =
       currentTab === TAB_SAMPLES &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       this.configForWorkflow[workflow].disableTaxonThresholdFilter;
 
     return (
@@ -528,8 +542,10 @@ class DiscoveryFilters extends React.Component<
                 })
               ) : (
                 <TaxonFilter
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                   domain={domain}
                   onChange={this.handleChange.bind(this, KEY_TAXON_SELECTED)}
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                   selectedOptions={taxonSelected}
                   disabled={taxonFilterDisabled}
                 />
@@ -560,9 +576,11 @@ class DiscoveryFilters extends React.Component<
             <div className={cs.filterContainer}>
               <LocationFilter
                 onChange={this.handleChange.bind(this, "locationV2Selected")}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 selected={
                   locationV2 && locationV2.length ? locationV2Selected : null
                 }
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 options={locationV2}
                 label="Location"
               />
@@ -573,8 +591,10 @@ class DiscoveryFilters extends React.Component<
         <div className={cs.filterContainer}>
           <BaseSingleFilter
             label="Timeframe"
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             options={time}
             onChange={this.handleChange.bind(this, "timeSelected")}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             value={time && !!time.length ? timeSelected : null}
           />
           {this.renderTags("time")}
@@ -583,8 +603,10 @@ class DiscoveryFilters extends React.Component<
           <div className={cs.filterContainer}>
             <BaseSingleFilter
               label="Visibility"
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               options={visibility}
               onChange={this.handleChange.bind(this, "visibilitySelected")}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               value={
                 visibility && visibility.length ? visibilitySelected : null
               }
@@ -595,7 +617,9 @@ class DiscoveryFilters extends React.Component<
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "hostSelected")}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selected={host && host.length ? hostSelected : null}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             options={host}
             label="Host"
           />
@@ -604,7 +628,9 @@ class DiscoveryFilters extends React.Component<
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "tissueSelected")}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selected={tissue && tissue.length ? tissueSelected : null}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             options={tissue}
             label="Sample Type"
           />

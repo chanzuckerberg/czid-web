@@ -138,6 +138,7 @@ export default class Heatmap {
     this.data = data;
     this.svgSaver = new SvgSaver();
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.options = Object.assign(
       {
         numberOfLevels: 10,
@@ -967,6 +968,7 @@ export default class Heatmap {
           row[j] = scale(row[j] || this.options.nullValue);
         }
         row.idx = i;
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         rows.push(row);
       }
     }
@@ -980,9 +982,12 @@ export default class Heatmap {
       for (let j = 0; j < this.rowLabels.length; j++) {
         if (!this.rowLabels[j].hidden) {
           if (!columns[i]) {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             columns[i] = [];
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             columns[i].idx = i;
           }
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
           columns[i].push(
             scale(this.data.values[j][i] || this.options.nullValue),
           );
@@ -1007,9 +1012,12 @@ export default class Heatmap {
       for (let j = 0; j < this.rowLabels.length; j++) {
         if (!this.rowLabels[j].hidden && !this.columnLabels[i].pinned) {
           if (!columns[i]) {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             columns[i] = [];
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             columns[i].idx = i;
           }
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
           columns[i].push(
             scale(this.data.values[j][i] || this.options.nullValue),
           );
@@ -1055,7 +1063,9 @@ export default class Heatmap {
     const stack = [];
     while (true) {
       while (root) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         if (root.right) stack.push(root.right);
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         stack.push(root);
         root = root.left;
       }
@@ -1063,6 +1073,7 @@ export default class Heatmap {
       root = stack.pop();
       if (root.right && stack[stack.length - 1] === root.right) {
         stack.pop();
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         stack.push(root);
         root = root.right;
       } else {
@@ -1088,6 +1099,7 @@ export default class Heatmap {
     const stack = [[root, 0]];
     let maxDepth = 0;
     while (stack.length) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2488
       const [node, depth] = stack.pop();
       maxDepth = depth > maxDepth ? depth : maxDepth;
       if (node.left) stack.push([node.left, depth + 1]);
@@ -1104,6 +1116,7 @@ export default class Heatmap {
     let pos = offset;
     while (!done) {
       if (root) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         stack.push(root);
         root = root.left;
       } else {
@@ -1245,11 +1258,13 @@ export default class Heatmap {
     sortedRows.forEach(row =>
       csvRows.push([
         row.label,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         ...(headers.includes("Genus") ? [row.genusName] : []),
       ]),
     );
 
     sortedColumns.forEach(column => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       csvHeaders.push(column.label);
 
       sortedRows.forEach(row => {
@@ -1273,7 +1288,9 @@ export default class Heatmap {
       });
     });
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     csvRows = csvRows.map(row => [sanitizeCSVRow(row).join()]);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return [[sanitizeCSVRow(csvHeaders).join()], csvRows];
   }
 
@@ -2481,6 +2498,7 @@ export default class Heatmap {
         if (node.right) stack.push(node.right);
 
         if (highlighted && node.value && node.value.idx >= 0)
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           toUpdate.push(targets[node.value.idx]);
       }
 
@@ -2495,6 +2513,7 @@ export default class Heatmap {
         this.highlightRowOrColumn(null);
       else {
         // Start at the lowest positioned row or column, and highlight `toUpdate.length` cells
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
         const rowOrColumn = minBy(d => d.pos, toUpdate);
         this.highlightRowOrColumn(rowOrColumn, toUpdate.length);
       }
@@ -2503,9 +2522,11 @@ export default class Heatmap {
     cluster.children(function(d: $TSFixMe) {
       const children = [];
       if (d.left) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         children.push(d.left);
       }
       if (d.right) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         children.push(d.right);
       }
       return children;

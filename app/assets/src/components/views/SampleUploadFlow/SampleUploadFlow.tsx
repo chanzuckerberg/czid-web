@@ -64,21 +64,31 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   state: SampleUploadFlowState = {
     currentStep: UploadStepType.SampleStep,
     // Sample upload information
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     samples: null,
     uploadType: "", // remote or local
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     project: null,
     sampleNamesToFiles: null, // Needed for local samples.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     bedFile: null, // Optional for WGS samples.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     refSeqAccession: null, // Optional for WGS samples.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     refSeqFile: null, // Needed for WGS samples.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     refSeqTaxon: null, // Needed for WGS samples.
     // Metadata upload information
     clearlabs: false,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     guppyBasecallerSetting: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     medakaModel: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     metadata: null, //
     metadataIssues: null,
     pipelineVersions: {} as { [projectId: string]: ProjectPipelineVersions },
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     technology: null,
     stepsEnabled: {
       [UploadStepType.SampleStep]: true,
@@ -87,6 +97,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     },
     hostGenomes: [], // set on metadata upload
     workflows: new Set() as Set<UploadWorkflows>,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     wetlabProtocol: null,
   };
 
@@ -149,21 +160,26 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     issues: SampleUploadFlowState["metadataIssues"];
     newHostGenomes: HostGenome[];
   }) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const updatedHostGenomes = this.props.hostGenomes.concat(newHostGenomes);
 
     // Populate host_genome_id in sample using metadata.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const newSamples: SampleFromApi[] = this.state.samples.map(
       (sample: $TSFixMe) => {
         const metadataRow = find(
           row =>
             get("sample_name", row) === sample.name ||
             get("Sample Name", row) === sample.name,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           metadata.rows,
         );
         const hostGenomeName = HOST_GENOME_SYNONYMS.reduce(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           (match: $TSFixMe, name: $TSFixMe) => metadataRow[name] || match,
           null,
         );
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         const hostGenomeId = find(
           // Lowercase to allow for 'human' to match 'Human'. The same logic
           // is replicated in MetadataHelper.
@@ -176,14 +192,11 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
         // Enforce hipaa compliant host age
         if (hostGenomeName.toLowerCase() === "human") {
           const maxValue = FIELDS_THAT_HAVE_MAX_INPUT["host_age"];
-          // THIS LINT ERROR LOOKS LIKE A BUG.
-          // I (ehoops) am not changing functionality in this PR.
-          // eslint-disable-next-line
-          metadata.rows.map((row: $TSFixMe) => {
+          metadata?.rows?.forEach((row: $TSFixMe) => {
             if ("Host Age" in row) {
               const parsedValue = Number.parseInt(row["Host Age"]);
               const hipaaCompliantVal = min([parsedValue, maxValue + 1]);
-              row["Host Age"] = hipaaCompliantVal.toString();
+              row["Host Age"] = hipaaCompliantVal?.toString();
             }
           });
         }
@@ -198,9 +211,13 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     );
 
     // Remove host_genome from metadata.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     const newMetadata: SampleUploadFlowState["metadata"] = flow(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       set("rows", metadata.rows.map(omit(HOST_GENOME_SYNONYMS))),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       set("headers", without(HOST_GENOME_SYNONYMS, metadata.headers)),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     )(metadata);
 
     this.setState({
@@ -273,6 +290,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
           basespaceOauthRedirectUri={this.props.basespaceOauthRedirectUri}
           admin={this.props.admin}
           biohubS3UploadEnabled={this.props.biohubS3UploadEnabled}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           getPipelineVersionsForExistingProject={(projectId: number) =>
             this.getPipelineVersionsForExistingProject(projectId)
           }

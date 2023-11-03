@@ -25,7 +25,7 @@ export interface UploadSampleStepState {
   basespaceAccessToken: $TSFixMe;
   basespaceSamples: $TSFixMe[];
   basespaceSelectedSampleIds: Set<string>;
-  bedFile: File;
+  bedFile: File | null;
   CLI: $TSFixMe;
   createProjectOpen: boolean;
   currentTab: SampleUploadType;
@@ -33,17 +33,17 @@ export interface UploadSampleStepState {
   localSamples: $TSFixMe[];
   localSelectedSampleIds: Set<string>;
   projects: $TSFixMe[];
-  refSeqFile: File;
-  refSeqAccession: RefSeqAccessionDataType;
+  refSeqFile: File | null;
+  refSeqAccession: RefSeqAccessionDataType | null;
   remoteSamples: $TSFixMe[];
   remoteSelectedSampleIds: Set<string>;
   removedLocalFiles: $TSFixMe[];
   selectedGuppyBasecallerSetting: $TSFixMe;
-  selectedTaxon: TaxonOption;
-  selectedTechnology: SEQUENCING_TECHNOLOGY_OPTIONS;
+  selectedTaxon: TaxonOption | null;
+  selectedTechnology: SEQUENCING_TECHNOLOGY_OPTIONS | null;
   selectedProject: $TSFixMe;
   selectedMedakaModel: string; // TODO: This should be an enum of available models
-  selectedWetlabProtocol: string; // TODO: This should be an enum of available protocols
+  selectedWetlabProtocol: string | null; // TODO: This should be an enum of available protocols
   selectedWorkflows: Set<UploadWorkflows>;
   showNoProjectError: boolean;
   usedClearLabs: boolean;

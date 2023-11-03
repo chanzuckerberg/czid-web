@@ -86,7 +86,9 @@ class PortalDropdown extends React.Component<PortalDropdownProps> {
   handleOutClick = () => {
     if (
       this.isOpen() &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !(this._triggerRef && this._triggerRef.contains(event.target)) &&
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !(this._menuRef && this._menuRef.contains(event.target))
     ) {
       this.close();

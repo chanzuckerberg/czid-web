@@ -13,6 +13,7 @@ import { DRUG_CLASS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const drugClassColumn: ColumnDef<AmrResult, any> = {
   id: "drugClass",
   accessorFn: function drugClassAccessor(row): string {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     return getFormattedCompoundString(row.drugClass);
   },
   sortingFn: sortStringOrFallback,

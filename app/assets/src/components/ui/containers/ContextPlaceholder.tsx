@@ -33,6 +33,7 @@ export default class ContextPlaceholder extends React.PureComponent<
 
     this.state = {
       style: this.getStyle(),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       open: this.props.open,
     };
   }
@@ -50,6 +51,7 @@ export default class ContextPlaceholder extends React.PureComponent<
   }
 
   handleOutClick = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (this.placeholderRef && !this.placeholderRef.contains(event.target)) {
       this.setState({ open: false });
       this.props.onClose && this.props.onClose();
@@ -70,6 +72,7 @@ export default class ContextPlaceholder extends React.PureComponent<
   }
 
   getPlaceholderPosition() {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const contextRect = this.props.context.getBoundingClientRect();
     const placeholderRect = this.placeholderRef.getBoundingClientRect();
     const { horizontalOffset, verticalOffset, position } = this.props;
@@ -81,11 +84,13 @@ export default class ContextPlaceholder extends React.PureComponent<
     let top: string | number = 0;
     let bottom: string | number = 0;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (position.includes("right")) {
       right = Math.round(
         clientWidth -
           (contextRect.right + pageXOffset) +
           contextRect.width / 2 -
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           horizontalOffset,
       );
       // If the placeholder is wider than how far to the right its trigger is positioned,
@@ -95,11 +100,13 @@ export default class ContextPlaceholder extends React.PureComponent<
         right = right + xOffset;
       }
       left = "auto";
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     } else if (position.includes("left")) {
       left = Math.round(
         contextRect.left +
           pageXOffset +
           contextRect.width / 2 +
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           horizontalOffset,
       );
       right = "auto";
@@ -107,24 +114,29 @@ export default class ContextPlaceholder extends React.PureComponent<
       // center
       const xOffset = (contextRect.width - placeholderRect.width) / 2;
       left = Math.round(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         contextRect.left + xOffset + pageXOffset + horizontalOffset,
       );
       right = "auto";
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (position.includes("top")) {
       bottom = Math.round(
         clientHeight -
           (contextRect.top + pageYOffset) -
           contextRect.height / 2 +
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           verticalOffset,
       );
       top = "auto";
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     } else if (position.includes("bottom")) {
       top = Math.round(
         contextRect.bottom +
           pageYOffset -
           contextRect.height / 2 +
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           verticalOffset,
       );
       bottom = "auto";
@@ -132,6 +144,7 @@ export default class ContextPlaceholder extends React.PureComponent<
       // middle
       const yOffset = (contextRect.height + placeholderRect.height) / 2;
       top = Math.round(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         contextRect.bottom + pageYOffset - yOffset + verticalOffset,
       );
       bottom = "auto";

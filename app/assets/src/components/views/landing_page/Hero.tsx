@@ -39,6 +39,7 @@ const Hero = ({ autoAcctCreationEnabled }: HeroProps) => {
         } else {
           setShiftLeft(false);
         }
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         textTarget.textContent = rotatingHeroText[i];
       }, 500);
 

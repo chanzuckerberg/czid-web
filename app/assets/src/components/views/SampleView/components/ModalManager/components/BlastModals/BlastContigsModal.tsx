@@ -57,7 +57,8 @@ export const BlastContigsModal = ({
     number | null
   >(
     blastModalInfo?.showCountTypeTabs
-      ? CountTypeToIndex[blastModalInfo?.availableCountTypeTabsForContigs[0]]
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        CountTypeToIndex[blastModalInfo?.availableCountTypeTabsForContigs[0]]
       : null,
   );
   const [showBlastRedirectionModal, setShowBlastRedirectModal] =
@@ -108,6 +109,7 @@ export const BlastContigsModal = ({
     let blastUrls = [];
     if (sequencesAreTooLong) {
       // SamplesController#taxid_contigs_for_blast will get the middle 7500 base pairs of a sequence if it is longer than 7500 (the NBCI BLAST character limit)
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       blastUrls = map(
         contig =>
           prepareBlastQuery({
@@ -118,6 +120,7 @@ export const BlastContigsModal = ({
       );
     } else {
       blastUrls = [
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         prepareBlastQuery({
           program: blastModalInfo?.selectedBlastType,
           sequences: map(
@@ -177,6 +180,7 @@ export const BlastContigsModal = ({
   const handleContinue = () => {
     const shouldAutoRedirectBlast =
       JSON.parse(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         sessionStorage.getItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY),
       ) || false;
 
@@ -297,8 +301,10 @@ export const BlastContigsModal = ({
 
   const renderCountTypeTabs = () => {
     const shouldDisableNtTab =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !blastModalInfo?.availableCountTypeTabsForContigs.includes(CountTypes.NT);
     const shouldDisableNrTab =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !blastModalInfo?.availableCountTypeTabsForContigs.includes(CountTypes.NR);
     let ntTab = (
       <Tab disabled={shouldDisableNtTab} label={`${CountTypes.NT} hits`}></Tab>

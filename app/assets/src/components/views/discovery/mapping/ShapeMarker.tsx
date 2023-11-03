@@ -49,12 +49,15 @@ class ShapeMarker extends React.Component<ShapeMarkerProps> {
     const computedSize =
       size ||
       clamp(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         minSize,
         maxSize,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         (pointCount / (pointCount + divisorConst)) * sizeMultiple * zoom,
       );
 
     return (
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       <Marker latitude={lat} longitude={lng}>
         {rectangular ? (
           <RectangleMarker

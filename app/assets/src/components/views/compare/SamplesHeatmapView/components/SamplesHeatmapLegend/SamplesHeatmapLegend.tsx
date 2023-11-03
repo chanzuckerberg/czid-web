@@ -16,7 +16,7 @@ export const SamplesHeatmapLegend = ({
   options,
 }: SamplesHeatmapLegendPropsType) => {
   if (loading || !data || !(data[selectedOptions.metric] || []).length) {
-    return;
+    return null;
   }
   const values = data[selectedOptions.metric];
   const scaleIndex = selectedOptions.dataScaleIdx;

@@ -107,17 +107,19 @@ export const groupSamplesByLane = ({
   // where concatenation happens (with local uploads, concatenation happens in the browser).
   if (sampleType === "basespace") {
     const groups = groupBy(sample => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       const name = removeLaneFromName(sample.name);
       const fileType = sample.file_type;
       const bsProjectId = sample.basespace_project_id;
       return `${name}:${fileType}:${bsProjectId}`;
     }, samples);
 
-    const sampleInfo = [];
+    const sampleInfo: object[] = [];
     for (const group in groups) {
       const files = groups[group];
       sampleInfo.push({
         ...files[0], // Most information is identical for all lanes
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         name: removeLaneFromName(files[0].name),
         basespace_dataset_id: files
           .map(file => file.basespace_dataset_id)
@@ -133,7 +135,9 @@ export const groupSamplesByLane = ({
   // Group samples by lanes *and* read pairs, e.g. if a user chooses the files
   // L1_R1, L1_R2, L2_R1, don't group them because we're missing L2_R2.
   const groups = groupBy(sample => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     const sampleID = removeLaneFromName(sample.name);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const readPairs = sample.input_files_attributes.map((f: $TSFixMe) =>
       removeLaneFromName(f.source),
     );
@@ -150,6 +154,7 @@ export const groupSamplesByLane = ({
     const readPairs: File[][] = [[], []]; // [ [list of R1 files], [list of R2 files] ]
     const readPairsConcat = {}; // { R1.fastq: concatenatedR1, R2.fastq: concatenatedR2 ]
     samples.forEach(sample => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       const files = sortBy(file => file.name, Object.values(sample.files));
       if (files.length > 0) readPairs[0].push(files[0]);
       if (files.length === 2) readPairs[1].push(files[1]);
@@ -165,12 +170,14 @@ export const groupSamplesByLane = ({
         const fileName = removeLaneFromName(laneFiles[0].name);
         readPairsConcat[fileName] = new File(laneFiles, fileName, {
           // Make sure we can still rely on timestamps for checking if files change
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           lastModified: maxBy(f => f.lastModified, laneFiles).lastModified,
         });
       }
     }
 
     // Combined attributes = first sample's attributes without lane numbers
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const filesAttributes = samples[0].input_files_attributes.map(
       (file, pairNb) => ({
         ...file,
@@ -183,6 +190,7 @@ export const groupSamplesByLane = ({
     // Generate modified sample object
     const sampleConcat = {
       ...samples[0],
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       name: removeLaneFromName(samples[0].name),
       files: readPairsConcat,
       input_files_attributes: filesAttributes,

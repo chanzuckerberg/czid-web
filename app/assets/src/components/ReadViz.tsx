@@ -154,9 +154,13 @@ function ReadViz({ metrics, name, refInfo, sequence }: ReadVizProps) {
   return (
     <div style={{ border: "1px solid" }}>
       Read Name: {name} <br />
+      {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
       Percentage Matched: {metrics[0]} %, Alignment Length: {metrics[1]}, #
+      {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
       Mismatches: {metrics[2]}, # Gap Openings: {metrics[3]} <br />
+      {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
       E-value: {metrics[8]}, Bit Score: {metrics[9]} <br />
+      {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
       Reference Alignment Range: {metrics[6]} - {metrics[7]} <br />
       <div
         style={{

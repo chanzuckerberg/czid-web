@@ -29,6 +29,7 @@ const ProjectHeader = ({
     const userFound = find({ email }, project.users);
     if (!userFound) {
       const newProject = assign(project, {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2488
         users: [...project.users, { name: username, email }],
       });
       onProjectUpdated && onProjectUpdated({ project: newProject });
@@ -57,6 +58,7 @@ const ProjectHeader = ({
 
     try {
       await saveProjectName(project.id, sanitizedName);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
       onMetadataUpdated();
     } catch (e) {
       error = "There was an error renaming your project.";
@@ -127,8 +129,11 @@ const ProjectHeader = ({
               sdsSize="s"
               sdsType="static"
             />{" "}
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             {project.users.length
-              ? `${project.users.length} member${
+              ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+                `${project.users.length} member${
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                   project.users.length > 1 ? "s" : ""
                 }`
               : "No members"}

@@ -189,6 +189,7 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
         <DiscoveryViewToggle
           currentDisplay={currentDisplay}
           onDisplaySwitch={(display: $TSFixMe) => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
             onDisplaySwitch(display);
             trackEventFromClassComponent(
               globalAnalyticsContext,
@@ -227,6 +228,7 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
 
   handleSortColumn = ({ sortBy, sortDirection }: $TSFixMe) => {
     // Calls onSortColumn callback to fetch sorted data
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     this.props.onSortColumn({ sortBy, sortDirection });
   };
 

@@ -56,6 +56,7 @@ class CollectionModal extends React.Component<
     super(props);
     this.state = {
       appliedMethod: "",
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       backgroundCreationResponse: null,
       backgroundDescription: null,
       backgroundName: "",
@@ -91,8 +92,10 @@ class CollectionModal extends React.Component<
   renderSampleList = () => {
     const { fetchedSamples, selectedSampleIds, maxSamplesShown } = this.props;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const samplesToDisplay = fetchedSamples.slice(0, maxSamplesShown);
     const numSamplesNotDisplayed =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       selectedSampleIds.size - samplesToDisplay.length;
 
     return (
@@ -184,15 +187,18 @@ class CollectionModal extends React.Component<
       backgroundCreationResponse = await createBackground({
         name: backgroundName,
         description: backgroundDescription,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         sampleIds: Array.from(selectedSampleIds),
         massNormalized: appliedMethod === "massNormalized",
       });
     } catch (_) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       backgroundCreationResponse = {
         status: "error",
         message: "Something went wrong.",
       };
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.setState({ backgroundCreationResponse });
   };
 
@@ -200,6 +206,7 @@ class CollectionModal extends React.Component<
     const { selectedSampleIds } = this.props;
     const enableMassNormalizedBackgrounds =
       await getMassNormalizedBackgroundAvailability(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         Array.from(selectedSampleIds),
       );
 
@@ -212,6 +219,7 @@ class CollectionModal extends React.Component<
   fetchSampleValidation = async () => {
     const { selectedSampleIds, workflow } = this.props;
     const { invalidSampleNames } = await validateSampleIds({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       sampleIds: Array.from(selectedSampleIds),
       workflow,
     });
@@ -231,6 +239,7 @@ class CollectionModal extends React.Component<
     const dropdownOptions = BACKGROUND_CORRECTION_METHODS;
     if (enableMassNormalizedBackgrounds) {
       dropdownOptions.massNormalized.disabled = false;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       dropdownOptions.massNormalized.tooltip = null;
     } else {
       dropdownOptions.massNormalized.disabled = true;
@@ -246,6 +255,7 @@ class CollectionModal extends React.Component<
           fluid
           onChange={this.handleNameChange}
           value={this.state.backgroundName}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           className={!isNull(invalidBackgroundName) && "error"}
         />
         {!isNull(invalidBackgroundName) && (
@@ -313,6 +323,7 @@ class CollectionModal extends React.Component<
     const { backgroundCreationResponse } = this.state;
     return (
       <div>
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         {backgroundCreationResponse.status === "ok" ? (
           <Notification className={cs.notification} type="success">
             Your Background Model is being created and will be visible on the
@@ -320,6 +331,7 @@ class CollectionModal extends React.Component<
           </Notification>
         ) : (
           <Notification className={cs.notification} type="error">
+            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
             {backgroundCreationResponse.message}
           </Notification>
         )}

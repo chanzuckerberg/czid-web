@@ -13,6 +13,7 @@ import { HIGH_LEVEL_DRUG_CLASS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const highLevelDrugClassColumn: ColumnDef<AmrResult, any> = {
   id: "highLevelDrugClass",
   accessorFn: function highLevelDrugClassAccessor(row): string {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     return getFormattedCompoundString(row.highLevelDrugClass);
   },
   sortingFn: sortStringOrFallback,

@@ -29,6 +29,7 @@ const CategoryFilter = ({
     options.push({ text: category.name, value: category.name });
 
     const suboptions: $TSFixMe = [];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
     (categoryParentChild[category.name] || []).forEach(
       (subcategory: $TSFixMe) => {
         suboptions.push({

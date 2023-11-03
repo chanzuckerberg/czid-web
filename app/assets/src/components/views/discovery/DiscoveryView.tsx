@@ -41,6 +41,7 @@ import {
   TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
+import { ThresholdForAPI } from "~/components/utils/ThresholdMap";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS,
@@ -344,9 +345,12 @@ class DiscoveryViewCC extends React.Component<
     this.mapPreviewSamples = this.samples;
 
     // hold references to the views to allow resetting the tables
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.projectsView = null;
     this.samplesView = React.createRef();
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.mapPreviewSidebar = null;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.visualizationsView = null;
 
     // preload first pages
@@ -446,12 +450,16 @@ class DiscoveryViewCC extends React.Component<
     const numOfCgSamples = countByWorkflow?.[WorkflowType.CONSENSUS_GENOME];
     const numOfAmrSamples = countByWorkflow?.[WorkflowType.AMR];
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (numOfShortReadMngsSamples > 0) {
       return WorkflowType.SHORT_READ_MNGS;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     } else if (numOfLongReadMngsSamples > 0) {
       return WorkflowType.LONG_READ_MNGS;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     } else if (numOfCgSamples > 0) {
       return WorkflowType.CONSENSUS_GENOME;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     } else if (numOfAmrSamples > 0) {
       return WorkflowType.AMR;
     }
@@ -491,6 +499,7 @@ class DiscoveryViewCC extends React.Component<
     };
   }
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   getConditionsFor = (tab: string, workflow: WorkflowType = null) => {
     return {
       ...this.getConditions(workflow),
@@ -504,12 +513,14 @@ class DiscoveryViewCC extends React.Component<
 
     return {
       projectId,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       snapshotShareId,
       search,
       orderBy,
       orderDir: orderDirection,
       filters: {
         ...this.preparedFilters(),
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         workflow,
       },
     };
@@ -524,6 +535,7 @@ class DiscoveryViewCC extends React.Component<
       DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[WorkflowType.CONSENSUS_GENOME];
 
     // eslint-disable-next-line standard/computed-property-even-spacing
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     stateObject.sampleActiveColumnsByWorkflow[WorkflowType.CONSENSUS_GENOME] =
       defaultCGColumns;
     stateObject["updatedAt"] = new Date();
@@ -533,29 +545,35 @@ class DiscoveryViewCC extends React.Component<
 
   getCurrentTabOrderByKey() {
     const { currentTab, workflow } = this.state;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     return getOrderByKeyFor(currentTab, workflow);
   }
 
   getCurrentTabOrderDirKey() {
     const { currentTab, workflow } = this.state;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     return getOrderDirKeyFor(currentTab, workflow);
   }
 
   getOrderStateFieldsFor = (
     tab: string,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     workflow: WorkflowType = null,
   ): {
     orderBy: string | undefined;
     orderDirection: SortDirectionType | undefined;
   } => {
     const sessionState = loadState(sessionStorage, "DiscoveryViewOptions");
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     const orderBy = sessionState[`${getOrderByKeyFor(tab, workflow)}`];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     const orderDirection = sessionState[`${getOrderDirKeyFor(tab, workflow)}`];
     return { orderBy, orderDirection };
   };
 
   getDataLayerOrderStateFieldsFor = (
     tab: string,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     workflow: WorkflowType = null,
   ) => {
     const { orderBy, orderDirection: orderDir } = this.getOrderStateFieldsFor(
@@ -643,6 +661,7 @@ class DiscoveryViewCC extends React.Component<
     const historyState = pick(stateFields, this.state);
 
     // If the url doesn't have the projectId in it, reset projectId to null in global redux state via redux action creator
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     !urlState.projectId && updateDiscoveryProjectId(urlState.projectId);
 
     // Saving on URL enables sharing current view with other users
@@ -761,7 +780,7 @@ class DiscoveryViewCC extends React.Component<
 
           return result;
         },
-        [],
+        [] as Array<ThresholdForAPI>,
       );
     }
 
@@ -827,21 +846,31 @@ class DiscoveryViewCC extends React.Component<
 
     this.setState(
       {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         filteredProjectCount: null,
         filteredProjectDimensions: [],
         filteredSampleCountsByWorkflow: {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2418
           [WorkflowType.AMR]: null,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2418
           [WorkflowType.CONSENSUS_GENOME]: null,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2418
           [WorkflowType.SHORT_READ_MNGS]: null,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2418
           [WorkflowType.LONG_READ_MNGS]: null,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2418
           [WorkflowType.BENCHMARK]: null,
         },
         filteredSampleDimensions: [],
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         filteredVisualizationCount: null,
         filteredSampleStats: {},
         loadingDimensions: true,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapSidebarProjectCount: null,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapSidebarSampleCount: null,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapSidebarSampleStats: null,
       },
       () => {
@@ -998,6 +1027,7 @@ class DiscoveryViewCC extends React.Component<
       },
       () => {
         refreshStatsCallback &&
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2349
           refreshStatsCallback(filteredSampleStats?.count);
       },
     );
@@ -1015,6 +1045,7 @@ class DiscoveryViewCC extends React.Component<
   refreshSampleData = (workflowTypeToUpdate: WorkflowType) => {
     const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
     const collectionToUpdate = configToUpdate.objectCollection;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     this.setState(prevState => {
       const {
         filteredSampleCountsByWorkflow: prevFilteredSampleCountsByWorkflow,
@@ -1044,6 +1075,7 @@ class DiscoveryViewCC extends React.Component<
     const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
     const collectionToUpdate = configToUpdate.objectCollection;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     this.setState(prevState => {
       const {
         filteredSampleCountsByWorkflow: prevFilteredSampleCountsByWorkflow,
@@ -1137,6 +1169,7 @@ class DiscoveryViewCC extends React.Component<
   refreshSelectedPLQCSamples = () => {
     this.setState(
       {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         plqcPreviewedSamples: null,
       },
       this.refreshPLQCPreviewedSamples,
@@ -1149,6 +1182,7 @@ class DiscoveryViewCC extends React.Component<
     let { workflow } = this.state;
 
     this.setState({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       userDataCounts: null,
     });
 
@@ -1163,6 +1197,7 @@ class DiscoveryViewCC extends React.Component<
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
 
     this.setState(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       {
         workflow,
         workflowEntity: WORKFLOWS[workflow].entity,
@@ -1227,6 +1262,7 @@ class DiscoveryViewCC extends React.Component<
     const { mapSidebarTab, workflow } = this.state;
     const currentTab = this.computeTabs()[currentTabIndex].value;
     this.setState(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       {
         currentTab,
         ...this.getOrderStateFieldsFor(currentTab, workflow),
@@ -1244,6 +1280,7 @@ class DiscoveryViewCC extends React.Component<
 
   handleFilterChange = ({
     selectedFilters,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     onFilterChangeCallback = null,
   }: {
     selectedFilters: SelectedFilters | Record<string, never>;
@@ -1252,6 +1289,7 @@ class DiscoveryViewCC extends React.Component<
     this.setState({ filters: selectedFilters }, () => {
       this.updateBrowsingHistory("replace");
       this.resetDataFromFilterChange({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         refreshFilterStatsCallback: onFilterChangeCallback,
       });
     });
@@ -1318,12 +1356,14 @@ class DiscoveryViewCC extends React.Component<
         let filteredTaxa = [];
 
         if (allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           filteredTaxa = xorBy(
             "id",
             [sdsTaxonFilterData],
             newFilters[selectedKey],
           );
         } else {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           filteredTaxa = xorBy(
             "value",
             [{ value, text }],
@@ -1362,6 +1402,7 @@ class DiscoveryViewCC extends React.Component<
       this.setState(
         {
           filters: newFilters,
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           search: null,
         },
         () => {
@@ -1377,6 +1418,7 @@ class DiscoveryViewCC extends React.Component<
 
     const parsedSearch = (search && search.trim()) || null;
     if (currentSearch !== parsedSearch) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
@@ -1407,6 +1449,7 @@ class DiscoveryViewCC extends React.Component<
         mapSidebarTab:
           mapSidebarTab === "summary" ? mapSidebarTab : TAB_SAMPLES,
         projectId: project.id,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         search: null,
         ...this.getOrderStateFieldsFor(TAB_SAMPLES, workflow),
       },
@@ -1465,8 +1508,10 @@ class DiscoveryViewCC extends React.Component<
     const url = generateUrlToSampleView({
       workflow,
       sampleId,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       workflowRunId,
       snapshotShareId,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       tempSelectedOptions,
     });
 
@@ -1613,9 +1658,12 @@ class DiscoveryViewCC extends React.Component<
       this.mapPreviewProjects = this.projects;
       this.mapPreviewSamples = this.samples;
       this.setState({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapPreviewedLocationId: null,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapSidebarProjectCount: null,
         mapSidebarProjectDimensions: [],
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapSidebarSampleCount: null,
         mapSidebarSampleDimensions: [],
         mapSidebarSampleStats: {},
@@ -1630,7 +1678,9 @@ class DiscoveryViewCC extends React.Component<
       // Previewed location has been filtered out, so exit preview mode.
       this.mapPreviewSamples = this.samples;
       this.setState({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapPreviewedLocationId: null,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapSidebarSampleCount: null,
         mapSidebarSampleDimensions: [],
         mapSidebarSampleStats: {},
@@ -1703,7 +1753,9 @@ class DiscoveryViewCC extends React.Component<
       // Previewed location has been filtered out, so exit preview mode.
       this.mapPreviewProjects = this.projects;
       this.setState({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapPreviewedLocationId: null,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapSidebarProjectCount: null,
         mapSidebarProjectDimensions: [],
       });
@@ -1779,6 +1831,7 @@ class DiscoveryViewCC extends React.Component<
     this.setState({ mapSidebarTab });
 
   handleClearFilters = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.setState({ filters: {}, search: null }, () => {
       this.updateBrowsingHistory("replace");
       this.resetDataFromFilterChange();
@@ -1976,6 +2029,7 @@ class DiscoveryViewCC extends React.Component<
       case TAB_PROJECTS:
         bannerData = {
           searchType: "Project",
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           icon: <ImgProjectsSecondary />,
           listenerLink: {
             text: "Or view Sample results",
@@ -1986,6 +2040,7 @@ class DiscoveryViewCC extends React.Component<
       case TAB_SAMPLES:
         bannerData = {
           searchType: "Sample",
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           icon: <ImgSamplesSecondary />,
           listenerLink: {
             text: "Or view Project results",
@@ -1996,6 +2051,7 @@ class DiscoveryViewCC extends React.Component<
       case TAB_VISUALIZATIONS:
         bannerData = {
           searchType: "Visualization",
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           icon: <ImgVizSecondary />,
           listenerLink: {
             text: "Or view Sample results",
@@ -2030,6 +2086,7 @@ class DiscoveryViewCC extends React.Component<
     return (
       <NoSearchResultsBanner
         searchType={searchType}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         icon={icon}
         listenerLink={listenerLink}
         className={cs.noResultsContainer}
@@ -2096,6 +2153,7 @@ class DiscoveryViewCC extends React.Component<
     }
 
     this.setState(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       {
         currentDisplay,
         ...(isWorkflowRunTab && {
@@ -2133,6 +2191,7 @@ class DiscoveryViewCC extends React.Component<
     return workflows.map(name => {
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
 
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       let workflowCount: number | string = filteredSampleCountsByWorkflow[name];
 
       // This count is set to null when we reset data, so show "-" as loading state.
@@ -2177,6 +2236,7 @@ class DiscoveryViewCC extends React.Component<
         const prevSampleCountByWorkflow =
           prevUserDataCounts?.sampleCountByWorkflow;
         const newWorkflowRunsCount =
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           prevFilteredSampleCountsByWorkflow?.[workflow] +
           numWorkflowRunsCreated;
 
@@ -2296,6 +2356,7 @@ class DiscoveryViewCC extends React.Component<
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                 onSortColumn={this.handleSortColumn}
                 projects={projects}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 ref={projectsView => (this.projectsView = projectsView)}
                 sortBy={orderByForCurrentTab}
                 sortDirection={orderDirection}
@@ -2382,6 +2443,7 @@ class DiscoveryViewCC extends React.Component<
                 onLoadRows={visualizations.handleLoadObjectRows}
                 onSortColumn={this.handleSortColumn}
                 ref={visualizationsView =>
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                   (this.visualizationsView = visualizationsView)
                 }
                 sortBy={orderByForCurrentTab}
@@ -2468,6 +2530,7 @@ class DiscoveryViewCC extends React.Component<
                   : mapSidebarProjectCount,
               }}
               ref={mapPreviewSidebar =>
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
               sampleDimensions={
@@ -2499,6 +2562,7 @@ class DiscoveryViewCC extends React.Component<
                 !userDataCounts.projectCount
               }
               loading={loading}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               onFilterClick={
                 // Re-enable when LocationFilter is supported.
                 domain !== DISCOVERY_DOMAIN_SNAPSHOT &&
@@ -2643,9 +2707,11 @@ interface DiscoveryViewWithContextProps extends DiscoveryViewProps {
 export const DiscoveryView = (props: DiscoveryViewProps) => {
   const { admin, allowedFeatures } = useContext(UserContext);
   const globalContext = useContext(GlobalContext);
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
   const dispatch = globalContext.globalContextDispatch;
 
   const updateDiscoveryProjectId = (projectId: number | null) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     dispatch(createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectId));
   };
 

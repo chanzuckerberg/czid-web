@@ -143,6 +143,7 @@ export default class HostOrganismMessage extends React.Component<HostOrganismMes
 
   render() {
     const uniqHosts = countBy(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       null,
       this.getSelectedHostOrganisms(),
     ) as unknown as CountUniqHosts;

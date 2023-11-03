@@ -37,6 +37,7 @@ class ObjectCollection<T extends MustHaveId> {
   }
 
   createView = (viewProps: ViewProps) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     return new ObjectCollectionView(this, viewProps);
   };
 
@@ -69,6 +70,7 @@ class ObjectCollectionView<T extends MustHaveId> {
       displayName = "",
     },
   ) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this._orderedIds = null;
     this._loading = true;
     this._collection = collection;
@@ -76,6 +78,7 @@ class ObjectCollectionView<T extends MustHaveId> {
     this._activePromises = {};
     this._pageSize = pageSize;
     this._displayName = displayName;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this._onViewChange = onViewChange;
   }
 
@@ -120,6 +123,7 @@ class ObjectCollectionView<T extends MustHaveId> {
     conditions?: ObjectCollectionView<T>["_conditions"];
     loadFirstPage?: boolean;
   } = {}) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this._orderedIds = null;
     this._loading = true;
     this._conditions = conditions;
@@ -133,6 +137,7 @@ class ObjectCollectionView<T extends MustHaveId> {
   loadPage = async (pageNumber: number) => {
     const indices = {
       startIndex: pageNumber,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       stopIndex: this._pageSize * (1 + pageNumber) - 1,
     };
     return this.handleLoadObjectRows(indices);

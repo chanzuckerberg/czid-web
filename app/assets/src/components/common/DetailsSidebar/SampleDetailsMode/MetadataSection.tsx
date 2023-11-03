@@ -40,6 +40,7 @@ const MetadataSection = ({
     if (!savePending && isPrevSavePending) {
       setHasSaved(true);
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setIsPrevSavePending(savePending);
   }, [savePending]);
 
@@ -68,6 +69,7 @@ const MetadataSection = ({
             data-testid={`${kebabCase(title)}-edit`}
             className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
             onClick={e => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
               onEditToggle();
               e.stopPropagation();
             }}
@@ -94,6 +96,7 @@ const MetadataSection = ({
             sdsStyle="square"
             sdsType="primary"
             onClick={() => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
               onEditToggle();
               setHasSaved(false);
             }}

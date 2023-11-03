@@ -18,7 +18,7 @@ function intersection(r1: $TSFixMe, r2: $TSFixMe) {
 
 function rescale(range: $TSFixMe, domain: $TSFixMe) {
   const logScale = d3.scale.log();
-  const parts = [];
+  const parts: { domain: $TSFixMe[]; type: $TSFixMe; extent: $TSFixMe }[] = [];
 
   // Negative log scale
   let d = intersection(domain, [Number.NEGATIVE_INFINITY, -1]);
@@ -63,6 +63,7 @@ function rescale(range: $TSFixMe, domain: $TSFixMe) {
       const ratio = part.extent / rangeExtent;
       const next =
         i === parts.length - 1 ? range[1] : rangeStart + ratio * rangeSize;
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       scales.push(part.type().domain(part.domain).range([rangeStart, next]));
       rangeStart = next;
     }
@@ -73,20 +74,24 @@ function rescale(range: $TSFixMe, domain: $TSFixMe) {
 
 export default function symlog() {
   const scale = compound(d3.scale.linear());
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
   const compoundRange = scale.range;
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
   const compoundDomain = scale.domain;
 
   // @ts-expect-error ts-migrate(2531) FIXME: Object is possibly 'null'.
   scale.domain = function(_: $TSFixMe) {
     return arguments.length
-      ? scale.scales(rescale(scale.range(), _))
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
+        scale.scales(rescale(scale.range(), _))
       : compoundDomain();
   };
 
   // @ts-expect-error ts-migrate(2531) FIXME: Object is possibly 'null'.
   scale.range = function(_: $TSFixMe) {
     return arguments.length
-      ? scale.scales(rescale(_, scale.domain()))
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
+        scale.scales(rescale(_, scale.domain()))
       : compoundRange();
   };
 

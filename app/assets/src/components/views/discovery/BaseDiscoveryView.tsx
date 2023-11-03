@@ -3,11 +3,12 @@ import React from "react";
 import { SortDirectionType } from "react-virtualized";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 // CSS file must be loaded after any elements you might want to override
+import { ColumnProps } from "~/interface/sampleView";
 import cs from "./base_discovery_view.scss";
 import csTableRenderer from "./table_renderers.scss";
 
 interface BaseDiscoveryViewProps {
-  columns?: $TSFixMeUnknown[];
+  columns?: ColumnProps[];
   data?: $TSFixMeUnknown[];
   handleRowClick?: $TSFixMeFunction;
   headerClassName?: string;

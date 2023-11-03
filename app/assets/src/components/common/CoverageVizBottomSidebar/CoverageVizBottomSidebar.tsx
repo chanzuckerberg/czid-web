@@ -62,6 +62,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
 
   state: CoverageVizBottomSidebarsState = {
     currentAccessionSummary: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     histogramTooltipLocation: null,
     histogramTooltipData: null,
   };
@@ -94,6 +95,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
     // Ensure that tooltips are hidden when sidebar closes.
     if (prevProps.visible && !visible) {
       this.setState({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         histogramTooltipLocation: null,
         histogramTooltipData: null,
       });
@@ -142,7 +144,9 @@ export default class CoverageVizBottomSidebar extends React.Component<
       : null;
 
     this.setState({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       currentAccessionSummary: accession,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       currentAccessionData: null,
     });
 
@@ -157,6 +161,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
     if (hoverData && hoverData[0] === 0) {
       this.setState({
         histogramTooltipData: getHistogramTooltipData(
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           currentAccessionData,
           hoverData[1],
         ),
@@ -175,6 +180,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
 
   handleHistogramBarExit = () => {
     this.setState({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       histogramTooltipLocation: null,
       histogramTooltipData: null,
     });
@@ -285,16 +291,19 @@ export default class CoverageVizBottomSidebar extends React.Component<
         trigger={
           <div className={cs.ncbiLinkWrapper}>
             <a
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
               href={`https://www.ncbi.nlm.nih.gov/nuccore/${currentAccessionSummary.id}?report=genbank`}
               target="_blank"
               rel="noopener noreferrer"
               className={cs.ncbiLink}
             >
+              {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531 */}
               {currentAccessionSummary.id} - {currentAccessionSummary.name}
             </a>
           </div>
         }
         inverted
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         content={`${currentAccessionSummary.id} - ${currentAccessionSummary.name}`}
         horizontalOffset={13}
       />
@@ -303,10 +312,12 @@ export default class CoverageVizBottomSidebar extends React.Component<
     return {
       referenceNCBIEntry,
       referenceLength: currentAccessionData.total_length,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
       alignedContigs: currentAccessionSummary.num_contigs,
       maxAlignedLength: currentAccessionData.max_aligned_length,
       coverageDepth: `${currentAccessionData.coverage_depth}x`,
       coverageBreadth: formatPercent(currentAccessionData.coverage_breadth),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
       alignedReads: currentAccessionSummary.num_reads,
       avgMismatchedPercent: formatPercent(
         currentAccessionData.avg_prop_mismatch,
@@ -357,6 +368,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
           <ButtonIcon
             className={cs.iconButton}
             onClick={() =>
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
               onBlastClick({
                 context: {
                   blastedFrom: "CoverageVizBottomSidebar",
@@ -523,6 +535,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
       currentAccessionData.hit_groups,
     );
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     const totalContigs = currentAccessionSummary.num_contigs; // total number of contigs not contig fragments
     const totalReads = sum(readHitGroups.map(hitGroup => hitGroup[1]));
 
@@ -550,6 +563,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
         <div
           className={cs.coverageVizHistogram}
           ref={coverageVizContainer => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             this.coverageVizContainer = coverageVizContainer;
           }}
         />
@@ -559,6 +573,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
             trigger={
               <a
                 className={cx(cs.refAccessionVizLink, cs.genomeViz)}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
                 href={`https://www.ncbi.nlm.nih.gov/nuccore/${currentAccessionSummary.id}?report=genbank`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -566,6 +581,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
                 <div
                   className={cs.genomeVizInner}
                   ref={refAccessionVizContainer => {
+                    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                     this.refAccessionVizContainer = refAccessionVizContainer;
                   }}
                 />
@@ -573,6 +589,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
             }
             inverted
             wide="very"
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
             content={currentAccessionSummary.name}
           />
         </div>

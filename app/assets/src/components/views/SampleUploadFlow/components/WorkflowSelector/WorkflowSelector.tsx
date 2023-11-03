@@ -121,17 +121,26 @@ const WorkflowSelector = ({
           "Run your samples through our metagenomics pipeline. Our pipeline supports Illumina and Nanopore technologies."
         }
         isDisabled={shouldDisableWorkflow(UPLOAD_WORKFLOWS.MNGS.value)}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         onClick={() => onWorkflowToggle(UPLOAD_WORKFLOWS.MNGS.value)}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         isSelected={selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value)}
         sequencingPlatformOptions={
           <MetagenomicsSequencingPlatformOptions
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             currentTab={currentTab}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onChangeGuppyBasecallerSetting={onGuppyBasecallerSettingChange}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onTechnologyToggle={onTechnologyToggle}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onWetlabProtocolChange={onWetlabProtocolChange}
             projectPipelineVersions={projectPipelineVersions}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedTechnology={selectedTechnology}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedWetlabProtocol={selectedWetlabProtocol}
           />
         }
@@ -160,7 +169,9 @@ const WorkflowSelector = ({
           </>
         }
         isDisabled={shouldDisableWorkflow(UPLOAD_WORKFLOWS.AMR.value)}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
         onClick={() => onWorkflowToggle(UPLOAD_WORKFLOWS.AMR.value)}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         isSelected={selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value)}
         sdsIcon={UPLOAD_WORKFLOWS.AMR.icon}
         testKey={UPLOAD_WORKFLOWS.AMR.value}
@@ -168,6 +179,7 @@ const WorkflowSelector = ({
         sequencingPlatformOptions={
           <div className={cs.technologyContent}>
             <PipelineVersionIndicator
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               isPinnedVersion={isPinnedVersion}
               pipelineHelpLink={PIPELINE_HELP_LINKS[WorkflowType.AMR]}
               version={projectPipelineVersions?.[WorkflowType.AMR]}
@@ -182,11 +194,13 @@ const WorkflowSelector = ({
           UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
         )}
         onClick={() =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onWorkflowToggle(
             UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
             SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
           )
         }
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         isSelected={selectedWorkflows.has(
           UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
         )}
@@ -210,22 +224,32 @@ const WorkflowSelector = ({
           UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
         )}
         onClick={() =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onWorkflowToggle(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value)
         }
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         isSelected={selectedWorkflows.has(
           UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
         )}
         sequencingPlatformOptions={
           <ConsensusGenomeSequencingPlatformOptions
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             currentTab={currentTab}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             isS3UploadEnabled={s3UploadEnabled}
             onClearLabsChange={onClearLabsChange}
             onMedakaModelChange={onMedakaModelChange}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedMedakaModel={selectedMedakaModel}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             usedClearLabs={usedClearLabs}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedWetlabProtocol={selectedWetlabProtocol}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onWetlabProtocolChange={onWetlabProtocolChange}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedTechnology={selectedTechnology}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onTechnologyToggle={onTechnologyToggle}
             projectPipelineVersions={projectPipelineVersions}
           />

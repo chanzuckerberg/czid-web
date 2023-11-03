@@ -9,6 +9,7 @@ interface PathogenPreviewProps {
 }
 
 const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
   const tags = Object.keys(tag2Count).sort();
   if (tags.length === 0) {
     return null;
@@ -16,10 +17,12 @@ const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
     const display = (
       <span className="idseq-ui pathogen-preview">
         {tags.map(type => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           if (tag2Count[type] > 0) {
             return (
               <span key={type}>
                 <Label circular color={CATEGORIES[type]["color"]} />
+                {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
                 <span className="pathogen-count">{tag2Count[type]}</span>
               </span>
             );

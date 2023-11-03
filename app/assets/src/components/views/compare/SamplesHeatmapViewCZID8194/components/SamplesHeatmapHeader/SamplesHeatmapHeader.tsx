@@ -82,6 +82,7 @@ export const SamplesHeatmapHeader = ({
   };
 
   const showNewPresetsButton =
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     allowedFeatures.includes("taxon_heatmap_presets") && !!presets.length;
 
   return (
@@ -133,7 +134,9 @@ export const SamplesHeatmapHeader = ({
           </div>
         </ViewHeader.Content>
         <ViewHeader.Controls className={cs.controls}>
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2786 */}
           <SamplesHeatmapLegend
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             loading={loading}
             data={data}
             selectedOptions={selectedOptions}

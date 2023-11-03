@@ -21,6 +21,7 @@ export const ReportViewSelector = ({
               name="table"
               active={view === "table"}
               onClick={() => {
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
                 onViewClick({ view: "table" });
               }}
             >
@@ -37,6 +38,7 @@ export const ReportViewSelector = ({
               name="tree"
               active={view === "tree"}
               onClick={() => {
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
                 onViewClick({ view: "tree" });
               }}
             >

@@ -21,7 +21,7 @@
       "resolveJsonModule": true,
       "skipLibCheck": true,
       "sourceMap": true,
-      "strictNullChecks": false,
+      "strictNullChecks": true,
       "target": "esnext",
       "baseUrl": "src",
       "paths": {

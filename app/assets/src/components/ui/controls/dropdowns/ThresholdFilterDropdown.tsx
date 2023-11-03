@@ -133,10 +133,12 @@ class ThresholdFilterDropdown extends React.Component<
     );
 
     this.setState({ popupIsOpen: false, thresholds: newThresholds });
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     this.props.onApply(newThresholds);
   };
 
   cancelFilterUpdates = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.setState({ popupIsOpen: false, thresholds: this.props.thresholds });
   };
 
@@ -158,20 +160,25 @@ class ThresholdFilterDropdown extends React.Component<
       useDropdownLabelCounter,
     } = this.props;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const labelCounter = thresholds.length > 0 && (
       <DropdownLabel
         className={cs.dropdownLabel}
         disabled={disabled}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         text={String(thresholds.length)}
         disableMarginRight={disableMarginRight}
       />
     );
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const labelText = label && thresholds.length > 0 ? label + ":" : label;
 
     const numSelectedText =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !useDropdownLabelCounter && thresholds.length > 0
-        ? `${String(thresholds.length)} selected`
+        ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+          `${String(thresholds.length)} selected`
         : null;
 
     return (

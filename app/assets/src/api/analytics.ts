@@ -128,6 +128,7 @@ const trackEvent = (
 const useGlobalAnalyticsContext = () => {
   const globalContext = useContext(GlobalContext);
   return {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     projectIds: globalContext?.globalContextState?.discoveryProjectIds,
   };
 };
@@ -145,7 +146,7 @@ export type WithAnalyticsType = (
   handleEvent: (...args: any[]) => void,
   eventName: string,
   eventData?: EventData,
-) => (...args: any[]) => void;
+) => (...args: any[]) => void | null;
 
 export const useWithAnalytics = (): WithAnalyticsType => {
   const globalAnalyticsContext = useGlobalAnalyticsContext();

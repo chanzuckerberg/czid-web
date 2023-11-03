@@ -8,7 +8,9 @@ const countReportRows = (filteredReportData: Taxon[], reportData: Taxon[]) => {
   let total = reportData.length;
   let filtered = filteredReportData.length;
   reportData.forEach(genusRow => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     total += genusRow.species.length;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     filtered += genusRow.filteredSpecies.length;
   });
 
@@ -78,8 +80,11 @@ export const renderReportInfo = (
       taxonWhitelisted,
     } = reportMetadata;
     return compact([
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       truncatedMessage(truncatedReadsCount),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       subsamplingReadsMessage(preSubsamplingCount, postSubsamplingCount),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       whitelistedMessage(taxonWhitelisted),
     ]).reduce((reportInfoMsg, msg) => {
       reportInfoMsg += msg;
@@ -89,7 +94,9 @@ export const renderReportInfo = (
     const { postSubsamplingCount, preSubsamplingCount, taxonWhitelisted } =
       reportMetadata;
     return compact([
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       subsamplingBasesMessage(preSubsamplingCount, postSubsamplingCount),
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       whitelistedMessage(taxonWhitelisted),
     ]).reduce((reportInfoMsg, msg) => {
       reportInfoMsg += msg;

@@ -86,6 +86,7 @@ export const ConsensusGenomePreviousModal = ({
       <div className={cs.title}>Consensus Genome</div>
       <div className={cs.label}>
         Taxon:{" "}
+        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
         <span className={cs.taxonName}>{consensusGenomeData.taxName}</span>
       </div>
       <div className={cs.table}>

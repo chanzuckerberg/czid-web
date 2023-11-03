@@ -41,6 +41,7 @@ class ProjectDescription extends React.Component<
       editing: false,
       changed: false,
       savePending: false,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       errors: null,
     };
   }
@@ -57,6 +58,7 @@ class ProjectDescription extends React.Component<
     this.setState({
       description: value,
       changed: true,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       errors: null,
     });
   };
@@ -71,6 +73,7 @@ class ProjectDescription extends React.Component<
         },
         () => {
           this._save(this.props.project.id, this.state.description);
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onProjectDescriptionSave(this.state.description);
         },
       );

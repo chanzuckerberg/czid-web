@@ -94,6 +94,7 @@ export const ModalManager = ({
                 pipelineVersion={blastData?.pipelineVersion}
                 sampleId={blastData?.sampleId}
                 taxonName={blastData?.taxName}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 taxonLevel={blastData?.taxLevel}
                 taxonId={blastData?.taxId}
               />

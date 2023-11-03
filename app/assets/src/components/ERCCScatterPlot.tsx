@@ -13,7 +13,7 @@ interface ERCCScatterPlotProps {
 }
 
 const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
-  const data = [];
+  const data: { name: string; actual: number; expected: number }[] = [];
   if (props.ercc_comparison) {
     for (const row of props.ercc_comparison) {
       if (row.actual === 0) {
@@ -31,6 +31,7 @@ const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
   }
 
   return (
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     <ScatterPlot
       data={data}
       xKey="expected"

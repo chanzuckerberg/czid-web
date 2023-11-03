@@ -45,6 +45,7 @@ class MultipleNestedDropdown extends React.Component<
     };
 
     this.suboptionsToOptionMap = {};
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     this.props.options.forEach((option: $TSFixMe) => {
       (option.suboptions || []).forEach((suboption: $TSFixMe) => {
         this.suboptionsToOptionMap[suboption.value] = option.value;
@@ -61,6 +62,7 @@ class MultipleNestedDropdown extends React.Component<
       props.selectedOptions !== state.oldSelectedOptions ||
       !ArrayUtils.equal(props.selectedOptions, state.oldSelectedOptions)
     ) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       newState = Object.assign(
         {},
         {
@@ -77,6 +79,7 @@ class MultipleNestedDropdown extends React.Component<
         state.oldSelectedSuboptions,
       )
     ) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       newState = Object.assign(newState || {}, {
         selectedSuboptions: props.selectedSuboptions,
         oldSelectedSuboptions: props.selectedSuboptions,
@@ -104,6 +107,7 @@ class MultipleNestedDropdown extends React.Component<
           const stateUpdate = {
             selectedOptions: [...prevState.selectedOptions, optionValue],
           };
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           const optionClicked = this.props.options.find(
             (option: $TSFixMe) => option.value === optionValue,
           );
@@ -118,6 +122,7 @@ class MultipleNestedDropdown extends React.Component<
           return stateUpdate;
         },
         () => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           this.props.onChange(
             this.state.selectedOptions,
             this.state.selectedSuboptions,
@@ -134,6 +139,7 @@ class MultipleNestedDropdown extends React.Component<
           };
         },
         () =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           this.props.onChange(
             this.state.selectedOptions,
             this.state.selectedSuboptions,
@@ -154,6 +160,7 @@ class MultipleNestedDropdown extends React.Component<
           return { selectedSuboptions: prevState.selectedSuboptions };
         },
         () =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           this.props.onChange(
             this.state.selectedOptions,
             this.state.selectedSuboptions,
@@ -171,6 +178,7 @@ class MultipleNestedDropdown extends React.Component<
           return { selectedSuboptions: prevState.selectedSuboptions };
         },
         () =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           this.props.onChange(
             this.state.selectedOptions,
             this.state.selectedSuboptions,
@@ -185,6 +193,7 @@ class MultipleNestedDropdown extends React.Component<
 
   getNumberOfSelectedOptions() {
     let suboptionCount = 0;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     this.props.options.forEach((option: $TSFixMe) => {
       suboptionCount += (this.state.selectedSuboptions[option.value] || [])
         .length;
@@ -225,6 +234,7 @@ class MultipleNestedDropdown extends React.Component<
 
   renderItems() {
     const items: $TSFixMe = [];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     this.props.options.forEach((option: $TSFixMe) => {
       items.push(
         this.renderItem(

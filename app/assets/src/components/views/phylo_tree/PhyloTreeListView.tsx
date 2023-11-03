@@ -73,7 +73,7 @@ interface PhyloTreeListViewState {
     id: $TSFixMeUnknown;
     parent_taxid: $TSFixMeUnknown;
     tax_id: $TSFixMeUnknown;
-    tax_name: $TSFixMeUnknown;
+    tax_name: string;
     sampleDetailsByNodeName: object;
     nextGeneration: $TSFixMeUnknown;
     log_url: string;
@@ -107,6 +107,7 @@ class PhyloTreeListViewCC extends React.Component<
 
     this.state = {
       adminToolsOpen: false,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       currentTree: null,
       matrixErrorModalOpen: false,
       phyloTrees: props.phyloTrees || [],
@@ -114,12 +115,15 @@ class PhyloTreeListViewCC extends React.Component<
       selectedSampleId: null,
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
         urlParams,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         props.phyloTrees,
       ),
       showLowCoverageWarning: false,
       showOldTreeWarning: true,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       selectedPhyloTreeNgId: props.selectedPhyloTreeNgId,
       sidebarConfig: null,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       sidebarMode: null,
       sidebarVisible: false,
       treeContainer: null,
@@ -129,10 +133,12 @@ class PhyloTreeListViewCC extends React.Component<
 
   getDefaultSelectedTreeId(urlParams: $TSFixMe, phyloTrees = []) {
     const selectedId =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       urlParams.treeId || parseInt(window.sessionStorage.getItem("treeId"));
 
     // If the selected tree doesn't exist, default to the first one.
     if (!selectedId || !find({ id: selectedId }, phyloTrees)) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       return (phyloTrees[0] || {}).id;
     }
 
@@ -214,6 +220,7 @@ class PhyloTreeListViewCC extends React.Component<
       this.setState({
         currentTree,
         selectedPhyloTreeId: newPhyloTreeId,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         selectedPhyloTreeNgId: null,
         showOldTreeWarning: true,
         sidebarVisible: false,
@@ -619,6 +626,7 @@ class PhyloTreeListViewCC extends React.Component<
         <Divider />
         <DetailsSidebar
           visible={this.state.sidebarVisible}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           mode={this.state.sidebarMode}
           onClose={this.closeSidebar}
           params={this.state.sidebarConfig}

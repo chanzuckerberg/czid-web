@@ -45,6 +45,7 @@ const MetadataAgeInput = ({
 }: MetadataAgeInputProps) => {
   const maxAge = FIELDS_THAT_HAVE_MAX_INPUT[metadataType.key];
   const [safeHumanAge, setSafeHumanAge] = useState(value);
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const [hipaaWarning, setHipaaWarning] = useState(value >= maxAge);
   const [ageChanged, setAgeChanged] = useState(false);
 
@@ -64,6 +65,7 @@ const MetadataAgeInput = ({
         onChange(metadataType.key, (maxAge + 1).toString());
       }
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     setHipaaWarning(safeHumanAge >= maxAge);
   }, [safeHumanAge]);
 

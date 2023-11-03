@@ -84,6 +84,7 @@ class PhyloTreeDownloadButton extends React.Component<PhyloTreeDownloadButtonPro
   getPhyloTreeOptions = () => {
     const { tree } = this.props;
     let readyOptions = this.dataOptions.filter(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       (opt: $TSFixMe) => !!tree[opt.value],
     );
 
@@ -161,6 +162,7 @@ class PhyloTreeDownloadButton extends React.Component<PhyloTreeDownloadButtonPro
     } = this.props;
 
     if (showPhyloTreeNgOptions) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const downloadItems = tree.clustermap_svg_url
         ? this.getMatrixItems()
         : this.getPhyloTreeNgItems();

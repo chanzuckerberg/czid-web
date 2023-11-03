@@ -133,6 +133,7 @@ class SamplesHeatmapVis extends React.Component<
       {
         rowLabels: this.extractTaxonLabels(),
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         values: this.props.data[this.props.metric],
         pathogenFlags: this.props.pathogenFlagsData,
         taxonFilterState: taxonFilterState,
@@ -209,6 +210,7 @@ class SamplesHeatmapVis extends React.Component<
     }
     if (this.props.data !== prevProps.data) {
       this.heatmap.updateData({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         values: this.props.data[this.props.metric],
         pathogenFlags: this.props.pathogenFlagsData,
         rowLabels: this.extractTaxonLabels(),
@@ -217,6 +219,7 @@ class SamplesHeatmapVis extends React.Component<
     }
     if (!isEqual(this.props.taxonIds, prevProps.taxonIds)) {
       this.heatmap.updateData({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         values: this.props.data[this.props.metric],
         pathogenFlags: this.props.pathogenFlagsData,
         rowLabels: this.extractTaxonLabels(),
@@ -239,7 +242,9 @@ class SamplesHeatmapVis extends React.Component<
   }
 
   extractSampleLabels() {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return this.props.sampleIds.map(id => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const sampleDetail = this.props.sampleDetails[id];
       const { name, metadata, duplicate } = sampleDetail;
       return {
@@ -247,6 +252,7 @@ class SamplesHeatmapVis extends React.Component<
         metadata: metadata,
         id,
         duplicateLabel: duplicate,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         pinned: this.props.pinnedSampleIds.includes(id),
         filterStateColumn: sampleDetail["index"],
       };
@@ -261,9 +267,13 @@ class SamplesHeatmapVis extends React.Component<
     colorNoValue: $TSFixMe,
   ) => {
     const { taxonFilterState, sampleIds, taxonIds } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleId = sampleIds[node.columnIndex];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const taxonId = taxonIds[node.rowIndex];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleDetails = this.props.sampleDetails[sampleId];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const taxonDetails = this.props.taxonDetails[taxonId];
 
     const filtered =
@@ -272,7 +282,9 @@ class SamplesHeatmapVis extends React.Component<
   };
 
   extractTaxonLabels() {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return this.props.taxonIds.map(id => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const taxon = this.props.taxonDetails[id];
       // parentId is false when taxon level is genus
       // This means there is no sortKey when set to "Taxon Level: Genus"
@@ -332,6 +344,7 @@ class SamplesHeatmapVis extends React.Component<
       }
       case "readSpecificity": {
         stringToReturn = `Read Specificity: ${
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           find({ value: val }, SPECIFICITY_OPTIONS).text
         }`;
         ++numberOfFilters;
@@ -378,14 +391,17 @@ class SamplesHeatmapVis extends React.Component<
     ];
 
     filterListOrder.forEach(name => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       let val = appliedFilters[name];
       if (val === undefined || name === "subcategories") return;
 
       if (name === "categories") {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         val = [...val, ...(appliedFilters.subcategories?.Viruses || [])];
       }
 
       const { string, numberOfFilters } = this.formatFilterString(name, val);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       filtersStrings.push(string);
       nFilters += numberOfFilters;
     });
@@ -475,6 +491,7 @@ class SamplesHeatmapVis extends React.Component<
 
   getSampleTooltipData(node: $TSFixMe) {
     const sampleId = node.id;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleDetails = this.props.sampleDetails[sampleId];
 
     if (sampleDetails["duplicate"]) {
@@ -499,21 +516,28 @@ class SamplesHeatmapVis extends React.Component<
 
   getTooltipData(node: $TSFixMe) {
     const { data, taxonFilterState, sampleIds, taxonIds } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleId = sampleIds[node.columnIndex];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const taxonId = taxonIds[node.rowIndex];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleDetails = this.props.sampleDetails[sampleId];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const taxonDetails = this.props.taxonDetails[taxonId];
 
     const nodeHasData = this.metrics.some(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       (metric: $TSFixMe) => !!data[metric.key][node.rowIndex][node.columnIndex],
     );
 
     const isFiltered =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       taxonFilterState[taxonDetails["index"]][sampleDetails["index"]];
 
     let values = null;
     if (nodeHasData) {
       values = this.metrics.map((metric: $TSFixMe) => {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         const data = this.props.data[metric.key];
         const value = parseFloat(
           (data[node.rowIndex][node.columnIndex] || 0).toFixed(4),
@@ -528,12 +552,15 @@ class SamplesHeatmapVis extends React.Component<
     let subtitle = null;
 
     if (!nodeHasData) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       subtitle = "This taxon was not found in the sample.";
     } else if (!isFiltered) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       subtitle = "This taxon does not satisfy the threshold filters.";
     }
 
     if (subtitle) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       subtitle = (
         <div className={cs.warning}>
           <IconAlertSmall className={cs.warningIcon} type="warning" />
@@ -557,6 +584,7 @@ class SamplesHeatmapVis extends React.Component<
     if (nodeHasData) {
       sections.push({
         name: "Values",
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         data: values,
         disabled: !isFiltered,
       });
@@ -587,6 +615,7 @@ class SamplesHeatmapVis extends React.Component<
 
     // Disable cell click if spacebar is pressed to pan the heatmap.
     if (!this.state.spacePressed) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const sampleId = this.props.sampleIds[cell.columnIndex];
       const url = generateUrlToSampleView({
         sampleId,
@@ -627,10 +656,13 @@ class SamplesHeatmapVis extends React.Component<
     // taxId => taxonDetails and taxName => taxonDetails,
     // so iterate over allTaxonIds to avoid duplicates.
     const { allTaxonIds, taxonDetails } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return allTaxonIds.map(taxId => {
       return {
         value: taxId,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         label: taxonDetails[taxId].name,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         count: taxonDetails[taxId].sampleCount,
       };
     });
@@ -639,6 +671,7 @@ class SamplesHeatmapVis extends React.Component<
   scrollToRow() {
     if (this.props.newTaxon) {
       this.heatmap.scrollToRow(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         this.props.taxonDetails[this.props.newTaxon]?.name,
       );
     }
@@ -683,6 +716,7 @@ class SamplesHeatmapVis extends React.Component<
   }
 
   getAvailableMetadataOptions() {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return this.props.metadataTypes
       .filter(metadata => {
         return metadata.key && metadata.name;
@@ -717,10 +751,13 @@ class SamplesHeatmapVis extends React.Component<
       pinIconHovered,
     } = this.state;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     let pinSampleOptions = this.props.sampleIds.map(id => {
       return {
         id,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         name: this.props.sampleDetails[id].name,
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         pinned: this.props.pinnedSampleIds.includes(id),
       };
     });
@@ -795,6 +832,7 @@ class SamplesHeatmapVis extends React.Component<
           />
         )}
         {addTaxonTrigger && (
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
           <TaxonSelector
             addTaxonTrigger={addTaxonTrigger}
             // @ts-expect-error ts-migrate(2554) FIXME: Expected 0-1 arguments, but got 2.
@@ -802,6 +840,7 @@ class SamplesHeatmapVis extends React.Component<
             availableTaxa={this.getAvailableTaxa()}
             sampleIds={this.props.sampleIds}
             onTaxonSelectionChange={(selected: $TSFixMe) => {
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
               this.props.onAddTaxon(selected);
             }}
             onTaxonSelectionClose={() => {
@@ -812,13 +851,17 @@ class SamplesHeatmapVis extends React.Component<
         )}
         {pinSampleTrigger && (
           <PinSampleSelector
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onApply={this.props.onPinSampleApply}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onCancel={this.props.onPinSampleCancel}
             onClose={() => {
               this.setState({ pinSampleTrigger: null });
             }}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onSelectionChange={this.props.onPinSample}
             options={pinSampleOptions}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedSamples={this.props.pendingPinnedSampleIds}
             selectSampleTrigger={pinSampleTrigger}
           />

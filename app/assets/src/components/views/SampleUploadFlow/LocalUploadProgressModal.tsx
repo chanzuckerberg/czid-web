@@ -124,7 +124,9 @@ const LocalUploadProgressModal = ({
   const acquireScreenLock = async () => {
     try {
       if ("wakeLock" in navigator) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         wakeLock = await navigator.wakeLock.request("screen");
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         wakeLock.addEventListener("release", () => {
           console.warn("Wake lock was released");
         });
@@ -142,17 +144,25 @@ const LocalUploadProgressModal = ({
     const samplesToUpload = addFlagsToSamples({
       adminOptions,
       bedFileName: bedFile?.name,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       clearlabs,
       guppyBasecallerSetting,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       medakaModel,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       samples,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       useStepFunctionPipeline,
       refSeqAccession,
       refSeqFileName: refSeqFile?.name,
       refSeqTaxon,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       skipSampleProcessing,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       technology,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       workflows,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       wetlabProtocol,
     });
 
@@ -198,6 +208,7 @@ const LocalUploadProgressModal = ({
 
   const uploadSamples = async (samples: $TSFixMe) => {
     // Ping a heartbeat periodically to say the browser is actively uploading the samples.
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     heartbeatInterval = await startUploadHeartbeat();
 
     // Upload each sample in serial, but upload each sample's input files and parts in parallel.
@@ -210,10 +221,12 @@ const LocalUploadProgressModal = ({
     // Once the upload is done, release the wake lock
     if (wakeLock !== null) {
       console.warn("Releasing wake lock since upload completed...");
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       await wakeLock.release();
       wakeLock = null;
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     clearInterval(heartbeatInterval);
     trackEvent(
       ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED,
@@ -257,6 +270,7 @@ const LocalUploadProgressModal = ({
       });
     } catch (e) {
       handleSampleUploadError(sample, e);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       clearInterval(heartbeatInterval);
     }
   };
@@ -326,6 +340,7 @@ const LocalUploadProgressModal = ({
     };
 
     fileUpload.on("httpUploadProgress", progress => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const percentage = progress.loaded / progress.total;
       updateSampleFilePercentage({
         sampleName: sample.name,
@@ -432,7 +447,9 @@ const LocalUploadProgressModal = ({
   const getLocalSamplesInProgress = () => {
     return filter(
       sample =>
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         sampleUploadStatuses[sample.name] === undefined ||
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         sampleUploadStatuses[sample.name] === IN_PROGRESS_STATUS,
       samples,
     );
@@ -440,6 +457,7 @@ const LocalUploadProgressModal = ({
 
   const getLocalSamplesFailed = () => {
     return filter(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       sample => sampleUploadStatuses[sample.name] === ERROR_STATUS,
       samples,
     );
@@ -540,7 +558,8 @@ const LocalUploadProgressModal = ({
         <div className={cs.title}>
           {retryingSampleUpload
             ? `Retrying ${numLocalSamplesInProgress} sample upload${pluralSuffix}`
-            : `Uploading ${numLocalSamplesInProgress} sample${pluralSuffix} to ${project.name}`}
+            : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+              `Uploading ${numLocalSamplesInProgress} sample${pluralSuffix} to ${project.name}`}
         </div>
         <div className={cs.subtitle}>
           Please stay on this page until upload completes! Closing your device
@@ -622,6 +641,7 @@ const LocalUploadProgressModal = ({
       if (!isEmpty(getLocalSamplesFailed())) {
         setConfirmationModalOpen(true);
       } else {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         redirectToProject(project.id);
       }
     };
@@ -651,6 +671,7 @@ const LocalUploadProgressModal = ({
           renderRetryAllFailedNotification()}
       </div>
       <UploadProgressModalSampleList
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         samples={samples}
         sampleUploadPercentages={sampleUploadPercentages}
         sampleUploadStatuses={sampleUploadStatuses}
@@ -666,6 +687,7 @@ const LocalUploadProgressModal = ({
             setConfirmationModalOpen(false);
           }}
           onConfirm={() => {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             redirectToProject(project.id);
           }}
           open

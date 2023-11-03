@@ -31,6 +31,7 @@ export const SectionNavigation = ({
 }: SectionNavigationProps) => {
   const data = useFragment(SectionNavigationFragment, pathogenData);
   const sectionContentByHeader = useMemo(
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     () => categorizeItems(data.pathogens),
     [data.pathogens],
   );

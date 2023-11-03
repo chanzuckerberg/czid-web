@@ -20,7 +20,7 @@ interface SampleInfoType {
   onAdminOptionsChanged(opts: Record<string, string>): void;
   onLinkClick(link: string): void;
   project: Project;
-  projectMetadataFields: $TSFixMeUnknown;
+  projectMetadataFields: object | null;
   samples?: SampleFromApi[];
   uploadType: string;
 }

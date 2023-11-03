@@ -74,7 +74,9 @@ const NextcladeModalFooter = ({
 
   const renderInvalidSamplesWarning = () => {
     return renderAccordionNotification({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       message: `${invalidSampleNames.length} consensus genome${
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         invalidSampleNames.length > 1 ? "s" : ""
       } won't be sent to Nextclade`,
       description: ", because they either failed or are still processing:",
@@ -112,6 +114,7 @@ const NextcladeModalFooter = ({
             "No valid consensus genomes to upload to Nextclade because they either failed or are still processing.",
           type: "error",
         });
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       } else if (invalidSampleNames.length > 0) {
         return renderInvalidSamplesWarning();
       }
@@ -119,9 +122,12 @@ const NextcladeModalFooter = ({
   };
 
   const renderNonSARSCov2Warning = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (!loading && samplesNotSentToNextclade.length > 0) {
       return renderAccordionNotification({
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         message: `${samplesNotSentToNextclade.length} consensus genome${
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           samplesNotSentToNextclade.length > 1 ? "s" : ""
         } won't be sent to Nextclade`,
         description:

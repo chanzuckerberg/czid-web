@@ -53,6 +53,7 @@ class ViewOnlyLinkForm extends React.Component<
   constructor(props) {
     super(props);
     this.state = {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       backgroundId: null,
       disableSharingConfirmationModalOpen: false,
       isLoading: false,
@@ -98,6 +99,7 @@ class ViewOnlyLinkForm extends React.Component<
     const { backgrounds } = await getBackgrounds({
       ownedOrPublicBackgroundsOnly: true,
     });
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const backgroundOptions = backgrounds.map(background => ({
       text: background.name,
       value: background.id,
@@ -333,8 +335,8 @@ class ViewOnlyLinkForm extends React.Component<
                   enableMassNormalizedBackgrounds={
                     enableMassNormalizedBackgrounds
                   }
-                  // @ts-expect-error Property 'fluid' does not exist on type
                   fluid
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                   label={null}
                   onChange={backgroundId =>
                     this.handleBackgroundChange(backgroundId)

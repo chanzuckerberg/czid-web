@@ -73,7 +73,9 @@ const ConsensusGenomeSequencingPlatformOptions = ({
           isSelected={selectedTechnology === NANOPORE}
           isS3UploadEnabled={isS3UploadEnabled}
           onClick={() => onTechnologyToggle(CG, NANOPORE)}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           onClearLabsChange={onClearLabsChange}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           onMedakaModelChange={onMedakaModelChange}
           selectedMedakaModel={selectedMedakaModel}
           usedClearLabs={usedClearLabs}

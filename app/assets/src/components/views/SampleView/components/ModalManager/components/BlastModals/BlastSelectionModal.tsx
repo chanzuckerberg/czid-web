@@ -55,8 +55,10 @@ export const BlastSelectionModal = ({
     }
   };
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2366
   const getBlastModalInformation = (): BlastModalInfo => {
     switch (blastOptionSelected) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2678
       case BlastMethods.BlastN: {
         return {
           selectedBlastType: blastOptionSelected,
@@ -64,6 +66,7 @@ export const BlastSelectionModal = ({
           showCountTypeTabs: false,
         };
       }
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2678
       case BlastMethods.BlastX: {
         return {
           selectedBlastType: blastOptionSelected,
@@ -119,6 +122,7 @@ export const BlastSelectionModal = ({
         onMouseEnter={() => setBlastOptionHovered(blastType)}
         onMouseLeave={() => setBlastOptionHovered(null)}
         onClick={() =>
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           blastOptionIsDisabled ? null : setBlastOptionSelected(blastType)
         }
         key={nanoid()}

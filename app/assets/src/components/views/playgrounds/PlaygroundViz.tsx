@@ -54,6 +54,7 @@ export default class PlaygroundViz extends React.Component {
       <div
         className={cs.heatmapContainer}
         ref={container => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           this.vizContainer = container;
         }}
       />

@@ -13,6 +13,7 @@ const TabbedGalleryTab = (props: TabbedGalleryTabProps) => {
     <div onClick={props.onClick} className={`${cs.tabContainer} tabContainer`}>
       <div
         className={cs.tabIndicator}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         style={props.activeClass ? { backgroundColor: "#3867fa" } : null}
       ></div>
       <div className={cs.tabContent}>

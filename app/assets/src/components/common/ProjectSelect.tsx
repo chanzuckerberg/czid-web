@@ -36,6 +36,7 @@ const ProjectSelect = ({
     <span data-testid="select-project">
       <SubtextDropdown
         fluid
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         options={getOptions()}
         onChange={(val: number) => onProjectChange(val)}
         initialSelectedValue={value}

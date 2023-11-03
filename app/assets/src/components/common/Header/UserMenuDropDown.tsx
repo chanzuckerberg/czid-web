@@ -109,6 +109,7 @@ const UserMenuDropDown = ({
       <BareDropdown
         trigger={<div className={cs.userName}>{userName}</div>}
         className={cs.userDropdown}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         items={renderItems(adminUser)}
         direction="left"
       />

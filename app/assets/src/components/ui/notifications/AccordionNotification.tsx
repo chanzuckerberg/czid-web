@@ -27,6 +27,7 @@ export default class AccordionNotification extends React.Component<AccordionNoti
         headerClassName={headerClassName}
         open={open}
         toggleable={toggleable}
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         className={cx(cs.listContainer, cs[type])}
         toggleArrowAlignment="topRight"
       >
@@ -37,6 +38,7 @@ export default class AccordionNotification extends React.Component<AccordionNoti
     return (
       <div className={cx(cs.AccordionNotification, className)}>
         <Notification
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           type={type}
           displayStyle={displayStyle}
           className={cx(cs.notificationContainer, notificationClassName)}

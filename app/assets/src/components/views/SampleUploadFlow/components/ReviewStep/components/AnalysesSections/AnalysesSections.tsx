@@ -75,6 +75,7 @@ const AnalysesSections = ({
         const workflowForPipelineVersion =
           WORKFLOWS_BY_UPLOAD_SELECTIONS[workflow][technologyForUpload];
         const pipelineVersion =
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           pipelineVersions[project.id][workflowForPipelineVersion];
 
         return (
@@ -83,6 +84,7 @@ const AnalysesSections = ({
               {CustomIcon ? (
                 <CustomIcon />
               ) : (
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 <Icon sdsIcon={icon} sdsSize="xl" sdsType="static" />
               )}
             </div>

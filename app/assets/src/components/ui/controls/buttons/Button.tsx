@@ -15,6 +15,7 @@ const Button = ({
   text,
   ...props
 }: ButtonProps) => {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   let content: JSX.Element | string = text;
   if (icon || label) {
     content = (

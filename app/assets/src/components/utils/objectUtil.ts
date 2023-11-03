@@ -10,6 +10,7 @@ const iteratee =
   (baseObj: object) => (result: unknown, value: object, key: string) => {
     if (!isEqual(value, baseObj[key])) {
       const valueIsObject = isObject(value) && isObject(baseObj[key]);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
       result[key] = valueIsObject === true ? diff(value, baseObj[key]) : value;
     }
   };

@@ -20,15 +20,19 @@ export const TaxonLinks = ({
 
     switch (source) {
       case "ncbi":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         url = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxonId}`;
         break;
       case "google":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         url = `http://www.google.com/search?q=${taxonName}`;
         break;
       case "pubmed":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         url = `https://www.ncbi.nlm.nih.gov/pubmed/?term=${taxonName}`;
         break;
       case "wikipedia":
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         url = wikiUrl;
         break;
       default:
@@ -36,6 +40,7 @@ export const TaxonLinks = ({
     }
     return (
       <ExternalLink
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         href={url}
         data-testid={"taxon-link"}
         analyticsEventName="TaxonDetailsMode_external-link_clicked"

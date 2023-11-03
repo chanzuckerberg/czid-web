@@ -52,6 +52,7 @@ interface PipelineTabProps {
 }
 
 export interface MngsPipelineInfo {
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2411
   workflow?: { text: WorkflowLabelType };
   [key: string]: {
     text?: string;
@@ -128,6 +129,7 @@ const PipelineTab = ({
 
   useEffect(() => {
     if (_graphContainer.current && graphWidth === 0) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       setGraphWidth(_graphContainer.current.getBoundingClientRect().width);
     }
   });
@@ -210,6 +212,7 @@ const PipelineTab = ({
       RESULTS_FOLDER_STEP_KEYS;
 
     const totalCount = get(
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       getSequenceType(pipelineRun?.technology),
       pipelineRun,
     );
@@ -226,6 +229,7 @@ const PipelineTab = ({
     // in the pipeline by the compression ratio to return nonunique reads.
     let uniqueReads = null;
     const readDedupKeys = READ_DEDUP_KEYS;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (readDedupKeys.includes(stepKey) && pipelineRun.pipeline_version > "4") {
       // Property order is predictable in JavaScript objects since ES2015
       const stepKeys = Object.keys(pipelineStepDict[stepsKey]);
@@ -236,6 +240,7 @@ const PipelineTab = ({
       readsAfter = previousStep[readsAfterKey];
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2363
     const percentReads = ((readsAfter / totalCount) * 100).toFixed(2);
 
     return (
@@ -252,6 +257,7 @@ const PipelineTab = ({
           <div className={cs.metadataValue}>
             {readsAfter ? readsAfter.toLocaleString() : ""}
             {uniqueReads && (
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
               <div>{` (${uniqueReads.toLocaleString()} unique)`}</div>
             )}
           </div>

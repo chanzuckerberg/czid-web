@@ -147,8 +147,11 @@ export interface MetadataUploadState {
 
 export interface Row {
   [key: string]: string | LocationObject;
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2411
   "Host Genome"?: string;
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2411
   "Host Organism"?: string;
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2411
   "Sample Name"?: string;
 }
 

@@ -67,6 +67,7 @@ export const getNameRenderer = (
     let childrenCount = 0;
 
     if (rowData.taxLevel === TAX_LEVEL_GENUS) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       childrenCount = rowData.filteredSpecies.length;
     }
 
@@ -89,6 +90,7 @@ export const getNameRenderer = (
           <div className={cs.taxonInfo}>
             <span
               className={cx(cs.taxonName, !!cellData || cs.missingName)}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
               onClick={() => onTaxonNameClick({ ...rowData })}
             >
               {cellData || rowData.name}

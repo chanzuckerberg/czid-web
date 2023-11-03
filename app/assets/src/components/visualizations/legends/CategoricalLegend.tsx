@@ -14,6 +14,7 @@ interface CategoricalLegendProps {
 // this.props.data = [ { color: "#aeaeae", label: "Sample Label" } ]
 const CategoricalLegend = ({ data, className }: CategoricalLegendProps) => {
   const renderCategories = () => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return data.map(item => {
       return (
         <div

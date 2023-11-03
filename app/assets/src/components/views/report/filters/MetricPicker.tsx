@@ -13,6 +13,7 @@ interface MetricPickerProps {
 const MetricPicker = ({ value, onChange, options }: MetricPickerProps) => {
   return (
     <Dropdown
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       options={options}
       value={value}
       label="Tree Metric"

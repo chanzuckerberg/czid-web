@@ -24,6 +24,7 @@ export const TaxonHistogram = ({
   const [shouldShowHistogram, setShouldShowHistogram] =
     useState<boolean>(false);
   const [histogramRpmSeries, setHistogramRpmSeries] =
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     useState<number[][]>(null);
 
   const histogramContainerRef: LegacyRef<HTMLDivElement> = useRef(null);
@@ -34,6 +35,7 @@ export const TaxonHistogram = ({
       return Promise.resolve();
     }
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     histogram = null;
 
     try {
@@ -59,6 +61,7 @@ export const TaxonHistogram = ({
 
   useEffect(() => {
     setIsLoading(true);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setHistogramRpmSeries(null);
     setShouldShowHistogram(false);
     loadBackgroundInfo();

@@ -51,6 +51,7 @@ const PinSampleSelector = ({
       anchorEl={selectSampleTrigger}
       disableCloseOnSelect
       multiple
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       onChange={onSelectionChange}
       onClose={handleClose}
       open

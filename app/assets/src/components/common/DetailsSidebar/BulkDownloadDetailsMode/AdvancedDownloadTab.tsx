@@ -75,7 +75,9 @@ const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
   const cloudCommandContainer = (
     <div
       className={cx(cs.cloudCommandContainer, hasCLICommand() && cs.enabled)}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       onClick={handleCLICommandClick}
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       onKeyDown={handleCLICommandClick}
       onMouseLeave={resetTooltip}
       role="button"

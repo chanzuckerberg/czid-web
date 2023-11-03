@@ -119,7 +119,9 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     validObjectIds: new Set(),
     invalidSampleNames: [],
     validationError: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     backgroundOptions: null,
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     metricsOptions: null,
     allObjectsUploadedByCurrentUser: false,
     loading: true,
@@ -152,6 +154,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
     const bulkDownloadTypesRequest = getBulkDownloadTypes(workflow);
     const validationInfoRequest = this.fetchValidationInfo({
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       ids: Array.from(selectedIds),
       workflow,
     });
@@ -183,12 +186,16 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       if (type.fields) {
         type.fields.forEach(field => {
           if (field.default_value) {
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             newSelectedFields = set(
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
               [type.type, field.type],
               field.default_value.value,
               newSelectedFields,
             );
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             newSelectedFieldsDisplay = set(
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
               [type.type, field.type],
               field.default_value.display_name,
               newSelectedFieldsDisplay,
@@ -231,6 +238,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   async fetchBackgrounds() {
     const { backgrounds } = await getBackgrounds();
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return backgrounds.map((background: $TSFixMe) => ({
       text: background.name,
       value: background.id,
@@ -241,6 +249,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   async fetchBackgroundAvailability() {
     const { selectedIds } = this.props;
     const { massNormalizedBackgroundsAvailable } =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
 
     this.setState({
@@ -252,8 +261,10 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     const { selectedIds, workflowEntity } = this.props;
 
     return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-      ? workflowRunsCreatedByCurrentUser(Array.from(selectedIds))
-      : samplesUploadedByCurrentUser(Array.from(selectedIds));
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+        workflowRunsCreatedByCurrentUser(Array.from(selectedIds))
+      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+        samplesUploadedByCurrentUser(Array.from(selectedIds));
   }
 
   checkUserIsCollaboratorOnAllSamples = () => {
@@ -261,7 +272,8 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
     return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
       ? false
-      : userIsCollaboratorOnAllSamples(Array.from(selectedIds));
+      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+        userIsCollaboratorOnAllSamples(Array.from(selectedIds));
   };
 
   // *** Callbacks ***
@@ -302,9 +314,11 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     const presets = [];
 
     if (metricList) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("thresholdFilters");
     }
     if (sortMetric) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("metric");
     }
 
@@ -429,14 +443,21 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     const objectDownloaded = WORKFLOW_OBJECT_LABELS[workflow];
     const sampleHostGenomes = selectedObjects
       .filter(obj => validObjectIds.has(obj.id))
-      .reduce((result, obj) => {
-        result.push({
-          id: obj.id,
-          name: obj.sample.name,
-          hostGenome: obj.host,
-        });
-        return result;
-      }, []);
+      .reduce(
+        (result, obj) => {
+          result.push({
+            id: obj.id,
+            name: obj.sample.name,
+            hostGenome: obj.host,
+          });
+          return result;
+        },
+        [] as {
+          id: number;
+          name: string;
+          hostGenome: string;
+        }[],
+      );
 
     return (
       <Modal narrow open={open} tall onClose={onClose}>
@@ -450,6 +471,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
           </div>
           <div className={cs.options}>
             <BulkDownloadModalOptions
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               downloadTypes={bulkDownloadTypes}
               validObjectIds={validObjectIds}
               backgroundOptions={backgroundOptions}
@@ -457,6 +479,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
               allObjectsUploadedByCurrentUser={allObjectsUploadedByCurrentUser}
               onFieldSelect={this.handleFieldSelect}
               selectedFields={selectedFields}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               selectedDownloadTypeName={selectedDownloadTypeName}
               onSelect={this.handleSelectDownloadType}
               handleHeatmapLink={this.handleHeatmapLink}
@@ -468,15 +491,20 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
           <div className={cs.footer}>
             <BulkDownloadModalFooter
               loading={!bulkDownloadTypes}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               downloadTypes={bulkDownloadTypes}
               validObjectIds={validObjectIds}
               invalidSampleNames={invalidSampleNames}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               validationError={validationError}
               waitingForCreate={waitingForCreate}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               createStatus={createStatus}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               createError={createError}
               sampleHostGenomes={sampleHostGenomes}
               selectedFields={selectedFields}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               selectedDownloadTypeName={selectedDownloadTypeName}
               onDownloadRequest={(sampleIds: number[]) =>
                 this.handleDownloadRequest(sampleIds)

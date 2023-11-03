@@ -74,6 +74,7 @@ export default class HeatmapCreationModal extends React.Component<
   async fetchBackgrounds() {
     const { backgrounds } = await getBackgrounds();
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const backgroundOptions = backgrounds.map((background: $TSFixMe) => ({
       text: background.name,
       value: background.id,
@@ -88,6 +89,7 @@ export default class HeatmapCreationModal extends React.Component<
   async fetchBackgroundAvailability() {
     const { selectedIds } = this.props;
     const { massNormalizedBackgroundsAvailable } =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
 
     this.setState({
@@ -147,8 +149,8 @@ export default class HeatmapCreationModal extends React.Component<
       <BackgroundModelFilter
         allBackgrounds={backgroundOptions}
         enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
-        // @ts-expect-error Property 'fluid' does not exist on type
         fluid
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         label={null}
         onChange={this.onBackgroundChange}
         rounded={false}
@@ -214,6 +216,7 @@ export default class HeatmapCreationModal extends React.Component<
 
     return (
       <ThresholdFilterDropdown
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         label={null}
         onApply={this.onThresholdFilterApply}
         options={{
@@ -291,21 +294,27 @@ export default class HeatmapCreationModal extends React.Component<
 
     const presets = [];
     if (selectedBackground !== 26) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("background");
     }
     if (selectedCategories.length > 0) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("categories");
     }
     if (!isNull(selectedSpecificity)) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("readSpecificity");
     }
     if (Object.keys(selectedSubcategories).length > 0) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("subcategories");
     }
     if (!isNull(selectedTaxonLevel)) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("species");
     }
     if (selectedThresholdFilters.length > 0) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("thresholdFilters");
     }
 
@@ -314,6 +323,7 @@ export default class HeatmapCreationModal extends React.Component<
       categories: selectedCategories,
       subcategories: JSON.stringify(selectedSubcategories),
       readSpecificity: selectedSpecificity,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       sampleIds: Array.from(selectedIds),
       species: selectedTaxonLevel,
       thresholdFilters: JSON.stringify(selectedThresholdFilters),
@@ -355,4 +365,5 @@ HeatmapCreationModal.defaultProps = {
   continueInNewTab: false,
 };
 
+// @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
 HeatmapCreationModal.contextType = UserContext;

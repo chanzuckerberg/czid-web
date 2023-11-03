@@ -66,7 +66,9 @@ export default class GenomeViz {
     for (let i = 0; i < this.data.length; i++) {
       const series = flatten(this.data[i]);
       const minMax = extent(series);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       mins.push(minMax[0]);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       maxs.push(minMax[1]);
     }
     return [min(mins), max(maxs)];

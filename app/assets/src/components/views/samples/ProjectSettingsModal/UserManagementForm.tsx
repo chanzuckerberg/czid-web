@@ -55,6 +55,7 @@ const UserManagementForm = ({
           authenticity_token: csrf,
         })
         .then(() => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onUserAdded(userNameToAdd, email);
           setName("");
           setEmail("");
@@ -128,6 +129,7 @@ const UserManagementForm = ({
           </div>
         )}
         <div className={cs.userList}>
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           {users.map(user => {
             return (
               <div className={cs.userEntry} key={user.email}>

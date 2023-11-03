@@ -81,6 +81,7 @@ class NextcladeReferenceTreeOptions extends React.Component<NextcladeReferenceTr
                     cs.localFilePicker,
                     !filePickerTitle && cs.short,
                   )}
+                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                   title={filePickerTitle}
                   accept=".json"
                   onChange={this.onDrop}

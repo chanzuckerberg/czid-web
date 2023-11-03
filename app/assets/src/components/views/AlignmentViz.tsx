@@ -21,7 +21,7 @@ interface AlignmentVizProps {
 }
 
 interface AlignmentVizState {
-  alignmentData: $TSFixMeUnknown[] | { error: string };
+  alignmentData: object[] | { error: string };
   pipelineRun: { pipeline_version: string } | null;
   loading: boolean;
 }
@@ -39,11 +39,17 @@ class AlignmentViz extends React.Component<
   taxName: string;
   constructor(props: AlignmentVizProps) {
     super(props);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.sampleId = props.sampleId;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.alignmentQuery = props.alignmentQuery;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.taxId = props.taxId;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.taxLevel = props.taxLevel;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.taxName = props.taxName;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.pipelineVersion = props.pipelineVersion;
     this.readsPerPage = props.readsPerPage || 20;
     this.state = {

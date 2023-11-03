@@ -62,10 +62,12 @@ const filterFlags = ({ row, flags }: $TSFixMe) => {
   if (isEmpty(flags)) return true;
   // check if any of the selected filter flags are found in the row's flags
   let rowFlags = [];
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   if (row.taxLevel === "genus") rowFlags = Object.keys(row.pathogens || {});
   else if (row.taxLevel === "species") rowFlags = row.pathogenFlags || [];
 
   return flags.reduce((result, flag) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     return result || rowFlags.includes(flag);
   }, false);
 };
@@ -173,6 +175,7 @@ export const setDisplayName = ({
   const useScientific = nameType === "Scientific name";
   reportData.forEach(genus => {
     genus.displayName = useScientific ? genus.name : genus.common_name;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     genus.species.forEach(species => {
       species.displayName = useScientific ? species.name : species.common_name;
     });
@@ -228,6 +231,7 @@ export const filterReportData = ({
       flags,
     });
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     genusRow.filteredSpecies = genusRow.species.filter((speciesRow: $TSFixMe) =>
       applyFilters({
         row: speciesRow,

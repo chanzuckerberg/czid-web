@@ -38,6 +38,7 @@ interface SampleUploadFlowHeaderProps {
 class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps> {
   static contextType = GlobalContext;
   isStepEnabled = (step: UploadStepType) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return this.props.stepsEnabled[step];
   };
 
@@ -49,6 +50,7 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
 
   render() {
     const { currentStep } = this.props;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
     const { title } = find(opt => currentStep === opt.step, MENU_OPTIONS);
 
     return (
@@ -76,7 +78,9 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
               )}
               {currentStep === UploadStepType.ReviewStep && (
                 <div className={cs.subtitle}>
+                  {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
                   Uploading {this.props.samples.length} samples to{" "}
+                  {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
                   {this.props.project.name}
                 </div>
               )}

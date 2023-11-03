@@ -69,6 +69,7 @@ export const ToggleVisibleColumnsDropdown = ({
     // Convert visibleColumns to a list of SDSFormattedDropdownOptions to pass to the DropdownMenu
     const dropdownValue = [];
     [...visibleColumns].slice(1).forEach((column: Column<any, unknown>) => {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       dropdownValue.push(formatDropdownOption(column));
     });
     setDropdownValue(dropdownValue);
@@ -161,6 +162,7 @@ export const ToggleVisibleColumnsDropdown = ({
                 {
                   <ToggleAllButton
                     dropdownOptions={dropdownOptions}
+                    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                     dropdownValue={dropdownValue}
                     section={params.group as ColumnSection}
                     setPendingOptions={handleApply}

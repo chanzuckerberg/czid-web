@@ -44,8 +44,11 @@ class LiveSearchBox extends React.Component<
     this.state = {
       isLoading: false,
       results: [],
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       value: this.props.initialValue,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       selectedResult: null,
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       lastSearchedTerm: null,
     };
 
@@ -115,9 +118,11 @@ class LiveSearchBox extends React.Component<
 
     if (!value) return;
 
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.setState({ isLoading: true, selectedResult: null });
 
     const timerId = this.lastestTimerId;
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     const results = await onSearchTriggered(value);
 
     if (timerId === this.lastestTimerId) {
@@ -135,6 +140,7 @@ class LiveSearchBox extends React.Component<
     onSearchChange && onSearchChange(value);
     // check minimum requirements for value
     const parsedValue = value.trim();
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     if (parsedValue.length >= minChars) {
       if (this.lastestTimerId) {
         clearTimeout(this.lastestTimerId);

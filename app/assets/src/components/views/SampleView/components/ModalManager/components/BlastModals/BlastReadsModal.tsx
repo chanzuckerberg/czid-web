@@ -54,7 +54,8 @@ export const BlastReadsModal = ({
     number | null
   >(
     blastModalInfo?.showCountTypeTabs
-      ? CountTypeToIndex[blastModalInfo?.availableCountTypeTabsForReads[0]]
+      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+        CountTypeToIndex[blastModalInfo?.availableCountTypeTabsForReads[0]]
       : null,
   );
   const currentCountType =
@@ -96,6 +97,7 @@ export const BlastReadsModal = ({
   const handleContinue = () => {
     const shouldAutoRedirectBlast =
       JSON.parse(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         sessionStorage.getItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY),
       ) || false;
 
@@ -175,8 +177,10 @@ export const BlastReadsModal = ({
 
   const renderCountTypeTabs = () => {
     const shouldDisableNtTab =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !blastModalInfo?.availableCountTypeTabsForReads.includes(CountTypes.NT);
     const shouldDisableNrTab =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       !blastModalInfo?.availableCountTypeTabsForReads.includes(CountTypes.NR);
     let ntTab = (
       <Tab disabled={shouldDisableNtTab} label={`${CountTypes.NT} hits`}></Tab>

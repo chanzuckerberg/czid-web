@@ -74,6 +74,7 @@ const AnnotationMenu = ({
 
   return (
     <>
+      {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322 */}
       <AnnotationLabel type={currentLabelType} onClick={handleClick} />
       <Menu
         anchorEl={anchorEl}

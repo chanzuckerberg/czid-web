@@ -31,6 +31,7 @@ const BarChartToggle = ({
               <MenuItem
                 className={cs.menuItem}
                 active={currentDisplay === display}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
                 onClick={() => onDisplaySwitch(display)}
                 key={`item-${display}`}
               >

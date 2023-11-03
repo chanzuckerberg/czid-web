@@ -581,6 +581,7 @@ const getSamplesReadStats = async (sampleIds: $TSFixMe) => {
       fetchBins.push([]);
       binIndex += 1;
     }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     fetchBins[binIndex].push(sampleId);
   });
 

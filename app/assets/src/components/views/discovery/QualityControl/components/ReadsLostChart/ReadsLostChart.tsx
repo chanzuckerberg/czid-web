@@ -83,9 +83,13 @@ export const ReadsLostChart = ({
       samplesReadsStatsData,
     );
     const chartColors = legendColors.map(({ color }) => color);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setReadsLostData(_readsLostData);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setReadsLostLegendColors(legendColors);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setReadsLostCategories(categories);
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setReadsLostChartColors(chartColors);
   }, []);
 
@@ -119,7 +123,9 @@ export const ReadsLostChart = ({
     const categories = samplesWithInitialReads.reduce((accum, sampleId) => {
       samplesReadsStats[sampleId].steps.forEach((step, index) => {
         step.name = HUMAN_READABLE_STEP_NAMES[step.name] || step.name;
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         if (!accum.includes(step.name)) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           accum.splice(index, 0, step.name);
         }
       });
@@ -127,6 +133,7 @@ export const ReadsLostChart = ({
     }, []);
 
     if (categories.length > 0) {
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       categories.push(READS_REMAINING);
     }
 
@@ -154,6 +161,7 @@ export const ReadsLostChart = ({
       // account for every category
       categories.forEach(category => {
         if (!dataRow[category]) {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           dataRow[category] = 0;
         }
       });
@@ -180,6 +188,7 @@ export const ReadsLostChart = ({
   };
 
   const handleSingleBarStackEnter = (stepName, readsLost) => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     const stepLegend = readsLostLegendColors.find(
       legendData => legendData.label === stepName,
     );
@@ -207,14 +216,17 @@ export const ReadsLostChart = ({
   };
 
   const handleEmptyBarSpaceEnter = readsLostData => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     const readsRemainingLegend = readsLostLegendColors.find(
       legendData => legendData.label === READS_REMAINING,
     );
-    const readsLostSummary = [];
+    const readsLostSummary: JSX.Element[][] = [];
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     readsLostCategories.forEach(category => {
       if (category === READS_REMAINING) {
         return;
       }
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
       const categoryLegend = readsLostLegendColors.find(
         legendData => legendData.label === category,
       );
@@ -277,6 +289,7 @@ export const ReadsLostChart = ({
   };
 
   const handleSampleLabelClick = sampleName => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleId = validSamples.find(sample => sample.name === sampleName).id;
 
     if (sampleId === sidebarParams.sampleId && sidebarVisible === true) {
@@ -349,14 +362,18 @@ export const ReadsLostChart = ({
               link={SHARED_SAMPLE_TABLE_COLUMNS.readsLost.link}
             />
           </div>
+          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339 */}
           {readsLostCategories?.length > 0 ? (
             <React.Fragment>
               <CategoricalLegend
                 className={cs.legend}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 data={readsLostLegendColors}
               />
               <HorizontalStackedBarChart
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 data={readsLostData}
+                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
                 keys={readsLostCategories}
                 options={options}
                 events={events}

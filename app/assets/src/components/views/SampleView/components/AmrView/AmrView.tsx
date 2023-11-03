@@ -85,6 +85,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     const generateReportWithAppliedFiltersDownloadLink = () => {
       const numOfActiveAmrFilters = countActiveFilters(activeFilterSelections);
       if (numOfActiveAmrFilters === 0) {
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         amrReportTableDownloadWithAppliedFiltersLinkVar(null);
       } else {
         const [csvHeaders, csvRows] = computeAmrReportTableValuesForCSV({
@@ -92,6 +93,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
           activeFilters: activeFilterSelections,
         });
 
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         const link = createCSVObjectURL(csvHeaders, csvRows);
         amrReportTableDownloadWithAppliedFiltersLinkVar(link);
       }
@@ -156,6 +158,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
           visible={Boolean(detailsSidebarGeneName)}
           mode="geneDetails"
           onClose={() => setDetailsSidebarGeneName(null)}
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           params={{ geneName: detailsSidebarGeneName }}
         />
       </>

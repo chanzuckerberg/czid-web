@@ -61,7 +61,9 @@ const IlluminaSequencingPlatformOption = ({
           <div className={cs.item}>
             <div className={cs.subheader}>Wetlab Protocol:</div>
             <WetlabSelector
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               selectedWetlabProtocol={selectedWetlabProtocol}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               onWetlabProtocolChange={onWetlabProtocolChange}
               technology={SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA}
             />

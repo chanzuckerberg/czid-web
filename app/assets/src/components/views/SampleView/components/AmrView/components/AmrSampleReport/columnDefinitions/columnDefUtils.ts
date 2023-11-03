@@ -22,6 +22,7 @@ export const isAllColumnsVisible = (
 ): boolean => {
   const columnIds = columns?.map(column => column?.id);
   return columnIds?.every(columnId => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     return isColumnVisible(columnId, table);
   });
 };
@@ -70,6 +71,7 @@ export const handleSectionOpenToggled = (
     // Section toggles do not affect the first column in the section
     if (!sectionWasOpen || idx === 0) {
       column?.toggleVisibility(true);
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       updatedVisibleColumnIds.push(columnId);
     }
     // if the section was open, collapse it by hiding all but the first column.
