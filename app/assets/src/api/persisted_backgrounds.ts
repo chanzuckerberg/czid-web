@@ -4,7 +4,7 @@ export const getPersistedBackgrounds = () => get("/persisted_backgrounds.json");
 
 export const getPersistedBackground = (
   projectId: number,
-): Promise<{ background_id: number }> =>
+): Promise<{ background_id: number | null }> =>
   get(`/persisted_backgrounds/${projectId}.json`);
 
 interface BackgroundParams {

@@ -169,8 +169,9 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   const [backgrounds, setBackgrounds] = useState<Background[]>([]);
   const [ownedBackgrounds, setOwnedBackgrounds] = useState<Background[]>([]);
   const [otherBackgrounds, setOtherBackgrounds] = useState<Background[]>([]);
-  const [hasPersistedBackground, setHasPersistedBackground] =
-    useState<boolean>(false);
+  const [hasPersistedBackground, setHasPersistedBackground] = useState<
+    boolean | null
+  >(null);
   const [sample, setSample] = useState<Sample | null>(null);
   const [project, setProject] = useState<NumberId | null>(null);
   const [projectSamples, setProjectSamples] = useState<
@@ -415,7 +416,11 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
               background: persistedBackgroundFetched,
             },
           });
-          setHasPersistedBackground(true);
+          if (persistedBackgroundFetched) {
+            setHasPersistedBackground(true);
+          } else {
+            setHasPersistedBackground(false);
+          }
         })
         .catch((error: object) => {
           setHasPersistedBackground(false);
@@ -423,9 +428,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
         });
     };
     if (project?.id && !ignoreProjectBackground && !hasPersistedBackground) {
-      fetchPersistedBackground({ projectId: project.id }).catch(error => {
-        console.error(error);
-      });
+      fetchPersistedBackground({ projectId: project.id });
     }
   }, [project?.id, ignoreProjectBackground, hasPersistedBackground]);
 
@@ -559,9 +562,10 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
 
   const persistNewBackgroundModelSelection = useCallback(
     async ({ newBackgroundId }: { newBackgroundId: number | null }) => {
-      const persistBackgroundApi = !hasPersistedBackground
-        ? createPersistedBackground
-        : updatePersistedBackground;
+      const persistBackgroundApi =
+        hasPersistedBackground === null
+          ? createPersistedBackground
+          : updatePersistedBackground;
       project?.id &&
         (await persistBackgroundApi({
           projectId: project?.id,
