@@ -631,7 +631,17 @@ class PipelineRun < ApplicationRecord
     #  "NR": [573,570,543,91347,1236,1224,-650,2, "Bacteria"]}
     output = {}
     if ct2taxid
-      ct2taxid.each { |count_type, taxid| output[count_type] = taxon_lineage_map[taxid.to_i] }
+      ct2taxid.each do |count_type, taxid|
+        lineage = taxon_lineage_map[taxid.to_i]
+        if lineage.nil? && taxid.to_i > 0
+          LogUtil.log_error(
+            "No lineage found for taxid #{taxid} when loading contigs.",
+            exception: TaxonLineage::LineageNotFoundError.new(taxid),
+            lineage_version: alignment_config.lineage_version
+          )
+        end
+        output[count_type] = lineage
+      end
     end
     output
   end
@@ -742,8 +752,8 @@ class PipelineRun < ApplicationRecord
     contig_array = []
     taxid_list = []
     contig2taxid.values.each { |entry| taxid_list += entry.values }
-    taxon_lineage_map = {}
-    TaxonLineage.where(taxid: taxid_list.uniq).order(:id).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
+
+    taxon_lineage_map = lineage_map_by_taxid(taxid_list)
 
     # A lambda allows us to access variables in the enclosing scope, such as contig2taxid.
     get_contig_hash = lambda do |header, sequence|
@@ -2156,6 +2166,13 @@ class PipelineRun < ApplicationRecord
     elsif technology == TECHNOLOGY_INPUT[:nanopore]
       SfnSingleStagePipelineDataService.call(id, technology)
     end
+  end
+
+  def lineage_map_by_taxid(taxid_list)
+    taxon_lineage_map = {}
+    lineage_version = alignment_config.lineage_version
+    TaxonLineage.versioned_lineages(taxid_list.uniq, lineage_version).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
+    return taxon_lineage_map
   end
 
   private

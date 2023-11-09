@@ -54,6 +54,21 @@ MALFORMED_AMR_COUNTS = [
   },
 ].freeze # properly handled amr count for problematic results
 
+# Constants for testing loading contigs into db
+CONTIG2TAXID = {
+  "NODE_1438_length_226_cov_1.660819" => { "NT" => "38289" }, "NODE_2_length_2504_cov_2.191915" => { "NT" => "485" },
+}.freeze
+
+CONTIGS = ">NODE_1438_length_226_cov_1.660819
+GTTATTCACTTATGGA
+>NODE_2_length_2504_cov_2.191915
+CTGTTACACGATTCAAC".freeze
+
+CONTIG_STATS = {
+  "NODE_1438_length_226_cov_1.660819": 4,
+  "NODE_2_length_2504_cov_2.191915": 92,
+}.freeze
+
 describe PipelineRun, type: :model do
   let(:fake_output_prefix) { "s3://fake-output-prefix" }
   let(:fake_sfn_name) { "fake_sfn_name" }
@@ -95,6 +110,8 @@ describe PipelineRun, type: :model do
   end
   let(:fake_wdl_version) { "999".freeze }
   let(:fake_dag_version) { "9.999".freeze }
+
+  create_users
 
   before do
     @mock_aws_clients = {
@@ -569,10 +586,9 @@ describe PipelineRun, type: :model do
     end
 
     before do
-      joe = create(:joe)
-      project = create(:project, users: [joe], name: "Test Project")
-      @sample_one = create(:sample, project: project, user: joe)
-      @sample_two = create(:sample, project: project, user: joe)
+      project = create(:project, users: [@joe], name: "Test Project")
+      @sample_one = create(:sample, project: project, user: @joe)
+      @sample_two = create(:sample, project: project, user: @joe)
       @pipeline_run_one = create(:pipeline_run, sample: @sample_one)
       @pipeline_run_two = create(:pipeline_run, sample: @sample_two, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore])
     end
@@ -750,6 +766,63 @@ describe PipelineRun, type: :model do
         @pipeline_running.update_single_stage_run_status
         expect(@pipeline_running.job_status).to eq(PipelineRun::STATUS_CHECKED)
       end
+    end
+  end
+
+  describe "#get_lineage_json" do
+    before do
+      project = create(:project)
+      sample1 = create(:sample, project: project,
+                                user: @joe,
+                                name: "sample")
+      @alignment_config = create(:alignment_config, lineage_version: "2022-01-02")
+      @pr = create(:pipeline_run, sample: sample1, alignment_config: @alignment_config)
+    end
+
+    it "logs an error if no lineage is found for the taxid" do
+      taxid = 38_289
+      taxon_lineage_map = {
+        1 => "this is a stringified taxon lineage entry",
+      }
+      c2taxid = { "NT" => taxid.to_s }
+      expect(LogUtil).to receive(:log_error).with(
+        "No lineage found for taxid #{taxid} when loading contigs.",
+        exception: TaxonLineage::LineageNotFoundError.new(taxid),
+        lineage_version: @alignment_config.lineage_version
+      )
+      @pr.get_lineage_json(c2taxid, taxon_lineage_map)
+    end
+  end
+
+  describe '#db_load_contigs' do
+    before do
+      project = create(:project)
+      sample1 = create(:sample, project: project,
+                                user: @joe,
+                                name: "sample")
+      @lineage = create(:taxon_lineage, taxid: 38_289, superkingdom_taxid: 2, kingdom_taxid: -650, phylum_taxid: 201_174, class_taxid: 1760, order_taxid: 85_007, family_taxid: 1653, genus_taxid: 1716, species_taxid: 38_289, version_start: "2022-01-02", version_end: "2022-01-02")
+      @alignment_config = create(:alignment_config, lineage_version: "2022-01-02")
+      @pr = create(:pipeline_run, sample: sample1, alignment_config: @alignment_config)
+
+      # stub file downloads and I/O and load contigs
+      allow(PipelineRun).to receive(:download_file_with_retries).with(@pr.s3_file_for("contigs"), PipelineRun::LOCAL_JSON_PATH, 3).and_return("/tmp/results_json/contig_stats.json")
+      allow(File).to receive(:read).with("/tmp/results_json/contig_stats.json").and_return(JSON.generate(CONTIG_STATS))
+      allow(PipelineRun).to receive(:download_file_with_retries).with("#{@pr.assembly_s3_path}/#{PipelineRun::ASSEMBLED_CONTIGS_NAME}", PipelineRun::LOCAL_JSON_PATH, 3).and_return("/tmp/results_json/contigs.fasta")
+      allow(File).to receive(:open).with("/tmp/results_json/contigs.fasta", "r").and_yield(StringIO.new(CONTIGS))
+      @pr.db_load_contigs(CONTIG2TAXID)
+    end
+
+    it "correctly loads lineage information into contigs" do
+      contig1 = @pr.contigs.first
+      expect(contig1.species_taxid_nt).to eq(@lineage.species_taxid)
+      expect(contig1.genus_taxid_nt).to eq(@lineage.genus_taxid)
+      expect(JSON.parse(contig1.lineage_json)["NT"]).to eq(@lineage.to_a)
+    end
+
+    it "correctly loads contigs for taxa missing a lineage" do
+      expect(@pr.contigs.count).to eq(2)
+      expect(@pr.contigs[1].species_taxid_nt).to be_nil
+      expect(JSON.parse(@pr.contigs[1].lineage_json)["NT"]).to be_nil
     end
   end
 end

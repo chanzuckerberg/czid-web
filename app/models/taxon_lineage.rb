@@ -77,6 +77,12 @@ class TaxonLineage < ApplicationRecord
     nil => "uncategorized",
   }.freeze
 
+  class LineageNotFoundError < StandardError
+    def initialize(taxid)
+      super("Taxon lineage not found for taxid #{taxid}")
+    end
+  end
+
   def tax_level
     TaxonCount::LEVEL_2_NAME.keys.sort.each do |level_int|
       level_str = TaxonCount::LEVEL_2_NAME[level_int]
