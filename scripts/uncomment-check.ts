@@ -50,11 +50,14 @@ commander
     if (!commander.hidecommands) {
       console.log(`Processing ${nProcessing} of ${totalFiles}`);
     }
+    // sed has different syntax on mac and linux (github actions run on linux)
+    const commandPrefix = process.platform === 'darwin' ? `sed -i '' '` : `sed -i '`;
+
     // if one or more of the matches in a file have a replace string
     // then seperate the matches into seperate commands
     if (matchesPerFile[file].some(match => match.replace)) {
       matchesPerFile[file].forEach(match => {
-          const commandString = `sed -i '' '${match.lineNumber}s/.*/${match.replace}/' ${file}`;
+          const commandString = `${commandPrefix}${match.lineNumber}s/.*/${match.replace}/' ${file}`;
           if (!commander.dryrun) {
             child_process.execSync(commandString);
           } else if (!commander.hidecommands) {
@@ -64,12 +67,10 @@ commander
       nProcessing += 1;
       return;
     }
-
-
     // otherwise, just run one command for the file
     let commandString = matchesPerFile[file].reduce((memo, match) => {
       return memo + generateCommand(match);
-    }, `sed -i '' '`);
+    }, commandPrefix);
   
     commandString += `' ${file}`;
     if (!commander.dryrun) {

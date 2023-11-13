@@ -187,6 +187,9 @@ jobs:
       run: exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')
     - name: TypeScript Checks
       run: npx tsc -p ./app/assets/tsconfig.json --noemit
+      # checks for hidden TS errors on  @ts-expect-error escaped lines
+    - name: TypeScript behind ts-expect-errors
+      run: bin/ts-peek.sh
 
   python:
     name: Python

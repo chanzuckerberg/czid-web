@@ -15,10 +15,12 @@ else
     git restore .
     git clean -f
     echo "Congrats! No errors found. ✅"
+    exit 0
   else
     echo "Restoring // @ts-expect-error comments..."
     git restore .
     git clean -f
-    echo "TSC errors found. Please fix them before committing. ❌"
+    echo "TSC errors found 👀. Please fix them before committing. ❌"
+    exit 1
   fi
 fi
