@@ -116,7 +116,6 @@ const LiveSearchPopBox = ({
   const renderSearchBox = () => (
     <div onFocus={handleFocus} onBlur={handleBlur}>
       <Input
-        fluid
         className={cx(
           cs.searchInput,
           rectangular && cs.rectangular,

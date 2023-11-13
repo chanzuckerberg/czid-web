@@ -200,9 +200,15 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
       </div>
     );
     return currentDisplay === "table" ? (
-      renderContent()
+      <>
+        {renderContent()}
+        {this.renderFilteredCount()}
+      </>
     ) : (
-      <NarrowContainer>{renderContent()}</NarrowContainer>
+      <NarrowContainer>
+        {renderContent()}
+        {this.renderFilteredCount()}
+      </NarrowContainer>
     );
   };
 
@@ -260,7 +266,6 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
     return (
       <div className={cs.container}>
         {this.renderDisplaySwitcher()}
-        {this.renderFilteredCount()}
         {currentDisplay === "table" ? (
           <BaseDiscoveryView
             columns={this.columns}

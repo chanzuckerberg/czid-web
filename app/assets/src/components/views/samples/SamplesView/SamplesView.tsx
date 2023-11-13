@@ -1108,11 +1108,18 @@ const SamplesView = forwardRef(function SamplesView(
   return (
     <div className={cs.container}>
       {currentDisplay === "table" || currentDisplay === "plqc" ? (
-        !snapshotShareId && renderToolbar()
+        !snapshotShareId && (
+          <>
+            {renderToolbar()}
+            {renderFilteredCount()}
+          </>
+        )
       ) : (
-        <NarrowContainer>{renderToolbar()}</NarrowContainer>
+        <NarrowContainer>
+          {renderToolbar()}
+          {renderFilteredCount()}
+        </NarrowContainer>
       )}
-      {renderFilteredCount()}
       {renderDisplay()}
       {phyloCreationModalOpen && (
         <PhyloTreeCreationModal
