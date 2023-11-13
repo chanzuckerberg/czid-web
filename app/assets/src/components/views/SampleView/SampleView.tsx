@@ -79,6 +79,11 @@ import {
   PipelineRun,
   Taxon,
 } from "~/interface/shared";
+import { initialAmrContext } from "./components/AmrView/amrContext/initialState";
+import {
+  AmrContext,
+  amrContextReducer,
+} from "./components/AmrView/amrContext/reducer";
 import { DetailsSidebarSwitcher } from "./components/DetailsSidebarSwitcher";
 import { ModalManager } from "./components/ModalManager";
 import { BlastModalInfo } from "./components/ModalManager/components/BlastModals/constants";
@@ -1142,69 +1147,76 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       background => selectedOptions?.background === background.id,
     ) || null;
 
+  const [amrContextState, amrContextDispatch] = useReducer(
+    amrContextReducer,
+    initialAmrContext,
+  );
+
   return (
     <>
       <NarrowContainer className={cs.sampleViewContainer}>
-        <SampleViewHeader
-          backgroundId={
-            isNaN(Number(selectedOptions?.background))
-              ? null
-              : selectedOptions?.background
-          }
-          currentRun={currentRun}
-          currentTab={currentTab}
-          getDownloadReportTableWithAppliedFiltersLink={
-            getDownloadReportTableWithAppliedFiltersLink
-          }
-          hasAppliedFilters={hasAppliedFilters(currentTab, selectedOptions)}
-          onDetailsClick={toggleSampleDetailsSidebar}
-          onPipelineVersionChange={handlePipelineVersionSelect}
-          project={project}
-          projectSamples={projectSamples}
-          reportMetadata={reportMetadata}
-          sample={sample}
-          snapshotShareId={snapshotShareId}
-          view={view}
-          onDeleteRunSuccess={handleDeleteCurrentRun}
-        />
-        <TabSwitcher
-          currentTab={currentTab}
-          handleTabChange={setCurrentTab}
-          reportMetadata={reportMetadata}
-          sample={sample}
-        />
-        <ReportPanel
-          amrDeprecatedData={amrDeprecatedData}
-          backgrounds={backgrounds}
-          currentTab={currentTab}
-          currentRun={currentRun}
-          clearAllFilters={clearAllFilters}
-          enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
-          filteredReportData={filteredReportData}
-          handleAnnotationUpdate={fetchSampleReportData}
-          handleBlastClick={handleBlastClick}
-          handleConsensusGenomeClick={handleConsensusGenomeClick}
-          handleCoverageVizClick={handleCoverageVizClick}
-          handlePreviousConsensusGenomeClick={
-            handlePreviousConsensusGenomeClick
-          }
-          handleOptionChanged={handleDeliberateOptionChanged}
-          handleTaxonClick={handleTaxonClick}
-          handleViewClick={handleViewClick}
-          handleWorkflowRunSelect={handleChangeWorkflowRun}
-          refreshDataFromOptionsChange={refreshDataFromOptionsChange}
-          lineageData={lineageData}
-          loadingReport={loadingReport}
-          ownedBackgrounds={ownedBackgrounds}
-          otherBackgrounds={otherBackgrounds}
-          project={project}
-          reportData={reportData}
-          reportMetadata={reportMetadata}
-          sample={sample}
-          selectedOptions={selectedOptions}
-          snapshotShareId={snapshotShareId}
-          view={view}
-        />
+        <AmrContext.Provider value={{ amrContextState, amrContextDispatch }}>
+          <SampleViewHeader
+            backgroundId={
+              isNaN(Number(selectedOptions?.background))
+                ? null
+                : selectedOptions?.background
+            }
+            currentRun={currentRun}
+            currentTab={currentTab}
+            getDownloadReportTableWithAppliedFiltersLink={
+              getDownloadReportTableWithAppliedFiltersLink
+            }
+            hasAppliedFilters={hasAppliedFilters(currentTab, selectedOptions)}
+            onDetailsClick={toggleSampleDetailsSidebar}
+            onPipelineVersionChange={handlePipelineVersionSelect}
+            project={project}
+            projectSamples={projectSamples}
+            reportMetadata={reportMetadata}
+            sample={sample}
+            snapshotShareId={snapshotShareId}
+            view={view}
+            onDeleteRunSuccess={handleDeleteCurrentRun}
+          />
+          <TabSwitcher
+            currentTab={currentTab}
+            handleTabChange={setCurrentTab}
+            reportMetadata={reportMetadata}
+            sample={sample}
+          />
+          <ReportPanel
+            amrDeprecatedData={amrDeprecatedData}
+            backgrounds={backgrounds}
+            currentTab={currentTab}
+            currentRun={currentRun}
+            clearAllFilters={clearAllFilters}
+            enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+            filteredReportData={filteredReportData}
+            handleAnnotationUpdate={fetchSampleReportData}
+            handleBlastClick={handleBlastClick}
+            handleConsensusGenomeClick={handleConsensusGenomeClick}
+            handleCoverageVizClick={handleCoverageVizClick}
+            handlePreviousConsensusGenomeClick={
+              handlePreviousConsensusGenomeClick
+            }
+            handleOptionChanged={handleDeliberateOptionChanged}
+            handleTaxonClick={handleTaxonClick}
+            handleViewClick={handleViewClick}
+            handleWorkflowRunSelect={handleChangeWorkflowRun}
+            refreshDataFromOptionsChange={refreshDataFromOptionsChange}
+            lineageData={lineageData}
+            loadingReport={loadingReport}
+            ownedBackgrounds={ownedBackgrounds}
+            otherBackgrounds={otherBackgrounds}
+            project={project}
+            reportData={reportData}
+            reportMetadata={reportMetadata}
+            sample={sample}
+            selectedOptions={selectedOptions}
+            snapshotShareId={snapshotShareId}
+            view={view}
+          />
+        </AmrContext.Provider>
       </NarrowContainer>
       {shouldShowCoverageViz && pipelineRun?.pipeline_version && sample && (
         <CoverageVizBottomSidebar

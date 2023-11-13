@@ -1,6 +1,4 @@
-import { Button } from "@czi-sds/components";
-import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
+import { Button, Icon } from "@czi-sds/components";
 import { ColumnDef, Table } from "@tanstack/react-table";
 import React from "react";
 import { generateHeaderWidthStyles } from "~/components/ui/Table/tableUtils";
@@ -44,9 +42,9 @@ export const getContigsColumnGroup = (
             isAllCaps={false}
           >
             {isSectionOpen ? (
-              <KeyboardDoubleArrowLeftIcon fontSize="inherit" />
+              <Icon sdsIcon="chevronLeft2" sdsSize="xs" sdsType="static" />
             ) : (
-              <KeyboardDoubleArrowRightIcon fontSize="inherit" />
+              <Icon sdsIcon="chevronRight2" sdsSize="xs" sdsType="static" />
             )}
             <span>Contigs</span>
           </Button>

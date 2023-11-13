@@ -34,8 +34,13 @@ import {
   TAXON_GENERAL_FIELDS,
 } from "~/components/views/SampleView/utils";
 import { ThresholdFilterData } from "~/interface/dropdown";
-import { AmrFilterSelections, FilterSelections } from "~/interface/sampleView";
+import { FilterSelections } from "~/interface/sampleView";
 import { Entries } from "~/interface/shared";
+import {
+  FiltersType,
+  FilterType,
+  TypeFilterType,
+} from "../views/SampleView/components/AmrView/components/AmrFiltersContainer/types";
 import { logError } from "./logUtil";
 import { IdMap } from "./objectUtil";
 
@@ -264,7 +269,7 @@ export const computeAmrReportTableValuesForCSV = ({
   activeFilters,
   displayedRows,
 }: {
-  activeFilters: AmrFilterSelections;
+  activeFilters: FiltersType | null;
   displayedRows: IdMap<AmrResult>;
 }) => {
   const csvRows = [];
@@ -283,44 +288,39 @@ export const computeAmrReportTableValuesForCSV = ({
 
 // The active filters row is added to the end of the CSV which describes the filters that were applied to the report
 // e.g. 2 Filters Applied: | Thresholds: | rPM (reads per million) >= 1 | Number of Contigs >= 1
-const generateCSVRowForActiveFilters = (activeFilters: AmrFilterSelections) => {
-  const numberOfFilters = countActiveFilters(activeFilters);
+const generateCSVRowForActiveFilters = (activeFilters: FiltersType | null) => {
+  const numberOfFilters = activeFilters ? countActiveFilters(activeFilters) : 0;
   const filterStatement = `# ${numberOfFilters} Filter${
-    numberOfFilters > 1 ? "s" : ""
+    numberOfFilters === 1 ? "" : "s"
   } Applied:`;
   const filterRow = [filterStatement];
 
-  const entries = Object.entries(activeFilters) as Entries<AmrFilterSelections>;
-  for (const [filterType, filters] of entries) {
-    if (filterType === "thresholdFilters") {
-      const thresholdFilters = filters.reduce(
-        (result: string[], threshold: ThresholdFilterData) => {
-          result.push(
+  if (!activeFilters) return [sanitizeCSVRow(filterRow)?.join()];
+  const values = Object.values(activeFilters);
+  const thresholdFilters: string[] = [];
+  let drugClassFilters = "";
+  values.forEach((value: FilterType) => {
+    if (value.type === TypeFilterType.THRESHOLD) {
+      if (!value.params.thresholdFilters) return;
+      value.params.thresholdFilters.forEach(
+        (threshold: ThresholdFilterData) => {
+          thresholdFilters.push(
             `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
           );
-          return result;
         },
-        [],
       );
-
-      if (!isEmpty(thresholdFilters)) {
-        filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
-      }
+    } else if (value.type === TypeFilterType.MULTIPLE) {
+      if (!value.params.multiSelected) return;
+      drugClassFilters = value.params.multiSelected.join();
     }
+  });
 
-    if (filterType === "drugClassFilters") {
-      const drugClassFilters = filters.reduce(
-        (result: string[], drugClass: string) => {
-          result.push(drugClass);
-          return result;
-        },
-        [],
-      );
+  if (!isEmpty(thresholdFilters)) {
+    filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
+  }
 
-      if (!isEmpty(drugClassFilters)) {
-        filterRow.push(`Drug Classes:, ${drugClassFilters.join()}`);
-      }
-    }
+  if (drugClassFilters) {
+    filterRow.push(`Drug Classes:, ${drugClassFilters}`);
   }
 
   // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
@@ -355,7 +355,7 @@ export const computeMngsReportTableValuesForCSV = (
       let val = JSON.stringify(getOr("-", column, datum));
       val = val === "null" ? '"-"' : val;
 
-      // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
+      // If value contains a comma, add double quotes around it to preserve the comma and prevent the creation of a new column.
       genusRow.push(val.includes(",") ? `"${val}"` : val);
     });
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
@@ -368,7 +368,7 @@ export const computeMngsReportTableValuesForCSV = (
           let val = JSON.stringify(getOr("-", column, speciesTaxon));
           val = val === "null" ? '"-"' : val;
 
-          // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
+          // If value contains a comma, add double quotes around it to preserve the comma and prevent the creation of a new column.
           speciesRow.push(val.includes(",") ? `"${val}"` : val);
         });
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532

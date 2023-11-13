@@ -20,7 +20,11 @@ export const getGeneInfoColumnGroup = (
           colSpan={header.colSpan}
           style={generateHeaderWidthStyles(header)}
         >
-          {!!nRows && <span className={cs.rowCount}>{`${nRows} Rows`}</span>}
+          {!!nRows && (
+            <span className={cs.rowCount}>{`${nRows} ${
+              nRows === 1 ? "Row" : "Rows"
+            }`}</span>
+          )}
         </th>
       );
     },

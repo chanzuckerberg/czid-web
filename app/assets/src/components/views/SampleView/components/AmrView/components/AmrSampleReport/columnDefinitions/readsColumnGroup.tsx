@@ -42,9 +42,9 @@ export const getReadsColumnGroup = (
             isAllCaps={false}
           >
             {isSectionOpen ? (
-              <Icon sdsIcon="chevronLeft2" sdsSize="s" sdsType="static" />
+              <Icon sdsIcon="chevronLeft2" sdsSize="xs" sdsType="static" />
             ) : (
-              <Icon sdsIcon="chevronRight2" sdsSize="s" sdsType="static" />
+              <Icon sdsIcon="chevronRight2" sdsSize="xs" sdsType="static" />
             )}
             <span>Reads</span>
           </Button>

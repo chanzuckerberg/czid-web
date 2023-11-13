@@ -1,15 +1,14 @@
-import { useReactiveVar } from "@apollo/client";
 import { Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import { kebabCase } from "lodash/fp";
-import React from "react";
+import React, { useContext } from "react";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import { useTrackEvent } from "~/api/analytics";
-import { amrReportTableDownloadWithAppliedFiltersLinkVar } from "~/cache/initialCache";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
 import { logDownloadOption } from "~/components/views/report/utils/download";
+import { AmrContext } from "~/components/views/SampleView/components/AmrView/amrContext/reducer";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import cs from "./amr_download_dropdown.scss";
 import {
@@ -32,9 +31,9 @@ export const AmrDownloadDropdown = ({
   sample,
 }: AmrDownloadDropdownProps) => {
   const trackEvent = useTrackEvent();
-  const amrReportTableDownloadWithAppliedFiltersLink = useReactiveVar(
-    amrReportTableDownloadWithAppliedFiltersLinkVar,
-  );
+  const { amrContextState } = useContext(AmrContext);
+  const reportTableDownloadWithAppliedFiltersLink =
+    amrContextState?.reportTableDownloadWithAppliedFiltersLink;
   if (!readyToDownload) return null;
 
   const downloadCSV = () => {
@@ -48,7 +47,7 @@ export const AmrDownloadDropdown = ({
         break;
       case "download_csv_with_filters":
         triggerFileDownload({
-          downloadUrl: amrReportTableDownloadWithAppliedFiltersLink,
+          downloadUrl: reportTableDownloadWithAppliedFiltersLink,
           fileName: `${sample.name}_amr_report_with_applied_filters.csv`,
         });
         break;
@@ -97,7 +96,7 @@ export const AmrDownloadDropdown = ({
     {
       text: "Download Report Table with Applied Filters (.csv)",
       value: "download_csv_with_filters",
-      disabled: !amrReportTableDownloadWithAppliedFiltersLink,
+      disabled: !reportTableDownloadWithAppliedFiltersLink,
     },
     {
       text: DownloadOptions.NON_HOST_READS_LABEL,

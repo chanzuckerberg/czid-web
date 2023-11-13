@@ -46,7 +46,6 @@ import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModa
 import { TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM } from "~/components/views/compare/SamplesHeatmapView/constants";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import QualityControl from "~/components/views/discovery/QualityControl";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import NextcladeModal from "~/components/views/nextclade/NextcladeModal";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
@@ -74,6 +73,7 @@ import {
   WORKFLOW_TABS,
 } from "~utils/workflows";
 import { DISCOVERY_DOMAIN_PUBLIC } from "../../discovery/discovery_api";
+import QualityControl from "../../discovery/QualityControl";
 import { BenchmarkModal } from "./BenchmarkModal";
 import { BulkDeleteModal } from "./BulkDeleteModal";
 import { BulkDeleteTrigger } from "./BulkDeleteTrigger";

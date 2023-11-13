@@ -1,3 +1,4 @@
+import { ThresholdFilterData } from "~/interface/dropdown";
 import { ColumnId } from "../../constants";
 
 export enum TypeFilterType {
@@ -7,13 +8,12 @@ export enum TypeFilterType {
 }
 
 export interface FilterParamsType {
-  lowerBound?: number;
-  upperBound?: number;
+  thresholdFilters?: ThresholdFilterData[];
   selected?: string;
   multiSelected?: string[]; // for drug class filter
 }
 export interface FilterType {
-  key: string;
+  key: ColumnId;
   params: FilterParamsType;
   transform?: (d: any) => any;
   type: TypeFilterType;
@@ -21,19 +21,4 @@ export interface FilterType {
 
 export type FiltersType = {
   [filterKey in ColumnId]?: FilterType;
-};
-
-type UpdateThresholdFilterType = {
-  filterKey: ColumnId;
-  lowerBound?: number | undefined;
-  upperBound?: number | undefined;
-};
-
-export type UpdateThresholdFiltersType = {
-  [filterKey in ColumnId]?: UpdateThresholdFilterType;
-};
-
-export type UpdateMultipleFilterType = {
-  filterKey: ColumnId;
-  multiSelected: string[];
 };

@@ -1,12 +1,12 @@
-import { useReactiveVar } from "@apollo/client";
 import { forEach, trim } from "lodash/fp";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { getWorkflowRunResults } from "~/api";
-import {
-  activeAmrFiltersVar,
-  amrDrugClassesVar,
-  amrReportTableDownloadWithAppliedFiltersLinkVar,
-} from "~/cache/initialCache";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { IconLoading } from "~/components/ui/icons";
 import {
@@ -22,6 +22,12 @@ import csIcon from "~/components/views/SampleView/components/SampleReportConent/
 import { SUCCEEDED_STATE } from "~/components/views/SampleView/utils";
 import Sample, { SampleStatus, WorkflowRun } from "~/interface/sample";
 import cs from "./amr_view.scss";
+import {
+  AmrContext,
+  AmrContextActionType,
+  AmrContextType,
+  createAmrContextAction,
+} from "./amrContext/reducer";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";
 import AmrNullResult from "./components/AmrNullResult";
@@ -58,6 +64,39 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     );
   };
 
+  // Get state and dispatch from the amrContext
+  const { amrContextState, amrContextDispatch } =
+    useContext<AmrContextType>(AmrContext);
+  const dispatchUpdateDrugClasses = useCallback(
+    (drugClasses: string[]) => {
+      amrContextDispatch(
+        createAmrContextAction(
+          AmrContextActionType.UPDATE_DRUG_CLASSES,
+          drugClasses,
+        ),
+      );
+    },
+    [amrContextDispatch],
+  );
+
+  // Available drug classes is the set of all drug classes identified in the reported rows
+  const setDrugClassesContext = useCallback(
+    reportTableData => {
+      const drugClasses = new Set<string>();
+      forEach((row: AmrResult) => {
+        const { drugClass } = row;
+        if (drugClass) {
+          // A drug class can have multiple values separated by ";"
+          drugClass.split(";").forEach((drugClass: string) => {
+            drugClasses.add(trim(drugClass));
+          });
+        }
+      }, reportTableData);
+      dispatchUpdateDrugClasses(Array.from(drugClasses));
+    },
+    [dispatchUpdateDrugClasses],
+  );
+
   useEffect(() => {
     if (
       workflowRun?.status !== SUCCEEDED_STATE ||
@@ -71,49 +110,57 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
       const reportDataRaw = await getWorkflowRunResults(workflowRun?.id);
       const reportData = camelize(reportDataRaw);
       setReportTableData(reportData?.reportTableData);
-      setDrugClassesReactiveVar(reportData?.reportTableData);
+      setDrugClassesContext(reportData?.reportTableData);
       setShouldShowNullResult(isValidNullResult(reportData?.reportTableData));
       setLoadingResults(false);
     };
 
     fetchResults();
-  }, [workflowRun?.id, workflowRun?.status, workflowRun?.workflow]);
+  }, [
+    setDrugClassesContext,
+    workflowRun?.id,
+    workflowRun?.status,
+    workflowRun?.workflow,
+  ]);
 
-  const activeFilterSelections = useReactiveVar(activeAmrFiltersVar);
+  const dispatchUpdateAmrReportTableDownloadWithAppliedFiltersLink =
+    useCallback(
+      (link: string | null) => {
+        amrContextDispatch(
+          createAmrContextAction(
+            AmrContextActionType.UPDATE_REPORT_TABLE_DOWNLOAD_WITH_APPLIED_FILTERS_LINK,
+            link,
+          ),
+        );
+      },
+      [amrContextDispatch],
+    );
 
+  const activeFilters = amrContextState.activeFilters;
   useEffect(() => {
     const generateReportWithAppliedFiltersDownloadLink = () => {
-      const numOfActiveAmrFilters = countActiveFilters(activeFilterSelections);
-      if (numOfActiveAmrFilters === 0) {
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-        amrReportTableDownloadWithAppliedFiltersLinkVar(null);
+      const nActiveFilters = activeFilters
+        ? countActiveFilters(activeFilters)
+        : 0;
+      if (nActiveFilters === 0) {
+        dispatchUpdateAmrReportTableDownloadWithAppliedFiltersLink(null);
       } else {
         const [csvHeaders, csvRows] = computeAmrReportTableValuesForCSV({
           displayedRows,
-          activeFilters: activeFilterSelections,
+          activeFilters,
         });
 
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
         const link = createCSVObjectURL(csvHeaders, csvRows);
-        amrReportTableDownloadWithAppliedFiltersLinkVar(link);
+        dispatchUpdateAmrReportTableDownloadWithAppliedFiltersLink(link);
       }
     };
     generateReportWithAppliedFiltersDownloadLink();
-  }, [displayedRows, activeFilterSelections]);
-
-  const setDrugClassesReactiveVar = reportTableData => {
-    const drugClasses = new Set<string>();
-    forEach((row: AmrResult) => {
-      const { drugClass } = row;
-      if (drugClass) {
-        // A drug class can have multiple values separated by ";"
-        drugClass.split(";").forEach((drugClass: string) => {
-          drugClasses.add(trim(drugClass));
-        });
-      }
-    }, reportTableData);
-    amrDrugClassesVar(Array.from(drugClasses));
-  };
+  }, [
+    displayedRows,
+    activeFilters,
+    dispatchUpdateAmrReportTableDownloadWithAppliedFiltersLink,
+  ]);
 
   if (sample && shouldShowNullResult) {
     return <AmrNullResult />;

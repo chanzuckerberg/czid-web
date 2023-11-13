@@ -3,7 +3,7 @@
 
 import { Button, DropdownPopper, InputDropdown } from "@czi-sds/components";
 import { find, isEmpty, some } from "lodash/fp";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";
 import {
@@ -41,14 +41,8 @@ export const ThresholdFilterSDS = ({
 
   const filterOperators: ThresholdFilterOperator[] = [">=", "<="];
 
-  useEffect(() => {
-    setThresholds(selectedThresholds);
-  }, [selectedThresholds]);
-
   const handleCancel = () => {
     setAnchorEl(null);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-    setThresholds(null);
   };
 
   const handleThresholdChange = (
@@ -101,8 +95,6 @@ export const ThresholdFilterSDS = ({
   const handleApply = () => {
     setAnchorEl(null);
     onApply(thresholds);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-    setThresholds(null);
   };
 
   // If any of the newThresholds were not found in the existing selected thresholds, then the threshold filters were modified
@@ -128,7 +120,7 @@ export const ThresholdFilterSDS = ({
   const handleDropdownInputClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
     setThresholds(selectedThresholds);
-    if (isEmpty(thresholds)) {
+    if (isEmpty(thresholds) || !thresholds) {
       handleAddThresholdItem();
     }
   };

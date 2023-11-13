@@ -1,24 +1,17 @@
-import { useReactiveVar } from "@apollo/client";
 import { cx } from "@emotion/css";
 import { filter, forEach, map, split, trim } from "lodash/fp";
-import React, { useEffect, useState } from "react";
-import { activeAmrFiltersVar, amrDrugClassesVar } from "~/cache/initialCache";
+import React, { useCallback, useContext, useEffect } from "react";
 import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
+import { ThresholdFilterData } from "~/interface/dropdown";
+import { AmrContext } from "../../amrContext/reducer";
 import { ColumnId } from "../../constants";
 import { AmrResult } from "../AmrSampleReport/types";
 import cs from "./amr_filters_container.scss";
 import { AmrThresholdFilters } from "./components/AmrThresholdFilters";
 import { DrugClassFilter } from "./components/DrugClassFilter";
 import { thresholdFilterOptionColumnIds } from "./constants";
-import {
-  FilterParamsType,
-  FiltersType,
-  FilterType,
-  TypeFilterType,
-  UpdateMultipleFilterType,
-  UpdateThresholdFiltersType,
-} from "./types";
-import { countActiveFilters } from "./utils";
+import { FiltersType, FilterType, TypeFilterType } from "./types";
+import { countActiveFilters, getAmrColumnTransform } from "./utils";
 
 interface AmrFiltersContainerProps {
   setDataFilterFunc: (filterFunc: any) => void;
@@ -26,25 +19,14 @@ interface AmrFiltersContainerProps {
   setHideFilters: (hideFilters: boolean) => void;
 }
 
-const THRESHOLD_FILTER_INIT = thresholdFilterOptionColumnIds.reduce(
+export const THRESHOLD_FILTER_INIT = thresholdFilterOptionColumnIds.reduce(
   (obj, item) => {
-    let transform;
-    // rPM and dPM are the only columns where the lookup key is different from the columnId
-    // rPM and dPM are also the only columns with number values instead of strings
-    if (item === ColumnId.READS_PER_MILLION) {
-      transform = (d: AmrResult) => d.rpm;
-    } else if (item === ColumnId.READ_DEPTH_PER_MILLION) {
-      transform = (d: AmrResult) => d.dpm;
-    } else {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-      transform = (d: AmrResult) => parseFloat(d[item]);
-    }
+    const transform = getAmrColumnTransform(item);
 
     obj[item] = {
       key: item,
       params: {
-        lowerBound: undefined,
-        upperBound: undefined,
+        thresholdFilters: [],
       },
       transform,
       type: TypeFilterType.THRESHOLD,
@@ -67,7 +49,7 @@ const DRUG_CLASS_FILTER_INIT = {
 
 // * `key` should be the ColumnId of the column you are filtering on
 // Merge inital values for additional filters here
-const DATA_FILTER_INIT: FiltersType = {
+export const DATA_FILTER_INIT: FiltersType = {
   ...THRESHOLD_FILTER_INIT,
   ...DRUG_CLASS_FILTER_INIT,
 };
@@ -77,27 +59,39 @@ const applyFilter = (data: AmrResult[], dataFilter: FilterType) => {
 
   const { key, params, transform, type } = dataFilter;
   if (!key || !params || !type) return data;
-  const { lowerBound, upperBound, selected, multiSelected = [] } = params;
+  const { thresholdFilters, selected, multiSelected = [] } = params;
 
   switch (type) {
     case TypeFilterType.THRESHOLD:
-      // lowerBound (or upperBound) === 0 is a valid value, so we need to check if it is undefined rather than falsy
-      if (lowerBound === undefined && upperBound === undefined) return data;
-
+      if (!thresholdFilterOptionColumnIds.includes(key)) return data;
       return filter(d => {
         const value = transform ? transform(d) : d;
 
-        // Check each row of the data to see if it passes this threshold filter
-        const doesPassFilterCheckLowerBound =
-          lowerBound === undefined || value >= lowerBound;
-        const doesPassFilterCheckUpperBound =
-          upperBound === undefined || value <= upperBound;
+        // Go through the list of threshold filters. If the value of the row fails
+        // any threshold filter, return false. Otherwise return true. This will end
+        // early if there is a failure rather than checking every threshold.
+        const doesFailThresholdFilter =
+          thresholdFilters &&
+          !!thresholdFilters.find((thresholdFilter: ThresholdFilterData) => {
+            // Note: true indicates that the value "doesFail" the threshold
+            // This check is inside the find because we want to return the NaN value
+            // if there is not a filter in place
+            if (isNaN(value)) return true;
 
-        return doesPassFilterCheckLowerBound && doesPassFilterCheckUpperBound;
+            const parsedThresholdFilterValue = parseFloat(
+              thresholdFilter.value,
+            );
+            if (thresholdFilter.operator === "<=") {
+              return value > parsedThresholdFilterValue; // Note: using > because we are looking for failures
+            }
+            if (thresholdFilter.operator === ">=") {
+              return value < parsedThresholdFilterValue; // Note: using < because we are looking for failures
+            }
+          });
+        return !doesFailThresholdFilter;
       }, data);
     case TypeFilterType.MULTIPLE:
       if (!multiSelected || multiSelected.length === 0) return data;
-
       return filter(d => {
         const value = transform ? transform(d) : d;
         return multiSelected.some((selected: string) =>
@@ -121,75 +115,27 @@ export const AmrFiltersContainer = ({
   hideFilters,
   setHideFilters,
 }: AmrFiltersContainerProps) => {
-  const [dataFilters, setDataFilters] = useState<FiltersType>(DATA_FILTER_INIT);
+  const activeFilters = useContext(AmrContext)?.amrContextState?.activeFilters;
+  const nActiveFilters = activeFilters ? countActiveFilters(activeFilters) : 0;
+
+  const wrappedFilterFunc = useCallback(() => {
+    const filterFunc = (filters: FiltersType | null) => {
+      return (data: AmrResult[]) => {
+        let filteredData = [...data];
+        if (!filters) return filteredData;
+        forEach((filter: FilterType) => {
+          filteredData = applyFilter(filteredData, filter);
+        }, filters);
+        return filteredData;
+      };
+    };
+    return filterFunc(activeFilters);
+  }, [activeFilters]);
 
   // set the data filter function (using setDataFilterFunc callback) based on the current dataFilters
   useEffect(() => {
-    const wrappedFilterFunc = () => {
-      const filterFunc = (filters: FiltersType) => {
-        return (data: AmrResult[]) => {
-          let filteredData = [...data];
-          forEach((filter: FilterType) => {
-            filteredData = applyFilter(filteredData, filter);
-          }, filters);
-          return filteredData;
-        };
-      };
-      return filterFunc(dataFilters);
-    };
-
     setDataFilterFunc(wrappedFilterFunc);
-  }, [dataFilters, setDataFilterFunc]);
-
-  // Generic update function that will be used by the more-specific update functions below
-  // NOTE: there is only one filterKey for each filter type. The threshold filters will be
-  // deduplicated in the AmrThresholdFilters component
-  const updateDataFilters = (
-    filters: { filterKey: string; params: FilterParamsType }[],
-  ) => {
-    const newFilters = { ...dataFilters };
-    forEach(({ filterKey, params }) => {
-      const { transform, type } = dataFilters[filterKey];
-      newFilters[filterKey] = {
-        key: filterKey,
-        params,
-        transform,
-        type,
-      };
-    }, filters);
-    setDataFilters(newFilters);
-  };
-
-  const updateThresholdFilters = (filtersData: UpdateThresholdFiltersType) => {
-    const filtersList = [];
-    for (const filterKey in filtersData) {
-      const { lowerBound, upperBound } = filtersData[filterKey];
-      const params = {
-        lowerBound,
-        upperBound,
-      };
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      filtersList.push({ filterKey, params });
-    }
-    updateDataFilters(filtersList);
-  };
-
-  const updateDrugClassFilter = (filtersData: UpdateMultipleFilterType) => {
-    const { multiSelected } = filtersData;
-
-    updateDataFilters([
-      {
-        filterKey: ColumnId.DRUG_CLASS,
-        params: {
-          multiSelected,
-        },
-      },
-    ]);
-  };
-
-  const activeAmrFilters = useReactiveVar(activeAmrFiltersVar);
-  const numOfActiveAmrFilters = countActiveFilters(activeAmrFilters);
-  const drugClassList = useReactiveVar(amrDrugClassesVar);
+  }, [setDataFilterFunc, wrappedFilterFunc]);
 
   return (
     <div className={cs.filtersContainer}>
@@ -200,28 +146,16 @@ export const AmrFiltersContainer = ({
         )}
       >
         <FilterButtonWithCounter
-          filterCounter={numOfActiveAmrFilters}
+          filterCounter={nActiveFilters}
           onFilterToggle={() => setHideFilters(!hideFilters)}
           showFilters={!hideFilters}
           popupPosition="top left"
         />
-        <div className={hideFilters && cs.hideFilters}>
+        <div className={hideFilters ? cs.hideFilters : undefined}>
           <div className={cs.filters}>
             <h2 className={cs.sectionTitle}>Filters</h2>
-            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2786 */}
-            <AmrThresholdFilters
-              hideFilters={hideFilters}
-              updateThresholdFilters={updateThresholdFilters}
-            />
-            {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2786 */}
-            <DrugClassFilter
-              hideFilters={hideFilters}
-              drugClassOptions={
-                drugClassList?.sort().map(drugClass => ({ name: drugClass })) ??
-                []
-              }
-              onDrugClassChange={updateDrugClassFilter}
-            />
+            <AmrThresholdFilters hideFilters={hideFilters} />
+            <DrugClassFilter hideFilters={hideFilters} />
           </div>
         </div>
       </div>

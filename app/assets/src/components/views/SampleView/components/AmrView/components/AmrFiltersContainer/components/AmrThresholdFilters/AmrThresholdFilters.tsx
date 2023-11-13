@@ -1,92 +1,87 @@
-import React, { useState } from "react";
-import { activeAmrFiltersVar } from "~/cache/initialCache";
+import React, { useContext } from "react";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
 import { ThresholdFilterData } from "~/interface/dropdown";
-import { COLUMN_ID_TO_NAME } from "../../../../constants";
+import {
+  AmrContext,
+  AmrContextActionType,
+  createAmrContextAction,
+} from "../../../../amrContext/reducer";
+import { ColumnId, COLUMN_ID_TO_NAME } from "../../../../constants";
 import { thresholdFilterOptionColumnIds } from "../../constants";
-import { UpdateThresholdFiltersType } from "../../types";
+import { FiltersType, FilterType, TypeFilterType } from "../../types";
+import { getAmrColumnTransform } from "../../utils";
 
 interface AmrThresholdFiltersProps {
-  updateThresholdFilters: (filtersData: UpdateThresholdFiltersType) => void;
   hideFilters: boolean;
 }
 
-/*
- * The updateThresholdFilters function takes an object with keys corresponding
- * to the columns in the table. There can be multiple filters for each column,
- * so we are deduplicating here.
- */
-const convertThresholdFilters = (
-  thresholdFilters: ThresholdFilterData[],
-): UpdateThresholdFiltersType => {
-  const allUpdateThresholdFilters: UpdateThresholdFiltersType =
-    thresholdFilterOptionColumnIds.reduce((obj, columnId) => {
-      obj[columnId] = {
-        filterKey: columnId,
-        lowerBound: undefined,
-        upperBound: undefined,
-      };
-      return obj;
-    }, {});
-
-  // For each threshold filter in the filters array, update the corresponding
-  // filter in the allUpdateThresholdFilters object. This will deduplicate
-  // threshold filters that correspond to the same filterKey.
-  thresholdFilters.forEach(thresholdFilter => {
-    const newThresholdValue = parseFloat(thresholdFilter.value);
-    if (isNaN(newThresholdValue)) {
-      return;
-    }
-
-    const currentUpdateThresholdFilter =
-      allUpdateThresholdFilters[thresholdFilter.metric];
-
-    if (thresholdFilter.operator === ">=") {
-      // If the operator is greater than or equal to, set the lower bound to the higher of the existing value and the new value
-      const currentLowerBound = currentUpdateThresholdFilter.lowerBound;
-      currentUpdateThresholdFilter.lowerBound = currentLowerBound
-        ? Math.max(newThresholdValue, currentLowerBound)
-        : newThresholdValue;
-    } else {
-      // If the operator is less than or equal to, set the upper bound to the lower of the existing value and the new value
-      const currentUpperBound = currentUpdateThresholdFilter.upperBound;
-      currentUpdateThresholdFilter.upperBound = currentUpperBound
-        ? Math.min(newThresholdValue, currentUpperBound)
-        : newThresholdValue;
-    }
-  });
-
-  return allUpdateThresholdFilters;
-};
-
 export const AmrThresholdFilters = ({
-  updateThresholdFilters,
   hideFilters,
 }: AmrThresholdFiltersProps) => {
-  const [thresholdFilters, setThresholdFilters] = useState<
-    ThresholdFilterData[]
-  >([]);
+  const { amrContextState, amrContextDispatch } = useContext(AmrContext);
 
-  const handleApply = (filterData: ThresholdFilterData[]) => {
-    setThresholdFilters(filterData);
-    updateThresholdFilters(convertThresholdFilters(filterData));
-    activeAmrFiltersVar({
-      ...activeAmrFiltersVar(),
-      thresholdFilters: filterData,
-    });
+  const activeFilters: FilterType[] = Object.values(
+    amrContextState?.activeFilters || {},
+  );
+  const activeThresholdFilters: ThresholdFilterData[] = activeFilters.reduce(
+    (arr, filter) => {
+      if (filter.type === TypeFilterType.THRESHOLD) {
+        if (!filter.params.thresholdFilters) return arr;
+        arr.push(...filter.params.thresholdFilters);
+      }
+      return arr;
+    },
+    [] as ThresholdFilterData[],
+  );
+
+  const dispatchUpdateThresholdFilters = (
+    activeThresholdFilters: FiltersType,
+  ) => {
+    amrContextDispatch(
+      createAmrContextAction(
+        AmrContextActionType.UPDATE_ACTIVE_THRESHOLD_FILTERS,
+        activeThresholdFilters,
+      ),
+    );
   };
 
-  return (
-    !hideFilters && (
-      <ThresholdFilterSDS
-        selectedThresholds={thresholdFilters}
-        onApply={handleApply}
-        disabled={hideFilters}
-        metricOptions={thresholdFilterOptionColumnIds.map(columnId => ({
-          text: COLUMN_ID_TO_NAME.get(columnId),
-          value: columnId,
-        }))}
-      />
-    )
+  const handleApply = (filterData: ThresholdFilterData[]) => {
+    // separate filters by columnId, then update the param thresholdFilters array
+    const emptyActiveFilters = thresholdFilterOptionColumnIds.reduce(
+      (obj, item) => {
+        const transform = getAmrColumnTransform(item);
+
+        obj[item] = {
+          key: item,
+          params: {
+            thresholdFilters: [],
+          },
+          transform,
+          type: TypeFilterType.THRESHOLD,
+        };
+        return obj;
+      },
+      {},
+    );
+
+    const activeFilters = filterData.reduce((obj, item) => {
+      const columnId = item.metric as ColumnId;
+      obj[columnId].params.thresholdFilters.push(item);
+      return obj;
+    }, emptyActiveFilters);
+
+    dispatchUpdateThresholdFilters(activeFilters);
+  };
+
+  return hideFilters ? null : (
+    <ThresholdFilterSDS
+      selectedThresholds={activeThresholdFilters}
+      onApply={handleApply}
+      disabled={hideFilters}
+      metricOptions={thresholdFilterOptionColumnIds.map(columnId => ({
+        text: COLUMN_ID_TO_NAME.get(columnId),
+        value: columnId,
+      }))}
+    />
   );
 };
