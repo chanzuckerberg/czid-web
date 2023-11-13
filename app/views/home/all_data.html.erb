@@ -1,6 +1,5 @@
 <%= javascript_tag do %>
   react_component('DiscoveryViewRouter', {
-    autoAcctCreationEnabled: <%= @auto_account_creation_enabled %>,
     domain: "all_data",
     admin: <%= current_user.admin %>,
     projectId: <%= escape_javascript(@project_id || "null") %>,

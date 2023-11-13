@@ -1,1 +1,0 @@
-export { QueryResult } from "./QueryResult";

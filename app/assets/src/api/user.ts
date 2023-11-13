@@ -1,28 +1,8 @@
-import { gql, useMutation } from "@apollo/client";
 import { isNull } from "lodash";
 import { postWithCSRF, putWithCSRF } from "./core";
 
-const CREATE_USER = gql`
-  # Creates a new user
-
-  mutation CreateUser($email: String!) {
-    createUser(email: $email) {
-      email
-    }
-  }
-`;
-
 // create_user.rb errors
 const EMAIL_TAKEN_ERROR = "Email has already been taken";
-
-const useCreateUser = () => {
-  const [create, { loading, error }] = useMutation(CREATE_USER);
-
-  if (loading) return "Submitting...";
-  if (error) return `Submission error! ${error.message}`;
-
-  return create;
-};
 
 const updateUser = ({
   userId,
@@ -186,7 +166,6 @@ const requestPasswordReset = (email: $TSFixMe) => {
 };
 
 export {
-  useCreateUser,
   updateUser,
   updateUserData,
   requestPasswordReset,

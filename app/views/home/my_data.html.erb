@@ -1,7 +1,6 @@
 <%= javascript_tag do %>
   react_component('DiscoveryViewRouter', {
     domain: "my_data",
-    autoAcctCreationEnabled: <%= @auto_account_creation_enabled %>,
     admin: <%= current_user ? current_user.admin : "null" %>,
     projectId: <%= escape_javascript(@project_id || "null") %>,
     mapTilerKey: '<%= ENV["MAPTILER_API_KEY"] %>',

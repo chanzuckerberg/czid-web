@@ -8,14 +8,12 @@ import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./LandingHeaderV2.scss";
 
 interface LandingHeaderV2Props {
-  autoAcctCreationEnabled?: boolean;
   announcementBannerEnabled?: boolean;
   emergencyBannerMessage?: string;
   impactPage?: boolean;
 }
 
 const LandingHeaderV2 = ({
-  autoAcctCreationEnabled,
   announcementBannerEnabled,
   emergencyBannerMessage,
   impactPage,
@@ -83,18 +81,6 @@ const LandingHeaderV2 = ({
             >
               Resources
             </a>
-            {!autoAcctCreationEnabled && (
-              <a
-                className={cs.buttonLink}
-                href="https://airtable.com/shrBGT42xVBR6JAVv"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="View the CZ ID intro survey (opens in new window)"
-                data-testid="home-top-nav-request-access"
-              >
-                Request Access
-              </a>
-            )}
             <a
               className={cs.buttonLink}
               href="/auth0/login"

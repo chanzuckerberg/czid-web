@@ -1,16 +1,23 @@
 import React, { useState } from "react";
+import { graphql, useMutation } from "react-relay";
 import { useHistory } from "react-router-dom";
-import { EMAIL_TAKEN_ERROR, useCreateUser } from "~/api/user";
+import { EMAIL_TAKEN_ERROR } from "~/api/user";
 import ArrowSubmit from "~/components/ui/icons/IconSubmitArrow";
 import cs from "./HeroEmailForm.scss";
 
-interface HeroEmailFormProps {
-  autoAcctCreationEnabled?: boolean;
-}
+const HeroEmailFormMutation = graphql`
+  mutation HeroEmailFormMutation($email: String!) {
+    createUser(email: $email) {
+      email
+    }
+  }
+`;
 
-const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
+const HeroEmailForm = () => {
   const [enteredEmail, setEnteredEmail] = useState("");
-  const userCreator = useCreateUser();
+  const [commitMutation, isMutationInFlight] = useMutation(
+    HeroEmailFormMutation,
+  );
   const RouterHistory = useHistory();
 
   function isValidEmail(enteredEmail: string) {
@@ -19,72 +26,35 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
     return emailRegex.test(enteredEmail);
   }
 
-  function requestAccess(e: React.MouseEvent<HTMLButtonElement>) {
+  async function registerAccount(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (isValidEmail(enteredEmail)) {
-      window.open(
-        `https://airtable.com/shrBGT42xVBR6JAVv?prefill_Email=${enteredEmail}`,
-        "_blank",
-      );
-    } else {
-      alert("Please enter a valid email address.");
-    }
-  }
-
-  async function registerAccount(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-
-    if (isValidEmail(enteredEmail)) {
-      try {
-        // @ts-expect-error This expression is not callable.
-        await userCreator({
-          variables: {
-            email: enteredEmail,
-          },
-        }).then(() => {
+      commitMutation({
+        variables: {
+          email: enteredEmail,
+        },
+        onCompleted: () => {
           RouterHistory.push("/users/register");
-        });
-      } catch (err) {
-        if (err.message === EMAIL_TAKEN_ERROR) {
-          RouterHistory.push("/users/register?error=email");
-        } else {
-          RouterHistory.push("/users/register?error=unknown");
-        }
-      }
-      location.reload();
+          location.reload();
+        },
+        onError: err => {
+          if (err.message.includes(EMAIL_TAKEN_ERROR)) {
+            RouterHistory.push("/users/register?error=email");
+          } else {
+            RouterHistory.push("/users/register?error=unknown");
+          }
+          location.reload();
+        },
+      });
     } else {
       alert("Please enter a valid email address.");
     }
   }
-
-  const requestAccessButton = (
-    <button
-      aria-label="Request access to CZ ID via the CZ ID intro survey (opens in new window)"
-      onClick={e => requestAccess(e)}
-    >
-      Request Access
-      <span>
-        <ArrowSubmit />
-      </span>
-    </button>
-  );
-
-  const registerNowButton = (
-    <button
-      aria-label="Register for a CZ ID account with your email address"
-      onClick={e => registerAccount(e)}
-    >
-      Register Now
-      <span>
-        <ArrowSubmit />
-      </span>
-    </button>
-  );
 
   return (
     <div className={cs.heroEmailForm}>
-      <form action="#">
+      <form onSubmit={e => registerAccount(e)}>
         <input
           placeholder="Your email address"
           value={enteredEmail}
@@ -92,7 +62,17 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
             setEnteredEmail(e.target.value);
           }}
         />
-        {autoAcctCreationEnabled ? registerNowButton : requestAccessButton}
+        <button
+          aria-label="Register for a CZ ID account with your email address"
+          type="submit"
+          disabled={isMutationInFlight}
+          className={isMutationInFlight ? cs.disabled : ""}
+        >
+          Register Now
+          <span>
+            <ArrowSubmit />
+          </span>
+        </button>
       </form>
     </div>
   );

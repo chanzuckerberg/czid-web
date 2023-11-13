@@ -33,7 +33,6 @@ interface DiscoveryViewRouterProps {
   snapshotProjectDescription: string;
   snapshotProjectName: string;
   snapshotShareId: string;
-  autoAcctCreationEnabled: boolean;
   announcementBannerEnabled: boolean;
   emergencyBannerMessage: string;
 }
@@ -46,7 +45,6 @@ const DiscoveryViewRouter = ({
   snapshotProjectDescription,
   snapshotProjectName,
   snapshotShareId,
-  autoAcctCreationEnabled,
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
@@ -56,11 +54,9 @@ const DiscoveryViewRouter = ({
 
   return (
     <Switch>
-      {autoAcctCreationEnabled && (
-        <Route exact path="/user_profile_form">
-          <UserProfileForm />
-        </Route>
-      )}
+      <Route exact path="/user_profile_form">
+        <UserProfileForm />
+      </Route>
       <Route exact path="/impact">
         <ImpactPage />
       </Route>
@@ -145,7 +141,6 @@ const DiscoveryViewRouter = ({
       ) : (
         <Route>
           <LandingV2
-            autoAcctCreationEnabled={autoAcctCreationEnabled}
             announcementBannerEnabled={announcementBannerEnabled}
             emergencyBannerMessage={emergencyBannerMessage}
           />
