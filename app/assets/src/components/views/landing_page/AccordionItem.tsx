@@ -12,9 +12,11 @@ interface AccordionItemProps {
 const AccordionItem = (props: AccordionItemProps) => {
   return (
     <div
+      className={`${cs.accordion} accordionItem`}
       onClick={props.onClick}
       onKeyDown={props.onClick}
-      className={`${cs.accordion} accordionItem`}
+      role="button"
+      tabIndex={0}
     >
       {props.isOpen ? (
         <svg

@@ -66,7 +66,7 @@
 }
 
 .topNavMenuTop {
-  background: black;
+  background: $sds-color-gray-black;
 }
 
 .bottomNavContainer {
@@ -120,7 +120,7 @@
 
   p {
     font-style: italic;
-    color: white;
+    color: $sds-color-gray-white;
 
     @media (max-width: 768px) {
       align-self: flex-start;

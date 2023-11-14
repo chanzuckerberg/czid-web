@@ -7,13 +7,13 @@
 
 .publicationsAndNews {
   padding: 0 $sds-spaces-xl;
-  margin: 3em auto;
+  margin: 80px auto;
   max-width: 1280px;
 
   @media (min-width: 769px) {
     display: flex;
     flex-direction: row;
-    margin: 6.75em auto;
+    margin: 100px auto 0px;
     padding: 0 100px;
   }
 
@@ -34,10 +34,14 @@
     letter-spacing: 0.01875em;
     text-transform: uppercase;
     margin: $sds-spaces-xs 0 0 0;
-    @include font-header-l;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 26px;
+    letter-spacing: 0.3px;
 
     @media (max-width: 768px) {
-      @include font-header-m;
+      font-size: 14px;
+      line-height: 24px;
     }
   }
 
@@ -66,6 +70,11 @@
   }
 
   .news {
+    @media (max-width: 768px) {
+      margin-top: 64px;
+      padding-top: 80px;
+    }
+
     @media (min-width: 769px) {
       width: percentage(math.div(1, 3));
       padding-bottom: 2em;
@@ -81,6 +90,7 @@
     .date {
       display: block;
       @include font-header-xs;
+      font-weight: 400;
     }
 
     .date,
@@ -106,6 +116,7 @@
     .readMore {
       color: $sds-color-primary-400;
       margin: 12px 0 0 0;
+      font-weight: 600;
 
       &:hover,
       &:active {
@@ -120,6 +131,23 @@
   }
 
   li {
-    margin: $sds-spaces-xxl 0;
+    margin: 32px 0;
+
+    &.marker {
+      display: flex;
+
+      h3 {
+        margin-top: 0;
+      }
+    }
+
+    .liMarker {
+      width: 19px;
+      height: $sds-spaces-xxxs;
+      background: $sds-color-gray-black;
+      margin-right: 17px;
+      flex-shrink: 0;
+      margin-top: 0.75em;
+    }
   }
 }

@@ -26,7 +26,7 @@
     @media (max-width: 768px) {
       @include font-body-s;
       width: 100%;
-      max-width: 350px;
+      max-width: unset;
       padding: unset;
       text-align: center;
       padding: $sds-spaces-xl 0;
@@ -43,7 +43,7 @@
     }
 
     @media (max-width: 768px) {
-      border-radius: $sds-corners-corner-m;
+      border-radius: 999px;
       margin-bottom: 7px;
       width: 100%;
       padding: 13px;
@@ -55,14 +55,14 @@
     color: $sds-color-gray-white;
     background: $sds-color-primary-400;
     width: 215px;
-    padding: 13px 38px 13px 30px;
+    padding: 13px $sds-spaces-xxl 13px 30px;
 
     &:hover {
       cursor: pointer;
     }
 
     @media (max-width: 768px) {
-      border-radius: $sds-corners-corner-m;
+      border-radius: 999px;
       width: 100%;
     }
 

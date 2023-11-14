@@ -2,99 +2,233 @@ import React from "react";
 
 const IconMatchesFigure = () => {
   return (
-    <svg width="100" height="101" viewBox="0 0 100 101" fill="none">
-      <g clipPath="url(#clip0)">
-        <rect
-          width="100"
-          height="100"
-          transform="translate(0 0.435059)"
-          fill="white"
-        />
-        <circle
-          cx="52.5"
-          cy="50.9351"
-          r="39.5"
+    <svg
+      width="111"
+      height="110"
+      viewBox="0 0 111 110"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clipPath="url(#clip0_3038_19281)">
+        <ellipse
+          cx="55.6714"
+          cy="53.9114"
+          rx="38.8834"
+          ry="38.8835"
           stroke="#3867FA"
-          strokeWidth="3"
+          strokeWidth="3.2157"
           strokeLinecap="round"
-          strokeDasharray="0.1 7"
+          strokeDasharray="0.12 11.96"
         />
-        <path
-          d="M16.5 67.9351H25L32.5 80.9351L25 86.4351L16.5 83.9351L14.5 71.4351L16.5 67.9351Z"
-          fill="white"
-        />
-        <path
-          d="M28.3951 72.5892L20.0686 72.5892L20.0686 80.9158L28.3951 80.9158L28.3951 72.5892Z"
-          fill="white"
-        />
-        <path
-          d="M28.3951 72.5892L20.0686 72.5892L20.0686 80.9158L28.3951 80.9158L28.3951 72.5892ZM28.3951 72.5892L74.7881 26.1962"
+        <ellipse
+          cx="55.6714"
+          cy="53.9114"
+          rx="38.8834"
+          ry="38.8835"
           stroke="#3867FA"
-          strokeWidth="3"
+          strokeWidth="3.2157"
+          strokeLinecap="round"
+          strokeDasharray="0.12 11.96"
         />
-        <circle
-          cx="51.6222"
-          cy="49.3632"
-          r="19.4757"
-          fill="white"
+        <ellipse
+          cx="55.402"
+          cy="53.6419"
+          rx="29.0428"
+          ry="29.0428"
           stroke="#3867FA"
-          strokeWidth="3"
-        />
-        <circle
-          cx="49.1216"
-          cy="46.4623"
-          r="5.94288"
-          stroke="#3867FA"
-          strokeWidth="3"
-        />
-        <path
-          d="M53.0312 51.1731L60.0651 58.207"
-          stroke="#3867FA"
-          strokeWidth="3"
-        />
-        <path
-          d="M77.5 27.9351L70 16.4351L76 4.43506L84.5 12.4351C85.6667 17.1017 88 26.7351 88 27.9351C88 29.1351 81.5 27.7684 77.5 27.9351Z"
-          fill="white"
-        />
-        <path
-          d="M22.0836 61.5773L7.39231 60.0235L-1.78814e-07 48.8273L11.1782 45.4661C15.803 46.7891 25.3124 49.585 26.3516 50.185C27.3908 50.785 23.9393 58.0299 22.0836 61.5773Z"
-          fill="white"
-        />
-        <path
-          d="M33 22.4351L27 8.93506L33 -3.06494L41.5 4.93506C42.6667 9.60172 45 19.2351 45 20.4351C45 21.6351 37 22.2684 33 22.4351Z"
-          fill="white"
-        />
-        <circle
-          cx="35.9969"
-          cy="14.4853"
-          r="3.8875"
-          fill="white"
-          stroke="#3867FA"
-          strokeWidth="3"
-        />
-        <circle
-          cx="12.8875"
-          cy="54.4053"
-          r="3.8875"
-          fill="white"
-          stroke="#3867FA"
-          strokeWidth="3"
+          strokeWidth="3.2157"
         />
         <rect
-          width="8.32657"
-          height="8.32657"
-          transform="matrix(-1 8.74228e-08 8.74228e-08 1 83.1748 17.8105)"
+          width="36.0741"
+          height="17.4436"
+          rx="8.72179"
+          transform="matrix(0.707106 0.707107 -0.707106 0.707107 48.313 35.3481)"
           stroke="#3867FA"
-          strokeWidth="3"
+          strokeWidth="3.2157"
+        />
+        <path
+          d="M51.8952 55.2538L56.7054 56.2156"
+          stroke="#3867FA"
+          strokeWidth="3.2157"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <ellipse
+          cx="56.5991"
+          cy="51.6633"
+          rx="1.19641"
+          ry="1.19642"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="72.9355"
+          cy="45.2493"
+          rx="1.50736"
+          ry="1.50736"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="58.1065"
+          cy="36.5892"
+          rx="1.50736"
+          ry="1.50736"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="38.5315"
+          cy="61.4674"
+          rx="1.50736"
+          ry="1.50736"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="57.1973"
+          cy="60.4916"
+          rx="1.19641"
+          ry="1.19642"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="92.7602"
+          cy="41.9472"
+          rx="1.79462"
+          ry="1.79462"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="1.50736"
+          cy="1.50736"
+          rx="1.50736"
+          ry="1.50736"
+          transform="matrix(0.826554 0.562857 -0.562856 0.826555 16.4702 23.9121)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="1.50736"
+          cy="1.50736"
+          rx="1.50736"
+          ry="1.50736"
+          transform="matrix(0.826554 0.562857 -0.562856 0.826555 9.54755 19.1977)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="100.657"
+          cy="67.9901"
+          rx="1.50736"
+          ry="1.50736"
+          transform="rotate(16.2043 100.657 67.9901)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="108.702"
+          cy="70.3264"
+          rx="1.50736"
+          ry="1.50736"
+          transform="rotate(16.7043 108.702 70.3264)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="92.8109"
+          cy="66.0094"
+          rx="1.79462"
+          ry="1.79462"
+          transform="rotate(16.2043 92.8109 66.0094)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="1.50736"
+          cy="1.50736"
+          rx="1.50736"
+          ry="1.50736"
+          transform="matrix(0.636565 -0.771223 0.771222 0.636566 81.5637 16.2816)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="102.693"
+          cy="53.624"
+          rx="1.50736"
+          ry="1.50736"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="94.6051"
+          cy="53.9113"
+          rx="1.79462"
+          ry="1.79462"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="1.79462"
+          cy="1.79462"
+          rx="1.79462"
+          ry="1.79462"
+          transform="matrix(0.561776 0.82729 -0.827289 0.561777 83.3817 89.6134)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="1.79462"
+          cy="1.79462"
+          rx="1.79462"
+          ry="1.79462"
+          transform="matrix(0.561776 0.82729 -0.827289 0.561777 78.6767 82.6849)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="10.753"
+          cy="68.8189"
+          rx="1.79462"
+          ry="1.79462"
+          transform="rotate(-19.8781 10.753 68.8189)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="2.50918"
+          cy="71.4936"
+          rx="1.50736"
+          ry="1.50736"
+          transform="rotate(-19.8781 2.50918 71.4936)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="1.79462"
+          cy="1.79462"
+          rx="1.79462"
+          ry="1.79462"
+          transform="matrix(0.616602 -0.787275 0.787274 0.616603 25.1161 92.1033)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="1.79462"
+          cy="1.79462"
+          rx="1.79462"
+          ry="1.79462"
+          transform="matrix(0.616602 -0.787275 0.787274 0.616603 30.2803 85.5099)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="55.2253"
+          cy="101.514"
+          rx="1.50736"
+          ry="1.50736"
+          transform="rotate(-90 55.2253 101.514)"
+          fill="#3867FA"
+        />
+        <ellipse
+          cx="55.5125"
+          cy="92.8522"
+          rx="1.79462"
+          ry="1.79462"
+          transform="rotate(-90 55.5125 92.8522)"
+          fill="#3867FA"
         />
       </g>
       <defs>
-        <clipPath id="clip0">
+        <clipPath id="clip0_3038_19281">
           <rect
-            width="100"
-            height="100"
+            width="110"
+            height="110"
             fill="white"
-            transform="translate(0 0.435059)"
+            transform="translate(0.847656)"
           />
         </clipPath>
       </defs>

@@ -84,10 +84,17 @@ const ImpactIntro = props => {
             onClick={() => {
               props.setSelectedCountry(ImpactCountryData[index]);
             }}
+            onKeyDown={e => {
+              if (e.key === "Enter") {
+                props.setSelectedCountry(ImpactCountryData[index]);
+              }
+            }}
             style={{
               bottom: `${country.mapPosition.bottom}`,
               left: `${country.mapPosition.left}`,
             }}
+            role="button"
+            tabIndex={0}
           >
             <span className={cs.impactMapDotLabel}>{country.countryName}</span>
           </div>

@@ -10,7 +10,17 @@ interface TabbedGalleryTabProps {
 
 const TabbedGalleryTab = (props: TabbedGalleryTabProps) => {
   return (
-    <div onClick={props.onClick} className={`${cs.tabContainer} tabContainer`}>
+    <div
+      className={`${cs.tabContainer} tabContainer`}
+      onClick={props.onClick}
+      onKeyDown={e => {
+        if (e.key === "Enter") {
+          return props.onClick;
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
       <div
         className={cs.tabIndicator}
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322

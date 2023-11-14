@@ -203,6 +203,13 @@ const ImpactCountryShowcase = props => {
                 props.selectedCountry === country ? "active-country-item" : ""
               }`}
               onClick={() => props.setSelectedCountry(country)}
+              onKeyDown={e => {
+                if (e.key === "Enter") {
+                  props.setSelectedCountry(country);
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
               <div
                 className={`${cs.countryScrollItemIndicator} ${
@@ -346,6 +353,18 @@ const ImpactCountryShowcase = props => {
                 );
               }
             }}
+            onKeyDown={e => {
+              if (
+                e.key === "Enter" &&
+                ImpactCountryData[props.selectedCountry?.prevCountryIndex]
+              ) {
+                props.setSelectedCountry(
+                  ImpactCountryData[props.selectedCountry.prevCountryIndex],
+                );
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             {ImpactCountryData[props.selectedCountry.prevCountryIndex] ===
             undefined ? (
@@ -369,6 +388,18 @@ const ImpactCountryShowcase = props => {
                 );
               }
             }}
+            onKeyDown={e => {
+              if (
+                e.key === "Enter" &&
+                ImpactCountryData[props.selectedCountry?.nextCountryIndex]
+              ) {
+                props.setSelectedCountry(
+                  ImpactCountryData[props.selectedCountry.nextCountryIndex],
+                );
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             {ImpactCountryData[props.selectedCountry.nextCountryIndex] ===
             undefined ? (

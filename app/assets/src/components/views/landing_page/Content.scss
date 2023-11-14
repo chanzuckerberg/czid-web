@@ -17,6 +17,71 @@
       @include font-header-xl;
     }
   }
+
+  .bottomEmailForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 80px;
+    margin-top: 64px;
+    text-align: center;
+    margin-left: $sds-spaces-xl;
+    margin-right: $sds-spaces-xl;
+
+    @media (min-width: 796px) {
+      margin-top: 120px;
+      margin-bottom: 96px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h2 {
+      font-weight: 600;
+      margin-bottom: 48px;
+      font-size: 26px;
+      line-height: 34px;
+      letter-spacing: 0.3px;
+
+      @media (min-width: 769px) {
+        font-size: 34px;
+        line-height: 46px;
+      }
+    }
+
+    form input {
+      border: 1px solid #d3d3d3 !important;
+      margin-bottom: $sds-spaces-m;
+
+      @media (min-width: 769px) {
+        margin-bottom: 0;
+        border-right: none !important;
+      }
+    }
+
+    .finePrint {
+      margin-top: 16px;
+      text-align: left;
+      font-size: 13px;
+      line-height: 20px;
+      letter-spacing: 0.3px;
+
+      @media (min-width: 769px) {
+        margin-top: $sds-spaces-m;
+        font-size: 12px;
+        line-height: 18px;
+        text-align: center;
+      }
+
+      a {
+        color: $info-medium !important;
+
+        &:hover {
+          text-decoration: none;
+          color: $info-dark !important;
+        }
+      }
+    }
+  }
 }
 
 .summary {
@@ -123,16 +188,34 @@
 }
 
 .howItWorks {
-  margin-top: 5rem;
+  margin-top: 120px;
+  padding-top: 96px;
+  padding-bottom: 96px;
+  margin-bottom: 160px;
   text-align: center;
+  background: $gray-off-white;
 
   @media (max-width: 768px) {
-    padding-right: $sds-spaces-xl;
+    padding-top: 64px;
+    margin-top: 64px;
+    padding-bottom: 64px;
+    margin-bottom: 0;
     padding-left: $sds-spaces-xl;
+    padding-right: $sds-spaces-xl;
   }
 
   h2 {
-    margin-bottom: $sds-spaces-l;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 34px;
+    letter-spacing: 0.3px;
+    margin-bottom: 24px;
+
+    @media (min-width: 769px) {
+      font-size: 34px;
+      line-height: 46px;
+      margin-bottom: 32px;
+    }
   }
 
   p {
@@ -150,7 +233,7 @@
 .howItWorksProcess {
   display: flex;
   justify-content: space-evenly;
-  margin-top: 3rem;
+  margin-top: 48px;
   max-width: 1152px;
   margin-left: auto;
   margin-right: auto;
@@ -159,16 +242,33 @@
   padding-left: 40px;
 
   @media (max-width: 768px) {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 30px;
+    row-gap: 40px;
+    padding-left: 0;
+    padding-right: 0;
+    margin-top: 40px;
   }
 
-  svg {
+  img {
     height: 100px;
     width: auto;
   }
 
   h3 {
-    @include font-header-m;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 0.3px;
+    padding-top: 24px;
+    margin-top: 0;
+
+    @media (min-width: 769px) {
+      font-size: 16px;
+      line-height: 22px;
+      padding-top: 32px;
+    }
   }
 
   p {
@@ -189,33 +289,35 @@
   }
 }
 
-.howItWorksProcessStep {
-  @media (max-width: 768px) {
-    margin-bottom: 50px;
-  }
-}
-
 .tabbedGallery {
   display: flex;
   justify-content: center;
 }
 
 .questions {
-  margin-top: 8rem;
+  margin-top: 80px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: $gray-off-white;
+  padding-top: 77px;
+  padding-bottom: 64px;
 
   @media (max-width: 768px) {
-    margin-top: 45px;
+    padding-top: 64px;
+    padding-bottom: 64px;
   }
 
   h2 {
     text-align: center;
-    margin-bottom: $sds-spaces-l;
+    margin-bottom: 40px;
   }
 
   a {
-    margin: $sds-spaces-xl auto 3rem;
+    margin: 40px auto 0;
+
+    @media (min-width: 769px) {
+      margin: 32px auto 0;
+    }
   }
 }

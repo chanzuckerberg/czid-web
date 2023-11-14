@@ -7,15 +7,25 @@
   position: relative;
   margin-top: 2em;
 
+  @media (max-width: 768px) {
+    margin-top: 80px;
+    background: $sds-color-gray-100;
+    padding-top: 48px;
+    padding-bottom: 40px;
+  }
+
   &::before {
-    content: "";
-    position: absolute;
-    z-index: 1;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    height: calc(100% - 2em);
-    background-color: $sds-color-gray-100;
+    @media (min-width: 769px) {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      left: 0;
+      bottom: 50%;
+      transform: translateY(50%);
+      right: 0;
+      height: calc(100% - 70px);
+      background-color: $sds-color-gray-100;
+    }
   }
 
   &__Inner {
@@ -25,10 +35,8 @@
     position: relative;
     z-index: 2;
     margin: 0 auto;
-    overflow: hidden;
     padding: 0 $sds-spaces-xl;
     text-decoration: none;
-    cursor: pointer;
 
     @media (min-width: 769px) {
       flex-direction: row;
@@ -41,10 +49,14 @@
       flex-shrink: 0;
       background-color: $sds-color-gray-white;
       max-width: 311px;
-      box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, 0.1);
+      border: 1px solid #dbdbdb;
+      box-shadow: 0px $sds-spaces-xxs $sds-spaces-s 0px rgba($black, 0.05),
+        0px 15px 15px 0px rgba($black, 0.04),
+        0px 34px 21px 0px rgba($black, 0.03),
+        0px 61px 24px 0px rgba($black, 0.01), 0px 95px 27px 0px rgba($black, 0);
 
       @media (max-width: 768px) {
-        margin: 0 auto 3em auto;
+        margin: 0 auto 48px auto;
       }
     }
 
@@ -54,27 +66,75 @@
     }
 
     &_Copy {
-      padding: 0 0 3em 0;
-
       @media (min-width: 769px) {
-        padding: calc(4% + 2em) 0 4% 8%;
+        margin-left: 9%;
+        margin-right: 5%;
+        max-width: 600px;
       }
 
       h2 {
         color: $sds-color-gray-black;
         @include font-header-xl;
-        margin-bottom: $sds-spaces-l;
+        margin-bottom: 24px;
       }
 
       p {
         color: $sds-color-gray-600;
-        margin-bottom: $sds-spaces-xl;
+        margin-bottom: 34px;
         @include font-body-s;
 
         @media (max-width: 768px) {
-          margin: 1em 0 2em 0;
+          margin: 1em 0 32px;
+          font-size: 14px;
+        }
+
+        a {
+          color: $info-medium !important;
+
+          &:hover {
+            color: $info-dark !important;
+          }
         }
       }
+    }
+  }
+
+  &__buttonRow {
+    display: flex;
+
+    .solidBtn {
+      color: white !important;
+      background: $info-medium;
+      margin-right: $sds-spaces-m;
+
+      &:hover {
+        background: $info-dark !important;
+        border-color: $info-dark;
+      }
+    }
+  }
+
+  .copyCitationButton {
+    position: relative;
+
+    &__confirmation {
+      position: absolute;
+    }
+
+    span {
+      position: absolute;
+      left: 0;
+      bottom: -34px;
+      opacity: 0;
+      transition: opacity 0.4s;
+      color: $sds-color-gray-white;
+      background: $sds-color-gray-black;
+      padding: $sds-spaces-xxxs $sds-spaces-s;
+      font-size: 11px;
+      white-space: nowrap;
+      border-radius: $sds-corners-corner-m;
+      letter-spacing: 0.3px;
+      box-shadow: 1px 1px $sds-spaces-xxxs rgba($sds-color-gray-black, 0.4);
     }
   }
 }

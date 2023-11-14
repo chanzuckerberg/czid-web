@@ -1,0 +1,130 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.mediaBlockSection {
+  @media (min-width: 1001px) {
+    display: flex;
+    align-items: center;
+    padding-left: 60px;
+    padding-right: 60px;
+    margin-top: 165px;
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (min-width: 1139px) {
+    padding-left: 122px;
+    padding-right: 122px;
+  }
+
+  .mediaBlockImg {
+    max-width: 766px;
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    display: block;
+
+    @media (min-width: 1001px) {
+      width: 40%;
+      margin-right: 76px;
+      margin-left: unset;
+      flex-shrink: 1;
+    }
+
+    @media (min-width: 1139px) {
+      width: 65%;
+    }
+  }
+
+  h3 {
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 50px;
+    letter-spacing: 0.3px;
+
+    @media (max-width: 1000px) {
+      font-size: 26px;
+      line-height: 34px;
+      margin-left: $sds-spaces-xl;
+      margin-right: $sds-spaces-xl;
+      padding-top: 48px;
+    }
+  }
+
+  p {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 26px;
+    letter-spacing: 0.3px;
+    color: $gray-darkest;
+    margin-top: 24px;
+
+    @media (max-width: 1000px) {
+      font-size: 14px;
+      line-height: 24px;
+      margin-top: 32px;
+      margin-left: $sds-spaces-xl;
+      margin-right: $sds-spaces-xl;
+    }
+  }
+
+  .mediaBlock__iconSection {
+    margin-top: 48px;
+
+    @media (max-width: 1000px) {
+      margin-top: 64px;
+      margin-left: $sds-spaces-xl;
+      margin-right: $sds-spaces-xl;
+    }
+
+    &_item {
+      display: flex;
+
+      &:not(:first-of-type) {
+        margin-top: 40px;
+      }
+
+      h4 {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+        letter-spacing: 0.3px;
+
+        @media (min-width: 1001px) {
+          font-size: 16px;
+          line-height: 22px;
+        }
+      }
+
+      p {
+        color: $gray-darkest;
+        font-size: 13px;
+        line-height: 20px;
+        letter-spacing: 0.3px;
+        margin: 0;
+
+        @media (min-width: 1001px) {
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 24px;
+        }
+      }
+
+      svg {
+        flex-shrink: 0;
+        width: 60px;
+        height: 60px;
+        margin-right: $sds-spaces-m;
+
+        @media (min-width: 1001px) {
+          width: 42px;
+          height: 42px;
+          margin-right: 33px;
+        }
+      }
+    }
+  }
+}

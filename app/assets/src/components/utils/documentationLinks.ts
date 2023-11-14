@@ -106,3 +106,6 @@ export const READ_URL_HELP_LINK =
 
 export const CONTACT_US_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/requests/new";
+
+export const WHITE_PAPER_LINK =
+  "https://academic.oup.com/gigascience/article/9/10/giaa111/5918865";

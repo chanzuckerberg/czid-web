@@ -38,9 +38,9 @@
 
 .textLinkActive {
   text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-decoration-color: rgba(255, 255, 255, 0.5);
-  text-underline-offset: 8px;
+  text-decoration-thickness: $sds-spaces-xxxs;
+  text-decoration-color: rgba($sds-color-gray-white, 0.5);
+  text-underline-offset: $sds-spaces-s;
 }
 
 .buttonLink {
@@ -119,7 +119,7 @@
   color: $sds-color-gray-black;
   @include font-body-xs;
   font-weight: $font-weight-semibold;
-  margin: 22px 0;
+  margin: $sds-spaces-xl 0;
   transition: opacity 0.2s;
 
   &:nth-of-type(2) {

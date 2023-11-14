@@ -69,7 +69,7 @@ const LandingHeaderV2 = ({
               aria-label="View the CZ ID impact page"
               data-testid="home-top-nav-impact"
             >
-              Impact
+              Case Studies
             </a>
             <a
               className={cs.textLink}
@@ -94,6 +94,8 @@ const LandingHeaderV2 = ({
             onKeyDown={toggleMobileNav}
             className={cs.hamburgerIcon}
             data-testid="home-mobile-hamburger"
+            role="button"
+            tabIndex={0}
           >
             <div className={cs.bar1}></div>
             <div className={cs.bar2}></div>
@@ -109,6 +111,8 @@ const LandingHeaderV2 = ({
                 onClick={toggleMobileNav}
                 onKeyDown={toggleMobileNav}
                 data-testid="home-mobile-close-hamburger"
+                role="button"
+                tabIndex={0}
               >
                 <IconMobileNavClose />
               </span>
@@ -123,7 +127,7 @@ const LandingHeaderV2 = ({
                 aria-label="View the CZ ID impact page (opens in new window)"
                 data-testid="home-mobile-menu-impact"
               >
-                Impact
+                Case Studies
               </a>
               <a
                 className={cs.mobileNavLink}
@@ -147,17 +151,6 @@ const LandingHeaderV2 = ({
                 data-testid="home-mobile-menu-login"
               >
                 Sign In
-              </a>
-              <a
-                className={cs.mobileNavLink}
-                href="https://airtable.com/shrBGT42xVBR6JAVv"
-                style={menuOpen ? { opacity: "1" } : { opacity: "0" }}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="View the CZ ID intro survey (opens in new window)"
-                data-testid="home-mobile-menu-request-access"
-              >
-                Request Access
               </a>
             </div>
           </div>

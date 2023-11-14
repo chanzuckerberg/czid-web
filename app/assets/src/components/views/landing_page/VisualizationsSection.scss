@@ -1,0 +1,218 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~@czi-sds/components/dist/variables";
+
+.visualizationsSection {
+  margin-top: 80px;
+  margin-left: $sds-spaces-xl;
+  margin-right: $sds-spaces-xl;
+
+  @media (min-width: 769px) {
+    margin-top: 160px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 60px;
+    padding-right: 60px;
+  }
+
+  @media (min-width: 1139px) {
+    padding-left: 122px;
+    padding-right: 122px;
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 34px;
+    letter-spacing: 0.3px;
+
+    @media (min-width: 769px) {
+      text-align: center;
+      font-size: 34px;
+      line-height: 46px;
+    }
+  }
+
+  &__desktop {
+    max-width: 1190px;
+    margin-left: auto;
+    margin-right: auto;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  &__mobile {
+    margin-top: 40px;
+
+    @media (min-width: 769px) {
+      display: none;
+    }
+
+    h3 {
+      color: $info-medium;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 22px;
+      letter-spacing: 0.3px;
+      margin-bottom: 0;
+
+      &.active {
+        color: $info-dark;
+      }
+    }
+
+    p {
+      color: $gray-darkest;
+      font-size: 13px;
+      line-height: 20px;
+      letter-spacing: 0.3px;
+      margin-bottom: 0;
+    }
+
+    img {
+      width: 100%;
+      box-shadow: 0px 1.2055px 2.411px 0px rgba($sds-color-gray-black, 0.05),
+        0px 4.521px 4.521px 0px rgba($sds-color-gray-black, 0.04),
+        0px 10.2466px 6.3288px 0px rgba($sds-color-gray-black, 0.03),
+        0px 18.3836px 7.2329px 0px rgba($sds-color-gray-black, 0.01),
+        0px 28.6301px 8.137px 0px rgba($sds-color-gray-black, 0);
+      border-radius: $sds-corners-corner-m;
+      transition: opacity 0.35s;
+      display: none;
+
+      &.active {
+        height: auto;
+        margin-top: 24px;
+        display: block;
+        animation: fadeIn 0.35s ease forwards;
+      }
+    }
+
+    &_item {
+      cursor: pointer;
+
+      &:hover {
+        h3 {
+          color: $info-dark;
+        }
+      }
+
+      &:not(:first-of-type) {
+        padding-top: 24px;
+        border-top: 1px solid $gray-lightest;
+      }
+
+      &:not(:last-of-type) {
+        padding-bottom: 40px;
+      }
+    }
+
+    &_titleContainer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+  }
+
+  &__imageContainer {
+    position: relative;
+    aspect-ratio: 1095 / 510;
+    border-radius: 4px;
+    overflow: hidden;
+
+    @media (min-width: 769px) {
+      box-shadow: 0px 4px 8px 0px rgba($sds-color-gray-black, 0.05),
+        0px 15px 15px 0px rgba($sds-color-gray-black, 0.04),
+        0px 34px 21px 0px rgba($sds-color-gray-black, 0.03),
+        0px 61px 24px 0px rgba($sds-color-gray-black, 0.01),
+        0px 95px 27px 0px rgba($sds-color-gray-black, 0);
+    }
+
+    &_wrap {
+      padding: 25px 68px;
+      margin-top: 32px;
+      background: $gray-off-white;
+    }
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: all 0.35s;
+    }
+  }
+
+  &__selectionRow {
+    display: flex;
+
+    @media (min-width: 769px) {
+      justify-content: space-around;
+      max-width: 1195px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    &_item {
+      text-align: center;
+      cursor: pointer;
+
+      @media (min-width: 769px) {
+        border-radius: 5px 5px 0px 0px;
+        padding: 24px 18px 21px;
+
+        &.active {
+          background: $gray-off-white;
+          border-radius: 0px 0px 5px 5px;
+        }
+      }
+
+      &:hover {
+        h3 {
+          color: $info-dark;
+        }
+      }
+
+      h3 {
+        color: $info-medium;
+        font-weight: 600;
+
+        @media (min-width: 769px) {
+          font-size: 18px;
+          line-height: 24px;
+          letter-spacing: 0.3px;
+        }
+
+        &.active {
+          color: $info-dark;
+        }
+      }
+
+      p {
+        color: $gray-darkest;
+
+        @media (min-width: 769px) {
+          font-size: 13px;
+          line-height: 20px;
+          letter-spacing: 0.3px;
+        }
+      }
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}

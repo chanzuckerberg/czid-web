@@ -22,7 +22,7 @@
 
   @media (max-width: 768px) {
     padding-left: 65px;
-    text-indent: -38px;
+    text-indent: -$sds-spaces-xxl;
   }
 
   &:hover {
@@ -42,6 +42,16 @@
 
   &:first-of-type {
     border-top: $sds-borders-gray-300;
+
+    @media (max-width: 768px) {
+      border-radius: 5px 5px 0 0;
+    }
+  }
+
+  &:last-of-type {
+    @media (max-width: 768px) {
+      border-radius: 0 0 5px 5px;
+    }
   }
 
   svg {

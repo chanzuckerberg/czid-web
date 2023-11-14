@@ -1,113 +1,82 @@
+import { Link } from "@czi-sds/components";
 import React from "react";
-import IconAnalyzeFigure from "~/components/ui/icons/IconAnalyzeFigure";
-import IconMatchesFigure from "~/components/ui/icons/IconMatchesFigure";
-import IconSampleFigure from "~/components/ui/icons/IconSampleFigure";
-import IconUploadFigure from "~/components/ui/icons/IconUploadFigure";
 import CtaButton from "~/components/views/landing_page/CtaButton";
-import LaptopImg from "~/images/landing_page/czid-laptop-2x.png";
-import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure.svg";
-import HealthQuestionsMobileFigure from "~/images/landing_page/health-questions-mobile.svg";
+import RunPipelineIcon from "~/images/landing_page/run-pipeline-icon.png";
+import UploadSamplesIcon from "~/images/landing_page/upload-samples-icon.png";
+import ViewReportIcon from "~/images/landing_page/view-report-icon.png";
+import VisualizeDataIcon from "~/images/landing_page/visualize-data-icon.png";
 import KniAccordion from "./Accordion";
 import cs from "./Content.scss";
+import HeroEmailForm from "./HeroEmailForm";
+import MediaBlock from "./MediaBlock";
+import PartnersSection from "./PartnersSection";
+import PipelineSection from "./PipelineSection";
 import { News, Publications } from "./PublicationsAndNews";
 import PublicationStyles from "./PublicationsAndNews.scss";
-import QuoteSlider from "./QuoteSlider";
-import TabbedGallery from "./TabbedGallery";
+import VisualizationsSection from "./VisualizationsSection";
 import WhitePaper from "./WhitePaper";
 import WhitePaperStyles from "./WhitePaper.scss";
 
 const Content = () => {
   return (
     <div className={cs.contentContainer}>
-      <section className={cs.summary}>
-        <div className={cs.summaryText}>
-          <h2>Detect and track emerging infectious diseases worldwide</h2>
-          <p>
-            Chan Zuckerberg ID accepts sequencing data from researchers around
-            the world and quickly processes the results to provide actionable
-            information on the state of pathogens in a given set of samples.
-            This allows scientists to make data-driven decisions about when to
-            deploy antibiotics, where to prioritize immunization campaigns, how
-            to shape vector-borne disease surveillance and control efforts, and
-            more.
-          </p>
-          <CtaButton
-            text="See it in action"
-            linkUrl="https://public.czid.org/"
-            aria-label="View the CZ ID COVID-19 public dataset example (opens in new window)"
-          />
-        </div>
-        <div className={cs.summaryImage}>
-          <img src={LaptopImg} alt="" />
-        </div>
-      </section>
-      <section className={cs.healthQuestions}>
-        <h2>Investigate the world&apos;s biggest health questions</h2>
-        <figure>
-          <img
-            className={cs.healthQuestionsFigure}
-            src={HealthQuestionsFigure}
-            alt=""
-          />
-          <img
-            className={cs.healthQuestionsMobileFigure}
-            src={HealthQuestionsMobileFigure}
-            alt=""
-          />
-        </figure>
-      </section>
-
-      <QuoteSlider />
-
+      <PipelineSection />
       <section className={cs.howItWorks}>
-        <h2>How It Works</h2>
+        <h2>Get Started with 4 Simple Steps</h2>
         <p>
-          Finding out what&apos;s in your sample is as easy as uploading your
-          data to CZ ID and clicking a button. Our pipeline immediately gets to
-          work in the cloud, delivering you results in hours, not days.
+          All you need is a laptop and an internet connection to analyze your
+          data.
         </p>
 
         <div className={cs.howItWorksProcess}>
           <div className={cs.howItWorksProcessStep}>
-            <IconUploadFigure />
-            <h3>Upload</h3>
+            <img src={UploadSamplesIcon} alt="" />
+            <h3>Upload Samples</h3>
+            <p>We accept raw sequencing data from Illumina and Nanopore</p>
+          </div>
+          <div className={cs.howItWorksSeparator}></div>
+          <div className={cs.howItWorksProcessStep}>
+            <img src={RunPipelineIcon} alt="" />
+            <h3>Run Pipeline</h3>
             <p>
-              Upload FASTA/FASTQ files from your computer, or import from
-              Illumina&apos;s Basespace.
+              Samples run concurrently in the cloud through our automated
+              pipeline
             </p>
           </div>
           <div className={cs.howItWorksSeparator}></div>
           <div className={cs.howItWorksProcessStep}>
-            <IconMatchesFigure />
-            <h3>Find matches in NCBI</h3>
+            <img src={ViewReportIcon} alt="" />
+            <h3>View Report</h3>
             <p>
-              The pipeline searches against the nucleotide and protein databases
-              in NCBI for plant viruses, parasitic worms, bacteria, etc.
+              Our report page provides insights and key metrics necessary for
+              your analysis
             </p>
           </div>
           <div className={cs.howItWorksSeparator}></div>
           <div className={cs.howItWorksProcessStep}>
-            <IconSampleFigure />
-            <h3>View Per-Sample Taxon Counts</h3>
+            <img src={VisualizeDataIcon} alt="" />
+            <h3>Visualize Data</h3>
             <p>
-              Check out the auto-generated results page to see the
-              microorganisms found in each sample.
-            </p>
-          </div>
-          <div className={cs.howItWorksSeparator}></div>
-          <div className={cs.howItWorksProcessStep}>
-            <IconAnalyzeFigure />
-            <h3>Analyze & Visualize</h3>
-            <p>
-              Generate heatmaps, phylogenetic trees, or quality control charts
-              to help draw conclusions across your samples.
+              Create heatmaps and quality control charts to help draw
+              conclusions across samples
             </p>
           </div>
         </div>
       </section>
 
-      <section className={cs.tabbedGallery}>
-        <TabbedGallery />
+      <MediaBlock />
+
+      <VisualizationsSection />
+
+      <PartnersSection />
+
+      <section className={WhitePaperStyles.whitePaper}>
+        <WhitePaper />
+      </section>
+
+      <section className={PublicationStyles.publicationsAndNews}>
+        <Publications />
+        <News />
       </section>
 
       <section className={cs.questions}>
@@ -120,13 +89,16 @@ const Content = () => {
         />
       </section>
 
-      <section className={WhitePaperStyles.whitePaper}>
-        <WhitePaper />
-      </section>
-
-      <section className={PublicationStyles.publicationsAndNews}>
-        <Publications />
-        <News />
+      <section className={cs.bottomEmailForm}>
+        <h2>Get started analyzing your genomic data today.</h2>
+        <HeroEmailForm />
+        <div className={cs.finePrint}>
+          {'By clicking "Register Now," you agree to our '}
+          <Link href="/terms">Terms</Link>
+          {" and "}
+          <Link href="/privacy">Privacy Policy</Link>
+          {"."}
+        </div>
       </section>
     </div>
   );
