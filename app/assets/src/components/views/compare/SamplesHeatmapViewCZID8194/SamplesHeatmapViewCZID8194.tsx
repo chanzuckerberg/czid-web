@@ -864,12 +864,11 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       return; // Return early so that loadingFailed is not set to false later
     }
 
-    let pipelineVersions = [];
-    // @ts-expect-error ts-migrate(2554) FIXME: Expected 1 arguments, but got 2.
-    pipelineVersions = compact(property("pipeline_version"), heatmapData);
+    const pipelineVersions = compact(
+      map(property("pipeline_version"), heatmapData),
+    );
     const pipelineMajorVersionsSet = new Set(
       map(
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
         pipelineVersion => `${pipelineVersion.split(".")[0]}.x`,
         pipelineVersions,
       ),
