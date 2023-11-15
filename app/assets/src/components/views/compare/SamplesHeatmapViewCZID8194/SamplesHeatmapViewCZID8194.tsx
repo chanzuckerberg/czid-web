@@ -721,7 +721,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
       background,
       taxonTags,
     } = this.state.selectedOptions;
-    const { allowedFeatures = [] } = this.context || {};
+    const { allowedFeatures = [] } = this.props;
     const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
@@ -818,7 +818,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
   }
 
   async fetchViewData() {
-    const { allowedFeatures = [] } = this.context || {};
+    const { allowedFeatures = [] } = this.props;
     const useHeatmapPathogensFeature = allowedFeatures.includes(
       HEATMAP_PATHOGEN_FLAGGING_FEATURE,
     );
@@ -902,7 +902,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
 
   handleLoadingFailure = (err: $TSFixMe) => {
     const { allTaxonIds, sampleIds } = this.state;
-    const { allowedFeatures = [] } = this.context || {};
+    const { allowedFeatures = [] } = this.props;
     const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
@@ -1395,7 +1395,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
   }
 
   getTopTaxaPerSample(filteredTaxonIds: $TSFixMe, addedTaxonIds: $TSFixMe) {
-    const { allowedFeatures = [] } = this.context || {};
+    const { allowedFeatures = [] } = this.props;
     const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
@@ -1804,7 +1804,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
 
   handleSelectedOptionsChange = (newOptions: $TSFixMe) => {
     const { selectedOptions } = this.state;
-    const { allowedFeatures = [] } = this.context || {};
+    const { allowedFeatures = [] } = this.props;
     const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
@@ -1874,7 +1874,7 @@ class SamplesHeatmapViewCZID8194CC extends React.Component<
   }
 
   updateFilters() {
-    const { allowedFeatures = [] } = this.context || {};
+    const { allowedFeatures = [] } = this.props;
     const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
