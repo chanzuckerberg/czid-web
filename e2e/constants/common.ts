@@ -8,12 +8,12 @@ export const HREF = {
   UPLOAD: "/samples/upload",
 };
 export const footer: Record<string, string> = {
-  Github: "https://github.com/chanzuckerberg/czid-workflows",
+  Github: "https://github.com/chanzuckerberg/czid-workflows#workflows",
   Careers: "https://boards.greenhouse.io/chanzuckerberginitiative/jobs/3293983",
   Resources: "http://help.czid.org",
 };
 export const tag =
-  "Chan Zuckerberg ID: The free, cloud-based metagenomics platform for researchers";
+  "The no-code, cloud-based bioinformatics tool for researchers";
 export const VISUALIZATIONS = "Visualizations";
 export const TAXON_FILTERS = "Taxon Filters";
 
