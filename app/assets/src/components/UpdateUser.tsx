@@ -1,6 +1,5 @@
 import { includes } from "lodash/fp";
 import React, { useState } from "react";
-import { useWithAnalytics } from "~/api/analytics";
 import { updateUser as userUpdater } from "~/api/user";
 import UserForm from "~/components/views/users/UserForm";
 import { openUrl } from "~utils/links";
@@ -29,7 +28,6 @@ interface UpdateUserProps {
 }
 
 function UpdateUser(props: UpdateUserProps = {}) {
-  const withAnalytics = useWithAnalytics();
   const user = props.selectedUser;
   const selectedUser = {
     email: user ? user.email : "",
@@ -175,11 +173,6 @@ function UpdateUser(props: UpdateUserProps = {}) {
     }
   }
 
-  const submitFunc = () =>
-    withAnalytics(handleUpdate, "UpdateUser_update-form_submitted", {
-      form: "Update",
-    });
-
   return (
     <div>
       <UserForm
@@ -227,7 +220,7 @@ function UpdateUser(props: UpdateUserProps = {}) {
         }
         serverErrors={serverErrors}
         showFailed={showFailed}
-        submitFunc={submitFunc}
+        submitFunc={handleUpdate}
         submitting={submitting}
         success={success}
         successMessage={successMessage}
