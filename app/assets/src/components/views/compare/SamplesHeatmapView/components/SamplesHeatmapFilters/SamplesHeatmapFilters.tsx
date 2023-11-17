@@ -1,7 +1,7 @@
 import { Icon, Tooltip } from "@czi-sds/components";
-import React from "react";
+import React, { useContext } from "react";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
-import { useAllowedFeatures } from "~/components/common/UserContext";
+import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import Link from "~/components/ui/controls/Link";
 import { HEATMAP_KNOWN_PATHOGEN_FILTER } from "~/components/utils/features";
@@ -72,7 +72,8 @@ const SamplesHeatmapFilters = ({
   selectedOptions,
   onSelectedOptionsChange,
 }: SamplesHeatmapFiltersPropsType) => {
-  const allowedFeatures = useAllowedFeatures();
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
 
   const onTaxonLevelChange = (taxonLevel: SDSFormattedOption) => {
     const value = taxonLevel.value;

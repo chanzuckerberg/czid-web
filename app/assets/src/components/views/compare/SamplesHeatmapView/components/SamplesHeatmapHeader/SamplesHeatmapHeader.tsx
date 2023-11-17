@@ -1,9 +1,9 @@
 import { ButtonIcon, Icon } from "@czi-sds/components";
-import React from "react";
+import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
 import { updateHeatmapName } from "~/api/visualization";
 import BasicPopup from "~/components/BasicPopup";
-import { useAllowedFeatures } from "~/components/common/UserContext";
+import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader } from "~/components/layout";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
@@ -22,6 +22,7 @@ import {
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
+import SamplesHeatmapLegend from "../SamplesHeatmapLegend";
 import cs from "./samples_heatmap_header.scss";
 
 interface SamplesHeatmapHeaderProps {
@@ -36,6 +37,9 @@ interface SamplesHeatmapHeaderProps {
   onSaveClick: $TSFixMeFunction;
   onFilterToggleClick: $TSFixMeFunction;
   filterPanelOpen: boolean;
+  data: $TSFixMeUnknown;
+  selectedOptions: $TSFixMeUnknown;
+  options: $TSFixMeUnknown;
 }
 
 export const SamplesHeatmapHeader = ({
@@ -50,8 +54,12 @@ export const SamplesHeatmapHeader = ({
   onSaveClick,
   onFilterToggleClick,
   filterPanelOpen,
+  data,
+  selectedOptions,
+  options,
 }: SamplesHeatmapHeaderProps) => {
-  const allowedFeatures = useAllowedFeatures();
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
 
   const handleHeatmapRename = async (name: string) => {
     if (name === "heatmap") return "";
@@ -126,6 +134,13 @@ export const SamplesHeatmapHeader = ({
           </div>
         </ViewHeader.Content>
         <ViewHeader.Controls className={cs.controls}>
+          <SamplesHeatmapLegend
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
+            loading={loading}
+            data={data}
+            selectedOptions={selectedOptions}
+            options={options}
+          />
           {showNewPresetsButton && (
             <ColumnHeaderTooltip
               trigger={

@@ -9,6 +9,8 @@
 
 .heatmap {
   margin-top: -$header-margin-bottom;
+  max-height: calc(100vh - 50px);
+  overflow: hidden;
 
   .menu {
     background-color: $sds-color-gray-white;
@@ -83,6 +85,12 @@
     margin: 50px;
     text-align: center;
     color: $sds-color-gray-500;
+  }
+}
+
+.filterPanelContainer {
+  &.hideFilterPanel {
+    display: none;
   }
 }
 

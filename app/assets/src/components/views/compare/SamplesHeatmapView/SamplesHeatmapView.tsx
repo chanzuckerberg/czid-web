@@ -1,4 +1,5 @@
 import { Notification } from "@czi-sds/components";
+import { cx } from "@emotion/css";
 import axios from "axios";
 import DeepEqual from "fast-deep-equal";
 import {
@@ -62,7 +63,7 @@ import {
 } from "~/components/utils/urls";
 import { WorkflowType } from "~/components/utils/workflows";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
-import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
+import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapView/components/SamplesHeatmapVis";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import { URL_FIELDS } from "~/components/views/SampleView/utils";
 import {
@@ -80,7 +81,6 @@ import { SamplesHeatmapDownloadModal } from "./components/SamplesHeatmapDownload
 import SamplesHeatmapFilters from "./components/SamplesHeatmapFilters";
 import { OptionsType } from "./components/SamplesHeatmapFilters/SamplesHeatmapFilters";
 import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
-import SamplesHeatmapLegend from "./components/SamplesHeatmapLegend";
 import {
   APPLIED_FILTERS,
   BACKGROUND_METRICS,
@@ -102,7 +102,7 @@ const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
   return isNaN(parsed) ? defaultVal : parsed;
 };
 
-export interface SamplesHeatmapViewProps {
+interface SamplesHeatmapViewProps {
   addedTaxonIds?: $TSFixMeUnknown[];
   backgrounds?: { name?: string; value?: number }[];
   categories?: string[];
@@ -671,12 +671,10 @@ class SamplesHeatmapViewCC extends React.Component<
   };
 
   handleDownloadSvg = () => {
-    // TODO (gdingle): pass in filename per sample?
     this.heatmapVis.download();
   };
 
   handleDownloadPng = () => {
-    // TODO (gdingle): pass in filename per sample?
     this.heatmapVis.downloadAsPng();
   };
 
@@ -710,7 +708,7 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   async fetchHeatmapData(sampleIds: $TSFixMe) {
-    const { allowedFeatures, heatmapTs } = this.props;
+    const { heatmapTs } = this.props;
     const {
       presets,
       species,
@@ -723,6 +721,7 @@ class SamplesHeatmapViewCC extends React.Component<
       background,
       taxonTags,
     } = this.state.selectedOptions;
+    const { allowedFeatures = [] } = this.props;
     const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
@@ -809,6 +808,7 @@ class SamplesHeatmapViewCC extends React.Component<
         useHeatmapES,
       },
     );
+
     return heatmapData;
   }
 
@@ -818,7 +818,8 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   async fetchViewData() {
-    const useHeatmapPathogensFeature = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.props;
+    const useHeatmapPathogensFeature = allowedFeatures.includes(
       HEATMAP_PATHOGEN_FLAGGING_FEATURE,
     );
     const { sampleIds } = this.state;
@@ -901,7 +902,8 @@ class SamplesHeatmapViewCC extends React.Component<
 
   handleLoadingFailure = (err: $TSFixMe) => {
     const { allTaxonIds, sampleIds } = this.state;
-    const useHeatmapES = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.props;
+    const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
 
@@ -1393,7 +1395,8 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   getTopTaxaPerSample(filteredTaxonIds: $TSFixMe, addedTaxonIds: $TSFixMe) {
-    const useHeatmapES = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.props;
+    const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
 
@@ -1705,26 +1708,12 @@ class SamplesHeatmapViewCC extends React.Component<
       this.setState({
         sidebarVisible: false,
       });
-      this.props.trackEvent(
-        "SamplesHeatmapView_sample-details-sidebar_closed",
-        {
-          sampleId: sampleId,
-          sidebarMode: "sampleDetails",
-        },
-      );
     } else {
       this.setState({
         selectedSampleId: sampleId,
         sidebarMode: "sampleDetails",
         sidebarVisible: true,
       });
-      this.props.trackEvent(
-        "SamplesHeatmapView_sample-details-sidebar_opened",
-        {
-          sampleId: sampleId,
-          sidebarMode: "sampleDetails",
-        },
-      );
     }
   };
 
@@ -1815,7 +1804,8 @@ class SamplesHeatmapViewCC extends React.Component<
 
   handleSelectedOptionsChange = (newOptions: $TSFixMe) => {
     const { selectedOptions } = this.state;
-    const useHeatmapES = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.props;
+    const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
 
@@ -1884,7 +1874,8 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   updateFilters() {
-    const useHeatmapES = this.props.allowedFeatures.includes(
+    const { allowedFeatures = [] } = this.props;
+    const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
     if (useHeatmapES) {
@@ -1964,6 +1955,8 @@ class SamplesHeatmapViewCC extends React.Component<
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}
           onTaxonLabelClick={this.handleTaxonLabelClick}
+          options={this.getControlOptions()}
+          loading={this.state.loading}
           ref={(vis: $TSFixMe) => {
             this.heatmapVis = vis;
           }}
@@ -2149,11 +2142,10 @@ class SamplesHeatmapViewCC extends React.Component<
       downloadModalOpen,
       // enableMassNormalizedBackgrounds,
       heatmapCreationModalOpen,
-      // hideFilters,
+      hideFilters,
       loading,
       sampleIds,
       selectedOptions,
-      selectedSampleId,
       sidebarMode,
       sidebarVisible,
       taxonIds,
@@ -2182,41 +2174,45 @@ class SamplesHeatmapViewCC extends React.Component<
           onSaveClick={this.handleSaveClick}
           onFilterToggleClick={this.toggleDisplayFilters}
           filterPanelOpen={!this.state.hideFilters}
+          data={this.state.data}
+          selectedOptions={selectedOptions}
+          options={this.getControlOptions()}
         />
         {/* render visualization */}
         <div className="visualization-content">
-          <SamplesHeatmapLegend
-            loading={loading}
-            data={this.state.data}
-            selectedOptions={selectedOptions}
-            options={this.getControlOptions()}
-          />
           {/* render filters */}
           <div className={cs.filtersAndHeatmapContainer}>
-            <FilterPanel
-              hideFilters={this.state.hideFilters}
-              content={
-                <SamplesHeatmapFilters
-                  options={this.getControlOptions()}
-                  selectedOptions={selectedOptions}
-                  onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                  loading={loading}
-                  data={this.state.data}
-                  filteredTaxaCount={shownTaxa.size}
-                  totalTaxaCount={
-                    selectedOptions.species
-                      ? this.state.allSpeciesIds.length
-                      : this.state.allGeneraIds.length
-                  }
-                  prefilterConstants={this.props.prefilterConstants}
-                  enableMassNormalizedBackgrounds={
-                    this.state.enableMassNormalizedBackgrounds
-                  }
-                />
-              }
-              anchorPosition={"left"}
-              customDrawerWidth={200}
-            />
+            <div
+              className={cx(
+                cs.filterPanelContainer,
+                hideFilters && cs.hideFilterPanel,
+              )}
+            >
+              <FilterPanel
+                hideFilters={hideFilters}
+                content={
+                  <SamplesHeatmapFilters
+                    options={this.getControlOptions()}
+                    selectedOptions={selectedOptions}
+                    onSelectedOptionsChange={this.handleSelectedOptionsChange}
+                    loading={loading}
+                    data={this.state.data}
+                    filteredTaxaCount={shownTaxa.size}
+                    totalTaxaCount={
+                      selectedOptions.species
+                        ? this.state.allSpeciesIds.length
+                        : this.state.allGeneraIds.length
+                    }
+                    prefilterConstants={this.props.prefilterConstants}
+                    enableMassNormalizedBackgrounds={
+                      this.state.enableMassNormalizedBackgrounds
+                    }
+                  />
+                }
+                anchorPosition={"left"}
+                customDrawerWidth={200}
+              />
+            </div>
             {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
           </div>
         </div>
@@ -2224,14 +2220,7 @@ class SamplesHeatmapViewCC extends React.Component<
         <DetailsSidebar
           visible={sidebarVisible}
           mode={sidebarMode}
-          onClose={this.props.withAnalytics(
-            this.closeSidebar,
-            ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_DETAILS_SIDEBAR_CLOSED,
-            {
-              sampleId: selectedSampleId,
-              sidebarMode: sidebarMode,
-            },
-          )}
+          onClose={this.closeSidebar}
           params={this.getSidebarParams()}
         />
         {heatmapCreationModalOpen && (
