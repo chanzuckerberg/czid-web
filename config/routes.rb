@@ -35,6 +35,8 @@ Rails.application.routes.draw do
   get 'users/password/new' => 'users#password_new'
   get 'users/register', to: 'users#register'
 
+  get "identify", to: "identity#identify"
+
   resources :samples do
     member do
       get :pipeline_runs
