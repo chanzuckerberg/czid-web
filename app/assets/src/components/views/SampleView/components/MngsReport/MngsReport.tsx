@@ -16,6 +16,7 @@ export const MngsReport = ({
   backgrounds,
   currentTab,
   clearAllFilters,
+  dispatchSelectedOptions,
   enableMassNormalizedBackgrounds,
   filteredReportData,
   handleAnnotationUpdate,
@@ -23,10 +24,8 @@ export const MngsReport = ({
   handleConsensusGenomeClick,
   handleCoverageVizClick,
   handlePreviousConsensusGenomeClick,
-  handleOptionChanged,
   handleTaxonClick,
   handleViewClick,
-  refreshDataFromOptionsChange,
   lineageData,
   loadingReport,
   ownedBackgrounds,
@@ -51,11 +50,10 @@ export const MngsReport = ({
       <div className={cs.reportViewContainer}>
         <ReportFilters
           backgrounds={backgrounds}
+          dispatchSelectedOptions={dispatchSelectedOptions}
           loadingReport={loadingReport}
           ownedBackgrounds={ownedBackgrounds}
           otherBackgrounds={otherBackgrounds}
-          refreshDataFromOptionsChange={refreshDataFromOptionsChange}
-          onFilterChanged={handleOptionChanged}
           sampleId={sample?.id}
           selected={selectedOptions}
           view={view}

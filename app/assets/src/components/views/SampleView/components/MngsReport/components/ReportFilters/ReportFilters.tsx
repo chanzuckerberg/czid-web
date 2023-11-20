@@ -32,6 +32,9 @@ import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
 import {
   CATEGORIES,
+  DispatchSelectedOptionsType,
+  KEY_SELECTED_OPTIONS_BACKGROUND,
+  NONE_BACKGROUND_VALUE,
   THRESHOLDS,
   TREE_METRICS,
 } from "~/components/views/SampleView/utils";
@@ -49,26 +52,14 @@ import cs from "./report_filters.scss";
 interface ReportFiltersProps {
   backgrounds?: Background[];
   currentTab: CurrentTabSample;
+  dispatchSelectedOptions: React.Dispatch<DispatchSelectedOptionsType>;
   loadingReport?: boolean;
-  onFilterChanged?: ({
-    key,
-    subpath,
-    value,
-  }: {
-    key: string;
-    subpath?: string;
-    value: unknown;
-  }) => void;
   otherBackgrounds?: Background[];
   ownedBackgrounds?: Background[];
   sampleId?: number;
-  selected?: FilterSelections;
+  selected: FilterSelections;
   view?: SampleReportViewMode;
   enableMassNormalizedBackgrounds?: boolean;
-  refreshDataFromOptionsChange: (x: {
-    key: string;
-    newSelectedOptions: FilterSelections;
-  }) => void;
   showBackgroundFilter?: boolean;
   snapshotShareId?: string;
 }
@@ -76,14 +67,13 @@ interface ReportFiltersProps {
 export const ReportFilters = ({
   backgrounds,
   currentTab,
+  dispatchSelectedOptions,
   loadingReport,
-  onFilterChanged,
   otherBackgrounds,
   ownedBackgrounds,
   sampleId,
   selected,
   view,
-  refreshDataFromOptionsChange,
   enableMassNormalizedBackgrounds,
   snapshotShareId,
 }: ReportFiltersProps) => {
@@ -106,7 +96,6 @@ export const ReportFilters = ({
       case "thresholdsShortReads":
       case "thresholdsLongReads":
       case "annotations":
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         newSelectedOptions[key] = pull(value, newSelectedOptions[key]);
         break;
       case "categories":
@@ -122,8 +111,7 @@ export const ReportFilters = ({
       default:
         return;
     }
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-    refreshDataFromOptionsChange({ key, newSelectedOptions });
+    dispatchSelectedOptions({ type: "clear", payload: newSelectedOptions });
   };
 
   const handleFilterChange = ({
@@ -133,6 +121,13 @@ export const ReportFilters = ({
     key: string;
     value: unknown;
   }) => {
+    if (
+      key === KEY_SELECTED_OPTIONS_BACKGROUND &&
+      value === NONE_BACKGROUND_VALUE
+    ) {
+      value = null;
+    }
+
     trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_FILTER_CHANGED, {
       key,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -148,8 +143,10 @@ export const ReportFilters = ({
         sampleId,
       },
     );
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-    onFilterChanged({ key, value });
+    dispatchSelectedOptions({
+      type: "optionChanged",
+      payload: { key, value },
+    });
   };
 
   const handleRemoveFilter = ({
@@ -256,7 +253,6 @@ export const ReportFilters = ({
 
   // Only show aggregate score metric as a selectable option if the user has a background selected.
   // The aggregate score is computed by having background model applied.
-  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const treeMetrics = !selected.background
     ? filter(
         metric => metric.value !== "aggregatescore",
@@ -267,17 +263,13 @@ export const ReportFilters = ({
   // Display reads OR bases metrics based on the sample's workflow
   const selectedTreeMetric =
     currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
-      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        selected.metricShortReads
-      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        selected.metricLongReads;
+      ? selected.metricShortReads
+      : selected.metricLongReads;
 
   const selectedThresholds =
     currentTab === WORKFLOW_TABS.SHORT_READ_MNGS
-      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        selected.thresholdsShortReads
-      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        selected.thresholdsLongReads;
+      ? selected.thresholdsShortReads
+      : selected.thresholdsLongReads;
 
   return (
     <div className={cs.reportFilters}>
@@ -321,7 +313,6 @@ export const ReportFilters = ({
         )}
         <div className={cs.filterListElement}>
           <NameTypeFilter
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             value={selected.nameType}
             onChange={(value: unknown) =>
               handleFilterChange({
@@ -413,7 +404,6 @@ export const ReportFilters = ({
         </div>
         <div className={cs.filterListElement}>
           <SpecificityFilter
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             value={selected.readSpecificity}
             onChange={(value: string) =>
               handleFilterChange({
@@ -427,7 +417,6 @@ export const ReportFilters = ({
           allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) && (
             <div className={cs.filterListElement}>
               <AnnotationFilter
-                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                 selectedAnnotations={selected.annotations}
                 onChange={(value: string) =>
                   handleFilterChange({
@@ -442,7 +431,6 @@ export const ReportFilters = ({
           allowedFeatures.includes(PATHOGEN_FLAG_FILTER_FEATURE) && (
             <div className={cs.filterListElement}>
               <FlagFilter
-                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
                 selectedFlags={selected.flags}
                 onChange={(value: string) =>
                   handleFilterChange({
@@ -473,7 +461,6 @@ export const ReportFilters = ({
       </div>
       {!loadingReport && (
         <div className={cs.tagList}>
-          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           {selected.taxa.map(taxon =>
             renderFilterTag({
               key: "taxa",
@@ -485,7 +472,6 @@ export const ReportFilters = ({
             renderThresholdFilterTag({ threshold, idx: i }),
           )}
           {renderCategoryFilterTags()}
-          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           {selected.annotations.map((annotation, i) =>
             renderFilterTag({
               key: "annotations",

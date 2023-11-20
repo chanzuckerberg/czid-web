@@ -10,11 +10,13 @@ import {
   SampleReportViewMode,
 } from "~/interface/sampleView";
 import { Background, NumberId, PipelineRun, Taxon } from "~/interface/shared";
+import { DispatchSelectedOptionsType } from "../../utils";
 
 export interface MngsReportProps {
   backgrounds: Background[] | undefined;
   currentTab: CurrentTabSample;
   clearAllFilters: () => void;
+  dispatchSelectedOptions: React.Dispatch<DispatchSelectedOptionsType>;
   enableMassNormalizedBackgrounds: boolean;
   filteredReportData: Taxon[];
   handleAnnotationUpdate: () => void;
@@ -28,13 +30,8 @@ export interface MngsReportProps {
     params: ConsensusGenomeClick,
     sample: Sample,
   ) => void;
-  handleOptionChanged: (x: { key: string; value: string }) => void;
   handleTaxonClick: (x: Taxon) => void;
   handleViewClick: (x: { view: SampleReportViewMode }) => void;
-  refreshDataFromOptionsChange: (x: {
-    key: string;
-    newSelectedOptions: FilterSelections;
-  }) => void;
   lineageData: { [key: string]: Lineage };
   loadingReport: boolean;
   ownedBackgrounds: Background[];

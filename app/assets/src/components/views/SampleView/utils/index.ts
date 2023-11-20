@@ -106,7 +106,7 @@ export const initializeSelectedOptions = ({
   };
 };
 
-type ACTIONTYPE =
+export type DispatchSelectedOptionsType =
   | { type: "newBackground"; payload: { background: number | null } }
   | {
       type: "revertToSampleViewFilters";
@@ -140,7 +140,7 @@ type ACTIONTYPE =
 
 export const selectedOptionsReducer = (
   state: FilterSelections,
-  action: ACTIONTYPE,
+  action: DispatchSelectedOptionsType,
 ): FilterSelections => {
   switch (action.type) {
     case "newBackground": {
@@ -207,6 +207,7 @@ export const selectedOptionsReducer = (
       };
     }
     case "clear": {
+      saveToLocalStorage(action.payload);
       return action.payload;
     }
   }

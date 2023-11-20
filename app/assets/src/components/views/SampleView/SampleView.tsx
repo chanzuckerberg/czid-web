@@ -106,7 +106,6 @@ import {
   KEY_SAMPLE_VIEW_OPTIONS,
   KEY_SELECTED_OPTIONS_BACKGROUND,
   loadState,
-  NONE_BACKGROUND_VALUE,
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   provideOptionToRevertToSampleViewFilters,
@@ -591,36 +590,20 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
     [hasPersistedBackground, project?.id],
   );
 
-  const handleDeliberateOptionChanged = useCallback(
-    ({ key, value }: { key: string; value: unknown }) => {
-      if (
-        key === KEY_SELECTED_OPTIONS_BACKGROUND &&
-        value === NONE_BACKGROUND_VALUE
-      ) {
-        value = null;
-      }
-      dispatchSelectedOptions({
-        type: "optionChanged",
-        payload: { key, value },
-      });
-    },
-    [],
-  );
-
   const handleInvalidBackgroundSelection = useCallback(
     ({ invalidBackgroundId }: { invalidBackgroundId: number | null }) => {
       const invalidBackground = backgrounds.find(
         background => invalidBackgroundId === background.id,
       );
-      handleDeliberateOptionChanged({
-        key: KEY_SELECTED_OPTIONS_BACKGROUND,
-        value: null,
+      dispatchSelectedOptions({
+        type: "optionChanged",
+        payload: { key: KEY_SELECTED_OPTIONS_BACKGROUND, value: null },
       });
       showNotification(NOTIFICATION_TYPES.invalidBackground, {
         backgroundName: invalidBackground?.name,
       });
     },
-    [backgrounds, handleDeliberateOptionChanged],
+    [backgrounds],
   );
 
   const previousBackground = useRef<number | null | undefined>(undefined);
@@ -1134,13 +1117,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
     setWorkflowRunId(workflowRun.id);
   };
 
-  const refreshDataFromOptionsChange = (x: {
-    key: string;
-    newSelectedOptions: FilterSelections;
-  }) => {
-    dispatchSelectedOptions({ type: "clear", payload: x.newSelectedOptions });
-  };
-
   const currentRun = getCurrentRun();
   const background =
     backgrounds.find(
@@ -1190,6 +1166,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
             currentTab={currentTab}
             currentRun={currentRun}
             clearAllFilters={clearAllFilters}
+            dispatchSelectedOptions={dispatchSelectedOptions}
             enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
             filteredReportData={filteredReportData}
             handleAnnotationUpdate={fetchSampleReportData}
@@ -1199,11 +1176,9 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
             handlePreviousConsensusGenomeClick={
               handlePreviousConsensusGenomeClick
             }
-            handleOptionChanged={handleDeliberateOptionChanged}
             handleTaxonClick={handleTaxonClick}
             handleViewClick={handleViewClick}
             handleWorkflowRunSelect={handleChangeWorkflowRun}
-            refreshDataFromOptionsChange={refreshDataFromOptionsChange}
             lineageData={lineageData}
             loadingReport={loadingReport}
             ownedBackgrounds={ownedBackgrounds}

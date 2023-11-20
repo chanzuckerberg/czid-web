@@ -15,15 +15,14 @@ export const ReportPanel = ({
   currentRun,
   currentTab,
   clearAllFilters,
+  dispatchSelectedOptions,
   enableMassNormalizedBackgrounds,
-  refreshDataFromOptionsChange,
   filteredReportData,
   handleAnnotationUpdate,
   handleBlastClick,
   handleConsensusGenomeClick,
   handleCoverageVizClick,
   handlePreviousConsensusGenomeClick,
-  handleOptionChanged,
   handleTaxonClick,
   handleViewClick,
   handleWorkflowRunSelect,
@@ -47,7 +46,7 @@ export const ReportPanel = ({
           backgrounds={backgrounds}
           currentTab={currentTab}
           clearAllFilters={clearAllFilters}
-          refreshDataFromOptionsChange={refreshDataFromOptionsChange}
+          dispatchSelectedOptions={dispatchSelectedOptions}
           enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
           filteredReportData={filteredReportData}
           handleAnnotationUpdate={handleAnnotationUpdate}
@@ -57,7 +56,6 @@ export const ReportPanel = ({
           handlePreviousConsensusGenomeClick={
             handlePreviousConsensusGenomeClick
           }
-          handleOptionChanged={handleOptionChanged}
           handleTaxonClick={handleTaxonClick}
           handleViewClick={handleViewClick}
           lineageData={lineageData}

@@ -12,10 +12,12 @@ import {
   SampleReportViewMode,
 } from "~/interface/sampleView";
 import { Background, NumberId, PipelineRun, Taxon } from "~/interface/shared";
+import { DispatchSelectedOptionsType } from "../../utils";
 
 export interface ReportPanelProps {
   amrDeprecatedData: AmrDeprectatedData[] | null;
   backgrounds?: Background[];
+  dispatchSelectedOptions: React.Dispatch<DispatchSelectedOptionsType>;
   currentRun?: PipelineRun | WorkflowRun | null;
   currentTab: CurrentTabSample;
   clearAllFilters: () => void;
@@ -29,14 +31,9 @@ export interface ReportPanelProps {
     x: ConsensusGenomeClick,
     sample: Sample,
   ) => void;
-  handleOptionChanged: (x: { key: string; value: string }) => void;
   handleTaxonClick: (x: Taxon) => void;
   handleViewClick: (x: { view: SampleReportViewMode }) => void;
   handleWorkflowRunSelect: (workflowRun: WorkflowRun) => void;
-  refreshDataFromOptionsChange: (x: {
-    key: string;
-    newSelectedOptions: FilterSelections;
-  }) => void;
   lineageData: { [key: string]: Lineage };
   loadingReport: boolean;
   ownedBackgrounds: Background[];
