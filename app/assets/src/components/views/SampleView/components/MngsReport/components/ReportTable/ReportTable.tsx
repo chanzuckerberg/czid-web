@@ -43,6 +43,7 @@ export const NUMBER_NULL_VALUES = [
   Number.MIN_SAFE_INTEGER,
   Number.MAX_SAFE_INTEGER,
 ];
+export const Z_SCORE_NULL_VALUE = -100;
 export const INVALID_CALL_BASE_TAXID = -1e8;
 export const TAX_LEVEL_INDICES = {
   species: 1,

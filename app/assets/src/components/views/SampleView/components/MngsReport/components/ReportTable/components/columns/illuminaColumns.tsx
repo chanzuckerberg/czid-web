@@ -9,7 +9,7 @@ import {
   SortFunctionsParams,
 } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
-import { NUMBER_NULL_VALUES } from "../../ReportTable";
+import { NUMBER_NULL_VALUES, Z_SCORE_NULL_VALUE } from "../../ReportTable";
 import { getAggregateScoreRenderer } from "./renderers/aggregateScoreRenderer";
 import { getCellValueRenderer } from "./renderers/cellValueRenderer";
 import { getZScoreRenderer } from "./renderers/zScoreRenderer";
@@ -54,7 +54,7 @@ export const getIlluminaColumns: (
         getCountTypeValuesFromDataRow({
           rowData,
           field: "z_score",
-          defaultValue: 0,
+          defaultValue: Z_SCORE_NULL_VALUE,
           countTypes: countTypes,
         }),
       cellRenderer: getZScoreRenderer(dbType, displayNoBackground),
@@ -66,7 +66,7 @@ export const getIlluminaColumns: (
           data,
           sortDirection,
           path: ["z_score"],
-          nullValue: 0,
+          nullValue: Z_SCORE_NULL_VALUE,
           limits: NUMBER_NULL_VALUES,
         }),
       disableSort: displayNoBackground,
