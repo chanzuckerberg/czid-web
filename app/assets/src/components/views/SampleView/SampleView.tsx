@@ -18,7 +18,11 @@ import {
   kickoffConsensusGenome,
 } from "~/api";
 import { getAmrDeprecatedData } from "~/api/amr";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  TrackEventType,
+  useTrackEvent,
+} from "~/api/analytics";
 import {
   createPersistedBackground,
   getPersistedBackground,
@@ -133,7 +137,8 @@ import {
 //  5.  If the user manually changes selectedOptions (e.g. by clicking on a filter) then the component needs to update the local storage
 
 const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
-  const trackEvent = useTrackEvent();
+  const trackEvent = useRef<TrackEventType | null>(null);
+  trackEvent.current = useTrackEvent();
   const { allowedFeatures } = useContext(UserContext) || {};
 
   const {
@@ -350,11 +355,12 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
     // track Clicks on tabs
     if (typeof currentTab === "string") {
       const name = currentTab.replace(/\W+/g, "-").toLowerCase();
-      trackEvent(`SampleView_tab-${name}_clicked`, {
-        tab: currentTab,
-      });
+      trackEvent.current &&
+        trackEvent.current(`SampleView_tab-${name}_clicked`, {
+          tab: currentTab,
+        });
     }
-  }, [currentTab, trackEvent]);
+  }, [currentTab]);
 
   useEffect(() => {
     if (
@@ -420,18 +426,22 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
               background: persistedBackgroundFetched,
             },
           });
-          if (persistedBackgroundFetched) {
-            setHasPersistedBackground(true);
-          } else {
-            setHasPersistedBackground(false);
-          }
+          setHasPersistedBackground(true);
         })
-        .catch((error: object) => {
+        .catch((error: { error: string }) => {
+          // the user has not created a persisted background for this sample yet
           setHasPersistedBackground(false);
-          console.error(error);
+          // if some other error has occured, log it
+          if (error.error !== "Persisted background not found") {
+            console.error(error);
+          }
         });
     };
-    if (project?.id && !ignoreProjectBackground && !hasPersistedBackground) {
+    if (
+      project?.id &&
+      !ignoreProjectBackground &&
+      hasPersistedBackground === null
+    ) {
       fetchPersistedBackground({ projectId: project.id });
     }
   }, [project?.id, ignoreProjectBackground, hasPersistedBackground]);
@@ -500,7 +510,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
     },
     [allowedFeatures, currentTab, selectedOptions?.nameType],
   );
-
   const fetchSampleReportData = useCallback(
     async ({ backgroundId }: { backgroundId?: number | null } = {}) => {
       let selectedBackground =
@@ -523,10 +532,14 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       const backgroundIdUsed = backgroundId || selectedBackground?.id || null;
 
       setLoadingReport(true);
-      trackEvent(ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_SAMPLE_VIEWED, {
-        sampleId,
-        workflow: currentTab,
-      });
+      trackEvent.current &&
+        trackEvent.current(
+          ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_SAMPLE_VIEWED,
+          {
+            sampleId,
+            workflow: currentTab,
+          },
+        );
       try {
         const rawReportData: RawReportData = await getSampleReportData({
           snapshotShareId,
@@ -554,7 +567,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       backgrounds,
       ignoreProjectBackground,
       enableMassNormalizedBackgrounds,
-      trackEvent,
       sampleId,
       currentTab,
       selectedOptions?.background,
@@ -567,25 +579,30 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   const persistNewBackgroundModelSelection = useCallback(
     async ({ newBackgroundId }: { newBackgroundId: number | null }) => {
       const persistBackgroundApi =
-        hasPersistedBackground === null
+        hasPersistedBackground === false
           ? createPersistedBackground
           : updatePersistedBackground;
       project?.id &&
         (await persistBackgroundApi({
           projectId: project?.id,
           backgroundId: newBackgroundId,
-        }).catch((error: Error) => {
-          logError({
-            message: "SampleView: Failed to persist background model selection",
-            details: {
-              error,
-              projectId: project?.id,
-              backgroundId: newBackgroundId,
-              hasExistingPersistedBackground: hasPersistedBackground,
-            },
-          });
-          console.error(error);
-        }));
+        })
+          .then(() => {
+            setHasPersistedBackground(true);
+          })
+          .catch((error: Error) => {
+            logError({
+              message:
+                "SampleView: Failed to persist background model selection",
+              details: {
+                error,
+                projectId: project?.id,
+                backgroundId: newBackgroundId,
+                hasExistingPersistedBackground: hasPersistedBackground,
+              },
+            });
+            console.error(error);
+          }));
     },
     [hasPersistedBackground, project?.id],
   );
@@ -628,7 +645,8 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
           // if project background is different than background
           previousBackground.current = selectedOptions?.background || null;
           if (successfullyFetchedSampleReportData) {
-            if (!ignoreProjectBackground) {
+            if (!ignoreProjectBackground && hasPersistedBackground !== null) {
+              // ie if you have already checked if there is a persisted background via fetchPersistedBackground
               persistNewBackgroundModelSelection({
                 newBackgroundId: selectedOptions?.background,
               });
@@ -795,11 +813,12 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       status = workflowRun?.status ?? "no workflow run status";
     }
 
-    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SINGLE_RUN_DELETED, {
-      workflow: workflow,
-      runStatus: status.toLowerCase(),
-      projectId: project?.id,
-    });
+    trackEvent.current &&
+      trackEvent.current(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SINGLE_RUN_DELETED, {
+        workflow: workflow,
+        runStatus: status.toLowerCase(),
+        projectId: project?.id,
+      });
 
     // add all the values of the workflowCount object
     const totalWorkflowCount = Object.values(workflowCount).reduce(
@@ -1093,7 +1112,8 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   };
 
   const handleViewClick = ({ view }: { view: SampleReportViewMode }) => {
-    trackEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
+    trackEvent.current &&
+      trackEvent.current(`PipelineSampleReport_${view}-view-menu_clicked`);
     setView(view);
   };
 
