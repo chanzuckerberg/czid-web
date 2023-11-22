@@ -709,13 +709,13 @@ class SamplesController < ApplicationController
       end
     end
 
-    version_number = client.sub(/-.*$/, "")
+    version_string = StringUtil.extract_version_string(client)
     # Check if the client is up-to-date. "web" is always valid whereas the
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
     min_version = Gem::Version.new(MIN_CLI_VERSION)
 
-    version_obj = client && client != "web" && Gem::Version.new(version_number)
+    version_obj = client && client != "web" && Gem::Version.new(version_string)
     unless client && (client == "web" || version_obj >= min_version)
       render json: {
         message: CLI_DEPRECATION_MSG,

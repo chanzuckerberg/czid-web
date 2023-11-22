@@ -64,4 +64,11 @@ RSpec.describe StringUtil do
       expect { StringUtil.canonicalize_url(url, :invalid_method) }.to raise_error(ActionController::UnknownHttpMethod)
     end
   end
+
+  describe "#extract_version_string" do
+    it "should only return the input up to the first hyphen/dash" do
+      client_input = "cli1.6.7-unnecessary-identifier"
+      expect(StringUtil.extract_version_string(client_input)).to eq("cli1.6.7")
+    end
+  end
 end

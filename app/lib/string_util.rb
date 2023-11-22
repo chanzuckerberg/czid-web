@@ -40,4 +40,8 @@ module StringUtil
     )
     raise err
   end
+
+  def self.extract_version_string(client_input_string)
+    return client_input_string.split("").take_while { |char| char != "-" }.join
+  end
 end
