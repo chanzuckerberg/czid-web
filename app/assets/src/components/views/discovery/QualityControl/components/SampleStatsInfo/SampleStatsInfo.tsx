@@ -10,7 +10,7 @@ interface SampleStatsInfoProps {
   runningSamples: Sample[];
   failedSamples: Sample[];
   validSamples: Sample[];
-  totalSampleCount: number;
+  totalSampleCount: number | null;
 }
 
 export const SampleStatsInfo = ({

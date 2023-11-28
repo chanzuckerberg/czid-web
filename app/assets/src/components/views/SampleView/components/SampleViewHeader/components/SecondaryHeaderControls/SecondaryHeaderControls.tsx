@@ -1,5 +1,4 @@
 import { Button } from "@czi-sds/components";
-import { get } from "lodash/fp";
 import React from "react";
 import { WorkflowType } from "~/components/utils/workflows";
 import { PipelineVersionSelect } from "~/components/views/components/PipelineVersionSelect";
@@ -29,7 +28,6 @@ export const SecondaryHeaderControls = ({
     <div className={cs.controlsTopRowContainer}>
       {currentRun && (
         <PipelineVersionSelect
-          sampleId={get("id", sample)}
           currentRun={currentRun}
           allRuns={getAllRuns()}
           workflowType={workflow}

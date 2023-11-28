@@ -84,7 +84,7 @@ export const SampleViewHeader = ({
                 onClick: () => {
                   openUrl(
                     generateUrlToSampleView({
-                      sampleId: sample.id,
+                      sampleId: sample?.id?.toString(),
                       snapshotShareId,
                     }),
                   );

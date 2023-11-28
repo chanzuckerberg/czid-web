@@ -4,11 +4,12 @@ import { UserContext } from "~/components/common/UserContext";
 import { SaveButton } from "~/components/ui/controls/buttons";
 import { WorkflowType } from "~/components/utils/workflows";
 import { parseUrlParams } from "~/helpers/url";
+import { SampleId } from "~/interface/shared";
 import { SampleViewSaveButtonConfig } from "./workflowTypeConfig";
 
 interface SampleViewSaveButtonProps {
   view: string;
-  sampleId: number;
+  sampleId: SampleId;
   isHidden?: boolean;
   className?: string;
   workflow: WorkflowType;

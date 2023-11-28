@@ -8,7 +8,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { FragmentRefs, ReaderFragment } from "relay-runtime";
+import { Fragment, ReaderFragment } from 'relay-runtime';
+import { FragmentRefs } from "relay-runtime";
 export type AnchorMenuFragment$data = {
   readonly pathogens: ReadonlyArray<{
     readonly category: string | null;
@@ -23,46 +24,46 @@ export type AnchorMenuFragment$key = {
 };
 
 const node: ReaderFragment = {
-  argumentDefinitions: [],
-  kind: "Fragment",
-  metadata: null,
-  name: "AnchorMenuFragment",
-  selections: [
+  "argumentDefinitions": [],
+  "kind": "Fragment",
+  "metadata": null,
+  "name": "AnchorMenuFragment",
+  "selections": [
     {
-      alias: null,
-      args: null,
-      concreteType: "Pathogen",
-      kind: "LinkedField",
-      name: "pathogens",
-      plural: true,
-      selections: [
+      "alias": null,
+      "args": null,
+      "concreteType": "Pathogen",
+      "kind": "LinkedField",
+      "name": "pathogens",
+      "plural": true,
+      "selections": [
         {
-          alias: null,
-          args: null,
-          kind: "ScalarField",
-          name: "category",
-          storageKey: null,
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "category",
+          "storageKey": null
         },
         {
-          alias: null,
-          args: null,
-          kind: "ScalarField",
-          name: "name",
-          storageKey: null,
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "name",
+          "storageKey": null
         },
         {
-          alias: null,
-          args: null,
-          kind: "ScalarField",
-          name: "taxId",
-          storageKey: null,
-        },
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "taxId",
+          "storageKey": null
+        }
       ],
-      storageKey: null,
-    },
+      "storageKey": null
+    }
   ],
-  type: "PathogenList",
-  abstractKey: null,
+  "type": "PathogenList",
+  "abstractKey": null
 };
 
 (node as any).hash = "f0bc3416b8eba1148aa2f9119707a15a";

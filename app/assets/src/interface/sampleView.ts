@@ -11,6 +11,7 @@ import {
   DateString,
   NumberId,
   PipelineRun,
+  SampleId,
   Taxon,
 } from "~/interface/shared";
 import { BlastModalInfo } from "../components/views/SampleView/components/ModalManager/components/BlastModals/constants";
@@ -48,7 +49,7 @@ export interface Lineage {
 export interface BlastData {
   context: { blastedFrom: string };
   pipelineVersion: string;
-  sampleId: number;
+  sampleId: SampleId;
   taxName: string;
   taxId: number;
   taxLevel?: number;

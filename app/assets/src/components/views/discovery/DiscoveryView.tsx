@@ -1507,7 +1507,7 @@ class DiscoveryViewCC extends React.Component<
 
     const url = generateUrlToSampleView({
       workflow,
-      sampleId,
+      sampleId: sampleId.toString(),
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       workflowRunId,
       snapshotShareId,

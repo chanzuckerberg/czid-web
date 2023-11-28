@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
+import { SampleId } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
@@ -30,7 +31,7 @@ interface BlastContigsModalProps {
   context: object;
   onClose: () => void;
   open: boolean;
-  sampleId: number;
+  sampleId: SampleId;
   pipelineVersion: string;
   taxonName: string;
   taxonId: number;

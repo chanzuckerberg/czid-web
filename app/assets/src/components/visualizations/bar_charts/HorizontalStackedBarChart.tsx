@@ -201,6 +201,7 @@ export default class HorizontalStackedBarChart extends React.Component<
   }
 
   componentWillUnmount() {
+    this.setState({ redrawNeeded: true });
     window.removeEventListener("resize", this.handleWindowResize);
   }
 

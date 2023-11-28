@@ -7,7 +7,7 @@ import {
   CurrentTabSample,
   SortFunctionsParams,
 } from "~/interface/sampleView";
-import { Taxon } from "~/interface/shared";
+import { SampleId, Taxon } from "~/interface/shared";
 import {
   PhyloTreeModalParamsType,
   STRING_NULL_VALUES,
@@ -31,7 +31,7 @@ export const getNonNumericColumns = (
   pipelineRunId: number,
   pipelineVersion: string,
   projectId: number,
-  sampleId: number,
+  sampleId: SampleId,
   handlePhyloTreeModalOpen: (
     phyloTreeModalParams: PhyloTreeModalParamsType,
   ) => void,

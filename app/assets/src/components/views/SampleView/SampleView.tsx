@@ -325,7 +325,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
     const fetchSample = async (sampleId: number) => {
       setLoadingReport(true);
       const sample = await getSample({ snapshotShareId, sampleId });
-      sample.id = sampleId;
+      sample.id = sampleId.toString();
 
       setSample(sample);
       setProject(sample.project);

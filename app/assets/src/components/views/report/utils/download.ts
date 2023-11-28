@@ -1,5 +1,6 @@
 import { compact } from "lodash/fp";
 import { EventData, TrackEventType } from "~/api/analytics";
+import { SampleId } from "~/interface/shared";
 
 const NON_HOST_READS_LABEL = "Download Non-Host Reads (.fasta)";
 const NON_HOST_CONTIGS_LABEL = "Download Non-Host Contigs (.fasta)";
@@ -123,7 +124,7 @@ export const getDownloadContigUrl = ({
   taxId,
 }: {
   pipelineVersion: string;
-  sampleId: number;
+  sampleId: SampleId;
   taxId: number;
 }): string => {
   return `/samples/${sampleId}/taxid_contigs_download?taxid=${taxId}&pipeline_version=${pipelineVersion}`;

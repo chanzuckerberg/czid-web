@@ -21,7 +21,7 @@ export interface TempSelectedOptionsShape {
 }
 
 interface generateUrlOptions {
-  sampleId: number;
+  sampleId: string;
   snapshotShareId?: string | null;
   tempSelectedOptions?: TempSelectedOptionsShape | Record<string, never>;
   workflow?: WorkflowType | null;

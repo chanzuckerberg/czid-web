@@ -109,7 +109,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
       return this._accessionDataCache[accessionId];
     } else {
       const data = await getCoverageVizData({
-        sampleId,
+        sampleId: sampleId.toString(),
         accessionId,
         snapshotShareId,
         pipelineVersion,

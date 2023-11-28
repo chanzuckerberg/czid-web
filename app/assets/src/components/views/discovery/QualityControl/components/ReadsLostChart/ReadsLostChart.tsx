@@ -28,7 +28,7 @@ interface ReadsLostChartProps {
   handleChartElementHover: (clientX: number, clientY: number) => void;
   handleChartElementExit: () => void;
   setChartTooltipData: $TSFixMeFunction;
-  setTooltipClass: (tooltipClass: string) => void;
+  setTooltipClass: React.Dispatch<React.SetStateAction<null>>;
   setSidebarVisible: (sidebarVisible: boolean) => void;
   setSidebarParams: (sidebarParams: SampleDetailsModeProps) => void;
   sidebarParams: SampleDetailsModeProps;
@@ -36,7 +36,7 @@ interface ReadsLostChartProps {
 }
 
 export const ReadsLostChartQuery = graphql`
-  query ReadsLostChartQuery($sampleIds: [Int!]!) {
+  query ReadsLostChartQuery($sampleIds: [String!]!) {
     sampleReadsStats(sampleIds: $sampleIds) {
       sampleReadsStats {
         sampleId
@@ -73,7 +73,7 @@ export const ReadsLostChart = ({
   const [readsLostChartColors, setReadsLostChartColors] = useState(null);
 
   const data = useLazyLoadQuery<ReadsLostChartQueryType>(ReadsLostChartQuery, {
-    sampleIds: validSamples.map(sample => sample.id),
+    sampleIds: validSamples.map(sample => sample.id.toString()),
   });
 
   const samplesReadsStatsData = data.sampleReadsStats.sampleReadsStats;
@@ -91,7 +91,7 @@ export const ReadsLostChart = ({
     setReadsLostCategories(categories);
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setReadsLostChartColors(chartColors);
-  }, []);
+  }, [samplesReadsStatsData]);
 
   function stackReadsLostData(samplesReadsStats) {
     samplesReadsStats = samplesReadsStats.reduce((result, item) => {
@@ -288,7 +288,7 @@ export const ReadsLostChart = ({
     setChartTooltipData(chartTooltipData);
   };
 
-  const handleSampleLabelClick = sampleName => {
+  const handleSampleLabelClick = (sampleName: string) => {
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const sampleId = validSamples.find(sample => sample.name === sampleName).id;
 

@@ -14,7 +14,7 @@ import BasicPopup from "~/components/BasicPopup";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import { getURLParamString } from "~/helpers/url";
-import { GenomeVizShape, TooltipLocation } from "~/interface/shared";
+import { GenomeVizShape, SampleId, TooltipLocation } from "~/interface/shared";
 import { TooltipVizTable } from "~ui/containers";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 import { AccessionsData } from "./types";
@@ -29,7 +29,7 @@ interface HitGroupVizProps {
   label: string;
   hitGroups: AccessionsData["hit_groups"];
   accessionData: AccessionsData;
-  sampleId: number;
+  sampleId: SampleId;
   taxonId: number;
   pipelineVersion: string;
   color: string;

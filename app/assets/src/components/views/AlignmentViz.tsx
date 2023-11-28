@@ -7,6 +7,7 @@ import {
   ASSEMBLY_FEATURE,
   isPipelineFeatureAvailable,
 } from "~/components/utils/pipeline_versions";
+import { SampleId } from "~/interface/shared";
 import AccessionViz from "../AccessionViz";
 import cs from "./alignment_viz.scss";
 
@@ -14,7 +15,7 @@ interface AlignmentVizProps {
   alignmentQuery?: string;
   pipelineVersion?: string;
   readsPerPage?: number;
-  sampleId?: number;
+  sampleId: SampleId;
   taxId?: string;
   taxLevel?: string;
   taxName?: string;
@@ -33,13 +34,12 @@ class AlignmentViz extends React.Component<
   alignmentQuery: string;
   pipelineVersion: string;
   readsPerPage: number;
-  sampleId: number;
+  sampleId: SampleId;
   taxId: string;
   taxLevel: string;
   taxName: string;
   constructor(props: AlignmentVizProps) {
     super(props);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.sampleId = props.sampleId;
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     this.alignmentQuery = props.alignmentQuery;
@@ -64,7 +64,11 @@ class AlignmentViz extends React.Component<
 
     // TODO(mark): Remove the metadata call once the alignment viz takes assembly into account.
     const [alignmentData, metadata] = await Promise.all([
-      getAlignmentData(sampleId, this.alignmentQuery, this.pipelineVersion),
+      getAlignmentData(
+        sampleId.toString(),
+        this.alignmentQuery,
+        this.pipelineVersion,
+      ),
       getSampleMetadata({
         id: sampleId,
         pipelineVersion: this.pipelineVersion,

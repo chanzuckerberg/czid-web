@@ -29,7 +29,7 @@ import {
   CurrentTabSample,
   DBType,
 } from "~/interface/sampleView";
-import { Taxon } from "~/interface/shared";
+import { SampleId, Taxon } from "~/interface/shared";
 import { getIlluminaColumns } from "./components/columns/illuminaColumns";
 import { getNanoporeColumns } from "./components/columns/nanoporeColumns";
 import { getNonNumericColumns } from "./components/columns/nonNumericColumns";
@@ -76,7 +76,7 @@ interface ReportTableProps {
   pipelineVersion?: string;
   projectId?: number;
   projectName?: string;
-  sampleId?: number;
+  sampleId?: SampleId;
   snapshotShareId?: string;
 }
 

@@ -21,6 +21,7 @@ import {
   Metadata,
   MetadataTypes,
   PipelineRun,
+  SampleId,
   SnapshotShareId,
   SummaryStats,
 } from "~/interface/shared";
@@ -41,7 +42,7 @@ export interface SampleDetailsModeProps {
   currentWorkflowTab?: CurrentTabSample;
   handleWorkflowTabChange?: (tab: CurrentTabSample) => void;
   sample?: Sample;
-  sampleId: number;
+  sampleId: SampleId;
   sampleWorkflowLabels?: string[];
   onMetadataUpdate?: (key: $TSFixMeUnknown, value: $TSFixMeUnknown) => void;
   onWorkflowRunSelect?: $TSFixMeFunction;
@@ -204,7 +205,7 @@ const SampleDetailsMode = ({
   };
 
   const _save = async (
-    id: number,
+    id: number | string,
     key: string,
     value: string | number | LocationObject,
   ) => {
@@ -357,7 +358,7 @@ const SampleDetailsMode = ({
         <div className={cs.reportLink}>
           <a
             href={generateUrlToSampleView({
-              sampleId,
+              sampleId: sampleId.toString(),
               tempSelectedOptions,
             })}
             target="_blank"

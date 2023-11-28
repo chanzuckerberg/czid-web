@@ -30,9 +30,9 @@ const saveSampleNotes = (id: $TSFixMe, sampleNotes: $TSFixMe) =>
   saveSampleField(id, "sample_notes", sampleNotes);
 
 const getAlignmentData = (
-  sampleId: $TSFixMe,
-  alignmentQuery: $TSFixMe,
-  pipelineVersion: $TSFixMe,
+  sampleId: string,
+  alignmentQuery: string,
+  pipelineVersion: string,
 ) =>
   get(
     `/samples/${sampleId}/alignment_viz/${alignmentQuery}.json?pipeline_version=${pipelineVersion}`,
@@ -434,7 +434,7 @@ const getCoverageVizData = ({
   snapshotShareId,
   pipelineVersion,
 }: {
-  sampleId?: number;
+  sampleId?: string;
   accessionId?: string;
   snapshotShareId?: string;
   pipelineVersion?: string;

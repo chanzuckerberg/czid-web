@@ -34,7 +34,6 @@ interface HistogramsProps {
   filters?: object;
   validSamples: Sample[];
   samplesDict: Record<string, Sample>;
-  loading: boolean;
   fetchProjectData: () => Promise<void>;
   handleBarClick: $TSFixMeFunction;
   handleChartElementHover: (clientX: number, clientY: number) => void;
@@ -54,7 +53,6 @@ export const Histograms = ({
   filters,
   validSamples,
   samplesDict,
-  loading,
   fetchProjectData,
   handleBarClick,
   handleChartElementHover,
@@ -72,10 +70,10 @@ export const Histograms = ({
   const totalReadsBins = useRef<DataBin[]>([]);
   const dcrBins = useRef<DataBin[]>([]);
   const qcPercentBins = useRef<DataBin[]>([]);
-  const totalReadsHistogramContainer = useRef(null);
-  const qualityReadsHistogramContainer = useRef(null);
-  const meanInsertSizeHistogramContainer = useRef(null);
-  const dcrHistogramContainer = useRef(null);
+  const totalReadsHistogramContainer = useRef<HTMLDivElement | null>(null);
+  const qualityReadsHistogramContainer = useRef<HTMLDivElement | null>(null);
+  const meanInsertSizeHistogramContainer = useRef<HTMLDivElement | null>(null);
+  const dcrHistogramContainer = useRef<HTMLDivElement | null>(null);
 
   const [meanInsertSizeHistogram, setMeanInsertSizeHistogram] = useState(null);
 
@@ -97,14 +95,10 @@ export const Histograms = ({
     }
   }, [filters]);
 
-  useEffect(() => {
-    redrawHistograms();
-  }, [loading]);
-
   const handleWindowResize = debounce(200, () => redrawHistograms());
 
   const redrawHistograms = () => {
-    if (!loading && validSamples.length > 0) {
+    if (validSamples.length > 0) {
       const { totalReadsBins, qcPercentBins, dcrBins, meanInsertSizeBins } =
         getBins();
 
@@ -473,7 +467,6 @@ export const Histograms = ({
             data-testid="total-read-histogram"
             className={cs.d3Container}
             ref={histogramContainer => {
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               totalReadsHistogramContainer.current = histogramContainer;
             }}
           />
@@ -519,7 +512,6 @@ export const Histograms = ({
             data-testid="passed-qc-histogram"
             className={cs.d3Container}
             ref={histogramContainer => {
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               qualityReadsHistogramContainer.current = histogramContainer;
             }}
           />
@@ -574,7 +566,6 @@ export const Histograms = ({
             data-testid="duplicate-compression-histogram"
             className={cs.d3Container}
             ref={histogramContainer => {
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               dcrHistogramContainer.current = histogramContainer;
             }}
           />
@@ -663,7 +654,6 @@ export const Histograms = ({
             data-testid="mean-insert-size-histogram"
             className={cs.d3Container}
             ref={histogramContainer => {
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               meanInsertSizeHistogramContainer.current = histogramContainer;
             }}
           />

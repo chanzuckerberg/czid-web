@@ -213,8 +213,8 @@ GQL
       expect(result["samples"].length).to eq(2)
       expect(result).to include_json(
         samples: [
-          { id: sample_public.id, public: 1 },
-          { id: sample_private.id, public: 0 },
+          { id: sample_public.id.to_s, public: 1 },
+          { id: sample_private.id.to_s, public: 0 },
         ]
       )
     end
@@ -236,8 +236,8 @@ GQL
     expect(json_response["samples"].length).to eq(2)
     expect(json_response).to include_json(
       samples: [
-        { id: sample_one.id },
-        { id: sample_two.id },
+        { id: sample_one.id.to_s },
+        { id: sample_two.id.to_s },
       ]
     )
   end
@@ -261,8 +261,8 @@ GQL
 
     expect(json_response["samples"].length).to eq(2)
     expect(json_response).to include_json(samples: [
-                                            { id: sample_two.id },
-                                            { id: sample_one.id },
+                                            { id: sample_two.id.to_s },
+                                            { id: sample_one.id.to_s },
                                           ])
   end
 

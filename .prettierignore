@@ -1,5 +1,5 @@
 package-lock.json
-
+**/__generated__/*.ts
 # Ignore biowasm.com assets that are minified on purposes
 app/assets/webassembly/*.js
 

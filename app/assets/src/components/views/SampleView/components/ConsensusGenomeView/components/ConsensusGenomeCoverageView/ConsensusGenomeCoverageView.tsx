@@ -11,11 +11,12 @@ import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils
 import cs from "~/components/views/SampleView/components/ConsensusGenomeView/consensus_genome_view.scss";
 import { WorkflowRun } from "~/interface/sample";
 import { ConsensusGenomeWorkflowRunResults } from "~/interface/sampleView";
+import { SampleId } from "~/interface/shared";
 import { ConsensusGenomeHistogram } from "./components/ConsensusGenomeHistogram";
 
 interface ConsensusGenomeCoverageViewProps {
   helpLinkUrl: string;
-  sampleId: number;
+  sampleId: SampleId;
   workflowRun: WorkflowRun;
   workflowRunResults: ConsensusGenomeWorkflowRunResults;
 }

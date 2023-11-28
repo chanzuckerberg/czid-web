@@ -13,6 +13,7 @@ import {
 } from "lodash/fp";
 import React, {
   forwardRef,
+  Suspense,
   useContext,
   useEffect,
   useImperativeHandle,
@@ -31,6 +32,7 @@ import {
   getSampleMetadataFields,
   getWorkflowRunMetadataFields,
 } from "~/api/metadata";
+import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { HEATMAP_ELASTICSEARCH_FEATURE } from "~/components/utils/features";
@@ -1036,18 +1038,24 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderQualityControl = () => {
-    return (
-      <QualityControl
-        projectId={projectId}
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-        handleBarClick={onPLQCHistogramBarClick}
-        filters={filters}
-        filtersSidebarOpen={filtersSidebarOpen}
-        sampleStatsSidebarOpen={sampleStatsSidebarOpen}
-      />
-    );
+    if (projectId) {
+      return (
+        <Suspense fallback={<LoadingPage />}>
+          <QualityControl
+            projectId={projectId}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
+            handleBarClick={onPLQCHistogramBarClick}
+            filters={filters}
+            filtersSidebarOpen={filtersSidebarOpen}
+            sampleStatsSidebarOpen={sampleStatsSidebarOpen}
+          />
+        </Suspense>
+      );
+    }
   };
-
+  const plqcDowntimeMaitenanceMode = allowedFeatures.includes(
+    "plqc_downtime_maitenance_mode",
+  );
   const renderDisplay = () => {
     switch (currentDisplay) {
       case "table":
@@ -1055,6 +1063,13 @@ const SamplesView = forwardRef(function SamplesView(
       case "map":
         return renderMap();
       case "plqc":
+        if (!plqcDowntimeMaitenanceMode) {
+          return (
+            <div>
+              PLQC is currently under maintenance. Please check back later.
+            </div>
+          );
+        }
         return renderQualityControl();
     }
   };

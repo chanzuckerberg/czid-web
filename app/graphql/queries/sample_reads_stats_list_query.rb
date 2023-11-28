@@ -6,7 +6,7 @@ module Queries
 
     included do
       field :sample_reads_stats, Types::SampleReadsStatsListType, null: false do
-        argument :sampleIds, [Integer], required: true
+        argument :sampleIds, [String], required: true
       end
     end
 

@@ -1,5 +1,5 @@
 import { WorkflowType } from "../components/utils/workflows";
-import { PipelineRun } from "./shared";
+import { PipelineRun, SampleId } from "./shared";
 import { DateString } from "./shared/generic";
 
 export interface WorkflowRun {
@@ -65,7 +65,7 @@ export default interface Sample {
   known_user_error?: string;
   pipeline_runs: PipelineRun[];
   workflow_runs?: WorkflowRun[];
-  id: number;
+  id: SampleId;
   name: string;
   created_at: DateString;
   updated_at: DateString;

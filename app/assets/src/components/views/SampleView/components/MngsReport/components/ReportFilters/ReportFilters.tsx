@@ -43,7 +43,7 @@ import {
   FilterSelections,
   SampleReportViewMode,
 } from "~/interface/sampleView";
-import { Background } from "~/interface/shared/specific";
+import { Background, SampleId } from "~/interface/shared/specific";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
@@ -56,7 +56,7 @@ interface ReportFiltersProps {
   loadingReport?: boolean;
   otherBackgrounds?: Background[];
   ownedBackgrounds?: Background[];
-  sampleId?: number;
+  sampleId?: SampleId;
   selected: FilterSelections;
   view?: SampleReportViewMode;
   enableMassNormalizedBackgrounds?: boolean;

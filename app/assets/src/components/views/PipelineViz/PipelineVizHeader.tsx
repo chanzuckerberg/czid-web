@@ -39,8 +39,6 @@ const PipelineVizHeader = ({
         <ViewHeader.Content>
           <div className={cs.pipelineInfo}>
             <PipelineVersionSelect
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-              sampleId={sample.id}
               shouldIncludeDatabaseVersion={true}
               currentRun={pipelineRun}
               allRuns={pipelineVersions}

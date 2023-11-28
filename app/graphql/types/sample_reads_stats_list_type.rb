@@ -5,7 +5,7 @@ module Types
   end
 
   class SampleReadsStatsType < Types::BaseObject
-    field :sampleId, Int, null: false
+    field :sampleId, ID, null: false
     field :initialReads, Int, null: true
     field :name, String, null: true
     field :pipelineVersion, String, null: true

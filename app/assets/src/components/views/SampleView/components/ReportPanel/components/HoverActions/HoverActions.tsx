@@ -31,7 +31,7 @@ import {
   ConsensusGenomeClick,
   CurrentTabSample,
 } from "~/interface/sampleView";
-import { Taxon } from "~/interface/shared";
+import { SampleId, Taxon } from "~/interface/shared";
 import { INVALID_CALL_BASE_TAXID } from "../../../MngsReport/components/ReportTable/ReportTable";
 import cs from "./hover_actions.scss";
 
@@ -52,7 +52,7 @@ interface HoverActionsProps {
   previousConsensusGenomeRuns?: $TSFixMeUnknown[];
   projectId?: number;
   rowData: Taxon;
-  sampleId?: number;
+  sampleId?: SampleId;
   snapshotShareId?: string;
 }
 

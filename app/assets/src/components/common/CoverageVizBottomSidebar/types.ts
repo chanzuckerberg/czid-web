@@ -1,6 +1,7 @@
 import { BlastData } from "~/interface/sampleView";
 import {
   AccessionData,
+  SampleId,
   Taxon,
   TaxonLevelType,
   TooltipLocation,
@@ -11,7 +12,7 @@ export interface CoverageVizBottomSidebarProps {
   onBlastClick?: (x: BlastData) => void;
   onClose: () => void;
   params: CoverageVizParams | Record<string, never>;
-  sampleId: number;
+  sampleId: SampleId;
   pipelineVersion: string;
   nameType: string;
   snapshotShareId?: string;

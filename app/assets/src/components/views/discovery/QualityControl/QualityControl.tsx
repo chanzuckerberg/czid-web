@@ -1,68 +1,114 @@
-import { useQuery } from "@apollo/client";
 import cx from "classnames";
 import { get } from "lodash/fp";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { graphql, useLazyLoadQuery } from "react-relay";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
+import { LoadingPage } from "~/components/common/LoadingPage";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WorkflowType } from "~/components/utils/workflows";
-import Sample from "~/interface/sample";
 import { TooltipVizTable } from "~ui/containers";
-import { QUALITY_CONTROL_QUERY } from "../api/quality_control";
 import InfoBanner from "../InfoBanner";
+import {
+  QualityControlQuery as QualityControlQueryType,
+  QualityControlQuery$data,
+} from "./__generated__/QualityControlQuery.graphql";
 import { Histograms } from "./components/Histograms";
 import { ReadsLostChart } from "./components/ReadsLostChart";
 import { SampleStatsInfo } from "./components/SampleStatsInfo";
 import cs from "./quality_control.scss";
 
-interface QualityControlWrapperProps {
-  filters?: { host: $TSFixMeUnknown };
-  projectId?: number;
-  handleBarClick: $TSFixMeFunction;
-  sampleStatsSidebarOpen?: boolean;
-  filtersSidebarOpen?: boolean;
-}
-
-// TODO: get rid of this wrapper once the graphql
-// conversion for getSamples and getSamplesReadStats
-// is complete
-function QualityControlWrapper(props: QualityControlWrapperProps) {
-  const { loading, error, data } = useQuery(QUALITY_CONTROL_QUERY, {
-    variables: {
-      projectId: props.projectId,
-      workflow: WorkflowType.SHORT_READ_MNGS,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-      hostIds: props.filters.host,
-      ...props.filters,
-    },
-  });
-  if (loading) return <span>Loading...</span>;
-  if (error) return <span>`Error! ${error.message}`</span>;
-
-  return (
-    <QualityControl
-      project={data.project}
-      samples={data.samplesList.samples}
-      {...props}
-    />
-  );
-}
+const QualityControlQuery = graphql`
+  query QualityControlQuery(
+    $projectId: Int!
+    # $search: String!
+    $domain: String
+    $limit: Int
+    $offset: Int
+    $orderBy: String
+    $orderDir: String
+    $listAllIds: Boolean
+    $basic: Boolean
+    $sampleIds: [Int!]
+    $hostIds: [Int!]
+    $location: String
+    $locationV2: [String!]
+    $taxIds: [Int!]
+    $taxLevels: [String!]
+    $thresholdFilterInfo: String
+    $annotations: [Annotation!]
+    $time: [String!]
+    $tissue: [String!]
+    $visibility: [String!]
+    $searchString: String
+    $requestedSampleIds: [Int!]
+    $workflow: String
+  ) {
+    samplesList(
+      projectId: $projectId
+      # search: $search
+      domain: $domain
+      limit: $limit
+      offset: $offset
+      orderBy: $orderBy
+      orderDir: $orderDir
+      listAllIds: $listAllIds
+      basic: $basic
+      sampleIds: $sampleIds
+      hostIds: $hostIds
+      location: $location
+      locationV2: $locationV2
+      taxIds: $taxIds
+      taxLevels: $taxLevels
+      thresholdFilterInfo: $thresholdFilterInfo
+      annotations: $annotations
+      time: $time
+      tissue: $tissue
+      visibility: $visibility
+      searchString: $searchString
+      requestedSampleIds: $requestedSampleIds
+      workflow: $workflow
+    ) {
+      samples {
+        id
+        details {
+          dbSample {
+            uploadError
+          }
+          derivedSampleOutput {
+            pipelineRun {
+              totalReads
+            }
+            summaryStats {
+              compressionRatio
+              qcPercent
+              insertSizeMean
+            }
+          }
+          mngsRunInfo {
+            resultStatusDescription
+            reportReady
+            createdAt
+          }
+        }
+      }
+    }
+  }
+`;
 
 interface QualityControlProps {
-  filters?: object;
-  projectId?: number;
+  filters?: { host: number[] };
+  projectId: number;
   handleBarClick: $TSFixMeFunction;
   sampleStatsSidebarOpen?: boolean;
   filtersSidebarOpen?: boolean;
-  project?: object;
-  samples: Sample[];
 }
 
 function QualityControl({
   filters,
-  samples,
+  projectId,
   handleBarClick,
 }: QualityControlProps) {
   const trackEvent = useTrackEvent();
@@ -72,20 +118,26 @@ function QualityControl({
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     sampleId: null,
   });
-  const [failedSamples, setFailedSamples] = useState(null);
-  const [totalSampleCount, setTotalSampleCount] = useState(null);
-  const [samplesDict, setSamplesDict] = useState(null);
-  const [tooltipLocation, setTooltipLocation] = useState(null);
-  const [tooltipClass, setTooltipClass] = useState(null);
-  const [validSamples, setValidSamples] = useState(null);
-  const [runningSamples, setRunningSamples] = useState(null);
+  const [totalSampleCount, setTotalSampleCount] = useState<number | null>(null);
+  const [samplesDict, setSamplesDict] = useState({});
+  const [validSamples, setValidSamples] = useState([]);
+  const [runningSamples, setRunningSamples] = useState([]);
+  const [failedSamples, setFailedSamples] = useState([]);
   const [chartTooltipData, setChartTooltipData] = useState(null);
+  const [tooltipLocation, setTooltipLocation] = useState<{
+    left: number;
+    top: number;
+  } | null>(null);
+  const [tooltipClass, setTooltipClass] = useState(null);
+  const data = useLazyLoadQuery<QualityControlQueryType>(QualityControlQuery, {
+    projectId: projectId,
+    workflow: WorkflowType.SHORT_READ_MNGS,
+    hostIds: filters?.host,
+    ...filters,
+  });
+  const samples = data.samplesList.samples;
 
-  useEffect(() => {
-    fetchProjectData();
-  }, []);
-
-  const fetchProjectData = async () => {
+  const fetchProjectData = useCallback(async () => {
     setLoading(true);
     const data = extractData(samples);
     const totalSampleCount =
@@ -93,20 +145,21 @@ function QualityControl({
       data.runningSamples.length +
       data.failedSamples.length;
 
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setValidSamples(data.validSamples);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setRunningSamples(data.runningSamples);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setFailedSamples(data.failedSamples);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setSamplesDict(data.samplesDict);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setTotalSampleCount(totalSampleCount);
     setLoading(false);
-  };
+  }, [samples]);
 
-  function extractData(samples) {
+  useEffect(() => {
+    fetchProjectData();
+  }, [fetchProjectData]);
+
+  function extractData(
+    samples: QualityControlQuery$data["samplesList"]["samples"],
+  ) {
     const validSamples = [];
     const runningSamples = [];
     const failedSamples = [];
@@ -130,7 +183,7 @@ function QualityControl({
           failedSamples.push(sample);
         } else if (
           runInfo.reportReady &&
-          sample.details.derivedSampleOutput.summaryStats
+          sample.details.derivedSampleOutput?.summaryStats
         ) {
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           validSamples.push(sample);
@@ -152,13 +205,12 @@ function QualityControl({
 
   /** callback functions **/
 
-  const handleChartElementHover = (clientX, clientY) => {
+  const handleChartElementHover = (clientX: number, clientY: number) => {
     const tooltipLocation =
       clientX && clientY ? { left: clientX, top: clientY } : null;
     trackEvent(
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED,
     );
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setTooltipLocation(tooltipLocation);
   };
 
@@ -168,99 +220,72 @@ function QualityControl({
     setChartTooltipData(null);
   };
 
-  /* --- render functions --- */
+  if (loading) return <LoadingPage />;
 
-  function renderLoading() {
-    return (
-      <div className={cs.content}>
-        <p>
-          <i className="fa fa-spinner fa-pulse fa-fw" />
-          Loading...
-        </p>
-      </div>
-    );
-  }
-
-  function renderVisualization() {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
-    const showBlankState = !loading && validSamples.length === 0;
-
-    return showBlankState ? (
-      <div className={cs.noDataBannerFlexContainer}>
-        <InfoBanner
-          className={cs.noDataBannerContainer}
-          icon={<ImgVizSecondary />}
-          link={{
-            href: "https://help.czid.org",
-            text: "Learn about sample QC",
-          }}
-          message="You can visually check your QC metrics after your samples have successfully processed."
-          title="Sample QC Visualizations"
-          type="no_successful_samples"
+  return validSamples?.length > 0 ? (
+    <div className={cs.content}>
+      <div className={cs.histogramSection}>
+        <SampleStatsInfo
+          runningSamples={runningSamples}
+          failedSamples={failedSamples}
+          validSamples={validSamples}
+          totalSampleCount={totalSampleCount}
+        />
+        <Histograms
+          filters={filters}
+          validSamples={validSamples}
+          samplesDict={samplesDict}
+          fetchProjectData={fetchProjectData}
+          handleBarClick={handleBarClick}
+          handleChartElementHover={handleChartElementHover}
+          handleChartElementExit={handleChartElementExit}
+          setChartTooltipData={setChartTooltipData}
         />
       </div>
-    ) : (
-      <div className={cs.content}>
-        <div className={cs.histogramSection}>
-          <SampleStatsInfo
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            runningSamples={runningSamples}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            failedSamples={failedSamples}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            validSamples={validSamples}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            totalSampleCount={totalSampleCount}
-          />
-          <Histograms
-            filters={filters}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            validSamples={validSamples}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            samplesDict={samplesDict}
-            loading={loading}
-            fetchProjectData={fetchProjectData}
-            handleBarClick={handleBarClick}
-            handleChartElementHover={handleChartElementHover}
-            handleChartElementExit={handleChartElementExit}
-            setChartTooltipData={setChartTooltipData}
-          />
-        </div>
-        <div className={cs.readsLostSection}>
-          <ReadsLostChart
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            validSamples={validSamples}
-            handleChartElementHover={handleChartElementHover}
-            handleChartElementExit={handleChartElementExit}
-            setChartTooltipData={setChartTooltipData}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            setTooltipClass={setTooltipClass}
-            setSidebarVisible={setSidebarVisible}
-            setSidebarParams={setSidebarParams}
-            sidebarParams={sidebarParams}
-            sidebarVisible={sidebarVisible}
-          />
-        </div>
-        <DetailsSidebar
-          visible={sidebarVisible}
-          mode="sampleDetails"
-          params={sidebarParams}
-          onClose={() => setSidebarVisible(false)}
+      <div className={cs.readsLostSection}>
+        <ReadsLostChart
+          validSamples={validSamples}
+          handleChartElementHover={handleChartElementHover}
+          handleChartElementExit={handleChartElementExit}
+          setChartTooltipData={setChartTooltipData}
+          setTooltipClass={setTooltipClass}
+          setSidebarVisible={setSidebarVisible}
+          setSidebarParams={setSidebarParams}
+          sidebarParams={sidebarParams}
+          sidebarVisible={sidebarVisible}
         />
-        {tooltipLocation && chartTooltipData && (
-          <div
-            data-testid="hover-tooltip"
-            style={getTooltipStyle(tooltipLocation)}
-            className={cx(cs.hoverTooltip, tooltipClass)}
-          >
-            <TooltipVizTable data={chartTooltipData} />
-          </div>
-        )}
       </div>
-    );
-  }
-
-  return loading ? renderLoading() : renderVisualization();
+      <DetailsSidebar
+        visible={sidebarVisible}
+        mode="sampleDetails"
+        params={sidebarParams}
+        onClose={() => setSidebarVisible(false)}
+      />
+      {tooltipLocation && chartTooltipData && (
+        <div
+          data-testid="hover-tooltip"
+          style={getTooltipStyle(tooltipLocation)}
+          className={cx(cs.hoverTooltip, tooltipClass)}
+        >
+          <TooltipVizTable data={chartTooltipData} />
+        </div>
+      )}
+    </div>
+  ) : (
+    <div className={cs.noDataBannerFlexContainer}>
+      <InfoBanner
+        className={cs.noDataBannerContainer}
+        icon={<ImgVizSecondary />}
+        link={{
+          href: "https://help.czid.org",
+          text: "Learn about sample QC",
+        }}
+        message="You can visually check your QC metrics after your samples have successfully processed."
+        title="Sample QC Visualizations"
+        type="no_successful_samples"
+      />
+    </div>
+  );
 }
 
-export default QualityControlWrapper;
+export default QualityControl;

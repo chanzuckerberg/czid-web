@@ -9,7 +9,6 @@ import cs from "./pipeline_version_select.scss";
 import { PipelineVersionSelectConfig } from "./workflowTypeConfig";
 
 interface PipelineVersionSelectProps {
-  sampleId?: number;
   shouldIncludeDatabaseVersion: boolean;
   currentRun?: WorkflowRun | PipelineRun;
   allRuns?: WorkflowRun[] | PipelineRun[] | string[];

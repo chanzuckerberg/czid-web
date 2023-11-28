@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
+import { SampleId } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import cs from "./blast_reads_modal.scss";
@@ -24,7 +25,7 @@ interface BlastReadsModalProps {
   context: object;
   onClose: () => void;
   open: boolean;
-  sampleId: number;
+  sampleId: SampleId;
   pipelineVersion: string;
   taxonName: string;
   taxonLevel: number;

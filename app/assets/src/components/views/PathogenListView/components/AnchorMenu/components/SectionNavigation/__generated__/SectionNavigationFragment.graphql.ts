@@ -8,7 +8,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { FragmentRefs, ReaderFragment } from "relay-runtime";
+import { Fragment, ReaderFragment } from 'relay-runtime';
+import { FragmentRefs } from "relay-runtime";
 export type SectionNavigationFragment$data = {
   readonly pathogens: ReadonlyArray<{
     readonly category: string | null;
@@ -22,39 +23,39 @@ export type SectionNavigationFragment$key = {
 };
 
 const node: ReaderFragment = {
-  argumentDefinitions: [],
-  kind: "Fragment",
-  metadata: null,
-  name: "SectionNavigationFragment",
-  selections: [
+  "argumentDefinitions": [],
+  "kind": "Fragment",
+  "metadata": null,
+  "name": "SectionNavigationFragment",
+  "selections": [
     {
-      alias: null,
-      args: null,
-      concreteType: "Pathogen",
-      kind: "LinkedField",
-      name: "pathogens",
-      plural: true,
-      selections: [
+      "alias": null,
+      "args": null,
+      "concreteType": "Pathogen",
+      "kind": "LinkedField",
+      "name": "pathogens",
+      "plural": true,
+      "selections": [
         {
-          alias: null,
-          args: null,
-          kind: "ScalarField",
-          name: "category",
-          storageKey: null,
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "category",
+          "storageKey": null
         },
         {
-          alias: null,
-          args: null,
-          kind: "ScalarField",
-          name: "name",
-          storageKey: null,
-        },
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "name",
+          "storageKey": null
+        }
       ],
-      storageKey: null,
-    },
+      "storageKey": null
+    }
   ],
-  type: "PathogenList",
-  abstractKey: null,
+  "type": "PathogenList",
+  "abstractKey": null
 };
 
 (node as any).hash = "47b49e2df54c147fdb127d4b0a3417ba";

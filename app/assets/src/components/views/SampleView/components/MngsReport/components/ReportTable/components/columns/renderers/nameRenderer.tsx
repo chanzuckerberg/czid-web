@@ -19,7 +19,7 @@ import {
   ConsensusGenomeClick,
   CurrentTabSample,
 } from "~/interface/sampleView";
-import { Taxon } from "~/interface/shared";
+import { SampleId, Taxon } from "~/interface/shared";
 import { PhyloTreeModalParamsType } from "../../../ReportTable";
 import { GenusLevelPreview } from "../components/GenusLevelPreview";
 
@@ -38,7 +38,7 @@ export const getNameRenderer = (
   pipelineVersion: string,
   pipelineRunId: number,
   projectId: number,
-  sampleId: number,
+  sampleId: SampleId,
   handlePhyloTreeModalOpen: (
     phyloTreeModalParams: PhyloTreeModalParamsType,
   ) => void,

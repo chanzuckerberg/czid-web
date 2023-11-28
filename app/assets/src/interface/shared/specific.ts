@@ -268,7 +268,7 @@ export interface SampleFromApi {
   basespace_dataset_id?: number;
 }
 
-export type SampleId = number;
+export type SampleId = number | string;
 
 export interface SampleType {
   created_at: string;

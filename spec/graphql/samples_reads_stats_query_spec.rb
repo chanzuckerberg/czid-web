@@ -19,7 +19,7 @@ RSpec.describe GraphqlController, type: :request do
   end
 
   query = <<-GQL
-    query GetSamplesReadStats($sampleIds: [Int!]!) {
+    query GetSamplesReadStats($sampleIds: [String!]!) {
       sampleReadsStats(sampleIds: $sampleIds) {
         sampleReadsStats {
           sampleId
@@ -44,7 +44,7 @@ RSpec.describe GraphqlController, type: :request do
       post "/graphql", headers: { 'Content-Type' => 'application/json' }, params: {
         query: query,
         context: { current_user: @joe },
-        variables: { sampleIds: [@sample_one.id] },
+        variables: { sampleIds: [@sample_one.id.to_s] },
       }.to_json
       expect(response).to have_http_status :success
 
@@ -67,7 +67,7 @@ RSpec.describe GraphqlController, type: :request do
       post "/graphql", headers: { 'Content-Type' => 'application/json' }, params: {
         query: query,
         context: { current_user: @joe },
-        variables: { sampleIds: [@sample_one.id, admin_sample.id] },
+        variables: { sampleIds: [@sample_one.id.to_s, admin_sample.id.to_s] },
       }.to_json
 
       expect(response).to have_http_status :success
