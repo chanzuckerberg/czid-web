@@ -1,10 +1,12 @@
 require "rails_helper"
 
-RSpec.describe PipelineVersionControlService, type: :service do
+RSpec.describe VersionRetrievalService, type: :service do
   let(:short_read_mngs_workflow) { WorkflowRun::WORKFLOW[:short_read_mngs] }
   let(:cg_workflow) { WorkflowRun::WORKFLOW[:consensus_genome] }
   let(:amr_workflow) { WorkflowRun::WORKFLOW[:amr] }
   let(:long_read_mngs_workflow) { WorkflowRun::WORKFLOW[:long_read_mngs] }
+  let(:index_version) { AlignmentConfig::NCBI_INDEX }
+  let(:default_index_version) { "11-22-2023" }
 
   before do
     AppConfigHelper.set_workflow_version(short_read_mngs_workflow, "2.0.0")
@@ -20,25 +22,26 @@ RSpec.describe PipelineVersionControlService, type: :service do
     create(:workflow_version, workflow: cg_workflow, version: "2.0.9")
     create(:workflow_version, workflow: amr_workflow, version: "1.0.2")
     create(:workflow_version, workflow: long_read_mngs_workflow, version: "0.0.1")
+    create(:workflow_version, workflow: index_version, version: "11-22-2023")
+    create(:workflow_version, workflow: index_version, version: "01-22-2021")
   end
 
-  describe "when version_prefix is not specified" do
+  describe "when user_specified_prefix is not present" do
     context "when the project does not have the workflow pinned to a specific version" do
-      let(:short_read_mngs_workflow) { WorkflowRun::WORKFLOW[:short_read_mngs] }
-
       before do
         AppConfigHelper.set_workflow_version(short_read_mngs_workflow, "1.0.0")
         @project = create(:project)
+        stub_const('AlignmentConfig::DEFAULT_NAME', "11-22-2023")
+        @default_versions_for_workflow = {
+          short_read_mngs_workflow => AppConfigHelper.get_workflow_version(short_read_mngs_workflow),
+          index_version => default_index_version,
+        }
       end
-
-      subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow, nil) }
 
       it "should return the latest version of the workflow" do
-        expect(subject).to eq(AppConfigHelper.get_workflow_version(short_read_mngs_workflow))
-      end
-
-      it "should not pin the project to a specific workflow version" do
-        expect(ProjectWorkflowVersion.exists?(project_id: @project.id, workflow: short_read_mngs_workflow)).to be(false)
+        @default_versions_for_workflow.each do |workflow, default_version|
+          expect(VersionRetrievalService.call(@project.id, workflow)).to eq(default_version)
+        end
       end
     end
 
@@ -50,6 +53,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
           cg_workflow => "2.0",
           amr_workflow => "1",
           long_read_mngs_workflow => "0.0.1",
+          index_version => "11-22-2023",
         }
 
         @workflow_version_prefixes.each do |workflow, version_prefix|
@@ -58,9 +62,9 @@ RSpec.describe PipelineVersionControlService, type: :service do
       end
 
       it "should return the latest version of the workflow for the version_prefix" do
-        @workflow_version_prefixes.each do |workflow, _version_prefix|
-          service = PipelineVersionControlService.new(@project.id, workflow)
-          latest_version_for_version_prefix = service.send(:fetch_latest_version_for_version_prefix).version
+        @workflow_version_prefixes.each do |workflow, version_prefix|
+          service = VersionRetrievalService.new(@project.id, workflow)
+          latest_version_for_version_prefix = service.send(:fetch_latest_version_for_version_prefix, version_prefix).version
 
           expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: workflow).present?).to be(true)
           expect(service.call).to eq(latest_version_for_version_prefix)
@@ -77,7 +81,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
         create(:project_workflow_version, project_id: @project.id, workflow: short_read_mngs_workflow, version_prefix: version_prefix)
       end
 
-      subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow) }
+      subject { VersionRetrievalService.call(@project.id, short_read_mngs_workflow) }
 
       it "should return the latest version of the workflow for the version_prefix" do
         expect(subject).to eq(latest_workflow_version_for_version_prefix)
@@ -92,10 +96,10 @@ RSpec.describe PipelineVersionControlService, type: :service do
           create(:project_workflow_version, project_id: @project.id, workflow: short_read_mngs_workflow, version_prefix: version_prefix)
         end
 
-        subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow) }
+        subject { VersionRetrievalService.call(@project.id, short_read_mngs_workflow) }
 
         it "should raise an error" do
-          expect { subject }.to raise_error(RuntimeError, ErrorHelper::PipelineVersionControlErrors.workflow_version_deprecated(short_read_mngs_workflow, latest_workflow_version_for_version_prefix))
+          expect { subject }.to raise_error(RuntimeError, ErrorHelper::VersionControlErrors.workflow_version_deprecated(short_read_mngs_workflow, latest_workflow_version_for_version_prefix))
         end
       end
 
@@ -108,10 +112,10 @@ RSpec.describe PipelineVersionControlService, type: :service do
           create(:project_workflow_version, project_id: @project.id, workflow: short_read_mngs_workflow, version_prefix: version_prefix)
         end
 
-        subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow) }
+        subject { VersionRetrievalService.call(@project.id, short_read_mngs_workflow) }
 
         it "should raise an error" do
-          expect { subject }.to raise_error(RuntimeError, ErrorHelper::PipelineVersionControlErrors.workflow_version_not_runnable(short_read_mngs_workflow, latest_workflow_version_for_version_prefix))
+          expect { subject }.to raise_error(RuntimeError, ErrorHelper::VersionControlErrors.workflow_version_not_runnable(short_read_mngs_workflow, latest_workflow_version_for_version_prefix))
         end
       end
 
@@ -123,44 +127,51 @@ RSpec.describe PipelineVersionControlService, type: :service do
           create(:project_workflow_version, project_id: @project.id, workflow: short_read_mngs_workflow, version_prefix: version_prefix)
         end
 
-        subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow) }
+        subject { VersionRetrievalService.call(@project.id, short_read_mngs_workflow) }
 
         it "should raise an error" do
-          expect { subject }.to raise_error(RuntimeError, ErrorHelper::PipelineVersionControlErrors.workflow_version_not_found(short_read_mngs_workflow, version_prefix))
+          expect { subject }.to raise_error(RuntimeError, ErrorHelper::VersionControlErrors.workflow_version_not_found(short_read_mngs_workflow, version_prefix))
         end
       end
     end
   end
 
-  describe "when version_prefix is specified" do
-    context "when the project is not pinned to a specific version for a workflow yet" do
-      let(:version_prefix) { "1.9" }
-      let(:latest_workflow_version_for_version_prefix) { "1.9.9-beta" }
-
-      before do
-        @project = create(:project)
-      end
-
-      subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow, version_prefix) }
-
-      it "should pin the project to the latest workflow version for the version_prefix and return the latest workflow version" do
-        expect(subject).to eq(latest_workflow_version_for_version_prefix)
-        expect(ProjectWorkflowVersion.exists?(project_id: @project.id, workflow: short_read_mngs_workflow)).to be(true)
-      end
+  describe "when user_specified_prefix is present" do
+    before do
+      @project = create(:project)
     end
 
     context "when the project is already pinned to a specific version for a workflow" do
       let(:version_prefix) { "2.0" }
 
       before do
-        @project = create(:project)
         create(:project_workflow_version, project_id: @project.id, workflow: cg_workflow, version_prefix: version_prefix)
       end
 
-      subject { PipelineVersionControlService.call(@project.id, cg_workflow, "100000") }
+      subject { VersionRetrievalService.call(@project.id, cg_workflow, "100000") }
 
       it "should raise an error" do
-        expect { subject }.to raise_error(RuntimeError, ErrorHelper::PipelineVersionControlErrors.project_workflow_version_already_pinned(@project.id, cg_workflow, version_prefix))
+        expect { subject }.to raise_error(RuntimeError, ErrorHelper::VersionControlErrors.project_workflow_version_already_pinned(@project.id, cg_workflow, version_prefix))
+      end
+    end
+
+    context "when the project is not already pinned to a specific version for a workflow" do
+      let(:latest_workflow_version_for_version_prefix) { "2.0.9" }
+
+      subject { VersionRetrievalService.call(@project.id, cg_workflow, "2.0") }
+
+      it "should return the latest workflow version for the specified prefix" do
+        expect(subject).to eq(latest_workflow_version_for_version_prefix)
+      end
+    end
+
+    context "when the user_specified_prefix has no matching runnable workflows" do
+      let(:version_prefix) { "10000" }
+
+      subject { VersionRetrievalService.call(@project.id, cg_workflow, version_prefix) }
+
+      it "should raise an error" do
+        expect { subject }.to raise_error(RuntimeError, ErrorHelper::VersionControlErrors.workflow_version_not_found(cg_workflow, version_prefix))
       end
     end
   end

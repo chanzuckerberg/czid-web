@@ -1,5 +1,5 @@
 module ErrorHelper
-  module PipelineVersionControlErrors
+  module VersionControlErrors
     def self.workflow_version_not_found(workflow, version_prefix)
       "WorkflowVersion for workflow=#{workflow} and version_prefix=#{version_prefix} does not exist"
     end

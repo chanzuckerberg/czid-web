@@ -26,16 +26,11 @@ class SfnAmrPipelineDispatchService
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_SINGLE_WDL_ARN) || AppConfigHelper.get_app_config(AppConfig::SFN_AMR_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
-    @wdl_version = PipelineVersionControlService.call(@sample.project.id, @workflow_run.workflow)
-    raise SfnVersionMissingError, @workflow_run.workflow if @wdl_version.blank?
-
     # AMR uses the host filtering stage of the mNGS pipeline
     @mngs_wdl_version = AppConfigHelper.get_workflow_version(WorkflowRun::WORKFLOW[:short_read_mngs])
 
-    if @current_user.allowed_feature_list.include?("modern_host_filtering")
-      @wdl_version = AppConfigHelper.get_app_config(AppConfig::MODERN_AMR_VERSION)
-      @mngs_wdl_version = AppConfigHelper.get_app_config(AppConfig::MODERN_SHORT_READ_MNGS_VERSION)
-    end
+    @wdl_version = VersionRetrievalService.call(@sample.project.id, @workflow_run.workflow)
+    raise SfnVersionMissingError, @workflow_run.workflow if @wdl_version.blank?
 
     @workflow_run.update(
       wdl_version: @wdl_version

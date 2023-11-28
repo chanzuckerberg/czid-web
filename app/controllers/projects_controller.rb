@@ -334,10 +334,10 @@ class ProjectsController < ApplicationController
 
   def project_pipeline_versions
     render json: {
-      WorkflowRun::WORKFLOW[:amr] => PipelineVersionControlService.call(@project.id, WorkflowRun::WORKFLOW[:amr]),
-      WorkflowRun::WORKFLOW[:consensus_genome] => PipelineVersionControlService.call(@project.id, WorkflowRun::WORKFLOW[:consensus_genome]),
-      WorkflowRun::WORKFLOW[:long_read_mngs] => PipelineVersionControlService.call(@project.id, WorkflowRun::WORKFLOW[:long_read_mngs]),
-      WorkflowRun::WORKFLOW[:short_read_mngs] => PipelineVersionControlService.call(@project.id, WorkflowRun::WORKFLOW[:short_read_mngs]),
+      WorkflowRun::WORKFLOW[:amr] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:amr]),
+      WorkflowRun::WORKFLOW[:consensus_genome] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:consensus_genome]),
+      WorkflowRun::WORKFLOW[:long_read_mngs] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:long_read_mngs]),
+      WorkflowRun::WORKFLOW[:short_read_mngs] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:short_read_mngs]),
     }
   end
 

@@ -59,7 +59,7 @@ class SfnCgPipelineDispatchService
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_SINGLE_WDL_ARN) || AppConfigHelper.get_app_config(AppConfig::SFN_CG_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
-    @wdl_version = PipelineVersionControlService.call(@sample.project.id, @workflow_run.workflow)
+    @wdl_version = VersionRetrievalService.call(@sample.project.id, @workflow_run.workflow)
     raise SfnVersionMissingError, @workflow_run.workflow if @wdl_version.blank?
 
     updated_inputs = JSON.parse(@workflow_run.inputs_json)

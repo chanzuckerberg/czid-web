@@ -15,6 +15,8 @@ class AlignmentConfig < ApplicationRecord
   #   set in SSM and loaded via chamber
   DEFAULT_NAME = ENV["ALIGNMENT_CONFIG_DEFAULT_NAME"]
 
+  NCBI_INDEX = "ncbi_index_date".freeze
+
   # Get the max lineage version from a set of alignment config ids.
   def self.max_lineage_version(alignment_config_ids)
     AlignmentConfig
