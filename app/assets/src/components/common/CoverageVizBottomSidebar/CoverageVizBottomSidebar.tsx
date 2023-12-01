@@ -655,8 +655,9 @@ export default class CoverageVizBottomSidebar extends React.Component<
           <div className={cs.noDataContainer}>
             <div className={cs.text}>
               <div className={cs.message}>
-                Sorry, the coverage visualization is only available for taxons
-                with at least one assembled contig in NT.
+                Sorry, the coverage visualization is only available for taxa
+                with at least one assembled contig in NT (Illumina) or at least
+                one NT read (Nanopore).
               </div>
               {!snapshotShareId &&
                 workflow === WorkflowType.SHORT_READ_MNGS && (
