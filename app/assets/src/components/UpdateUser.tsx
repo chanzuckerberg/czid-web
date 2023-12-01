@@ -76,16 +76,18 @@ function UpdateUser(props: UpdateUserProps = {}) {
   const [isGCE, setIsGCE] = useState(includes(GCE, selectedUser.segments));
   const [isLMIC, setIsLMIC] = useState(includes(LMIC, selectedUser.segments));
 
-  function isUpdateFormValid() {
+  function isUpdateFormValid(): boolean {
     if (email === "") {
       setShowFailed(true);
       setErrorMessage("Please enter valid email address");
-      return true;
+      return false;
     }
+
+    return true;
   }
 
   const handleUpdate = () => {
-    if (!isUpdateFormValid()) {
+    if (isUpdateFormValid()) {
       setSubmitting(true);
       updateUser();
     }

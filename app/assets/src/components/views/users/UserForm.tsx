@@ -54,149 +54,146 @@ const UserForm = ({
   return (
     <div className="user-form">
       <div className="row">
-        <form className="new_user" id="new_user" onSubmit={submitFunc}>
-          <div className="row title">
-            <p className="col s8 signup"> Update User</p>
+        <div className="row title">
+          <p className="col s8 signup"> Update User</p>
+        </div>
+        {success ? (
+          <div className="success-info">
+            <i className="fa fa-success" />
+            <span>{successMessage}</span>
           </div>
-          {success ? (
-            <div className="success-info">
-              <i className="fa fa-success" />
-              <span>{successMessage}</span>
-            </div>
-          ) : null}
-          <div className={showFailed ? "error-info" : ""}>
-            {displayError(showFailed, serverErrors, errorMessage)}
+        ) : null}
+        <div className={showFailed ? "error-info" : ""}>
+          {displayError(showFailed, serverErrors, errorMessage)}
+        </div>
+        <div className="row content-wrapper">
+          <div className="section">
+            <div className="header">Email</div>
+            <Input
+              className={cs.inputField}
+              defaultValue={email}
+              onChange={onEmailChange}
+              placeholder="Email"
+              type="email"
+            />
+            <div className="header">Name</div>
+            <Input
+              className={cs.inputField}
+              defaultValue={name}
+              onChange={onNameChange}
+              placeholder="Name"
+              type="text"
+            />
+            <div className="header">Institution</div>
+            <Input
+              className={cs.inputField}
+              defaultValue={institution}
+              onChange={onInstitutionChange}
+              placeholder="Institution"
+              type="text"
+            />
           </div>
-          <div className="row content-wrapper">
-            <div className="section">
-              <div className="header">Email</div>
-              <Input
-                className={cs.inputField}
-                defaultValue={email}
-                onChange={onEmailChange}
-                placeholder="Email"
-                type="email"
-              />
-              <div className="header">Name</div>
-              <Input
-                className={cs.inputField}
-                defaultValue={name}
-                onChange={onNameChange}
-                placeholder="Name"
-                type="text"
-              />
-              <div className="header">Institution</div>
-              <Input
-                className={cs.inputField}
-                defaultValue={institution}
-                onChange={onInstitutionChange}
-                placeholder="Institution"
-                type="text"
+          <div className="section">
+            <div className="header">Archetypes</div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={archetypes.isMedicalDetective}
+                onChange={onMedicalDetectiveChange}
+                label="Medical Detective"
               />
             </div>
-            <div className="section">
-              <div className="header">Archetypes</div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={archetypes.isMedicalDetective}
-                  onChange={onMedicalDetectiveChange}
-                  label="Medical Detective"
-                />
-              </div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={archetypes.isLandscapeExplorer}
-                  onChange={onLandscapeExplorerChange}
-                  label="Landscape Explorer"
-                />
-              </div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={archetypes.isOutbreakSurveyor}
-                  onChange={onOutbreakSurveyorChange}
-                  label="Outbreak Surveyor"
-                />
-              </div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={archetypes.isMicrobiomeInvestigator}
-                  onChange={onMicrobiomeInvestigatorChange}
-                  label="Microbiome Investigator"
-                />
-              </div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={archetypes.isLandscapeExplorer}
+                onChange={onLandscapeExplorerChange}
+                label="Landscape Explorer"
+              />
             </div>
-            <div className="section">
-              <div className="header">Segments</div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={segments.isDPH}
-                  onChange={onDPHChange}
-                  label="DPH"
-                />
-              </div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={segments.isGCE}
-                  onChange={onGCEChange}
-                  label="GCE"
-                />
-              </div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={segments.isAfricaCDC}
-                  onChange={onAfricaCDCChange}
-                  label="Africa CDC"
-                />
-              </div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={segments.isBiohub}
-                  onChange={onBiohubChange}
-                  label="Biohub"
-                />
-              </div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={segments.isLMIC}
-                  onChange={onLMICChange}
-                  label="LMIC"
-                />
-              </div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={archetypes.isOutbreakSurveyor}
+                onChange={onOutbreakSurveyorChange}
+                label="Outbreak Surveyor"
+              />
             </div>
-            <div className="section">
-              <div className="header">Admin</div>
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={isAdmin}
-                  onChange={onAdminChange}
-                  label="Admin"
-                />
-              </div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={archetypes.isMicrobiomeInvestigator}
+                onChange={onMicrobiomeInvestigatorChange}
+                label="Microbiome Investigator"
+              />
             </div>
           </div>
-          <input className="hidden" type="submit" />
-          {submitting ? (
-            <div className="center login-wrapper disabled">
-              {" "}
-              <i className="fa fa-spinner fa-spin fa-lg" />{" "}
+          <div className="section">
+            <div className="header">Segments</div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={segments.isDPH}
+                onChange={onDPHChange}
+                label="DPH"
+              />
             </div>
-          ) : (
-            // @ts-expect-error Type 'unknown' is not assignable to type 'MouseEventHandler<HTMLDivElement>'.
-            <button onClick={submitFunc()} className="center login-wrapper">
-              Submit
-            </button>
-          )}
-        </form>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={segments.isGCE}
+                onChange={onGCEChange}
+                label="GCE"
+              />
+            </div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={segments.isAfricaCDC}
+                onChange={onAfricaCDCChange}
+                label="Africa CDC"
+              />
+            </div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={segments.isBiohub}
+                onChange={onBiohubChange}
+                label="Biohub"
+              />
+            </div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={segments.isLMIC}
+                onChange={onLMICChange}
+                label="LMIC"
+              />
+            </div>
+          </div>
+          <div className="section">
+            <div className="header">Admin</div>
+            <div>
+              <Checkbox
+                className="checkbox"
+                checked={isAdmin}
+                onChange={onAdminChange}
+                label="Admin"
+              />
+            </div>
+          </div>
+        </div>
+        <input className="hidden" type="submit" />
+        {submitting ? (
+          <div className="center login-wrapper disabled">
+            {" "}
+            <i className="fa fa-spinner fa-spin fa-lg" />{" "}
+          </div>
+        ) : (
+          <button onClick={submitFunc} className="center login-wrapper">
+            Submit
+          </button>
+        )}
       </div>
     </div>
   );
