@@ -10,7 +10,10 @@ import {
 const fetchFn: FetchFunction = (params, variables) => {
   const response = fetch("/graphqlfed", {
     method: "POST",
-    headers: [["Content-Type", "application/json"]],
+    headers: [
+      ["Content-Type", "application/json"],
+      ["x-graphql-yoga-csrf", "graphql-yoga-csrf-prevention"],
+    ],
     body: JSON.stringify({
       query: params.text,
       variables,
