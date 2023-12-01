@@ -5,6 +5,7 @@ RSpec.describe "Sample request", type: :request do
 
   let(:short_read_mngs) { WorkflowRun::WORKFLOW[:short_read_mngs] }
   let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
+  let(:fake_alignment_config_name) { "fake_alignment_config_name" }
 
   context 'Joe' do
     before do
@@ -96,7 +97,8 @@ RSpec.describe "Sample request", type: :request do
       before do
         # Sample setup
         @project = create(:public_project, users: [@joe])
-        create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
+        @default_alignment_config = create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
+        @fake_alignment_config = create(:alignment_config, name: fake_alignment_config_name)
         hg = create(:host_genome)
         @sample_params = {
           client: "web",
@@ -196,6 +198,35 @@ RSpec.describe "Sample request", type: :request do
           project_id: @project.id,
           do_not_process: false,
           workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
+        }
+
+        @sample_params_long_read_mngs = {
+          client: "web",
+          host_genome_id: hg.id,
+          host_genome_name: hg.name,
+          input_files_attributes: [
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              upload_client: "web",
+              file_type: "fastq",
+            },
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              upload_client: "web",
+              file_type: "fastq",
+            },
+          ],
+          length: 2,
+          name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",
+          project_id: @project.id,
+          do_not_process: false,
+          workflows: [WorkflowRun::WORKFLOW[:long_read_mngs]],
+          guppy_basecaller_setting: "hac",
+          technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore],
         }
 
         @metadata_params = {
@@ -556,6 +587,35 @@ RSpec.describe "Sample request", type: :request do
 
         expect(response.content_type).to include("application/json")
         expect(response).to have_http_status(:ok)
+      end
+
+      context "when the workflow is long read mngs" do
+        it "should set the alignment config to admin provided option if present" do
+          samples_params = @sample_params_long_read_mngs.merge({ alignment_config_name: fake_alignment_config_name })
+          post "/samples/bulk_upload_with_metadata", params: { samples: [samples_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to include("application/json")
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          pr = PipelineRun.find_by(sample_id: sample_id)
+          expect(pr.alignment_config_id).to eq(@fake_alignment_config.id)
+        end
+
+        it "should set the alignment config to the default if no admin option is present" do
+          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params_long_read_mngs], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to include("application/json")
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          pr = PipelineRun.find_by(sample_id: sample_id)
+          expect(pr.alignment_config_id).to eq(@default_alignment_config.id)
+        end
       end
     end
 

@@ -845,11 +845,12 @@ module SamplesHelper
                           base_inputs_json
                         end
           if workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
+            alignment_config_name = sample_attributes[:alignment_config_name] || AlignmentConfig::DEFAULT_NAME
             pr = PipelineRun.new(
               sample: sample,
               technology: technology,
               guppy_basecaller_setting: guppy_basecaller_setting,
-              alignment_config: AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+              alignment_config: AlignmentConfig.find_by(name: alignment_config_name)
             )
             pr.save!
           else
