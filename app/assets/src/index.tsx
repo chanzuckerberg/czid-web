@@ -1,4 +1,3 @@
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { defaultTheme } from "@czi-sds/components";
 import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
@@ -10,7 +9,6 @@ import { BrowserRouter } from "react-router-dom";
 import "semantic-ui-css/semantic.min.css";
 import "url-search-params-polyfill";
 import { UserContext } from "~/components/common/UserContext";
-import { initalCache, typeDefs } from "./cache";
 import { initialGlobalContextState } from "./globalContext/initialState";
 import { GlobalContext, globalContextReducer } from "./globalContext/reducer";
 import UserContextType from "./interface/allowedFeatures";
@@ -55,23 +53,6 @@ contextKeys.forEach(key => {
   }
 });
 
-// Initialize Apollo for Rails Client
-// This will be the default client passed in through the ApolloProvider
-// It is used for all native GraphQL queries and mutations in the Rails app (e.g. app/graphql)
-// TODO: (smccanny): delete this once rails and graphql are integrated under a single client
-export const apolloClient = new ApolloClient({
-  uri: "/graphql",
-  cache: new InMemoryCache(),
-});
-
-// Initialize federated Apollo client with graphql endpoints
-// Use this client for all federated queries and mutations (e.g. czid-graphql-federation-server)
-export const federationClient = new ApolloClient({
-  uri: "/graphqlfed",
-  cache: initalCache,
-  typeDefs,
-});
-
 // Using a function component provides a way to access useReducer
 const ReactComponentWithGlobalContext = ({
   matchedComponent,
@@ -90,24 +71,22 @@ const ReactComponentWithGlobalContext = ({
   return (
     <Sentry.ErrorBoundary fallback={"An error has occured"}>
       <BrowserRouter>
-        <ApolloProvider client={apolloClient}>
-          <RelayEnvironment>
-            <UserContext.Provider value={userContext}>
-              <GlobalContext.Provider
-                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-                value={{ globalContextState, globalContextDispatch }}
-              >
-                <StyledEngineProvider injectFirst>
-                  <EmotionThemeProvider theme={defaultTheme}>
-                    <ThemeProvider theme={defaultTheme}>
-                      {React.createElement(matchedComponent, props)}
-                    </ThemeProvider>
-                  </EmotionThemeProvider>
-                </StyledEngineProvider>
-              </GlobalContext.Provider>
-            </UserContext.Provider>
-          </RelayEnvironment>
-        </ApolloProvider>
+        <RelayEnvironment>
+          <UserContext.Provider value={userContext}>
+            <GlobalContext.Provider
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
+              value={{ globalContextState, globalContextDispatch }}
+            >
+              <StyledEngineProvider injectFirst>
+                <EmotionThemeProvider theme={defaultTheme}>
+                  <ThemeProvider theme={defaultTheme}>
+                    {React.createElement(matchedComponent, props)}
+                  </ThemeProvider>
+                </EmotionThemeProvider>
+              </StyledEngineProvider>
+            </GlobalContext.Provider>
+          </UserContext.Provider>
+        </RelayEnvironment>
       </BrowserRouter>
     </Sentry.ErrorBoundary>
   );
