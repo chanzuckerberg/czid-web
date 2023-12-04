@@ -1,6 +1,7 @@
 import { isEmpty } from "lodash/fp";
 import React from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import ToastContainer from "~ui/containers/ToastContainer";
 import { CZIDLogoReversed } from "~ui/icons";
 import { postToUrlWithCSRF } from "~utils/links";
@@ -28,6 +29,7 @@ const Header = ({
   showLogOut,
   userSignedIn,
   emergencyBannerMessage,
+  announcementBannerEnabled,
   signOutEndpoint,
   userName,
 }: HeaderProps) => {
@@ -68,12 +70,31 @@ const Header = ({
   }
   return (
     <div>
+      {/* Announcement banners we only want to show within the app, not the landing page */}
+
       <AnnouncementBanner
         id="emergency"
         visible={!isEmpty(emergencyBannerMessage)}
         message={emergencyBannerMessage}
       />
-      {/* ONT AnnouncementBanner should only be displayed on the landing page */}
+
+      <AnnouncementBanner
+        id="low-support-2023"
+        visible={announcementBannerEnabled}
+        message={
+          <>
+            <span className={cs.title}>Low-Support Mode:</span>
+            {
+              " We will only be responding to highly urgent issues from 12/20/2023-1/3/2024. For now, check out our "
+            }
+            <ExternalLink className={cs.link} href="https://help.czid.org">
+              Help Center
+            </ExternalLink>
+            . Happy Holidays!
+          </>
+        }
+      />
+
       <div className={cs.header}>
         <div className={cs.logo}>
           <a href="/">

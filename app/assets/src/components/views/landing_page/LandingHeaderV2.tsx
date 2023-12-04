@@ -1,9 +1,7 @@
 import { isEmpty } from "lodash/fp";
 import React, { useState } from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
 import IconMobileNavClose from "~/components/ui/icons/IconMobileNavClose";
-import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./LandingHeaderV2.scss";
 
@@ -14,7 +12,6 @@ interface LandingHeaderV2Props {
 }
 
 const LandingHeaderV2 = ({
-  announcementBannerEnabled,
   emergencyBannerMessage,
   impactPage,
 }: LandingHeaderV2Props) => {
@@ -26,12 +23,15 @@ const LandingHeaderV2 = ({
 
   return (
     <>
+      {/* Announcement banners we only want to show on the landing page, not within the app */}
+
       <AnnouncementBanner
         id="emergency"
         visible={!isEmpty(emergencyBannerMessage)}
         message={emergencyBannerMessage}
       />
-      <AnnouncementBanner
+
+      {/* <AnnouncementBanner
         id="amr"
         visible={announcementBannerEnabled}
         message={
@@ -54,7 +54,8 @@ const LandingHeaderV2 = ({
           </>
         }
         inverted={true}
-      />
+      /> */}
+
       <div className={cs.header} data-testid="home-top-nav-bar">
         <a aria-label="Go to the CZ ID homepage" href="/">
           <CZIDLogoReversed className={cs.headerLogo} />
