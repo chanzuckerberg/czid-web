@@ -23,13 +23,14 @@ import {
   PipelineRun,
   SampleId,
   SnapshotShareId,
-  SummaryStats,
 } from "~/interface/shared";
 import { processMetadata, processMetadataTypes } from "~utils/metadata";
-import MetadataTab from "./MetadataTab";
+import { MetadataTab } from "./components/MetadataTab";
+import { SIDEBAR_TABS } from "./constants";
 import NotesTab from "./NotesTab";
 import PipelineTab, { MngsPipelineInfo, PipelineInfo } from "./PipelineTab";
 import cs from "./sample_details_mode.scss";
+import { AdditionalInfo, SidebarTabName } from "./types";
 import {
   processAdditionalInfo,
   processAMRWorkflowRun,
@@ -52,23 +53,6 @@ export interface SampleDetailsModeProps {
   tempSelectedOptions?: TempSelectedOptionsShape;
 }
 
-export interface AdditionalInfo {
-  name: string;
-  project_id: number;
-  project_name: string;
-  upload_date?: string;
-  host_genome_name?: string;
-  host_genome_taxa_category?: string;
-  editable?: boolean;
-  notes?: string | null;
-  ercc_comparison: { name: string; actual: number; expected: number }[];
-  summary_stats?: SummaryStats;
-  pipeline_run?: PipelineRun;
-}
-
-type TabNames = "Metadata" | "Pipelines" | "Notes";
-const TABS: TabNames[] = ["Metadata", "Pipelines", "Notes"];
-
 const SampleDetailsMode = ({
   currentRun,
   currentWorkflowTab,
@@ -85,7 +69,7 @@ const SampleDetailsMode = ({
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo | null>(
     null,
   );
-  const [currentTab, setCurrentTab] = useState(TABS[0]);
+  const [currentTabSidebar, setCurrentTabSidebar] = useState(SIDEBAR_TABS[0]);
   const [lastValidMetadata, setLastValidMetadata] = useState<Metadata | null>(
     null,
   );
@@ -125,8 +109,8 @@ const SampleDetailsMode = ({
     }
   }, [metadata]);
 
-  const onTabChange = (tab: TabNames) => {
-    setCurrentTab(tab);
+  const onTabChange = (tab: SidebarTabName) => {
+    setCurrentTabSidebar(tab);
   };
 
   const fetchMetadata = async () => {
@@ -246,12 +230,11 @@ const SampleDetailsMode = ({
   const renderTab = () => {
     const savePending = some(metadataSavePending);
 
-    if (currentTab === "Metadata") {
+    if (currentTabSidebar === "Metadata") {
       return (
         <MetadataTab
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           metadata={metadata}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           additionalInfo={additionalInfo}
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           metadataTypes={metadataTypes}
@@ -267,7 +250,7 @@ const SampleDetailsMode = ({
         />
       );
     }
-    if (currentTab === "Pipelines") {
+    if (currentTabSidebar === "Pipelines") {
       const workflowTabs = size(sampleWorkflowLabels) > 1 && (
         <Tabs
           className={cs.workflowTabs}
@@ -283,8 +266,7 @@ const SampleDetailsMode = ({
 
       const consensusGenomeWorkflowRuns =
         sample &&
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        sample.workflow_runs.filter(
+        sample.workflow_runs?.filter(
           run => run.workflow === WorkflowType.CONSENSUS_GENOME,
         );
 
@@ -306,8 +288,7 @@ const SampleDetailsMode = ({
           </div>
         );
 
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      let pipelineInfoForTab: PipelineInfo = pipelineInfo;
+      let pipelineInfoForTab: PipelineInfo | null = pipelineInfo;
       if (currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME) {
         pipelineInfoForTab = processCGWorkflowRunInfo(currentRun);
       } else if (currentWorkflowTab === WORKFLOW_TABS.AMR) {
@@ -330,13 +311,11 @@ const SampleDetailsMode = ({
         </>
       );
     }
-    if (currentTab === "Notes") {
+    if (currentTabSidebar === "Notes") {
       return (
         <NotesTab
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
-          notes={additionalInfo.notes}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
-          editable={additionalInfo.editable}
+          notes={additionalInfo?.notes}
+          editable={additionalInfo?.editable}
           onNoteChange={val => handleMetadataChange("notes", val)}
           onNoteSave={() => handleMetadataSave("notes")}
           savePending={savePending}
@@ -374,8 +353,8 @@ const SampleDetailsMode = ({
       {!loading && (
         <Tabs
           className={cs.tabs}
-          tabs={TABS}
-          value={currentTab}
+          tabs={SIDEBAR_TABS}
+          value={currentTabSidebar}
           onChange={onTabChange}
         />
       )}

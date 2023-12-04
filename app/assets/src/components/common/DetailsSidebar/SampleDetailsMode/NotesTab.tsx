@@ -4,8 +4,8 @@ import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
 interface NotesTabProps {
-  notes: string;
-  editable: boolean;
+  notes: string | undefined | null;
+  editable: boolean | undefined;
   onNoteChange: (val: string, shouldSave?: boolean) => void;
   onNoteSave: (key?: string) => Promise<void>;
   savePending: boolean;
@@ -44,7 +44,7 @@ const NotesTab = ({
           <Textarea
             onChange={onNoteChange}
             onBlur={() => onNoteSave()}
-            value={notes}
+            value={notes || ""}
             className={cs.textarea}
           />
         </div>

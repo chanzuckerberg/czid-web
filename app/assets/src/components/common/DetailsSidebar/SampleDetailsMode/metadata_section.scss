@@ -16,16 +16,16 @@
 
   .editLink {
     @include font-body-xxs;
-    color: $sds-color-gray-300;
+    color: transparent;
     text-decoration: underline;
-    display: none;
     cursor: pointer;
 
     &.show {
-      display: block;
+      color: $sds-color-gray-300;
     }
 
-    &:hover {
+    &:hover,
+    &:focus {
       color: $sds-color-gray-black;
     }
   }
@@ -44,6 +44,6 @@
 
 .metadataSection:hover {
   .editLink {
-    display: block;
+    color: $sds-color-gray-300;
   }
 }

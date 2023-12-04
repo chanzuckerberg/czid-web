@@ -1,10 +1,11 @@
 import cx from "classnames";
 import { filter, get, isEmpty, pick } from "lodash/fp";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { getSamplePipelineResults } from "~/api";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { isPipelineVersionAtLeast } from "~/components/utils/pipeline_versions";
 import {
   READ_DEDUP_KEYS,
   RESULTS_FOLDER_ROOT_KEY,
@@ -44,7 +45,7 @@ const ERCC_PLOT = "erccScatterplot";
 export type PipelineInfo = AmrPipelineTabInfo | MngsPipelineInfo;
 
 interface PipelineTabProps {
-  pipelineInfo: PipelineInfo;
+  pipelineInfo: PipelineInfo | null;
   sampleId: SampleId;
   snapshotShareId?: SnapshotShareId;
   erccComparison?: ERCCComparisonShape[];
@@ -124,15 +125,11 @@ const PipelineTab = ({
   };
 
   useEffect(() => {
-    !snapshotShareId && getReadCounts();
-  }, []);
-
-  useEffect(() => {
     if (_graphContainer.current && graphWidth === 0) {
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       setGraphWidth(_graphContainer.current.getBoundingClientRect().width);
     }
-  });
+  }, [graphWidth]);
 
   const toggleSection = (section: keyof typeof sectionOpen) => {
     const toggleValue = !sectionOpen[section];
@@ -140,7 +137,7 @@ const PipelineTab = ({
   };
 
   const getPipelineInfoField = (field: { name: string; key: string }) => {
-    const { text, linkLabel, link } = pipelineInfo[field.key] || {};
+    const { text, linkLabel, link } = pipelineInfo?.[field.key] || {};
 
     const metadataLink = !snapshotShareId && linkLabel && link && (
       <Link href={link}>{linkLabel}</Link>
@@ -161,7 +158,7 @@ const PipelineTab = ({
     };
   };
 
-  const getReadCounts = async () => {
+  const getReadCounts = useCallback(async () => {
     const pipelineResults = await getSamplePipelineResults(
       sampleId,
       pipelineRun && pipelineRun.pipeline_version,
@@ -194,7 +191,7 @@ const PipelineTab = ({
         prevState.filter(section => section !== READ_COUNTS_TABLE),
       );
     }
-  };
+  }, [sampleId, pipelineRun, stepsKey]);
 
   const getSequenceType = (technology: string) => {
     switch (technology) {
@@ -229,8 +226,11 @@ const PipelineTab = ({
     // in the pipeline by the compression ratio to return nonunique reads.
     let uniqueReads = null;
     const readDedupKeys = READ_DEDUP_KEYS;
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    if (readDedupKeys.includes(stepKey) && pipelineRun.pipeline_version > "4") {
+    if (
+      readDedupKeys.includes(stepKey) &&
+      pipelineRun?.pipeline_version &&
+      isPipelineVersionAtLeast(pipelineRun.pipeline_version, "4.0.0")
+    ) {
       // Property order is predictable in JavaScript objects since ES2015
       const stepKeys = Object.keys(pipelineStepDict[stepsKey]);
       const previousStepKey =
@@ -364,6 +364,10 @@ const PipelineTab = ({
   ] as WorkflowLabelType[];
   const workflowIsMngs = mngsWorkflows.includes(workflow);
 
+  useEffect(() => {
+    !snapshotShareId && workflowIsMngs && getReadCounts();
+  }, [getReadCounts, snapshotShareId, workflowIsMngs]);
+
   const fields = INFO_FIELDS_FOR_WORKFLOW[getWorkflowTypeFromLabel(workflow)];
 
   const pipelineInfoFields = fields.map(getPipelineInfoField);
@@ -372,6 +376,9 @@ const PipelineTab = ({
       ? "Bases Remaining"
       : "Reads Remaining";
 
+  if (!pipelineInfo) {
+    return <LoadingMessage message="Loading" className={cs.loading} />;
+  }
   return (
     <div>
       <MetadataSection

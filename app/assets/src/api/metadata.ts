@@ -52,6 +52,7 @@ const getWorkflowRunMetadataFields = (
     },
   );
 
+// TODO: Replace with GQL mutation
 const saveSampleMetadata = (id: $TSFixMe, field: $TSFixMe, value: $TSFixMe) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
     field,

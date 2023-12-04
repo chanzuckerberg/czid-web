@@ -11,7 +11,7 @@ import {
 import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 import { WorkflowRun } from "~/interface/sample";
 import { AmrPipelineTabInfo, MngsPipelineInfo } from "./PipelineTab";
-import { AdditionalInfo } from "./SampleDetailsMode";
+import { AdditionalInfo } from "./types";
 
 const BLANK_TEXT = "unknown";
 const YYYY_MM_DD = "YYYY-MM-DD";

@@ -16,6 +16,7 @@ import {
   putWithCSRF,
 } from "./core";
 
+// TODO: Replace with GQL mutation
 // Save fields on the sample model (NOT sample metadata)
 const saveSampleField = (id: $TSFixMe, field: $TSFixMe, value: $TSFixMe) =>
   postWithCSRF(`/samples/${id}/save_metadata`, {

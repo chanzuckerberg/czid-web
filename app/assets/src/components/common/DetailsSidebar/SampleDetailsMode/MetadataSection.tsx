@@ -33,16 +33,15 @@ const MetadataSection = ({
   className,
 }: MetadataSectionProps) => {
   const [hasSaved, setHasSaved] = useState(false);
-  const [isPrevSavePending, setIsPrevSavePending] = useState(false);
+  const [isPrevSavePending, setIsPrevSavePending] = useState<boolean>(false);
 
   useEffect(() => {
     // If saving has just finished, show 'All changed saved'
     if (!savePending && isPrevSavePending) {
       setHasSaved(true);
     }
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-    setIsPrevSavePending(savePending);
-  }, [savePending]);
+    setIsPrevSavePending(!!savePending); // If savePending is undefined, set to false
+  }, [isPrevSavePending, savePending]);
 
   const renderStatus = () => {
     if (savePending) {
@@ -65,17 +64,18 @@ const MetadataSection = ({
         (editing ? (
           renderStatus()
         ) : (
-          <div
+          <Button
+            sds-style="minimal"
+            sds-type="secondary"
             data-testid={`${kebabCase(title)}-edit`}
             className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
             onClick={e => {
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-              onEditToggle();
+              onEditToggle && onEditToggle();
               e.stopPropagation();
             }}
           >
             Edit
-          </div>
+          </Button>
         ))}
     </React.Fragment>
   );
@@ -96,8 +96,7 @@ const MetadataSection = ({
             sdsStyle="square"
             sdsType="primary"
             onClick={() => {
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-              onEditToggle();
+              onEditToggle && onEditToggle();
               setHasSaved(false);
             }}
           >

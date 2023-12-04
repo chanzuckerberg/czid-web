@@ -33,7 +33,7 @@ export const MINIMUM_VERSIONS = {
  * isPipelineVersionAtLeast("1.0.0", "1.0.0-beta") // true1
  * isPipelineVersionAtLeast("1.0.0-alpha", "1.0.0-beta") // false
  */
-const isPipelineVersionAtLeast = (
+export const isPipelineVersionAtLeast = (
   pipelineVersion: string,
   testVersion: string,
 ): boolean => {

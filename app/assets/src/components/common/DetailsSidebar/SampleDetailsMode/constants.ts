@@ -1,3 +1,11 @@
+import { SidebarTabName } from "./types";
+
+export const SIDEBAR_TABS: SidebarTabName[] = [
+  "Metadata",
+  "Pipelines",
+  "Notes",
+];
+
 export const SAMPLE_ADDITIONAL_INFO = [
   {
     name: "Sample Name",
