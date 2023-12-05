@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<fa262452bed45a6aaceffe0cfedf9e1c>>
+ * @generated SignedSource<<b31ddb16be827b82d03c1fdccffed644>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,12 +10,12 @@
 
 import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type PathogenListViewQuery$variables = {};
+export type PathogenListViewQuery$variables = Record<PropertyKey, never>;
 export type PathogenListViewQuery$data = {
   readonly pathogenList: {
-    readonly citations: ReadonlyArray<string> | null;
-    readonly updatedAt: any | null;
-    readonly version: string | null;
+    readonly citations: ReadonlyArray<string> | null | undefined;
+    readonly updatedAt: any | null | undefined;
+    readonly version: string | null | undefined;
     readonly " $fragmentSpreads": FragmentRefs<"AnchorMenuFragment" | "SectionNavigationFragment">;
   };
 };

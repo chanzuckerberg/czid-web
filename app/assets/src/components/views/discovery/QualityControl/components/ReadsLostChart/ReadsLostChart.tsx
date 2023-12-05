@@ -289,8 +289,9 @@ export const ReadsLostChart = ({
   };
 
   const handleSampleLabelClick = (sampleName: string) => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    const sampleId = validSamples.find(sample => sample.name === sampleName).id;
+    const sampleId = validSamples.find(
+      sample => sample.name === sampleName,
+    )?.id;
 
     if (sampleId === sidebarParams.sampleId && sidebarVisible === true) {
       setSidebarVisible(false);
@@ -304,8 +305,10 @@ export const ReadsLostChart = ({
       },
     );
 
-    setSidebarVisible(true);
-    setSidebarParams({ sampleId });
+    if (sampleId) {
+      setSidebarVisible(true);
+      setSidebarParams({ sampleId });
+    }
   };
 
   const events = {

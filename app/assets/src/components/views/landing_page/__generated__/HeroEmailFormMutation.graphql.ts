@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9a91ed81f9c202510706e71db0f1ca52>>
+ * @generated SignedSource<<4447479ad93f78f33a2da79fd4bc2b10>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,7 +14,7 @@ export type HeroEmailFormMutation$variables = {
 };
 export type HeroEmailFormMutation$data = {
   readonly createUser: {
-    readonly email: string | null;
+    readonly email: string | null | undefined;
   };
 };
 export type HeroEmailFormMutation = {

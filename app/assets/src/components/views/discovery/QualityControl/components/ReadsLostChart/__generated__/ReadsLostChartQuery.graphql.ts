@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e23e0dac46bd9b70c03c6e9e8db0ea65>>
+ * @generated SignedSource<<46bed28f58f775ef9dbfaff58fb09629>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,15 +15,15 @@ export type ReadsLostChartQuery$variables = {
 export type ReadsLostChartQuery$data = {
   readonly sampleReadsStats: {
     readonly sampleReadsStats: ReadonlyArray<{
-      readonly initialReads: number | null;
-      readonly name: string | null;
-      readonly pipelineVersion: string | null;
+      readonly initialReads: number | null | undefined;
+      readonly name: string | null | undefined;
+      readonly pipelineVersion: string | null | undefined;
       readonly sampleId: string;
       readonly steps: ReadonlyArray<{
-        readonly name: string | null;
-        readonly readsAfter: number | null;
-      }> | null;
-      readonly wdlVersion: string | null;
+        readonly name: string | null | undefined;
+        readonly readsAfter: number | null | undefined;
+      }> | null | undefined;
+      readonly wdlVersion: string | null | undefined;
     }>;
   };
 };

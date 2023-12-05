@@ -73,6 +73,7 @@ const QualityControlQuery = graphql`
     ) {
       samples {
         id
+        name
         details {
           dbSample {
             uploadError

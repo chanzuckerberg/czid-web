@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bf24a26eff45bdfc7597c26a4f64b167>>
+ * @generated SignedSource<<e28cabceb72796740a17e53ab5d5c062>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,9 +12,9 @@ import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type SectionNavigationFragment$data = {
   readonly pathogens: ReadonlyArray<{
-    readonly category: string | null;
-    readonly name: string | null;
-  }> | null;
+    readonly category: string | null | undefined;
+    readonly name: string | null | undefined;
+  }> | null | undefined;
   readonly " $fragmentType": "SectionNavigationFragment";
 };
 export type SectionNavigationFragment$key = {

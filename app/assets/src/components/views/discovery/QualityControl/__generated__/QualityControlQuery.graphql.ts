@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dac300db51f7e3d976e938acfa105849>>
+ * @generated SignedSource<<587e93c72c69b4f7d544ea93b0664911>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,53 +13,54 @@ export type Annotation = {
   name: string;
 };
 export type QualityControlQuery$variables = {
-  annotations?: ReadonlyArray<Annotation> | null;
-  basic?: boolean | null;
-  domain?: string | null;
-  hostIds?: ReadonlyArray<number> | null;
-  limit?: number | null;
-  listAllIds?: boolean | null;
-  location?: string | null;
-  locationV2?: ReadonlyArray<string> | null;
-  offset?: number | null;
-  orderBy?: string | null;
-  orderDir?: string | null;
+  annotations?: ReadonlyArray<Annotation> | null | undefined;
+  basic?: boolean | null | undefined;
+  domain?: string | null | undefined;
+  hostIds?: ReadonlyArray<number> | null | undefined;
+  limit?: number | null | undefined;
+  listAllIds?: boolean | null | undefined;
+  location?: string | null | undefined;
+  locationV2?: ReadonlyArray<string> | null | undefined;
+  offset?: number | null | undefined;
+  orderBy?: string | null | undefined;
+  orderDir?: string | null | undefined;
   projectId: number;
-  requestedSampleIds?: ReadonlyArray<number> | null;
-  sampleIds?: ReadonlyArray<number> | null;
-  searchString?: string | null;
-  taxIds?: ReadonlyArray<number> | null;
-  taxLevels?: ReadonlyArray<string> | null;
-  thresholdFilterInfo?: string | null;
-  time?: ReadonlyArray<string> | null;
-  tissue?: ReadonlyArray<string> | null;
-  visibility?: ReadonlyArray<string> | null;
-  workflow?: string | null;
+  requestedSampleIds?: ReadonlyArray<number> | null | undefined;
+  sampleIds?: ReadonlyArray<number> | null | undefined;
+  searchString?: string | null | undefined;
+  taxIds?: ReadonlyArray<number> | null | undefined;
+  taxLevels?: ReadonlyArray<string> | null | undefined;
+  thresholdFilterInfo?: string | null | undefined;
+  time?: ReadonlyArray<string> | null | undefined;
+  tissue?: ReadonlyArray<string> | null | undefined;
+  visibility?: ReadonlyArray<string> | null | undefined;
+  workflow?: string | null | undefined;
 };
 export type QualityControlQuery$data = {
   readonly samplesList: {
     readonly samples: ReadonlyArray<{
       readonly details: {
         readonly dbSample: {
-          readonly uploadError: string | null;
-        } | null;
+          readonly uploadError: string | null | undefined;
+        } | null | undefined;
         readonly derivedSampleOutput: {
           readonly pipelineRun: {
-            readonly totalReads: number | null;
-          } | null;
+            readonly totalReads: number | null | undefined;
+          } | null | undefined;
           readonly summaryStats: {
-            readonly compressionRatio: number | null;
-            readonly insertSizeMean: number | null;
-            readonly qcPercent: number | null;
-          } | null;
-        } | null;
+            readonly compressionRatio: number | null | undefined;
+            readonly insertSizeMean: number | null | undefined;
+            readonly qcPercent: number | null | undefined;
+          } | null | undefined;
+        } | null | undefined;
         readonly mngsRunInfo: {
-          readonly createdAt: any | null;
-          readonly reportReady: boolean | null;
-          readonly resultStatusDescription: string | null;
-        } | null;
+          readonly createdAt: any | null | undefined;
+          readonly reportReady: boolean | null | undefined;
+          readonly resultStatusDescription: string | null | undefined;
+        } | null | undefined;
       };
       readonly id: string;
+      readonly name: string;
     }>;
   };
 };
@@ -317,6 +318,13 @@ v22 = [
           {
             "alias": null,
             "args": null,
+            "kind": "ScalarField",
+            "name": "name",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "SampleDetails",
             "kind": "LinkedField",
             "name": "details",
@@ -507,16 +515,16 @@ return {
     "selections": (v22/*: any*/)
   },
   "params": {
-    "cacheID": "75a5dce2a142b1d551cd636aab528bb8",
+    "cacheID": "7bb2914215777e3ee9bc389e0b97c532",
     "id": null,
     "metadata": {},
     "name": "QualityControlQuery",
     "operationKind": "query",
-    "text": "query QualityControlQuery(\n  $projectId: Int!\n  $domain: String\n  $limit: Int\n  $offset: Int\n  $orderBy: String\n  $orderDir: String\n  $listAllIds: Boolean\n  $basic: Boolean\n  $sampleIds: [Int!]\n  $hostIds: [Int!]\n  $location: String\n  $locationV2: [String!]\n  $taxIds: [Int!]\n  $taxLevels: [String!]\n  $thresholdFilterInfo: String\n  $annotations: [Annotation!]\n  $time: [String!]\n  $tissue: [String!]\n  $visibility: [String!]\n  $searchString: String\n  $requestedSampleIds: [Int!]\n  $workflow: String\n) {\n  samplesList(projectId: $projectId, domain: $domain, limit: $limit, offset: $offset, orderBy: $orderBy, orderDir: $orderDir, listAllIds: $listAllIds, basic: $basic, sampleIds: $sampleIds, hostIds: $hostIds, location: $location, locationV2: $locationV2, taxIds: $taxIds, taxLevels: $taxLevels, thresholdFilterInfo: $thresholdFilterInfo, annotations: $annotations, time: $time, tissue: $tissue, visibility: $visibility, searchString: $searchString, requestedSampleIds: $requestedSampleIds, workflow: $workflow) {\n    samples {\n      id\n      details {\n        dbSample {\n          uploadError\n        }\n        derivedSampleOutput {\n          pipelineRun {\n            totalReads\n          }\n          summaryStats {\n            compressionRatio\n            qcPercent\n            insertSizeMean\n          }\n        }\n        mngsRunInfo {\n          resultStatusDescription\n          reportReady\n          createdAt\n        }\n      }\n    }\n  }\n}\n"
+    "text": "query QualityControlQuery(\n  $projectId: Int!\n  $domain: String\n  $limit: Int\n  $offset: Int\n  $orderBy: String\n  $orderDir: String\n  $listAllIds: Boolean\n  $basic: Boolean\n  $sampleIds: [Int!]\n  $hostIds: [Int!]\n  $location: String\n  $locationV2: [String!]\n  $taxIds: [Int!]\n  $taxLevels: [String!]\n  $thresholdFilterInfo: String\n  $annotations: [Annotation!]\n  $time: [String!]\n  $tissue: [String!]\n  $visibility: [String!]\n  $searchString: String\n  $requestedSampleIds: [Int!]\n  $workflow: String\n) {\n  samplesList(projectId: $projectId, domain: $domain, limit: $limit, offset: $offset, orderBy: $orderBy, orderDir: $orderDir, listAllIds: $listAllIds, basic: $basic, sampleIds: $sampleIds, hostIds: $hostIds, location: $location, locationV2: $locationV2, taxIds: $taxIds, taxLevels: $taxLevels, thresholdFilterInfo: $thresholdFilterInfo, annotations: $annotations, time: $time, tissue: $tissue, visibility: $visibility, searchString: $searchString, requestedSampleIds: $requestedSampleIds, workflow: $workflow) {\n    samples {\n      id\n      name\n      details {\n        dbSample {\n          uploadError\n        }\n        derivedSampleOutput {\n          pipelineRun {\n            totalReads\n          }\n          summaryStats {\n            compressionRatio\n            qcPercent\n            insertSizeMean\n          }\n        }\n        mngsRunInfo {\n          resultStatusDescription\n          reportReady\n          createdAt\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "78a9300162c7d409c83122017b6fa5b3";
+(node as any).hash = "f8b5713bac78f5c3e19f7e3a4042fdf6";
 
 export default node;
