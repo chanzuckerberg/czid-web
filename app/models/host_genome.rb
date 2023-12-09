@@ -9,7 +9,17 @@ class HostGenome < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :default_background, optional: true, class_name: "Background"
 
-  validates :name, presence: true, uniqueness: { case_sensitive: false }, format: {
+  # A specific version of a HostGenome can be deprecated: doing this allows us
+  # to keep around its index file references while stopping displaying it in
+  # options lists and generally restricting its further use. This effectively
+  # allows us to version a given host: there can be lots of HostGenomes with
+  # the `name` of "Human", but only one for any given deprecation_status.
+  # See https://czi-tech.atlassian.net/browse/CZID-8173 for motivation.
+  validates :name, presence: true, uniqueness: {
+    case_sensitive: false,
+    scope: :deprecation_status,
+    message: "plus `deprecation_status` must be unique, e.g., you can not have two 'active' rows for a name.",
+  }, format: {
     with: /\A\w[\w|\s|\.|\-]+\z/,
     message: "of host organism allows only word, period, dash or space chars, and must start with a word char.",
   }
