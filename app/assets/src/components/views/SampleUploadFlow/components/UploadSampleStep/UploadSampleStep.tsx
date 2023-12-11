@@ -82,6 +82,7 @@ import { PreUploadQCCheck } from "./components/PreUploadQCCheck";
 import {
   MISMATCH_FORMAT_ERROR,
   NCBI_GENBANK_REF_SEQ_HEADER_REGEX,
+  REF_SEQ_FILE_NAME_ERROR_MESSAGE,
   UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
 } from "./constants";
 import {
@@ -1223,7 +1224,7 @@ class UploadSampleStepCC extends React.Component<
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value) &&
       !this.isRefSeqFileNameValid()
     ) {
-      return "Reference file name can only contain letters, numbers, dashes, parenthesis and underscores";
+      return REF_SEQ_FILE_NAME_ERROR_MESSAGE;
     }
 
     if (
@@ -1566,6 +1567,9 @@ class UploadSampleStepCC extends React.Component<
             bedFileName={bedFile?.name}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             refSeqFileName={refSeqFile?.name}
+            hasRefSeqFileNameError={
+              refSeqFile !== null && !this.isRefSeqFileNameValid()
+            }
             selectedMedakaModel={selectedMedakaModel}
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322

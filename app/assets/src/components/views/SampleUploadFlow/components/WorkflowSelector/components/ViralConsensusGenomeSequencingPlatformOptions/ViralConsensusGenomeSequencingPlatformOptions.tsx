@@ -3,7 +3,9 @@ import cx from "classnames";
 import React from "react";
 import { TaxonOption } from "~/components/common/filters/types";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import IssueGroup from "~/components/ui/notifications/IssueGroup";
 import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
+import { REF_SEQ_FILE_NAME_ERROR_MESSAGE } from "../../../UploadSampleStep/constants";
 import { TooltipIcon } from "../TooltipIcon";
 import { UploadButton } from "./components/UploadButton";
 import { UploadedFileName } from "./components/UploadedFileName";
@@ -13,6 +15,7 @@ import cs from "./viral_consensus_genmone_sequencing_platform_options.scss";
 interface ViralConsensusGenomeSequencingPlatformOptionsProps {
   bedFileName: string;
   refSeqFileName: string;
+  hasRefSeqFileNameError: boolean;
   selectedTaxon: TaxonOption;
   onBedFileChanged(file?: File): void;
   onRefSeqFileChanged(file?: File): void;
@@ -22,6 +25,7 @@ interface ViralConsensusGenomeSequencingPlatformOptionsProps {
 const ViralConsensusGenomeSequencingPlatformOptions = ({
   bedFileName,
   refSeqFileName,
+  hasRefSeqFileNameError,
   selectedTaxon,
   onBedFileChanged,
   onRefSeqFileChanged,
@@ -48,71 +52,83 @@ const ViralConsensusGenomeSequencingPlatformOptions = ({
   );
 
   return (
-    <div
-      className={cx(commonStyles.technologyContent, "noStyleButton")}
-      onClick={e => e.stopPropagation()}
-    >
-      <div className={commonStyles.item}>
-        <div className={commonStyles.subheader}>
-          Taxon Name
-          <Tooltip
-            arrow
-            placement="top"
-            title="Include the taxon name of the reference sequence to help you search generated genomes."
-          >
-            <TooltipIcon />
-          </Tooltip>
+    <>
+      <div
+        className={cx(commonStyles.technologyContent, "noStyleButton")}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className={commonStyles.item}>
+          <div className={commonStyles.subheader}>
+            Taxon Name
+            <Tooltip
+              arrow
+              placement="top"
+              title="Include the taxon name of the reference sequence to help you search generated genomes."
+            >
+              <TooltipIcon />
+            </Tooltip>
+          </div>
+          <div className={cs.dropdown}>
+            <UploadTaxonFilter
+              selectedTaxon={selectedTaxon}
+              onChange={onTaxonChange}
+            />
+          </div>
         </div>
-        <div className={cs.dropdown}>
-          <UploadTaxonFilter
-            selectedTaxon={selectedTaxon}
-            onChange={onTaxonChange}
-          />
-        </div>
-      </div>
 
-      <div className={commonStyles.item}>
-        <div className={commonStyles.subheader}>
-          Reference Sequence
-          <Tooltip arrow placement="top" title={refFileTooltipText}>
-            <TooltipIcon />
-          </Tooltip>
+        <div className={commonStyles.item}>
+          <div className={commonStyles.subheader}>
+            Reference Sequence
+            <Tooltip arrow placement="top" title={refFileTooltipText}>
+              <TooltipIcon />
+            </Tooltip>
+          </div>
+          {refSeqFileName ? (
+            <UploadedFileName
+              fileName={refSeqFileName}
+              onFileChanged={onRefSeqFileChanged}
+            />
+          ) : (
+            <UploadButton
+              fileTypes={[".fasta", ".fa", "fasta.gz", ".fa.gz"]}
+              onFileChanged={onRefSeqFileChanged}
+              data-testid="reference-sequence-file-upload"
+            />
+          )}
         </div>
-        {refSeqFileName ? (
-          <UploadedFileName
-            fileName={refSeqFileName}
-            onFileChanged={onRefSeqFileChanged}
-          />
-        ) : (
-          <UploadButton
-            fileTypes={[".fasta", ".fa", "fasta.gz", ".fa.gz"]}
-            onFileChanged={onRefSeqFileChanged}
-            data-testid="reference-sequence-file-upload"
-          />
-        )}
-      </div>
 
-      <div className={commonStyles.item}>
-        <div className={commonStyles.subheader}>
-          <span>Trim Primers</span>
-          <span className={cs.optional}> &mdash; Optional</span>
-          <Tooltip arrow placement="top" title={bedFileTooltip}>
-            <TooltipIcon />
-          </Tooltip>
+        <div className={commonStyles.item}>
+          <div className={commonStyles.subheader}>
+            <span>Trim Primers</span>
+            <span className={cs.optional}> &mdash; Optional</span>
+            <Tooltip arrow placement="top" title={bedFileTooltip}>
+              <TooltipIcon />
+            </Tooltip>
+          </div>
+          {bedFileName ? (
+            <UploadedFileName
+              fileName={bedFileName}
+              onFileChanged={onBedFileChanged}
+            />
+          ) : (
+            <UploadButton
+              fileTypes={[".bed", ".bed.gz"]}
+              onFileChanged={onBedFileChanged}
+            />
+          )}
         </div>
-        {bedFileName ? (
-          <UploadedFileName
-            fileName={bedFileName}
-            onFileChanged={onBedFileChanged}
-          />
-        ) : (
-          <UploadButton
-            fileTypes={[".bed", ".bed.gz"]}
-            onFileChanged={onBedFileChanged}
-          />
-        )}
       </div>
-    </div>
+      {hasRefSeqFileNameError && (
+        <IssueGroup
+          caption={REF_SEQ_FILE_NAME_ERROR_MESSAGE}
+          headers={["File Name"]}
+          rows={[[refSeqFileName]]}
+          toggleable={false}
+          type="warning"
+          className={cs.error}
+        />
+      )}
+    </>
   );
 };
 

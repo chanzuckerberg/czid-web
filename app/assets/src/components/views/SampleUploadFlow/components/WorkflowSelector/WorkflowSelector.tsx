@@ -33,6 +33,7 @@ import cs from "./workflow_selector.scss";
 interface WorkflowSelectorProps {
   bedFileName: string;
   refSeqFileName: string;
+  hasRefSeqFileNameError: boolean;
   enabledWorkflows: UploadWorkflows[];
   onBedFileChanged(file?: File): void;
   onClearLabsChange?: (usedClearLabs: boolean) => void;
@@ -81,6 +82,7 @@ export const shouldDisableSequencingPlatformOption = (
 const WorkflowSelector = ({
   bedFileName,
   refSeqFileName,
+  hasRefSeqFileNameError,
   enabledWorkflows,
   onBedFileChanged,
   onClearLabsChange,
@@ -211,6 +213,7 @@ const WorkflowSelector = ({
           <ViralConsensusGenomeSequencingPlatformOptions
             bedFileName={bedFileName}
             refSeqFileName={refSeqFileName}
+            hasRefSeqFileNameError={hasRefSeqFileNameError}
             selectedTaxon={selectedTaxon}
             onBedFileChanged={onBedFileChanged}
             onRefSeqFileChanged={onRefSeqFileChanged}
