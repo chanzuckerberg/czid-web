@@ -170,10 +170,6 @@ function EventDictionary() {
   this.REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED =
     "REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED";
 
-  /** The user hovered over a histogram bar on a QualityControl histogram. */
-  this.QUALITY_CONTROL_HISTOGRAM_BAR_HOVERED =
-    "QUALITY_CONTROL_HISTOGRAM_BAR_HOVERED";
-
   /** The user clicked a MenuItem within the AnnotationMenu. */
   this.ANNOTATION_MENU_MENU_ITEM_CLICKED = "ANNOTATION_MENU_MENU_ITEM_CLICKED";
 

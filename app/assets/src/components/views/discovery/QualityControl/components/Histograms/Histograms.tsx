@@ -437,19 +437,7 @@ export const Histograms = ({
             <ColumnHeaderTooltip
               data-testid="total-read-tooltip"
               trigger={
-                <span
-                  data-testid="total-read-info-icon"
-                  onFocus={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
-                    );
-                  }}
-                  onMouseOver={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
-                    );
-                  }}
-                >
+                <span data-testid="total-read-info-icon">
                   <Icon
                     sdsIcon="infoCircle"
                     sdsSize="s"
@@ -482,19 +470,7 @@ export const Histograms = ({
             <ColumnHeaderTooltip
               data-testid="passed-qc-tooltip"
               trigger={
-                <span
-                  data-testid="passed-qc-info-icon"
-                  onFocus={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
-                    );
-                  }}
-                  onMouseOver={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
-                    );
-                  }}
-                >
+                <span data-testid="passed-qc-info-icon">
                   <Icon
                     sdsIcon="infoCircle"
                     sdsSize="s"
@@ -530,19 +506,7 @@ export const Histograms = ({
             <ColumnHeaderTooltip
               data-testid="duplicate-tooltip-info-icon"
               trigger={
-                <span
-                  data-testid="duplicate-tooltip"
-                  onFocus={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
-                    );
-                  }}
-                  onMouseOver={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
-                    );
-                  }}
-                >
+                <span data-testid="duplicate-tooltip">
                   <Icon
                     sdsIcon="infoCircle"
                     sdsSize="s"
@@ -587,19 +551,7 @@ export const Histograms = ({
             <ColumnHeaderTooltip
               data-testid="mean-insert-size-info-icon"
               trigger={
-                <span
-                  data-testid="mean-insert-size-tooltip"
-                  onFocus={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
-                    );
-                  }}
-                  onMouseOver={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
-                    );
-                  }}
-                >
+                <span data-testid="mean-insert-size-tooltip">
                   <Icon
                     sdsIcon="infoCircle"
                     sdsSize="s"
@@ -620,18 +572,7 @@ export const Histograms = ({
                 samples.
                 <ColumnHeaderTooltip
                   trigger={
-                    <span
-                      onFocus={() => {
-                        trackEvent(
-                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
-                        );
-                      }}
-                      onMouseOver={() => {
-                        trackEvent(
-                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
-                        );
-                      }}
-                    >
+                    <span>
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"

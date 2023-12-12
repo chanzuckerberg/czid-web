@@ -278,13 +278,6 @@ export const ReadsLostChart = ({
         disabled: false,
       },
     ];
-
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_HOVERED,
-      {
-        sampleName,
-      },
-    );
     setChartTooltipData(chartTooltipData);
   };
 
@@ -340,18 +333,7 @@ export const ReadsLostChart = ({
             <ColumnHeaderTooltip
               data-testid="read-lost-tooltip"
               trigger={
-                <span
-                  onFocus={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
-                    );
-                  }}
-                  onMouseOver={() => {
-                    trackEvent(
-                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
-                    );
-                  }}
-                >
+                <span>
                   <Icon
                     sdsIcon="infoCircle"
                     sdsSize="s"

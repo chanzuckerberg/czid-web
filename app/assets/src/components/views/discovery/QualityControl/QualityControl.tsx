@@ -2,7 +2,6 @@ import cx from "classnames";
 import { get } from "lodash/fp";
 import React, { useCallback, useEffect, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
 import { LoadingPage } from "~/components/common/LoadingPage";
@@ -112,7 +111,6 @@ function QualityControl({
   projectId,
   handleBarClick,
 }: QualityControlProps) {
-  const trackEvent = useTrackEvent();
   const [loading, setLoading] = useState(true);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarParams, setSidebarParams] = useState<SampleDetailsModeProps>({
@@ -209,9 +207,6 @@ function QualityControl({
   const handleChartElementHover = (clientX: number, clientY: number) => {
     const tooltipLocation =
       clientX && clientY ? { left: clientX, top: clientY } : null;
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED,
-    );
     setTooltipLocation(tooltipLocation);
   };
 

@@ -102,7 +102,6 @@ export const ConsensusGenomeCoverageView = ({
       <div className={cs.title}>
         How good is the coverage?
         <HelpIcon
-          analyticsEventName="ConsensusGenomeView_quality-metrics-help-icon_hovered"
           className={cx(cs.helpIcon, cs.lower)}
           text="These metrics and chart help determine the coverage of the reference accession."
           learnMoreLinkUrl={helpLinkUrl}

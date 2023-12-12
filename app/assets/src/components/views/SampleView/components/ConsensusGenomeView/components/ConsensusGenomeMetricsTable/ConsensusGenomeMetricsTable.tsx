@@ -103,9 +103,6 @@ export const ConsensusGenomeMetricsTable = ({
         <HelpIcon
           text="These metrics help determine the quality of the reference accession."
           learnMoreLinkUrl={helpLinkUrl}
-          analyticsEventName={
-            "ConsensusGenomeView_quality-metrics-help-icon_hovered"
-          }
           learnMoreLinkAnalyticsEventName="ConsensusGenomeView_help-link_clicked"
           className={cx(cs.helpIcon, cs.lower)}
         />
