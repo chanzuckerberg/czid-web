@@ -4,10 +4,10 @@
 import axios from "axios";
 import { CoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/types";
 import { WorkflowType } from "~/components/utils/workflows";
+import { AmrWorkflowResult } from "~/components/views/SampleView/components/AmrView/components/AmrSampleReport/types";
 import { BenchmarkWorkflowRunResults } from "~/components/views/SampleView/components/BenchmarkView/BenchmarkView";
 import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
-import { ConsensusGenomeWorkflowRunResults } from "~/interface/sampleView";
 import { Background, ProjectPipelineVersions } from "~/interface/shared";
 import {
   get,
@@ -456,7 +456,7 @@ const getWorkflowRunsInfo = (workflowRunIds: $TSFixMe) =>
 
 const getWorkflowRunResults = (
   workflowRunId: number,
-): Promise<ConsensusGenomeWorkflowRunResults | BenchmarkWorkflowRunResults> =>
+): Promise<AmrWorkflowResult | BenchmarkWorkflowRunResults> =>
   get(`/workflow_runs/${workflowRunId}/results`);
 
 const getContigsSequencesByByteranges = (

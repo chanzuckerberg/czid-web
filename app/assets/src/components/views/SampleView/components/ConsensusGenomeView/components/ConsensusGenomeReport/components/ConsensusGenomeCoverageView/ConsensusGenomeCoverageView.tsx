@@ -1,6 +1,7 @@
 import { Button, Icon } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import React from "react";
+import { graphql, useFragment } from "react-relay";
 import BasicPopup from "~/components/BasicPopup";
 import { HelpIcon } from "~/components/ui/containers";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -10,33 +11,63 @@ import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils/download";
 import cs from "~/components/views/SampleView/components/ConsensusGenomeView/consensus_genome_view.scss";
 import { WorkflowRun } from "~/interface/sample";
-import { ConsensusGenomeWorkflowRunResults } from "~/interface/sampleView";
 import { SampleId } from "~/interface/shared";
+import { ConsensusGenomeReportQuery$data } from "../../__generated__/ConsensusGenomeReportQuery.graphql";
+import { ConsensusGenomeCoverageViewFragment$key } from "./__generated__/ConsensusGenomeCoverageViewFragment.graphql";
 import { ConsensusGenomeHistogram } from "./components/ConsensusGenomeHistogram";
 
+export const ConsensusGenomeCoverageViewFragment = graphql`
+  fragment ConsensusGenomeCoverageViewFragment on ConsensusGenomeWorkflowResults {
+    reference_genome {
+      accession_id
+      taxon {
+        name
+        id
+      }
+    }
+    metric_consensus_genome {
+      coverage_viz {
+        coverage_breadth
+        coverage_depth
+        total_length
+      }
+    }
+  }
+`;
 interface ConsensusGenomeCoverageViewProps {
   helpLinkUrl: string;
   sampleId: SampleId;
   workflowRun: WorkflowRun;
-  workflowRunResults: ConsensusGenomeWorkflowRunResults;
+  workflowRunResultsData: NonNullable<
+    ConsensusGenomeReportQuery$data["ConsensusGenomeWorkflowResults"]
+  >;
 }
 
 export const ConsensusGenomeCoverageView = ({
   helpLinkUrl,
   sampleId,
   workflowRun,
-  workflowRunResults,
+  workflowRunResultsData,
 }: ConsensusGenomeCoverageViewProps) => {
+  const data = useFragment<ConsensusGenomeCoverageViewFragment$key>(
+    ConsensusGenomeCoverageViewFragment,
+    workflowRunResultsData,
+  );
   const {
-    accession_id: accessionId,
-    taxonId,
-    taxon_name: taxonName,
-  } = workflowRunResults.taxon_info;
+    reference_genome: referenceGenome,
+    metric_consensus_genome: metricConsensusGenome,
+  } = data || {};
+  const { accession_id: accessionId, taxon } = referenceGenome || {};
+  const { name: taxonName, id: taxonId } = taxon || {};
   const {
     coverage_breadth: coverageBreadthRaw,
     coverage_depth: coverageDepthRaw,
     total_length: totalLength,
-  } = workflowRunResults.coverage_viz;
+  } = metricConsensusGenome?.coverage_viz || {};
+
+  if (!coverageBreadthRaw || !coverageDepthRaw || !totalLength) {
+    return null;
+  }
 
   const referenceNCBIEntry = (
     <BasicPopup
@@ -129,7 +160,7 @@ export const ConsensusGenomeCoverageView = ({
         </div>
         <ConsensusGenomeHistogram
           workflowRun={workflowRun}
-          workflowRunResults={workflowRunResults}
+          workflowRunResultsData={workflowRunResultsData}
         />
       </div>
     </div>

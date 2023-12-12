@@ -5,7 +5,6 @@ import {
   AmrDeprectatedData,
   BlastData,
   ConsensusGenomeClick,
-  ConsensusGenomeWorkflowRunResults,
   CurrentTabSample,
   FilterSelections,
   Lineage,
@@ -45,7 +44,4 @@ export interface ReportPanelProps {
   selectedOptions: FilterSelections;
   snapshotShareId?: string;
   view: SampleReportViewMode;
-  workflowRunResults?:
-    | Record<string, never>
-    | ConsensusGenomeWorkflowRunResults;
 }

@@ -13,7 +13,7 @@ import {
   TempSelectedOptionsShape,
 } from "~/components/utils/urls";
 import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
-import { ConsensusGenomeDropdown } from "~/components/views/SampleView/components/ConsensusGenomeView/components/ConsensusGenomeDropdown/ConsensusGenomeDropdown";
+import { ConsensusGenomeDropdown } from "~/components/views/SampleView/components/ConsensusGenomeView/components/ConsensusGenomeHeader/components/ConsensusGenomeDropdown";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import {
@@ -270,24 +270,6 @@ const SampleDetailsMode = ({
           run => run.workflow === WorkflowType.CONSENSUS_GENOME,
         );
 
-      const consensusGenomeDropdown = currentWorkflowTab ===
-        WORKFLOW_TABS.CONSENSUS_GENOME &&
-        size(consensusGenomeWorkflowRuns) > 1 && (
-          <div className={cs.dropdownContainer}>
-            <ConsensusGenomeDropdown
-              workflowRuns={consensusGenomeWorkflowRuns}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-              initialSelectedValue={currentRun.id}
-              onConsensusGenomeSelection={workflowRunId =>
-                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-                onWorkflowRunSelect(
-                  find({ id: workflowRunId }, consensusGenomeWorkflowRuns),
-                )
-              }
-            />
-          </div>
-        );
-
       let pipelineInfoForTab: PipelineInfo | null = pipelineInfo;
       if (currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME) {
         pipelineInfoForTab = processCGWorkflowRunInfo(currentRun);
@@ -298,7 +280,22 @@ const SampleDetailsMode = ({
       return (
         <>
           {workflowTabs}
-          {consensusGenomeDropdown}
+          {currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME &&
+            consensusGenomeWorkflowRuns &&
+            size(consensusGenomeWorkflowRuns) > 1 && (
+              <div className={cs.dropdownContainer}>
+                <ConsensusGenomeDropdown
+                  workflowRuns={consensusGenomeWorkflowRuns}
+                  initialSelectedValue={currentRun?.id}
+                  onConsensusGenomeSelection={workflowRunId =>
+                    onWorkflowRunSelect &&
+                    onWorkflowRunSelect(
+                      find({ id: workflowRunId }, consensusGenomeWorkflowRuns),
+                    )
+                  }
+                />
+              </div>
+            )}
           <PipelineTab
             pipelineInfo={pipelineInfoForTab}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531

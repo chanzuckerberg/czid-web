@@ -1,4 +1,4 @@
 import CoverageVizBottomSidebar from "./CoverageVizBottomSidebar";
-import { HistogramTooltipData } from "./types";
-export { HistogramTooltipData };
+import { TooltipData } from "./types";
+export { TooltipData };
 export default CoverageVizBottomSidebar;

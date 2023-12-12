@@ -84,7 +84,7 @@ export interface AccessionsData
   total_length: number;
 }
 
-export interface HistogramTooltipData {
+export interface TooltipData {
   data: [string, string | number][];
   name: string;
   disabled?: boolean;
@@ -93,6 +93,6 @@ export interface HistogramTooltipData {
 export interface CoverageVizBottomSidebarsState {
   currentAccessionSummary: AccessionsSummary | null;
   histogramTooltipLocation?: TooltipLocation;
-  histogramTooltipData: HistogramTooltipData[] | null;
+  histogramTooltipData: TooltipData[] | null;
   currentAccessionData?: AccessionsData;
 }

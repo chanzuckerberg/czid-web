@@ -115,7 +115,6 @@ export interface SampleViewState {
   view: SampleReportViewMode;
   workflowRun?: WorkflowRun;
   workflowRunId?: number;
-  workflowRunResults: ConsensusGenomeWorkflowRunResults | Record<string, never>;
   sharedWithNoBackground: boolean;
 }
 
@@ -136,23 +135,6 @@ export interface FilterSelections {
 }
 
 export type SampleReportViewMode = "table" | "tree";
-
-export interface ConsensusGenomeWorkflowRunResults {
-  coverage_viz: {
-    coverage_bin_size: number;
-    coverage: $TSFixMeUnknown[];
-    total_length: number;
-    coverage_breadth: number;
-    coverage_depth: number;
-  };
-  quality_metrics: object;
-  taxon_info: {
-    accession_name: string;
-    accession_id: number;
-    taxonId: number;
-    taxon_name: string;
-  };
-}
 
 export interface RawReportData {
   all_tax_ids: number[];

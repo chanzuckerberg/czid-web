@@ -6,15 +6,12 @@ import {
   AccessionsSummary,
   CoverageVizBottomSidebarProps,
   CoverageVizParams,
-  HistogramTooltipData,
   Hit,
+  TooltipData,
 } from "./types";
 // Gets called on every mouse move, so need to memoize.
 export const getHistogramTooltipData = memoize(
-  (
-    accessionData: AccessionsData,
-    coverageIndex: number,
-  ): HistogramTooltipData[] => {
+  (accessionData: AccessionsData, coverageIndex: number): TooltipData[] => {
     // coverageObj format:
     //   [binIndex, averageCoverageDepth, coverageBreadth, numberContigs, numberReads]
     const coverageObj = accessionData.coverage[coverageIndex];

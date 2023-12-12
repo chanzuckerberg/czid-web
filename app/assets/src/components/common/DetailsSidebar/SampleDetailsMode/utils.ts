@@ -218,7 +218,6 @@ export const processAMRWorkflowRun = (
       workflow: { text: workflowLabel },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: pipelineVersionInfo,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
       totalReads: { text: numberWithCommas(totalReads) },
@@ -228,7 +227,6 @@ export const processAMRWorkflowRun = (
       compressionRatio: { text: compressionRatio },
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       meanInsertSize: { text: meanInsertSize },
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       wildcardDatabaseVersion: { text: wildcardVersion },
     };
   } else {
@@ -237,10 +235,8 @@ export const processAMRWorkflowRun = (
       workflow: { text: workflowLabel },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: pipelineVersionInfo,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       wildcardDatabaseVersion: { text: wildcardVersion },
     };
   }

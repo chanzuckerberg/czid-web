@@ -12,7 +12,7 @@ export interface WorkflowRun {
     label?: string;
     message: string;
   };
-  inputs?: {
+  inputs: {
     accession_id: string;
     accession_name: string;
     card_version: string;
