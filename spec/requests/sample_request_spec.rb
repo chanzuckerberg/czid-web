@@ -4,6 +4,7 @@ RSpec.describe "Sample request", type: :request do
   create_users
 
   let(:short_read_mngs) { WorkflowRun::WORKFLOW[:short_read_mngs] }
+  let(:long_read_mngs) { WorkflowRun::WORKFLOW[:long_read_mngs] }
   let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
   let(:fake_alignment_config_name) { "fake_alignment_config_name" }
 
@@ -97,8 +98,11 @@ RSpec.describe "Sample request", type: :request do
       before do
         # Sample setup
         @project = create(:public_project, users: [@joe])
+        stub_const('AlignmentConfig::DEFAULT_NAME', "11-22-2023")
         @default_alignment_config = create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
         @fake_alignment_config = create(:alignment_config, name: fake_alignment_config_name)
+        create(:workflow_version, workflow: AlignmentConfig::NCBI_INDEX, version: fake_alignment_config_name)
+        create(:workflow_version, workflow: AlignmentConfig::NCBI_INDEX, version: AlignmentConfig::DEFAULT_NAME)
         hg = create(:host_genome)
         @sample_params = {
           client: "web",
@@ -243,6 +247,24 @@ RSpec.describe "Sample request", type: :request do
         }
 
         @client_params = "web"
+      end
+
+      def make_successful_request(sample_params, metadata_params, client_params, workflow)
+        post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: metadata_params, client: client_params, format: :json }
+
+        expect(response.content_type).to include("application/json")
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        sample_id = json_response["sample_ids"][0]
+
+        if workflow == short_read_mngs
+          # we have to call the method manually in testing,
+          # to bypass the file upload process
+          Sample.find(sample_id).kickoff_pipeline
+        end
+
+        return sample_id
       end
 
       describe "sample input files" do
@@ -589,32 +611,59 @@ RSpec.describe "Sample request", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      context "when the workflow is long read mngs" do
-        it "should set the alignment config to admin provided option if present" do
-          samples_params = @sample_params_long_read_mngs.merge({ alignment_config_name: fake_alignment_config_name })
-          post "/samples/bulk_upload_with_metadata", params: { samples: [samples_params], metadata: @metadata_params, client: @client_params, format: :json }
-
-          expect(response.content_type).to include("application/json")
-          expect(response).to have_http_status(:ok)
-
-          json_response = JSON.parse(response.body)
-          sample_id = json_response["sample_ids"][0]
-
-          pr = PipelineRun.find_by(sample_id: sample_id)
-          expect(pr.alignment_config_id).to eq(@fake_alignment_config.id)
+      context "when the alignment config is provided by an admin user" do
+        before do
+          @workflow_params = {
+            short_read_mngs => @sample_params.merge({ alignment_config_name: fake_alignment_config_name }),
+            long_read_mngs => @sample_params_long_read_mngs.merge({ alignment_config_name: fake_alignment_config_name }),
+          }
         end
 
-        it "should set the alignment config to the default if no admin option is present" do
-          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params_long_read_mngs], metadata: @metadata_params, client: @client_params, format: :json }
+        it "sets the pipeline run's alignment config to the admin provided option" do
+          @workflow_params.each do |workflow, sample_params|
+            sample_id = make_successful_request(sample_params, @metadata_params, @client_params, workflow)
 
-          expect(response.content_type).to include("application/json")
-          expect(response).to have_http_status(:ok)
+            pr = PipelineRun.find_by(sample_id: sample_id)
+            expect(pr.alignment_config_id).to eq(@fake_alignment_config.id)
+          end
+        end
+      end
 
-          json_response = JSON.parse(response.body)
-          sample_id = json_response["sample_ids"][0]
+      context "when no alignment config is provided" do
+        before do
+          @workflow_params = {
+            short_read_mngs => @sample_params,
+            long_read_mngs => @sample_params_long_read_mngs,
+          }
+        end
 
-          pr = PipelineRun.find_by(sample_id: sample_id)
-          expect(pr.alignment_config_id).to eq(@default_alignment_config.id)
+        context "when the project is pinned to an alignment config version" do
+          before do
+            create(:project_workflow_version, project_id: @project.id, workflow: AlignmentConfig::NCBI_INDEX, version_prefix: fake_alignment_config_name)
+          end
+
+          it "sets the alignment config to the pinned version and does not update the pinned version" do
+            @workflow_params.each do |workflow, sample_params|
+              sample_id = make_successful_request(sample_params, @metadata_params, @client_params, workflow)
+
+              pr = PipelineRun.find_by(sample_id: sample_id)
+              expect(pr.alignment_config_id).to eq(@fake_alignment_config.id)
+              expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: AlignmentConfig::NCBI_INDEX).version_prefix).to eq(@fake_alignment_config.name)
+            end
+          end
+        end
+
+        context "when the project is not yet pinned to an alignment config version" do
+          it "sets the alignment config to the default version and pins it to the project" do
+            @workflow_params.each do |workflow, sample_params|
+              sample_id = make_successful_request(sample_params, @metadata_params, @client_params, workflow)
+
+              pr = PipelineRun.find_by(sample_id: sample_id)
+              expect(pr.alignment_config_id).to eq(@default_alignment_config.id)
+
+              expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: AlignmentConfig::NCBI_INDEX).version_prefix).to eq(@default_alignment_config.name)
+            end
+          end
         end
       end
     end

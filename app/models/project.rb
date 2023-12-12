@@ -133,6 +133,12 @@ class Project < ApplicationRecord
     where("projects.id in (?)", Sample.public_samples.distinct.pluck(:project_id))
   end
 
+  def self.fetch_and_pin_alignment_config(project_id)
+    pinned_alignment_config = VersionRetrievalService.call(project_id, AlignmentConfig::NCBI_INDEX)
+    VersionPinningService.call(project_id, AlignmentConfig::NCBI_INDEX, pinned_alignment_config)
+    pinned_alignment_config
+  end
+
   def add_default_metadata_fields
     metadata_fields.push(MetadataField.where(is_default: 1) - metadata_fields)
   end

@@ -694,11 +694,13 @@ class Sample < ApplicationRecord
     elsif initial_workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
       if transient_status == STATUS_RERUN
         # If we're rerunning an existing long read mngs sample, we need to create a new pipeline run to dispatch.
+        alignment_config_name = VersionRetrievalService.call(project_id, AlignmentConfig::NCBI_INDEX)
+
         new_pr = PipelineRun.new(
           sample: self,
           technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore],
           guppy_basecaller_setting: pr.guppy_basecaller_setting,
-          alignment_config: AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+          alignment_config: AlignmentConfig.find_by(name: alignment_config_name)
         )
         mark_older_pipeline_runs_as_deprecated if new_pr.save!
         new_pr.dispatch
@@ -961,8 +963,10 @@ class Sample < ApplicationRecord
     pr.dag_vars = dag_vars if dag_vars
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)
 
-    pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
-    pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+    # use admin-supplied alignment config or fetch the pinned alignment config for the project
+    alignment_config_name_for_pr = alignment_config_name || Project.fetch_and_pin_alignment_config(project_id)
+    pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name_for_pr)
+
     pr.technology = PipelineRun::TECHNOLOGY_INPUT[:illumina]
     mark_older_pipeline_runs_as_deprecated if pr.save!
 
