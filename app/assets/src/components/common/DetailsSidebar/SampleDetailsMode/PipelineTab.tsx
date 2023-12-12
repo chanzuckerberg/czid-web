@@ -103,7 +103,7 @@ const PipelineTab = ({
   pipelineRun,
   erccComparison,
 }: PipelineTabProps) => {
-  const _graphContainer = useRef(null);
+  const _graphContainer = useRef<HTMLDivElement>(null);
   const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
 
   const [sectionOpen, setSectionOpen] = useState({
@@ -126,10 +126,9 @@ const PipelineTab = ({
 
   useEffect(() => {
     if (_graphContainer.current && graphWidth === 0) {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       setGraphWidth(_graphContainer.current.getBoundingClientRect().width);
     }
-  }, [graphWidth]);
+  });
 
   const toggleSection = (section: keyof typeof sectionOpen) => {
     const toggleValue = !sectionOpen[section];

@@ -159,7 +159,7 @@ local-logs: ## Tail the logs of the dev env containers. ex: make local-logs CONT
 frontend-lint:
 	npx prettier app/assets/src --ext .js,.jsx,.ts,.tsx --write
 	npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 39 --fix
-	npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 159
+	npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 155
 	exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')
 	npx tsc -p ./app/assets/tsconfig.json --noemit
 	bin/ts-peek.sh
