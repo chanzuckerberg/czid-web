@@ -181,6 +181,8 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   const [hasPersistedBackground, setHasPersistedBackground] = useState<
     boolean | null
   >(null);
+  const [isCreatingPersistedBackground, setIsCreatingPersistedBackground] =
+    useState(false);
   const [sample, setSample] = useState<Sample | null>(null);
   const [project, setProject] = useState<NumberId | null>(null);
   const [projectSamples, setProjectSamples] = useState<
@@ -578,16 +580,22 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
 
   const persistNewBackgroundModelSelection = useCallback(
     async ({ newBackgroundId }: { newBackgroundId: number | null }) => {
-      const persistBackgroundApi =
-        hasPersistedBackground === false
-          ? createPersistedBackground
-          : updatePersistedBackground;
-      project?.id &&
-        (await persistBackgroundApi({
+      if (project?.id) {
+        let persistBackgroundApi = updatePersistedBackground;
+        if (
+          hasPersistedBackground === false &&
+          !isCreatingPersistedBackground
+        ) {
+          setIsCreatingPersistedBackground(true);
+          persistBackgroundApi = createPersistedBackground;
+        }
+
+        await persistBackgroundApi({
           projectId: project?.id,
           backgroundId: newBackgroundId,
         })
           .then(() => {
+            setIsCreatingPersistedBackground(false);
             setHasPersistedBackground(true);
           })
           .catch((error: Error) => {
@@ -599,12 +607,15 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
                 projectId: project?.id,
                 backgroundId: newBackgroundId,
                 hasExistingPersistedBackground: hasPersistedBackground,
+                isCreatingPersistedBackground,
               },
             });
+            setIsCreatingPersistedBackground(false);
             console.error(error);
-          }));
+          });
+      }
     },
-    [hasPersistedBackground, project?.id],
+    [hasPersistedBackground, project?.id, isCreatingPersistedBackground],
   );
 
   const handleInvalidBackgroundSelection = useCallback(
@@ -647,6 +658,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
           if (successfullyFetchedSampleReportData) {
             if (!ignoreProjectBackground && hasPersistedBackground !== null) {
               // ie if you have already checked if there is a persisted background via fetchPersistedBackground
+              // and the background model is not currently being persisted
               persistNewBackgroundModelSelection({
                 newBackgroundId: selectedOptions?.background,
               });
