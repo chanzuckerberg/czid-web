@@ -1,8 +1,5 @@
 import React from "react";
-import { useTrackEvent } from "~/api/analytics";
-import { openUrl } from "~/components/utils/links";
 import { WorkflowType } from "~/components/utils/workflows";
-import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
@@ -34,13 +31,6 @@ export const SampleViewDownloadButton = ({
   backgroundId,
   currentTab,
 }: SampleViewDownloadButtonProps) => {
-  const trackEvent = useTrackEvent();
-  const onDownloadAll = (eventName: WorkflowType) => {
-    openUrl(getWorkflowRunZipLink(currentRun?.id));
-    trackEvent(`SampleViewHeader_${eventName}-download-all-button_clicked`, {
-      sampleId: sample?.id,
-    });
-  };
   const { component: DownloadButtonByWorkflow, readyToDownload } =
     SampleViewDownloadButtonConfig[workflow]({
       currentRun,
@@ -52,8 +42,8 @@ export const SampleViewDownloadButton = ({
       readyToDownload={readyToDownload}
       className={className}
       workflowRun={currentRun as WorkflowRun}
+      workflowType={workflow}
       sample={sample}
-      handleDownloadAllClick={() => onDownloadAll(workflow)}
       backgroundId={backgroundId}
       getDownloadReportTableWithAppliedFiltersLink={
         getDownloadReportTableWithAppliedFiltersLink

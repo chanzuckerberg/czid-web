@@ -91,9 +91,6 @@ type CreateUserPayload {
   sendActivation: Boolean
 }
 
-"""Represents date values"""
-scalar Date
-
 type DbSample {
   alignmentConfigName: String
   basespaceAccessToken: String
@@ -193,19 +190,6 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
-type KickoffWGSWorkflow {
-  id: Int
-  status: String
-  workflow: String
-  wdl_version: String
-  executed_at: String
-  deprecated: Boolean
-  input_error: JSON
-  inputs: mutation_KickoffWGSWorkflow_inputs
-  parsed_cached_results: JSON
-  run_finalized: Boolean
-}
-
 type MngsRunInfo {
   createdAt: ISO8601DateTime
   finalized: Int
@@ -224,15 +208,48 @@ type MngsWorkflowResults {
 type Mutation {
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
   UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): JSON
-  KickoffWGSWorkflow(sampleId: String, input: mutationInput_KickoffWGSWorkflow_input_Input): KickoffWGSWorkflow
-  KickoffAMRWorkflow(sampleId: String, input: mutationInput_KickoffAMRWorkflow_input_Input): KickoffWGSWorkflow
+  KickoffWGSWorkflow(sampleId: String, input: mutationInput_KickoffWGSWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
+  KickoffAMRWorkflow(sampleId: String, input: mutationInput_KickoffAMRWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
   createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
 }
 
-type mutation_KickoffWGSWorkflow_inputs {
-  start_from_mngs: String
+type mutation_KickoffWGSWorkflow_items {
+  id: String
+  status: String
+  workflow: String
+  wdl_version: String
+  executed_at: String
+  deprecated: Boolean
+  input_error: JSON
+  inputs: mutation_KickoffWGSWorkflow_items_inputs
+  parsed_cached_results: mutation_KickoffWGSWorkflow_items_parsed_cached_results
+  run_finalized: Boolean
+}
+
+type mutation_KickoffWGSWorkflow_items_inputs {
+  accession_id: JSON
+  accession_name: JSON
+  taxon_id: JSON
+  taxon_name: JSON
+  technology: String
   card_version: String
   wildcard_version: String
+}
+
+type mutation_KickoffWGSWorkflow_items_parsed_cached_results {
+  quality_metrics: mutation_KickoffWGSWorkflow_items_parsed_cached_results_quality_metrics
+}
+
+type mutation_KickoffWGSWorkflow_items_parsed_cached_results_quality_metrics {
+  total_reads: Int
+  qc_percent: Float
+  adjusted_remaining_reads: Int
+  compression_ratio: Float
+  total_ercc_reads: Int
+  fraction_subsampled: Float
+  insert_size_mean: JSON
+  insert_size_standard_deviation: JSON
+  percent_remaining: Float
 }
 
 input mutationInput_DeleteSamples_input_Input {
@@ -262,7 +279,7 @@ input mutationInput_KickoffWGSWorkflow_input_inputs_json_Input {
   accession_name: String
   taxon_id: String
   taxon_name: String
-  alignment_config_name: Date
+  alignment_config_name: String
   technology: String
 }
 
@@ -372,6 +389,7 @@ type Query {
   TaxonDist(backgroundId: String, taxonId: String): TaxonDist
   UserBlastAnnotations(sampleId: String, workflowVersionId: String): [query_UserBlastAnnotations_items]
   ValidateUserCanDeleteObjects(input: queryInput_ValidateUserCanDeleteObjects_input_Input): ValidateUserCanDeleteObjects
+  ZipLink(workflowRunId: String): ZipLink
   appConfig(id: ID!): AppConfig
   pathogenList(version: String): PathogenList!
   project(id: Int!): Project!
@@ -910,5 +928,10 @@ type WorkflowRun {
   updatedAt: ISO8601DateTime!
   wdlVersion: String
   workflow: String!
+}
+
+type ZipLink {
+  url: String
+  error: String
 }
 
