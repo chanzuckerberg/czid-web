@@ -67,12 +67,14 @@ export const UPLOAD_METADATA = "Upload Metadata";
 export const HOST_SEX = "Host Sex";
 export const KNOWN_ORGANISM = "Known Organism";
 export const RNA_DNA = "RNA/DNA Input (ng)";
+export const NUCLEOTIDES = ["RNA", "DNA"];
 export const HOST_GENUS_SPECIES = "Host Genus Species";
 export const ISOLATE = "Isolate";
 export const DISEASES_CONDITIONS = "Diseases and Conditions";
 export const START_UPLOAD = "Start Upload";
 export const HOST_ORGANISM = "Host Organism";
 export const FIXTURE_DIR = "./fixtures/samples";
+export const FIXTURE_METADATA_DIR = "./fixtures/metadata";
 export const SELECT_PROJECT = '[data-testid="select-project"]';
 export const TEST_PROJECTS: Record<string, string> = {
   CI: "omar test",
@@ -86,6 +88,10 @@ export const WORKFLOWS = {
   WGS: "viral-consensus-genome",
   AMR: "amr",
   SC2: "covid-consensus-genome",
+} as const;
+export const SEQUENCING_PLATFORMS = {
+  MNGS: "Illumina",
+  LMNGS: "Nanopore",
 } as const;
 
 export const TABLE_VIEW = "table-view";
