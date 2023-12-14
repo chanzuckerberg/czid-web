@@ -32,6 +32,11 @@ class SfnLongReadMngsPipelineDispatchService
 
     @wdl_version = pipeline_run.pipeline_branch || VersionRetrievalService.call(@sample.project.id, WORKFLOW_NAME)
     raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
+
+    user = User.find(@sample.user_id)
+    if user.allowed_feature?("pin_pipeline_version")
+      VersionPinningService.call(@sample.project_id, @workflow_run.workflow, @wdl_version[0])
+    end
   end
 
   def call

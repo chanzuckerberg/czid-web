@@ -27,3 +27,4 @@ export const HEATMAP_KNOWN_PATHOGEN_FILTER = "heatmap_pathogen_filter";
 export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const BENCHMARKING_FEATURE = "benchmarking";
 export const PLQC_DOWNTIME_MAINTENANCE_MODE = "plqc_downtime_maitenance_mode";
+export const PIN_PIPELINE_VERSIONS = "pin_pipeline_version";

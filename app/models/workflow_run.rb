@@ -447,6 +447,14 @@ class WorkflowRun < ApplicationRecord
     return Gem::Version.new(wdl_version) >= Gem::Version.new(version)
   end
 
+  def self.latest_major_workflow_versions
+    latest_major_versions = {}
+    WORKFLOW.values.each do |workflow|
+      latest_major_versions[workflow] = AppConfigHelper.get_workflow_version(workflow)&.[](0)
+    end
+    latest_major_versions
+  end
+
   private
 
   def cleanup_s3

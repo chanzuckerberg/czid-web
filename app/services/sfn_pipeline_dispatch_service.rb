@@ -34,6 +34,12 @@ class SfnPipelineDispatchService
     raise SfnArnMissingError if @sfn_arn.blank?
 
     @wdl_version = /\d+\.\d+\.\d+/ =~ pipeline_run.pipeline_branch ? pipeline_run.pipeline_branch : VersionRetrievalService.call(@sample.project.id, WORKFLOW_NAME)
+
+    user = User.find(@sample.user_id)
+    if user.allowed_feature?("pin_pipeline_version")
+      VersionPinningService.call(@sample.project_id, WORKFLOW_NAME, @wdl_version[0])
+    end
+
     raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
   end
 

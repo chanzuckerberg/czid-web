@@ -71,6 +71,10 @@ describe WorkflowRun, type: :model do
     }
   end
   let(:fake_runtime) { 10.minutes }
+  let(:short_read_mngs_workflow) { WorkflowRun::WORKFLOW[:short_read_mngs] }
+  let(:cg_workflow) { WorkflowRun::WORKFLOW[:consensus_genome] }
+  let(:amr_workflow) { WorkflowRun::WORKFLOW[:amr] }
+  let(:long_read_mngs_workflow) { WorkflowRun::WORKFLOW[:long_read_mngs] }
 
   before do
     project = create(:project)
@@ -882,4 +886,37 @@ describe WorkflowRun, type: :model do
     end
   end
   # rubocop:enable Naming/VariableNumber
+
+  describe "#latest_major_workflow_versions" do
+    before do
+      workflow_versions = {
+        cg_workflow => "3.4.18",
+        short_read_mngs_workflow => "8.2.2",
+        amr_workflow => "0.2.4-beta",
+        long_read_mngs_workflow => "0.7.3",
+      }
+
+      workflow_versions.each do |workflow, version|
+        create(:app_config, key: "#{workflow}-version", value: version)
+      end
+    end
+
+    subject { WorkflowRun.latest_major_workflow_versions }
+
+    it "fetches the latest major version" do
+      major_versions = {
+        cg_workflow => "3",
+        short_read_mngs_workflow => "8",
+        amr_workflow => "0",
+        long_read_mngs_workflow => "0",
+      }
+      major_versions.each do |workflow, major_version|
+        expect(subject[workflow]).to eq(major_version)
+      end
+    end
+
+    it "handles the case when there is no app config for a workflow version" do
+      expect(subject[WorkflowRun::WORKFLOW[:main]]).to be_nil
+    end
+  end
 end

@@ -32,6 +32,10 @@ class SfnAmrPipelineDispatchService
     @wdl_version = VersionRetrievalService.call(@sample.project.id, @workflow_run.workflow)
     raise SfnVersionMissingError, @workflow_run.workflow if @wdl_version.blank?
 
+    if @current_user.allowed_feature?("pin_pipeline_version")
+      VersionPinningService.call(@sample.project_id, @workflow_run.workflow, @wdl_version[0])
+    end
+
     @workflow_run.update(
       wdl_version: @wdl_version
     )
