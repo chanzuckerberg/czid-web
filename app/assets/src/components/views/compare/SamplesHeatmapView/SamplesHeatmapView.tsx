@@ -48,6 +48,7 @@ import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import {
   HEATMAP_ELASTICSEARCH_FEATURE,
   HEATMAP_PATHOGEN_FLAGGING_FEATURE,
+  NCBI_COMPRESSED_INDEX,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
@@ -877,6 +878,19 @@ class SamplesHeatmapViewCC extends React.Component<
     if (pipelineMajorVersionsSet.size > 1) {
       this.showNotification(NOTIFICATION_TYPES.multiplePipelineVersions, [
         ...pipelineMajorVersionsSet,
+      ]);
+    }
+
+    const indexVersions = new Set(
+      compact(map(property("alignment_config_name"), heatmapData)),
+    );
+
+    if (
+      indexVersions.size > 1 &&
+      allowedFeatures.includes(NCBI_COMPRESSED_INDEX)
+    ) {
+      this.showNotification(NOTIFICATION_TYPES.multipleIndexVersions, [
+        ...indexVersions,
       ]);
     }
 
@@ -2041,10 +2055,9 @@ class SamplesHeatmapViewCC extends React.Component<
     );
   }
 
-  renderFilteredOutWarning(onClose: $TSFixMe, taxon: $TSFixMe) {
+  renderFilteredOutWarning(onClose: () => void, taxon: $TSFixMe) {
     return (
-      // @ts-expect-error Property 'dismissDirection' is missing in type
-      <Notification intent="warning" onClose={onClose}>
+      <Notification intent="warning" onClose={onClose} slideDirection="right">
         <div>
           <span className={cs.highlight}>
             {taxon.name} is filtered out by your current filter settings.
@@ -2056,12 +2069,11 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   renderFilteredMultiplePipelineVersionsWarning(
-    onClose: $TSFixMe,
-    versions: $TSFixMe,
+    onClose: () => void,
+    versions: string[],
   ) {
     return (
-      // @ts-expect-error Property 'dismissDirection' is missing in type
-      <Notification intent="warning" onClose={onClose}>
+      <Notification intent="warning" onClose={onClose} slideDirection="right">
         <div>
           <span className={cs.highlight}>
             The selected samples come from multiple major pipeline versions:{" "}
@@ -2075,10 +2087,27 @@ class SamplesHeatmapViewCC extends React.Component<
     );
   }
 
-  renderCustomBackgroundWarning(onClose: $TSFixMe) {
+  renderMultipleIndexVersionWarning(
+    onClose: () => void,
+    indexVersions: string[],
+  ) {
     return (
-      // @ts-expect-error Property 'dismissDirection' is missing in type
-      <Notification intent="warning" onClose={onClose}>
+      <Notification intent="warning" onClose={onClose} slideDirection="right">
+        <div>
+          <span className={cs.highlight}>
+            The selected samples were run on different versions of our NCBI
+            index: {indexVersions.join(", ")}.
+          </span>{" "}
+          Changes across indices may produce results that are not comparable. We
+          recommend choosing samples with the same NCBI index date.
+        </div>
+      </Notification>
+    );
+  }
+
+  renderCustomBackgroundWarning(onClose: () => void) {
+    return (
+      <Notification intent="warning" onClose={onClose} slideDirection="right">
         <div>
           We&apos;re busy generating your heatmap with a new background model.
           It may take a couple of minutes to load.
@@ -2087,7 +2116,7 @@ class SamplesHeatmapViewCC extends React.Component<
     );
   }
 
-  showNotification(notification: $TSFixMe, params: $TSFixMe) {
+  showNotification(notification: string, params: $TSFixMe) {
     switch (notification) {
       case NOTIFICATION_TYPES.invalidSamples:
         showToast(
@@ -2114,6 +2143,15 @@ class SamplesHeatmapViewCC extends React.Component<
               closeToast,
               params,
             ),
+          {
+            autoClose: 12000,
+          },
+        );
+        break;
+      case NOTIFICATION_TYPES.multipleIndexVersions:
+        showToast(
+          ({ closeToast }: $TSFixMe) =>
+            this.renderMultipleIndexVersionWarning(closeToast, params),
           {
             autoClose: 12000,
           },

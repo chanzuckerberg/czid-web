@@ -188,6 +188,7 @@ module HeatmapHelper
         results[sample_id] = {
           sample_id: sample_id,
           pipeline_version: pr.pipeline_version,
+          alignment_config_name: pr.alignment_config&.name,
           name: samples_by_id[sample_id].name,
           metadata: samples_by_id[sample_id].metadata_with_base_type,
           host_genome_name: samples_by_id[sample_id].host_genome_name,

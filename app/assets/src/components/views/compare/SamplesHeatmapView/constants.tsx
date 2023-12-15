@@ -154,6 +154,7 @@ export const NOTIFICATION_TYPES = {
   taxaFilteredOut: "taxa filtered out",
   multiplePipelineVersions: "diverse_pipelines",
   customBackground: "custom_background_slow_with_es",
+  multipleIndexVersions: "multiple_index_versions",
 };
 
 export const MASS_NORMALIZED_PIPELINE_VERSION = 4.0;
