@@ -1,3 +1,4 @@
+import { WorkflowType } from "~/components/utils/workflows";
 import { BlastData } from "~/interface/sampleView";
 import {
   AccessionData,
@@ -14,9 +15,10 @@ export interface CoverageVizBottomSidebarProps {
   params: CoverageVizParams | Record<string, never>;
   sampleId: SampleId;
   pipelineVersion: string;
+  wdlVersion: string;
   nameType: string;
   snapshotShareId?: string;
-  workflow: string;
+  workflow: WorkflowType;
 }
 
 export interface CoverageVizParamsRaw {

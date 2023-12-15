@@ -49,6 +49,7 @@ import {
   selectContigsFromHitGroups,
   selectReadsFromHitGroups,
 } from "./utils";
+import { CoverageVizBottomSidebarConfig } from "./workflowTypeConfig";
 
 export default class CoverageVizBottomSidebar extends React.Component<
   CoverageVizBottomSidebarProps,
@@ -643,7 +644,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
   }
 
   renderNoDataContents() {
-    const { params, snapshotShareId, workflow } = this.props;
+    const { params, snapshotShareId, workflow, wdlVersion } = this.props;
 
     return (
       <NarrowContainer className={cs.contents}>
@@ -655,9 +656,9 @@ export default class CoverageVizBottomSidebar extends React.Component<
           <div className={cs.noDataContainer}>
             <div className={cs.text}>
               <div className={cs.message}>
-                Sorry, the coverage visualization is only available for taxa
-                with at least one assembled contig in NT (Illumina) or at least
-                one NT read (Nanopore).
+                {CoverageVizBottomSidebarConfig[
+                  workflow
+                ].getUnavailableMessage?.(wdlVersion)}
               </div>
               {!snapshotShareId &&
                 workflow === WorkflowType.SHORT_READ_MNGS && (

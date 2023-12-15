@@ -1235,6 +1235,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
             coverageVizDataByTaxon,
           )}
           pipelineVersion={pipelineRun.pipeline_version}
+          wdlVersion={pipelineRun.wdl_version}
           sampleId={sample.id}
           snapshotShareId={snapshotShareId}
           visible={coverageVizVisible}

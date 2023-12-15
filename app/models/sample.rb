@@ -210,6 +210,7 @@ class Sample < ApplicationRecord
       prvs[pr.pipeline_version] ||= {
         id: pr.id,
         pipeline_version: pr.pipeline_version,
+        wdl_version: pr.wdl_version,
         created_at: pr.created_at,
         alignment_config_name: pr.alignment_config.name,
         assembled: pr.assembled.to_i,
