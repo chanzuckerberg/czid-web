@@ -6,7 +6,7 @@ interface LogErrorParams {
   message: string;
   exception?: Error | null;
   details?: {
-    [key: string]: string | boolean | number | string[] | Error | null;
+    [key: string]: any;
   };
 }
 

@@ -1,10 +1,8 @@
 import React from "react";
-import ErrorModal from "~/components/ui/containers/ErrorModal";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
   BlastData,
   ConsensusGenomeClick,
-  ConsensusGenomeParams,
   ModalsVisible,
 } from "~/interface/sampleView";
 import { ConsensusGenomeData } from "~/interface/shared";
@@ -26,14 +24,16 @@ interface ModalManagerProps {
   consensusGenomePreviousParams: ConsensusGenomeData;
   handleBlastSelectionModalContinue: (blastModalInfo: BlastModalInfo) => void;
   handleConsensusGenomeClick: (x: ConsensusGenomeClick) => void;
-  handleConsensusGenomeErrorModalRetry: () => Promise<void>;
   handleModalAction: (modals: ["open" | "close", string][]) => void;
   handlePreviousConsensusGenomeReportClick: (x: {
     rowData: WorkflowRun;
   }) => void;
-  onConsensusGenomeCreation: (x: ConsensusGenomeParams) => Promise<void>;
   modalsVisible: ModalsVisible;
   sample: Sample;
+  handleConsensusGenomeKickoff: (
+    workflowRuns: WorkflowRun[],
+    sample: Sample,
+  ) => Promise<void>;
 }
 
 export const ModalManager = ({
@@ -43,11 +43,10 @@ export const ModalManager = ({
   consensusGenomePreviousParams,
   handleBlastSelectionModalContinue,
   handleConsensusGenomeClick,
-  handleConsensusGenomeErrorModalRetry,
   handleModalAction,
+  handleConsensusGenomeKickoff,
   handlePreviousConsensusGenomeReportClick,
   modalsVisible,
-  onConsensusGenomeCreation,
   sample,
 }: ModalManagerProps) => {
   // filter out modals that are not visible
@@ -107,9 +106,11 @@ export const ModalManager = ({
                 onClose={() =>
                   handleModalAction([["close", "consensusGenomeCreation"]])
                 }
-                onCreation={onConsensusGenomeCreation}
+                handleModalAction={handleModalAction}
+                handleConsensusGenomeKickoff={handleConsensusGenomeKickoff}
                 open={modalsVisible.consensusGenomeCreation}
                 sample={sample}
+                modalsVisible={modalsVisible}
               />
             );
           case "consensusGenomePrevious":
@@ -124,21 +125,6 @@ export const ModalManager = ({
                 onRowClick={handlePreviousConsensusGenomeReportClick}
                 open={modalsVisible.consensusGenomePrevious}
                 sample={sample}
-              />
-            );
-          case "consensusGenomeError":
-            return (
-              <ErrorModal
-                key={modalName}
-                labelText="Failed"
-                open={modalsVisible.consensusGenomeError}
-                onCancel={() =>
-                  handleModalAction([["close", "consensusGenomeError"]])
-                }
-                onConfirm={handleConsensusGenomeErrorModalRetry}
-                title={
-                  "Sorry! There was an error starting your consensus genome run."
-                }
               />
             );
           default:

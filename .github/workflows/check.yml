@@ -177,7 +177,7 @@ jobs:
     - name: ESLint
       # setup-node automatically creates annotations from this output
       # Use eslint-disable or fix another warning to stay below the max.
-      run: npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 39
+      run: npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 37
     - name: ESLint a11y Rules
       # These rules are related to web accessibility, with a separate warnings budget.
       # Use eslint-disable or fix another warning to stay below the max.

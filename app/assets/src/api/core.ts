@@ -37,7 +37,7 @@ const instrument = (func: $TSFixMe) => {
   };
 };
 
-const CSRF_TOKEN = "csrf-token";
+export const CSRF_TOKEN = "csrf-token";
 
 const postWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
   try {

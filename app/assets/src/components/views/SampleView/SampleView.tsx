@@ -15,7 +15,6 @@ import {
   getSample,
   getSampleReportData,
   getSamples,
-  kickoffConsensusGenome,
 } from "~/api";
 import { getAmrDeprecatedData } from "~/api/amr";
 import {
@@ -49,7 +48,6 @@ import {
   WorkflowType,
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import {
   ActionType,
   createAction,
@@ -66,7 +64,6 @@ import {
   AmrDeprectatedData,
   BlastData,
   ConsensusGenomeClick,
-  ConsensusGenomeParams,
   CurrentTabSample,
   FilterSelections,
   Lineage,
@@ -208,13 +205,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   const [blastModalInfo, setBlastModalInfo] = useState<BlastModalInfo>({});
   const [consensusGenomeData, setConsensusGenomeData] =
     useState<ConsensusGenomeData>({});
-  const [consensusGenomeCreationParams, setConsensusGenomeCreationParams] =
-    useState<ConsensusGenomeParams>({
-      accessionId: "",
-      accessionName: "",
-      taxonId: null,
-      taxonName: "",
-    });
   const [consensusGenomePreviousParams, setConsensusGenomePreviousParams] =
     useState<ConsensusGenomeData | Record<string, never>>({});
   const [coverageVizDataByTaxon, setCoverageVizDataByTaxon] = useState<{
@@ -934,17 +924,9 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   };
 
   const handleConsensusGenomeKickoff = async (
-    consensusGenomeParams: ConsensusGenomeParams,
+    workflowRuns: WorkflowRun[],
     sample: Sample,
   ) => {
-    const workflowRuns = await kickoffConsensusGenome({
-      sampleId: sample.id,
-      workflow: WorkflowType.CONSENSUS_GENOME,
-      alignment_config_name: sample?.pipeline_runs[0]?.alignment_config_name,
-      ...consensusGenomeParams,
-      technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
-    });
-
     setSample({
       ...sample,
       workflow_runs: workflowRuns,
@@ -996,20 +978,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
     });
   };
 
-  const onConsensusGenomeCreation = async (
-    consensusGenomeCreationParams: ConsensusGenomeParams,
-    sample: Sample,
-  ) => {
-    try {
-      // Save the creation parameters if kickoff fails and we need to retry.
-      setConsensusGenomeCreationParams(consensusGenomeCreationParams);
-      await handleConsensusGenomeKickoff(consensusGenomeCreationParams, sample);
-    } catch (error) {
-      console.error(error);
-      handleModalAction([["open", "consensusGenomeError"]]);
-    }
-  };
-
   // Opening up a previous Consensus Genome run
   const handlePreviousConsensusGenomeReportClick = ({
     rowData,
@@ -1047,14 +1015,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       newModalsVisible[modal[1]] = modal[0] === "open";
     });
     setModalsVisible(newModalsVisible);
-  };
-
-  const handleConsensusGenomeErrorModalRetry = async (sample: Sample) => {
-    try {
-      await handleConsensusGenomeKickoff(consensusGenomeCreationParams, sample);
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   const handleMetadataUpdate = (key: string, value: string, sample: Sample) => {
@@ -1271,15 +1231,10 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
             handleConsensusGenomeClick={params =>
               handleConsensusGenomeClick(params, sample)
             }
-            handleConsensusGenomeErrorModalRetry={() =>
-              handleConsensusGenomeErrorModalRetry(sample)
-            }
+            handleConsensusGenomeKickoff={handleConsensusGenomeKickoff}
             handleModalAction={handleModalAction}
             handlePreviousConsensusGenomeReportClick={
               handlePreviousConsensusGenomeReportClick
-            }
-            onConsensusGenomeCreation={params =>
-              onConsensusGenomeCreation(params, sample)
             }
             modalsVisible={modalsVisible}
             sample={sample}
