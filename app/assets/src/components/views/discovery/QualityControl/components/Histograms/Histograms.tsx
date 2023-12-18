@@ -336,10 +336,6 @@ export const Histograms = ({
         label: "Base Pairs",
       });
     }
-
-    trackEvent(ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_HOVEREED, {
-      bin,
-    });
     setChartTooltipData(histogramTooltipData);
   };
 
