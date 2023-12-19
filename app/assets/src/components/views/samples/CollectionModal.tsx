@@ -1,6 +1,6 @@
 import { Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { isNull, toLower, trim } from "lodash/fp";
+import { compact, isNull, map, toLower, trim, uniq } from "lodash/fp";
 import React from "react";
 import {
   createBackground,
@@ -8,6 +8,7 @@ import {
 } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { NCBI_COMPRESSED_INDEX } from "~/components/utils/features";
 import { GlobalContext } from "~/globalContext/reducer";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
@@ -25,9 +26,13 @@ import {
 } from "./constants";
 
 interface CollectionModalProps {
+  allowedFeatures: string[];
   maxSamplesShown?: number;
   numDescriptionRows?: number;
-  fetchedSamples?: { id: number; sample: { name: string; project: string } }[];
+  fetchedSamples?: {
+    id: number;
+    sample: { name: string; project: string; ncbiIndexVersion: string };
+  }[];
   selectedSampleIds?: Set<number>;
   trigger: React.ReactNode;
   workflow?: string;
@@ -42,6 +47,7 @@ interface CollectionModalState {
   invalidBackgroundName: unknown;
   invalidSampleNames: string[];
   modalOpen: boolean;
+  validSampleIds: number[];
 }
 
 /**
@@ -63,6 +69,7 @@ class CollectionModal extends React.Component<
       invalidBackgroundName: null,
       invalidSampleNames: [],
       modalOpen: false,
+      validSampleIds: [],
     };
   }
   static contextType = GlobalContext;
@@ -218,22 +225,26 @@ class CollectionModal extends React.Component<
 
   fetchSampleValidation = async () => {
     const { selectedSampleIds, workflow } = this.props;
-    const { invalidSampleNames } = await validateSampleIds({
+    const { validIds, invalidSampleNames } = await validateSampleIds({
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       sampleIds: Array.from(selectedSampleIds),
       workflow,
     });
-    this.setState({ invalidSampleNames });
+    this.setState({
+      validSampleIds: validIds,
+      invalidSampleNames,
+    });
   };
 
   renderForm = () => {
-    const { numDescriptionRows } = this.props;
+    const { allowedFeatures, numDescriptionRows } = this.props;
 
     const {
       appliedMethod,
       enableMassNormalizedBackgrounds,
       invalidBackgroundName,
       invalidSampleNames,
+      validSampleIds,
     } = this.state;
 
     const dropdownOptions = BACKGROUND_CORRECTION_METHODS;
@@ -246,6 +257,16 @@ class CollectionModal extends React.Component<
       dropdownOptions.massNormalized.tooltip =
         "Only for ERCC samples run on Pipeline v4.0 or later";
     }
+
+    const validSamples = this.props.fetchedSamples?.filter(sample =>
+      validSampleIds.includes(sample.id),
+    );
+    const indexVersions = uniq(
+      compact(
+        map(sampleObject => sampleObject.sample.ncbiIndexVersion, validSamples),
+      ) as string[],
+    );
+
     return (
       <div className={cs.form}>
         <div className={cs.sectionHeader}>
@@ -307,10 +328,25 @@ class CollectionModal extends React.Component<
           onChange={this.handleMethodChange}
         />
         {this.renderSampleList()}
+        {indexVersions.length > 1 &&
+          allowedFeatures.includes(NCBI_COMPRESSED_INDEX) && (
+            <Notification
+              className={cs.notificationContainer}
+              type="warning"
+              displayStyle="flat"
+            >
+              <span className={cs.highlight}>
+                The selected samples were run using different versions of our
+                NCBI index: {indexVersions.join(", ")}.{" "}
+              </span>
+              We recommend using samples that were run against the same NCBI
+              index date.
+            </Notification>
+          )}
         {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
         <div className={cs.buttons}>
           <PrimaryButton text="Create" onClick={this.handleCreateBackground} />
-          <SecondaryButton text="Cancel" onClick={() => this.closeModal} />
+          <SecondaryButton text="Cancel" onClick={this.closeModal} />
         </div>
         <div className={cs.details}>
           A large number of samples may increase the processing time.

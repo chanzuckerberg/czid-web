@@ -461,6 +461,7 @@ const SamplesView = forwardRef(function SamplesView(
       />
     ) : (
       <CollectionModal
+        allowedFeatures={allowedFeatures}
         trigger={
           <ToolbarButtonIcon
             className={cs.action}
