@@ -103,17 +103,38 @@ class SfnAmrPipelineDispatchService
     str == "true"
   end
 
+  # CZID-8173: In the past, we used just HG38 for the human host genome. Now
+  # we are using an improved genome that combines HG38+T2T. However, we want to
+  # avoid disrupting old projects, so they still use previous human genome.
+  # TODO (Vince): Short-term, for QA purposes this determination is made entirely
+  # by user feature flag. Once validated and ready to ship, this will be converted
+  # to a pipeline version check: old pipelines get HG38, new pipelines HG38+T2T.
+  # If the user flag is still around in March 2024, something went terribly wrong.
+  def appropriate_human_genome
+    if @current_user.allowed_feature?("use_t2t_human_genome")
+      HostGenome.get_active_host_genome_by_name("Human")
+    else
+      HostGenome.find_by(name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN)
+    end
+  end
+
   def host_filtering_parameters
-    hg = @sample.host_genome
+    host_genome = @sample.host_genome
+    human_host_genome = appropriate_human_genome
+    if host_genome.name == "Human"
+      # if specified host was Human, make sure it uses appropriate genome
+      host_genome = human_host_genome
+    end
+
     {
       "host_filtering_docker_image_id": retrieve_mngs_docker_image_id,
       "host_filter_stage.file_ext": @sample.fasta_input? ? "fasta" : "fastq",
       "host_filter_stage.nucleotide_type": @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
-      "host_filter_stage.host_genome": hg.name.downcase,
-      "host_filter_stage.star_genome": hg.s3_star_index_path,
-      "host_filter_stage.bowtie2_genome": hg.s3_bowtie2_index_path,
-      "host_filter_stage.human_star_genome": HostGenome.find_by(name: "Human").s3_star_index_path,
-      "host_filter_stage.human_bowtie2_genome": HostGenome.find_by(name: "Human").s3_bowtie2_index_path,
+      "host_filter_stage.host_genome": host_genome.name.downcase,
+      "host_filter_stage.star_genome": host_genome.s3_star_index_path,
+      "host_filter_stage.bowtie2_genome": host_genome.s3_bowtie2_index_path,
+      "host_filter_stage.human_star_genome": human_host_genome.s3_star_index_path,
+      "host_filter_stage.human_bowtie2_genome": human_host_genome.s3_bowtie2_index_path,
       "host_filter_stage.adapter_fasta": PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
       "host_filter_stage.max_input_fragments": PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS,
       "host_filter_stage.max_subsample_fragments": PipelineRun::DEFAULT_SUBSAMPLING,
@@ -121,17 +142,23 @@ class SfnAmrPipelineDispatchService
   end
 
   def modern_host_filtering_parameters
-    hg = @sample.host_genome
+    host_genome = @sample.host_genome
+    human_host_genome = appropriate_human_genome
+    if host_genome.name == "Human"
+      # if specified host was Human, make sure it uses appropriate genome
+      host_genome = human_host_genome
+    end
+
     {
       "host_filtering_docker_image_id": retrieve_mngs_docker_image_id,
       "host_filter_stage.adapter_fasta": PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
 
-      "host_filter_stage.host_genome": hg.name.downcase,
-      "host_filter_stage.bowtie2_index_tar": hg.s3_bowtie2_index_path_v2,
-      "host_filter_stage.hisat2_index_tar": hg.s3_hisat2_index_path,
-      "host_filter_stage.kallisto_idx": hg.s3_kallisto_index_path,
-      "host_filter_stage.human_bowtie2_index_tar": HostGenome.find_by(name: "Human").s3_bowtie2_index_path_v2,
-      "host_filter_stage.human_hisat2_index_tar": HostGenome.find_by(name: "Human").s3_hisat2_index_path,
+      "host_filter_stage.host_genome": host_genome.name.downcase,
+      "host_filter_stage.bowtie2_index_tar": host_genome.s3_bowtie2_index_path_v2,
+      "host_filter_stage.hisat2_index_tar": host_genome.s3_hisat2_index_path,
+      "host_filter_stage.kallisto_idx": host_genome.s3_kallisto_index_path,
+      "host_filter_stage.human_bowtie2_index_tar": human_host_genome.s3_bowtie2_index_path_v2,
+      "host_filter_stage.human_hisat2_index_tar": human_host_genome.s3_hisat2_index_path,
 
       "host_filter_stage.max_input_fragments": PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS,
       "host_filter_stage.max_subsample_fragments": PipelineRun::DEFAULT_SUBSAMPLING,

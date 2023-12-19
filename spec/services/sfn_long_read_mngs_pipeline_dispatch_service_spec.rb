@@ -57,6 +57,7 @@ RSpec.describe SfnLongReadMngsPipelineDispatchService, type: :service do
         allow(ENV).to receive(:[]).and_call_original
         allow(ENV).to receive(:[]).with('SAMPLES_BUCKET_NAME').and_return(fake_samples_bucket)
 
+        create(:host_genome, name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN)
         create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: fake_sfn_arn)
         create(:alignment_config, name: fake_alignment_config)
 
@@ -108,7 +109,7 @@ RSpec.describe SfnLongReadMngsPipelineDispatchService, type: :service do
             sfn_input_json: {
               Input: {
                 Run: {
-                  minimap_human_db: SfnLongReadMngsPipelineDispatchService::HUMAN_S3_MINIMAP2_INDEX_PATH,
+                  minimap_human_db: SfnLongReadMngsPipelineDispatchService::DEPRECATED_HUMAN_HG38_S3_MINIMAP2_INDEX_PATH,
                   subsample_depth: @sample.subsample,
                   lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
                   accession2taxid_db: @pipeline_run.alignment_config.s3_accession2taxid_path,

@@ -9,6 +9,7 @@ FactoryBot.define do
     sequence(:name) { |n| "Host #{n}" }
     # Only null-user host genomes are shown as options for new samples.
     user { nil }
+    deprecation_status { HostGenome::NON_DEPRECATED_KEYWORD }
 
     after :create do |host_genome, options|
       options.metadata_fields.each do |metadata_field_name|

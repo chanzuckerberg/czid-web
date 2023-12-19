@@ -49,6 +49,19 @@ class HostGenome < ApplicationRecord
   S3_STAR_INDEX_FILE = "STAR_genome.tar".freeze
   S3_BOWTIE2_INDEX_FILE = "bowtie2_genome.tar".freeze
 
+  # HostGenome can be deprecated via `deprecation_status` col.
+  # If a HostGenome is still in use (i.e., not deprecated) it uses this keyword.
+  NON_DEPRECATED_KEYWORD = "active".freeze
+  # We sometimes need to directly reference old HG38 Human genome.
+  DEPRECATION_STATUS_HG38_V1_HUMAN = "deprecated, 2023-12-13, v1, HG38".freeze
+
+  # Some HostGenomes are deprecated in favor of newer versions for the organism.
+  # This is not common -- most organisms only have one HG and it's active --
+  # but for those cases where the organism may have deprecated HGs, use this.
+  def self.get_active_host_genome_by_name(name)
+    HostGenome.find_by(name: name, deprecation_status: NON_DEPRECATED_KEYWORD)
+  end
+
   def self.s3_star_index_path_default
     HostGenome::ERCC_PATH_PREFIX + HostGenome::S3_STAR_INDEX_FILE
   end
@@ -86,6 +99,6 @@ class HostGenome < ApplicationRecord
   end
 
   def show_as_option?
-    user.nil?
+    user.nil? && deprecation_status == NON_DEPRECATED_KEYWORD
   end
 end

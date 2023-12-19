@@ -1051,6 +1051,7 @@ RSpec.describe "Sample request", type: :request do
 
       before do
         host_genome1 = create(:host_genome, name: "Human")
+        create(:host_genome, name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN)
         @project = create(:project, users: [@joe])
         @sample1 = create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], host_genome: host_genome1)
         @sample2 = create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], host_genome: host_genome1)

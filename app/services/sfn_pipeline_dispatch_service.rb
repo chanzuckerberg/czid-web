@@ -65,8 +65,22 @@ class SfnPipelineDispatchService
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample.sample_path}/#{@pipeline_run.id}"
   end
 
-  def new_host_filtering_inputs
-    hg = @sample.host_genome
+  # CZID-8173: In the past, we used just HG38 for the human host genome. Now
+  # we are using an improved genome that combines HG38+T2T. However, we want to
+  # avoid disrupting old projects, so they still use previous human genome.
+  # TODO (Vince): Short-term, for QA purposes this determination is made entirely
+  # by user feature flag. Once validated and ready to ship, this will be converted
+  # to a pipeline version check: old pipelines get HG38, new pipelines HG38+T2T.
+  # If the user flag is still around in March 2024, something went terribly wrong.
+  def appropriate_human_genome
+    if @sample.user.allowed_feature?("use_t2t_human_genome")
+      HostGenome.get_active_host_genome_by_name("Human")
+    else
+      HostGenome.find_by(name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN)
+    end
+  end
+
+  def new_host_filtering_inputs(host_genome, human_host_genome)
     {
       fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[0].name),
       fastqs_1: @sample.input_files.fastq[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[1].name) : nil,
@@ -74,13 +88,13 @@ class SfnPipelineDispatchService
 
       adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files.fastq[1] ? "paired-end" : "single-end"],
 
-      host_genome: hg.name.downcase,
-      bowtie2_index_tar: hg.s3_bowtie2_index_path_v2,
-      hisat2_index_tar: hg.s3_hisat2_index_path,
-      kallisto_idx: hg.s3_kallisto_index_path,
-      human_bowtie2_index_tar: HostGenome.find_by(name: "Human").s3_bowtie2_index_path_v2,
-      human_hisat2_index_tar: HostGenome.find_by(name: "Human").s3_hisat2_index_path,
-      gtf_gz: hg.name == "Human" ? hg.s3_original_transcripts_gtf_index_path : nil,
+      host_genome: host_genome.name.downcase,
+      bowtie2_index_tar: host_genome.s3_bowtie2_index_path_v2,
+      hisat2_index_tar: host_genome.s3_hisat2_index_path,
+      kallisto_idx: host_genome.s3_kallisto_index_path,
+      human_bowtie2_index_tar: human_host_genome.s3_bowtie2_index_path_v2,
+      human_hisat2_index_tar: human_host_genome.s3_hisat2_index_path,
+      gtf_gz: host_genome.name == "Human" ? host_genome.s3_original_transcripts_gtf_index_path : nil,
 
       max_input_fragments: @pipeline_run.max_input_fragments,
       max_subsample_fragments: @pipeline_run.subsample,
@@ -89,6 +103,13 @@ class SfnPipelineDispatchService
   end
 
   def generate_wdl_input
+    host_genome = @sample.host_genome
+    human_host_genome = appropriate_human_genome
+    if host_genome.name == "Human"
+      # if specified host was Human, make sure it uses appropriate genome
+      host_genome = human_host_genome
+    end
+
     sfn_pipeline_input_json = {
       HOST_FILTER_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/host_filter.wdl",
       NON_HOST_ALIGNMENT_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/non_host_alignment.wdl",
@@ -97,19 +118,19 @@ class SfnPipelineDispatchService
       STAGES_IO_MAP_JSON: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/stage_io_map.json",
       Input: {
         HostFilter: if pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version)
-                      new_host_filtering_inputs
+                      new_host_filtering_inputs(host_genome, human_host_genome)
                     else
                       {
                         fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[0].name),
                         fastqs_1: @sample.input_files.fastq[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[1].name) : nil,
                         file_ext: @sample.fasta_input? ? "fasta" : "fastq",
                         nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
-                        host_genome: @sample.host_genome_name.downcase,
+                        host_genome: host_genome.name.downcase,
                         adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files.fastq[1] ? "paired-end" : "single-end"],
-                        star_genome: @sample.host_genome.s3_star_index_path,
-                        bowtie2_genome: @sample.host_genome.s3_bowtie2_index_path,
-                        human_star_genome: HostGenome.find_by(name: "Human").s3_star_index_path,
-                        human_bowtie2_genome: HostGenome.find_by(name: "Human").s3_bowtie2_index_path,
+                        star_genome: host_genome.s3_star_index_path,
+                        bowtie2_genome: host_genome.s3_bowtie2_index_path,
+                        human_star_genome: human_host_genome.s3_star_index_path,
+                        human_bowtie2_genome: human_host_genome.s3_bowtie2_index_path,
                         max_input_fragments: @pipeline_run.max_input_fragments,
                         max_subsample_fragments: @pipeline_run.subsample,
                       }

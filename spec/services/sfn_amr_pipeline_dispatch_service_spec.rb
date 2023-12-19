@@ -46,6 +46,7 @@ end
     before do
       create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: amr_workflow), value: modern_amr_version)
       create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: fake_sfn_arn)
+      create(:host_genome, name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN)
 
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with('SAMPLES_BUCKET_NAME').and_return(fake_samples_bucket)
