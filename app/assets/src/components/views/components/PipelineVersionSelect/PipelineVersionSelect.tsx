@@ -9,7 +9,6 @@ import cs from "./pipeline_version_select.scss";
 import { PipelineVersionSelectConfig } from "./workflowTypeConfig";
 
 interface PipelineVersionSelectProps {
-  shouldIncludeDatabaseVersion: boolean;
   currentRun?: WorkflowRun | PipelineRun;
   allRuns?: WorkflowRun[] | PipelineRun[] | string[];
   workflowType: WorkflowType;
@@ -17,7 +16,6 @@ interface PipelineVersionSelectProps {
 }
 
 export const PipelineVersionSelect = ({
-  shouldIncludeDatabaseVersion = false,
   currentRun,
   allRuns = [],
   workflowType,
@@ -59,9 +57,9 @@ export const PipelineVersionSelect = ({
   const currentPipelineString =
     currentRun[versionKey] &&
     `${workflowName} Pipeline v${currentRun[versionKey]}`;
-  const versionInfoString = ` | ${
-    shouldIncludeDatabaseVersion ? getDatabaseVersionString(currentRun) : ""
-  }${getLastProcessedString()}`;
+  const versionInfoString = ` | ${getDatabaseVersionString(
+    currentRun,
+  )}${getLastProcessedString()}`;
   // figure out which version of the header to use and return it
   // only one version, and it's the current one? return a string rather than a dropdown.
   const showSingleVersionTextHeader =

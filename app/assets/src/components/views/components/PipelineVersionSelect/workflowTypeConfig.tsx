@@ -14,8 +14,8 @@ interface PipelineVersionSelectConfigProps {
 }
 
 const getMetagenomicsDatabaseVersionString = (pipelineRun: PipelineRun) => {
-  const alignmentDbVersion = pipelineRun.version?.alignment_db;
-  return alignmentDbVersion ? alignmentDbVersion.concat(" | ") : "";
+  const ncbiIndexDate = pipelineRun.alignment_config_name;
+  return ncbiIndexDate ? `NCBI Index Date: ${ncbiIndexDate} | ` : "";
 };
 
 const shortReadConfig = {

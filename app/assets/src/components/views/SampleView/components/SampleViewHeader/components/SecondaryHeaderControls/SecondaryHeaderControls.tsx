@@ -32,7 +32,6 @@ export const SecondaryHeaderControls = ({
           allRuns={getAllRuns()}
           workflowType={workflow}
           onVersionChange={onPipelineVersionChange}
-          shouldIncludeDatabaseVersion={workflow === "amr"}
         />
       )}
       {sample && <PipelineRunsButton sample={sample} workflow={workflow} />}

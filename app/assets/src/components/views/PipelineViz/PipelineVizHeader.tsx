@@ -39,7 +39,6 @@ const PipelineVizHeader = ({
         <ViewHeader.Content>
           <div className={cs.pipelineInfo}>
             <PipelineVersionSelect
-              shouldIncludeDatabaseVersion={true}
               currentRun={pipelineRun}
               allRuns={pipelineVersions}
               onVersionChange={handlePipelineVersionSelect}
