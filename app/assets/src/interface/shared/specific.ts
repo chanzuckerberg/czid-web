@@ -359,6 +359,7 @@ export interface Background {
   ready: 0 | 1;
   updated_at: DateString;
   user_id: boolean;
+  alignment_config_names: string[];
 }
 
 export interface SampleTypeProps {

@@ -14,6 +14,7 @@ export const showNotification = (
     backgroundName?: string;
     handleTabChange?: (tab: string) => void;
     revertToSampleViewFilters?: () => void;
+    indexName?: string;
   } = {},
 ) => {
   switch (notification) {
@@ -61,6 +62,27 @@ export const showNotification = (
       showToast(
         ({ closeToast }: { closeToast(): void }) =>
           renderSampleDeleteError(closeToast, params),
+        {
+          autoClose: 12000,
+        },
+      );
+      break;
+    }
+    case NOTIFICATION_TYPES.multipleIndexVersions: {
+      showToast(
+        ({ closeToast }: { closeToast(): void }) => (
+          <Notification
+            type="warning"
+            displayStyle="elevated"
+            onClose={closeToast}
+            closeWithIcon
+          >
+            The background model you selected contains sample(s) run against a
+            different version of our NCBI index than the current sample. We
+            recommend choosing a background model run on NCBI index date{" "}
+            {params.indexName}.
+          </Notification>
+        ),
         {
           autoClose: 12000,
         },

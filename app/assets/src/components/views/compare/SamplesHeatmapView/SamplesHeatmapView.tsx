@@ -17,6 +17,7 @@ import {
   map,
   omit,
   property,
+  pullAll,
   set,
   size,
   uniq,
@@ -105,7 +106,11 @@ const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
 
 interface SamplesHeatmapViewProps {
   addedTaxonIds?: $TSFixMeUnknown[];
-  backgrounds?: { name?: string; value?: number }[];
+  backgrounds?: {
+    name?: string;
+    value?: number;
+    alignmentConfigNames?: string[];
+  }[];
   categories?: string[];
   heatmapTs?: number;
   metrics?: { value: string }[];
@@ -819,11 +824,12 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   async fetchViewData() {
-    const { allowedFeatures = [] } = this.props;
+    const { allowedFeatures = [], backgrounds } = this.props;
     const useHeatmapPathogensFeature = allowedFeatures.includes(
       HEATMAP_PATHOGEN_FLAGGING_FEATURE,
     );
     const { sampleIds } = this.state;
+    const selectedBackgroundId = this.state.selectedOptions.background;
 
     this.setState({ loading: true }); // Gets false from this.updateFilters
 
@@ -857,7 +863,7 @@ class SamplesHeatmapViewCC extends React.Component<
       pathogenFlags = useHeatmapPathogensFeature
         ? await getPathogenFlags({
             sampleIds: validIds,
-            background: this.state.selectedOptions.background,
+            background: selectedBackgroundId,
           })
         : Promise.resolve({});
     } catch (err) {
@@ -881,17 +887,35 @@ class SamplesHeatmapViewCC extends React.Component<
       ]);
     }
 
-    const indexVersions = new Set(
+    // set of unique alignment config names for samples
+    const indexVersions = uniq(
       compact(map(property("alignment_config_name"), heatmapData)),
     );
 
-    if (
-      indexVersions.size > 1 &&
-      allowedFeatures.includes(NCBI_COMPRESSED_INDEX)
-    ) {
-      this.showNotification(NOTIFICATION_TYPES.multipleIndexVersions, [
-        ...indexVersions,
-      ]);
+    const backgroundIndexVersions =
+      find({ value: selectedBackgroundId }, backgrounds)
+        ?.alignmentConfigNames || [];
+
+    // alignment configs in background not in samples
+    const nonMatchingBackgroundIndexVersions = pullAll(
+      indexVersions,
+      backgroundIndexVersions,
+    );
+
+    // if samples have multiple index versions, show samples warning
+    // if samples have same index version but background doesn't match, show bg warning
+    if (allowedFeatures.includes(NCBI_COMPRESSED_INDEX)) {
+      if (indexVersions.length > 1) {
+        this.showNotification(
+          NOTIFICATION_TYPES.multipleIndexVersions,
+          indexVersions,
+        );
+      } else if (nonMatchingBackgroundIndexVersions.length > 0) {
+        this.showNotification(
+          NOTIFICATION_TYPES.backgroundDifferentIndexVersion,
+          {},
+        );
+      }
     }
 
     this.setState({ pathogenFlags }, () => {
@@ -2087,24 +2111,6 @@ class SamplesHeatmapViewCC extends React.Component<
     );
   }
 
-  renderMultipleIndexVersionWarning(
-    onClose: () => void,
-    indexVersions: string[],
-  ) {
-    return (
-      <Notification intent="warning" onClose={onClose} slideDirection="right">
-        <div>
-          <span className={cs.highlight}>
-            The selected samples were run on different versions of our NCBI
-            index: {indexVersions.join(", ")}.
-          </span>{" "}
-          Changes across indices may produce results that are not comparable. We
-          recommend choosing samples with the same NCBI index date.
-        </div>
-      </Notification>
-    );
-  }
-
   renderCustomBackgroundWarning(onClose: () => void) {
     return (
       <Notification intent="warning" onClose={onClose} slideDirection="right">
@@ -2120,7 +2126,7 @@ class SamplesHeatmapViewCC extends React.Component<
     switch (notification) {
       case NOTIFICATION_TYPES.invalidSamples:
         showToast(
-          ({ closeToast }: $TSFixMe) =>
+          ({ closeToast }: { closeToast(): void }) =>
             this.renderInvalidSamplesWarning(closeToast),
           {
             autoClose: 12000,
@@ -2129,7 +2135,7 @@ class SamplesHeatmapViewCC extends React.Component<
         break;
       case NOTIFICATION_TYPES.taxaFilteredOut:
         showToast(
-          ({ closeToast }: $TSFixMe) =>
+          ({ closeToast }: { closeToast(): void }) =>
             this.renderFilteredOutWarning(closeToast, params),
           {
             autoClose: 12000,
@@ -2138,7 +2144,7 @@ class SamplesHeatmapViewCC extends React.Component<
         break;
       case NOTIFICATION_TYPES.multiplePipelineVersions:
         showToast(
-          ({ closeToast }: $TSFixMe) =>
+          ({ closeToast }: { closeToast(): void }) =>
             this.renderFilteredMultiplePipelineVersionsWarning(
               closeToast,
               params,
@@ -2150,8 +2156,45 @@ class SamplesHeatmapViewCC extends React.Component<
         break;
       case NOTIFICATION_TYPES.multipleIndexVersions:
         showToast(
-          ({ closeToast }: $TSFixMe) =>
-            this.renderMultipleIndexVersionWarning(closeToast, params),
+          ({ closeToast }: { closeToast(): void }) => {
+            return (
+              <Notification
+                intent="warning"
+                onClose={closeToast}
+                slideDirection="right"
+              >
+                <div>
+                  <span className={cs.highlight}>
+                    The selected samples were run on different versions of our
+                    NCBI index: {params.join(", ")}.
+                  </span>{" "}
+                  Changes across indices may produce results that are not
+                  comparable. We recommend choosing samples and a background
+                  model with the same NCBI index date.
+                </div>
+              </Notification>
+            );
+          },
+          {
+            autoClose: 12000,
+          },
+        );
+        break;
+      case NOTIFICATION_TYPES.backgroundDifferentIndexVersion:
+        showToast(
+          ({ closeToast }: { closeToast(): void }) => (
+            <Notification
+              intent="warning"
+              onClose={closeToast}
+              slideDirection="right"
+            >
+              <div>
+                The background model you selected contains sample(s) run against
+                a different version of our NCBI index than sample(s) in this
+                heatmap.
+              </div>
+            </Notification>
+          ),
           {
             autoClose: 12000,
           },
@@ -2159,7 +2202,7 @@ class SamplesHeatmapViewCC extends React.Component<
         break;
       case NOTIFICATION_TYPES.customBackground:
         showToast(
-          ({ closeToast }: $TSFixMe) =>
+          ({ closeToast }: { closeToast(): void }) =>
             this.renderCustomBackgroundWarning(closeToast),
           {
             autoClose: 12000,

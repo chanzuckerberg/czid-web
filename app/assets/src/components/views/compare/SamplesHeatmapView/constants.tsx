@@ -155,6 +155,7 @@ export const NOTIFICATION_TYPES = {
   multiplePipelineVersions: "diverse_pipelines",
   customBackground: "custom_background_slow_with_es",
   multipleIndexVersions: "multiple_index_versions",
+  backgroundDifferentIndexVersion: "background_diff_index_version",
 };
 
 export const MASS_NORMALIZED_PIPELINE_VERSION = 4.0;

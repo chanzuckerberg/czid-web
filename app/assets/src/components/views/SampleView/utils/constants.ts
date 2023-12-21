@@ -66,6 +66,7 @@ export const NOTIFICATION_TYPES = {
   discoveryViewFiltersPersisted: "discoveryViewFiltersPersisted",
   sampleDeleteSuccess: "sampleDeleteSuccess",
   sampleDeleteError: "sampleDeleteError",
+  multipleIndexVersions: "multipleIndexVersions",
 };
 
 // Text constants

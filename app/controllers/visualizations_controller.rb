@@ -175,7 +175,7 @@ class VisualizationsController < ApplicationController
       },
       metrics: WorkflowRun::WORKFLOW_METRICS[workflow],
       backgrounds: current_power.backgrounds.map do |background|
-        { name: background.name, value: background.id, mass_normalized: background.mass_normalized }
+        { name: background.name, value: background.id, mass_normalized: background.mass_normalized, alignmentConfigNames: background.alignment_config_names }
       end,
       thresholdFilters: {
         targets: [

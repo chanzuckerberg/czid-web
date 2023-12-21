@@ -28,6 +28,10 @@ class Background < ApplicationRecord
 
   scope :created_by_idseq, -> { where(user: nil, public_access: 1) }
 
+  def as_json(options = {})
+    super({ methods: [:alignment_config_names] }.merge(options))
+  end
+
   def mass_normalized_has_ercc
     if mass_normalized &&
        PipelineRun.where('id in (?) AND (total_ercc_reads = 0 OR total_ercc_reads IS NULL)', pipeline_run_ids).count > 0
@@ -194,5 +198,9 @@ class Background < ApplicationRecord
 
   def mass_normalized?
     mass_normalized
+  end
+
+  def alignment_config_names
+    pipeline_runs.joins(:alignment_config).distinct.pluck("alignment_configs.name")
   end
 end

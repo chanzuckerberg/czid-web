@@ -1,5 +1,15 @@
 import deepEqual from "fast-deep-equal";
-import { find, get, head, isEmpty, isNull, map, merge, uniq } from "lodash/fp";
+import {
+  find,
+  get,
+  head,
+  isEmpty,
+  isNull,
+  map,
+  merge,
+  pull,
+  uniq,
+} from "lodash/fp";
 import React, {
   useCallback,
   useContext,
@@ -36,7 +46,10 @@ import {
   computeMngsReportTableValuesForCSV,
   createCSVObjectURL,
 } from "~/components/utils/csv";
-import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
+import {
+  MULTITAG_PATHOGENS_FEATURE,
+  NCBI_COMPRESSED_INDEX,
+} from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
   COVERAGE_VIZ_FEATURE,
@@ -521,6 +534,25 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
           });
         selectedBackground = null;
       }
+
+      const backgroundAlignmentConfigs =
+        selectedBackground?.alignment_config_names ?? [];
+      // remove pipeline run's alignment config from the list of
+      // alignment configs for the background
+      const nonMatchingAlignmentConfigs = pull(
+        pipelineRun?.alignment_config_name,
+        backgroundAlignmentConfigs,
+      );
+
+      if (
+        nonMatchingAlignmentConfigs.length > 0 &&
+        allowedFeatures.includes(NCBI_COMPRESSED_INDEX)
+      ) {
+        showNotification(NOTIFICATION_TYPES.multipleIndexVersions, {
+          indexName: pipelineRun?.alignment_config_name,
+        });
+      }
+
       const backgroundIdUsed = backgroundId || selectedBackground?.id || null;
 
       setLoadingReport(true);
@@ -556,6 +588,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       }
     },
     [
+      allowedFeatures,
       backgrounds,
       ignoreProjectBackground,
       enableMassNormalizedBackgrounds,
@@ -564,6 +597,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       selectedOptions?.background,
       snapshotShareId,
       pipelineVersion,
+      pipelineRun,
       processRawSampleReportData,
     ],
   );
