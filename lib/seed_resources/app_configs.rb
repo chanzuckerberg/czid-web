@@ -35,6 +35,11 @@ module SeedResource
       end
     end
 
+    def alignment_config
+      find_or_create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: "2021-01-22")
+      find_or_create(:workflow_version, workflow: AlignmentConfig::NCBI_INDEX, version: "2021-01-22")
+    end
+
     def launched_features
       features = [
         "bulk_downloads",

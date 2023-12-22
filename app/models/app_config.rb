@@ -72,6 +72,9 @@ class AppConfig < ApplicationRecord
   # Initially set to "card-3.2.6-wildcard-4.0.0". Must follow pattern of
   # "card-{version}-wildcard-{version}."
   CARD_FOLDER = "card_folder".freeze
+  # The default alignment config to use when dispatching an mNGS run.
+  # Initially set to "2021-01-22".
+  DEFAULT_ALIGNMENT_CONFIG_NAME = "default_alignment_config_name".freeze
 
   after_save :clear_cached_record
 

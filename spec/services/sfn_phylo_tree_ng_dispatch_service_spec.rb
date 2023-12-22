@@ -7,7 +7,7 @@ RSpec.describe SfnPhyloTreeNgDispatchService, type: :service do
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn" }
   let(:test_workflow_name) { "phylotree-ng" }
   let(:fake_wdl_version) { "10.0.0" }
-  let(:fake_alignment_config) { AlignmentConfig::DEFAULT_NAME }
+  let(:fake_alignment_config) { AlignmentConfig.default_name }
 
   let(:fake_states_client) do
     Aws::States::Client.new(

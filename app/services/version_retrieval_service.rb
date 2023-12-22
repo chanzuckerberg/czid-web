@@ -24,7 +24,7 @@ class VersionRetrievalService
 
   def default_version
     if @workflow == AlignmentConfig::NCBI_INDEX
-      AlignmentConfig::DEFAULT_NAME
+      AlignmentConfig.default_name
     else
       AppConfigHelper.get_workflow_version(@workflow)
     end

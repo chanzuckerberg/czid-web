@@ -6,7 +6,7 @@ RSpec.describe VersionRetrievalService, type: :service do
   let(:amr_workflow) { WorkflowRun::WORKFLOW[:amr] }
   let(:long_read_mngs_workflow) { WorkflowRun::WORKFLOW[:long_read_mngs] }
   let(:index_version) { AlignmentConfig::NCBI_INDEX }
-  let(:default_index_version) { "11-22-2023" }
+  let(:default_index_version) { "01-22-2021" }
 
   before do
     AppConfigHelper.set_workflow_version(short_read_mngs_workflow, "2.0.0")
@@ -23,15 +23,15 @@ RSpec.describe VersionRetrievalService, type: :service do
     create(:workflow_version, workflow: amr_workflow, version: "1.0.2")
     create(:workflow_version, workflow: long_read_mngs_workflow, version: "0.0.1")
     create(:workflow_version, workflow: index_version, version: "11-22-2023")
-    create(:workflow_version, workflow: index_version, version: "01-22-2021")
+    create(:workflow_version, workflow: index_version, version: default_index_version)
   end
 
   describe "when user_specified_prefix is not present" do
     context "when the project does not have the workflow pinned to a specific version" do
       before do
         AppConfigHelper.set_workflow_version(short_read_mngs_workflow, "1.0.0")
+        create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: default_index_version)
         @project = create(:project)
-        stub_const('AlignmentConfig::DEFAULT_NAME', "11-22-2023")
         @default_versions_for_workflow = {
           short_read_mngs_workflow => AppConfigHelper.get_workflow_version(short_read_mngs_workflow),
           index_version => default_index_version,

@@ -9,7 +9,7 @@ RSpec.describe SfnLongReadMngsPipelineDispatchService, type: :service do
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn" }
   let(:test_workflow_name) { WorkflowRun::WORKFLOW[:long_read_mngs] }
   let(:fake_wdl_version) { "0.1.1-beta" }
-  let(:fake_alignment_config) { AlignmentConfig::DEFAULT_NAME }
+  let(:fake_alignment_config) { AlignmentConfig.default_name }
 
   let(:fake_states_client) do
     Aws::States::Client.new(

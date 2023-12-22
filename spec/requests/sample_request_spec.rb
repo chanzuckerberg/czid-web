@@ -7,6 +7,7 @@ RSpec.describe "Sample request", type: :request do
   let(:long_read_mngs) { WorkflowRun::WORKFLOW[:long_read_mngs] }
   let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
   let(:fake_alignment_config_name) { "fake_alignment_config_name" }
+  let(:default_index_version) { "2021-01-22" }
 
   context 'Joe' do
     before do
@@ -98,11 +99,11 @@ RSpec.describe "Sample request", type: :request do
       before do
         # Sample setup
         @project = create(:public_project, users: [@joe])
-        stub_const('AlignmentConfig::DEFAULT_NAME', "11-22-2023")
-        @default_alignment_config = create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
+        create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: default_index_version)
+        @default_alignment_config = create(:alignment_config, name: AlignmentConfig.default_name)
         @fake_alignment_config = create(:alignment_config, name: fake_alignment_config_name)
         create(:workflow_version, workflow: AlignmentConfig::NCBI_INDEX, version: fake_alignment_config_name)
-        create(:workflow_version, workflow: AlignmentConfig::NCBI_INDEX, version: AlignmentConfig::DEFAULT_NAME)
+        create(:workflow_version, workflow: AlignmentConfig::NCBI_INDEX, version: AlignmentConfig.default_name)
         hg = create(:host_genome)
         @sample_params = {
           client: "web",
@@ -1187,7 +1188,7 @@ RSpec.describe "Sample request", type: :request do
       before do
         # Sample setup
         @project = create(:public_project, users: [@admin])
-        create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
+        create(:alignment_config, name: AlignmentConfig.default_name)
         hg = create(:host_genome)
         @sample_params = {
           client: "web",

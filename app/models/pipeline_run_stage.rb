@@ -35,9 +35,6 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_POSTPROCESS = "postprocess".freeze
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
-  # Older alignment configs might not have an s3_nt_info_db_path field, so use a reasonable default in this case.
-  DEFAULT_S3_NT_INFO_DB_PATH = "s3://#{S3_DATABASE_BUCKET}/alignment_data/#{AlignmentConfig::DEFAULT_NAME}/nt_info.db".freeze
-
   DAG_NAME_BY_STAGE_NAME = {
     HOST_FILTERING_STAGE_NAME => DAG_NAME_HOST_FILTER,
     ALIGNMENT_STAGE_NAME => DAG_NAME_ALIGNMENT,
@@ -78,6 +75,11 @@ class PipelineRunStage < ApplicationRecord
 
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
+
+  # Older alignment configs might not have an s3_nt_info_db_path field, so use a reasonable default in this case.
+  def self.default_s3_nt_info_db_path
+    "s3://#{S3_DATABASE_BUCKET}/ncbi-indexes-prod/#{AlignmentConfig.default_name}/index-generation-2/nt_info.db".freeze
+  end
 
   def started?
     job_command.present?

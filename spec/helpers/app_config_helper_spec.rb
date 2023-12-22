@@ -59,4 +59,32 @@ RSpec.describe AppConfigHelper, type: :helper do
       AppConfigHelper.remove_app_config(invalid_key)
     end
   end
+
+  describe "#update_alignment_config" do
+    let(:alignment_config_name) { "fake alignment config name" }
+
+    subject { AppConfigHelper.update_default_alignment_config(alignment_config_name) }
+
+    context "when alignment config does not exist for the supplied name" do
+      it "raises an error" do
+        expect { subject }.to raise_error(RuntimeError, "Alignment config does not exist")
+      end
+    end
+
+    context "when the alignment config name corresponds to a valid alignment config" do
+      before do
+        create(:alignment_config, name: alignment_config_name)
+      end
+
+      it "creates a workflow version for the NCBI index" do
+        subject
+        expect(WorkflowVersion.find_by(workflow: AlignmentConfig::NCBI_INDEX, version: alignment_config_name)).to_not be_nil
+      end
+
+      it "updates the app config" do
+        subject
+        expect(AppConfig.find_by(key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME).value).to eq(alignment_config_name)
+      end
+    end
+  end
 end

@@ -83,4 +83,15 @@ module AppConfigHelper
       WorkflowVersion.create(workflow: workflow_name, version: workflow_version, deprecated: false, runnable: true)
     end
   end
+
+  def update_default_alignment_config(alignment_config_name)
+    alignment_config = AlignmentConfig.find_by(name: alignment_config_name)
+    if alignment_config.nil?
+      raise "Alignment config does not exist"
+    end
+
+    Rails.logger.info("UpgradeEvent: Setting #{AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME} to #{alignment_config_name}")
+    create_workflow_version(AlignmentConfig::NCBI_INDEX, alignment_config_name)
+    return set_app_config(AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, alignment_config_name)
+  end
 end

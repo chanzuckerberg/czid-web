@@ -40,7 +40,7 @@ describe Sample, type: :model do
   context "#transfer_basespace_fastq_files" do
     before do
       project = create(:public_project)
-      create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
+      create(:alignment_config, name: AlignmentConfig.default_name)
       @sample = create(:sample, project: project, status: Sample::STATUS_CREATED, input_files: [], uploaded_from_basespace: 1)
     end
 

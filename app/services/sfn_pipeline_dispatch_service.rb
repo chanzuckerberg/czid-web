@@ -158,7 +158,7 @@ class SfnPipelineDispatchService
                       nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
                       nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
                       file_ext: @sample.fasta_input? ? "fasta" : "fastq",
-                      nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
+                      nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage.default_s3_nt_info_db_path,
                     },
       },
       OutputPrefix: output_prefix,

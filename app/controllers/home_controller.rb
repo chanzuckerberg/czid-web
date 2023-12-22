@@ -197,8 +197,18 @@ class HomeController < ApplicationController
     permitted_params = params.permit(:key, :value)
     config_name = permitted_params[:key]
     value = permitted_params[:value]
-
-    AppConfigHelper.set_app_config(config_name, value)
+    begin
+      if config_name == AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME
+        AppConfigHelper.update_default_alignment_config(value)
+      else
+        AppConfigHelper.set_app_config(config_name, value)
+      end
+    rescue StandardError => e
+      render json: {
+        status: e,
+      }
+      return
+    end
 
     render json: {
       status: :success,

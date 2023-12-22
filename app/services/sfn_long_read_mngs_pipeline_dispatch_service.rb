@@ -136,7 +136,7 @@ class SfnLongReadMngsPipelineDispatchService
           minimap2_db: @pipeline_run.alignment_config.minimap2_long_db_path,
           diamond_db: @pipeline_run.alignment_config.diamond_db_path,
           s3_wd_uri: "#{output_prefix}/#{@pipeline_run.version_key_subpath}",
-          nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
+          nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path,
         },
       },
       OutputPrefix: output_prefix,
