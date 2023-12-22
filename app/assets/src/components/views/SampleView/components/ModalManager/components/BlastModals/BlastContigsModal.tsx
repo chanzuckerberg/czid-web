@@ -331,6 +331,7 @@ export const BlastContigsModal = ({
     }
 
     return (
+      // @ts-expect-error SDS is working on a fix for this in v19.0.1
       <Tabs
         sdsSize="small"
         underlined

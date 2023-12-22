@@ -47,6 +47,10 @@ export const ConsensusGenomeDropdown = ({
         sdsType: "label",
         value: nameFromValue(initialSelectedValue),
       }}
+      DropdownMenuProps={{
+        getOptionKey: ({ name, value }) => name + value,
+        isOptionEqualToValue: (option, value) => option.value === value.value,
+      }}
     />
   );
 };
