@@ -3,4 +3,4 @@ pyOpenSSL>=19.1.0
 setuptools==65.5.1
 miniwdl==0.7.4
 biom-format==2.1.12
-jwcrypto==1.5.0
+jwcrypto==1.5.1
