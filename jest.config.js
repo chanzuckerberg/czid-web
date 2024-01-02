@@ -16,10 +16,7 @@ mappedModuleAliases["\\.(css|scss)$"] = "jest/__mocks__/styleMock.ts";
 
 module.exports = {
   verbose: true,
-  moduleNameMapper: {
-    ...mappedModuleAliases,
-    "^axios$": require.resolve("axios"),
-  },
+  moduleNameMapper: mappedModuleAliases,
   coverageDirectory: "<rootDir>/client-coverage",
   coveragePathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/build/"],
   coverageReporters: ["text-summary", "json", "html"],
