@@ -15,6 +15,7 @@ import { PageObject } from "./page-object";
 
 const REF_FILENAME = "consensus_papilloma.fa";
 const REF_FILE = `./fixtures/reference_sequences/${REF_FILENAME}`;
+const METADATA_FILE_NAME = "metadata_template.csv";
 
 const SAMPLE_NAME_LOCATOR = "[class*='sampleUploadTable'] [role='gridcell'][title]";
 const COOKIE_BANNER_LOCATOR = "[id='onetrust-accept-btn-handler']:visible";
@@ -69,32 +70,6 @@ export class UploadPage extends PageObject {
   // #endregion Navigate
 
   // #region Api
-  public async getOrCreateProject(projectName: string) {
-    let project = await this.getProjects(projectName);
-    if (project.length < 1) {
-      const payload = {
-        "project":{
-          "name": projectName,
-          "public_access": 1, // Public
-          "description": "created by automation",
-        },
-      };
-      await this.page.context().request.post(
-        `${process.env.BASEURL}/projects.json`, {data: payload},
-      );
-      project = await this.getProjects(projectName);
-    }
-    return project.filter(p => p.name === projectName)[0];
-  }
-
-  public async getProjects(searchTerm: string) {
-    const response = await this.page.context().request.get(
-      `${process.env.BASEURL}/projects.json?search=${searchTerm}`,
-    );
-    const responseJson = await response.json();
-    return responseJson.projects;
-  }
-
   public async getAllHostGenomesPublic() {
     const response = await this.page.context().request.get(
       `${process.env.BASEURL}/host_genomes/index_public`,
@@ -107,14 +82,6 @@ export class UploadPage extends PageObject {
       `${process.env.BASEURL}/sample_types.json`,
     );
     return response.json();
-  }
-
-  public async getPublicProjects() {
-    const response = await this.page.context().request.get(
-      `${process.env.BASEURL}/projects.json?domain=public`,
-    );
-    const responseJson = await response.json();
-    return responseJson.projects;
   }
   // #endregion Api
 
@@ -499,6 +466,34 @@ export class UploadPage extends PageObject {
       await this.fillCollectionDate(inputs[i].collectionDate, i);
       await this.fillCollectionLocation(inputs[i].collectionLocation, i);
     }
+  }
+
+  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string) {
+    await this.goto();
+    await this.dismissCookieBanner();
+
+    await this.selectProject(project.name);
+    await this.setWorkFlow(workflow);
+    await this.uploadSampleFiles(sampleFiles);
+
+    const sampleName = await this.getSampleName();
+    const inputs = await this.getRandomizedSampleInputs(sampleFiles, sampleName);
+
+    // Continue
+    await this.clickContinue();
+
+    // Click CSV Upload
+    await this.clickCSVUpload();
+
+    await this.uploadCSVMetaData(METADATA_FILE_NAME, inputs);
+
+    // Continue to Review to verify the CSV Sample Info
+    await this.clickContinue();
+
+    // Continue to Upload
+    await this.clickTermsAgreementCheckbox();
+    await this.clickStartUploadButton();
+    await this.waitForUploadComplete();
   }
   // #endregion Macro
 

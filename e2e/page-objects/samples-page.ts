@@ -80,6 +80,20 @@ export class SamplesPage extends PageObject {
       return tableRowsText;
     }
 
+    public async getWaitForReportError(sampleId: number) {
+      const startTime = Date.now();
+      const timeout = 30000;
+      let report = null;
+      while ((Date.now() - startTime) < timeout) {
+        report = await this.getReportV2(sampleId);
+        if (report.error !== undefined) {
+          break;
+        }
+        await this.pause(1);
+      }
+      return report;
+    }
+
     public async getReportV2(sampleId: number) {
       const response = await this.page.context().request.get(
         `${process.env.BASEURL}/samples/${sampleId}/report_v2.json?&id=${sampleId}`,
@@ -87,14 +101,21 @@ export class SamplesPage extends PageObject {
       return response.json();
     }
 
-    public async getSamples(projectName = null) {
+    public async getSamples(projectName = null, sampleName = null) {
+      const urlParams = new URLSearchParams();
       let project = null;
       if (projectName !== null) {
         const projectPage = new ProjectPage(this.page);
         project = await projectPage.getProjectByName(projectName);
+        if (project !== null) {
+          urlParams.append("projectId", project.id);
+        }
+      }
+      if (sampleName !== null) {
+        urlParams.append("search", sampleName);
       }
 
-      const params = project !== null ? `?project_id=${project.id}` : "";
+      const params = Array.from(urlParams.entries()).length > 0 ? `?${urlParams.toString()}` : "";
       const requestUrl = `${process.env.BASEURL}/samples/index_v2.json${params}`;
       const response = await this.page.context().request.get(requestUrl);
       const responseJson = await response.json();

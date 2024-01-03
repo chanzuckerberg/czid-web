@@ -32,6 +32,7 @@ const config: PlaywrightTestConfig = {
   ],
   testDir: "../tests",
   timeout: 60000,
+  retries: 2,
   use: {
     channel: "chromium",
     baseURL: "https://staging.czid.org",
