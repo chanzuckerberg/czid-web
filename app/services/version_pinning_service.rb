@@ -17,6 +17,6 @@ class VersionPinningService
   private
 
   def pin_project_to_workflow_version
-    ProjectWorkflowVersion.create!(project_id: @project_id, workflow: @workflow, version_prefix: @version_to_pin)
+    ProjectWorkflowVersion.create(project_id: @project_id, workflow: @workflow, version_prefix: @version_to_pin)
   end
 end
