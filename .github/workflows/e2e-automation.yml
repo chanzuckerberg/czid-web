@@ -1,0 +1,42 @@
+name: e2e-automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      node-environment:
+        type: choice
+        description: 'Environment'
+        required: true
+        default: 'staging'
+        options:
+        - staging
+
+jobs:
+  workflow-e2e:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      SAUCE_USERNAME: ${{secrets.SAUCE_USERNAME}}
+      SAUCE_ACCESS_KEY: ${{secrets.SAUCE_ACCESS_KEY}}
+      CZID_USERNAME: ${{secrets.CZID_USERNAME}}
+      CZID_PASSWORD: ${{secrets.CZID_PASSWORD}}
+      NODE_ENV: ${{inputs.node-environment}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: npm install
+        working-directory: ./e2e/
+        run: |
+          npm install
+          npm i -g saucectl
+          npm i -g @playwright/test
+
+      - name: Use saucectl
+        working-directory: ./e2e/
+        if: failure() || success()
+        run: |
+          saucectl run -c ./.sauce/staging.yml
