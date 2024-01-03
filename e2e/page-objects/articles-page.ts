@@ -4,6 +4,7 @@ import { PageObject } from "./page-object";
 export class ArticlesPage extends PageObject {
 
   public async validateUrlIncludesLinkText(linkText: string) {
-      expect(this.page.url().includes(linkText)).toBeTruthy();
+    const pageUrl = this.page.url();
+    expect(pageUrl.includes(linkText)).toBeTruthy();
   }
 }

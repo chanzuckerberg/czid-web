@@ -1,48 +1,49 @@
+import { WORKFLOWS } from "@e2e/constants/common";
 import {
   ANNOTATION_FILTERS,
   COLUMN_HEADER_PROP,
   READ_SPECIFICITY_FILTERS,
-  THRESHOLD_FILTERS,
   THRESHOLD_COMPARISON_OPERATORS,
   NAME_TYPES,
   CATEGORY_NAMES,
-  BACTERIA,
   VIRUSES,
   PHAGE,
   SCIENTIFIC,
   SPECIFIC_ONLY,
+  SHORT_READS_THRESHOLDS,
+  LONG_READS_THRESHOLDS,
 } from "@e2e/constants/sample";
-import { test } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { SamplesPage } from "../../page-objects/samples-page";
 
+const THRESHOLD_FILTERS = {
+  "mngs": SHORT_READS_THRESHOLDS,
+  "ONT": LONG_READS_THRESHOLDS,
+};
 let sampleId = null;
 let samplesPage = null;
+const uploadWorkflows = [WORKFLOWS.MNGS, WORKFLOWS.LMNGS];
 
 // These tests validate the user's proficiency in utilizing various filter functions on the sample report page, such as Nametype, Annotation, Category, Threshold filter, and Read specificity.
 test.describe("Sample report filter test", () => {
 
   test.beforeEach(async ({ page }) => {
     // go to sample page
-    test.setTimeout(60000*5);
     samplesPage = new SamplesPage(page);
-
-    const randomSample = await samplesPage.getRandomCompletedSample();
-    sampleId = randomSample.id;
-
-    await samplesPage.navigate(sampleId);
-  });
-
-  test.afterEach(async () => {
-    await samplesPage.close();
   });
 
   test(`Verify url displayed on the columns`, async () => {
+    const randomSample = await samplesPage.getRandomCompletedSample("automation_project");
+    const sampleId = randomSample.id;
+    await samplesPage.navigate(sampleId);
+
     await samplesPage.validateColumnsVisible();
 
     const n = await samplesPage.getAllColumnText();
     for (let i = 1; i < n.length; i++) {
       await samplesPage.hoverOverColumnByIndex(i);
-      await samplesPage.validateTotalReadPopupTest(COLUMN_HEADER_PROP[n[i]]["description"]);
+      const prop = await COLUMN_HEADER_PROP[n[i]];
+      await samplesPage.validateTotalReadPopupTest(await prop.description);
 
       const articlePage = await samplesPage.clickLearnMoreLink();
 
@@ -54,160 +55,217 @@ test.describe("Sample report filter test", () => {
     }
   });
 
-  /**
-   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-1
-   */
-  test(`Should be able to filter by Taxon name`, async () => {
-    const sampleReport = await samplesPage.getReportV2(sampleId);
-    const taxons = await samplesPage.getSpecificTaxons(sampleReport);
+  for (const workflow of uploadWorkflows) {
+    /**
+     * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-1
+     */
+    test(`Should be able to filter by Taxon name ${workflow}`, async () => {
+      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      sampleId = randomSample.id;
+      await samplesPage.navigate(sampleId);
 
-    const taxon = taxons[Math.floor(Math.random() * taxons.length)];
-    const genus = await taxon.name.split(" ")[0];
-    const expectedTagText = `${genus} (genus)`;
+      const sampleReport = await samplesPage.getReportV2(sampleId);
+      const taxons = await samplesPage.getSpecificTaxons(sampleReport);
 
-    // Search for data
-    await samplesPage.fillSearchBar(genus);
-    await samplesPage.clickSearchResult(expectedTagText);
-    await samplesPage.clickExpandAll();
+      const taxon = taxons[Math.floor(Math.random() * taxons.length)];
+      const genus = await taxon.name.split(" ")[0];
+      await samplesPage.fillSearchBar(genus);
+      const searchResults = await samplesPage.getSearchResults();
 
-    // Verify filter result
-    await samplesPage.validateTaxonsFilteredByName(genus);
-    await samplesPage.validateFilterTags([expectedTagText]);
-    await samplesPage.validateTaxonIsVisible(taxon.name);
-  });
+      expect(searchResults.length >= 1).toBeTruthy();
+      const expectedTagText = searchResults[0];
 
-  /**
-   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-2
-   */
-  test("Should be able to filter by Name Type", async () => {
-    const sampleReport = await samplesPage.getReportV2(sampleId);
-    const taxonNames = await samplesPage.getTaxonNamesFromReport(sampleReport);
+      await samplesPage.clickSearchResult(expectedTagText);
 
-    for (const option of NAME_TYPES) {
-      await samplesPage.selectNameTypeOption(option);
-      await samplesPage.validateReportFilteredByNameType(option, taxonNames[option]);
-    }
-  });
+      // Search for data
+      await samplesPage.fillSearchBar(genus);
+      await samplesPage.clickSearchResult(expectedTagText);
+      await samplesPage.clickExpandAll();
 
-  /**
-   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-3
-   */
-  test(`Should be able to filter by Category name`, async () => {
-    const sampleReport = await samplesPage.getReportV2(sampleId);
-    await samplesPage.clickExpandAll();
-    await samplesPage.ClickSortByName();
+      // Verify filter result
+      await samplesPage.validateTaxonsFilteredByName(genus);
+      await samplesPage.validateFilterTags([expectedTagText]);
+      await samplesPage.validateTaxonIsVisible(taxon.name);
+    });
+  };
 
-    const filter_categories = [...CATEGORY_NAMES].sort(() => 0.5 - Math.random()).slice(0, 2);
 
-    // #region Validate filter by single category
-    for (let i = 0; i < filter_categories.length; i++) {
-      await samplesPage.selectCategoryFilter(filter_categories[i]);
-      await samplesPage.toggleSortByName();
+  for (const workflow of uploadWorkflows) {
+    /**
+     * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-2
+     */
+    test(`Should be able to filter by Name Type ${workflow}`, async () => {
+      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      sampleId = randomSample.id;
+      await samplesPage.navigate(sampleId);
 
-      const expectedFilterTags = filter_categories[i] === VIRUSES ? [VIRUSES, PHAGE] : [filter_categories[i]];
-      await samplesPage.validateFilterTags(expectedFilterTags);
+      const sampleReport = await samplesPage.getReportV2(sampleId);
+      const taxonNames = await samplesPage.getTaxonNamesFromReport(sampleReport);
 
-      const expectedTaxonNames = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, [filter_categories[i]]);
-      await expectedTaxonNames.sort();
-      await samplesPage.validateTaxonsAreVisible(expectedTaxonNames);
-
-      await samplesPage.removeFilterTags(expectedFilterTags);
-      await samplesPage.validateFilterTagVisiblity(filter_categories[i], false);
-    }
-    // #endregion Validate filter by single category
-
-    // #region Validate filter by mutiple category
-    const mutipleCategories = [];
-    for (let i = 0; i < filter_categories.length; i++) {
-      await samplesPage.selectCategoryFilter(filter_categories[i]);
-      await samplesPage.toggleSortByName();
-
-      mutipleCategories.push(filter_categories[i]);
-      const expectedTaxonNames = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, mutipleCategories);
-      await expectedTaxonNames.sort();
-      await samplesPage.validateTaxonsAreVisible(expectedTaxonNames);
-    }
-    // #endregion Validate filter by mutiple category
-
-    // #region Test Stats bar
-    const expectedTags = filter_categories.includes(VIRUSES) && !filter_categories.includes(PHAGE)
-      ? [...filter_categories, PHAGE]
-      : (filter_categories.includes(VIRUSES) && filter_categories.includes(PHAGE))
-      ? filter_categories.filter(category => category !== PHAGE)
-      : filter_categories;
-    await samplesPage.validateFilterTagCount(expectedTags.length);
-    await samplesPage.validateStatsInfoNotEmpty();
-    // #endregion Test Stats bar
-
-    // #region Test Clear Filters button
-    await samplesPage.clickClearFilters();
-    await samplesPage.validateFilterTagCount(0);
-    // #endregion Test Clear Filters button
-  });
-
-  /**
-   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-4
-   */
-  test(`Should be able to filter by Threshold`, async () => {
-    // const sampleReport = await samplesPage.getReportV2(sampleId);
-    await samplesPage.validateThresholdOptionFilterHasExpectedOptions(THRESHOLD_FILTERS);
-
-    for (const thresholdOption of THRESHOLD_FILTERS) {
-      for (const operator of THRESHOLD_COMPARISON_OPERATORS) {
-        const thresholdValue = Math.floor(Math.random() * 10) + 1;
-        await samplesPage.selectThresholdOptions(thresholdOption, operator, thresholdValue);
-
-        await samplesPage.validateFilterTags([thresholdOption + ` ${operator} ${thresholdValue}`]);
-        // TODO: Complete validation of Report Filtered by Threshold
-        // await samplesPage.validateReportFilteredThreshold(thresholdOption, operator, thresholdValue, sampleReport);
-
-        await samplesPage.clickFilterTagCloseIcon(operator);
+      for (const option of NAME_TYPES) {
+        await samplesPage.selectNameTypeOption(option);
+        await samplesPage.validateReportFilteredByNameType(option, taxonNames[option]);
       }
-    }
-  });
+    });
+  };
 
-  /**
-   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-5
-   */
-  test(`Should be able to filter by Read Specificity`, async () => {
-    await samplesPage.validateReadSpecificityFiltersHasExpectedOptions(READ_SPECIFICITY_FILTERS);
+  for (const workflow of uploadWorkflows) {
+    /**
+     * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-3
+     */
+    test(`Should be able to filter by Category name ${workflow}`, async () => {
+      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      sampleId = randomSample.id;
+      await samplesPage.navigate(sampleId);
 
-    const sampleReport = await samplesPage.getReportV2(sampleId);
-    const taxonNames = await samplesPage.getTaxonNamesFromReport(sampleReport);
-    const categories = [null];
-    const taxonNamesWithNoCategory = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, categories);
-    const expectedTaxonNames = {
-      "All": taxonNames.Scientific,
-      "Specific Only": taxonNames.Scientific.filter(item => !taxonNamesWithNoCategory.includes(item)),
-    };
+      const sampleReport = await samplesPage.getReportV2(sampleId);
+      await samplesPage.clickExpandAll();
+      await samplesPage.ClickSortByName();
 
-    for (const option of READ_SPECIFICITY_FILTERS) {
-      await samplesPage.selectReadSpecificityOption(option);
-      await samplesPage.validateReportFilteredByReadSpecificity(option, expectedTaxonNames[option]);
-    }
-  });
+      const filterCategories = [...CATEGORY_NAMES].sort(() => 0.5 - Math.random()).slice(0, 2);
 
-  /**
-   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-6
-   */
-  test(`Should be able to filter by Annotation`, async () => {
-    await samplesPage.validateAnnotationFiltersHasExpectedOptions(ANNOTATION_FILTERS);
+      // #region Validate filter by single category
+      for (let i = 0; i < filterCategories.length; i++) {
+        await samplesPage.selectCategoryFilter(filterCategories[i]);
+        await samplesPage.toggleSortByName();
 
-    await samplesPage.validateReportFilteredByAnnotation(ANNOTATION_FILTERS);
-  });
+        const expectedFilterTags = filterCategories[i] === VIRUSES ? [VIRUSES, PHAGE] : [filterCategories[i]];
+        await samplesPage.validateFilterTags(expectedFilterTags);
 
-  /**
-   * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-7
-   */
-    test(`Should be able to filter by multiple criteria`, async () => {
+        const expectedTaxonNames = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, [filterCategories[i]]);
+        await expectedTaxonNames.sort();
+        await samplesPage.validateTaxonsAreVisible(expectedTaxonNames);
+
+        await samplesPage.removeFilterTags(expectedFilterTags);
+        await samplesPage.validateFilterTagVisiblity(filterCategories[i], false);
+      }
+      // #endregion Validate filter by single category
+
+      // #region Validate filter by mutiple category
+      const mutipleCategories = [];
+      for (let i = 0; i < filterCategories.length; i++) {
+        await samplesPage.selectCategoryFilter(filterCategories[i]);
+        await samplesPage.toggleSortByName();
+
+        mutipleCategories.push(filterCategories[i]);
+        const expectedTaxonNames = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, mutipleCategories);
+        await expectedTaxonNames.sort();
+        await samplesPage.validateTaxonsAreVisible(expectedTaxonNames);
+      }
+      // #endregion Validate filter by mutiple category
+
+      // #region Test Stats bar
+
+      // #region Viruses and Phase
+      let expectedTags = null;
+      const virusesAndNotPhage = filterCategories.includes(VIRUSES) && !filterCategories.includes(PHAGE);
+      if (virusesAndNotPhage) {
+        // Add Phage to expectedTags when Virus is selected
+        expectedTags = [...filterCategories, PHAGE];
+      } else {
+        // The expectedTags should match the filterCategories
+        expectedTags = filterCategories;
+      }
+      // #endregion Viruses and Phase
+
+      await samplesPage.validateFilterTagCount(expectedTags.length);
+      await samplesPage.validateStatsInfoNotEmpty();
+      // #endregion Test Stats bar
+
+      // #region Test Clear Filters button
+      await samplesPage.clickClearFilters();
+      await samplesPage.validateFilterTagCount(0);
+      // #endregion Test Clear Filters button
+    });
+  };
+
+  for (const workflow of uploadWorkflows) {
+    /**
+     * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-4
+     */
+    test(`Should be able to filter by Threshold ${workflow}`, async () => {
+      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      sampleId = randomSample.id;
+      await samplesPage.navigate(sampleId);
+
+      await samplesPage.validateThresholdOptionFilterHasExpectedOptions(THRESHOLD_FILTERS[workflow]);
+
+      for (const thresholdOption of THRESHOLD_FILTERS[workflow]) {
+        for (const operator of THRESHOLD_COMPARISON_OPERATORS) {
+          const thresholdValue = Math.floor(Math.random() * 10) + 1;
+          await samplesPage.selectThresholdOptions(thresholdOption.text, operator, thresholdValue);
+
+          await samplesPage.validateFilterTags([thresholdOption.text + ` ${operator} ${thresholdValue}`]);
+          await samplesPage.validateReportFilteredThreshold(thresholdOption.text, operator, thresholdValue);
+
+          await samplesPage.clickFilterTagCloseIcon(operator);
+        }
+      }
+    });
+  };
+
+  for (const workflow of uploadWorkflows) {
+    /**
+     * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-5
+     */
+    test(`Should be able to filter by Read Specificity ${workflow}`, async () => {
+      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      sampleId = randomSample.id;
+      await samplesPage.navigate(sampleId);
+
+      await samplesPage.validateReadSpecificityFiltersHasExpectedOptions(READ_SPECIFICITY_FILTERS);
+
+      const sampleReport = await samplesPage.getReportV2(sampleId);
+      const taxonNames = await samplesPage.getTaxonNamesFromReport(sampleReport);
+      const categories = [null];
+      const taxonNamesWithNoCategory = await samplesPage.getTaxonNamesFromReportByCategory(sampleReport, categories);
+      const expectedTaxonNames = {
+        "All": taxonNames.Scientific,
+        "Specific Only": taxonNames.Scientific.filter(item => !taxonNamesWithNoCategory.includes(item)),
+      };
+
+      for (const option of READ_SPECIFICITY_FILTERS) {
+        await samplesPage.selectReadSpecificityOption(option);
+        await samplesPage.validateReportFilteredByReadSpecificity(option, expectedTaxonNames[option]);
+      }
+    });
+  };
+
+  for (const workflow of uploadWorkflows) {
+    /**
+     * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-6
+     */
+    test(`Should be able to filter by Annotation ${workflow}`, async () => {
+      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      sampleId = randomSample.id;
+      await samplesPage.navigate(sampleId);
+
+      await samplesPage.validateAnnotationFiltersHasExpectedOptions(ANNOTATION_FILTERS);
+
+      await samplesPage.validateReportFilteredByAnnotation(ANNOTATION_FILTERS);
+    });
+  };
+
+  for (const workflow of uploadWorkflows) {
+    /**
+     * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-7
+     */
+    test(`Should be able to filter by multiple criteria ${workflow}`, async () => {
+      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      sampleId = randomSample.id;
+      await samplesPage.navigate(sampleId);
+
       const sampleReport = await samplesPage.getReportV2(sampleId);
 
-      const category = BACTERIA;
+      const categories = await samplesPage.getTaxonCategories(sampleReport);
+      let category = categories[Math.floor(Math.random() * categories.length)];
+
+      category = category.charAt(0).toUpperCase() + category.slice(1);
+
       const taxons = await samplesPage.getTaxonsByCategory(sampleReport, [category]);
       const taxon = taxons[Math.floor(Math.random() * taxons.length)];
 
       const genus = await taxon.name.split(" ")[0];
-      const searchResultText = `${genus} (genus)`;
 
       // Filter by Scientific name only
       await samplesPage.selectNameTypeOption(SCIENTIFIC);
@@ -219,12 +277,19 @@ test.describe("Sample report filter test", () => {
       await samplesPage.selectCategoryFilter(category);
 
       // Filter by Taxon name
-      await samplesPage.filterByName(genus, searchResultText);
+      await samplesPage.fillSearchBar(genus);
+      const searchResults = await samplesPage.getSearchResults();
+
+      expect(searchResults.length >= 1).toBeTruthy();
+      const searchResultText = searchResults[0];
+      await samplesPage.clickSearchResult(searchResultText);
 
       await samplesPage.clickExpandAll();
       await samplesPage.validateTaxonsFilteredByName(genus);
       await samplesPage.validateTaxonIsVisible(taxon.name);
 
-      await samplesPage.validateFilterTags([searchResultText, category]);
-  });
+      const expectedFilterTags = category === VIRUSES ? [searchResultText, category, PHAGE] : [searchResultText, category];
+      await samplesPage.validateFilterTags(expectedFilterTags);
+    });
+  };
 });

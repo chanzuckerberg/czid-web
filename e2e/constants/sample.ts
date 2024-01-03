@@ -7,6 +7,8 @@ export const PATHOGEN_LINk = 'a[class="linkDefault-34rbs"]';
 export const TAXONS = '[class*="taxonName"]';
 export const FILTER_RESULT = '[data-testid="filter-tag"]';
 export const SEARCH_BAR = '[placeholder="Taxon name"]';
+export const SEARCH_RESULT = "[class='result']";
+export const SEARCH_RESULT_TITLE = "[class='result'] [class='title']";
 export const ALL_COLUMN_HEADERS = [
   "Taxon",
   "Score",
@@ -39,6 +41,69 @@ export const CANCEL_ICON =
   '[data-testid="filter-tag"] [data-testid="x-close-icon"]';
 export const X_CLOSE_ICON = '[data-testid="x-close-icon"]';
 export const TOTAL_READ_POPOUP_CONTENT = '[data-testid="column-tooltip"]';
+
+// Text constants
+const NT_R_TOTAL_READS = "NT r (total reads)";
+const NT_CONTIGS = "NT contigs";
+const NT_LENGTH = "NT L (alignment length in bp)";
+const NT_E = "NT E value (as a power of 10)";
+const NR_R_TOTAL_READS = "NR r (total reads)";
+const NR_CONTIGS = "NR contigs";
+const NR_LENGTH = "NR L (alignment length in bp)";
+const NR_E = "NR E value (as a power of 10)";
+
+// value constants
+const VALUE_NT_CONTIGS = "nt:contigs";
+const VALUE_NT_PERCENT_IDENTITY = "nt:percent_identity";
+const VALUE_NT_LENGTH = "nt:alignment_length";
+const VALUE_NT_E = "nt:e_value";
+const VALUE_NR_CONTIGS = "nr:contigs";
+const VALUE_NR_PERCENT_IDENTITY = "nr:percent_identity";
+const VALUE_NR_LENGTH = "nr:alignment_length";
+const VALUE_NR_E = "nr:e_value";
+const NT_CONTIG_READS = "NT contig reads";
+const NR_CONTIG_READS = "NR contig reads";
+
+export const SHORT_READS_THRESHOLDS = [
+  { text: "Score", value: "agg_score" },
+  { text: "NT Z Score", value: "nt:z_score" },
+  { text: "NT rPM", value: "nt:rpm" },
+  { text: NT_R_TOTAL_READS, value: "nt:count" },
+  { text: NT_CONTIGS, value: VALUE_NT_CONTIGS },
+  { text: NT_CONTIG_READS, value: "nt:contig_r" },
+  { text: "NT %id", value: VALUE_NT_PERCENT_IDENTITY },
+  { text: NT_LENGTH, value: VALUE_NT_LENGTH },
+  { text: NT_E, value: VALUE_NT_E },
+  { text: "NR Z Score", value: "nr:z_score" },
+  { text: "NR rPM", value: "nr:rpm" },
+  { text: NR_R_TOTAL_READS, value: "nr:count" },
+  { text: NR_CONTIGS, value: VALUE_NR_CONTIGS },
+  { text: NR_CONTIG_READS, value: "nr:contig_r" },
+  { text: "NR %id", value: VALUE_NR_PERCENT_IDENTITY },
+  { text: NR_LENGTH, value: VALUE_NR_LENGTH },
+  { text: NR_E, value: VALUE_NR_E },
+];
+
+export const LONG_READS_THRESHOLDS = [
+  { text: "NT bPM", value: "nt:bpm" },
+  { text: "NT b (total bases)", value: "nt:base_count" },
+  { text: NT_R_TOTAL_READS, value: "nt:count" },
+  { text: NT_CONTIGS, value: VALUE_NT_CONTIGS },
+  { text: "NT contig bases", value: "nt:contig_b" },
+  { text: "NT %id", value: VALUE_NT_PERCENT_IDENTITY },
+  { text: NT_LENGTH, value: VALUE_NT_LENGTH },
+  { text: NT_E, value: VALUE_NT_E },
+  { text: "NR bPM", value: "nr:bpm" },
+  { text: "NR b (total bases)", value: "nr:base_count" },
+  { text: NR_R_TOTAL_READS, value: "nr:count" },
+  { text: NR_CONTIGS, value: VALUE_NR_CONTIGS },
+  { text: "NR contig bases", value: "nr:contig_b" },
+  { text: "NR %id", value: VALUE_NR_PERCENT_IDENTITY },
+  { text: NR_LENGTH, value: VALUE_NR_LENGTH },
+  { text: NR_E, value: VALUE_NR_E },
+];
+
+const ANALYZE_NANOPORE_DATA = "Analyze-Nanopore-Data#sample-report";
 export const COLUMN_HEADER_PROP = {
   Score: {
     description:
@@ -55,7 +120,16 @@ export const COLUMN_HEADER_PROP = {
       "rPM:Number of reads aligning to the taxon in the NCBI NR/NT database, per million reads sequenced. Learn more.",
     url: "Single-Sample-Report-Table#rpm",
   },
-
+  bPM: {
+    description:
+      "bPM:Number of bases within all the reads aligning to a given taxon, including those assembled into contigs that mapped to the taxon, per million bases sequenced. Learn more.",
+    url: ANALYZE_NANOPORE_DATA,
+  },
+  b: {
+    description:
+      "b:Number of bases within all the reads aligning to a given taxon, including those assembled into contigs that mapped to the taxon. Learn more.",
+    url: ANALYZE_NANOPORE_DATA,
+  },
   r: {
     description:
       "r:Number of reads aligning to the taxon in the NCBI NT/NR database. Learn more.",
@@ -66,6 +140,11 @@ export const COLUMN_HEADER_PROP = {
     description:
       "contig:Number of assembled contigs aligning to the taxon. Learn more.",
     url: "Single-Sample-Report-Table#contig",
+  },
+  "contig b": {
+    description:
+      "contig b:Number of bases within all the reads that assembled into contigs aligning to a given taxon. Learn more.",
+    url: ANALYZE_NANOPORE_DATA,
   },
   "contig r": {
     description:
@@ -125,7 +204,7 @@ export const THRESHOLD_FILTERS = [
   "NT rPM",
   "NT r (total reads)",
   "NT contigs",
-  "NT contig reads",
+  NT_CONTIG_READS,
   "NT %id",
   "NT L (alignment length in bp)",
   "NT E value (as a power of 10)",
@@ -133,7 +212,7 @@ export const THRESHOLD_FILTERS = [
   "NR rPM",
   "NR r (total reads)",
   "NR contigs",
-  "NR contig reads",
+  NR_CONTIG_READS,
   "NR %id",
   "NR L (alignment length in bp)",
   "NR E value (as a power of 10)",

@@ -17,6 +17,8 @@ import {
   NUMBER_INPUT,
   READ_SPECIFICITY,
   SEARCH_BAR,
+  SEARCH_RESULT,
+  SEARCH_RESULT_TITLE,
   FILTERS_DROPDOWN,
   THRESHOLD_FILTER,
   THRESHOLD_OPTION_FILTER,
@@ -40,6 +42,7 @@ const ACTION_BUTTONS_LOCATOR = "[class*='actionIcons'] button";
 const BLAST_SELECTION_MODAL_TESTID = "blast-selection-modal";
 const BLAST_SELECTION_OPTIONS = "[data-testid='blast-selection-modal'] [class*='optionText'] [class*='title']";
 const BLAST_TYPES = ["blastn", "blastx"];
+const REPORT_TABLE_ROWS = "[class*='reportTable'] [role='row']";
 
 export class SamplesPage extends PageObject {
 
@@ -60,6 +63,23 @@ export class SamplesPage extends PageObject {
     // #endregion Navigate
 
     // #region Get
+    public async getReportFilterTable() {
+      const tableHeaders = await this.page.locator("[class*='Table__headerColumn']").allTextContents();
+      const tableRowElements = await this.page.locator(REPORT_TABLE_ROWS).all();
+      const tableRowsText = [];
+      for (const row of tableRowElements) {
+        const td = await row.locator("[aria-colindex]").allTextContents();
+        const tdValues = {};
+        for (let i = 0; i < td.length; i++) {
+          tdValues[tableHeaders[i]] = td[i];
+        }
+        if (Object.keys(tdValues).length > 0) {
+          tableRowsText.push(tdValues);
+        }
+      }
+      return tableRowsText;
+    }
+
     public async getReportV2(sampleId: number) {
       const response = await this.page.context().request.get(
         `${process.env.BASEURL}/samples/${sampleId}/report_v2.json?&id=${sampleId}`,
@@ -145,6 +165,17 @@ export class SamplesPage extends PageObject {
       );
     }
 
+    public async getTaxonCategories(sampleReport: any) {
+      const taxons = await this.getTaxonsFromReport(sampleReport);
+      const taxonCategories = [];
+      for (const taxon of taxons) {
+        if (taxon.category && !taxonCategories.includes(taxon.category)) {
+          taxonCategories.push(taxon.category);
+        }
+      }
+      return taxonCategories;
+    }
+
     public async getSpecificTaxons(sampleReport: any) {
       const taxons = await this.getTaxonsFromReport(sampleReport);
       return taxons.filter(taxon => taxon.category);
@@ -190,6 +221,15 @@ export class SamplesPage extends PageObject {
 
     public async getAllColumnText() {
       return this.page.locator(COLUMNS_LABEL).allInnerTexts();
+    }
+
+    public async getSearchResults() {
+      const searchResults = await this.page.locator(SEARCH_RESULT_TITLE).all();
+      const searchResultsArray = [];
+      for (const searchResult of searchResults) {
+        searchResultsArray.push(await searchResult.textContent());
+      }
+      return searchResultsArray;
     }
     // #endregion Get
 
@@ -257,7 +297,7 @@ export class SamplesPage extends PageObject {
     }
 
     public async clickSearchResult(text: string) {
-      await this.page.locator("[class='result']").getByText(text, {exact: true}).first().click();
+      await this.page.locator(SEARCH_RESULT).getByText(text, {exact: true}).first().click();
     }
 
     public async clickAnnotationFilter() {
@@ -277,7 +317,7 @@ export class SamplesPage extends PageObject {
     }
 
     public async clickTableRowByIndex(index: number) {
-      await this.page.locator("[aria-rowindex]").nth(index).click();
+      await this.page.locator(REPORT_TABLE_ROWS).nth(index).click();
     }
 
     public async ClickSortByName() {
@@ -286,6 +326,10 @@ export class SamplesPage extends PageObject {
 
     public async clickClearFilters() {
       await this.page.locator(`text="Clear Filters"`).click();
+    }
+
+    public async clickSearchBar() {
+      await this.page.locator(SEARCH_BAR).click();
     }
 
     public async clickTaxonCoverageVisualisation(taxonName: string) {
@@ -312,7 +356,7 @@ export class SamplesPage extends PageObject {
     // #region Fill
     public async fillSearchBar(value: string) {
       await this.page.locator(SEARCH_BAR).fill(value);
-      await this.page.locator(SEARCH_BAR).click();
+      await this.pause(1);
     }
 
     public async fillThresholdValue(value: number) {
@@ -323,14 +367,17 @@ export class SamplesPage extends PageObject {
 
     // #region Macro
     public async isTaxonVisible(name: string) {
+      const reportTableRowIndexAttribute = "aria-rowindex";
       const taxonLocatorString = `${TAXONS}:text("${name}")`;
       const taxonElement = this.page.locator(taxonLocatorString).first();
 
       if (!(await taxonElement.isVisible())) {
         await this.clickTableRowByIndex(0);
-        await this.scrollUpToElement('[aria-rowindex="1"]');
+        await this.scrollUpToElement(
+          `[${reportTableRowIndexAttribute}="1"]`, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
 
-        await this.scrollDownToElement(taxonLocatorString);
+        await this.scrollDownToElement(
+          taxonLocatorString, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
       }
 
       return taxonElement.isVisible();
@@ -388,12 +435,23 @@ export class SamplesPage extends PageObject {
 
     public async selectCategoryFilter(option: string) {
       await this.clickCategoriesFilter();
-      await this.clickCategoriesOption(option);
+
+      // Get the checkbox element
+      // So we don't select if it's already selected
+      const checkBox = this.page.locator(this.CategoryDataIds[option]) // option label
+        .locator("..") // parent node
+        .locator("[data-testid='checked']"); // Checkbox
+      const checkBoxClass = await checkBox.getAttribute("class");
+
+      if (!checkBoxClass.includes("checked")) {
+        await this.clickCategoriesOption(option);
+      }
       await this.pressEscape();
     }
 
     public async filterByName(name: string, searchResultText: string) {
       await this.fillSearchBar(name);
+      await this.clickSearchBar();
       await this.clickSearchResult(searchResultText);
     }
     // #endregion Macro
@@ -451,39 +509,28 @@ export class SamplesPage extends PageObject {
       }
     }
 
-    /*
-    // TODO: Complete validation of Report Filtered by Threshold
-    public async validateReportFilteredThreshold(thresholdOption: string, comparisonOperator: string, thresholdValue: number, sampleReport: any) {
-      const optionToKeyMap = {
-        "Score": "agg_score",
-        "NT Z Score": "nt.z_score",
-        "NT rPM": "nt.rpm",
-        "NT r (total reads)": "nt.count",
-        "NT contigs": "undefined", // Requires further clarification
-        "NT contig reads": "undefined", // Requires further clarification
-        "NT %id": "nt.percent_identity",
-        "NT L (alignment length in bp)": "nt.alignment_length",
-        "NT E value (as a power of 10)": "nt.e_value",
-        "NR Z Score": "nr.z_score",
-        "NR rPM": "nr.rpm",
-        "NR r (total reads)": "nr.count",
-        "NR contigs": "undefined", // Requires further clarification
-        "NR contig reads": "undefined", // Requires further clarification
-        "NR %id": "nr.percent_identity",
-        "NR L (alignment length in bp)": "nr.alignment_length",
-        "NR E value (as a power of 10)": "nr.e_value",
-      };
-
-      const key = optionToKeyMap[thresholdOption];
-      // TODO: Complete validation
+    public async validateReportFilteredThreshold(thresholdOption: string, comparisonOperator: string, thresholdValue: number) {
+      const reportFilterTable = await this.getReportFilterTable();
+      for (const row of reportFilterTable) {
+        // TODO: Expand to include sampleReport api for values like "NT Z Score"
+        if (row[thresholdOption] !== undefined) {
+          const actualValue = row[thresholdOption] === "-" ? 0 : row[thresholdOption];
+          if (comparisonOperator === "<=") {
+            expect(actualValue).toBeLessThanOrEqual(thresholdValue);
+          } else if (comparisonOperator === ">=") {
+            expect(actualValue).toBeGreaterThanOrEqual(thresholdValue);
+          } else {
+            throw new Error(`Unexpected comparisonOperator: ${comparisonOperator}`);
+          }
+        }
+      }
     }
-    */
 
-    public async validateThresholdOptionFilterHasExpectedOptions(expectedThresholdOptions: string[]) {
+    public async validateThresholdOptionFilterHasExpectedOptions(expectedThresholdOptions: any) {
       await this.clickThresholdFilter(); // Open the filter dropdown
       await this.clickThresholdOptionFilter();
       for (const expectedOption of expectedThresholdOptions) {
-        expect(this.page.getByTestId(`dropdown-${kebabCase(expectedOption)}`)).toBeTruthy();
+        expect(this.page.getByTestId("dropdown-menu").getByText(expectedOption.text).first()).toBeVisible();
       }
       await this.clickThresholdFilter(); // Close the filter dropdown
     }
@@ -506,9 +553,11 @@ export class SamplesPage extends PageObject {
 
     public async validateTaxonsFilteredByName(expectedTaxonName: string) {
       const taxonElements = await this.getTaxonElements();
+      const taxonNames = [];
       for (const taxonElement of taxonElements) {
-        expect(taxonElement).toContainText(expectedTaxonName);
+        taxonNames.push(await taxonElement.textContent());
       }
+      expect(taxonNames.join(",")).toContain(expectedTaxonName);
     }
 
     public async validateAnnotationFiltersHasExpectedOptions(expectedAnnotationOptions: string[]) {
@@ -548,7 +597,8 @@ export class SamplesPage extends PageObject {
 
     public async validateTaxonsAreVisible(taxonNames: string[]) {
       for (const taxonName of taxonNames) {
-        await this.validateTaxonIsVisible(taxonName);
+        const taxonWithoutSpecies = taxonName.includes("(") ? taxonName.slice(0, taxonName.lastIndexOf("(")).trim() : taxonName;
+        await this.validateTaxonIsVisible(taxonWithoutSpecies);
       }
     }
 

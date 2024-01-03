@@ -39,32 +39,40 @@ export abstract class PageObject {
     await this.page.waitForTimeout(seconds * 1000);
   }
 
-  public async scrollToElement(locator: string, direction: "up" | "down") {
+  public async scrollToElement(locator: string, direction: "up" | "down", rowsLocator: string, indexAttribute: string) {
     const startTime = Date.now();
     const timeout = 30000;
     const scrollAmount = direction === "up" ? -500 : 500;
 
     while (true) {
-        const element = this.page.locator(locator).first();
-        const isElementVisible = await element.isVisible();
+      const lastRow = await this.page.locator(rowsLocator).last().getAttribute(indexAttribute);
+      const element = this.page.locator(locator).first();
+      const isElementVisible = await element.isVisible();
 
-        if (isElementVisible) {
-          break;
-        }
+      if (isElementVisible) {
+        break;
+      }
 
-        if (Date.now() - startTime > timeout) {
-          break;
-        }
+      if (Date.now() - startTime > timeout) {
+        break;
+      }
 
-        await this.page.mouse.wheel(0, scrollAmount);
+      await this.page.mouse.wheel(0, scrollAmount);
+
+      const lastRowAfterScroll = await this.page.locator(rowsLocator).last().getAttribute(indexAttribute);
+      if (lastRow === lastRowAfterScroll) {
+        // The list has not advanced, assume we reached the end of the list
+        break;
+      }
+
     }
   }
 
-  public async scrollUpToElement(locator: string) {
-    await this.scrollToElement(locator, "up");
+  public async scrollUpToElement(locator: string, rowsLocator: string, indexAttribute: string) {
+    await this.scrollToElement(locator, "up", rowsLocator, indexAttribute);
   }
 
-  public async scrollDownToElement(locator: string) {
-    await this.scrollToElement(locator, "down");
+  public async scrollDownToElement(locator: string, rowsLocator: string, indexAttribute: string) {
+    await this.scrollToElement(locator, "down", rowsLocator, indexAttribute);
   }
 }
