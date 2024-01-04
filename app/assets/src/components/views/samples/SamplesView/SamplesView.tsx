@@ -21,12 +21,7 @@ import React, {
 } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { SortDirectionType } from "react-virtualized";
-import {
-  benchmarkSamples,
-  bulkDeleteObjects,
-  bulkKickoffWorkflowRuns,
-  validateUserCanDeleteObjects,
-} from "~/api";
+import { benchmarkSamples, bulkKickoffWorkflowRuns } from "~/api";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   getSampleMetadataFields,
@@ -77,7 +72,7 @@ import {
 import { DISCOVERY_DOMAIN_PUBLIC } from "../../discovery/discovery_api";
 import QualityControl from "../../discovery/QualityControl";
 import { BenchmarkModal } from "./BenchmarkModal";
-import { BulkDeleteModal } from "./BulkDeleteModal";
+import BulkDeleteModal from "./BulkDeleteModal";
 import { BulkDeleteTrigger } from "./BulkDeleteTrigger";
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
 import {
@@ -1175,12 +1170,6 @@ const SamplesView = forwardRef(function SamplesView(
         selectedIds={Array.from(selectedIds)}
         isShortReadMngs={workflow === WorkflowType.SHORT_READ_MNGS}
         workflowLabel={WORKFLOWS[workflow]?.label}
-        validateUserCanDeleteObjects={selectedIds =>
-          validateUserCanDeleteObjects({ selectedIds, workflow })
-        }
-        bulkDeleteObjects={selectedIds =>
-          bulkDeleteObjects({ selectedIds, workflow })
-        }
       />
       {heatmapCreationModalOpen && (
         <HeatmapCreationModal

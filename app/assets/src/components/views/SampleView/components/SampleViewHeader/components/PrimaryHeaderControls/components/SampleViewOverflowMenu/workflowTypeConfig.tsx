@@ -4,6 +4,7 @@ import {
   WorkflowType,
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
+import { SampleId } from "~/interface/shared";
 
 type SampleViewOverflowMenuConfigType = ({
   currentRun,
@@ -12,7 +13,7 @@ type SampleViewOverflowMenuConfigType = ({
   sample,
 }) => {
   isVisible: boolean;
-  deleteId?: number;
+  deleteId?: SampleId;
   readyToDelete?: boolean;
   isShortReadMngs?: boolean;
 };

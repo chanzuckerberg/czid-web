@@ -1,2 +1,3 @@
 import { BulkDeleteModal } from "./BulkDeleteModal";
-export { BulkDeleteModal };
+
+export default BulkDeleteModal;

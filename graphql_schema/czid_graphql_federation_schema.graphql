@@ -125,7 +125,7 @@ type DbSample {
 }
 
 type DeleteSamples {
-  deleted_workflow_ids: [Int]
+  deleted_workflow_ids: [Int]!
   error: String
 }
 
@@ -210,6 +210,7 @@ type Mutation {
   UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): JSON
   KickoffWGSWorkflow(sampleId: String, input: mutationInput_KickoffWGSWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
   KickoffAMRWorkflow(sampleId: String, input: mutationInput_KickoffAMRWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
+  UpdateMetadata(sampleId: String, input: mutationInput_UpdateMetadata_input_Input): UpdateMetadataReponse
   createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
 }
 
@@ -254,7 +255,7 @@ type mutation_KickoffWGSWorkflow_items_parsed_cached_results_quality_metrics {
 
 input mutationInput_DeleteSamples_input_Input {
   ids: [Int]
-  _workflow: String
+  workflow: String
   authenticityToken: String
 }
 
@@ -281,6 +282,12 @@ input mutationInput_KickoffWGSWorkflow_input_inputs_json_Input {
   taxon_name: String
   alignment_config_name: String
   technology: String
+}
+
+input mutationInput_UpdateMetadata_input_Input {
+  field: String!
+  value: String!
+  authenticityToken: String!
 }
 
 input mutationInput_UpdateSampleNotes_input_Input {
@@ -894,6 +901,11 @@ type TaxonDist {
   NT: query_TaxonDist_NT
 }
 
+type UpdateMetadataReponse {
+  status: String
+  message: String
+}
+
 type User {
   archetypes: String!
   createdByUserId: BigInt!
@@ -906,9 +918,9 @@ type User {
 }
 
 type ValidateUserCanDeleteObjects {
-  validIds: [Int]
-  invalidSampleNames: [String]
-  error: JSON
+  validIds: [Int]!
+  invalidSampleNames: [String]!
+  error: String
 }
 
 type WorkflowRun {

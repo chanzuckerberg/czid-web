@@ -5,29 +5,76 @@ import {
   DialogContent,
   DialogTitle,
 } from "@czi-sds/components";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useState } from "react";
+import { useLazyLoadQuery, useMutation } from "react-relay";
+import { graphql } from "relay-runtime";
+import { getCsrfToken } from "~/api/utils";
 import { ErrorButton } from "~/components/ui/controls/buttons";
+import { logError } from "~/components/utils/logUtil";
 import { pluralize } from "~/components/utils/stringUtil";
 import { showToast } from "~/components/utils/toast";
-import { WorkflowLabelType } from "~/components/utils/workflows";
+import {
+  getWorkflowTypeFromLabel,
+  WorkflowLabelType,
+} from "~/components/utils/workflows";
+import { SampleId } from "~/interface/shared";
+import { BulkDeleteModalMutation as BulkDeleteModalMutationType } from "./__generated__/BulkDeleteModalMutation.graphql";
+import { BulkDeleteModalQuery as BulkDeleteModalQueryType } from "./__generated__/BulkDeleteModalQuery.graphql";
 import cs from "./bulk_delete_modal.scss";
 import { DeleteErrorNotification } from "./DeleteErrorNotification";
 import { DeleteSampleModalText } from "./DeleteSampleModalText";
 import { DeleteSuccessNotification } from "./DeleteSuccessNotification";
 import { InvalidSampleDeletionWarning } from "./InvalidSampleDeletionWarning";
+
+const BulkDeleteModalQuery = graphql`
+  query BulkDeleteModalQuery(
+    $selectedIds: [Int!]!
+    $workflow: String!
+    $authenticityToken: String!
+  ) {
+    ValidateUserCanDeleteObjects(
+      input: {
+        selectedIds: $selectedIds
+        workflow: $workflow
+        authenticityToken: $authenticityToken
+      }
+    ) {
+      validIds
+      invalidSampleNames
+      error
+    }
+  }
+`;
+
+const BulkDeleteModalMutation = graphql`
+  mutation BulkDeleteModalMutation(
+    $ids: [Int!]!
+    $workflow: String!
+    $authenticityToken: String!
+  ) {
+    DeleteSamples(
+      input: {
+        ids: $ids
+        workflow: $workflow
+        authenticityToken: $authenticityToken
+      }
+    ) {
+      error
+    }
+  }
+`;
+
 interface BulkDeleteModalProps {
-  bulkDeleteObjects: (selectedIds: number[]) => Promise<any>;
   isOpen: boolean;
   onClose(): void;
-  selectedIds: number[];
+  selectedIds: SampleId[];
   onSuccess?(): void;
   redirectOnSuccess?: boolean;
-  validateUserCanDeleteObjects: (selectedIds: number[]) => Promise<any>;
   workflowLabel: WorkflowLabelType;
   isShortReadMngs?: boolean;
 }
 
-const BulkDeleteModal = ({
+const BulkDeleteModalComponent = ({
   isOpen,
   onClose,
   selectedIds,
@@ -35,36 +82,70 @@ const BulkDeleteModal = ({
   redirectOnSuccess,
   workflowLabel,
   isShortReadMngs,
-  validateUserCanDeleteObjects,
-  bulkDeleteObjects,
 }: BulkDeleteModalProps) => {
-  const [isValidating, setIsValidating] = useState<boolean>(true);
-  const [validIds, setValidsIds] = useState<number[]>([]);
-  const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  // Relay hooks:
+  const { ValidateUserCanDeleteObjects: data } =
+    useLazyLoadQuery<BulkDeleteModalQueryType>(BulkDeleteModalQuery, {
+      selectedIds: selectedIds.map((id: SampleId) => Number(id)),
+      workflow: getWorkflowTypeFromLabel(workflowLabel),
+      authenticityToken: getCsrfToken(),
+    });
+  const [commit, isInFlight] = useMutation<BulkDeleteModalMutationType>(
+    BulkDeleteModalMutation,
+  );
 
-  useEffect(() => {
-    const validateSamplesCanBeDeleted = async () => {
-      const { validIds: newIds, invalidSampleNames: newInvalidNames } =
-        await validateUserCanDeleteObjects(selectedIds);
+  // Component state:
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const buttonsDisabled = isInFlight || isRedirecting;
 
-      setIsValidating(false);
-      setValidsIds(newIds);
-      setInvalidSampleNames(newInvalidNames);
-    };
+  // Loading error:
+  if (data == null || data.error) {
+    logError({
+      message: data?.error
+        ? data.error
+        : "Error retrieving deletion permissions",
+    });
+    return null;
+  }
 
-    setIsValidating(true);
-    setValidsIds([]);
-    setInvalidSampleNames([]);
+  // Data from query:
+  const validIds = data.validIds.filter(
+    (validId): validId is number => validId != null,
+  );
+  const invalidSampleNames = data.invalidSampleNames.filter(
+    (invalidSampleName): invalidSampleName is string =>
+      invalidSampleName != null,
+  );
 
-    if (!isOpen) return;
-
-    validateSamplesCanBeDeleted();
-  }, [isOpen, selectedIds, validateUserCanDeleteObjects]);
-
+  // Delete callbacks:
+  const deleteSamples = async () => {
+    commit({
+      variables: {
+        ids: validIds,
+        workflow: getWorkflowTypeFromLabel(workflowLabel),
+        authenticityToken: getCsrfToken(),
+      },
+      onCompleted: data => {
+        if (data.DeleteSamples != null && data.DeleteSamples.error == null) {
+          onDeleteSuccess({
+            successCount: validIds.length,
+          });
+        } else {
+          onDeleteError(
+            data.DeleteSamples?.error ?? undefined,
+            validIds.length,
+          );
+        }
+      },
+      onError: error => {
+        onDeleteError(error.message);
+      },
+    });
+  };
   const onDeleteSuccess = ({ successCount }) => {
-    if (!redirectOnSuccess) {
-      setIsDeleting(false);
+    if (redirectOnSuccess) {
+      setIsRedirecting(true);
+    } else {
       onClose();
       showToast(({ closeToast }) => (
         <DeleteSuccessNotification
@@ -76,36 +157,19 @@ const BulkDeleteModal = ({
     }
     onSuccess && onSuccess();
   };
-
-  const onDeleteError = ({ errorCount }) => {
+  const onDeleteError = (error?: string, numSamples?: number) => {
     onClose();
-    setIsDeleting(false);
     showToast(({ closeToast }) => (
       <DeleteErrorNotification
         onClose={closeToast}
-        sampleCount={errorCount}
+        sampleCount={numSamples}
         workflowLabel={workflowLabel}
       />
     ));
-  };
-
-  const handleDeleteSamples = async () => {
-    setIsDeleting(true);
-    try {
-      const { error } = await bulkDeleteObjects(validIds);
-      if (error) {
-        console.error(error);
-        onDeleteError({ errorCount: validIds.length });
-      } else {
-        onDeleteSuccess({ successCount: validIds.length });
-      }
-    } catch (error) {
+    if (error !== undefined) {
       console.error(error);
-      onDeleteError({ errorCount: null });
     }
   };
-
-  if (isValidating) return null;
 
   return (
     <Dialog
@@ -128,18 +192,18 @@ const BulkDeleteModal = ({
       </DialogContent>
       <DialogActions className={cs.dialogActions}>
         <ErrorButton
-          onClick={handleDeleteSamples}
+          onClick={deleteSamples}
           data-testid="delete-samples-button"
-          disabled={isDeleting}
-          startIcon={isDeleting ? "loading" : undefined}
+          disabled={buttonsDisabled}
+          startIcon={buttonsDisabled ? "loading" : undefined}
         >
-          {!isDeleting ? "Delete" : "Deleting"}
+          {buttonsDisabled ? "Deleting" : "Delete"}
         </ErrorButton>
         <Button
           sdsStyle="rounded"
           sdsType="secondary"
           onClick={onClose}
-          disabled={isDeleting}
+          disabled={buttonsDisabled}
         >
           Cancel
         </Button>
@@ -148,4 +212,14 @@ const BulkDeleteModal = ({
   );
 };
 
-export { BulkDeleteModal };
+export function BulkDeleteModal(props: BulkDeleteModalProps) {
+  if (!props.isOpen) {
+    return null;
+  }
+
+  return (
+    <Suspense fallback={null}>
+      <BulkDeleteModalComponent {...props}></BulkDeleteModalComponent>
+    </Suspense>
+  );
+}

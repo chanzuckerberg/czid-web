@@ -6,7 +6,7 @@ import { WorkflowLabelType } from "~/components/utils/workflows";
 
 interface DeleteSuccessNotificationProps {
   onClose(): void;
-  sampleCount: number | null;
+  sampleCount?: number;
   workflowLabel: WorkflowLabelType;
 }
 
@@ -23,7 +23,7 @@ const DeleteErrorNotification = ({
       buttonOnClick={onClose}
       slideDirection="right"
     >
-      {typeof sampleCount === "number"
+      {sampleCount !== undefined
         ? `${sampleCount} ${workflowLabel} ${pluralize(
             "run",
             sampleCount,

@@ -1,5 +1,4 @@
 import React from "react";
-import { bulkDeleteObjects, validateUserCanDeleteObjects } from "~/api";
 import { WORKFLOWS, WorkflowType } from "~/components/utils/workflows";
 import {
   FINALIZED_SAMPLE_UPLOAD_ERRORS,
@@ -49,9 +48,6 @@ export const SampleViewOverflowMenu = ({
     );
   return (
     <OverflowMenu
-      bulkDeleteObjects={(selectedIds: number[]) =>
-        bulkDeleteObjects({ selectedIds, workflow })
-      }
       className={className}
       deleteId={deleteId}
       isShortReadMngs={isShortReadMngs}
@@ -60,9 +56,6 @@ export const SampleViewOverflowMenu = ({
       redirectOnSuccess={redirectOnSuccess}
       runFinalized={runFinalized}
       sampleUserId={sample?.user_id}
-      validateUserCanDeleteObjects={(selectedIds: number[]) =>
-        validateUserCanDeleteObjects({ selectedIds, workflow })
-      }
       workflowShorthand={WORKFLOWS[workflow].shorthand}
       workflowLabel={WORKFLOWS[workflow]?.label}
     />

@@ -4,19 +4,18 @@ import { PopoverProps } from "@mui/material";
 import React, { useContext, useState } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { WorkflowLabelType } from "~/components/utils/workflows";
-import { BulkDeleteModal } from "~/components/views/samples/SamplesView/BulkDeleteModal";
+import BulkDeleteModal from "~/components/views/samples/SamplesView/BulkDeleteModal";
+import { SampleId } from "~/interface/shared";
 import cs from "./overflow_menu.scss";
 
 interface OverflowMenuProps {
   readyToDelete?: boolean;
   className: string;
-  deleteId?: number;
+  deleteId?: SampleId;
   onDeleteRunSuccess: () => void;
   redirectOnSuccess?: boolean;
   runFinalized: boolean;
   sampleUserId: number;
-  bulkDeleteObjects: (selectedIds: number[]) => Promise<any>;
-  validateUserCanDeleteObjects: (selectedIds: number[]) => Promise<any>;
   workflowShorthand: string;
   workflowLabel: WorkflowLabelType;
   isShortReadMngs?: boolean;
@@ -30,8 +29,6 @@ export const OverflowMenu = ({
   redirectOnSuccess,
   runFinalized,
   sampleUserId,
-  bulkDeleteObjects,
-  validateUserCanDeleteObjects,
   workflowShorthand,
   workflowLabel,
   isShortReadMngs,
@@ -127,8 +124,6 @@ export const OverflowMenu = ({
         selectedIds={[deleteId]}
         onSuccess={onDeleteRunSuccess}
         redirectOnSuccess={redirectOnSuccess}
-        bulkDeleteObjects={bulkDeleteObjects}
-        validateUserCanDeleteObjects={validateUserCanDeleteObjects}
         workflowLabel={workflowLabel}
         isShortReadMngs={isShortReadMngs}
       />
