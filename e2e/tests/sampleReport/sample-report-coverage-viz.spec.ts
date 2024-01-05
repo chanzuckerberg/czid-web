@@ -36,7 +36,7 @@ test.describe("Coverage Viz Smoke Tests", () => {
    *
    * A popup showing the coverage visualisation for that specific organism should be showed
    */
-  test(`Verify the popup for the coverage visualisation is visible after clicking the icon`, async () => {
+  test(`Smoke Test: Verify the popup for the coverage visualisation is visible after clicking the icon`, async () => {
     await samplesPage.validateCoverageVisualisationVisible(taxon.name);
   });
 
@@ -45,7 +45,7 @@ test.describe("Coverage Viz Smoke Tests", () => {
    *
    * A popup prompting user to select the Blast type should be shown
    */
-  test(`Verify user is able to select the "BLAST" option`, async () => {
+  test(`Smoke Test: Verify user is able to select the "BLAST" option`, async () => {
     await samplesPage.clickBlastButton();
     await samplesPage.validateBlastSelectionModalVisible();
   });
@@ -55,7 +55,7 @@ test.describe("Coverage Viz Smoke Tests", () => {
    *
    * The appropriate fasta file should be downloaded
    */
-  test(`Verify user is able to download "Contig Fasta"`, async () => {
+  test(`Smoke Test: Verify user is able to download "Contig Fasta"`, async () => {
     await samplesPage.validateContigFastaDownload(sample, taxon);
   });
 });

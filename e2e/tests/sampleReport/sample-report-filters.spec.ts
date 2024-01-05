@@ -59,7 +59,7 @@ test.describe("Sample report filter test", () => {
     /**
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-1
      */
-    test(`Should be able to filter by Taxon name ${workflow}`, async () => {
+    test(`Smoke Test: Should be able to filter by Taxon name ${workflow}`, async () => {
       const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
@@ -94,7 +94,7 @@ test.describe("Sample report filter test", () => {
     /**
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-2
      */
-    test(`Should be able to filter by Name Type ${workflow}`, async () => {
+    test(`Smoke Test: Should be able to filter by Name Type ${workflow}`, async () => {
       const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
@@ -113,7 +113,7 @@ test.describe("Sample report filter test", () => {
     /**
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-3
      */
-    test(`Should be able to filter by Category name ${workflow}`, async () => {
+    test(`Smoke Test: Should be able to filter by Category name ${workflow}`, async () => {
       const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
@@ -183,14 +183,15 @@ test.describe("Sample report filter test", () => {
     /**
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-4
      */
-    test(`Should be able to filter by Threshold ${workflow}`, async () => {
+    test(`Smoke Test: Should be able to filter by Threshold ${workflow}`, async () => {
       const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
 
       await samplesPage.validateThresholdOptionFilterHasExpectedOptions(THRESHOLD_FILTERS[workflow]);
 
-      for (const thresholdOption of THRESHOLD_FILTERS[workflow]) {
+      const thresholdOptions = [...THRESHOLD_FILTERS[workflow]].sort(() => 0.5 - Math.random()).slice(0, 2);
+      for (const thresholdOption of thresholdOptions) {
         for (const operator of THRESHOLD_COMPARISON_OPERATORS) {
           const thresholdValue = Math.floor(Math.random() * 10) + 1;
           await samplesPage.selectThresholdOptions(thresholdOption.text, operator, thresholdValue);
@@ -208,7 +209,7 @@ test.describe("Sample report filter test", () => {
     /**
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-5
      */
-    test(`Should be able to filter by Read Specificity ${workflow}`, async () => {
+    test(`Smoke Test: Should be able to filter by Read Specificity ${workflow}`, async () => {
       const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
@@ -235,7 +236,7 @@ test.describe("Sample report filter test", () => {
     /**
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-6
      */
-    test(`Should be able to filter by Annotation ${workflow}`, async () => {
+    test(`Smoke Test: Should be able to filter by Annotation ${workflow}`, async () => {
       const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);

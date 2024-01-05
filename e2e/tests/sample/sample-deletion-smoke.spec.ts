@@ -26,7 +26,7 @@ test.describe("Sample Deletion", () => {
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-17
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-36
      */
-    test(`Delete ${workflow} sample`, async () => {
+    test(`Smoke Test: Delete ${workflow} sample`, async () => {
       const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
 
       // #region Try to seed some data for the workflow

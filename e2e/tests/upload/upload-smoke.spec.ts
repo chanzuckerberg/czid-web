@@ -23,7 +23,7 @@ test.describe("Upload Smoke Tests", () => {
 
   // #region Verify Upload Sample for Workflows
   for (const workflow of uploadWorkflows) {
-    test(`Verify Upload Sample ${workflow}`, async () => {
+    test(`Smoke Test: Verify Upload Sample ${workflow}`, async () => {
       const sampleFiles = workflow === WORKFLOWS.LMNGS ? LMNGS_SAMPLE_FILES : SAMPLE_FILES;
       const sampleNames = workflow === WORKFLOWS.LMNGS ? ["Ct20K_VarSkip"] : ["RR004_water_2_S23A"];
 
@@ -52,7 +52,7 @@ test.describe("Upload Smoke Tests", () => {
 
   // #region Verify Set Metadata for Samples Manually
   for (const workflow of uploadWorkflows) {
-    test(`Verify Set Metadata for Samples Manually ${workflow}`, async () => {
+    test(`Smoke Test: Verify Set Metadata for Samples Manually ${workflow}`, async () => {
       const sampleFiles = workflow === WORKFLOWS.LMNGS ? LMNGS_SAMPLE_FILES : SAMPLE_FILES;
 
       // Choose project
@@ -102,7 +102,7 @@ test.describe("Upload Smoke Tests", () => {
 
   // #region Verify Upload Metadata for Sample using CSV
   for (const workflow of uploadWorkflows) {
-    test(`Verify Upload Metadata for Sample using CSV ${workflow}`, async () => {
+    test(`Smoke Test: Verify Upload Metadata for Sample using CSV ${workflow}`, async () => {
       const sampleFiles = workflow === WORKFLOWS.LMNGS ? LMNGS_SAMPLE_FILES : SAMPLE_FILES;
 
       // Choose project

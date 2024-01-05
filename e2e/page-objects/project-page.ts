@@ -5,7 +5,8 @@ const SAMPLE_CHECKBOX_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${
 const DELETE_BUTTON_TESTID = "bulk-delete-trigger";
 const ROW_CHECKBOXES = "[data-testid='row-select-checkbox'] input[type='checkbox']";
 const COMPLETED_ROWS = "//div[contains(@class, 'sampleStatus') and contains(@data-testid, 'complete')]//ancestor::div[@aria-rowindex]";
-const COMPLETED_SAMPLE_NAMES = "//div[contains(@class, 'sampleStatus') and contains(@data-testid, 'complete')]//ancestor::div[@aria-rowindex]//div[contains(@class, 'sampleName-')]";
+const ROWS = "//div[contains(@class, 'sampleStatus')]//ancestor::div[@aria-rowindex]";
+const SAMPLE_NAME_BY_INDEX = (index: number) => `//div[contains(@class, "sampleStatus")]//ancestor::div[@aria-rowindex="${index}"]//div[contains(@class, "sampleName-")]`;
 const DELETE_CONFIRMATION_BUTTON = "//button[text()='Delete']";
 const ALERT_MESSAGE = "[class*='MuiAlert-message']";
 const WORKFLOW_PARAM = {
@@ -96,7 +97,9 @@ export class ProjectPage extends PageObject {
 
   // #region Click
   public async clickSampleCheckbox(sampleName: string) {
-    await this.page.locator(SAMPLE_CHECKBOX_BY_SAMPLE_NAME(sampleName)).click();
+    const completedSampleLocator = SAMPLE_CHECKBOX_BY_SAMPLE_NAME(sampleName);
+    await this.page.locator(completedSampleLocator).scrollIntoViewIfNeeded();
+    await this.page.locator(completedSampleLocator).click();
   }
 
   public async clickDeleteButton() {
@@ -111,12 +114,15 @@ export class ProjectPage extends PageObject {
 
   // #region Get
   public async getCompletedRowIndexes() {
+    await this.scrollDownToElement(COMPLETED_ROWS, ROWS, "aria-rowindex");
+
     const rows = await this.page.locator(COMPLETED_ROWS).all();
     const indexes = [];
     for (const row of rows) {
       const rowIndex = await row.getAttribute("aria-rowindex");
-      indexes.push(+rowIndex - 1);
+      indexes.push(+rowIndex);
     }
+
     return indexes;
   }
 
@@ -126,7 +132,8 @@ export class ProjectPage extends PageObject {
   }
 
   public async getSampleNameFromRow(index: number) {
-    const row = this.page.locator(COMPLETED_SAMPLE_NAMES).nth(index);
+    const row = this.page.locator(SAMPLE_NAME_BY_INDEX(index));
+    await row.scrollIntoViewIfNeeded();
     return row.textContent();
   }
 

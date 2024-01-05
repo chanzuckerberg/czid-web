@@ -291,6 +291,7 @@ export class SamplesPage extends PageObject {
 
     public async clickThresholdComparisonOperatorFilter() {
       await this.page.locator(THRESHOLD_OPTION_FILTER).last().click();
+      await this.pause(0.2);
     }
 
     public async clickThresholdComparisonOperatorOption(option: string) {

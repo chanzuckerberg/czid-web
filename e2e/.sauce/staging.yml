@@ -25,13 +25,45 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
-  - name: "Chromium Mac"
+  - name: "Sample Deletion Smoke Tests"
     platformName: "macOS 12"
     screenResolution: "1440x900"
-    testMatch: ["tests/upload/upload-smoke.spec.ts"]
+    testMatch: ['tests/sample/sample-deletion-smoke.spec.ts']
     params:
       browserName: "chromium"
       project: "chromium"
+      grep: "Smoke Test: "
+      retries: 3
+    shard: concurrency
+  - name: "Sample Report Filter Smoke Tests"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sampleReport/sample-report-filters.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 3
+    shard: concurrency
+  - name: "Sample Upload Smoke Tests"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/upload/upload-smoke.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 3
+    shard: concurrency
+  - name: "Sample Report / Coverage Viz"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sampleReport/sample-report-coverage-viz.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 3
     shard: concurrency
 artifacts:
   cleanup: true

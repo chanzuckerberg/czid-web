@@ -44,16 +44,15 @@ export abstract class PageObject {
     const timeout = 30000;
     const scrollAmount = direction === "up" ? -500 : 500;
 
-    while (true) {
+    while ((Date.now() - startTime) < timeout) {
+      await this.page.locator(rowsLocator).last().hover();
+      await this.page.locator(rowsLocator).last().focus();
+
       const lastRow = await this.page.locator(rowsLocator).last().getAttribute(indexAttribute);
       const element = this.page.locator(locator).first();
       const isElementVisible = await element.isVisible();
 
       if (isElementVisible) {
-        break;
-      }
-
-      if (Date.now() - startTime > timeout) {
         break;
       }
 
