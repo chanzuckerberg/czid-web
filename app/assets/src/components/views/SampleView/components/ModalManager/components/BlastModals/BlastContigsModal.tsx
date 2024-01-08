@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
-import { SampleId } from "~/interface/shared";
+import { SampleId, TABS_TEMP_FIX_PROPS } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
@@ -341,6 +341,7 @@ export const BlastContigsModal = ({
           // Reset user contig selections when they switch NT/NR tabs
           setSelectedContigIds(new Set());
         }}
+        {...TABS_TEMP_FIX_PROPS}
       >
         {ntTab}
         {nrTab}

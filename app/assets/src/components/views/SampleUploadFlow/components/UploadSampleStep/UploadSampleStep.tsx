@@ -49,7 +49,7 @@ import { useAllowedFeatures } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
-import { SampleUploadType } from "~/interface/shared";
+import { SampleUploadType, TABS_TEMP_FIX_PROPS } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import BasespaceSampleImport from "../../BasespaceSampleImport";
 import {
@@ -1408,6 +1408,7 @@ class UploadSampleStepCC extends React.Component<
         onChange={(_, selectedTabIndex) =>
           this.handleTabChange(selectedTabIndex)
         }
+        {...TABS_TEMP_FIX_PROPS}
       >
         <Tab
           label={LOCAL_UPLOAD_LABEL}
