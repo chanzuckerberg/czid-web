@@ -1049,9 +1049,6 @@ const SamplesView = forwardRef(function SamplesView(
       );
     }
   };
-  const plqcDowntimeMaitenanceMode = allowedFeatures.includes(
-    "plqc_downtime_maitenance_mode",
-  );
   const renderDisplay = () => {
     switch (currentDisplay) {
       case "table":
@@ -1059,13 +1056,6 @@ const SamplesView = forwardRef(function SamplesView(
       case "map":
         return renderMap();
       case "plqc":
-        if (!plqcDowntimeMaitenanceMode) {
-          return (
-            <div>
-              PLQC is currently under maintenance. Please check back later.
-            </div>
-          );
-        }
         return renderQualityControl();
     }
   };
