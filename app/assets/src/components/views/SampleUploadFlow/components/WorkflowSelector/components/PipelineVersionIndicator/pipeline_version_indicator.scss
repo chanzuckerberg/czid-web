@@ -12,11 +12,6 @@
   flex-direction: row;
 }
 
-.header {
-  @include font-header-xs;
-  margin-bottom: $sds-spaces-xs;
-}
-
 .tooltip {
   margin-left: $sds-spaces-xs;
 }
@@ -29,4 +24,8 @@
 .subText {
   font: $sds-font-body-xxs-400-font;
   color: $sds-color-gray-600;
+}
+
+.infoIcon {
+  color: $sds-color-warning-400;
 }

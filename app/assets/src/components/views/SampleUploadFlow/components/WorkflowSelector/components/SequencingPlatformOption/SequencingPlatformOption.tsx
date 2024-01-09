@@ -11,16 +11,19 @@ interface SequencingPlatformOptionProps {
   customDescription?: string | ReactNode;
   githubLink: string;
   isDisabled?: boolean;
-  isPinnedVersion?: boolean;
   isSelected: boolean;
   onClick(): void;
   pipelineVersion?: string;
-  pipelineHelpLink: string;
+  latestMajorPipelineVersion?: string;
+  latestMajorIndexVersion?: string;
   technologyName: string;
   technologyDetails: ReactNode;
   testId: string;
   tooltipText?: string;
-  versionHelpLink?: string;
+  versionHelpLink: string;
+  warningHelpLink: string;
+  indexVersion?: string;
+  showIndexVersion?: boolean;
 }
 
 const SequencingPlatformOption = ({
@@ -28,11 +31,14 @@ const SequencingPlatformOption = ({
   customDescription,
   githubLink,
   isDisabled = false,
-  isPinnedVersion,
   isSelected,
   onClick,
   pipelineVersion,
-  pipelineHelpLink,
+  latestMajorPipelineVersion,
+  latestMajorIndexVersion,
+  warningHelpLink,
+  indexVersion,
+  showIndexVersion,
   technologyName,
   technologyDetails,
   testId,
@@ -91,14 +97,27 @@ const SequencingPlatformOption = ({
         <div>
           {isSelected && (
             <div className={commonStyles.technologyContent}>
-              {technologyDetails}
               <PipelineVersionIndicator
-                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-                isPinnedVersion={isPinnedVersion}
-                pipelineHelpLink={pipelineHelpLink}
+                isPipelineVersion={true}
                 version={pipelineVersion}
                 versionHelpLink={versionHelpLink}
+                warningHelpLink={warningHelpLink}
+                isNewVersionAvailable={
+                  pipelineVersion?.[0] !== latestMajorPipelineVersion
+                }
               />
+              {showIndexVersion && (
+                <PipelineVersionIndicator
+                  version={indexVersion}
+                  versionHelpLink={versionHelpLink}
+                  warningHelpLink={versionHelpLink}
+                  isPipelineVersion={false}
+                  isNewVersionAvailable={
+                    indexVersion !== latestMajorIndexVersion
+                  }
+                />
+              )}
+              {technologyDetails}
             </div>
           )}
         </div>

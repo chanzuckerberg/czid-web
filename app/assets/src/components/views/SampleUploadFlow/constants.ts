@@ -1,11 +1,5 @@
 import { IconNameToSizes } from "@czi-sds/components";
 import { IconCovidVirusXLarge } from "~/components/ui/icons";
-import {
-  AMR_PIPELINE_HELP_LINK,
-  CG_PIPELINE_HELP_LINK,
-  ILLUMINA_MNGS_PIPELINE_HELP_LINK,
-  NANOPORE_MNGS_PIPELINE_HELP_LINK,
-} from "~/components/utils/documentationLinks";
 import { WorkflowType } from "~/components/utils/workflows";
 
 export const NO_TARGET_PROJECT_ERROR =
@@ -18,6 +12,13 @@ export const ILLUMINA = "Illumina";
 export const NANOPORE = "ONT";
 export const NO_TECHNOLOGY_SELECTED = "noTechnologySelected";
 
+export enum UploadWorkflows {
+  MNGS = "mngs",
+  AMR = "amr",
+  COVID_CONSENSUS_GENOME = "covid-consensus-genome",
+  VIRAL_CONSENSUS_GENOME = "viral-consensus-genome",
+}
+
 export const UPLOAD_WORKFLOWS: {
   [key: string]: {
     label: string;
@@ -28,22 +29,22 @@ export const UPLOAD_WORKFLOWS: {
 } = {
   MNGS: {
     label: "Metagenomics" as const,
-    value: "mngs" as const,
+    value: UploadWorkflows.MNGS,
     icon: "dna" as const,
   },
   VIRAL_CONSENSUS_GENOME: {
     label: "Viral Consensus Genome" as const,
-    value: "viral-consensus-genome" as const,
+    value: UploadWorkflows.VIRAL_CONSENSUS_GENOME,
     icon: "virus" as const,
   },
   COVID_CONSENSUS_GENOME: {
     label: "SARS-CoV-2 Consensus Genome" as const,
-    value: "covid-consensus-genome" as const,
+    value: UploadWorkflows.COVID_CONSENSUS_GENOME,
     customIcon: IconCovidVirusXLarge,
   },
   AMR: {
     label: "Antimicrobial Resistance" as const,
-    value: WorkflowType.AMR,
+    value: UploadWorkflows.AMR,
     icon: "bacteria" as const,
   },
 };
@@ -405,23 +406,20 @@ export const LOCAL_UPLOAD = "local";
 export const REMOTE_UPLOAD = "remote";
 export const BASESPACE_UPLOAD = "basespace";
 
-export const PIPELINE_HELP_LINKS = {
-  [WorkflowType.SHORT_READ_MNGS]: ILLUMINA_MNGS_PIPELINE_HELP_LINK,
-  [WorkflowType.LONG_READ_MNGS]: NANOPORE_MNGS_PIPELINE_HELP_LINK,
-  [WorkflowType.CONSENSUS_GENOME]: CG_PIPELINE_HELP_LINK,
-  [WorkflowType.AMR]: AMR_PIPELINE_HELP_LINK,
-};
-
 // Limit file uploads to 35 GB; our pipelines can't handle larger files.
 export const MAX_FILE_SIZE = 35e9;
 
+export const NCBI_INDEX = "ncbi_index_date";
+
 // TYPES
 export type Technology = "Illumina" | "ONT";
-export type UploadWorkflows =
-  | "mngs"
-  | "amr"
-  | "covid-consensus-genome"
-  | "viral-consensus-genome";
+
+export type UploadWorkflowConfigType<T> = Record<Required<UploadWorkflows>, T>;
+
+export type UploadWorkflowLinkConfigType<T> = Record<
+  Required<UploadWorkflows & WorkflowType>,
+  T
+>;
 
 export const INPUT_FILE_TYPES = {
   FASTQ: "fastq",

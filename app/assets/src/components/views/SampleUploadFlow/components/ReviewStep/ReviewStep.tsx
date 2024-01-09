@@ -15,8 +15,8 @@ import UserContextType from "~/interface/allowedFeatures";
 import {
   HostGenome,
   MetadataBasic,
+  PipelineVersions,
   Project,
-  ProjectPipelineVersions,
   SampleFromApi,
 } from "~/interface/shared";
 import { UploadStepType } from "~/interface/upload";
@@ -45,7 +45,7 @@ interface ReviewStepProps {
   onUploadStatusChange?: $TSFixMeFunction;
   onStepSelect?(UploadStepType): void;
   originalHostGenomes?: HostGenome[];
-  pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
+  pipelineVersions: { [projectId: string]: PipelineVersions };
   project?: Project;
   refSeqAccession?: RefSeqAccessionDataType;
   refSeqFile?: File;

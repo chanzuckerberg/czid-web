@@ -6,32 +6,37 @@ import {
   MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
 import { WorkflowType } from "~/components/utils/workflows";
-import {
-  PIPELINE_HELP_LINKS,
-  SEQUENCING_TECHNOLOGY_OPTIONS,
-} from "../../../../../../constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../../../constants";
+import { WorkflowLinksConfig } from "../../../../workflowTypeConfig";
 import { SequencingPlatformOption } from "../../../SequencingPlatformOption";
 import { MetagenomicsNanoporeSettings } from "./components/MetagenomicsNanoporeSettings";
 
 interface MetagenomicsWithNanoporeProps {
+  indexVersion?: string;
   isDisabled: boolean;
   isSelected: boolean;
   onClick(): void;
   selectedGuppyBasecallerSetting: string;
   onChangeGuppyBasecallerSetting(selected: string): void;
   pipelineVersion?: string;
+  latestMajorPipelineVersion?: string;
+  latestMajorIndexVersion?: string;
 }
 
 const MetagenomicsWithNanopore = ({
+  indexVersion,
   isDisabled,
   isSelected,
   onClick,
   selectedGuppyBasecallerSetting,
   onChangeGuppyBasecallerSetting,
   pipelineVersion,
+  latestMajorPipelineVersion,
+  latestMajorIndexVersion,
 }: MetagenomicsWithNanoporeProps) => {
   const tooltipText = "This pipeline only supports upload from your computer.";
-
+  const { pipelineVersionLink, warningLink } =
+    WorkflowLinksConfig[WorkflowType.LONG_READ_MNGS];
   return (
     <SequencingPlatformOption
       analyticsEventName={
@@ -56,6 +61,8 @@ const MetagenomicsWithNanopore = ({
       isDisabled={isDisabled}
       isSelected={isSelected}
       onClick={onClick}
+      indexVersion={indexVersion}
+      showIndexVersion={true}
       technologyName="Nanopore"
       technologyDetails={
         <MetagenomicsNanoporeSettings
@@ -66,7 +73,10 @@ const MetagenomicsWithNanopore = ({
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE}
       tooltipText={tooltipText}
       pipelineVersion={pipelineVersion}
-      pipelineHelpLink={PIPELINE_HELP_LINKS[WorkflowType.LONG_READ_MNGS]}
+      latestMajorPipelineVersion={latestMajorPipelineVersion}
+      latestMajorIndexVersion={latestMajorIndexVersion}
+      versionHelpLink={pipelineVersionLink}
+      warningHelpLink={warningLink}
     />
   );
 };

@@ -1,22 +1,14 @@
 import React from "react";
 import { TaxonOption } from "~/components/common/filters/types";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import {
-  AMR_PINNED_PIPELINE_VERSION_HELP_LINK,
-  AMR_PIPELINE_GITHUB_LINK,
-} from "~/components/utils/documentationLinks";
-import {
-  AMR_MODERN_HOST_FILTERING_FEATURE,
-  isPipelineFeatureAvailable,
-} from "~/components/utils/pipeline_versions";
+import { AMR_PIPELINE_GITHUB_LINK } from "~/components/utils/documentationLinks";
 import { WorkflowType } from "~/components/utils/workflows";
-import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
+import { PipelineVersions, SampleUploadType } from "~/interface/shared";
 import { IconCovidVirusXLarge } from "~ui/icons";
 import {
   BASESPACE_UPLOAD,
   LOCAL_UPLOAD,
   NANOPORE,
-  PIPELINE_HELP_LINKS,
   REMOTE_UPLOAD,
   SEQUENCING_TECHNOLOGY_OPTIONS,
   Technology,
@@ -29,6 +21,7 @@ import { MetagenomicsSequencingPlatformOptions } from "./components/Metagenomics
 import { PipelineVersionIndicator } from "./components/PipelineVersionIndicator";
 import { ViralConsensusGenomeSequencingPlatformOptions } from "./components/ViralConsensusGenomeSequencingPlatformOptions";
 import cs from "./workflow_selector.scss";
+import { WorkflowLinksConfig } from "./workflowTypeConfig";
 
 interface WorkflowSelectorProps {
   bedFileName: string;
@@ -51,7 +44,8 @@ interface WorkflowSelectorProps {
     technology?: SEQUENCING_TECHNOLOGY_OPTIONS,
   ) => void;
   currentTab?: SampleUploadType;
-  projectPipelineVersions: ProjectPipelineVersions;
+  projectPipelineVersions: PipelineVersions;
+  latestMajorPipelineVersions: PipelineVersions;
   selectedMedakaModel?: string;
   selectedGuppyBasecallerSetting?: string;
   selectedTaxon: TaxonOption;
@@ -95,6 +89,7 @@ const WorkflowSelector = ({
   onWorkflowToggle,
   currentTab,
   projectPipelineVersions,
+  latestMajorPipelineVersions,
   selectedMedakaModel,
   selectedGuppyBasecallerSetting,
   selectedTaxon,
@@ -107,13 +102,6 @@ const WorkflowSelector = ({
   const shouldDisableWorkflow = (workflow: UploadWorkflows) => {
     return !enabledWorkflows.includes(workflow);
   };
-
-  const isPinnedVersion =
-    projectPipelineVersions?.[WorkflowType.AMR] &&
-    !isPipelineFeatureAvailable(
-      AMR_MODERN_HOST_FILTERING_FEATURE,
-      projectPipelineVersions?.[WorkflowType.AMR],
-    );
 
   return (
     <div className={cs.workflowSelector}>
@@ -131,6 +119,7 @@ const WorkflowSelector = ({
           <MetagenomicsSequencingPlatformOptions
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             currentTab={currentTab}
+            latestMajorPipelineVersions={latestMajorPipelineVersions}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onChangeGuppyBasecallerSetting={onGuppyBasecallerSettingChange}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
@@ -181,11 +170,18 @@ const WorkflowSelector = ({
         sequencingPlatformOptions={
           <div className={cs.technologyContent}>
             <PipelineVersionIndicator
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              isPinnedVersion={isPinnedVersion}
-              pipelineHelpLink={PIPELINE_HELP_LINKS[WorkflowType.AMR]}
+              isPipelineVersion={true}
+              isNewVersionAvailable={
+                projectPipelineVersions?.[WorkflowType.AMR]?.[0] !==
+                latestMajorPipelineVersions?.[WorkflowType.AMR]
+              }
+              warningHelpLink={
+                WorkflowLinksConfig[WorkflowType.AMR].warningLink
+              }
               version={projectPipelineVersions?.[WorkflowType.AMR]}
-              versionHelpLink={AMR_PINNED_PIPELINE_VERSION_HELP_LINK}
+              versionHelpLink={
+                WorkflowLinksConfig[WorkflowType.AMR].pipelineVersionLink
+              }
             />
           </div>
         }
@@ -218,6 +214,12 @@ const WorkflowSelector = ({
             onBedFileChanged={onBedFileChanged}
             onRefSeqFileChanged={onRefSeqFileChanged}
             onTaxonChange={onTaxonChange}
+            pipelineVersion={
+              projectPipelineVersions?.[WorkflowType.CONSENSUS_GENOME]
+            }
+            latestMajorVersion={
+              latestMajorPipelineVersions?.[WorkflowType.CONSENSUS_GENOME]
+            }
           />
         }
       />
@@ -255,6 +257,7 @@ const WorkflowSelector = ({
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onTechnologyToggle={onTechnologyToggle}
             projectPipelineVersions={projectPipelineVersions}
+            latestMajorPipelineVersions={latestMajorPipelineVersions}
           />
         }
         customIcon={

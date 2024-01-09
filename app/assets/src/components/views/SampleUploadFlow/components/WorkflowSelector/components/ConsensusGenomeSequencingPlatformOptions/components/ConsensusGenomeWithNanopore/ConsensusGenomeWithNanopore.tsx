@@ -1,11 +1,11 @@
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { ARTIC_PIPELINE_LINK } from "~/components/utils/documentationLinks";
-import { WorkflowType } from "~/components/utils/workflows";
 import {
-  PIPELINE_HELP_LINKS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
+  UploadWorkflows,
 } from "../../../../../../constants";
+import { WorkflowLinksConfig } from "../../../../workflowTypeConfig";
 import { SequencingPlatformOption } from "../../../SequencingPlatformOption";
 import { ConsensusGenomeNanoporeSettings } from "./components/ConsensusGenomeNanoporeSettings";
 
@@ -21,6 +21,7 @@ interface ConsensusGenomeWithNanoporeProps {
   onWetlabProtocolChange(value: string): void;
   selectedWetlabProtocol: string;
   pipelineVersion?: string;
+  latestMajorPipelineVersion?: string;
 }
 
 const ConsensusGenomeWithNanopore = ({
@@ -35,10 +36,14 @@ const ConsensusGenomeWithNanopore = ({
   onWetlabProtocolChange,
   selectedWetlabProtocol,
   pipelineVersion,
+  latestMajorPipelineVersion,
 }: ConsensusGenomeWithNanoporeProps) => {
   const tooltipText = `This pipeline only supports upload from your computer${
     isS3UploadEnabled ? " or S3" : ""
   }.`;
+
+  const { pipelineVersionLink, warningLink } =
+    WorkflowLinksConfig[UploadWorkflows.COVID_CONSENSUS_GENOME];
 
   return (
     <SequencingPlatformOption
@@ -50,6 +55,7 @@ const ConsensusGenomeWithNanopore = ({
       isDisabled={isDisabled}
       isSelected={isSelected}
       onClick={onClick}
+      showIndexVersion={false}
       technologyName="Nanopore"
       technologyDetails={
         <ConsensusGenomeNanoporeSettings
@@ -64,7 +70,9 @@ const ConsensusGenomeWithNanopore = ({
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE}
       tooltipText={tooltipText}
       pipelineVersion={pipelineVersion}
-      pipelineHelpLink={PIPELINE_HELP_LINKS[WorkflowType.CONSENSUS_GENOME]}
+      latestMajorPipelineVersion={latestMajorPipelineVersion}
+      versionHelpLink={pipelineVersionLink}
+      warningHelpLink={warningLink}
     />
   );
 };

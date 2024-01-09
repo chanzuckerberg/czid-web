@@ -64,18 +64,8 @@ export const CONCAT_FILES_HELP_LINK_ONT =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360051806072-Concatenate-Sequence-Files#automatic-concatenation-nanopore";
 export const PROJECT_SHARING_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-Data-through-the-Web-App#Project-Sharing";
-export const ILLUMINA_MNGS_PIPELINE_HELP_LINK =
-  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790554-Pipeline-Details#pipeline-intro";
-export const NANOPORE_MNGS_PIPELINE_HELP_LINK =
-  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13756558532884-CZ-ID-Pipeline-Overview#mNGS-Nanopore-overview";
 export const AMR_PIPELINE_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15091031482644-AMR-Pipeline-Workflow";
-export const CG_PIPELINE_HELP_LINK =
-  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13785499135124-SARS-CoV-2-Pipeline";
-export const ILLUMINA_MNGS_PINNED_PIPELINE_VERSION_HELP_LINK =
-  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-mNGS-Data-through-the-Web-App#analysis-type";
-export const AMR_PINNED_PIPELINE_VERSION_HELP_LINK =
-  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15312621892372#analysis-type";
 export const TOTAL_READ_HELP_LINK = {
   url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
   header: "Do my samples have enough total reads?",
@@ -109,3 +99,18 @@ export const CONTACT_US_LINK =
 
 export const WHITE_PAPER_LINK =
   "https://academic.oup.com/gigascience/article/9/10/giaa111/5918865";
+
+export const WORKFLOWS_CHANGELOG_LINK =
+  "https://github.com/chanzuckerberg/czid-workflows/blob/main/CHANGELOG.md"; // generic link for short read mNGS and CG
+
+// Links for pipeline version indicator
+export const MNGS_ILLUMINA_UPLOAD_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-mNGS-Data-through-the-Web-App#project-selection";
+export const MNGS_NANOPORE_UPLOAD_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13830756964372-Upload-Nanopore-Data-#Upload-Data";
+export const AMR_UPLOAD_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15312621892372-Upload-or-Select-Data-for-AMR-Analysis#upload-data";
+export const SARS_COV_2_UPLOAD_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360059656311-Upload-Data-and-Assemble-SARS-CoV-2-Genomes-Using-the-Web-App";
+export const VIRAL_CONSENSUS_GENOME_UPLOAD_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/14783973727636-Upload-Viral-Genome-Data-through-the-Web-App#upload-samples";

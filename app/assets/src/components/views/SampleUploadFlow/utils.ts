@@ -3,7 +3,7 @@ import { openUrlInPopupWindow } from "~/components/utils/links";
 import { WorkflowType } from "~/components/utils/workflows";
 import { getURLParamString } from "~/helpers/url";
 import {
-  ProjectPipelineVersions,
+  PipelineVersions,
   SampleFromApi,
   SampleUploadType,
 } from "~/interface/shared";
@@ -209,10 +209,10 @@ export const groupSamplesByLane = ({
 };
 
 export const getPipelineVersionString = (
-  projectPipelineVersions: ProjectPipelineVersions,
+  projectPipelineVersions: PipelineVersions,
   workflow: WorkflowType.AMR | WorkflowType.CONSENSUS_GENOME | "mngs",
   technology: SEQUENCING_TECHNOLOGY_OPTIONS,
-): string => {
+): string | undefined => {
   if (workflow === "amr") {
     return projectPipelineVersions[WorkflowType.AMR];
   } else if (workflow === "consensus-genome") {

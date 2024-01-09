@@ -4,35 +4,37 @@ import {
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
-import { WorkflowType } from "~/components/utils/workflows";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
-import {
-  PIPELINE_HELP_LINKS,
-  SEQUENCING_TECHNOLOGY_OPTIONS,
-} from "../../../../constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../constants";
 import { SequencingPlatformOption } from "../SequencingPlatformOption";
 import { WetlabSelector } from "../WetlabSelector";
 
 interface IlluminaSequencingPlatformOptionProps {
+  indexVersion?: string;
   isCg: boolean;
-  isPinnedVersion?: boolean;
   isSelected: boolean;
   onClick(): void;
   onWetlabProtocolChange?(value: string): void;
   selectedWetlabProtocol?: string;
   pipelineVersion?: string;
-  versionHelpLink?: string;
+  latestMajorPipelineVersion?: string;
+  latestMajorIndexVersion?: string;
+  versionHelpLink: string;
+  warningHelpLink: string;
 }
 
 const IlluminaSequencingPlatformOption = ({
+  indexVersion,
   isCg,
-  isPinnedVersion,
   isSelected,
   onClick,
   onWetlabProtocolChange,
   selectedWetlabProtocol,
   pipelineVersion,
+  latestMajorPipelineVersion,
+  latestMajorIndexVersion,
   versionHelpLink,
+  warningHelpLink,
 }: IlluminaSequencingPlatformOptionProps) => {
   const {
     UPLOAD_SAMPLE_STEP_MNGS_ILLUMINA_PIPELINE_LINK_CLICKED,
@@ -51,9 +53,10 @@ const IlluminaSequencingPlatformOption = ({
           ? MNGS_ILLUMINA_PIPELINE_GITHUB_LINK
           : CG_ILLUMINA_PIPELINE_GITHUB_LINK
       }
-      isPinnedVersion={isPinnedVersion}
       isSelected={isSelected}
       onClick={onClick}
+      indexVersion={indexVersion}
+      showIndexVersion={!isCg}
       technologyName="Illumina"
       technologyDetails={
         isCg &&
@@ -72,12 +75,10 @@ const IlluminaSequencingPlatformOption = ({
       }
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA}
       pipelineVersion={pipelineVersion}
-      pipelineHelpLink={
-        !isCg
-          ? PIPELINE_HELP_LINKS[WorkflowType.SHORT_READ_MNGS]
-          : PIPELINE_HELP_LINKS[WorkflowType.CONSENSUS_GENOME]
-      }
+      latestMajorPipelineVersion={latestMajorPipelineVersion}
+      latestMajorIndexVersion={latestMajorIndexVersion}
       versionHelpLink={versionHelpLink}
+      warningHelpLink={warningHelpLink}
     />
   );
 };

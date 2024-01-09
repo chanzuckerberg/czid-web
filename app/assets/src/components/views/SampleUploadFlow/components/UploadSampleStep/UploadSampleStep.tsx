@@ -1485,8 +1485,13 @@ class UploadSampleStepCC extends React.Component<
   };
 
   render() {
-    const { admin, allowedFeatures, biohubS3UploadEnabled, pipelineVersions } =
-      this.props;
+    const {
+      admin,
+      allowedFeatures,
+      biohubS3UploadEnabled,
+      latestMajorPipelineVersions,
+      pipelineVersions,
+    } = this.props;
     const {
       bedFile,
       refSeqFile,
@@ -1565,6 +1570,7 @@ class UploadSampleStepCC extends React.Component<
             onWorkflowToggle={this.handleWorkflowToggle}
             currentTab={currentTab}
             projectPipelineVersions={pipelineVersions[selectedProject?.id]}
+            latestMajorPipelineVersions={latestMajorPipelineVersions}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
             bedFileName={bedFile?.name}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339

@@ -5,7 +5,10 @@ import { TaxonOption } from "~/components/common/filters/types";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import IssueGroup from "~/components/ui/notifications/IssueGroup";
 import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
+import { UploadWorkflows } from "~/components/views/SampleUploadFlow/constants";
 import { REF_SEQ_FILE_NAME_ERROR_MESSAGE } from "../../../UploadSampleStep/constants";
+import { WorkflowLinksConfig } from "../../workflowTypeConfig";
+import { PipelineVersionIndicator } from "../PipelineVersionIndicator";
 import { TooltipIcon } from "../TooltipIcon";
 import { UploadButton } from "./components/UploadButton";
 import { UploadedFileName } from "./components/UploadedFileName";
@@ -20,6 +23,8 @@ interface ViralConsensusGenomeSequencingPlatformOptionsProps {
   onBedFileChanged(file?: File): void;
   onRefSeqFileChanged(file?: File): void;
   onTaxonChange(taxa: TaxonOption): void;
+  pipelineVersion?: string;
+  latestMajorVersion?: string;
 }
 
 const ViralConsensusGenomeSequencingPlatformOptions = ({
@@ -30,6 +35,8 @@ const ViralConsensusGenomeSequencingPlatformOptions = ({
   onBedFileChanged,
   onRefSeqFileChanged,
   onTaxonChange,
+  pipelineVersion,
+  latestMajorVersion,
 }: ViralConsensusGenomeSequencingPlatformOptionsProps) => {
   const refFileTooltipText = (
     <div>
@@ -51,12 +58,22 @@ const ViralConsensusGenomeSequencingPlatformOptions = ({
     </div>
   );
 
+  const { pipelineVersionLink, warningLink } =
+    WorkflowLinksConfig[UploadWorkflows.VIRAL_CONSENSUS_GENOME];
+
   return (
     <>
       <div
         className={cx(commonStyles.technologyContent, "noStyleButton")}
         onClick={e => e.stopPropagation()}
       >
+        <PipelineVersionIndicator
+          version={pipelineVersion}
+          isPipelineVersion={true}
+          versionHelpLink={pipelineVersionLink}
+          warningHelpLink={warningLink}
+          isNewVersionAvailable={pipelineVersion?.[0] !== latestMajorVersion}
+        />
         <div className={commonStyles.item}>
           <div className={commonStyles.subheader}>
             Taxon Name

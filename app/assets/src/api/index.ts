@@ -8,7 +8,7 @@ import { AmrWorkflowResult } from "~/components/views/SampleView/components/AmrV
 import { BenchmarkWorkflowRunResults } from "~/components/views/SampleView/components/BenchmarkView/BenchmarkView";
 import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
-import { Background, ProjectPipelineVersions } from "~/interface/shared";
+import { Background, PipelineVersionResponse } from "~/interface/shared";
 import {
   get,
   MAX_SAMPLES_FOR_GET_REQUEST,
@@ -313,7 +313,7 @@ const getVisualizations = ({
 
 const getProjectPipelineVersions = (
   projectId: number,
-): Promise<ProjectPipelineVersions> =>
+): Promise<PipelineVersionResponse> =>
   get(`/projects/${projectId}/pipeline_versions`);
 
 const createProject = (params: $TSFixMe) =>

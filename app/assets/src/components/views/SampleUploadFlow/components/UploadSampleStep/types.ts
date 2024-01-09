@@ -1,5 +1,5 @@
 import { TaxonOption } from "~/components/common/filters/types";
-import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
+import { PipelineVersions, SampleUploadType } from "~/interface/shared";
 import {
   SEQUENCING_TECHNOLOGY_OPTIONS,
   UploadWorkflows,
@@ -17,8 +17,9 @@ export interface UploadSampleStepProps {
   basespaceOauthRedirectUri: string;
   getPipelineVersionsForExistingProject: (
     projectId: number,
-  ) => Promise<{ pipelineVersions: ProjectPipelineVersions }>;
-  pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
+  ) => Promise<{ pipelineVersions: PipelineVersions }>;
+  pipelineVersions: { [projectId: string]: PipelineVersions };
+  latestMajorPipelineVersions: PipelineVersions;
 }
 
 export interface UploadSampleStepState {

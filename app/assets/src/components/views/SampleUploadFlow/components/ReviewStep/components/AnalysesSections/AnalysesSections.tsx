@@ -1,7 +1,10 @@
 import { Icon } from "@czi-sds/components";
 import { compact, map } from "lodash/fp";
 import React from "react";
+import { useAllowedFeatures } from "~/components/common/UserContext";
+import { NCBI_COMPRESSED_INDEX } from "~/components/utils/features";
 import {
+  NCBI_INDEX,
   NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
   Technology,
@@ -10,11 +13,12 @@ import {
   UPLOAD_WORKFLOW_KEY_FOR_VALUE,
   WORKFLOWS_BY_UPLOAD_SELECTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
-import { Project, ProjectPipelineVersions } from "~/interface/shared";
+import { PipelineVersions, Project } from "~/interface/shared";
 import cs from "./analyses_sections.scss";
 import { CGAnalysisSection } from "./components/CGAnalysisSection/CGAnalysisSection";
 import { MNGSAnalysisSection } from "./components/MNGSAnalysisSection";
 import { WGSAnalysisSection } from "./components/WGSAnalysisSection";
+import { AnalysisSectionsConfig } from "./workflowTypeConfig";
 
 interface AnalysesSectionsType {
   bedFile: string;
@@ -22,7 +26,7 @@ interface AnalysesSectionsType {
   guppyBasecallerSetting: string;
   medakaModel: string;
   wetlabProtocol: string;
-  pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
+  pipelineVersions: { [projectId: string]: PipelineVersions };
   project: Project;
   refSeqFile: string;
   refSeqTaxon: string;
@@ -57,6 +61,8 @@ const AnalysesSections = ({
   wetlabProtocol,
   workflows,
 }: AnalysesSectionsType) => {
+  const allowedFeatures = useAllowedFeatures();
+
   return (
     <div data-testid="upload-input-review">
       {map(workflow => {
@@ -77,6 +83,11 @@ const AnalysesSections = ({
         const pipelineVersion =
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
           pipelineVersions[project.id][workflowForPipelineVersion];
+
+        const indexDate = pipelineVersions?.[project.id][NCBI_INDEX];
+        const showIndexDate =
+          AnalysisSectionsConfig[workflow] &&
+          allowedFeatures.includes(NCBI_COMPRESSED_INDEX);
 
         return (
           <div className={cs.section}>
@@ -102,6 +113,16 @@ const AnalysesSections = ({
                     </div>
                   </div>
                 )}
+                <div className={cs.item}>
+                  <div className={cs.subheader}>{"Pipeline Version: "}</div>
+                  <div className={cs.description}>{pipelineVersion}</div>
+                </div>
+                {showIndexDate && (
+                  <div className={cs.item}>
+                    <div className={cs.subheader}>{"NCBI Index Date: "}</div>
+                    <div className={cs.description}>{indexDate}</div>
+                  </div>
+                )}
                 {workflow === UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value && (
                   <CGAnalysisSection
                     clearlabs={clearlabs}
@@ -123,10 +144,6 @@ const AnalysesSections = ({
                     bedFile={bedFile}
                   />
                 )}
-                <div className={cs.item}>
-                  <div className={cs.subheader}>{"Pipeline Version: "}</div>
-                  <div className={cs.description}>{pipelineVersion}</div>
-                </div>
               </div>
             </div>
           </div>

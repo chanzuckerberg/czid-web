@@ -1,6 +1,9 @@
 import { AccessionsSummary } from "~/components/common/CoverageVizBottomSidebar/types";
-import { WorkflowType } from "~/components/utils/workflows";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
+import { WorkflowConfigType } from "~/components/utils/workflows";
+import {
+  NCBI_INDEX,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
+} from "~/components/views/SampleUploadFlow/constants";
 import { ThresholdFilterData } from "../dropdown";
 import { BooleanNums, DateString, NameId, NumberId } from "./generic";
 export interface AccessionData {
@@ -193,11 +196,12 @@ export interface PipelineRun {
   guppy_basecaller_setting: string | null;
 }
 
-export interface ProjectPipelineVersions {
-  [WorkflowType.AMR]: string;
-  [WorkflowType.CONSENSUS_GENOME]: string;
-  [WorkflowType.LONG_READ_MNGS]: string;
-  [WorkflowType.SHORT_READ_MNGS]: string;
+export type PipelineVersions = WorkflowConfigType<string | undefined> &
+  Record<Required<typeof NCBI_INDEX>, string | undefined>;
+
+export interface PipelineVersionResponse {
+  projectPipelineVersions: PipelineVersions;
+  latestMajorPipelineVersions: PipelineVersions;
 }
 
 export interface Project {

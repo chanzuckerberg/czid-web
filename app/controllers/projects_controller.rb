@@ -333,11 +333,16 @@ class ProjectsController < ApplicationController
   end
 
   def project_pipeline_versions
+    latest_major_versions = WorkflowRun.latest_major_workflow_versions.except(WorkflowRun::WORKFLOW[:main], WorkflowRun::WORKFLOW[:benchmark]).merge({ AlignmentConfig::NCBI_INDEX => AlignmentConfig.default_name })
     render json: {
-      WorkflowRun::WORKFLOW[:amr] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:amr]),
-      WorkflowRun::WORKFLOW[:consensus_genome] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:consensus_genome]),
-      WorkflowRun::WORKFLOW[:long_read_mngs] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:long_read_mngs]),
-      WorkflowRun::WORKFLOW[:short_read_mngs] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:short_read_mngs]),
+      projectPipelineVersions: {
+        WorkflowRun::WORKFLOW[:amr] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:amr]),
+        WorkflowRun::WORKFLOW[:consensus_genome] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:consensus_genome]),
+        WorkflowRun::WORKFLOW[:long_read_mngs] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:long_read_mngs]),
+        WorkflowRun::WORKFLOW[:short_read_mngs] => VersionRetrievalService.call(@project.id, WorkflowRun::WORKFLOW[:short_read_mngs]),
+        AlignmentConfig::NCBI_INDEX => VersionRetrievalService.call(@project.id, AlignmentConfig::NCBI_INDEX),
+      },
+      latestMajorPipelineVersions: latest_major_versions,
     }
   end
 

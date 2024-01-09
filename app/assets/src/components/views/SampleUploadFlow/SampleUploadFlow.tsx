@@ -11,8 +11,8 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
   HostGenome,
   MetadataBasic,
+  PipelineVersions,
   Project,
-  ProjectPipelineVersions,
   SampleFromApi,
 } from "~/interface/shared";
 import { UploadStepType } from "~/interface/upload";
@@ -49,7 +49,8 @@ interface SampleUploadFlowState {
   medakaModel: string;
   metadata?: MetadataBasic;
   metadataIssues: $TSFixMeUnknown;
-  pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
+  pipelineVersions: { [projectId: string]: PipelineVersions };
+  latestMajorPipelineVersions: PipelineVersions;
   technology?: Technology;
   stepsEnabled: {
     [UploadStepType.SampleStep]: boolean;
@@ -87,7 +88,8 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     metadata: null, //
     metadataIssues: null,
-    pipelineVersions: {} as { [projectId: string]: ProjectPipelineVersions },
+    pipelineVersions: {} as { [projectId: string]: PipelineVersions },
+    latestMajorPipelineVersions: {} as PipelineVersions,
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     technology: null,
     stepsEnabled: {
@@ -261,12 +263,14 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
       return { pipelineVersions: this.state.pipelineVersions[projectId] };
     }
 
-    const pipelineVersions = await getProjectPipelineVersions(projectId);
+    const { projectPipelineVersions, latestMajorPipelineVersions } =
+      await getProjectPipelineVersions(projectId);
     this.setState((prevState: SampleUploadFlowState) => ({
       pipelineVersions: {
         ...prevState.pipelineVersions,
-        [projectId]: pipelineVersions,
+        [projectId]: projectPipelineVersions,
       },
+      latestMajorPipelineVersions,
     }));
   };
 
@@ -279,7 +283,12 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   // SLIGHT HACK: Keep steps mounted, so user can return to them if needed.
   // The internal state of some steps is difficult to recover if they are unmounted.
   renderSteps = () => {
-    const { pipelineVersions, workflows, wetlabProtocol } = this.state;
+    const {
+      latestMajorPipelineVersions,
+      pipelineVersions,
+      workflows,
+      wetlabProtocol,
+    } = this.state;
     return (
       <div>
         <UploadSampleStep
@@ -295,6 +304,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
             this.getPipelineVersionsForExistingProject(projectId)
           }
           pipelineVersions={pipelineVersions}
+          latestMajorPipelineVersions={latestMajorPipelineVersions}
         />
         {this.state.samples && (
           <UploadMetadataStep

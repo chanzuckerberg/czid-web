@@ -52,7 +52,8 @@
 
 .radioButton {
   flex-shrink: 0;
-  margin: $sds-spaces-l;
+  align-items: unset;
+  padding: 0px $sds-spaces-s 0px 0px;
 
   &.alignTitle {
     margin-top: $sds-spaces-xxs;
