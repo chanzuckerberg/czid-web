@@ -1,6 +1,9 @@
 import { expect } from "@playwright/test";
+import { HeatmapPage } from "./heatmap-page";
 import { PageObject } from "./page-object";
 
+const HEATMAP_BUTTON = "[class*='actions'] [role='listbox'] [class*='action']:not([data-testid])";
+const TAXON_HEATMAP = "[href*='/heatmap']";
 const SAMPLE_CHECKBOX_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleName}']/ancestor::div[@aria-rowindex]//div[contains(@class, 'checkbox')]`;
 const DELETE_BUTTON_TESTID = "bulk-delete-trigger";
 const ROW_CHECKBOXES = "[data-testid='row-select-checkbox'] input[type='checkbox']";
@@ -96,6 +99,19 @@ export class ProjectPage extends PageObject {
   // #endregion Api
 
   // #region Click
+  public async clickHeatmapButton() {
+    await this.page.locator(HEATMAP_BUTTON).click();
+  }
+
+  public async clickTaxonHeatmap() {
+    const [newPage] = await Promise.all([
+      this.page.context().waitForEvent("page"),
+      await this.page.locator(TAXON_HEATMAP).click(),
+    ]);
+    await newPage.waitForLoadState();
+    return new HeatmapPage(newPage);
+  }
+
   public async clickSampleCheckbox(sampleName: string) {
     const completedSampleLocator = SAMPLE_CHECKBOX_BY_SAMPLE_NAME(sampleName);
     await this.page.locator(completedSampleLocator).scrollIntoViewIfNeeded();

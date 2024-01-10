@@ -65,6 +65,16 @@ suites:
       grep: "Smoke Test: "
       retries: 3
     shard: concurrency
+  - name: "Sample Heatmap"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sample/sample-heatmap-smoke.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 3
+    shard: concurrency
 artifacts:
   cleanup: true
   download:

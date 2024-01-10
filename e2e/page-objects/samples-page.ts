@@ -95,9 +95,8 @@ export class SamplesPage extends PageObject {
     }
 
     public async getReportV2(sampleId: number) {
-      const response = await this.page.context().request.get(
-        `${process.env.BASEURL}/samples/${sampleId}/report_v2.json?&id=${sampleId}`,
-      );
+      const requestUrl = `${process.env.BASEURL}/samples/${sampleId}/report_v2.json?&id=${sampleId}`;
+      const response = await this.page.context().request.get(requestUrl);
       return response.json();
     }
 
@@ -143,6 +142,18 @@ export class SamplesPage extends PageObject {
       return samples[Math.floor(Math.random() * samples.length)];
     }
 
+    public async getGenusNamesFromReport(sampleReport: any) {
+      const taxons = await this.getTaxonsFromReport(sampleReport);
+      const genusNames = [];
+      for (const taxon of taxons) {
+        const genus = taxon.name.split(" ")[0];
+        if (!genusNames.includes(genus)) {
+          genusNames.push(genus);
+        }
+      }
+      return genusNames;
+    }
+
     public async getTaxonNamesFromReport(sampleReport: any) {
       const taxonNames = {
         "Scientific": [],
@@ -164,14 +175,16 @@ export class SamplesPage extends PageObject {
       const taxons = [];
       for (const key in sampleReport.counts) {
         for (const taxonId in sampleReport.counts[key]) {
-          const taxon = sampleReport.counts[key][taxonId];
-          taxon.id = taxonId;
-          if (taxon.name.split(" ").length >= 1) {
-            taxon.rank = "species";
-          } else {
-            taxon.rank = "genius";
+          if (+taxonId > 0 ) {
+            const taxon = sampleReport.counts[key][taxonId];
+            taxon.id = taxonId;
+            if (taxon.name.split(" ").length >= 1) {
+              taxon.rank = "species";
+            } else {
+              taxon.rank = "genius";
+            }
+            taxons.push(taxon);
           }
-          taxons.push(taxon);
         }
       }
       return taxons;
