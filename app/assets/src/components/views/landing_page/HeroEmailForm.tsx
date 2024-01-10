@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { useHistory } from "react-router-dom";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { EMAIL_TAKEN_ERROR } from "~/api/user";
 import ArrowSubmit from "~/components/ui/icons/IconSubmitArrow";
 import cs from "./HeroEmailForm.scss";
@@ -14,6 +15,7 @@ const HeroEmailFormMutation = graphql`
 `;
 
 const HeroEmailForm = () => {
+  const trackEvent = useTrackEvent();
   const [enteredEmail, setEnteredEmail] = useState("");
   const [commitMutation, isMutationInFlight] = useMutation(
     HeroEmailFormMutation,
@@ -47,6 +49,12 @@ const HeroEmailForm = () => {
           location.reload();
         },
       });
+
+      // Log lowercase emails, since emails are lowercased in the database
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.LANDING_PAGE_REGISTER_NOW_BUTTON_CLICKED,
+        { email: enteredEmail.toLowerCase() },
+      );
     } else {
       alert("Please enter a valid email address.");
     }

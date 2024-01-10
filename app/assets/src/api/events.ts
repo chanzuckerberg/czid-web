@@ -175,6 +175,10 @@ function EventDictionary() {
 
   this.PIPELINE_SAMPLE_REPORT_TAXON_SIDEBAR_LINK_CLICKED =
     "PIPELINE_SAMPLE_REPORT_TAXON_SIDEBAR_LINK_CLICKED";
+
+  /** The user has clicked the "Register Now" button on the LandingPage */
+  this.LANDING_PAGE_REGISTER_NOW_BUTTON_CLICKED =
+    "LANDING_PAGE_REGISTER_NOW_BUTTON_CLICKED";
 }
 
 const eventNames = new EventDictionary();
