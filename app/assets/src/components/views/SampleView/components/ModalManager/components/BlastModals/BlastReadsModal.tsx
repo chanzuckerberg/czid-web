@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
-import { SampleId, TABS_TEMP_FIX_PROPS } from "~/interface/shared";
+import { SampleId } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import cs from "./blast_reads_modal.scss";
@@ -215,7 +215,6 @@ export const BlastReadsModal = ({
         onChange={(_, selectedTabIndex) =>
           setSelectedCountTypeTab(selectedTabIndex)
         }
-        {...TABS_TEMP_FIX_PROPS}
       >
         {ntTab}
         {nrTab}

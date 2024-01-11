@@ -93,7 +93,7 @@ import {
   PipelineTypeRun,
   SamplesViewHandle,
 } from "~/interface/samplesView";
-import { Project, TABS_TEMP_FIX_PROPS } from "~/interface/shared";
+import { Project } from "~/interface/shared";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
 import ImgVizSecondary from "~ui/illustrations/ImgVizSecondary";
@@ -2110,7 +2110,6 @@ class DiscoveryViewCC extends React.Component<
           onChange={(_, selectedTabIndex) =>
             this.handleWorkflowTabChange(selectedTabIndex)
           }
-          {...TABS_TEMP_FIX_PROPS}
         >
           {this.computeWorkflowTabs().map(tab => tab.label)}
         </Tabs>

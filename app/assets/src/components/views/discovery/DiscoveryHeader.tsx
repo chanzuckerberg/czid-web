@@ -5,7 +5,6 @@ import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
 import { WorkflowType } from "~/components/utils/workflows";
-import { TABS_TEMP_FIX_PROPS } from "~/interface/shared";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import { TAB_SAMPLES, TAB_VISUALIZATIONS } from "./constants";
 import cs from "./discovery_header.scss";
@@ -164,7 +163,6 @@ const DiscoveryHeader = ({
           value={findIndex({ value: currentTab }, tabs)}
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           onChange={(_, selectedTabIndex) => onTabChange(selectedTabIndex)}
-          {...TABS_TEMP_FIX_PROPS}
         >
           {tabs.map(tab => tab.label)}
         </Tabs>
