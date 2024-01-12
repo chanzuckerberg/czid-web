@@ -15,7 +15,7 @@ export interface CoverageVizBottomSidebarProps {
   params: CoverageVizParams | Record<string, never>;
   sampleId: SampleId;
   pipelineVersion: string;
-  wdlVersion: string;
+  wdlVersion: string | null | undefined;
   nameType: string;
   snapshotShareId?: string;
   workflow: WorkflowType;

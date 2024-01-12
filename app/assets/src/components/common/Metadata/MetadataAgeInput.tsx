@@ -95,7 +95,7 @@ const MetadataAgeInput = ({
           });
           setAgeChanged(true);
           setSafeHumanAge(definedVal);
-          onChange(metadataType.key, definedVal.toString());
+          onChange(metadataType.key, definedVal && definedVal.toString());
         }}
         onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => handleKeyDown(e)}
         onBlur={() => onSave && onSave(metadataType.key)}

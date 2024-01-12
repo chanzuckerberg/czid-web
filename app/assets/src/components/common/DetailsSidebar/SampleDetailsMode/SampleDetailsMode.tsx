@@ -1,12 +1,13 @@
-import { some } from "lodash";
-import { find, get, set, size } from "lodash/fp";
+import { find, set, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import { getAllSampleTypes, saveSampleName, saveSampleNotes } from "~/api";
 import {
-  getSampleMetadata,
-  getSampleMetadataFields,
-  saveSampleMetadata,
-} from "~/api/metadata";
+  graphql,
+  useLazyLoadQuery,
+  useMutation,
+  useQueryLoader,
+} from "react-relay";
+import { getAllSampleTypes } from "~/api";
+import { getCsrfToken } from "~/api/utils";
 import Tabs from "~/components/ui/controls/Tabs";
 import {
   generateUrlToSampleView,
@@ -18,25 +19,26 @@ import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import {
   LocationObject,
-  Metadata,
+  MetadataType,
   MetadataTypes,
   PipelineRun,
   SampleId,
+  SampleType,
   SnapshotShareId,
 } from "~/interface/shared";
-import { processMetadata, processMetadataTypes } from "~utils/metadata";
+import { formatSendValue, processMetadataTypes } from "~utils/metadata";
+import { SampleDetailsModeSampleMetadataFieldsQuery } from "./__generated__/SampleDetailsModeSampleMetadataFieldsQuery.graphql";
+import { SampleDetailsModeSampleMetadataQuery } from "./__generated__/SampleDetailsModeSampleMetadataQuery.graphql";
+import { SampleDetailsModeUpdateMetadataMutation } from "./__generated__/SampleDetailsModeUpdateMetadataMutation.graphql";
+import { SampleDetailsModeUpdateSampleNameMutation } from "./__generated__/SampleDetailsModeUpdateSampleNameMutation.graphql";
+import { SampleDetailsModeUpdateSampleNotesMutation } from "./__generated__/SampleDetailsModeUpdateSampleNotesMutation.graphql";
 import { MetadataTab } from "./components/MetadataTab";
+import { NotesTab } from "./components/NotesTab";
+import { PipelineTab } from "./components/PipelineTab";
 import { SIDEBAR_TABS } from "./constants";
-import NotesTab from "./NotesTab";
-import PipelineTab, { MngsPipelineInfo, PipelineInfo } from "./PipelineTab";
 import cs from "./sample_details_mode.scss";
 import { AdditionalInfo, SidebarTabName } from "./types";
-import {
-  processAdditionalInfo,
-  processAMRWorkflowRun,
-  processCGWorkflowRunInfo,
-  processPipelineInfo,
-} from "./utils";
+import { processAdditionalInfo } from "./utils";
 
 export interface SampleDetailsModeProps {
   currentRun?: WorkflowRun | PipelineRun;
@@ -53,7 +55,85 @@ export interface SampleDetailsModeProps {
   tempSelectedOptions?: TempSelectedOptionsShape;
 }
 
-const SampleDetailsMode = ({
+const SampleMetadataFieldsQuery = graphql`
+  query SampleDetailsModeSampleMetadataFieldsQuery(
+    $snapshotLinkId: String
+    $input: queryInput_MetadataFields_input_Input!
+  ) {
+    MetadataFields(snapshotLinkId: $snapshotLinkId, input: $input) {
+      key
+      dataType
+      name
+      options
+      host_genome_ids
+      description
+      is_required
+      isBoolean
+      group
+    }
+  }
+`;
+
+const SampleMetadataQuery = graphql`
+  query SampleDetailsModeSampleMetadataQuery(
+    $sampleId: String!
+    $snapshotLinkId: String
+  ) {
+    SampleMetadata(sampleId: $sampleId, snapshotLinkId: $snapshotLinkId) {
+      ...MetadataTabMetadataFragment
+      ...NotesTabFragment
+      ...MetadataSectionContentFragment
+      additional_info {
+        name
+        ...PipelineTabFragment
+        editable
+        project_id
+        project_name
+        host_genome_taxa_category
+        host_genome_name
+        upload_date
+      }
+    }
+  }
+`;
+
+const UpdateMetadataMutation = graphql`
+  mutation SampleDetailsModeUpdateMetadataMutation(
+    $sampleId: String!
+    $input: mutationInput_UpdateMetadata_input_Input!
+  ) {
+    UpdateMetadata(sampleId: $sampleId, input: $input) {
+      status
+      message
+    }
+  }
+`;
+
+const UpdateSampleNameMutation = graphql`
+  mutation SampleDetailsModeUpdateSampleNameMutation(
+    $sampleId: String!
+    $input: mutationInput_UpdateSampleNotes_input_Input!
+  ) {
+    UpdateSampleName(sampleId: $sampleId, input: $input) {
+      status
+      message
+    }
+  }
+`;
+
+const UpdateSampleNotesMutation = graphql`
+  mutation SampleDetailsModeUpdateSampleNotesMutation(
+    $sampleId: String!
+    $input: mutationInput_UpdateSampleNotes_input_Input!
+  ) {
+    UpdateSampleNotes(sampleId: $sampleId, input: $input) {
+      status
+      message
+    }
+  }
+`;
+
+export const SampleDetailsMode = ({
   currentRun,
   currentWorkflowTab,
   handleWorkflowTabChange,
@@ -66,39 +146,59 @@ const SampleDetailsMode = ({
   tempSelectedOptions,
   sampleWorkflowLabels,
 }: SampleDetailsModeProps) => {
-  const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo | null>(
-    null,
-  );
+  const authenticityToken = getCsrfToken();
   const [currentTabSidebar, setCurrentTabSidebar] = useState(SIDEBAR_TABS[0]);
-  const [lastValidMetadata, setLastValidMetadata] = useState<Metadata | null>(
-    null,
-  );
-  const [loading, setLoading] = useState(true);
-  const [metadata, setMetadata] = useState<Metadata | null>(null);
   const [metadataChanged, setMetadataChanged] = useState<
     Record<string, boolean>
   >({});
   const [metadataErrors, setMetadataErrors] = useState<
     Record<string, string | null>
   >({});
-  const [metadataSavePending, setMetadataSavePending] = useState<
-    Record<string, boolean>
-  >({});
-  const [metadataTypes, setMetadataTypes] = useState<MetadataTypes | null>(
-    null,
-  );
-  const [pipelineInfo, setPipelineInfo] = useState<MngsPipelineInfo | null>(
-    null,
-  );
-  const [pipelineRun, setPipelineRun] = useState<PipelineRun | null>(null);
-  const [sampleTypes, setSampleTypes] = useState(null);
+  const [sampleTypes, setSampleTypes] = useState<SampleType[] | null>(null);
   const [singleKeyValueToSave, setSingleKeyValueToSave] = useState<
     [string, string | number | LocationObject] | null
   >(null);
 
+  const metadataFields =
+    useLazyLoadQuery<SampleDetailsModeSampleMetadataFieldsQuery>(
+      SampleMetadataFieldsQuery,
+      {
+        snapshotLinkId: snapshotShareId,
+        input: {
+          sampleIds: [String(sampleId)],
+          authenticityToken: authenticityToken,
+        },
+      },
+    );
+
+  const [_, loadMetadataQuery] =
+    useQueryLoader<SampleDetailsModeSampleMetadataQuery>(SampleMetadataQuery);
+
+  const sampleMetadataFields = metadataFields?.MetadataFields;
+  const metadataTypes: MetadataTypes = processMetadataTypes(
+    sampleMetadataFields as MetadataType[],
+  );
+
+  const sampleMetadata = useLazyLoadQuery<SampleDetailsModeSampleMetadataQuery>(
+    SampleMetadataQuery,
+    {
+      sampleId: String(sampleId),
+      snapshotLinkId: snapshotShareId,
+    },
+  );
+
+  const sampleMetadataValues = sampleMetadata?.SampleMetadata;
+
+  const additionalInfo: AdditionalInfo = processAdditionalInfo(
+    sampleMetadataValues?.additional_info as AdditionalInfo,
+  );
+  const [nameLocal, setNameLocal] = useState(additionalInfo?.name);
+
   useEffect(() => {
-    if (sampleId) fetchMetadata();
-  }, [sampleId]);
+    getAllSampleTypes().then(fetchedSampleTypes => {
+      setSampleTypes(fetchedSampleTypes);
+    });
+  }, []);
 
   useEffect(() => {
     // _save relies on this.state.metadata being up-to-date
@@ -107,50 +207,10 @@ const SampleDetailsMode = ({
       _save(sampleId, key, value);
       setSingleKeyValueToSave(null);
     }
-  }, [metadata]);
+  }, [singleKeyValueToSave]);
 
   const onTabChange = (tab: SidebarTabName) => {
     setCurrentTabSidebar(tab);
-  };
-
-  const fetchMetadata = async () => {
-    setLoading(true);
-    setMetadata(null);
-    setAdditionalInfo(null);
-    setPipelineInfo(null);
-
-    if (!sampleId) {
-      return;
-    }
-
-    const [fetchedMetadata, fetchedMetadataTypes, fetchedSampleTypes] =
-      await Promise.all([
-        getSampleMetadata({
-          id: sampleId,
-          pipelineVersion: get("pipeline_version", currentRun),
-          snapshotShareId,
-        }),
-        getSampleMetadataFields(sampleId, snapshotShareId),
-        !snapshotShareId && getAllSampleTypes(),
-      ]);
-
-    const processedMetadata = processMetadata({
-      metadata: fetchedMetadata.metadata,
-      flatten: true,
-    });
-
-    setMetadata(processedMetadata);
-    setLastValidMetadata(processedMetadata);
-    setAdditionalInfo(processAdditionalInfo(fetchedMetadata.additional_info));
-    setPipelineInfo(processPipelineInfo(fetchedMetadata.additional_info));
-    setPipelineRun(fetchedMetadata.additional_info.pipeline_run);
-    setMetadataTypes(
-      fetchedMetadataTypes
-        ? processMetadataTypes(fetchedMetadataTypes)
-        : metadataTypes,
-    );
-    setSampleTypes(fetchedSampleTypes);
-    setLoading(false);
   };
 
   // shouldSave option is used when <Input> option is selected
@@ -162,95 +222,149 @@ const SampleDetailsMode = ({
   ) => {
     /* Sample name and note are special cases */
     if (key === "name" || key === "notes") {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-      setAdditionalInfo(set(key, value, additionalInfo));
       setMetadataChanged(set(key, true, metadataChanged));
       return;
     }
     if (shouldSave) {
       setSingleKeyValueToSave([key, value]);
     }
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-    setMetadata(set(key, value, metadata));
     setMetadataChanged(set(key, !shouldSave, metadataChanged));
     setMetadataErrors(set(key, null, metadataErrors));
   };
 
-  const handleMetadataSave = async (key: string) => {
+  const handleMetadataSave = async (key: string, metadata) => {
     if (metadataChanged[key]) {
-      const newValue =
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
-        key === "name" || key === "notes" ? additionalInfo[key] : metadata[key];
-
+      const newValue = metadata[key];
       setMetadataChanged(set(key, false, metadataChanged));
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       _save(sampleId, key, newValue);
     }
   };
+
+  const [commitUpdateMetadataMutation, isUpdateMetadataMutationInFlight] =
+    useMutation<SampleDetailsModeUpdateMetadataMutation>(
+      UpdateMetadataMutation,
+    );
+
+  const [commitUpdateSampleNameMutation, isUpdateSampleNameMutationInFlight] =
+    useMutation<SampleDetailsModeUpdateSampleNameMutation>(
+      UpdateSampleNameMutation,
+    );
+
+  const [commitUpdateSampleNotesMutation, isUpdateSampleNotesMutationInFlight] =
+    useMutation<SampleDetailsModeUpdateSampleNotesMutation>(
+      UpdateSampleNotesMutation,
+    );
 
   const _save = async (
     id: number | string,
     key: string,
     value: string | number | LocationObject,
   ) => {
-    let _lastValidMetadata = lastValidMetadata;
     let _metadataErrors = metadataErrors;
-    let _metadata = metadata;
 
     // When metadata is saved, fire event.
     if (onMetadataUpdate) {
       onMetadataUpdate(key, value);
     }
 
-    setMetadataSavePending(set(key, true, metadataSavePending));
+    const onMetadataSaveCompleted = data => {
+      if (data.UpdateMetadata?.status === "failed") {
+        _metadataErrors = set(
+          key,
+          data.UpdateMetadata.message,
+          _metadataErrors,
+        );
+        setMetadataErrors(_metadataErrors);
+      } else {
+        loadMetadataQuery(
+          {
+            sampleId: String(sampleId),
+            snapshotLinkId: snapshotShareId,
+          },
+          {
+            fetchPolicy: "network-only",
+          },
+        );
+      }
+    };
+
+    const onMetadataSaveError = error => {
+      _metadataErrors = set(key, error, _metadataErrors);
+      setMetadataErrors(_metadataErrors);
+    };
+
     if (key === "name") {
-      await saveSampleName(id, value);
+      commitUpdateSampleNameMutation({
+        variables: {
+          sampleId: id as string,
+          input: {
+            value: String(value),
+            authenticityToken: authenticityToken,
+          },
+        },
+        onCompleted: onMetadataSaveCompleted,
+        onError: onMetadataSaveError,
+      });
     } else if (key === "notes") {
-      await saveSampleNotes(id, value);
+      commitUpdateSampleNotesMutation({
+        variables: {
+          sampleId: id as string,
+          input: {
+            value: String(value),
+            authenticityToken: authenticityToken,
+          },
+        },
+        onCompleted: onMetadataSaveCompleted,
+        onError: onMetadataSaveError,
+      });
     } else {
-      await saveSampleMetadata(sampleId, key, value).then(response => {
-        // If the save fails, immediately revert to the last valid metadata value.
-        if (response.status === "failed") {
-          _metadataErrors = set(key, response.message, _metadataErrors);
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-          _metadata = set(key, _lastValidMetadata[key], _metadata);
-        } else {
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-          _lastValidMetadata = set(key, value, _lastValidMetadata);
-        }
+      const sendValue = formatSendValue(value);
+      commitUpdateMetadataMutation({
+        variables: {
+          sampleId: id as string,
+          input: {
+            field: key,
+            value: sendValue,
+            authenticityToken: authenticityToken,
+          },
+        },
+        onError: onMetadataSaveError,
+        onCompleted: onMetadataSaveCompleted,
       });
     }
 
-    setMetadataSavePending(set(key, false, metadataSavePending));
     setMetadataErrors(_metadataErrors);
-    setMetadata(_metadata);
-    setLastValidMetadata(_lastValidMetadata);
   };
 
   const renderTab = () => {
-    const savePending = some(metadataSavePending);
+    const savePending =
+      isUpdateMetadataMutationInFlight ||
+      isUpdateSampleNameMutationInFlight ||
+      isUpdateSampleNotesMutationInFlight;
 
-    if (currentTabSidebar === "Metadata") {
+    if (currentTabSidebar === "Metadata" && sampleMetadataValues) {
       return (
         <MetadataTab
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-          metadata={metadata}
-          additionalInfo={additionalInfo}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           metadataTypes={metadataTypes}
           onMetadataChange={handleMetadataChange}
           onMetadataSave={handleMetadataSave}
           savePending={savePending}
+          nameLocal={nameLocal}
+          setNameLocal={setNameLocal}
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           metadataErrors={metadataErrors}
           sampleTypes={sampleTypes || []}
           snapshotShareId={snapshotShareId}
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           currentWorkflowTab={currentWorkflowTab}
+          metadataTabFragmentKey={sampleMetadataValues}
         />
       );
     }
-    if (currentTabSidebar === "Pipelines") {
+    if (
+      currentTabSidebar === "Pipelines" &&
+      sampleMetadataValues?.additional_info
+    ) {
       const workflowTabs = size(sampleWorkflowLabels) > 1 && (
         <Tabs
           className={cs.workflowTabs}
@@ -269,13 +383,6 @@ const SampleDetailsMode = ({
         sample.workflow_runs?.filter(
           run => run.workflow === WorkflowType.CONSENSUS_GENOME,
         );
-
-      let pipelineInfoForTab: PipelineInfo | null = pipelineInfo;
-      if (currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME) {
-        pipelineInfoForTab = processCGWorkflowRunInfo(currentRun);
-      } else if (currentWorkflowTab === WORKFLOW_TABS.AMR) {
-        pipelineInfoForTab = processAMRWorkflowRun(currentRun as WorkflowRun);
-      }
 
       return (
         <>
@@ -297,11 +404,9 @@ const SampleDetailsMode = ({
               </div>
             )}
           <PipelineTab
-            pipelineInfo={pipelineInfoForTab}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
-            erccComparison={additionalInfo.ercc_comparison}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-            pipelineRun={pipelineRun}
+            currentRun={currentRun}
+            currentWorkflowTab={currentWorkflowTab}
+            pipelineTabFragmentKey={sampleMetadataValues?.additional_info}
             sampleId={sampleId}
             snapshotShareId={snapshotShareId}
           />
@@ -311,10 +416,11 @@ const SampleDetailsMode = ({
     if (currentTabSidebar === "Notes") {
       return (
         <NotesTab
-          notes={additionalInfo?.notes}
-          editable={additionalInfo?.editable}
+          notesFragmentKey={sampleMetadataValues}
           onNoteChange={val => handleMetadataChange("notes", val)}
-          onNoteSave={() => handleMetadataSave("notes")}
+          onNoteSave={(notes: string | null | undefined) =>
+            handleMetadataSave("notes", { notes: notes })
+          }
           savePending={savePending}
         />
       );
@@ -324,13 +430,8 @@ const SampleDetailsMode = ({
 
   return (
     <div className={cs.content}>
-      {loading ? (
-        <div className={cs.loadingMsg}>Loading...</div>
-      ) : (
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
-        <div className={cs.title}>{additionalInfo.name}</div>
-      )}
-      {!loading && showReportLink && (
+      <div className={cs.title}>{nameLocal}</div>
+      {showReportLink && (
         <div className={cs.reportLink}>
           <a
             href={generateUrlToSampleView({
@@ -339,25 +440,18 @@ const SampleDetailsMode = ({
             })}
             target="_blank"
             rel="noreferrer noopener"
-            // this is broken, but alldoami found it while working on something unrelated
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            onClick={() => {}}
           >
             See Report
           </a>
         </div>
       )}
-      {!loading && (
-        <Tabs
-          className={cs.tabs}
-          tabs={SIDEBAR_TABS}
-          value={currentTabSidebar}
-          onChange={onTabChange}
-        />
-      )}
-      {!loading && renderTab()}
+      <Tabs
+        className={cs.tabs}
+        tabs={SIDEBAR_TABS}
+        value={currentTabSidebar}
+        onChange={onTabChange}
+      />
+      {renderTab()}
     </div>
   );
 };
-
-export default SampleDetailsMode;

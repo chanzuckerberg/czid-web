@@ -1,26 +1,30 @@
 import React from "react";
+import { ERCCComparisonShape } from "~/interface/shared";
 import cs from "./ercc_scatterplot.scss";
 import ScatterPlot from "./ScatterPlot";
 
 interface ERCCScatterPlotProps {
   width?: number;
   height?: number;
-  ercc_comparison?: {
-    name: string;
-    actual: number;
-    expected: number;
-  }[];
+  erccComparison?: ReadonlyArray<ERCCComparisonShape | null | undefined>;
 }
 
 const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
   const data: { name: string; actual: number; expected: number }[] = [];
-  if (props.ercc_comparison) {
-    for (const row of props.ercc_comparison) {
-      if (row.actual === 0) {
+
+  if (props.erccComparison) {
+    for (const row of props.erccComparison) {
+      if (!row) {
+        continue;
+      }
+      if (row.actual === 0 || row.actual === null || row.actual === undefined) {
+        continue;
+      }
+      if (row.expected === null || row.expected === undefined) {
         continue;
       }
       data.push({
-        name: row.name,
+        name: row.name ?? "",
         actual: Math.log10(row.actual),
         expected: Math.log10(row.expected),
       });

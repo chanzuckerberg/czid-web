@@ -1,0 +1,8 @@
+@import "~@czi-sds/components/dist/variables";
+
+.loading {
+  margin: $sds-spaces-xl $sds-spaces-m;
+  margin-right: 60px;
+  word-break: break-all;
+  line-height: 1.4em;
+}

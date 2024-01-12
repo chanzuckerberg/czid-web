@@ -1,3 +1,2 @@
-import SampleDetailsMode, { SampleDetailsModeProps } from "./SampleDetailsMode";
-export { SampleDetailsModeProps };
-export default SampleDetailsMode;
+import { SampleDetailsMode, SampleDetailsModeProps } from "./SampleDetailsMode";
+export { SampleDetailsMode, SampleDetailsModeProps };

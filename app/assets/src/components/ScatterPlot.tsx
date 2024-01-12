@@ -155,6 +155,9 @@ class ScatterPlot extends React.Component<ScatterPlotProps> {
   }
 
   renderFitLine() {
+    if (this.data.length < 2) {
+      return;
+    }
     const leastSquares = this.leastSquares();
     const slope = leastSquares[0];
     const intercept = leastSquares[1];

@@ -28,7 +28,7 @@ export const getNonNumericColumns = (
   isExpandAllOpened: boolean,
   isFastaDownloadEnabled: boolean,
   isPhyloTreeAllowed: boolean,
-  pipelineRunId: number,
+  pipelineRunId: number | string | null,
   pipelineVersion: string,
   projectId: number,
   sampleId: SampleId,

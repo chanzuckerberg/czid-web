@@ -8,8 +8,7 @@
   position: relative;
 }
 
-.title,
-.loadingMsg {
+.title {
   @include font-header-xl;
   margin: 0 $sds-spaces-m;
   margin-right: 60px;
