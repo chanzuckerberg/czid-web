@@ -35,6 +35,7 @@ import {
 
 import { ArticlesPage } from "./articles-page";
 import { PageObject } from "./page-object";
+import { PipelineVizPage } from "./pipeline_viz-page";
 import { ProjectPage } from "./project-page";
 const TAXON_HOVER_ACTIONS = (taxonName: string) => `//span[text()='${taxonName}']/parent::div//span[@data-testid='hover-actions']//button`;
 const COVERAGE_VIZ_HISTOGRAM_LOCATOR = "[class*='coverageVizHistogram']";
@@ -43,6 +44,9 @@ const BLAST_SELECTION_MODAL_TESTID = "blast-selection-modal";
 const BLAST_SELECTION_OPTIONS = "[data-testid='blast-selection-modal'] [class*='optionText'] [class*='title']";
 const BLAST_TYPES = ["blastn", "blastx"];
 const REPORT_TABLE_ROWS = "[class*='reportTable'] [role='row']";
+const SAMPLE_DETAILS_BUTTON = "[data-testid='sample-details']";
+const PIPELINES_TAB = "[data-testid='pipelines']";
+const VIEW_PIPELINE_VISUALIZATION_LINK = "[class*='vizLink'] a";
 
 export class SamplesPage extends PageObject {
 
@@ -268,6 +272,19 @@ export class SamplesPage extends PageObject {
     // #endregion Get
 
     // #region Click
+    public async clickViewPipelineVisualizationLink() {
+      await this.page.locator(VIEW_PIPELINE_VISUALIZATION_LINK).click();
+      return new PipelineVizPage(this.page);
+    }
+
+    public async clickPipelinesTab() {
+      await this.page.locator(PIPELINES_TAB).click();
+    }
+
+    public async clickSampleDetailsButton() {
+      await this.page.locator(SAMPLE_DETAILS_BUTTON).click();
+    }
+
     public async clickExpandAll() {
       await this.page.getByTestId("expand-taxon-parent-all").click();
     }

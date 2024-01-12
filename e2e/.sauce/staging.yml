@@ -25,6 +25,16 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Pipeline Visualization"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/view/pipeline-visualization-smoke.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 1
+    shard: concurrency
   - name: "Sample Deletion Smoke Tests"
     platformName: "macOS 12"
     screenResolution: "1440x900"
@@ -73,7 +83,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
-      retries: 3
+      retries: 1
     shard: concurrency
 artifacts:
   cleanup: true
