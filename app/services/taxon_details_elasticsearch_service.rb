@@ -15,7 +15,8 @@ class TaxonDetailsElasticsearchService
     @pr_id_to_sample_id = pr_id_to_sample_id
     @samples = samples
     @taxon_ids = taxon_ids
-    @background_id = background_id
+    @should_remove_zscore = background_id.nil?
+    @background_id = background_id || Rails.configuration.x.constants.default_background
   end
 
   def call
@@ -34,7 +35,8 @@ class TaxonDetailsElasticsearchService
 
     dict = ElasticsearchQueryHelper.samples_taxons_details(
       results_by_pr,
-      @samples
+      @samples,
+      @should_remove_zscore
     )
     return dict
   end

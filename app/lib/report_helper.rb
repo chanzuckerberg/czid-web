@@ -105,8 +105,10 @@ module ReportHelper
           csv << data_values.values_at(*attribute_names.map(&:to_sym))
         end
       end
-      background_name = Background.find(background_id)&.name
-      csv << ["Background: #{background_name}"]
+      unless background_id.nil?
+        background_name = Background.find(background_id)&.name
+        csv << ["Background: #{background_name}"]
+      end
     end
   end
 
@@ -308,7 +310,14 @@ module ReportHelper
     taxon_counts_2d.delete_if { |tax_id, _tax_info| TaxonLineage::HOMO_SAPIENS_TAX_IDS.include?(tax_id) }
   end
 
-  def self.taxon_counts_cleanup(taxon_counts, workflow)
+  def self.remove_zscore(taxon_counts_2d)
+    taxon_counts_2d.each do |_, tax_info|
+      tax_info["NT"]["zscore"] = nil
+      tax_info["NR"]["zscore"] = nil
+    end
+  end
+
+  def self.taxon_counts_cleanup(taxon_counts, workflow, should_remove_zscore = false)
     # convert_2d also does some filtering.
     tax_2d = convert_2d(taxon_counts, workflow)
     cleanup_genus_ids!(tax_2d)
@@ -316,6 +325,7 @@ module ReportHelper
     # Remove any rows that correspond to homo sapiens. These should be mostly
     # filtered out in the pipeline but occassionally a few slip through.
     remove_homo_sapiens_counts!(tax_2d)
+    remove_zscore(tax_2d) if should_remove_zscore
     tax_2d
   end
 

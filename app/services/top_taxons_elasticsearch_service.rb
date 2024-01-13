@@ -20,7 +20,8 @@ class TopTaxonsElasticsearchService
   )
     @params = params
     @samples = samples_for_heatmap
-    @background_id = background_for_heatmap
+    @should_remove_zscore = background_for_heatmap.nil?
+    @background_id = background_for_heatmap || Rails.configuration.x.constants.default_background
   end
 
   def call
@@ -52,7 +53,8 @@ class TopTaxonsElasticsearchService
     )
     dict = ElasticsearchQueryHelper.samples_taxons_details(
       results_by_pr,
-      @samples
+      @samples,
+      @should_remove_zscore
     )
     return dict
   end

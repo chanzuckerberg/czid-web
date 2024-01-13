@@ -1055,10 +1055,7 @@ module ElasticsearchQueryHelper
     return result_hash
   end
 
-  def self.samples_taxons_details(
-    results_by_pr,
-    samples
-  )
+  def self.samples_taxons_details(results_by_pr, samples, should_remove_zscore = false)
     results = {}
 
     workflow = samples.first.initial_workflow
@@ -1069,7 +1066,7 @@ module ElasticsearchQueryHelper
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts, workflow)
+      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts, workflow, should_remove_zscore)
 
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
