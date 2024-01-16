@@ -20,7 +20,7 @@ type CountUniqHosts = { [host: string]: number };
  * Shows a message depending on whether the selected host matches a
  * IDseq-supported host.
  */
-export default class HostOrganismMessage extends React.Component<HostOrganismMessageProps> {
+export class HostOrganismMessage extends React.Component<HostOrganismMessageProps> {
   // By design, host names are case insensitive, so we don't
   // get duplicates.
   hasMatch = (host: string) => {

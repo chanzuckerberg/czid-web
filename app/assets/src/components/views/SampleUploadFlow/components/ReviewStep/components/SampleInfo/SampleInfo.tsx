@@ -16,12 +16,12 @@ interface SampleInfoType {
   adminOptions: Record<string, string>;
   areLinksEnabled: boolean;
   hostGenomes?: HostGenome[];
-  metadata: MetadataBasic;
+  metadata: MetadataBasic | null;
   onAdminOptionsChanged(opts: Record<string, string>): void;
   onLinkClick(link: string): void;
   project: Project;
   projectMetadataFields: object | null;
-  samples?: SampleFromApi[];
+  samples: SampleFromApi[] | null;
   uploadType: string;
 }
 

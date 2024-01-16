@@ -1,7 +1,7 @@
 import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
-import HostOrganismMessage from "~/components/views/SampleUploadFlow/HostOrganismMessage";
+import { HostOrganismMessage } from "~/components/views/SampleUploadFlow/components/ReviewStep/components/HostOrganismMessage";
 import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
 import cs from "./playground_components.scss";
 

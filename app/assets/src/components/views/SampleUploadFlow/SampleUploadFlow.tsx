@@ -17,12 +17,12 @@ import {
 } from "~/interface/shared";
 import { UploadStepType } from "~/interface/upload";
 import { ReviewStep } from "./components/ReviewStep";
+import { SampleUploadFlowHeader } from "./components/SampleUploadFlowHeader";
+import { UploadMetadataStep } from "./components/UploadMetadataStep";
+import { UploadSampleStep } from "./components/UploadSampleStep";
 import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
-import UploadSampleStep from "./components/UploadSampleStep/UploadSampleStep";
 import { Technology, UploadWorkflows } from "./constants";
 import cs from "./sample_upload_flow.scss";
-import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
-import UploadMetadataStep from "./UploadMetadataStep";
 
 interface SampleUploadFlowProps {
   csrf?: string;
@@ -36,61 +36,52 @@ interface SampleUploadFlowProps {
 interface SampleUploadFlowState {
   workflows: Set<UploadWorkflows>;
   currentStep: UploadStepType;
-  samples?: SampleFromApi[];
+  samples: SampleFromApi[] | null;
   uploadType: "remote" | "local" | "";
   project: Project;
   sampleNamesToFiles: $TSFixMeUnknown;
-  bedFile?: File;
-  refSeqAccession?: RefSeqAccessionDataType;
-  refSeqFile?: File;
-  refSeqTaxon?: TaxonOption;
+  bedFile: File | null;
+  refSeqAccession: RefSeqAccessionDataType | null;
+  refSeqFile: File | null;
+  refSeqTaxon: TaxonOption | null;
   clearlabs: boolean;
-  guppyBasecallerSetting?: string;
-  medakaModel: string;
-  metadata?: MetadataBasic;
+  guppyBasecallerSetting: string | null;
+  medakaModel: string | null;
+  metadata: MetadataBasic | null;
   metadataIssues: $TSFixMeUnknown;
   pipelineVersions: { [projectId: string]: PipelineVersions };
   latestMajorPipelineVersions: PipelineVersions;
-  technology?: Technology;
+  technology: Technology | null;
   stepsEnabled: {
     [UploadStepType.SampleStep]: boolean;
     [UploadStepType.MetadataStep]: boolean;
     [UploadStepType.ReviewStep]: boolean;
   };
   hostGenomes: HostGenome[];
-  wetlabProtocol?: string;
+  wetlabProtocol: string | null;
 }
 
 class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   state: SampleUploadFlowState = {
     currentStep: UploadStepType.SampleStep,
     // Sample upload information
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     samples: null,
     uploadType: "", // remote or local
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     project: null,
     sampleNamesToFiles: null, // Needed for local samples.
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     bedFile: null, // Optional for WGS samples.
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     refSeqAccession: null, // Optional for WGS samples.
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     refSeqFile: null, // Needed for WGS samples.
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     refSeqTaxon: null, // Needed for WGS samples.
     // Metadata upload information
     clearlabs: false,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     guppyBasecallerSetting: null,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     medakaModel: null,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     metadata: null, //
     metadataIssues: null,
     pipelineVersions: {} as { [projectId: string]: PipelineVersions },
     latestMajorPipelineVersions: {} as PipelineVersions,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     technology: null,
     stepsEnabled: {
       [UploadStepType.SampleStep]: true,
@@ -99,7 +90,6 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     },
     hostGenomes: [], // set on metadata upload
     workflows: new Set() as Set<UploadWorkflows>,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     wetlabProtocol: null,
   };
 

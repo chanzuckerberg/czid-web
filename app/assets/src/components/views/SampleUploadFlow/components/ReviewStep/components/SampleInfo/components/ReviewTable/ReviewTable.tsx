@@ -9,9 +9,9 @@ import { DataHeaders } from "./types";
 
 interface ReviewTableType {
   hostGenomes?: HostGenome[];
-  metadata: MetadataBasic;
+  metadata: MetadataBasic | null;
   projectMetadataFields: object | null;
-  samples?: SampleFromApi[];
+  samples: SampleFromApi[] | null;
   uploadType: string;
 }
 

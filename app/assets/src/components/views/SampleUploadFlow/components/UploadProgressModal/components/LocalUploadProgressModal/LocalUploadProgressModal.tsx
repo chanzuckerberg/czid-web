@@ -25,42 +25,43 @@ import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { logError } from "~/components/utils/logUtil";
-import { Project, SampleFromApi } from "~/interface/shared";
+import { MetadataBasic, Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import Notification from "~ui/notifications/Notification";
-import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
-import cs from "./upload_progress_modal.scss";
+import { UploadWorkflows } from "../../../../constants";
+import { RefSeqAccessionDataType } from "../../../UploadSampleStep/types";
+import cs from "../../upload_progress_modal.scss";
 import {
   addAdditionalInputFilesToSamples,
   addFlagsToSamples,
   redirectToProject,
-} from "./upload_progress_utils";
-import UploadConfirmationModal from "./UploadConfirmationModal";
-import UploadProgressModalSampleList from "./UploadProgressModalSampleList";
+} from "../../upload_progress_utils";
+import { UploadConfirmationModal } from "./components/UploadConfirmationModal";
+import { UploadProgressModalSampleList } from "./components/UploadProgressModalSampleList";
 
 interface LocalUploadProgressModalProps {
   adminOptions: Record<string, string>;
-  bedFile?: File;
-  clearlabs?: boolean;
+  bedFile: File | null;
+  clearlabs: boolean;
   guppyBasecallerSetting: string;
-  medakaModel?: string;
-  metadata?: Record<string, any>;
+  medakaModel: string | null;
+  metadata: MetadataBasic | null;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
-  refSeqAccession: RefSeqAccessionDataType;
-  refSeqFile?: File;
-  refSeqTaxon?: TaxonOption;
-  samples?: SampleFromApi[];
-  skipSampleProcessing?: boolean;
-  technology?: string;
+  refSeqAccession: RefSeqAccessionDataType | null;
+  refSeqFile: File | null;
+  refSeqTaxon: TaxonOption | null;
+  samples: SampleFromApi[] | null;
+  skipSampleProcessing: boolean;
+  technology: string | null;
   uploadType: string;
-  useStepFunctionPipeline?: boolean;
-  wetlabProtocol?: string;
-  workflows?: Set<$TSFixMe>;
+  useStepFunctionPipeline: boolean;
+  wetlabProtocol: string | null;
+  workflows: Set<UploadWorkflows>;
 }
 
-const LocalUploadProgressModal = ({
+export const LocalUploadProgressModal = ({
   adminOptions,
   bedFile,
   clearlabs,
@@ -144,25 +145,17 @@ const LocalUploadProgressModal = ({
     const samplesToUpload = addFlagsToSamples({
       adminOptions,
       bedFileName: bedFile?.name,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       clearlabs,
       guppyBasecallerSetting,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       medakaModel,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       samples,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       useStepFunctionPipeline,
       refSeqAccession,
       refSeqFileName: refSeqFile?.name,
       refSeqTaxon,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       skipSampleProcessing,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       technology,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       workflows,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       wetlabProtocol,
     });
 
@@ -696,5 +689,3 @@ const LocalUploadProgressModal = ({
     </Modal>
   );
 };
-
-export default LocalUploadProgressModal;

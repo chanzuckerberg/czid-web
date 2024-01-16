@@ -12,17 +12,18 @@ import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { logError } from "~/components/utils/logUtil";
-import { Project, SampleFromApi } from "~/interface/shared";
+import { MetadataBasic, Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { IconSuccess } from "~ui/icons";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
-import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
-import cs from "./upload_progress_modal.scss";
+import { UploadWorkflows } from "../../../../constants";
+import { RefSeqAccessionDataType } from "../../../UploadSampleStep/types";
+import cs from "../../upload_progress_modal.scss";
 import {
   addAdditionalInputFilesToSamples,
   addFlagsToSamples,
   redirectToProject,
-} from "./upload_progress_utils";
+} from "../../upload_progress_utils";
 
 const BASESPACE_SAMPLE_FIELDS = [
   "name",
@@ -36,25 +37,25 @@ const NUM_FAILED_SAMPLES_TO_DISPLAY = 3;
 
 interface RemoteUploadProgressModalProps {
   adminOptions: Record<string, string>;
-  bedFile?: File;
-  clearlabs?: boolean;
-  medakaModel?: string;
-  metadata?: Record<string, any>;
+  bedFile: File | null;
+  clearlabs: boolean;
+  medakaModel: string | null;
+  metadata?: MetadataBasic;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
-  refSeqAccession?: RefSeqAccessionDataType;
-  refSeqFile?: File;
-  refSeqTaxon?: TaxonOption;
-  samples?: SampleFromApi[];
-  skipSampleProcessing?: boolean;
-  technology?: string;
+  refSeqAccession: RefSeqAccessionDataType | null;
+  refSeqFile: File | null;
+  refSeqTaxon: TaxonOption | null;
+  samples: SampleFromApi[] | null;
+  skipSampleProcessing: boolean;
+  technology: string | null;
   uploadType: string;
-  useStepFunctionPipeline?: boolean;
-  wetlabProtocol?: string;
-  workflows?: Set<string>;
+  useStepFunctionPipeline: boolean;
+  wetlabProtocol: string | null;
+  workflows: Set<UploadWorkflows>;
 }
 
-const RemoteUploadProgressModal = ({
+export const RemoteUploadProgressModal = ({
   adminOptions,
   bedFile,
   clearlabs,
@@ -103,23 +104,16 @@ const RemoteUploadProgressModal = ({
     const samplesWithFlags = addFlagsToSamples({
       adminOptions,
       bedFileName: bedFile?.name,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       clearlabs,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       medakaModel,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       useStepFunctionPipeline,
       refSeqAccession,
       refSeqFileName: refSeqFile?.name,
       refSeqTaxon,
       samples: samplesToFlag,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       skipSampleProcessing,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       technology,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       workflows,
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       wetlabProtocol,
     });
 
@@ -369,5 +363,3 @@ const RemoteUploadProgressModal = ({
     </Modal>
   );
 };
-
-export default RemoteUploadProgressModal;

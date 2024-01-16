@@ -2,26 +2,27 @@ import { TaxonOption } from "~/components/common/filters/types";
 import {
   NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_OPTIONS,
+  UploadWorkflows,
   UPLOAD_WORKFLOWS,
   WORKFLOWS_BY_UPLOAD_SELECTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
 import { SampleFromApi } from "~/interface/shared";
-import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
-import { INPUT_FILE_TYPES } from "./constants";
+import { INPUT_FILE_TYPES } from "../../constants";
+import { RefSeqAccessionDataType } from "../UploadSampleStep/types";
 
 interface addFlagsToSamplesProps {
   adminOptions: Record<string, string>;
   bedFileName?: string;
   clearlabs: boolean;
-  medakaModel: string;
-  refSeqAccession?: RefSeqAccessionDataType;
+  medakaModel: string | null;
+  refSeqAccession: RefSeqAccessionDataType | null;
   refSeqFileName?: string;
-  refSeqTaxon?: TaxonOption;
-  samples: Partial<SampleFromApi>[];
+  refSeqTaxon: TaxonOption | null;
+  samples: Partial<SampleFromApi>[] | null;
   skipSampleProcessing: boolean;
-  technology: string;
-  workflows: Set<string>;
-  wetlabProtocol: string;
+  technology: string | null;
+  workflows: Set<UploadWorkflows>;
+  wetlabProtocol: string | null;
   useStepFunctionPipeline: boolean;
   guppyBasecallerSetting?: string;
 }
@@ -66,48 +67,51 @@ export const addFlagsToSamples = ({
     UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
   );
   const isNanopore = technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
-  return samples.map(sample => ({
-    ...sample,
-    ...adminOptions,
-    technology,
-    do_not_process: skipSampleProcessing,
-    pipeline_execution_strategy: pipelineExecutionStrategy,
-    workflows: workflowsConverted,
-    // Add mNGS specific fields
-    ...(isMetagenomics &&
-      isNanopore && {
-        guppy_basecaller_setting: guppyBasecallerSetting,
+  return (
+    samples &&
+    samples.map(sample => ({
+      ...sample,
+      ...adminOptions,
+      technology,
+      do_not_process: skipSampleProcessing,
+      pipeline_execution_strategy: pipelineExecutionStrategy,
+      workflows: workflowsConverted,
+      // Add mNGS specific fields
+      ...(isMetagenomics &&
+        isNanopore && {
+          guppy_basecaller_setting: guppyBasecallerSetting,
+        }),
+      // Add Viral CG specific fields
+      ...(isViralConensusGenome && {
+        ref_fasta: refSeqFileName,
+        ...(refSeqAccession && {
+          accession_id: refSeqAccession.id,
+          accession_name: refSeqAccession.name,
+        }),
+        ...(refSeqTaxon && {
+          taxon_id: refSeqTaxon.id,
+          taxon_name: refSeqTaxon.name,
+        }),
+        ...(bedFileName && {
+          primer_bed: bedFileName,
+        }),
       }),
-    // Add Viral CG specific fields
-    ...(isViralConensusGenome && {
-      ref_fasta: refSeqFileName,
-      ...(refSeqAccession && {
-        accession_id: refSeqAccession.id,
-        accession_name: refSeqAccession.name,
+      // Add Covid CG specific fields
+      ...(isCovidConsensusGenome && {
+        wetlab_protocol: wetlabProtocol,
+        ...(isNanopore && {
+          clearlabs,
+          medaka_model: medakaModel,
+        }),
       }),
-      ...(refSeqTaxon && {
-        taxon_id: refSeqTaxon.id,
-        taxon_name: refSeqTaxon.name,
-      }),
-      ...(bedFileName && {
-        primer_bed: bedFileName,
-      }),
-    }),
-    // Add Covid CG specific fields
-    ...(isCovidConsensusGenome && {
-      wetlab_protocol: wetlabProtocol,
-      ...(isNanopore && {
-        clearlabs,
-        medaka_model: medakaModel,
-      }),
-    }),
-  }));
+    }))
+  );
 };
 
 interface addAdditionalInputFilesToSamplesProps {
-  bedFile?: File;
-  refSeqFile?: File;
-  samples: Partial<SampleFromApi>[];
+  bedFile: File | null;
+  refSeqFile: File | null;
+  samples: Partial<SampleFromApi>[] | null;
 }
 
 // Create InputFiles for the bedFile and refSeqFile for **each** sample
@@ -117,7 +121,7 @@ export const addAdditionalInputFilesToSamples = ({
   bedFile,
   refSeqFile,
 }: addAdditionalInputFilesToSamplesProps) => {
-  if (bedFile) {
+  if (bedFile && samples) {
     samples.forEach(sample => {
       if (sample.input_files_attributes === undefined) {
         sample.input_files_attributes = [];
@@ -136,7 +140,7 @@ export const addAdditionalInputFilesToSamples = ({
       sample.files[bedFile.name] = bedFile;
     });
   }
-  if (refSeqFile) {
+  if (refSeqFile && samples) {
     samples.forEach(sample => {
       if (sample.input_files_attributes === undefined) {
         sample.input_files_attributes = [];

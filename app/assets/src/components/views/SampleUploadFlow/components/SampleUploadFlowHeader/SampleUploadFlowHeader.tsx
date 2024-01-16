@@ -7,7 +7,7 @@ import { GlobalContext } from "~/globalContext/reducer";
 import { Project, SampleFromApi } from "~/interface/shared";
 import { UploadStepType } from "~/interface/upload";
 import Label from "~ui/labels/Label";
-import cs from "./sample_upload_flow.scss";
+import cs from "../../sample_upload_flow.scss";
 
 const MENU_OPTIONS = [
   {
@@ -29,13 +29,13 @@ const MENU_OPTIONS = [
 
 interface SampleUploadFlowHeaderProps {
   currentStep: UploadStepType;
-  samples?: SampleFromApi[];
+  samples: SampleFromApi[] | null;
   project?: Project;
   onStepSelect(UploadStepType): void;
   stepsEnabled?: Record<UploadStepType, boolean>;
 }
 
-class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps> {
+export class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps> {
   static contextType = GlobalContext;
   isStepEnabled = (step: UploadStepType) => {
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
@@ -112,5 +112,3 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
     );
   }
 }
-
-export default SampleUploadFlowHeader;

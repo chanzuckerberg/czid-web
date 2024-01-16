@@ -10,8 +10,8 @@ import Notification from "~ui/notifications/Notification";
 import {
   NO_TARGET_PROJECT_ERROR,
   NO_VALID_SAMPLES_FOUND_ERROR,
-} from "./constants";
-import cs from "./sample_upload_flow.scss";
+} from "../../../../constants";
+import cs from "../../../../sample_upload_flow.scss";
 
 interface RemoteSampleFileUploadProps {
   project?: Project;
@@ -27,7 +27,7 @@ interface RemoteSampleFileUploadState {
   error?: string;
 }
 
-class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps> {
+export class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps> {
   static contextType = GlobalContext;
   state: RemoteSampleFileUploadState = {
     showInfo: false,

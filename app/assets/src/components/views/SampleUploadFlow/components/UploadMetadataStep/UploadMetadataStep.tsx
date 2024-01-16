@@ -10,7 +10,7 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import Instructions from "~/components/views/samples/MetadataUploadModal/Instructions";
 import { HostGenome, MetadataBasic } from "~/interface/shared/";
-import cs from "./sample_upload_flow.scss";
+import cs from "../../sample_upload_flow.scss";
 
 export interface UploadMetadataStepProps
   extends Pick<
@@ -20,7 +20,7 @@ export interface UploadMetadataStepProps
   onUploadMetadata: $TSFixMeFunction;
 }
 
-const UploadMetadataStep = ({
+export const UploadMetadataStep = ({
   samples,
   project,
   visible,
@@ -137,5 +137,3 @@ const UploadMetadataStep = ({
     </div>
   );
 };
-
-export default UploadMetadataStep;

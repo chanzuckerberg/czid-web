@@ -1,4 +1,4 @@
-import UploadSampleStep from "./UploadSampleStep";
+import { UploadSampleStep } from "./UploadSampleStep";
 export { UploadSampleStep };
 
 /*

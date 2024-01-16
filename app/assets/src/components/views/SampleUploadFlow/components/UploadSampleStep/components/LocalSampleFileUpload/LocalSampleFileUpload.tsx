@@ -21,8 +21,8 @@ import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { Project, SampleFromApi } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
-import { INPUT_FILE_TYPES, MAX_FILE_SIZE } from "./constants";
-import cs from "./sample_upload_flow.scss";
+import { INPUT_FILE_TYPES, MAX_FILE_SIZE } from "../../../../constants";
+import cs from "../../../../sample_upload_flow.scss";
 
 // @ts-expect-error working with Lodash types
 const map = _fp.map.convert({ cap: false });
@@ -213,7 +213,7 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
 // Using a function component wrapper provides a semi-hacky way to
 // access useContext from multiple providers without the class component to function component
 // conversion.
-const LocalSampleFileUpload = (props: LocalSampleFileUploadProps) => {
+export const LocalSampleFileUpload = (props: LocalSampleFileUploadProps) => {
   const allowedFeatures = useAllowedFeatures();
   const trackEvent = useTrackEvent();
 
@@ -225,5 +225,3 @@ const LocalSampleFileUpload = (props: LocalSampleFileUploadProps) => {
     />
   );
 };
-
-export default LocalSampleFileUpload;

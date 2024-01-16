@@ -25,7 +25,7 @@ interface UploadProgressModalSampleListProps {
   onRetryUpload: (uploadsToRetry: SampleFromApi[]) => void;
 }
 
-const UploadProgressModalSampleList = ({
+export const UploadProgressModalSampleList = ({
   samples,
   sampleUploadPercentages,
   sampleUploadStatuses,
@@ -94,5 +94,3 @@ const UploadProgressModalSampleList = ({
     </div>
   );
 };
-
-export default UploadProgressModalSampleList;

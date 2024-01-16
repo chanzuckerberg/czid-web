@@ -23,10 +23,10 @@ import { UploadStepType } from "~/interface/upload";
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { Technology, UploadWorkflows, UPLOAD_WORKFLOWS } from "../../constants";
-import HostOrganismMessage from "../../HostOrganismMessage";
-import UploadProgressModal from "../../UploadProgressModal";
+import { UploadProgressModal } from "../UploadProgressModal";
 import { RefSeqAccessionDataType } from "../UploadSampleStep/types";
 import { AnalysesSections } from "./components/AnalysesSections";
+import { HostOrganismMessage } from "./components/HostOrganismMessage";
 import { ProjectInfo } from "./components/ProjectInfo";
 import { ReviewHeader } from "./components/ReviewHeader";
 import { SampleInfo } from "./components/SampleInfo";
@@ -34,12 +34,12 @@ import cs from "./review_step.scss";
 
 interface ReviewStepProps {
   admin?: boolean;
-  bedFile?: File;
-  clearlabs?: boolean;
-  guppyBasecallerSetting?: string;
+  bedFile: File | null;
+  clearlabs: boolean;
+  guppyBasecallerSetting: string | null;
   hostGenomes?: HostGenome[];
-  medakaModel?: string;
-  metadata?: MetadataBasic;
+  medakaModel: string | null;
+  metadata: MetadataBasic | null;
   // Triggers when we start or stop uploading. Lets the parent know to disable header link.
   onUploadComplete: $TSFixMeFunction;
   onUploadStatusChange?: $TSFixMeFunction;
@@ -47,15 +47,15 @@ interface ReviewStepProps {
   originalHostGenomes?: HostGenome[];
   pipelineVersions: { [projectId: string]: PipelineVersions };
   project?: Project;
-  refSeqAccession?: RefSeqAccessionDataType;
-  refSeqFile?: File;
-  refSeqTaxon?: TaxonOption;
-  samples?: SampleFromApi[];
+  refSeqAccession: RefSeqAccessionDataType | null;
+  refSeqFile: File | null;
+  refSeqTaxon: TaxonOption | null;
+  samples: SampleFromApi[] | null;
   uploadType: string;
   visible?: boolean;
-  technology?: Technology;
-  workflows?: Set<UploadWorkflows>;
-  wetlabProtocol?: string;
+  technology: Technology | null;
+  workflows: Set<UploadWorkflows>;
+  wetlabProtocol: string | null;
 }
 
 interface ReviewStepWithContextProps extends ReviewStepProps {
@@ -195,11 +195,9 @@ class ReviewStepCC extends React.Component<
               pipelineVersions={pipelineVersions}
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               project={project}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               workflows={workflows}
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               technology={technology}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               clearlabs={clearlabs}
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               medakaModel={medakaModel}
@@ -224,14 +222,12 @@ class ReviewStepCC extends React.Component<
             project={project}
             uploadType={uploadType}
             hostGenomes={hostGenomes}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             metadata={metadata}
             projectMetadataFields={projectMetadataFields}
             samples={samples}
           />
         </div>
         <div className={cs.controls}>
-          {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
           {workflows.has(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value) || ( // TODO (mlila): should be with viral cg as well?
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
             <HostOrganismMessage

@@ -10,9 +10,9 @@ import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
 import { Table } from "~/components/visualizations/table";
 import { SampleUploadType } from "~/interface/shared";
-import { SELECT_ID_KEY } from "./constants";
+import { SELECT_ID_KEY } from "../../../../constants";
+import { SampleUploadTableRenderers } from "./components/SampleUploadTableRenderers";
 import cs from "./sample_upload_table.scss";
-import SampleUploadTableRenderers from "./SampleUploadTableRenderers";
 
 const NAME_COLUMN = {
   dataKey: "name",
@@ -94,7 +94,7 @@ interface SampleUploadTableProps {
   files?: unknown[];
 }
 
-export default class SampleUploadTable extends React.Component<SampleUploadTableProps> {
+export class SampleUploadTable extends React.Component<SampleUploadTableProps> {
   getColumns = () => {
     const { sampleUploadType } = this.props;
     if (sampleUploadType === "basespace") {

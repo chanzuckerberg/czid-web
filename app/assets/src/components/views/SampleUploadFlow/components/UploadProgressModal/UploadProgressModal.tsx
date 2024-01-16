@@ -2,32 +2,33 @@ import { flow, keyBy, mapValues, omit } from "lodash/fp";
 import React from "react";
 import { TaxonOption } from "~/components/common/filters/types";
 import { MetadataBasic, Project, SampleFromApi } from "~/interface/shared";
-import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
-import LocalUploadProgressModal from "./LocalUploadProgressModal";
-import RemoteUploadProgressModal from "./RemoteUploadProgressModal";
+import { UploadWorkflows } from "../../constants";
+import { RefSeqAccessionDataType } from "../UploadSampleStep/types";
+import { LocalUploadProgressModal } from "./components/LocalUploadProgressModal";
+import { RemoteUploadProgressModal } from "./components/RemoteUploadProgressModal";
 
 interface UploadProgressModalProps {
   adminOptions: Record<string, string>;
-  bedFile?: File;
-  clearlabs?: boolean;
+  bedFile: File | null;
+  clearlabs: boolean;
   guppyBasecallerSetting: string;
-  medakaModel?: string;
-  metadata?: MetadataBasic;
+  medakaModel: string | null;
+  metadata: MetadataBasic | null;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
-  refSeqAccession?: RefSeqAccessionDataType;
-  refSeqFile?: File;
-  refSeqTaxon?: TaxonOption;
-  samples?: SampleFromApi[];
-  skipSampleProcessing?: boolean;
-  technology?: string;
+  refSeqAccession: RefSeqAccessionDataType | null;
+  refSeqFile: File | null;
+  refSeqTaxon: TaxonOption | null;
+  samples: SampleFromApi[] | null;
+  skipSampleProcessing: boolean;
+  technology: string | null;
   uploadType: string;
-  useStepFunctionPipeline?: boolean;
-  wetlabProtocol?: string;
-  workflows?: Set<string>;
+  useStepFunctionPipeline: boolean;
+  wetlabProtocol: string | null;
+  workflows: Set<UploadWorkflows>;
 }
 
-const UploadProgressModal = ({
+export const UploadProgressModal = ({
   adminOptions,
   bedFile,
   clearlabs,
@@ -64,11 +65,9 @@ const UploadProgressModal = ({
           guppyBasecallerSetting={guppyBasecallerSetting}
           technology={technology}
           medakaModel={medakaModel}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-          metadata={processMetadataRows(metadata.rows)}
+          metadata={metadata && processMetadataRows(metadata.rows)}
           onUploadComplete={onUploadComplete}
           project={project}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           refSeqAccession={refSeqAccession}
           refSeqFile={refSeqFile}
           refSeqTaxon={refSeqTaxon}
@@ -104,5 +103,3 @@ const UploadProgressModal = ({
     </>
   );
 };
-
-export default UploadProgressModal;

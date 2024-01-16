@@ -51,7 +51,6 @@ import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { SampleUploadType } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
-import BasespaceSampleImport from "../../BasespaceSampleImport";
 import {
   ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY,
   BASESPACE_UPLOAD,
@@ -66,19 +65,21 @@ import {
   UploadWorkflows,
   UPLOAD_WORKFLOWS,
 } from "../../constants";
-import LocalSampleFileUpload from "../../LocalSampleFileUpload";
-import RemoteSampleFileUpload from "../../RemoteSampleFileUpload";
 import cs from "../../sample_upload_flow.scss";
-import SampleUploadTable, {
-  SampleForUploadTable,
-} from "../../SampleUploadTable";
 import {
   groupSamplesByLane,
   openBasespaceOAuthPopup,
   removeLaneFromName,
 } from "../../utils";
 import { WorkflowSelector } from "../WorkflowSelector";
+import { BasespaceSampleImport } from "./components/BasespaceSampleImport";
+import { LocalSampleFileUpload } from "./components/LocalSampleFileUpload";
 import { PreUploadQCCheck } from "./components/PreUploadQCCheck";
+import { RemoteSampleFileUpload } from "./components/RemoteSampleFileUpload";
+import {
+  SampleForUploadTable,
+  SampleUploadTable,
+} from "./components/SampleUploadTable";
 import {
   MISMATCH_FORMAT_ERROR,
   NCBI_GENBANK_REF_SEQ_HEADER_REGEX,
@@ -1674,7 +1675,7 @@ class UploadSampleStepCC extends React.Component<
 // Using a function component wrapper provides a semi-hacky way to
 // access useContext from multiple providers without the class component to function component
 // conversion.
-const UploadSampleStep = (props: UploadSampleStepProps) => {
+export const UploadSampleStep = (props: UploadSampleStepProps) => {
   const allowedFeatures = useAllowedFeatures();
   const trackEvent = useTrackEvent();
   const withAnalytics = useWithAnalytics();
@@ -1688,5 +1689,3 @@ const UploadSampleStep = (props: UploadSampleStepProps) => {
     />
   );
 };
-
-export default UploadSampleStep;

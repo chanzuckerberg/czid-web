@@ -10,7 +10,7 @@ interface UploadConfirmationModalProps {
   onConfirm: $TSFixMeFunction;
 }
 
-const UploadConfirmationModal = ({
+export const UploadConfirmationModal = ({
   numberOfFailedSamples,
   open,
   onCancel,
@@ -44,5 +44,3 @@ const UploadConfirmationModal = ({
     </Modal>
   );
 };
-
-export default UploadConfirmationModal;

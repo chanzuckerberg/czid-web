@@ -9,9 +9,9 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { Project } from "~/interface/shared";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import Notification from "~ui/notifications/Notification";
+import { NO_TARGET_PROJECT_ERROR } from "../../../../constants";
+import { openBasespaceOAuthPopup } from "../../../../utils";
 import cs from "./basespace_sample_import.scss";
-import { NO_TARGET_PROJECT_ERROR } from "./constants";
-import { openBasespaceOAuthPopup } from "./utils";
 
 interface BasespaceSampleImportProps {
   onChange: $TSFixMeFunction;
@@ -31,7 +31,7 @@ interface BasespaceSampleImportState {
   errorType?: "success" | "info" | "warning" | "error";
 }
 
-export default class BasespaceSampleImport extends React.Component<BasespaceSampleImportProps> {
+export class BasespaceSampleImport extends React.Component<BasespaceSampleImportProps> {
   state: BasespaceSampleImportState = {
     basespaceProjects: null,
     selectedProjectId: null,
