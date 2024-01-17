@@ -147,7 +147,11 @@ export const MetadataSectionContent = ({
               {additionalInfo?.[info.key]}
             </a>
           ) : (
-            <MetadataValue value={additionalInfo?.[info.key]} />
+            <MetadataValue
+              value={
+                info.key === "name" ? nameLocal : additionalInfo?.[info.key]
+              }
+            />
           ),
       });
     });
