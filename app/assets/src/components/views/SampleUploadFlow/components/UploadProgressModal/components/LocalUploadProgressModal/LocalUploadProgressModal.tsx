@@ -23,12 +23,9 @@ import {
 } from "~/api/upload";
 import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { logError } from "~/components/utils/logUtil";
 import { MetadataBasic, Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
-import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
-import Notification from "~ui/notifications/Notification";
 import { UploadWorkflows } from "../../../../constants";
 import { RefSeqAccessionDataType } from "../../../UploadSampleStep/types";
 import cs from "../../upload_progress_modal.scss";
@@ -37,6 +34,7 @@ import {
   addFlagsToSamples,
   redirectToProject,
 } from "../../upload_progress_utils";
+import { LocalUploadModalHeader } from "./components/LocalUploadModalHeader";
 import { UploadConfirmationModal } from "./components/UploadConfirmationModal";
 import { UploadProgressModalSampleList } from "./components/UploadProgressModalSampleList";
 
@@ -48,7 +46,7 @@ interface LocalUploadProgressModalProps {
   medakaModel: string | null;
   metadata: MetadataBasic | null;
   onUploadComplete: $TSFixMeFunction;
-  project?: Project;
+  project: Project;
   refSeqAccession: RefSeqAccessionDataType | null;
   refSeqFile: File | null;
   refSeqTaxon: TaxonOption | null;
@@ -538,114 +536,8 @@ export const LocalUploadProgressModal = ({
     {});
   }; */
 
-  /*
-    START Component rendering methods
-  */
-
-  const uploadInProgressTitle = () => {
-    const numLocalSamplesInProgress = size(getLocalSamplesInProgress());
-    const pluralSuffix = numLocalSamplesInProgress > 1 ? "s" : "";
-
-    return (
-      <>
-        <div className={cs.title}>
-          {retryingSampleUpload
-            ? `Retrying ${numLocalSamplesInProgress} sample upload${pluralSuffix}`
-            : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-              `Uploading ${numLocalSamplesInProgress} sample${pluralSuffix} to ${project.name}`}
-        </div>
-        <div className={cs.subtitle}>
-          Please stay on this page until upload completes! Closing your device
-          or putting it to sleep will interrupt the upload.
-        </div>
-      </>
-    );
-  };
-
-  const failedSamplesTitle = () => {
-    const numFailedSamples = size(getLocalSamplesFailed());
-    const title =
-      Object.keys(sampleUploadStatuses).length === numFailedSamples
-        ? "All uploads failed"
-        : `Uploads completed with ${numFailedSamples} error${
-            numFailedSamples > 1 ? "s" : ""
-          }`;
-
-    return (
-      <>
-        <div className={cs.titleWithIcon}>{title}</div>
-        {numFailedSamples === size(samples) && (
-          <div className={cs.subtitle}>
-            <a
-              className={cs.helpLink}
-              href={CONTACT_US_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Contact us for help
-            </a>
-          </div>
-        )}
-      </>
-    );
-  };
-
-  const renderTitle = () => {
-    const numLocalSamplesInProgress = size(getLocalSamplesInProgress());
-    // While local samples are being uploaded.
-    if (numLocalSamplesInProgress) {
-      return uploadInProgressTitle();
-    } else if (!isEmpty(getLocalSamplesFailed())) {
-      return failedSamplesTitle();
-    } else {
-      return <div className={cs.titleWithIcon}>Uploads completed!</div>;
-    }
-  };
-
-  const renderRetryAllFailedNotification = () => {
-    const localSamplesFailed = getLocalSamplesFailed();
-    const numberOfLocalSamplesFailed = size(localSamplesFailed);
-
-    return (
-      <Notification
-        className={cs.notificationContainer}
-        type="error"
-        displayStyle="flat"
-      >
-        <div className={cs.content}>
-          <div className={cs.errorMessage}>
-            {numberOfLocalSamplesFailed} upload
-            {numberOfLocalSamplesFailed > 1 && "s"} ha
-            {numberOfLocalSamplesFailed > 1 ? "ve" : "s"} failed
-          </div>
-          <div
-            className={cx(cs.sampleRetry, cs.retryAll)}
-            onClick={() => retryFailedSampleUploads(localSamplesFailed)}
-          >
-            Retry all failed
-          </div>
-        </div>
-      </Notification>
-    );
-  };
-
-  const renderViewProjectButton = () => {
-    const buttonCallback = () => {
-      if (!isEmpty(getLocalSamplesFailed())) {
-        setConfirmationModalOpen(true);
-      } else {
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        redirectToProject(project.id);
-      }
-    };
-
-    return (
-      <PrimaryButton text="Go to Project" onClick={() => buttonCallback()} />
-    );
-  };
-  /*
-    END component rendering methods
-  */
+  const hasFailedSamples = !isEmpty(getLocalSamplesFailed());
+  const numberOfFailedSamples = size(getLocalSamplesFailed());
 
   return (
     <Modal
@@ -657,30 +549,42 @@ export const LocalUploadProgressModal = ({
         uploadComplete && cs.uploadComplete,
       )}
     >
-      <div className={cs.header}>
-        <ImgUploadPrimary className={cs.uploadImg} />
-        {renderTitle()}
-        {!isEmpty(getLocalSamplesFailed()) &&
-          renderRetryAllFailedNotification()}
-      </div>
+      <LocalUploadModalHeader
+        hasFailedSamples={hasFailedSamples}
+        numberOfFailedSamples={numberOfFailedSamples}
+        localSamplesFailed={getLocalSamplesFailed()}
+        numLocalSamplesInProgress={size(getLocalSamplesInProgress())}
+        retryFailedSampleUploads={retryFailedSampleUploads}
+        retryingSampleUpload={retryingSampleUpload}
+        sampleUploadStatuses={sampleUploadStatuses}
+        numberOfSamples={size(samples)}
+        projectName={project.name}
+      />
       <UploadProgressModalSampleList
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         samples={samples}
         sampleUploadPercentages={sampleUploadPercentages}
         sampleUploadStatuses={sampleUploadStatuses}
         onRetryUpload={retryFailedSampleUploads}
       />
       {!retryingSampleUpload && uploadComplete && (
-        <div className={cs.footer}>{renderViewProjectButton()}</div>
+        <div className={cs.footer}>
+          <PrimaryButton
+            text="Go to Project"
+            onClick={() => {
+              hasFailedSamples
+                ? setConfirmationModalOpen(true)
+                : redirectToProject(project.id);
+            }}
+          />
+        </div>
       )}
       {confirmationModalOpen && (
         <UploadConfirmationModal
-          numberOfFailedSamples={size(getLocalSamplesFailed())}
+          numberOfFailedSamples={numberOfFailedSamples}
           onCancel={() => {
             setConfirmationModalOpen(false);
           }}
           onConfirm={() => {
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
             redirectToProject(project.id);
           }}
           open

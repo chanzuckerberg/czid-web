@@ -223,7 +223,7 @@ export interface Project {
   id: number;
   locations?: string[];
   number_of_samples?: number;
-  name?: string;
+  name: string;
   owner?: string;
   public_access?: 1 | 0;
   sample_counts?: { [key: string]: number };

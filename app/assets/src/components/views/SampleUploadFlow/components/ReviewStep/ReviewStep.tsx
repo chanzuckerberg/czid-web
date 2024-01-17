@@ -46,7 +46,7 @@ interface ReviewStepProps {
   onStepSelect?(UploadStepType): void;
   originalHostGenomes?: HostGenome[];
   pipelineVersions: { [projectId: string]: PipelineVersions };
-  project?: Project;
+  project: Project;
   refSeqAccession: RefSeqAccessionDataType | null;
   refSeqFile: File | null;
   refSeqTaxon: TaxonOption | null;
@@ -92,7 +92,6 @@ class ReviewStepCC extends React.Component<
 
   loadProjectMetadataFields = async () => {
     const { project } = this.props;
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const projectMetadataFields = await getProjectMetadataFields(project.id);
     this.setState({
       projectMetadataFields: keyBy("key", projectMetadataFields),
@@ -180,20 +179,17 @@ class ReviewStepCC extends React.Component<
             areLinksEnabled={areLinksEnabled}
             onLinkClick={this.onLinkClick}
             uploadType={uploadType}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             project={project}
           />
           <div className={cs.sectionContainer}>
             <ReviewHeader
               areLinksEnabled={areLinksEnabled}
               onLinkClick={this.onLinkClick}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               project={project}
               uploadType={uploadType}
             />
             <AnalysesSections
               pipelineVersions={pipelineVersions}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               project={project}
               workflows={workflows}
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
@@ -218,7 +214,6 @@ class ReviewStepCC extends React.Component<
             areLinksEnabled={areLinksEnabled}
             onAdminOptionsChanged={this.handleAdminOptionsChanged}
             onLinkClick={this.onLinkClick}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             project={project}
             uploadType={uploadType}
             hostGenomes={hostGenomes}

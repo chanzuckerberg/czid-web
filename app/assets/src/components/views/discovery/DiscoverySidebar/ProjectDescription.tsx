@@ -8,7 +8,7 @@ import Textarea from "~ui/controls/Textarea";
 import cs from "./project_description.scss";
 
 interface ProjectDescriptionProps {
-  project: Optional<Project, "id">;
+  project: Optional<Project, "id" | "name">;
   onProjectDescriptionSave?: (value: string) => void;
 }
 

@@ -24,7 +24,7 @@ interface DiscoverySidebarProps {
   projectStats?: object;
   sampleDimensions?: DimensionsDetailed;
   sampleStats?: object;
-  project?: Optional<Project, "id">;
+  project?: Optional<Project, "id" | "name">;
 }
 
 interface DiscoverySidebarState {

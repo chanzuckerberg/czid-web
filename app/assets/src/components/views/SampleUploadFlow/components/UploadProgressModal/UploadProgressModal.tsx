@@ -15,7 +15,7 @@ interface UploadProgressModalProps {
   medakaModel: string | null;
   metadata: MetadataBasic | null;
   onUploadComplete: $TSFixMeFunction;
-  project?: Project;
+  project: Project;
   refSeqAccession: RefSeqAccessionDataType | null;
   refSeqFile: File | null;
   refSeqTaxon: TaxonOption | null;

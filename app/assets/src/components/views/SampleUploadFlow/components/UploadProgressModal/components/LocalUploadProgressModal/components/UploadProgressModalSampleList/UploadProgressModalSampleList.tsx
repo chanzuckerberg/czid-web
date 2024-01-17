@@ -19,7 +19,7 @@ type SampleUploadStatusMap = { [key: string]: SampleUploadStatus };
 type SampleUploadPercentageMap = { [key: string]: number };
 
 interface UploadProgressModalSampleListProps {
-  samples: SampleFromApi[];
+  samples: SampleFromApi[] | null;
   sampleUploadPercentages: SampleUploadPercentageMap;
   sampleUploadStatuses: SampleUploadStatusMap;
   onRetryUpload: (uploadsToRetry: SampleFromApi[]) => void;
@@ -50,47 +50,48 @@ export const UploadProgressModalSampleList = ({
 
   return (
     <div className={cs.uploadProgressModalSampleList}>
-      {samples.map(sample => {
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
-        const status = sampleUploadStatuses[sample.name];
+      {samples &&
+        samples.map(sample => {
+          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
+          const status = sampleUploadStatuses[sample.name];
 
-        return (
-          <div key={sample.name} className={cs.sample}>
-            <div className={cs.sampleHeader}>
-              <div className={cs.sampleName}>{sample.name}</div>
-              <div className={cs.sampleStatus}>
-                {status === SampleUploadStatus.Error && (
-                  <>
-                    <IconAlert className={cs.alertIcon} type="error" />
-                    Upload failed
-                    <div className={cs.verticalDivider}> | </div>
-                    <div
-                      onClick={() => onRetryUpload([sample])}
-                      className={cs.sampleRetry}
-                    >
-                      Retry
+          return (
+            <div key={sample.name} className={cs.sample}>
+              <div className={cs.sampleHeader}>
+                <div className={cs.sampleName}>{sample.name}</div>
+                <div className={cs.sampleStatus}>
+                  {status === SampleUploadStatus.Error && (
+                    <>
+                      <IconAlert className={cs.alertIcon} type="error" />
+                      Upload failed
+                      <div className={cs.verticalDivider}> | </div>
+                      <div
+                        onClick={() => onRetryUpload([sample])}
+                        className={cs.sampleRetry}
+                      >
+                        Retry
+                      </div>
+                    </>
+                  )}
+                  {status === SampleUploadStatus.Success && (
+                    <div className={cs.success}>
+                      <IconCheckSmall className={cs.checkmarkIcon} />
+                      Sent to pipeline
                     </div>
-                  </>
-                )}
-                {status === SampleUploadStatus.Success && (
-                  <div className={cs.success}>
-                    <IconCheckSmall className={cs.checkmarkIcon} />
-                    Sent to pipeline
-                  </div>
-                )}
-                {(status === SampleUploadStatus.InProgress ||
-                  status === undefined) && (
-                  <>{getUploadedPercentageText(sample)}</>
-                )}
+                  )}
+                  {(status === SampleUploadStatus.InProgress ||
+                    status === undefined) && (
+                    <>{getUploadedPercentageText(sample)}</>
+                  )}
+                </div>
               </div>
+              <LoadingBar
+                percentage={getUploadPercentageForSample(sample)}
+                error={status === ERROR_STATUS}
+              />
             </div>
-            <LoadingBar
-              percentage={getUploadPercentageForSample(sample)}
-              error={status === ERROR_STATUS}
-            />
-          </div>
-        );
-      })}
+          );
+        })}
     </div>
   );
 };
