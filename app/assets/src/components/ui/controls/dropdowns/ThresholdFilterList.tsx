@@ -38,7 +38,7 @@ const ThresholdFilterList = ({
         {Array.isArray(thresholds) &&
           thresholds.map((threshold: ThresholdFilterData, idx: number) => (
             <ThresholdFilter
-              key={idx}
+              key={`${threshold.metric}-${idx}`}
               metrics={metrics}
               operators={operators}
               threshold={threshold}

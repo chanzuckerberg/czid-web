@@ -69,12 +69,15 @@ export const ThresholdFilterSDS = ({
     setThresholds(newThresholds);
   };
 
+  // selectedThresholds are the thresholds in the parent state,
+  // while thresholds are internal to this component's state.
+  // handleThresholdFilterTagRemove uses selectedThresholds rather than thresholds
+  // because this function is used while the threshold filter modal is closed.
   const handleThresholdFilterTagRemove = (thresholdIdx: number) => {
     const newThresholds = [
-      ...thresholds.slice(0, thresholdIdx),
-      ...thresholds.slice(thresholdIdx + 1, thresholds.length),
+      ...selectedThresholds.slice(0, thresholdIdx),
+      ...selectedThresholds.slice(thresholdIdx + 1, selectedThresholds.length),
     ];
-
     onApply(newThresholds);
   };
 
