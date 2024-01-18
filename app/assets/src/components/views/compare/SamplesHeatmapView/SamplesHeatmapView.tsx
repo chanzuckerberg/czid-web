@@ -50,6 +50,7 @@ import {
   HEATMAP_ELASTICSEARCH_FEATURE,
   HEATMAP_PATHOGEN_FLAGGING_FEATURE,
   NCBI_COMPRESSED_INDEX,
+  REMOVE_HEATMAP_DEFAULT_BG,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
@@ -74,6 +75,7 @@ import {
   GlobalContext,
 } from "~/globalContext/reducer";
 import { copyShortUrlToClipboard } from "~/helpers/url";
+import { ThresholdFilterData } from "~/interface/dropdown";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import { IconAlert } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
@@ -88,6 +90,7 @@ import {
   BACKGROUND_METRICS,
   HEATMAP_FILTERS,
   METRIC_OPTIONS,
+  NONE_BACKGROUND,
   NOTIFICATION_TYPES,
   SCALE_OPTIONS,
   SORT_SAMPLES_OPTIONS,
@@ -98,19 +101,23 @@ import {
   TAXON_LEVEL_SELECTED,
 } from "./constants";
 import cs from "./samples_heatmap_view.scss";
+import { metricIsZscore } from "./utils";
 
 const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
   const parsed = parseInt(val);
   return isNaN(parsed) ? defaultVal : parsed;
 };
 
+export interface RawBackground {
+  mass_normalized: boolean;
+  name: string;
+  value: number;
+  alignmentConfigNames: string[];
+}
+
 interface SamplesHeatmapViewProps {
   addedTaxonIds?: $TSFixMeUnknown[];
-  backgrounds?: {
-    name?: string;
-    value?: number;
-    alignmentConfigNames?: string[];
-  }[];
+  backgrounds?: RawBackground[];
   categories?: string[];
   heatmapTs?: number;
   metrics?: { value: string }[];
@@ -217,23 +224,29 @@ class SamplesHeatmapViewCC extends React.Component<
       ...this.urlParams,
     };
 
+    const defaultBgValue = this.props.allowedFeatures.includes(
+      REMOVE_HEATMAP_DEFAULT_BG,
+    )
+      ? null
+      : this.props.backgrounds?.[0].value;
+    const background = parseAndCheckInt(
+      this.urlParams.background,
+      defaultBgValue,
+    );
+
     this.initOnBeforeUnload(props.savedParamValues);
     // IMPORTANT NOTE: These default values should be kept in sync with the
     // backend defaults in HeatmapHelper for sanity.
     this.state = {
       selectedOptions: {
-        metric: this.getSelectedMetric(),
+        metric: this.getSelectedMetric(background),
         categories: this.urlParams.categories || [],
         subcategories: this.urlParams.subcategories || {},
-        background: parseAndCheckInt(
-          this.urlParams.background,
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-          this.props.backgrounds[0].value,
-        ),
+        background: background,
         species: parseAndCheckInt(this.urlParams.species, 1),
         sampleSortType: this.urlParams.sampleSortType || "cluster",
         taxaSortType: this.urlParams.taxaSortType || "cluster",
-        thresholdFilters: this.urlParams.thresholdFilters || [],
+        thresholdFilters: this.checkThresholdFilters(background),
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         // Based on the trade-off between performance and information quantity, we
         // decided on 10 as the best default number of taxons to show per sample.
@@ -327,13 +340,19 @@ class SamplesHeatmapViewCC extends React.Component<
   };
 
   // For converting legacy URLs
-  getSelectedMetric() {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    if (this.props.metrics.map(m => m.value).includes(this.urlParams.metric)) {
-      return this.urlParams.metric;
+  // this.urlParams.metric is a string, e.g "NT.zscore"
+  // this.props.metrics is an object of { text, value }
+  getSelectedMetric(background: number | null) {
+    const urlMetricInProps = this.props.metrics
+      ?.map(m => m.value)
+      .includes(this.urlParams.metric);
+    if (
+      (metricIsZscore(this.urlParams.metric) && !background) ||
+      !urlMetricInProps
+    ) {
+      return this.props.metrics?.[0]?.value;
     } else {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-      return (this.props.metrics[0] || {}).value;
+      return this.urlParams.metric;
     }
   }
 
@@ -491,6 +510,16 @@ class SamplesHeatmapViewCC extends React.Component<
     );
   };
 
+  checkThresholdFilters = (background: number | null) => {
+    let thresholdFilters = this.urlParams.thresholdFilters || [];
+    if (!background) {
+      thresholdFilters = thresholdFilters.filter(
+        (threshold: ThresholdFilterData) => !metricIsZscore(threshold.metric),
+      );
+    }
+    return thresholdFilters;
+  };
+
   prepareParams = (removeFilters = false) => {
     const params = this.getUrlParams();
     if (removeFilters) {
@@ -537,11 +566,9 @@ class SamplesHeatmapViewCC extends React.Component<
     const { selectedOptions } = this.state;
     const { metric, background } = selectedOptions;
 
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    const selectedBackgroundName = find(
-      { value: background },
-      backgrounds,
-    ).name;
+    const selectedBackgroundName = background
+      ? find({ value: background }, backgrounds)?.name
+      : NONE_BACKGROUND.name;
     // We want to show the metric and background selected, but do not consider them as filters.
     const filterRow = [
       `\nMetric:, ${metric}`,
@@ -892,9 +919,12 @@ class SamplesHeatmapViewCC extends React.Component<
       compact(map(property("alignment_config_name"), heatmapData)),
     );
 
-    const backgroundIndexVersions =
-      find({ value: selectedBackgroundId }, backgrounds)
-        ?.alignmentConfigNames || [];
+    let backgroundIndexVersions: string[] = [];
+    if (selectedBackgroundId) {
+      backgroundIndexVersions =
+        find({ value: selectedBackgroundId }, backgrounds)
+          ?.alignmentConfigNames || [];
+    }
 
     // alignment configs in background not in samples
     const nonMatchingBackgroundIndexVersions = pullAll(
@@ -1851,6 +1881,19 @@ class SamplesHeatmapViewCC extends React.Component<
     if (!newOptions) return;
     let haveOptionsChanged = false;
 
+    if (newOptions.background === NONE_BACKGROUND.value) {
+      newOptions.background = null;
+      // remove Z score filters
+      newOptions.thresholdFilters =
+        this.state.selectedOptions.thresholdFilters?.filter(
+          (threshold: ThresholdFilterData) => !metricIsZscore(threshold.metric),
+        );
+      // change metric to NT rpm if metric was Z score
+      if (selectedOptions.metric && metricIsZscore(selectedOptions.metric)) {
+        newOptions.metric = this.props.metrics?.[0]?.value;
+      }
+    }
+
     forEach(key => {
       const newValue = newOptions[key];
       const storedValue = selectedOptions[key];
@@ -1939,7 +1982,10 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   renderHeatmap() {
-    const { loadingFailed } = this.state;
+    const {
+      loadingFailed,
+      selectedOptions: { background },
+    } = this.state;
 
     // @ts-expect-error ts-migrate(2339) FIXME: Property 'taxonIds' does not exist on type 'Readon... Remove this comment to see the full error message
     let shownTaxa = new Set(this.state.taxonIds, this.state.addedTaxonIds);
@@ -2026,11 +2072,9 @@ class SamplesHeatmapViewCC extends React.Component<
           // appliedFilters and background are for the heatmap image caption
           appliedFilters={this.getAppliedFilters()}
           backgroundName={
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-            find(
-              { value: this.state.selectedOptions.background },
-              this.props.backgrounds,
-            ).name
+            background
+              ? find({ value: background }, this.props.backgrounds)?.name
+              : NONE_BACKGROUND.name
           }
         />
       </ErrorBoundary>

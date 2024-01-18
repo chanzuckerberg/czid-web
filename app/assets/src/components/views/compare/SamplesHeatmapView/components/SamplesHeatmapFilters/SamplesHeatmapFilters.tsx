@@ -6,6 +6,7 @@ import { Divider } from "~/components/layout";
 import Link from "~/components/ui/controls/Link";
 import { HEATMAP_KNOWN_PATHOGEN_FILTER } from "~/components/utils/features";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
+import { RawBackground } from "../../SamplesHeatmapView";
 import SamplesHeatmapBackgroundDropdown from "./components/SamplesHeatmapBackgroundDropdown";
 import SamplesHeatmapCategoryDropdown from "./components/SamplesHeatmapCategoryDropdown";
 import SamplesHeatmapPresetTooltip from "./components/SamplesHeatmapPresetTooltip";
@@ -19,6 +20,9 @@ export interface SDSFormattedOption {
   name: string;
   text?: string;
   value?: number | string;
+  subtext?: string;
+  details?: string;
+  disabled?: boolean;
 }
 
 export interface TextValueString {
@@ -35,10 +39,7 @@ export interface OptionsType {
   metrics?: TextValueString[];
   categories?: string[];
   subcategories?: Subcategories | Record<string, never>;
-  backgrounds?: {
-    name?: string;
-    value?: number;
-  }[];
+  backgrounds?: RawBackground[];
   taxonLevels?: TextValueNumber[];
   specificityOptions?: TextValueNumber[];
   sampleSortTypeOptions?: TextValueString[];
@@ -149,8 +150,7 @@ const SamplesHeatmapFilters = ({
 
     const backgroundSelect = (
       <SamplesHeatmapBackgroundDropdown
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        allBackgrounds={options.backgrounds}
+        allBackgrounds={options?.backgrounds}
         disabled={disabled}
         enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
         onChange={onBackgroundChange}

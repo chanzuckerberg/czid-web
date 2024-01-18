@@ -289,7 +289,7 @@ export interface SelectedOptions {
   categories?: string[];
   subcategories?: Subcategories;
   metric?: string;
-  background?: number;
+  background?: number | null;
   thresholdFilters?: ThresholdFilterData[];
   readSpecificity?: number;
   sampleSortType?: string;

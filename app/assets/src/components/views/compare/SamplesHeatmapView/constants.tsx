@@ -145,8 +145,16 @@ export const METRIC_OPTIONS = [
 ];
 
 export const BACKGROUND_METRICS = [
-  { text: "NT Z Score", value: "NT.zscore" },
-  { text: "NR Z Score", value: "NR.zscore" },
+  {
+    text: "NT Z Score",
+    metric: "NT.zscore",
+    thresholdMetricValue: "NT_zscore",
+  },
+  {
+    text: "NR Z Score",
+    metric: "NR.zscore",
+    thresholdMetricValue: "NR_zscore",
+  },
 ];
 
 export const NOTIFICATION_TYPES = {
@@ -180,4 +188,9 @@ export const THRESHOLDS = [
 export const SPECIES_SELECTION_OPTIONS = {
   species: 1,
   genus: 0,
+};
+
+export const NONE_BACKGROUND = {
+  name: "None",
+  value: 0,
 };

@@ -581,9 +581,8 @@ export class SamplesHeatmapVis extends React.Component<
       values = this.metrics.map((metric: $TSFixMe) => {
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         const data = this.props.data[metric.key];
-        const value = parseFloat(
-          (data[node.rowIndex][node.columnIndex] || 0).toFixed(4),
-        );
+        const rawVal = data[node.rowIndex][node.columnIndex];
+        const value = rawVal !== null ? parseFloat(rawVal.toFixed(4)) : "-";
         return [
           metric.label,
           metric.key === this.props.metric ? <b>{value}</b> : value,

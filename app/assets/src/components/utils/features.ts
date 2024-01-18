@@ -28,3 +28,4 @@ export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const BENCHMARKING_FEATURE = "benchmarking";
 export const PIN_PIPELINE_VERSIONS = "pin_pipeline_version";
 export const NCBI_COMPRESSED_INDEX = "ncbi_compressed_index";
+export const REMOVE_HEATMAP_DEFAULT_BG = "remove_heatmap_default_bg";

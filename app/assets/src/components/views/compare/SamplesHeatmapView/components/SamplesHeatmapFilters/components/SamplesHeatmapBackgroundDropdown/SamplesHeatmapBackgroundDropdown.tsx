@@ -3,6 +3,10 @@
 /* eslint-disable react/prop-types */
 import { Dropdown } from "@czi-sds/components";
 import React from "react";
+import { useAllowedFeatures } from "~/components/common/UserContext";
+import { REMOVE_HEATMAP_DEFAULT_BG } from "~/components/utils/features";
+import { NONE_BACKGROUND } from "../../../../constants";
+import { RawBackground } from "../../../../SamplesHeatmapView";
 import { SDSFormattedOption } from "../../SamplesHeatmapFilters";
 import { valueToName } from "../../samplesHeatmapFilterUtils";
 import cs from "./samples_heatmap_background_dropdown.scss";
@@ -15,16 +19,8 @@ interface SamplesHeatmapBackgroundDropdownProps {
   onChange: (background: number) => void;
   placeholder?: string;
   rounded?: boolean;
-  value?: string | number;
+  value?: string | number | null;
   className?: string;
-}
-
-export interface RawBackground {
-  mass_normalized?: boolean;
-  text?: string;
-  name?: string;
-  id?: number;
-  value?: number;
 }
 
 export const SamplesHeatmapBackgroundDropdown = React.memo(
@@ -36,27 +32,41 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
     ...props
   }: SamplesHeatmapBackgroundDropdownProps) => {
     let disabled = props.disabled || false;
+    const allowedFeatures = useAllowedFeatures();
+
+    const backgroundValue = value || 0;
 
     const formatBackgroundOptions = (
       backgrounds: RawBackground[],
     ): SDSFormattedOption[] => {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      return backgrounds.map(background => {
+      const options: SDSFormattedOption[] = [];
+      if (allowedFeatures.includes(REMOVE_HEATMAP_DEFAULT_BG)) {
+        options.push({
+          name: NONE_BACKGROUND.name,
+          text: NONE_BACKGROUND.name,
+          value: 0,
+          disabled: false,
+        });
+      }
+
+      const backgroundOptions = backgrounds.map(background => {
         const disabledOption =
           !enableMassNormalizedBackgrounds && background.mass_normalized;
         return {
-          name: background.name || background.text,
-          text: background.name || background.text,
+          name: background.name,
+          text: background.name,
           subtext: background.mass_normalized
             ? "Normalized by input mass"
             : "Standard",
           details: background.mass_normalized
             ? "Normalized by input mass"
             : "Standard",
-          value: background.id || background.value,
+          value: background.value,
           disabled: disabledOption,
         };
       });
+      options.push(...backgroundOptions);
+      return options;
     };
 
     let backgroundOptions: SDSFormattedOption[] =
@@ -81,20 +91,25 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
             onChange(newValue?.value);
           }
         }}
-        // @ts-expect-error -- complains about the default SDS dropdown option type not having a `value` field, but we're using objects with a superset of the SDS option type
-        value={{ name: valueToName(value, backgroundOptions), value: value }}
+        value={{
+          name: valueToName(backgroundValue, backgroundOptions),
+          // @ts-expect-error -- complains about the default SDS dropdown option type not having a `value` field, but we're using objects with a superset of the SDS option type
+          value: backgroundValue,
+        }}
         DropdownMenuProps={{
           getOptionDisabled: getOptionDisabled,
-          isOptionEqualToValue: (option, value) => {
-            return option.value === value;
+          isOptionEqualToValue: (
+            option: SDSFormattedOption,
+            value: SDSFormattedOption,
+          ) => {
+            return option.value === value.value;
           },
         }}
         InputDropdownProps={{
           sdsStyle: "minimal",
           sdsType: "label",
           disabled: disabled,
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-          value: valueToName(value, backgroundOptions),
+          value: valueToName(backgroundValue, backgroundOptions),
         }}
         options={backgroundOptions}
       />
