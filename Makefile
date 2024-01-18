@@ -16,20 +16,25 @@ export AWS_DEV_PROFILE=idseq-dev
 ### Tell docker compose to use buildkit when building docker images.
 export DOCKER_BUILDKIT:=1
 export COMPOSE_DOCKER_CLI_BUILD:=1
+export COMPOSE_PROFILES ?= local-lambdas
 
 ### HELPFUL #################################################
+.PHONY: help
 help: ## display help for this makefile
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: help
-.env.localdev: # Write useful env vars to ".env.localdev" so we can use them later.
+# Make the version of the Makefile a dependency for the `.env.localdev` target.
+# This way each time the Makefile gets updated, the .env.localdev file does as well.
+Makefile:
+	@echo
+
+.env.localdev: Makefile # Write useful env vars to ".env.localdev" so we can use them later.
 	export AWS_ACCOUNT_ID=$$(aws sts get-caller-identity --profile $(AWS_DEV_PROFILE) | jq -r .Account); \
 	if [ -n "$${AWS_ACCOUNT_ID}" ]; then \
 		echo AWS_ACCOUNT_ID=$${AWS_ACCOUNT_ID} > .env.localdev; \
 		echo AWS_REGION=us-west-2 >> .env.localdev; \
 		echo AWS_PROFILE=$(AWS_DEV_PROFILE) >> .env.localdev; \
 		echo DEPLOYMENT_ENVIRONMENT=dev >> .env.localdev; \
-		echo COMPOSE_PROFILES=local-lambdas >> .env.localdev; \
 	else \
 		false; \
 	fi
@@ -109,7 +114,7 @@ local-start: .env.localdev ## Start localdev containers or refresh credentials
 
 .PHONY: local-stop
 local-stop: .env.localdev ## Stop localdev containers
-	$(docker_compose_simple) stop
+	$(docker_compose_simple) --profile '*' stop
 
 .PHONY: local-down
 local-down: .env.localdev ## Tear down localdev containers (will lose data in containers that are not stored in docker volume)

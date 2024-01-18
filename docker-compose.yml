@@ -55,7 +55,7 @@ x-env-variables: &env-variables
   ? ENVIRONMENT
   ? OFFLINE
 
-version: '3.4'
+version: '3.8'
 services:
   opensearch:
     image: opensearchproject/opensearch:2.7.0
@@ -154,11 +154,12 @@ services:
       - redis
     environment:
       <<: [*web-variables, *aws-variables]
-    command: bundle exec "COUNT=5 rake resque:workers"
+    command: bundle exec "COUNT=2 rake resque:workers"
   resque-scheduler:
     # See config/resque_schedule.yml for usages.
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
+    profiles: ["async-failures"]  # We *very rarely* need to run this in local-dev
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -174,6 +175,7 @@ services:
   resque-result-monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
+    profiles: ["async-failures"]  # We *very rarely* need to run this in local-dev
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -189,6 +191,7 @@ services:
   resque-pipeline-monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
+    profiles: ["async-failures"]  # We *very rarely* need to run this in local-dev
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -213,7 +216,7 @@ services:
     environment:
       <<: [*web-variables, *aws-variables]
       SFN_NOTIFICATIONS_QUEUE_ARN:
-    command: bundle exec "shoryuken -R -C config/shoryuken.yml"
+    command: bundle exec "shoryuken -R -C config/shoryuken-dev.yml"
   concurrency-lambda:
     # image built from idseq repo main branch
     # for other versions, clone idseq repo, build image locally and change image to `concurreny-lambda:local`

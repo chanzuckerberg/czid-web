@@ -1,0 +1,4 @@
+concurrency: 2
+delay: 5
+queues:
+  - <%= ENV["SFN_NOTIFICATIONS_QUEUE_ARN"] %>
