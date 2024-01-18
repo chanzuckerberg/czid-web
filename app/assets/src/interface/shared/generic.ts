@@ -41,7 +41,3 @@ export type Entries<T> = {
 }[keyof T][];
 
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-
-export type CreateMutable<Type> = {
-  -readonly [Property in keyof Type]: Type[Property];
-};

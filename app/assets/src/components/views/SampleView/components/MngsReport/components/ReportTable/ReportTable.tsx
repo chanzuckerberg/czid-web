@@ -72,8 +72,8 @@ interface ReportTableProps {
   onConsensusGenomeClick: (params: ConsensusGenomeClick) => void;
   onCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void;
   onPreviousConsensusGenomeClick: (params: ConsensusGenomeClick) => void;
-  pipelineRunId?: number | string | null;
-  pipelineVersion?: string | null;
+  pipelineRunId?: number;
+  pipelineVersion?: string;
   projectId?: number;
   projectName?: string;
   sampleId?: SampleId;

@@ -138,6 +138,7 @@ class MetadataDictionary extends React.Component {
               className={cs.hostGenome}
               label="Host Organism"
               options={this.getHostGenomeOptions()}
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               value={this.state.currentHostGenome}
               onChange={this.handleHostGenomeChange}
               rounded

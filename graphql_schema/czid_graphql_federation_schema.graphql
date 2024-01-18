@@ -4,11 +4,7 @@ directive @specifiedBy(
   url: String!
 ) on SCALAR
 
-directive @oneOf on OBJECT | INTERFACE | INPUT_OBJECT
-
 directive @example(value: ObjMap) on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
-
-directive @resolveRoot on FIELD_DEFINITION
 
 directive @globalOptions(sourceName: String, endpoint: String, operationHeaders: ObjMap, queryStringOptions: ObjMap, queryParams: ObjMap) on OBJECT
 
@@ -129,7 +125,7 @@ type DbSample {
 }
 
 type DeleteSamples {
-  deleted_workflow_ids: [Int]
+  deleted_workflow_ids: [Int]!
   error: String
 }
 
@@ -211,8 +207,7 @@ type MngsWorkflowResults {
 
 type Mutation {
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
-  UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleNotes
-  UpdateSampleName(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleName
+  UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): JSON
   KickoffWGSWorkflow(sampleId: String, input: mutationInput_KickoffWGSWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
   KickoffAMRWorkflow(sampleId: String, input: mutationInput_KickoffAMRWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
   UpdateMetadata(sampleId: String, input: mutationInput_UpdateMetadata_input_Input): UpdateMetadataReponse
@@ -291,18 +286,14 @@ input mutationInput_KickoffWGSWorkflow_input_inputs_json_Input {
 
 input mutationInput_UpdateMetadata_input_Input {
   field: String!
-  value: mutationInput_UpdateMetadata_input_value_Input!
+  value: String!
   authenticityToken: String!
-}
-
-input mutationInput_UpdateMetadata_input_value_Input {
-  String: String
-  query_SampleMetadata_metadata_items_location_validated_value_oneOf_1_Input: query_SampleMetadata_metadata_items_location_validated_value_oneOf_1_Input
 }
 
 input mutationInput_UpdateSampleNotes_input_Input {
-  value: String!
-  authenticityToken: String!
+  value: String
+  field: String
+  authenticityToken: String
 }
 
 scalar ObjMap
@@ -395,10 +386,8 @@ type Query {
   Background(snapshotLinkId: String): Background
   BulkDownload(bulkDownloadId: String): BulkDownload
   ConsensusGenomeWorkflowResults(workflowRunId: String): ConsensusGenomeWorkflowResults
-  CoverageVizSummary(snapshotLinkId: String, sampleId: String): [query_CoverageVizSummary_items]
-  MetadataFields(snapshotLinkId: String, input: queryInput_MetadataFields_input_Input): [query_MetadataFields_items]
-  SampleMetadata(snapshotLinkId: String, sampleId: String, input: queryInput_SampleMetadata_input_Input): SampleMetadata
   MngsWorkflowResults(snapshotLinkId: String, sampleId: String, workflowVersionId: String, _backgroundId: String): MngsWorkflowResults
+  CoverageVizSummary(snapshotLinkId: String, sampleId: String): [query_CoverageVizSummary_items]
   Pathogens(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Pathogens_items]
   PersistedBackground(projectId: String): PersistedBackground
   PipelineData(sampleId: String, workflowVersionId: String): PipelineData
@@ -563,24 +552,6 @@ type query_CoverageVizSummary_items {
   coverage_depth: JSON
 }
 
-type query_MetadataFields_items {
-  key: String
-  dataType: String
-  name: String
-  options: JSON
-  group: String
-  host_genome_ids: [Int]
-  description: String
-  is_required: Int
-  examples: query_MetadataFields_items_examples
-  default_for_new_host_genome: Int
-  isBoolean: Boolean
-}
-
-type query_MetadataFields_items_examples {
-  all: [String]
-}
-
 type query_MngsWorkflowResults__ {
   lineage: [query_MngsWorkflowResults___lineage_items]
 }
@@ -684,171 +655,6 @@ type query_PipelineData_stages_items_steps_items_inputVariables_items {
 type query_PipelineData_stages_items_steps_items_outputFiles_items {
   displayName: String
   url: JSON
-}
-
-type query_SampleMetadata_additional_info {
-  name: String
-  editable: Boolean
-  host_genome_name: String
-  host_genome_taxa_category: String
-  upload_date: String
-  project_name: String
-  project_id: Int
-  notes: String
-  ercc_comparison: [query_SampleMetadata_additional_info_ercc_comparison_items]
-  pipeline_run: query_SampleMetadata_additional_info_pipeline_run
-  summary_stats: query_SampleMetadata_additional_info_summary_stats
-}
-
-type query_SampleMetadata_additional_info_ercc_comparison_items {
-  name: String
-  actual: Int
-  expected: JSON
-}
-
-type query_SampleMetadata_additional_info_pipeline_run {
-  id: String
-  sample_id: Int
-  created_at: String
-  updated_at: String
-  job_status: String
-  finalized: Int
-  total_reads: Int
-  adjusted_remaining_reads: Int
-  unmapped_reads: Int
-  subsample: Int
-  pipeline_branch: String
-  total_ercc_reads: Int
-  fraction_subsampled: Float
-  pipeline_version: String
-  pipeline_commit: String
-  truncated: JSON
-  results_finalized: Int
-  alignment_config_id: Int
-  alert_sent: Int
-  dag_vars: JSON
-  assembled: Int
-  max_input_fragments: Int
-  error_message: JSON
-  known_user_error: JSON
-  pipeline_execution_strategy: String
-  sfn_execution_arn: String
-  use_taxon_whitelist: Boolean
-  wdl_version: String
-  s3_output_prefix: String
-  executed_at: String
-  time_to_finalized: Int
-  time_to_results_finalized: Int
-  qc_percent: Float
-  compression_ratio: Float
-  deprecated: Boolean
-  technology: String
-  guppy_basecaller_setting: JSON
-  total_bases: JSON
-  unmapped_bases: JSON
-  fraction_subsampled_bases: JSON
-  truncated_bases: JSON
-  deleted_at: JSON
-  mapped_reads: JSON
-  version: query_SampleMetadata_additional_info_pipeline_run_version
-  host_subtracted: String
-}
-
-type query_SampleMetadata_additional_info_pipeline_run_version {
-  pipeline: String
-  alignment_db: String
-}
-
-type query_SampleMetadata_additional_info_summary_stats {
-  adjusted_remaining_reads: Int
-  compression_ratio: Float
-  qc_percent: Float
-  percent_remaining: Float
-  unmapped_reads: Int
-  insert_size_mean: JSON
-  insert_size_standard_deviation: JSON
-  last_processed_at: String
-  reads_after_bowtie2_ercc_filtered: JSON
-  reads_after_fastp: Int
-  reads_after_bowtie2_host_filtered: Int
-  reads_after_hisat2_host_filtered: Int
-  reads_after_czid_dedup: Int
-}
-
-type query_SampleMetadata_metadata_items {
-  id: String
-  key: String
-  raw_value: String
-  string_validated_value: String
-  number_validated_value: String
-  sample_id: Int
-  created_at: String
-  updated_at: String
-  date_validated_value: String
-  location_validated_value: query_SampleMetadata_metadata_items_location_validated_value
-  metadata_field_id: Int
-  location_id: Int
-  base_type: String
-}
-
-union query_SampleMetadata_metadata_items_location_validated_value = query_SampleMetadata_metadata_items_location_validated_value_oneOf_0 | query_SampleMetadata_metadata_items_location_validated_value_oneOf_1
-
-type query_SampleMetadata_metadata_items_location_validated_value_oneOf_0 {
-  name: String
-}
-
-type query_SampleMetadata_metadata_items_location_validated_value_oneOf_1 {
-  id: String
-  name: String
-  geo_level: String
-  country_name: String
-  country_code: String
-  state_name: String
-  subdivision_name: String
-  city_name: String
-  osm_id: Int
-  locationiq_id: JSON
-  lat: JSON
-  lng: JSON
-  created_at: String
-  updated_at: String
-  osm_type: String
-  country_id: Int
-  state_id: Int
-  subdivision_id: Int
-  city_id: String
-  raw_value: String
-  title: String
-  description: String
-  key: String
-  refetch_adjusted_location: Boolean
-}
-
-input query_SampleMetadata_metadata_items_location_validated_value_oneOf_1_Input {
-  id: String
-  name: String
-  geo_level: String
-  country_name: String
-  country_code: String
-  state_name: String
-  subdivision_name: String
-  city_name: String
-  osm_id: Int
-  locationiq_id: JSON
-  lat: JSON
-  lng: JSON
-  created_at: String
-  updated_at: String
-  osm_type: String
-  country_id: Int
-  state_id: Int
-  subdivision_id: Int
-  city_id: String
-  raw_value: String
-  title: String
-  description: String
-  key: String
-  refetch_adjusted_location: Boolean
 }
 
 type query_Samples_pipeline_runs_items {
@@ -964,15 +770,6 @@ type query_UserBlastAnnotations_items {
   annotation: JSON
 }
 
-input queryInput_MetadataFields_input_Input {
-  sampleIds: [String]!
-  authenticityToken: String!
-}
-
-input queryInput_SampleMetadata_input_Input {
-  pipelineVersion: String
-}
-
 input queryInput_ValidateUserCanDeleteObjects_input_Input {
   selectedIds: [Int]
   workflow: String
@@ -1035,8 +832,6 @@ type SampleList {
 }
 
 type SampleMetadata {
-  metadata: [query_SampleMetadata_metadata_items]
-  additional_info: query_SampleMetadata_additional_info
   collectionDate: String
   collectionLocationV2: String
   nucleotideType: String
@@ -1107,16 +902,6 @@ type TaxonDist {
 }
 
 type UpdateMetadataReponse {
-  status: String
-  message: String
-}
-
-type UpdateSampleName {
-  status: String
-  message: String
-}
-
-type UpdateSampleNotes {
   status: String
   message: String
 }

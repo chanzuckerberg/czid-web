@@ -84,9 +84,9 @@ export interface DownloadTypeParam {
 }
 
 export interface ERCCComparisonShape {
-  name: string | null | undefined;
-  actual: number | null | undefined;
-  expected: number | null | undefined;
+  name: string;
+  actual: number;
+  expected: number;
 }
 
 export type FileList = {
@@ -119,10 +119,7 @@ export interface LocationObject {
   geo_level?: string;
 }
 
-export type Metadata = Record<
-  string,
-  string | LocationObject | null | undefined
->;
+export type Metadata = Record<string, string | LocationObject>;
 
 export interface MetadataBasic {
   headers?: string[];
@@ -147,61 +144,55 @@ export type MetadataTypes = {
   [key: string]: MetadataType;
 };
 
-export type MetadataValue = string | number | LocationObject | null;
+export type MetadataValue = string | number | LocationObject;
 
 export interface PipelineRun {
-  id: string | null | undefined;
-  wdl_version: string | null | undefined;
-  executed_at: DateString | null | undefined;
-  sample_id: number | null | undefined;
-  created_at: DateString | null | undefined;
-  updated_at: DateString | null | undefined;
-  job_status: "CHECKED" | string | null | undefined;
-  finalized: number | null | undefined;
-  total_reads: number | null | undefined;
-  adjusted_remaining_reads: number | null | undefined;
-  unmapped_reads: number | null | undefined;
-  subsample: number | null | undefined;
-  pipeline_branch: "master" | string | null | undefined;
-  total_ercc_reads: number | null | undefined;
-  fraction_subsampled: number | null | undefined;
-  pipeline_version: string | null | undefined;
-  pipeline_commit: string | null | undefined;
-  run_finalized?: boolean | null | undefined;
+  id: number;
+  wdl_version: string;
+  executed_at: DateString;
+  sample_id: number;
+  created_at: DateString;
+  updated_at: DateString;
+  job_status: "CHECKED" | string;
+  finalized: number;
+  total_reads: number;
+  adjusted_remaining_reads: number;
+  unmapped_reads: number | null;
+  subsample: number;
+  pipeline_branch: "master" | string;
+  total_ercc_reads: number;
+  fraction_subsampled: number;
+  pipeline_version: string;
+  pipeline_commit: string;
+  run_finalized: boolean;
   truncated: null;
-  results_finalized: number | null | undefined;
-  alignment_config_name?: string;
-  alignment_config_id: number | null | undefined;
-  alert_sent: number | null | undefined;
+  results_finalized: number;
+  alignment_config_name: string;
+  alignment_config_id: number;
+  alert_sent: number;
   dag_vars: string | null;
-  assembled: number | null | undefined;
-  max_input_fragments: number | null | undefined;
+  assembled: number;
+  max_input_fragments: number;
   error_message?: string;
   known_user_error?: string;
-  pipeline_execution_strategy: "step_function" | string | null | undefined;
-  sfn_execution_arn: string | null | undefined;
-  use_taxon_whitelist: boolean | null | undefined;
-  s3_output_prefix: string | null | undefined;
+  pipeline_execution_strategy: "step_function" | string;
+  sfn_execution_arn: string;
+  use_taxon_whitelist: boolean;
+  s3_output_prefix: string;
   technology:
     | SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
-    | SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE
-    | string
-    | null
-    | undefined;
-  time_to_finalized: number | null | undefined;
-  time_to_results_finalized: number | null | undefined;
+    | SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
+  time_to_finalized: number;
+  time_to_results_finalized: number;
   total_bases: number;
-  qc_percent: number | null | undefined;
-  compression_ratio: number | null | undefined;
-  deprecated: boolean | null | undefined;
-  version:
-    | {
-        pipeline: string | null | undefined;
-        alignment_db: string | null | undefined;
-      }
-    | null
-    | undefined;
-  host_subtracted: string | null | undefined;
+  qc_percent: number;
+  compression_ratio: number;
+  deprecated: boolean;
+  version: {
+    pipeline: string;
+    alignment_db: string;
+  };
+  host_subtracted: string;
   guppy_basecaller_setting: string | null;
 }
 
@@ -234,17 +225,17 @@ export interface Project {
 export interface RawMetadata {
   base_type: "date" | "location";
   created_at: string;
-  id: string;
+  id: number;
   key: string;
   location_id: number | null;
-  location_validated_value?: LocationObject | null;
-  date_validated_value: string | null;
-  metadata_field_id: number | null;
-  number_validated_value: string | null;
-  raw_value: string | null;
-  sample_id: number | null;
-  string_validated_value: string | null;
-  updated_at: string | null;
+  location_validated_value?: LocationObject;
+  date_validated_value: null;
+  metadata_field_id: number;
+  number_validated_value: null;
+  raw_value: string;
+  sample_id: number;
+  string_validated_value: null;
+  updated_at: string;
 }
 
 export interface SampleFromApi {

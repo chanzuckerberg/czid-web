@@ -18,7 +18,7 @@ import { Section } from "./components/Section";
 import { getSectionId } from "./components/SectionNavigation";
 interface AnchorMenuProps {
   setCurrentSectionIndex: Dispatch<SetStateAction<number>>;
-  pathogenData: AnchorMenuFragment$key;
+  pathogenData: any;
 }
 
 export const AnchorMenuFragment = graphql`
@@ -40,7 +40,10 @@ export const AnchorMenu = ({
   pathogenData,
   setCurrentSectionIndex,
 }: AnchorMenuProps) => {
-  const data = useFragment(AnchorMenuFragment, pathogenData);
+  const data = useFragment<AnchorMenuFragment$key>(
+    AnchorMenuFragment,
+    pathogenData,
+  );
   const [observer, setObserver] = useState<IntersectionObserver | null>(null);
   const sectionContentByHeader = useMemo(
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2344

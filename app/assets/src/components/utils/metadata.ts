@@ -1,24 +1,15 @@
 import { isObject, keyBy, mapValues } from "lodash/fp";
 import { FIELDS_THAT_HAVE_MAX_INPUT } from "~/components/common/Metadata/constants";
-import {
-  LocationObject,
-  Metadata,
-  MetadataType,
-  MetadataTypes,
-  RawMetadata,
-} from "~/interface/shared";
+import { Metadata, MetadataType, RawMetadata } from "~/interface/shared";
 
 // Transform the server metadata response to a simple key => value map.
 export const processMetadata = ({
   metadata,
   flatten = false,
 }: {
-  metadata?: RawMetadata[] | null;
+  metadata: RawMetadata[];
   flatten: boolean;
 }): Metadata => {
-  if (!metadata) {
-    return {};
-  }
   const metadataObject = keyBy("key", metadata);
   const newMetadata = mapValues(
     (val: RawMetadata) =>
@@ -29,20 +20,17 @@ export const processMetadata = ({
   );
   // If flatten, simplify objects (e.g. location objects) to .name
   if (flatten) {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     return mapValues(val => (isObject(val) ? val.name : val), newMetadata);
   }
 
+  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   return newMetadata;
 };
 
-export const processMetadataTypes = (
-  metadataTypes: MetadataType[] | null | undefined,
-): MetadataTypes => {
-  if (!metadataTypes) {
-    return {};
-  }
-  return keyBy("key", metadataTypes);
-};
+export const processMetadataTypes = (metadataTypes: {
+  [key: string]: MetadataType;
+}) => keyBy("key", metadataTypes);
 
 export const returnHipaaCompliantMetadata = (
   metadataType: string,
@@ -57,17 +45,4 @@ export const returnHipaaCompliantMetadata = (
     }
   }
   return hipaaCompliantValue;
-};
-
-export const formatSendValue = (value: string | LocationObject | number) => {
-  if (isObject(value)) {
-    return {
-      query_SampleMetadata_metadata_items_location_validated_value_oneOf_1_Input:
-        value,
-    };
-  } else {
-    return {
-      String: String(value),
-    };
-  }
 };

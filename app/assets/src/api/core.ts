@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getCsrfToken } from "./utils";
 
 const INSTRUMENTATION_ENDPOINT = "/frontend_metrics";
 const MAX_SAMPLES_FOR_GET_REQUEST = 256;
@@ -38,13 +37,16 @@ const instrument = (func: $TSFixMe) => {
   };
 };
 
+export const CSRF_TOKEN = "csrf-token";
+
 const postWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
   try {
     // resp also contains headers, status, etc. that we might use later.
     return await axios.post(url, {
       ...params,
       // Fetch the CSRF token from the DOM.
-      authenticity_token: getCsrfToken(),
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
+      authenticity_token: document.getElementsByName(CSRF_TOKEN)[0].content,
     });
   } catch (e) {
     return Promise.reject(e.response);
@@ -58,7 +60,8 @@ const putWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
     return await axios.put(url, {
       ...params,
       // Fetch the CSRF token from the DOM.
-      authenticity_token: getCsrfToken(),
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
+      authenticity_token: document.getElementsByName(CSRF_TOKEN)[0].content,
     });
   } catch (e) {
     return Promise.reject(e.response);
@@ -82,7 +85,8 @@ const deleteWithCSRF = instrument(async (url: $TSFixMe) => {
     return await axios.delete(url, {
       data: {
         // Fetch the CSRF token from the DOM.
-        authenticity_token: getCsrfToken(),
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
+        authenticity_token: document.getElementsByName(CSRF_TOKEN)[0].content,
       },
     });
   } catch (e) {

@@ -69,7 +69,7 @@ interface GeoSearchInputBoxProps {
   className?: string;
   inputClassName?: string;
   onResultSelect?(params: any): void;
-  value?: { name: string } | string | null;
+  value?: { name: string } | string;
 }
 
 /** An input box that fetches and shows geosearch suggestions for user input of locations. */
@@ -141,7 +141,7 @@ const GeoSearchInputBox = ({
       onSearchTriggered={handleSearchTriggered}
       placeholder="Enter a city, region or country"
       rectangular
-      value={isString(value) ? value : value?.name}
+      value={isString(value) ? value : value.name}
     />
   );
 };
