@@ -1,5 +1,5 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_R1, SAMPLE_FILE_R2, SAMPLE_FILE_CT } from "@e2e/constants/sample";
+import { SAMPLE_FILE_R1, SAMPLE_FILE_R2, SAMPLE_FILE_CT, SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
 import { test } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 import { UploadPage } from "../../page-objects/upload-page";
@@ -9,6 +9,7 @@ let projectPage = null;
 let project = null;
 const createdBy = "automation";
 const SAMPLE_FILES = [SAMPLE_FILE_R1, SAMPLE_FILE_R2];
+const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const LMNGS_SAMPLE_FILES = [SAMPLE_FILE_CT];
 const uploadWorkflows = [WORKFLOWS.MNGS, WORKFLOWS.LMNGS, WORKFLOWS.AMR, WORKFLOWS.WGS, WORKFLOWS.SC2];
 
@@ -53,7 +54,15 @@ test.describe("Upload Smoke Tests", () => {
   // #region Verify Set Metadata for Samples Manually
   for (const workflow of uploadWorkflows) {
     test(`Smoke Test: Verify Set Metadata for Samples Manually ${workflow}`, async () => {
-      const sampleFiles = workflow === WORKFLOWS.LMNGS ? LMNGS_SAMPLE_FILES : SAMPLE_FILES;
+      let sampleFiles = null;
+      if (workflow === WORKFLOWS.LMNGS) {
+        sampleFiles = LMNGS_SAMPLE_FILES;
+      } else if (workflow === WORKFLOWS.WGS) {
+        test.setTimeout(180000); // viral-consensus-genome takes longer to upload
+        sampleFiles = WGS_SAMPLE_FILES;
+      } else {
+        sampleFiles = SAMPLE_FILES;
+      }
 
       // Choose project
       project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
@@ -64,7 +73,9 @@ test.describe("Upload Smoke Tests", () => {
 
       // Upload sample files
       await uploadPage.uploadSampleFiles(sampleFiles);
-      const sampleName = await uploadPage.getSampleName();
+
+      // TODO: Update to get all
+      const sampleNames = await uploadPage.getSampleNames();
 
       // Continue
       await uploadPage.clickContinue();
@@ -73,7 +84,7 @@ test.describe("Upload Smoke Tests", () => {
       await uploadPage.validateUploadMetaDataVisible();
 
       // Manual Input
-      const inputs = await uploadPage.getRandomizedSampleInputs(sampleFiles, sampleName);
+      const inputs = await uploadPage.getRandomizedSampleInputs(sampleFiles, sampleNames);
       await uploadPage.setManualInputs(inputs);
 
       // Validate the expected values were set
@@ -103,7 +114,15 @@ test.describe("Upload Smoke Tests", () => {
   // #region Verify Upload Metadata for Sample using CSV
   for (const workflow of uploadWorkflows) {
     test(`Smoke Test: Verify Upload Metadata for Sample using CSV ${workflow}`, async () => {
-      const sampleFiles = workflow === WORKFLOWS.LMNGS ? LMNGS_SAMPLE_FILES : SAMPLE_FILES;
+      let sampleFiles = null;
+      if (workflow === WORKFLOWS.LMNGS) {
+        sampleFiles = LMNGS_SAMPLE_FILES;
+      } else if (workflow === WORKFLOWS.WGS) {
+        test.setTimeout(180000); // viral-consensus-genome takes longer to upload
+        sampleFiles = WGS_SAMPLE_FILES;
+      } else {
+        sampleFiles = SAMPLE_FILES;
+      }
 
       // Choose project
       project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
@@ -117,8 +136,8 @@ test.describe("Upload Smoke Tests", () => {
       await uploadPage.uploadSampleFiles(sampleFiles);
 
       // Get the uploaded sample name and generate randomized inputs
-      const sampleName = await uploadPage.getSampleName();
-      const inputs = await uploadPage.getRandomizedSampleInputs(sampleFiles, sampleName);
+      const sampleNames = await uploadPage.getSampleNames();
+      const inputs = await uploadPage.getRandomizedSampleInputs(sampleFiles, sampleNames);
 
       // Continue
       await uploadPage.clickContinue();

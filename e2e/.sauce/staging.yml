@@ -25,6 +25,46 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Bulk Download: AMR"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/download/bulk-download-amr-smoke.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 2
+    shard: concurrency
+  - name: "Bulk Download: LMNGS"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/download/bulk-download-lmngs-smoke.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 3
+    shard: concurrency
+  - name: "Bulk Download: MNGS"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/download/bulk-download-mngs-smoke.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 3
+    shard: concurrency
+  - name: "Bulk Download: WGS"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/download/bulk-download-wgs-smoke.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Smoke Test: "
+      retries: 2
+    shard: concurrency
   - name: "Pipeline Visualization"
     platformName: "macOS 12"
     screenResolution: "1440x900"
@@ -65,7 +105,7 @@ suites:
       grep: "Smoke Test: "
       retries: 3
     shard: concurrency
-  - name: "Sample Report / Coverage Viz"
+  - name: "Coverage Viz Smoke Tests"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/sampleReport/sample-report-coverage-viz.spec.ts']

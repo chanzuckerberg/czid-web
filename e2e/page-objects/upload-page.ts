@@ -13,8 +13,10 @@ import {
 import { expect } from "@playwright/test";
 import { PageObject } from "./page-object";
 
-const REF_FILENAME = "consensus_papilloma.fa";
+const REF_FILENAME = "consensus_TEST_SC2.fa";
+const TRIM_PRIMER_FILENAME = "Primer_K.bed";
 const REF_FILE = `./fixtures/reference_sequences/${REF_FILENAME}`;
+const TRIM_PRIMER_FILE = `./fixtures/trim_primers/${TRIM_PRIMER_FILENAME}`;
 const METADATA_FILE_NAME = "metadata_template.csv";
 
 const SAMPLE_NAME_LOCATOR = "[class*='sampleUploadTable'] [role='gridcell'][title]";
@@ -33,9 +35,11 @@ const UPLOAD_TAXON_FILTER_TESTID = "upload-taxon-filter";
 const CLEAR_UPLOADED_FILE_BUTTON_TESTID = "clear-uploaded-file-button";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
 const REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID = "reference-sequence-file-upload";
+const TRIM_PRIMERS_FILE_UPLOAD = "//span[text()='Trim Primers']/parent::div/following-sibling::button";
 const PORTAL_DROPDOWN_LOCATOR = "[class*='portalDropdown']";
 
 // Metadata locators
+const METADATA_SAMPLE_NAMES = "[data-testid='sample-name']";
 const METADATA_FILENAMES_LOCATORS = "[class*='fileName']";
 const METADATA_HOST_ORGANISM_TESTID = "host-organism";
 const METADATA_SAMPLE_TYPE_TESTID = "sample_type";
@@ -46,6 +50,7 @@ const METADATA_COLLECTION_LOCATION_TESTID = "collection_location_v2";
 const METADATA_APPLY_TO_ALL_LOCATOR = "[class*='applyToAll']";
 
 // Review locators
+const REVIEW_SAMPLE_NAMES = "[class*='visible'] [data-testid='sample-name']";
 const REVIEW_FILENAMES_LOCATORS = "[data-testid='input-files'] [class*='file-']";
 const REVIEW_HOST_ORGANISM_LOCATOR = "//span[text()='Sample Info']/parent::div/following-sibling::div//td[@data-testid='host-organism']";
 const REVIEW_WATER_CONTROL_TESTID = "water-control";
@@ -171,64 +176,74 @@ export class UploadPage extends PageObject {
     return this.page.getByTestId(`analysis-type-${workflow}`).locator("input");
   }
 
+  public async getSampleNames() {
+    return this.page.locator(SAMPLE_NAME_LOCATOR).allTextContents();
+  }
+
   public async getSampleName(index = 0) {
     return this.page.locator(SAMPLE_NAME_LOCATOR).nth(index).textContent();
   }
 
-  public async getRandomizedSampleInputs(inputFiles: Array<string>, sampleName: string) {
-    const inputs = [];
-    inputs.push({
-      sampleFile: sampleName,
-      inputFiles: inputFiles,
+  public async getRandomizedSampleInputs(inputFiles: Array<string>, sampleNames: Array<string>) {
+    const inputs = {};
+    for (let i = 0; i < sampleNames.length; i++) {
+      inputs[sampleNames[i]] = {
+        sampleFile: sampleNames[i],
+        inputFile: inputFiles[i],
+        inputFiles: inputFiles, // TODO: Remove?
 
-      hostOrganism: await this.getRandomHostOrganism(),
-      sampleTissueType: await this.getRandomSampleTissueType(),
+        hostOrganism: [await this.getRandomHostOrganism(), "Human"][Math.floor(Math.random() * 2)], // More Human samples
+        sampleTissueType: await this.getRandomSampleTissueType(),
 
-      waterControl: ["Yes", "No"][Math.floor(Math.random() * 2)],
-      nucleotideType: NUCLEOTIDES[Math.floor(Math.random() * NUCLEOTIDES.length)],
-      collectionDate: new Date().toISOString().slice(0, 7), // YYYY-MM (BUG? front-end says YYYY-MM-DD)
-      collectionLocation: ["New York", "Los Angeles"][Math.floor(Math.random() * 2)],
-    });
+        waterControl: ["Yes", "No"][Math.floor(Math.random() * 2)],
+        nucleotideType: NUCLEOTIDES[Math.floor(Math.random() * NUCLEOTIDES.length)],
+        collectionDate: new Date().toISOString().slice(0, 7), // YYYY-MM (BUG? front-end says YYYY-MM-DD)
+        collectionLocation: ["New York", "Los Angeles"][Math.floor(Math.random() * 2)],
+      };
+    }
     return inputs;
   }
 
   // #region Review
-  public async getReviewInputFiles() {
-    const inputFilesArray = [];
-    await this.page.locator(REVIEW_FILENAMES_LOCATORS).first().waitFor({state: "visible"});
-    const inputFiles = await this.page.locator(REVIEW_FILENAMES_LOCATORS).all();
-    for (const attchedFile of inputFiles) {
-      inputFilesArray.push(await attchedFile.textContent());
-    }
-    return inputFilesArray;
+  public async getReviewSampleNames() {
+    await this.page.locator(REVIEW_SAMPLE_NAMES).first().waitFor();
+    return this.page.locator(REVIEW_SAMPLE_NAMES).allInnerTexts();
   }
 
-  public async getReviewHostOrganismValue() {
-    return this.page.locator(REVIEW_HOST_ORGANISM_LOCATOR).textContent();
+  public async getReviewInputFiles(index = 0) {
+    return this.page.locator(REVIEW_FILENAMES_LOCATORS).nth(index).textContent();
   }
 
-  public async getReviewSampleTissueTypeValue() {
-    return this.page.getByTestId(REVIEW_SAMPLE_TYPE_TESTID).textContent();
+  public async getReviewHostOrganismValue(index = 0) {
+    return (await this.page.locator(REVIEW_HOST_ORGANISM_LOCATOR).all())[index].textContent();
   }
 
-  public async getReviewWaterControlValue() {
-    return this.page.getByTestId(REVIEW_WATER_CONTROL_TESTID).textContent();
+  public async getReviewSampleTissueTypeValue(index = 0) {
+    return this.page.getByTestId(REVIEW_SAMPLE_TYPE_TESTID).nth(index).textContent();
   }
 
-  public async getReviewNucleotideTypeValue() {
-    return this.page.getByTestId(REVIEW_NUCLEOTIDE_TYPE_TESTID).textContent();
+  public async getReviewWaterControlValue(index = 0) {
+    return this.page.getByTestId(REVIEW_WATER_CONTROL_TESTID).nth(index).textContent();
   }
 
-  public async getReviewCollectionDateValue() {
-    return this.page.getByTestId(REVIEW_COLLECTION_DATE_TESTID).textContent();
+  public async getReviewNucleotideTypeValue(index = 0) {
+    return this.page.getByTestId(REVIEW_NUCLEOTIDE_TYPE_TESTID).nth(index).textContent();
   }
 
-  public async getReviewCollectionLocationValue() {
-    return this.page.locator(REVIEW_COLLECTION_LOCATION_LOCATOR).textContent();
+  public async getReviewCollectionDateValue(index = 0) {
+    return this.page.getByTestId(REVIEW_COLLECTION_DATE_TESTID).nth(index).textContent();
+  }
+
+  public async getReviewCollectionLocationValue(index = 0) {
+    return this.page.locator(REVIEW_COLLECTION_LOCATION_LOCATOR).nth(index).textContent();
   }
   // #endregion Review
 
   // #region Metadata
+  private async getMetadataSampleNames() {
+    return this.page.locator(METADATA_SAMPLE_NAMES).allTextContents();
+  }
+
   private async getPortalDropdownOptions() {
     const options = await this.page.locator(PORTAL_DROPDOWN_LOCATOR).locator("[class*='title']").all();
     const optionStringsArray = [];
@@ -361,6 +376,15 @@ export class UploadPage extends PageObject {
     await refSeqFileChooser.setFiles(path.resolve(REF_FILE));
   };
 
+  public async uploadTrimPrimer() {
+    const [trimPrimerFileChooser] = await Promise.all([
+      this.page.waitForEvent("filechooser"),
+      this.page.locator(TRIM_PRIMERS_FILE_UPLOAD).click(),
+    ]);
+    await this.pause(2);
+    await trimPrimerFileChooser.setFiles(path.resolve(TRIM_PRIMER_FILE));
+  };
+
   public async selectFiles(selector: string, filePath: string, files: string[]) {
     for (let i = 0; i < files.length; i++) {
       const fullPath = await path.join(filePath, files[i]);
@@ -393,20 +417,22 @@ export class UploadPage extends PageObject {
     const tempFileName = `${randomUUID()}_${metadataFileName}`;
     const tempFilePath = path.join(FIXTURE_METADATA_DIR, tempFileName);
 
+    let csvContent = "";
     try {
-      const csvContent = inputs.map(input => [
-        input.sampleFile,
-        input.hostOrganism,
-        input.sampleTissueType,
-        input.nucleotideType,
-        input.collectionDate,
-        input.waterControl,
-        input.collectionLocation,
-        ",,,,,,,,,,,,,,,,,",
-      ].join(",")).join("\n");
-
-      await fs.writeFile(tempFilePath, `${templateContent}\n${csvContent}\n`, "utf8");
-
+      for (const sampleName of Object.keys(inputs)) {
+        const row = [
+          inputs[sampleName].sampleFile,
+          inputs[sampleName].hostOrganism,
+          inputs[sampleName].sampleTissueType,
+          inputs[sampleName].nucleotideType,
+          inputs[sampleName].collectionDate,
+          inputs[sampleName].waterControl,
+          inputs[sampleName].collectionLocation,
+          ",,,,,,,,,,,,,,,,,",
+        ].join(",");
+        csvContent += `${row}\n`;
+      }
+      await fs.writeFile(tempFilePath, `${templateContent}\n${csvContent}`, "utf8");
       await this.selectFiles(REVIEW_CSV_FILE_INPUT_SELECTOR, FIXTURE_METADATA_DIR, [tempFileName]);
 
     } finally {
@@ -436,6 +462,7 @@ export class UploadPage extends PageObject {
       await this.setUploadTaxonFilter("Unknown");
 
       await this.uploadRefSequence();
+      await this.uploadTrimPrimer();
     }
     if (analysisType === WORKFLOWS.SC2) {
       await this.clickCheckboxForWorkflow(analysisType);
@@ -458,13 +485,15 @@ export class UploadPage extends PageObject {
 
   public async setManualInputs(inputs: any)
   {
-    for (let i = 0; i < inputs.length; i++) {
-      await this.fillHostOrganism(inputs[i].hostOrganism, i);
-      await this.fillSampleTissueType(inputs[i].sampleTissueType, i);
-      await this.fillWaterControl(inputs[i].waterControl, i);
-      await this.fillNucleotideType(inputs[i].nucleotideType, i);
-      await this.fillCollectionDate(inputs[i].collectionDate, i);
-      await this.fillCollectionLocation(inputs[i].collectionLocation, i);
+    const sampleNames = await this.getMetadataSampleNames();
+    for (let i = 0; i < Object.keys(inputs).length; i++) {
+      const sampleName = sampleNames[i];
+      await this.fillHostOrganism(inputs[sampleName].hostOrganism, i);
+      await this.fillSampleTissueType(inputs[sampleName].sampleTissueType, i);
+      await this.fillWaterControl(inputs[sampleName].waterControl, i);
+      await this.fillNucleotideType(inputs[sampleName].nucleotideType, i);
+      await this.fillCollectionDate(inputs[sampleName].collectionDate, i);
+      await this.fillCollectionLocation(inputs[sampleName].collectionLocation, i);
     }
   }
 
@@ -477,7 +506,7 @@ export class UploadPage extends PageObject {
     await this.uploadSampleFiles(sampleFiles);
 
     const sampleName = await this.getSampleName();
-    const inputs = await this.getRandomizedSampleInputs(sampleFiles, sampleName);
+    const inputs = await this.getRandomizedSampleInputs(sampleFiles, [sampleName]);
 
     // Continue
     await this.clickContinue();
@@ -525,13 +554,16 @@ export class UploadPage extends PageObject {
   }
 
   public async validateManualInputsValues(inputs: any) {
-    for (let i = 0; i < inputs.length; i++) {
-      expect(inputs[i].hostOrganism).toEqual(await this.getMetadataHostOrganismValue(i));
-      expect(inputs[i].sampleTissueType).toEqual(await this.getMetadataSampleTissueTypeValue(i));
-      expect(inputs[i].waterControl).toEqual(await this.getMetadataWaterControlValue(i));
-      expect(inputs[i].nucleotideType).toEqual(await this.getMetadataNucleotideTypeValue(i));
-      expect(inputs[i].collectionDate).toEqual(await this.getMetadataCollectionDateValue(i));
-      expect(inputs[i].collectionLocation).toEqual(await this.getMetadataCollectionLocationValue(i));
+    const metaDataSamples = await this.getMetadataSampleNames();
+    for (let i = 0; i < Object.keys(inputs).length; i++) {
+      const sampleName = metaDataSamples[i];
+      const expectedInput = inputs[sampleName];
+      expect(expectedInput.hostOrganism).toEqual(await this.getMetadataHostOrganismValue(i));
+      expect(expectedInput.sampleTissueType).toEqual(await this.getMetadataSampleTissueTypeValue(i));
+      expect(expectedInput.waterControl).toEqual(await this.getMetadataWaterControlValue(i));
+      expect(expectedInput.nucleotideType).toEqual(await this.getMetadataNucleotideTypeValue(i));
+      expect(expectedInput.collectionDate).toEqual(await this.getMetadataCollectionDateValue(i));
+      expect(expectedInput.collectionLocation).toEqual(await this.getMetadataCollectionLocationValue(i));
     }
   }
   // #endregion Metadata
@@ -572,8 +604,8 @@ export class UploadPage extends PageObject {
         "Analysis Type": "Viral Consensus Genome",
         "Sequencing Platform": "Illumina",
         "Taxon Name": "unknown",
-        "Reference Sequence": "consensus_papilloma.fa",
-        "Trim Primer": "None provided",
+        "Reference Sequence": "consensus_TEST_SC2.fa",
+        "Trim Primer": "Primer_K.bed",
         "Pipeline Version": "3.4.18",
       };
     }
@@ -594,14 +626,18 @@ export class UploadPage extends PageObject {
   }
 
   public async validateSampleInfo(inputs: Array<any>) {
-    for (let i = 0; i < inputs.length; i++) {
-      expect(inputs[i].inputFiles).toEqual(await this.getReviewInputFiles());
-      expect(inputs[i].hostOrganism).toEqual(await this.getReviewHostOrganismValue());
-      expect(inputs[i].sampleTissueType).toEqual(await this.getReviewSampleTissueTypeValue());
-      expect(inputs[i].waterControl).toEqual(await this.getReviewWaterControlValue());
-      expect(inputs[i].nucleotideType).toEqual(await this.getReviewNucleotideTypeValue());
-      expect(inputs[i].collectionDate).toEqual(await this.getReviewCollectionDateValue());
-      expect(inputs[i].collectionLocation).toEqual(await this.getReviewCollectionLocationValue());
+    const reviewSamples = await this.getReviewSampleNames();
+    for (let i = 0; i < Object.keys(inputs).length; i++) {
+      const sampleName = reviewSamples[i];
+      const expectedInput = inputs[sampleName];
+      expect(expectedInput["sampleFile"]).toEqual(sampleName);
+      expect(expectedInput["inputFile"]).toEqual(await this.getReviewInputFiles(i));
+      expect(expectedInput["hostOrganism"]).toEqual(await this.getReviewHostOrganismValue(i));
+      expect(expectedInput["sampleTissueType"]).toEqual(await this.getReviewSampleTissueTypeValue(i));
+      expect(expectedInput["waterControl"]).toEqual(await this.getReviewWaterControlValue(i));
+      expect(expectedInput["nucleotideType"]).toEqual(await this.getReviewNucleotideTypeValue(i));
+      expect(expectedInput["collectionDate"]).toEqual(await this.getReviewCollectionDateValue(i));
+      expect(expectedInput["collectionLocation"]).toEqual(await this.getReviewCollectionLocationValue(i));
     }
   }
   // #endregion Review
