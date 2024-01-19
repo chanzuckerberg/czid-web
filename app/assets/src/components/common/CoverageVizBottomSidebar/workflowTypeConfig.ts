@@ -10,15 +10,23 @@ const READ_REQUIRED_MESSAGE =
   "Sorry, the coverage visualization is only available for taxa with at least one assembled NT read.";
 
 export interface CoverageVizBottomSidebarConfigType {
-  getUnavailableMessage?: (version?: string) => string;
+  getUnavailableMessage: ((version?: string | null) => string) | null;
 }
 
 export const CoverageVizBottomSidebarConfig: WorkflowConfigType<CoverageVizBottomSidebarConfigType> =
   {
-    [WorkflowType.AMR]: {},
-    [WorkflowType.AMR_DEPRECATED]: {},
-    [WorkflowType.BENCHMARK]: {},
-    [WorkflowType.CONSENSUS_GENOME]: {},
+    [WorkflowType.AMR]: {
+      getUnavailableMessage: null,
+    },
+    [WorkflowType.AMR_DEPRECATED]: {
+      getUnavailableMessage: null,
+    },
+    [WorkflowType.BENCHMARK]: {
+      getUnavailableMessage: null,
+    },
+    [WorkflowType.CONSENSUS_GENOME]: {
+      getUnavailableMessage: null,
+    },
     [WorkflowType.LONG_READ_MNGS]: {
       getUnavailableMessage: (version: string) =>
         isPipelineFeatureAvailable(

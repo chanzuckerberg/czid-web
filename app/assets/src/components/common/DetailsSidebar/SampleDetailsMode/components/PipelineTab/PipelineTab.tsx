@@ -1,8 +1,11 @@
 import cx from "classnames";
 import { filter, get, isEmpty, pick } from "lodash/fp";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useFragment } from "react-relay";
+import { graphql } from "relay-runtime";
 import { getSamplePipelineResults } from "~/api";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
+import LoadingMessage from "~/components/common/LoadingMessage";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { isPipelineVersionAtLeast } from "~/components/utils/pipeline_versions";
@@ -21,6 +24,7 @@ import {
 } from "~/components/utils/workflows";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
+import { WorkflowRun } from "~/interface/sample";
 import {
   ERCCComparisonShape,
   PipelineRun,
@@ -28,81 +32,140 @@ import {
   SnapshotShareId,
 } from "~/interface/shared";
 import Link from "~ui/controls/Link";
-import LoadingMessage from "../../LoadingMessage";
 import {
   AMR_WORKFLOW_INFO_FIELDS,
   CG_WORKFLOW_INFO_FIELDS,
   HOST_FILTERING_WIKI,
   LONG_READ_MNGS_INFO_FIELDS,
   SHORT_READ_MNGS_INFO_FIELDS,
-} from "./constants";
-import MetadataSection from "./MetadataSection";
-import cs from "./sample_details_mode.scss";
+} from "../../constants";
+import MetadataSection from "../../MetadataSection";
+import cs from "../../sample_details_mode.scss";
+import { PipelineTabFragment$key } from "./__generated__/PipelineTabFragment.graphql";
+import { MngsPipelineInfo, PipelineInfo, PipelineStepDictState } from "./types";
+import {
+  processAMRWorkflowRun,
+  processCGWorkflowRunInfo,
+  processPipelineInfo,
+} from "./utils";
 
 const READ_COUNTS_TABLE = "readsRemaining";
 const ERCC_PLOT = "erccScatterplot";
 
-export type PipelineInfo = AmrPipelineTabInfo | MngsPipelineInfo;
+export const PipelineTabFragment = graphql`
+  fragment PipelineTabFragment on query_SampleMetadata_additional_info {
+    ercc_comparison {
+      actual
+      expected
+      name
+    }
+    pipeline_run {
+      error_message
+      guppy_basecaller_setting
+      host_subtracted
+      job_status
+      mapped_reads
+      adjusted_remaining_reads
+      alert_sent
+      alignment_config_id
+      assembled
+      compression_ratio
+      created_at
+      dag_vars
+      deleted_at
+      deprecated
+      executed_at
+      finalized
+      fraction_subsampled
+      fraction_subsampled_bases
+      id
+      known_user_error
+      max_input_fragments
+      pipeline_branch
+      pipeline_commit
+      pipeline_execution_strategy
+      pipeline_version
+      qc_percent
+      results_finalized
+      s3_output_prefix
+      sample_id
+      sfn_execution_arn
+      subsample
+      technology
+      time_to_finalized
+      time_to_results_finalized
+      total_bases
+      total_ercc_reads
+      total_reads
+      truncated
+      truncated_bases
+      unmapped_bases
+      unmapped_reads
+      updated_at
+      use_taxon_whitelist
+      wdl_version
+      version {
+        alignment_db
+        pipeline
+      }
+    }
+    summary_stats {
+      adjusted_remaining_reads
+      compression_ratio
+      insert_size_mean
+      insert_size_standard_deviation
+      last_processed_at
+      percent_remaining
+      qc_percent
+      reads_after_bowtie2_ercc_filtered
+      reads_after_bowtie2_host_filtered
+      reads_after_czid_dedup
+      reads_after_fastp
+      reads_after_hisat2_host_filtered
+      unmapped_reads
+    }
+  }
+`;
 
 interface PipelineTabProps {
-  pipelineInfo: PipelineInfo | null;
+  currentRun?: WorkflowRun | PipelineRun;
+  currentWorkflowTab?: WorkflowLabelType;
   sampleId: SampleId;
   snapshotShareId?: SnapshotShareId;
   erccComparison?: ERCCComparisonShape[];
-  pipelineRun?: PipelineRun;
+  pipelineTabFragmentKey: PipelineTabFragment$key;
 }
 
-export interface MngsPipelineInfo {
-  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2411
-  workflow?: { text: WorkflowLabelType };
-  [key: string]: {
-    text?: string;
-    link?: string;
-    linkLabel?: string;
-  };
-}
-
-export interface AmrPipelineTabInfo {
-  analysisType: { text: WorkflowLabelType };
-  workflow: { text: WorkflowLabelType };
-  technology: { text: string };
-  pipelineVersion: { text: string; link: string; linkLabel: string };
-  cardDatabaseVersion?: { text: string };
-  totalReads?: { text: string };
-  totalErccReads?: { text: string };
-  nonhostReads?: { text: string };
-  qcPercent?: { text: string };
-  compressionRatio?: { text: string };
-  meanInsertSize?: { text: string };
-  lastProcessedAt: { text: string };
-  wildcardDatabaseVersion?: { text: string };
-}
-
-type PipelineStepDictState = PiplineStepDictInterface | Record<string, never>;
-interface PiplineStepDictInterface {
-  name: string;
-  stageDescription: string;
-  steps: {
-    [key: string]: {
-      fileList: {
-        displayName: string;
-        key: string | null;
-        url: string | null;
-      }[];
-      name: string;
-      readsAfter: number | null;
-      stepDescription: string;
-    };
-  };
-}
-
-const PipelineTab = ({
+export const PipelineTab = ({
+  currentRun,
+  currentWorkflowTab,
   snapshotShareId,
   sampleId,
-  pipelineInfo,
-  pipelineRun,
-  erccComparison,
+  pipelineTabFragmentKey,
 }: PipelineTabProps) => {
+  const data = useFragment<PipelineTabFragment$key>(
+    PipelineTabFragment,
+    pipelineTabFragmentKey,
+  );
+
+  const pipelineRun = data?.pipeline_run;
+
+  const pipelineInfoRaw: MngsPipelineInfo | null = processPipelineInfo(data);
+
+  const erccComparison:
+    | ReadonlyArray<ERCCComparisonShape | null | undefined>
+    | null
+    | undefined = data?.ercc_comparison;
+
+  let pipelineInfo: PipelineInfo | null = pipelineInfoRaw;
+  if (currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME) {
+    pipelineInfo = processCGWorkflowRunInfo(currentRun);
+  } else if (currentWorkflowTab === WORKFLOW_TABS.AMR) {
+    pipelineInfo = processAMRWorkflowRun(currentRun as WorkflowRun);
+  } else {
+    pipelineInfo = processPipelineInfo(data);
+  }
+
   const _graphContainer = useRef<HTMLDivElement>(null);
   const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
 
@@ -167,6 +230,9 @@ const PipelineTab = ({
       const hostFilteringStageKey = Object.keys(
         pipelineResults[RESULTS_FOLDER_ROOT_KEY],
       )[0];
+      if (hostFilteringStageKey === undefined) {
+        return;
+      }
 
       // Remove the host filtering steps that have readsAfter === null;
       // With the modern host filtering step (as of Nov, 2022) - the following steps may have no readsAfter
@@ -348,7 +414,7 @@ const PipelineTab = ({
 
     return (
       <ERCCScatterPlot
-        ercc_comparison={erccComparison}
+        erccComparison={erccComparison}
         width={graphWidth}
         height={0.7 * graphWidth}
       />
@@ -438,5 +504,3 @@ const PipelineTab = ({
     </div>
   );
 };
-
-export default PipelineTab;

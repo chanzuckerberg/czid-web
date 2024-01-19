@@ -1,22 +1,40 @@
 import { mapValues } from "lodash/fp";
 import React, { useMemo, useState } from "react";
+import { graphql, useFragment } from "react-relay";
 import { WorkflowLabelType } from "~/components/utils/workflows";
 import { Metadata, MetadataTypes, SampleType } from "~/interface/shared";
 import MetadataSection from "../../MetadataSection";
-import { AdditionalInfo } from "../../types";
+import { processAdditionalInfo } from "../../utils";
+import { MetadataTabMetadataFragment$key } from "./__generated__/MetadataTabMetadataFragment.graphql";
 import { MetadataSectionContent } from "./components/MetadataSectionContent";
+import { MetadataSectionContentFragment$key } from "./components/MetadataSectionContent/__generated__/MetadataSectionContentFragment.graphql";
+
+export const MetadataTabMetadataFragment = graphql`
+  fragment MetadataTabMetadataFragment on SampleMetadata {
+    additional_info {
+      name @required(action: LOG)
+      editable
+      project_id @required(action: LOG)
+      project_name @required(action: LOG)
+      host_genome_taxa_category
+      host_genome_name
+      upload_date
+    }
+  }
+`;
 
 interface MetadataTabProps {
-  metadata: Metadata;
-  metadataTypes: MetadataTypes;
-  onMetadataChange: (key: string, value: any, shouldSave?: boolean) => void;
-  onMetadataSave: (key: string) => Promise<void>;
-  savePending?: boolean;
-  additionalInfo: AdditionalInfo | null;
-  metadataErrors?: { [key: string]: string };
-  sampleTypes: SampleType[];
-  snapshotShareId?: string;
   currentWorkflowTab: WorkflowLabelType;
+  metadataErrors?: { [key: string]: string };
+  metadataTabFragmentKey: unknown;
+  metadataTypes: MetadataTypes;
+  nameLocal: string;
+  onMetadataChange: (key: string, value: any, shouldSave?: boolean) => void;
+  onMetadataSave: (key: string, metadata: Metadata) => Promise<void>;
+  savePending?: boolean;
+  sampleTypes: SampleType[];
+  setNameLocal: (name: string) => void;
+  snapshotShareId?: string;
 }
 export interface Section {
   name: string;
@@ -27,24 +45,30 @@ export type SectionEditingLookup = {
 };
 
 export const MetadataTab = ({
+  currentWorkflowTab,
+  metadataErrors,
+  metadataTabFragmentKey,
   metadataTypes,
-  metadata,
+  nameLocal,
   onMetadataChange,
   onMetadataSave,
-  metadataErrors,
-  additionalInfo,
   sampleTypes,
-  snapshotShareId,
-  currentWorkflowTab,
   savePending,
+  setNameLocal,
+  snapshotShareId,
 }: MetadataTabProps) => {
+  const data = useFragment(
+    MetadataTabMetadataFragment,
+    metadataTabFragmentKey as MetadataTabMetadataFragment$key,
+  );
+  const additionalInfo = processAdditionalInfo(data?.additional_info);
   const getMetadataSections = () => {
     // Group the MetadataFields by group name
     // Include Sample Info by default so that special cases in SAMPLE_ADDITIONAL_INFO always show
     const nameToFields = { "Sample Info": [] };
     Object.values(metadataTypes).forEach(field => {
-      const name =
-        field.group === null ? "Custom Metadata" : field.group + " Info";
+      if (field.group === null) return;
+      const name = field.group + " Info";
       if (name in nameToFields) {
         nameToFields[name].push(field.key);
       } else {
@@ -106,15 +130,19 @@ export const MetadataTab = ({
           <MetadataSectionContent
             additionalInfo={additionalInfo}
             currentWorkflowTab={currentWorkflowTab}
-            metadata={metadata}
             metadataErrors={metadataErrors}
             metadataTypes={metadataTypes}
             onMetadataChange={onMetadataChange}
             onMetadataSave={onMetadataSave}
+            nameLocal={nameLocal}
             sampleTypes={sampleTypes}
             section={section}
             sectionEditing={sectionEditing}
+            setNameLocal={setNameLocal}
             snapshotShareId={snapshotShareId}
+            metadataTabFragmentKey={
+              metadataTabFragmentKey as MetadataSectionContentFragment$key
+            }
           />
         </MetadataSection>
       ))}

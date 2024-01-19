@@ -874,7 +874,8 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       ? "pipeline_runs"
       : "workflow_runs";
 
-    const runs: { id: number }[] = sample[runType] || [];
+    const runs: { id: number | string | null | undefined }[] =
+      sample[runType] || [];
 
     // filter out the current run
     const currentRun = getCurrentRun();

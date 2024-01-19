@@ -36,7 +36,7 @@ export const getNameRenderer = (
   isFastaDownloadEnabled: boolean,
   isPhyloTreeAllowed: boolean,
   pipelineVersion: string,
-  pipelineRunId: number,
+  pipelineRunId: number | string | null,
   projectId: number,
   sampleId: SampleId,
   handlePhyloTreeModalOpen: (

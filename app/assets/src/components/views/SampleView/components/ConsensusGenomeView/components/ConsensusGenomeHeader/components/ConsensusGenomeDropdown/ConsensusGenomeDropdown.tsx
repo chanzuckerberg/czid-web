@@ -9,7 +9,7 @@ interface ConsensusGenomeDropdownProps {
   label?: string;
   onConsensusGenomeSelection: (workflowRunId: number) => void;
   rounded?: boolean;
-  initialSelectedValue?: number;
+  initialSelectedValue?: number | string | null;
 }
 
 export const ConsensusGenomeDropdown = ({
@@ -30,7 +30,7 @@ export const ConsensusGenomeDropdown = ({
       value: wr.id,
     };
   });
-  const nameFromValue = (value: number | undefined) => {
+  const nameFromValue = (value: number | string | undefined) => {
     const option = options.find(o => o.value === value);
     return option?.name;
   };
@@ -45,7 +45,7 @@ export const ConsensusGenomeDropdown = ({
       InputDropdownProps={{
         sdsStyle: "rounded",
         sdsType: "label",
-        value: nameFromValue(initialSelectedValue),
+        value: nameFromValue(initialSelectedValue ?? undefined),
       }}
       DropdownMenuProps={{
         getOptionKey: ({ name, value }) => name + value,

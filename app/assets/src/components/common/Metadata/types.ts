@@ -47,7 +47,7 @@ export interface MetadataCSVUploadState {
 
 export interface MetadataInputProps {
   className: string;
-  value: MetadataValue | undefined;
+  value: MetadataValue | null | undefined;
   metadataType: Pick<
     MetadataType,
     "dataType" | "key" | "options" | "isBoolean"

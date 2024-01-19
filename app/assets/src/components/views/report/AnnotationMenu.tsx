@@ -18,7 +18,7 @@ import cs from "./annotation_menu.scss";
 
 interface AnnotationMenuProps {
   onAnnotationUpdate: () => void;
-  pipelineRunId: number;
+  pipelineRunId: number | string | null;
   taxonId: number;
   currentLabelType?: "hit" | "not_a_hit" | "inconclusive" | "none";
   analyticsContext?: object;

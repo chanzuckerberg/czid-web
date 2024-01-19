@@ -11,7 +11,7 @@ interface MetadataSectionProps {
   open?: boolean;
   toggleable: boolean;
   onToggle?: () => void;
-  editable?: boolean;
+  editable?: boolean | null;
   editing?: boolean;
   onEditToggle?: () => void;
   savePending?: boolean;
@@ -65,8 +65,8 @@ const MetadataSection = ({
           renderStatus()
         ) : (
           <Button
-            sds-style="minimal"
-            sds-type="secondary"
+            sdsStyle="minimal"
+            sdsType="secondary"
             data-testid={`${kebabCase(title)}-edit`}
             className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
             onClick={e => {
