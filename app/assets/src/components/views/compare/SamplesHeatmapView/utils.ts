@@ -23,6 +23,6 @@ export const getTruncatedLabel = (label: string) => {
 export const metricIsZscore = (metric: string) => {
   return (
     BACKGROUND_METRICS.map(m => m.thresholdMetricValue).includes(metric) ||
-    BACKGROUND_METRICS.map(m => m.metric).includes(metric)
+    BACKGROUND_METRICS.map(m => m.value).includes(metric)
   );
 };

@@ -144,15 +144,21 @@ export const METRIC_OPTIONS = [
   "NR.r",
 ];
 
-export const BACKGROUND_METRICS = [
+export type BackgroundMetricType = {
+  text: string;
+  value: string;
+  thresholdMetricValue: string;
+};
+
+export const BACKGROUND_METRICS: BackgroundMetricType[] = [
   {
     text: "NT Z Score",
-    metric: "NT.zscore",
+    value: "NT.zscore",
     thresholdMetricValue: "NT_zscore",
   },
   {
     text: "NR Z Score",
-    metric: "NR.zscore",
+    value: "NR.zscore",
     thresholdMetricValue: "NR_zscore",
   },
 ];

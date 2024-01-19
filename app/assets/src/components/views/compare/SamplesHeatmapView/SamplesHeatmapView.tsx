@@ -87,6 +87,7 @@ import { OptionsType } from "./components/SamplesHeatmapFilters/SamplesHeatmapFi
 import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
 import {
   APPLIED_FILTERS,
+  BackgroundMetricType,
   BACKGROUND_METRICS,
   HEATMAP_FILTERS,
   METRIC_OPTIONS,
@@ -1214,7 +1215,7 @@ class SamplesHeatmapViewCC extends React.Component<
           const taxon = sample.taxons[j];
           const taxonIndex = allTaxonDetails[taxon.tax_id].index;
 
-          BACKGROUND_METRICS.forEach((metric: $TSFixMe) => {
+          BACKGROUND_METRICS.forEach((metric: BackgroundMetricType) => {
             const [metricType, metricName] = metric.value.split(".");
             allData[metric.value] = allData[metric.value] || [];
             allData[metric.value][taxonIndex] =
