@@ -23,7 +23,7 @@ export enum WorkflowType {
 export type WorkflowConfigType<T> = Record<Required<WorkflowType>, T>;
 
 export type WorkflowCount = {
-  [key in WorkflowType]?: number;
+  [key in Exclude<WorkflowType, WorkflowType.AMR_DEPRECATED>]?: number;
 };
 
 type WorkflowStrings = {
@@ -126,14 +126,6 @@ export const WORKFLOW_TABS = Object.fromEntries(
 export const workflowIsWorkflowRunEntity = (workflowValue: WorkflowType) => {
   return WORKFLOWS[workflowValue].entity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
 };
-
-export const WORKFLOW_ORDER = [
-  WorkflowType.SHORT_READ_MNGS,
-  WorkflowType.LONG_READ_MNGS,
-  WorkflowType.CONSENSUS_GENOME,
-  WorkflowType.AMR,
-  WorkflowType.BENCHMARK,
-];
 
 export const getShorthandFromWorkflow = (workflowValue: WorkflowType) => {
   return WORKFLOWS[workflowValue].shorthand;

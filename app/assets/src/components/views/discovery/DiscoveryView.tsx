@@ -15,7 +15,6 @@ import {
   mapValues,
   merge,
   pick,
-  pull,
   some,
   sumBy,
   union,
@@ -25,7 +24,7 @@ import {
 } from "lodash/fp";
 import moment from "moment";
 import { nanoid } from "nanoid";
-import React, { useContext } from "react";
+import React, { ReactNode, Suspense, useContext } from "react";
 import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
 import { trackPageTransition } from "~/api/analytics";
@@ -55,7 +54,6 @@ import {
   WORKFLOWS,
   WorkflowType,
   WORKFLOW_ENTITIES,
-  WORKFLOW_ORDER,
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
@@ -107,6 +105,8 @@ import SamplesView from "../samples/SamplesView/SamplesView";
 import VisualizationsView, {
   Visualization,
 } from "../visualizations/VisualizationsView";
+import { ConsensusGenomesTabCount } from "./components/ConsensusGenomesTabCount";
+import { SamplesTabCount } from "./components/SamplesTabCount";
 import {
   CURRENT_TAB_OPTIONS,
   DISPLAY_PLQC,
@@ -1230,7 +1230,7 @@ class DiscoveryViewCC extends React.Component<
       filteredVisualizationCount,
     } = this.state;
 
-    const renderTab = (label: string, count: number | string) => {
+    const renderTab = (label: string, count: ReactNode) => {
       return (
         <Tab
           key={nanoid()}
@@ -1247,7 +1247,12 @@ class DiscoveryViewCC extends React.Component<
         value: TAB_PROJECTS,
       },
       {
-        label: renderTab("Samples", filteredSampleStats.count || "-"),
+        label: renderTab(
+          "Samples",
+          <Suspense fallback="-">
+            <SamplesTabCount count={filteredSampleStats.count ?? "-"} />
+          </Suspense>,
+        ),
         value: TAB_SAMPLES,
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
@@ -2180,32 +2185,52 @@ class DiscoveryViewCC extends React.Component<
 
   computeWorkflowTabs = () => {
     const { allowedFeatures, isAdmin, snapshotShareId } = this.props;
-    const { filteredSampleCountsByWorkflow } = this.state;
-    let workflows = WORKFLOW_ORDER;
 
-    if (!isAdmin && !allowedFeatures.includes(BENCHMARKING_FEATURE)) {
-      workflows = pull(WorkflowType.BENCHMARK, workflows);
+    // Only short-read-mngs
+    if (snapshotShareId) {
+      return [this.getWorkflowTab(WorkflowType.SHORT_READ_MNGS)];
     }
 
-    if (snapshotShareId) workflows = [workflows[0]]; // Only short-read-mngs
-
-    return workflows.map(name => {
-      const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
-
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      let workflowCount: number | string = filteredSampleCountsByWorkflow[name];
-
-      // This count is set to null when we reset data, so show "-" as loading state.
-      // This is the same pattern used for the top level tabs.
-      if (workflowCount === null) workflowCount = "-";
-
-      return {
-        label: (
-          <Tab
-            key={nanoid()}
-            data-testid={workflowName.toLowerCase().replace(/ /g, "-")}
-            label={workflowName}
+    return [
+      this.getWorkflowTab(WorkflowType.SHORT_READ_MNGS),
+      this.getWorkflowTab(WorkflowType.LONG_READ_MNGS),
+      this.getWorkflowTab(
+        WorkflowType.CONSENSUS_GENOME,
+        <Suspense fallback="-">
+          <ConsensusGenomesTabCount
             count={
+              this.state.filteredSampleCountsByWorkflow[
+                WorkflowType.CONSENSUS_GENOME
+              ] ?? "-"
+            }
+          />
+        </Suspense>,
+      ),
+      this.getWorkflowTab(WorkflowType.AMR),
+      ...(isAdmin || allowedFeatures.includes(BENCHMARKING_FEATURE)
+        ? [this.getWorkflowTab(WorkflowType.BENCHMARK)]
+        : []),
+    ];
+  };
+
+  getWorkflowTab = (workflow: WorkflowType, countNode?: ReactNode) => {
+    const workflowName = `${WORKFLOWS[workflow].pluralizedLabel}`;
+
+    let workflowCount: number | string =
+      this.state.filteredSampleCountsByWorkflow[workflow];
+
+    // This count is set to null when we reset data, so show "-" as loading state.
+    // This is the same pattern used for the top level tabs.
+    if (workflowCount === null) workflowCount = "-";
+
+    return {
+      label: (
+        <Tab
+          key={nanoid()}
+          data-testid={workflowName.toLowerCase().replace(/ /g, "-")}
+          label={workflowName}
+          count={
+            countNode || (
               <span
                 data-testid={`${workflowName
                   .toLowerCase()
@@ -2213,12 +2238,12 @@ class DiscoveryViewCC extends React.Component<
               >
                 {workflowCount || "0"}
               </span>
-            }
-          />
-        ),
-        value: name,
-      };
-    });
+            )
+          }
+        />
+      ),
+      value: workflow,
+    };
   };
 
   handleNewWorkflowRunsCreated = ({
@@ -2237,7 +2262,6 @@ class DiscoveryViewCC extends React.Component<
         const prevSampleCountByWorkflow =
           prevUserDataCounts?.sampleCountByWorkflow;
         const newWorkflowRunsCount =
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           prevFilteredSampleCountsByWorkflow?.[workflow] +
           numWorkflowRunsCreated;
 
@@ -2706,6 +2730,10 @@ interface DiscoveryViewWithContextProps extends DiscoveryViewProps {
 }
 
 export const DiscoveryView = (props: DiscoveryViewProps) => {
+  // Some queries in discovery view are significantly slower than others, so fire queries
+  // separately in parallel to allow the faster parts of the page to load first.
+  // TODO(bchu): Kick off parallel queries here.
+
   const { admin, allowedFeatures } = useContext(UserContext);
   const globalContext = useContext(GlobalContext);
   // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531

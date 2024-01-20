@@ -76,7 +76,6 @@ export const determineInitialTab = ({
     [WorkflowType.AMR]: amr,
     [WorkflowType.BENCHMARK]: benchmark,
   } = workflowCount;
-  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   if (currentTab && workflowCount[getWorkflowTypeFromLabel(currentTab)] > 0) {
     return currentTab;
   } else if (shortReadMngs) {
