@@ -80,6 +80,7 @@ import {
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "./ColumnConfiguration";
+import { FilteredCount } from "./components/FilteredCount";
 import {
   PipelineRunStatuses,
   SARS_COV_2,
@@ -905,41 +906,46 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderFilteredCount = () => {
-    if (!isEmpty(userDataCounts)) {
-      const totalNumberOfObjects =
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        userDataCounts.sampleCountByWorkflow[workflow];
-
-      const workflowConfig = configForWorkflow[workflow];
-
-      const workflowDisplayText =
-        totalNumberOfObjects === 1
-          ? workflowConfig.singlularDisplay
-          : workflowConfig.pluralDisplay;
-
-      const filteredCountByWorkflowMessage = `${
-        selectableIds?.length || 0
-      } out of ${totalNumberOfObjects} ${workflowDisplayText}`;
-
-      const description = hasAtLeastOneFilterApplied
-        ? filteredCountByWorkflowMessage
-        : `${selectableIds?.length} ${workflowDisplayText}`;
-
-      return (
-        <div className={cs.filteredCount} data-testid="sample-count">
-          {description}
-          {hasAtLeastOneFilterApplied && (
-            <Button
-              sdsStyle="minimal"
-              sdsType="secondary"
-              onClick={onClearFilters}
-            >
-              Clear Filters
-            </Button>
-          )}
-        </div>
-      );
+    if (isEmpty(userDataCounts)) {
+      return;
     }
+
+    const totalNumberOfObjects =
+      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
+      userDataCounts.sampleCountByWorkflow[workflow];
+    const workflowConfig = configForWorkflow[workflow];
+
+    return (
+      <div className={cs.filteredCount} data-testid="sample-count">
+        {/* TODO(bryanchu): Add more descriptive "- out of X" fallback. */}
+        <Suspense fallback="">
+          <FilteredCount
+            count={
+              hasAtLeastOneFilterApplied
+                ? {
+                    numerator: selectableIds?.length ?? 0,
+                    denominator: totalNumberOfObjects,
+                  }
+                : selectableIds?.length ?? 0
+            }
+            workflowDisplayText={
+              totalNumberOfObjects === 1
+                ? workflowConfig.singlularDisplay
+                : workflowConfig.pluralDisplay
+            }
+          />
+        </Suspense>
+        {hasAtLeastOneFilterApplied && (
+          <Button
+            sdsStyle="minimal"
+            sdsType="secondary"
+            onClick={onClearFilters}
+          >
+            Clear Filters
+          </Button>
+        )}
+      </div>
+    );
   };
 
   const renderTable = () => {

@@ -31,6 +31,7 @@ import { trackPageTransition } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import { IconLoading } from "~/components/ui/icons";
 import {
   BENCHMARKING_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
@@ -2400,55 +2401,58 @@ class DiscoveryViewCC extends React.Component<
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
+              {/* TODO(bchu): Style <Suspense> fallback. */}
               {userDataCounts &&
               !userDataCounts.sampleCountByWorkflow[workflow] ? (
                 this.renderNoDataWorkflowBanner()
               ) : (
-                <SamplesView
-                  activeColumns={sampleActiveColumnsByWorkflow[workflow]}
-                  admin={isAdmin}
-                  currentDisplay={currentDisplay}
-                  currentTab={currentTab}
-                  domain={domain}
-                  filters={this.preparedFilters()}
-                  hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
-                  mapLevel={mapLevel}
-                  mapLocationData={mapLocationData}
-                  mapPreviewedLocationId={mapPreviewedLocationId}
-                  mapTilerKey={mapTilerKey}
-                  objects={workflowObjects}
-                  onActiveColumnsChange={this.handleSampleActiveColumnsChange}
-                  onClearFilters={this.handleClearFilters}
-                  onDeleteSample={this.resetDataFromFilterChange}
-                  onDisplaySwitch={this.handleDisplaySwitch}
-                  onLoadRows={workflowObjects.handleLoadObjectRows}
-                  onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
-                  onMapClick={this.clearMapPreview}
-                  onMapLevelChange={this.handleMapLevelChange}
-                  onMapMarkerClick={this.handleMapMarkerClick}
-                  onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
-                  onObjectSelected={this.handleObjectSelected}
-                  onSortColumn={this.handleSortColumn}
-                  projectId={projectId}
-                  snapshotShareId={snapshotShareId}
-                  sortable={sortable}
-                  ref={this.samplesView}
-                  selectableIds={selectableIds}
-                  selectedIds={selectedIds}
-                  showAllMetadata={showAllMetadata}
-                  sortBy={orderByForCurrentTab}
-                  sortDirection={orderDirection}
-                  onUpdateSelectedIds={updateSelectedIds}
-                  userDataCounts={userDataCounts}
-                  handleNewWorkflowRunsCreated={
-                    this.handleNewWorkflowRunsCreated
-                  }
-                  filtersSidebarOpen={showFilters}
-                  sampleStatsSidebarOpen={showStats}
-                  hideAllTriggers={hideAllTriggers}
-                  workflow={workflow}
-                  workflowEntity={workflowEntity}
-                />
+                <Suspense fallback={<IconLoading />}>
+                  <SamplesView
+                    activeColumns={sampleActiveColumnsByWorkflow[workflow]}
+                    admin={isAdmin}
+                    currentDisplay={currentDisplay}
+                    currentTab={currentTab}
+                    domain={domain}
+                    filters={this.preparedFilters()}
+                    hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
+                    mapLevel={mapLevel}
+                    mapLocationData={mapLocationData}
+                    mapPreviewedLocationId={mapPreviewedLocationId}
+                    mapTilerKey={mapTilerKey}
+                    objects={workflowObjects}
+                    onActiveColumnsChange={this.handleSampleActiveColumnsChange}
+                    onClearFilters={this.handleClearFilters}
+                    onDeleteSample={this.resetDataFromFilterChange}
+                    onDisplaySwitch={this.handleDisplaySwitch}
+                    onLoadRows={workflowObjects.handleLoadObjectRows}
+                    onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
+                    onMapClick={this.clearMapPreview}
+                    onMapLevelChange={this.handleMapLevelChange}
+                    onMapMarkerClick={this.handleMapMarkerClick}
+                    onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
+                    onObjectSelected={this.handleObjectSelected}
+                    onSortColumn={this.handleSortColumn}
+                    projectId={projectId}
+                    snapshotShareId={snapshotShareId}
+                    sortable={sortable}
+                    ref={this.samplesView}
+                    selectableIds={selectableIds}
+                    selectedIds={selectedIds}
+                    showAllMetadata={showAllMetadata}
+                    sortBy={orderByForCurrentTab}
+                    sortDirection={orderDirection}
+                    onUpdateSelectedIds={updateSelectedIds}
+                    userDataCounts={userDataCounts}
+                    handleNewWorkflowRunsCreated={
+                      this.handleNewWorkflowRunsCreated
+                    }
+                    filtersSidebarOpen={showFilters}
+                    sampleStatsSidebarOpen={showStats}
+                    hideAllTriggers={hideAllTriggers}
+                    workflow={workflow}
+                    workflowEntity={workflowEntity}
+                  />
+                </Suspense>
               )}
             </div>
             {userDataCounts &&
