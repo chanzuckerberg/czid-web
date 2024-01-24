@@ -14,16 +14,16 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LinkCS from "~ui/controls/link.scss";
 import RadioButton from "~ui/controls/RadioButton";
 import StatusLabel from "~ui/labels/StatusLabel";
-import { MICROBIOME_DOWNLOAD_METRIC_OPTIONS } from "../compare/SamplesHeatmapView/constants";
-import cs from "./bulk_download_modal_options.scss";
 import {
   BULK_DOWNLOAD_DOCUMENTATION_LINKS,
   BULK_DOWNLOAD_TYPES,
   CONDITIONAL_FIELDS,
-} from "./constants";
-import TaxonHitSelect from "./TaxonHitSelect";
-import ThresholdFilterModal from "./ThresholdFilterModal";
-import { triggersConditionalField } from "./utils";
+} from "../../../../../../BulkDownloadListView/constants";
+import { MICROBIOME_DOWNLOAD_METRIC_OPTIONS } from "../../../../../../compare/SamplesHeatmapView/constants";
+import { triggersConditionalField } from "../../utils";
+import cs from "./bulk_download_modal_options.scss";
+import { TaxonHitSelect } from "./components/TaxonHitSelect/TaxonHitSelect";
+import { ThresholdFilterModal } from "./components/ThresholdFilterModal/ThresholdFilterModal";
 
 interface BulkDownloadModalOptionsProps {
   downloadTypes?: BulkDownloadType[];
@@ -42,7 +42,7 @@ interface BulkDownloadModalOptionsProps {
   userIsCollaborator: boolean;
 }
 
-const BulkDownloadModalOptions = ({
+export const BulkDownloadModalOptions = ({
   backgroundOptions,
   metricsOptions,
   validObjectIds,
@@ -476,5 +476,3 @@ const BulkDownloadModalOptions = ({
     <div className={cs.downloadTypeContainer}>{renderDownloadTypes()}</div>
   );
 };
-
-export default BulkDownloadModalOptions;

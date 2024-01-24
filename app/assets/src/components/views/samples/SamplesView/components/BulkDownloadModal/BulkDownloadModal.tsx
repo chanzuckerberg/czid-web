@@ -29,10 +29,13 @@ import { BulkDownloadType } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import { WorkflowType, WORKFLOW_ENTITIES } from "~utils/workflows";
+import {
+  DEFAULT_BACKGROUND_MODEL,
+  WORKFLOW_OBJECT_LABELS,
+} from "../../../../BulkDownloadListView/constants";
 import cs from "./bulk_download_modal.scss";
-import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
-import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
-import { DEFAULT_BACKGROUND_MODEL, WORKFLOW_OBJECT_LABELS } from "./constants";
+import { BulkDownloadModalFooter } from "./components/BulkDownloadModalFooter";
+import { BulkDownloadModalOptions } from "./components/BulkDownloadModalOptions";
 
 const DEFAULT_CREATION_ERROR =
   "An unknown error occurred. Please contact us for help.";
@@ -102,7 +105,7 @@ interface BulkDownloadModalState {
   userIsCollaboratorOnAllSamples: boolean;
 }
 
-class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
+export class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   state: BulkDownloadModalState = {
     bulkDownloadTypes: null,
     // We save the fields for ALL download types.
@@ -517,5 +520,3 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     );
   }
 }
-
-export default BulkDownloadModal;

@@ -24,7 +24,9 @@ const thresholdToString = (thresholds: ThresholdFilterData[]) => {
   );
 };
 
-const ThresholdFilterModal = ({ addFilterList }: ThresholdFilterModalProps) => {
+export const ThresholdFilterModal = ({
+  addFilterList,
+}: ThresholdFilterModalProps) => {
   const initialThreshold: ThresholdFilterData = {
     metric: "",
     metricDisplay: "",
@@ -84,5 +86,3 @@ const ThresholdFilterModal = ({ addFilterList }: ThresholdFilterModalProps) => {
     />
   );
 };
-
-export default ThresholdFilterModal;

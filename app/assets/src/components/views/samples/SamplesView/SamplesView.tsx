@@ -37,16 +37,16 @@ import {
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
-import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
-import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import { TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM } from "~/components/views/compare/SamplesHeatmapView/constants";
+import { showBulkDownloadNotification } from "~/components/views/components/BulkDownloadNotification";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import NextcladeModal from "~/components/views/nextclade/NextcladeModal";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
+import { BulkDownloadModal } from "~/components/views/samples/SamplesView/components/BulkDownloadModal";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
 import { CreationSource } from "~/interface/sample";

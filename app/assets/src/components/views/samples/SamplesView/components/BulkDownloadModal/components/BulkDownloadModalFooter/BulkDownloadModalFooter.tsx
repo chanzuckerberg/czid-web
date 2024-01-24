@@ -4,13 +4,13 @@ import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
-import cs from "./bulk_download_modal_footer.scss";
 import {
   BULK_DOWNLOAD_TYPES,
   CONDITIONAL_FIELDS,
   HOST_GENOME_NAMES,
   OPTIONAL_FIELDS,
-} from "./constants";
+} from "../../../../../../BulkDownloadListView/constants";
+import cs from "./bulk_download_modal_footer.scss";
 
 const triggersCondtionalFieldMetricList = (
   conditionalField,
@@ -74,7 +74,7 @@ interface BulkDownloadModalFooterProps {
   workflow: string;
 }
 
-export default function BulkDownloadModalFooter({
+export function BulkDownloadModalFooter({
   loading,
   downloadTypes,
   validObjectIds,

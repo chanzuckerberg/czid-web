@@ -22,7 +22,7 @@ interface TaxonHitSelectProps {
   hitType?: "read" | "contig";
 }
 
-class TaxonHitSelect extends React.Component<TaxonHitSelectProps> {
+export class TaxonHitSelect extends React.Component<TaxonHitSelectProps> {
   state = {
     options: null,
     isLoadingOptions: false,
@@ -140,5 +140,3 @@ TaxonHitSelect.defaultProps = {
   usePortal: true,
   withinModal: true,
 };
-
-export default TaxonHitSelect;

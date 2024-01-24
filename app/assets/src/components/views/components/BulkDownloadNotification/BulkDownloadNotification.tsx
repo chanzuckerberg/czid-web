@@ -8,7 +8,7 @@ interface BulkDownloadNotificationProps {
   onClose?: $TSFixMeFunction;
 }
 
-export default class BulkDownloadNotification extends React.Component<BulkDownloadNotificationProps> {
+class BulkDownloadNotification extends React.Component<BulkDownloadNotificationProps> {
   render() {
     const { onClose } = this.props;
     const { admin, userName } = this.context || {};

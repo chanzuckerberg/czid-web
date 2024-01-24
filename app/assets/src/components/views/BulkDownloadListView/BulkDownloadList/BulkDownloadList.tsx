@@ -18,7 +18,7 @@ import ImgDownloadPrimary from "~ui/illustrations/ImgDownloadPrimary";
 import Notification from "~ui/notifications/Notification";
 import { openUrl } from "~utils/links";
 import cs from "./bulk_download_list.scss";
-import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
+import { BulkDownloadTableRenderers } from "./components/BulkDownloadTableRenderers";
 
 // The number of times we automatically update the bulk downloads on the page before prompting the user.
 const AUTO_UPDATE_MAX_COUNT = 15;

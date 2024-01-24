@@ -5,10 +5,10 @@ import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import LoadingBar from "~ui/controls/LoadingBar";
 import StatusLabel from "~ui/labels/StatusLabel";
+import { BULK_DOWNLOAD_TYPES } from "../../../constants";
 import cs from "./bulk_download_table_renderers.scss";
-import { BULK_DOWNLOAD_TYPES } from "./constants";
 
-export default class BulkDownloadTableRenderers extends React.Component {
+export class BulkDownloadTableRenderers extends React.Component {
   static renderDownload = ({ rowData }, admin = false) => {
     if (!rowData) {
       return null;

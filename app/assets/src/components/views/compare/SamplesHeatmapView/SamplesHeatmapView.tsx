@@ -67,6 +67,7 @@ import {
 import { WorkflowType } from "~/components/utils/workflows";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapView/components/SamplesHeatmapVis";
+import { showBulkDownloadNotification } from "~/components/views/components/BulkDownloadNotification";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import { URL_FIELDS } from "~/components/views/SampleView/utils";
 import {
@@ -80,7 +81,6 @@ import { SelectedOptions, Subcategories } from "~/interface/shared";
 import { IconAlert } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
-import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
 import { SamplesHeatmapDownloadModal } from "./components/SamplesHeatmapDownloadModal/SamplesHeatmapDownloadModal";
 import SamplesHeatmapFilters from "./components/SamplesHeatmapFilters";
 import { OptionsType } from "./components/SamplesHeatmapFilters/SamplesHeatmapFilters";
