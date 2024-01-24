@@ -44,10 +44,12 @@ jobs:
       developer_name: ${{ github.actor }}
       deployment_reason: scheduled deployment of main to staging
 
-  run_e2e:
-    name: Run E2E tests on staging
+  run_staging_playwright_e2e_tests:
+    name: Run Playwright E2E tests on staging
     needs: deploy-staging
-    uses: ./.github/workflows/e2e-staging.yml
+    uses: ./.github/workflows/e2e-automation.yml
+    with:
+      node-environment: "staging"
     secrets: inherit
 
   # Separated make-release-checklist into it's own job to prevent the failure of it from blocking deployment

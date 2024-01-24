@@ -1,6 +1,13 @@
 name: e2e-automation
 
 on:
+  workflow_call:
+    inputs:
+      node-environment:
+        type: string
+        required: true
+        default: 'staging'
+
   workflow_dispatch:
     inputs:
       node-environment:
