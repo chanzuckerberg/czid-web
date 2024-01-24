@@ -179,15 +179,15 @@ class VisualizationsController < ApplicationController
       end,
       thresholdFilters: {
         targets: [
-          { text: "NT Z Score", value: "NT_zscore" },
           { text: "NT rPM", value: "NT_rpm" },
+          { text: "NT Z Score", value: "NT_zscore" },
           { text: "NT r (total reads)", value: "NT_r" },
           { text: "NT %id", value: "NT_percentidentity" },
           { text: "NT L (alignment length in bp)", value: "NT_alignmentlength" },
           { text: "NT E Value (as a power of 10)", value: "NT_logevalue" },
+          { text: "NR rPM", value: "NR_rpm" },
           { text: "NR Z Score", value: "NR_zscore" },
           { text: "NR r (total reads)", value: "NR_r" },
-          { text: "NR rPM", value: "NR_rpm" },
           { text: "NR %id", value: "NR_percentidentity" },
           { text: "NR L (alignment length in bp)", value: "NR_alignmentlength" },
           { text: "NR E Value (as a power of 10)", value: "NR_logevalue" },

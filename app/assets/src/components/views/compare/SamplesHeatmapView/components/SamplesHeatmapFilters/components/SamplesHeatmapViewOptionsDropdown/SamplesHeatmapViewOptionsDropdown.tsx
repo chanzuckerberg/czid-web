@@ -34,6 +34,8 @@ export const SamplesHeatmapViewOptionsDropdown = ({
     ? customValueToNameFunction(selectedOptionValue, options)
     : valueToName(selectedOptionValue, options);
 
+  const getOptionDisabled = (option: SDSFormattedOption) => option.disabled;
+
   return (
     <Dropdown
       value={valueToSDSFormatOption(
@@ -48,6 +50,15 @@ export const SamplesHeatmapViewOptionsDropdown = ({
         disabled: disabled,
         sdsType: "label",
         value: selectedOptionName,
+      }}
+      DropdownMenuProps={{
+        getOptionDisabled: getOptionDisabled,
+        isOptionEqualToValue: (
+          option: SDSFormattedOption,
+          value: SDSFormattedOption,
+        ) => {
+          return option.value === value.value;
+        },
       }}
     />
   );

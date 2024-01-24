@@ -6,6 +6,7 @@ import { Divider } from "~/components/layout";
 import Link from "~/components/ui/controls/Link";
 import { HEATMAP_KNOWN_PATHOGEN_FILTER } from "~/components/utils/features";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
+import { BACKGROUND_METRICS } from "../../constants";
 import { RawBackground } from "../../SamplesHeatmapView";
 import SamplesHeatmapBackgroundDropdown from "./components/SamplesHeatmapBackgroundDropdown";
 import SamplesHeatmapCategoryDropdown from "./components/SamplesHeatmapCategoryDropdown";
@@ -27,7 +28,7 @@ export interface SDSFormattedOption {
 
 export interface TextValueString {
   text?: string;
-  value?: string;
+  value: string;
 }
 
 export interface TextValueNumber {
@@ -121,13 +122,21 @@ const SamplesHeatmapFilters = ({
   };
 
   const renderMetricSelect = () => {
+    const backgroundMetricValues = BACKGROUND_METRICS.map(m => m.value);
+    const newOptions = options?.metrics?.map((metric: TextValueString) => {
+      return {
+        ...metric,
+        disabled:
+          !selectedOptions?.background &&
+          backgroundMetricValues.includes(metric.value),
+      };
+    });
     return (
       <SamplesHeatmapViewOptionsDropdown
         disabled={loading || !data}
         label="Metric"
         onChange={onMetricChange}
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-        options={optionsToSDSFormat(options.metrics)}
+        options={optionsToSDSFormat(newOptions || [])}
         selectedOptions={selectedOptions}
         selectedOptionsKey="metric"
       />
@@ -175,12 +184,26 @@ const SamplesHeatmapFilters = ({
     const isPreset = selectedOptions.presets.includes("thresholdFilters");
     const disabled = loading || !data || isPreset;
 
+    const backgroundMetricValues = BACKGROUND_METRICS.map(m =>
+      m.value.replace(".", "_"),
+    );
+    const newOptions = options?.thresholdFilters?.targets?.map(
+      (metric: TextValueString) => {
+        return {
+          ...metric,
+          disabled:
+            !selectedOptions?.background &&
+            backgroundMetricValues.includes(metric.value),
+        };
+      },
+    );
+
     const thresholdSelect = (
       <>
         <ThresholdFilterSDS
           isDisabled={disabled}
           // @ts-expect-error Type 'TextValueString' is not assignable to type 'MetricOption'. Property 'text' is optional in type 'TextValueString' but required in type 'MetricOption'.ts(2322)
-          metricOptions={options.thresholdFilters.targets}
+          metricOptions={newOptions}
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           selectedThresholds={selectedOptions["thresholdFilters"]}
           onApply={onThresholdFilterApply}

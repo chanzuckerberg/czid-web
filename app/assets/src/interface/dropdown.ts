@@ -4,6 +4,7 @@ export type ThresholdFilterOperator = ">=" | "<=";
 export interface MetricOption {
   text: MetricText;
   value: string;
+  disabled?: boolean;
 }
 
 export interface ThresholdFilterData {
