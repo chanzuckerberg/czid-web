@@ -102,13 +102,15 @@ class SfnAmrPipelineDispatchService
   # CZID-8173: In the past, we used just HG38 for the human host genome. Now
   # we are using an improved genome that combines HG38+T2T. However, we want to
   # avoid disrupting old projects, so they still use previous human genome.
-  # TODO (Vince): Short-term, for QA purposes this determination is made entirely
+  # TODO: (Vince) Short-term, for QA purposes this determination is made entirely
   # by user feature flag. Once validated and ready to ship, this will be converted
   # to a pipeline version check: old pipelines get HG38, new pipelines HG38+T2T.
   # If the user flag is still around in March 2024, something went terribly wrong.
+  # TODO: (Vince) Current approach is very short-term, just a bridge between this PR
+  # and my next PR when we will start storing human HG version and retrieving it.
   def appropriate_human_genome
     if @current_user.allowed_feature?("use_t2t_human_genome")
-      HostGenome.get_active_host_genome_by_name("Human")
+      HostGenome.find_by(name: "Human", version: 2)
     else
       HostGenome.find_by(name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN)
     end

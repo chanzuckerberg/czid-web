@@ -57,7 +57,9 @@ RSpec.describe SfnLongReadMngsPipelineDispatchService, type: :service do
         allow(ENV).to receive(:[]).and_call_original
         allow(ENV).to receive(:[]).with('SAMPLES_BUCKET_NAME').and_return(fake_samples_bucket)
 
-        create(:host_genome, name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN)
+        # TODO: (Vince) Use of `version: 0` is temp to  support safe migration
+        # The additional Human host_genome creation here will go away with next PR.
+        create(:host_genome, name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN, version: 0)
         create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: fake_sfn_arn)
         create(:alignment_config, name: fake_alignment_config)
 

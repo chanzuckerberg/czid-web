@@ -33,7 +33,12 @@ class CreateHostGenomes < ActiveRecord::Migration[5.1]
       # in case things are being run fully from scratch.
       # SUMMARY: in the future, we added this col to the historical migration
       # to avoid conflicts when setting up test DB. No impact to Staging/Prod.
-      t.string :deprecation_status, default: NON_DEPRECATED_HG_KEYWORD, null: false, comment: "Non-deprecated HostGenomes should use keyword `#{NON_DEPRECATED_HG_KEYWORD}`, otherwise should be a brief message explaining deprecation, eg, 'v1, deprecated on Nov 29 2023'." # VOODOO update to be exact col match
+      t.string :deprecation_status, default: NON_DEPRECATED_HG_KEYWORD, null: false, comment: "Non-deprecated HostGenomes should use keyword `#{NON_DEPRECATED_HG_KEYWORD}`, otherwise should be a brief message explaining deprecation, eg, 'v1, deprecated on Nov 29 2023'."
+      # LATER ON: in the even farther-flung future of Jan 2024, the same thing
+      # happened when the original plan shifted to using strict versioning. All
+      # the reasoning above also holds for the below column here, it's just that
+      # its migration file is 20240117054458_enable_host_genome_versioning.rb.
+      t.integer :version, default: 1, null: false, comment: "Version of this host's genome data, 1-indexed. Allows us to track multiple revisions of a certain host organism. Still, most hosts only have one version."
     end
 
     add_column :samples, :host_genome_id, :bigint

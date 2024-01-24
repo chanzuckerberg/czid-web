@@ -74,17 +74,19 @@ class SfnLongReadMngsPipelineDispatchService
   # CZID-8173: In the past, we used just HG38 for the human host genome. Now
   # we are using an improved genome that combines HG38+T2T. However, we want to
   # avoid disrupting old projects, so they still use previous human genome.
-  # TODO (Vince): Short-term, for QA purposes this determination is made entirely
+  # TODO: (Vince) Short-term, for QA purposes this determination is made entirely
   # by user feature flag. Once validated and ready to ship, this will be converted
   # to a pipeline version check: old pipelines get HG38, new pipelines HG38+T2T.
   # If the user flag is still around in March 2024, something went terribly wrong.
+  # TODO: (Vince) Current approach is very short-term, just a bridge between this PR
+  # and my next PR when we will start storing human HG version and retrieving it.
   def using_human_t2t_genome?
     @sample.user.allowed_feature?("use_t2t_human_genome")
   end
 
   def appropriate_human_genome
     if using_human_t2t_genome?
-      HostGenome.get_active_host_genome_by_name("Human")
+      HostGenome.find_by(name: "Human", version: 2)
     else
       HostGenome.find_by(name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN)
     end
@@ -103,7 +105,7 @@ class SfnLongReadMngsPipelineDispatchService
   # optimized. We continue to provide it for old, pre-T2T projects.
   def minimap_human_path(library_type)
     if using_human_t2t_genome?
-      human_host_genome = HostGenome.get_active_host_genome_by_name("Human")
+      human_host_genome = HostGenome.find_by(name: "Human", version: 2)
       minimap_path_by_library_type(library_type, human_host_genome)
     else
       DEPRECATED_HUMAN_HG38_S3_MINIMAP2_INDEX_PATH

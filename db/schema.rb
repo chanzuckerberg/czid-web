@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_11_30_002352) do
+ActiveRecord::Schema.define(version: 2024_01_17_054458) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -213,8 +213,9 @@ ActiveRecord::Schema.define(version: 2023_11_30_002352) do
     t.string "s3_kallisto_index_path", default: "s3://czid-public-references/host_filter/ercc/20221031/kallisto_idx/ercc.kallisto.idx", comment: "The path to the index file to be used in the pipeline by kallisto for host filtering."
     t.string "s3_bowtie2_index_path_v2", default: "s3://czid-public-references/host_filter/ercc/20221031/bowtie2_index_tar/ercc.bowtie2.tar", comment: "The path to the index file to be used in the pipeline by bowtie2 for host filtering."
     t.string "s3_original_transcripts_gtf_index_path", comment: "The path to the index file to be used in the pipeline by kallisto for host filtering. Used to generate host gene counts"
-    t.string "deprecation_status", default: "active", null: false, comment: "Non-deprecated HostGenomes should use keyword `active`, otherwise should be a brief message explaining deprecation, eg, 'v1, deprecated on Nov 29 2023'."
-    t.index ["name", "deprecation_status"], name: "index_host_genomes_on_name_and_deprecation_status", unique: true
+    t.string "deprecation_status", comment: "Non-deprecated HostGenomes must be NULL. If deprecated, provide a brief message about deprecation, eg, 'deprecated on Nov 29 2023'."
+    t.integer "version", default: 1, null: false, comment: "Version of this host's genome data, 1-indexed. Allows us to track multiple revisions of a certain host organism. Still, most hosts only have one version."
+    t.index ["name", "version"], name: "index_host_genomes_on_name_and_version", unique: true
     t.index ["user_id"], name: "index_host_genomes_on_user_id"
   end
 

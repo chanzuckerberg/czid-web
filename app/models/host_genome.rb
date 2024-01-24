@@ -9,16 +9,20 @@ class HostGenome < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :default_background, optional: true, class_name: "Background"
 
-  # A specific version of a HostGenome can be deprecated: doing this allows us
-  # to keep around its index file references while stopping displaying it in
-  # options lists and generally restricting its further use. This effectively
-  # allows us to version a given host: there can be lots of HostGenomes with
-  # the `name` of "Human", but only one for any given deprecation_status.
-  # See https://czi-tech.atlassian.net/browse/CZID-8173 for motivation.
+  # HostGenomes can have multiple versions for a given host (that is, `name`).
+  # This allows us to keep around index file references for older versions of
+  # the host and generally restrict the use of old versions. For example, we can
+  # display a single "Human" as a host option, but have multiple versions of
+  # "Human", then do things like ensuring old projects use their original version,
+  # while new projects get the latest "Human" version. That said, the vast majority
+  # of hosts only have a single version and just one HostGenome record.
+  # If a host has multiple versions, only the newest version should be considered
+  # non-deprecated. All old versions need non-NULL values for deprecation_status.
+  # See https://czi-tech.atlassian.net/browse/CZID-8173 for more info.
   validates :name, presence: true, uniqueness: {
     case_sensitive: false,
-    scope: :deprecation_status,
-    message: "plus `deprecation_status` must be unique, e.g., you can not have two 'active' rows for a name.",
+    scope: :version,
+    message: "plus `version` must be unique, e.g., you can not have two version 1 rows for a name.",
   }, format: {
     with: /\A\w[\w|\s|\.|\-]+\z/,
     message: "of host organism allows only word, period, dash or space chars, and must start with a word char.",
@@ -49,18 +53,10 @@ class HostGenome < ApplicationRecord
   S3_STAR_INDEX_FILE = "STAR_genome.tar".freeze
   S3_BOWTIE2_INDEX_FILE = "bowtie2_genome.tar".freeze
 
-  # HostGenome can be deprecated via `deprecation_status` col.
-  # If a HostGenome is still in use (i.e., not deprecated) it uses this keyword.
-  NON_DEPRECATED_KEYWORD = "active".freeze
-  # We sometimes need to directly reference old HG38 Human genome.
+  # TODO: (Vince) Keeping this in code is very short term: it's just a bridge between
+  # this PR and my next when we'll only use human HG version for selection. But we should
+  # continue to select by it to ensure safety until migration to `version` is confirmed.
   DEPRECATION_STATUS_HG38_V1_HUMAN = "deprecated, 2023-12-13, v1, HG38".freeze
-
-  # Some HostGenomes are deprecated in favor of newer versions for the organism.
-  # This is not common -- most organisms only have one HG and it's active --
-  # but for those cases where the organism may have deprecated HGs, use this.
-  def self.get_active_host_genome_by_name(name)
-    HostGenome.find_by(name: name, deprecation_status: NON_DEPRECATED_KEYWORD)
-  end
 
   def self.s3_star_index_path_default
     HostGenome::ERCC_PATH_PREFIX + HostGenome::S3_STAR_INDEX_FILE
@@ -98,7 +94,11 @@ class HostGenome < ApplicationRecord
       s3_bowtie2_index_path.include?(HostGenome::ERCC_DIRECTORY_PATH)
   end
 
+  # We only show NULL user HostGenomes (per IDSEQ-2193, see above for more).
+  # Additionally, if the `deprecation_status` is anything other than NULL, we
+  # consider that to be a deprecated record, and it should not be presented as
+  # an option to choose from.
   def show_as_option?
-    user.nil? && deprecation_status == NON_DEPRECATED_KEYWORD
+    user.nil? && deprecation_status.nil?
   end
 end
