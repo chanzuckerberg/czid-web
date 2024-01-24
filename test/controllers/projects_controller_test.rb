@@ -9,6 +9,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     @deletable_project = projects(:deletable_project)
     @user = users(:admin_one)
     @user_nonadmin = users(:joe)
+    AppConfigHelper.set_app_config(AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, "2021-01-22")
   end
 
   test 'should get index' do

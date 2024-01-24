@@ -732,6 +732,10 @@ RSpec.describe ProjectsController, type: :controller do
           { name: fake_name, public_access: fake_access, description: fake_description }
         end
 
+        before do
+          create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: "2021-01-22")
+        end
+
         it "successfully creates a project with provided params" do
           post :create, params: { format: "json", project: create_params }
           expect(response).to have_http_status(:success)
@@ -987,6 +991,7 @@ RSpec.describe ProjectsController, type: :request do
   context 'Admin User' do
     before do
       sign_in_auth0 @admin
+      create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: "2021-01-22")
     end
 
     it 'should get index' do

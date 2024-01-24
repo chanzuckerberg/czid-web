@@ -387,6 +387,10 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       if @project.save
+        if current_user.allowed_feature?("pin_pipeline_version")
+          @project.pin_to_major_versions
+        end
+        @project.pin_default_alignment_config
         format.html { redirect_to @project, notice: 'Project was successfully created.' }
         format.json { render :show, status: :created, location: @project, project: @project }
       else

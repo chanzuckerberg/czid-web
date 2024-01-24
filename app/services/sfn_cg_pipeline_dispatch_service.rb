@@ -62,11 +62,6 @@ class SfnCgPipelineDispatchService
     @wdl_version = VersionRetrievalService.call(@sample.project.id, @workflow_run.workflow)
     raise SfnVersionMissingError, @workflow_run.workflow if @wdl_version.blank?
 
-    user = User.find(@sample.user_id)
-    if user.allowed_feature?("pin_pipeline_version")
-      VersionPinningService.call(@sample.project_id, @workflow_run.workflow, @wdl_version[0])
-    end
-
     updated_inputs = JSON.parse(@workflow_run.inputs_json)
     updated_inputs[:creation_source] = creation_source
 

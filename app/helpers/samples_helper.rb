@@ -845,7 +845,7 @@ module SamplesHelper
                           base_inputs_json
                         end
           if workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
-            alignment_config_name = sample_attributes[:alignment_config_name] || Project.fetch_and_pin_alignment_config(sample_attributes[:project_id])
+            alignment_config_name = sample_attributes[:alignment_config_name] || VersionRetrievalService.call(sample_attributes[:project_id], AlignmentConfig::NCBI_INDEX)
 
             pr = PipelineRun.new(
               sample: sample,

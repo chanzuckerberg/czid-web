@@ -965,7 +965,7 @@ class Sample < ApplicationRecord
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)
 
     # use admin-supplied alignment config or fetch the pinned alignment config for the project
-    alignment_config_name_for_pr = alignment_config_name || Project.fetch_and_pin_alignment_config(project_id)
+    alignment_config_name_for_pr = alignment_config_name || VersionRetrievalService.call(project_id, AlignmentConfig::NCBI_INDEX)
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name_for_pr)
 
     pr.technology = PipelineRun::TECHNOLOGY_INPUT[:illumina]

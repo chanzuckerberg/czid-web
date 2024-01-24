@@ -643,26 +643,23 @@ RSpec.describe "Sample request", type: :request do
             create(:project_workflow_version, project_id: @project.id, workflow: AlignmentConfig::NCBI_INDEX, version_prefix: fake_alignment_config_name)
           end
 
-          it "sets the alignment config to the pinned version and does not update the pinned version" do
+          it "sets the alignment config to the pinned version" do
             @workflow_params.each do |workflow, sample_params|
               sample_id = make_successful_request(sample_params, @metadata_params, @client_params, workflow)
 
               pr = PipelineRun.find_by(sample_id: sample_id)
               expect(pr.alignment_config_id).to eq(@fake_alignment_config.id)
-              expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: AlignmentConfig::NCBI_INDEX).version_prefix).to eq(@fake_alignment_config.name)
             end
           end
         end
 
         context "when the project is not yet pinned to an alignment config version" do
-          it "sets the alignment config to the default version and pins it to the project" do
+          it "sets the alignment config to the default version" do
             @workflow_params.each do |workflow, sample_params|
               sample_id = make_successful_request(sample_params, @metadata_params, @client_params, workflow)
 
               pr = PipelineRun.find_by(sample_id: sample_id)
               expect(pr.alignment_config_id).to eq(@default_alignment_config.id)
-
-              expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: AlignmentConfig::NCBI_INDEX).version_prefix).to eq(@default_alignment_config.name)
             end
           end
         end

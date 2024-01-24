@@ -30,10 +30,10 @@ RSpec.describe 'backfill_pin_pipeline_versions' do
     Rake.application.invoke_task "backfill_pin_pipeline_versions"
   end
 
-  it "pins workflows for which there is an existing run" do
+  it "pins workflows regardless of existing runs in the project" do
     expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: amr_workflow).version_prefix).to eq("1")
     expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: cg_workflow).version_prefix).to eq("3")
-    expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: long_read_mngs_workflow)).to be_nil
+    expect(ProjectWorkflowVersion.find_by(project_id: @project.id, workflow: long_read_mngs_workflow).version_prefix).to eq("0")
   end
 
   it "does not overwrite existing pinned workflows" do

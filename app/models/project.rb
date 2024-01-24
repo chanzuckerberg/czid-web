@@ -133,10 +133,15 @@ class Project < ApplicationRecord
     where("projects.id in (?)", Sample.public_samples.distinct.pluck(:project_id))
   end
 
-  def self.fetch_and_pin_alignment_config(project_id)
-    pinned_alignment_config = VersionRetrievalService.call(project_id, AlignmentConfig::NCBI_INDEX)
-    VersionPinningService.call(project_id, AlignmentConfig::NCBI_INDEX, pinned_alignment_config)
-    pinned_alignment_config
+  def pin_to_major_versions
+    latest_major_versions = WorkflowRun.latest_major_workflow_versions.except(WorkflowRun::WORKFLOW[:main], WorkflowRun::WORKFLOW[:benchmark])
+    latest_major_versions.each do |workflow, version|
+      VersionPinningService.call(id, workflow, version)
+    end
+  end
+
+  def pin_default_alignment_config
+    VersionPinningService.call(id, AlignmentConfig::NCBI_INDEX, AlignmentConfig.default_name)
   end
 
   def add_default_metadata_fields
