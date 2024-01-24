@@ -1,8 +1,8 @@
 import { ChecksumAlgorithm, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import cx from "classnames";
-import { find, get, map, pick, size, take } from "lodash/fp";
-import React, { useEffect, useState } from "react";
+import { find, get, map, pick, take } from "lodash/fp";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   bulkUploadBasespace,
   bulkUploadRemote,
@@ -10,12 +10,9 @@ import {
 } from "~/api/upload";
 import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { logError } from "~/components/utils/logUtil";
 import { MetadataBasic, Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
-import { IconSuccess } from "~ui/icons";
-import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import { UploadWorkflows } from "../../../../constants";
 import { RefSeqAccessionDataType } from "../../../UploadSampleStep/types";
 import cs from "../../upload_progress_modal.scss";
@@ -24,6 +21,7 @@ import {
   addFlagsToSamples,
   redirectToProject,
 } from "../../upload_progress_utils";
+import { RemoteUploadModalHeader } from "./components/RemoteUploadModalHeader";
 
 const BASESPACE_SAMPLE_FIELDS = [
   "name",
@@ -42,7 +40,7 @@ interface RemoteUploadProgressModalProps {
   medakaModel: string | null;
   metadata?: MetadataBasic;
   onUploadComplete: $TSFixMeFunction;
-  project?: Project;
+  project: Project;
   refSeqAccession: RefSeqAccessionDataType | null;
   refSeqFile: File | null;
   refSeqTaxon: TaxonOption | null;
@@ -78,11 +76,38 @@ export const RemoteUploadProgressModal = ({
   const [samplesToUpload, setSamplesToUpload] = useState([]);
   const [failedSampleNames, setFailedSampleNames] = useState([]);
 
-  useEffect(() => {
-    initiateRemoteUpload();
+  const uploadSamples = useCallback(async (samples: $TSFixMe) => {
+    // Note that unlike LocalUploadProgressModal, we don't track the progress of the uploads.
+    await Promise.all(
+      samples.map(async (sample: $TSFixMe) => {
+        try {
+          // Get the credentials for the sample
+          const s3ClientForSample = await getS3Client(sample);
+
+          await Promise.all(
+            sample.input_files.map(async (inputFile: $TSFixMe) => {
+              // Upload the additional input files to s3
+              // The sample FASTQS from Basespace or S3 will be uploaded by the backend.
+              if (Object.keys(sample.filesToUpload).includes(inputFile.name)) {
+                await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
+              }
+            }),
+          );
+        } catch (e) {
+          logError({
+            message:
+              "UploadProgressModal: Upload error to s3 occurred for additional input file of remote sample",
+            details: {
+              sample,
+              e,
+            },
+          });
+        }
+      }),
+    );
   }, []);
 
-  const initiateRemoteUpload = async () => {
+  const initiateRemoteUpload = useCallback(async () => {
     let bulkUploadFn;
     let bulkUploadFnName;
     let samplesToFlag;
@@ -170,38 +195,29 @@ export const RemoteUploadProgressModal = ({
     setFailedSampleNames(response.errored_sample_names || []);
 
     onUploadComplete();
-  };
+  }, [
+    adminOptions,
+    bedFile,
+    clearlabs,
+    medakaModel,
+    metadata,
+    onUploadComplete,
+    refSeqAccession,
+    refSeqFile,
+    refSeqTaxon,
+    samples,
+    skipSampleProcessing,
+    technology,
+    uploadSamples,
+    uploadType,
+    useStepFunctionPipeline,
+    wetlabProtocol,
+    workflows,
+  ]);
 
-  const uploadSamples = async (samples: $TSFixMe) => {
-    // Note that unlike LocalUploadProgressModal, we don't track the progress of the uploads.
-    await Promise.all(
-      samples.map(async (sample: $TSFixMe) => {
-        try {
-          // Get the credentials for the sample
-          const s3ClientForSample = await getS3Client(sample);
-
-          await Promise.all(
-            sample.input_files.map(async (inputFile: $TSFixMe) => {
-              // Upload the additional input files to s3
-              // The sample FASTQS from Basespace or S3 will be uploaded by the backend.
-              if (Object.keys(sample.filesToUpload).includes(inputFile.name)) {
-                await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
-              }
-            }),
-          );
-        } catch (e) {
-          logError({
-            message:
-              "UploadProgressModal: Upload error to s3 occurred for additional input file of remote sample",
-            details: {
-              sample,
-              e,
-            },
-          });
-        }
-      }),
-    );
-  };
+  useEffect(() => {
+    initiateRemoteUpload();
+  }, [initiateRemoteUpload]);
 
   const getS3Client = async (sample: $TSFixMe) => {
     const credentials = await getUploadCredentials(sample.id);
@@ -252,77 +268,6 @@ export const RemoteUploadProgressModal = ({
     await fileUpload.done();
   };
 
-  const getNumFailedSamples = () => failedSampleNames.length;
-
-  const failedSamplesTitle = () => {
-    const numFailedSamples = getNumFailedSamples();
-    const title =
-      samplesToUpload.length === numFailedSamples
-        ? "All uploads failed"
-        : `Uploads completed with ${numFailedSamples} error${
-            numFailedSamples > 1 ? "s" : ""
-          }`;
-
-    return (
-      <>
-        <div className={cs.titleWithIcon}>{title}</div>
-        {numFailedSamples === size(samples) && (
-          <div className={cs.subtitle}>
-            <a
-              className={cs.helpLink}
-              href={CONTACT_US_LINK}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Contact us for help
-            </a>
-          </div>
-        )}
-      </>
-    );
-  };
-
-  const createdSamplesTitle = () => (
-    <>
-      <div className={cs.titleWithIcon}>
-        <IconSuccess className={cs.checkmarkIcon} />
-        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
-        {samples.length} samples successfully created
-      </div>
-      <div className={cs.instructions}>
-        We have started uploading your sample files from{" "}
-        {uploadType === "basespace" ? "Basespace" : "S3"}. After the upload is
-        complete, your samples will automatically start processing.
-      </div>
-    </>
-  );
-
-  const uploadInProgressTitle = () => (
-    <>
-      <div className={cs.title}>
-        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
-        Creating {samples.length} sample{samples.length !== 1 && "s"} in //
-        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
-        {project.name}
-      </div>
-      <div className={cs.subtitle}>
-        Stay on this page until upload completes.
-      </div>
-    </>
-  );
-
-  const renderTitle = () => {
-    if (uploadComplete) {
-      if (failedSampleNames.length > 0) {
-        return failedSamplesTitle();
-      } else {
-        return createdSamplesTitle();
-      }
-    } else {
-      return uploadInProgressTitle();
-    }
-  };
-
   const renderViewProjectButton = () => {
     if (project) {
       const buttonCallback = () => redirectToProject(project.id);
@@ -342,8 +287,13 @@ export const RemoteUploadProgressModal = ({
       )}
     >
       <div className={cs.header}>
-        <ImgUploadPrimary className={cs.uploadImg} />
-        {renderTitle()}
+        <RemoteUploadModalHeader
+          isUploadComplete={uploadComplete}
+          nFailedSamples={failedSampleNames.length}
+          nSamples={samplesToUpload.length}
+          projectName={project.name}
+          uploadType={uploadType}
+        />
       </div>
       {failedSampleNames.length > 0 && (
         <div className={cs.failedSamples}>
