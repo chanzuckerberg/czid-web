@@ -13,10 +13,6 @@
   }
 }
 
-.highlight {
-  @include font-header-xxs;
-}
-
 .listContainer {
   background-color: $sds-color-warning-100;
   margin-bottom: $sds-spaces-l;
@@ -28,12 +24,6 @@
   .errorMessage {
     @include font-header-xxs;
   }
-}
-
-.messageLine {
-  @include font-body-xxs;
-  padding: $sds-spaces-xxs 0;
-  margin-right: $sds-spaces-xl;
 }
 
 .notifications {

@@ -3,7 +3,6 @@ import React from "react";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { BulkDownloadType } from "~/interface/shared";
-import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import {
   BULK_DOWNLOAD_TYPES,
@@ -12,6 +11,7 @@ import {
   OPTIONAL_FIELDS,
 } from "../../../../../../BulkDownloadListView/constants";
 import cs from "./bulk_download_modal_footer.scss";
+import { BulkDownloadWarning } from "./components/BulkDownloadWarning";
 
 const triggersCondtionalFieldMetricList = (
   conditionalField,
@@ -98,8 +98,7 @@ export function BulkDownloadModalFooter({
 
   // Get all the fields we need to validate for the selected download type.
   const getRequiredFieldsForSelectedType = () => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-    const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
+    const selectedFieldsForType = selectedFields?.selectedDownloadTypeName;
     const downloadType = getSelectedDownloadType();
 
     if (!downloadType) return null;
@@ -125,8 +124,7 @@ export function BulkDownloadModalFooter({
   };
 
   const isSelectedDownloadValid = () => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-    const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
+    const selectedFieldsForType = selectedFields?.selectedDownloadTypeName;
     const downloadType: BulkDownloadType | null = getSelectedDownloadType();
 
     if (!downloadType || validObjectIds.size < 1) {
@@ -156,104 +154,6 @@ export function BulkDownloadModalFooter({
     return true;
   };
 
-  const renderInvalidSamplesWarning = () => {
-    return renderWarning({
-      message: " because they either failed or are still processing:",
-      sampleNames: invalidSampleNames,
-    });
-  };
-
-  const renderHostGeneCountsWarning = () => {
-    return renderWarning({
-      message:
-        " because currently we only support human hosts for this download type. Samples that will not be included are:",
-      sampleNames: map(
-        "name",
-        filter(
-          sample => sample.hostGenome !== HOST_GENOME_NAMES.HUMAN,
-          sampleHostGenomes,
-        ),
-      ),
-    });
-  };
-
-  const renderWarning = ({ message, sampleNames }) => {
-    const header = (
-      <div>
-        <span className={cs.highlight}>
-          {sampleNames.length} sample
-          {sampleNames.length > 1 ? "s" : ""} won&apos;t be included in the bulk
-          download
-        </span>
-        {message}
-      </div>
-    );
-
-    const content = (
-      <span>
-        {sampleNames.map((name, index) => {
-          return (
-            <div key={index} className={cs.messageLine}>
-              {name}
-            </div>
-          );
-        })}
-      </span>
-    );
-
-    return (
-      <AccordionNotification
-        header={header}
-        content={content}
-        open={false}
-        type={"warning"}
-        displayStyle={"flat"}
-      />
-    );
-  };
-
-  const renderValidationError = () => {
-    return (
-      <div className={cs.notificationContainer}>
-        <Notification type="error" displayStyle="flat">
-          <div className={cs.errorMessage}>
-            An error occurred when verifying your selected samples.
-          </div>
-        </Notification>
-      </div>
-    );
-  };
-
-  const renderNoValidSamplesError = () => {
-    return (
-      <div className={cs.notificationContainer}>
-        <Notification type="error" displayStyle="flat">
-          <div className={cs.errorMessage}>
-            No valid samples to download data from.
-          </div>
-        </Notification>
-      </div>
-    );
-  };
-
-  const renderDownloadButton = () => {
-    if (waitingForCreate) {
-      return <LoadingMessage message="Starting your download..." />;
-    }
-
-    if (createStatus === "error") {
-      return <Notification type="error">{createError}</Notification>;
-    }
-
-    return (
-      <PrimaryButton
-        disabled={!isSelectedDownloadValid()}
-        text="Start Generating Download"
-        onClick={() => onDownloadRequest(getValidSampleIds())}
-      />
-    );
-  };
-
   const getValidSampleIds = () => {
     if (selectedDownloadTypeName === BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS) {
       return map("id", samplesWithHumanHost);
@@ -270,15 +170,57 @@ export function BulkDownloadModalFooter({
   return (
     <div className={cs.footer}>
       <div className={cs.notifications}>
-        {/* @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532 */}
-        {invalidSampleNames.length > 0 && renderInvalidSamplesWarning()}
+        {invalidSampleNames && invalidSampleNames.length > 0 && (
+          <BulkDownloadWarning
+            message=" because they either failed or are still processing:"
+            sampleNames={invalidSampleNames}
+          />
+        )}
         {numNonHumanHostSamples > 0 &&
-          selectedDownloadTypeName === BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS &&
-          renderHostGeneCountsWarning()}
-        {validationError != null && renderValidationError()}
-        {numSamples < 1 && !loading && renderNoValidSamplesError()}
+          selectedDownloadTypeName === BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS && (
+            <BulkDownloadWarning
+              message=" because currently we only support human hosts for this download type. Samples that will not be included are:"
+              sampleNames={map(
+                "name",
+                filter(
+                  sample => sample.hostGenome !== HOST_GENOME_NAMES.HUMAN,
+                  sampleHostGenomes,
+                ),
+              )}
+            />
+          )}
+        {validationError != null && (
+          <div className={cs.notificationContainer}>
+            <Notification type="error" displayStyle="flat">
+              <div className={cs.errorMessage}>
+                An error occurred when verifying your selected samples.
+              </div>
+            </Notification>
+          </div>
+        )}
+        {numSamples < 1 && !loading && (
+          <div className={cs.notificationContainer}>
+            <Notification type="error" displayStyle="flat">
+              <div className={cs.errorMessage}>
+                No valid samples to download data from.
+              </div>
+            </Notification>
+          </div>
+        )}
       </div>
-      {renderDownloadButton()}
+      {waitingForCreate && (
+        <LoadingMessage message="Starting your download..." />
+      )}
+      {createStatus === "error" && (
+        <Notification type="error">{createError}</Notification>
+      )}
+      {!waitingForCreate && createStatus !== "error" && (
+        <PrimaryButton
+          disabled={!isSelectedDownloadValid()}
+          text="Start Generating Download"
+          onClick={() => onDownloadRequest(getValidSampleIds())}
+        />
+      )}
       <div className={cs.downloadDisclaimer}>
         Downloads for larger files can take multiple hours to generate.
       </div>
