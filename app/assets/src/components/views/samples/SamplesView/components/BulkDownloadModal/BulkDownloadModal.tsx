@@ -1,6 +1,6 @@
-import { get, set, unset } from "lodash/fp";
+import { set, unset } from "lodash/fp";
 import memoize from "memoize-one";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   getBackgrounds,
   getMassNormalizedBackgroundAvailability,
@@ -12,33 +12,43 @@ import {
   validateSampleIds,
   validateWorkflowRunIds,
 } from "~/api/access_control";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEventFromClassComponent,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   createBulkDownload,
   getBulkDownloadMetrics,
   getBulkDownloadTypes,
 } from "~/api/bulk_downloads";
-import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
-import { GlobalContext } from "~/globalContext/reducer";
-import { getURLParamString } from "~/helpers/url";
-import { Entry } from "~/interface/samplesView";
-import { BulkDownloadType } from "~/interface/shared";
-import Modal from "~ui/containers/Modal";
-import { openUrlInNewTab } from "~utils/links";
-import { WorkflowType, WORKFLOW_ENTITIES } from "~utils/workflows";
+import Modal from "~/components/ui/containers/Modal";
+import { openUrlInNewTab } from "~/components/utils/links";
+import { WorkflowType, WORKFLOW_ENTITIES } from "~/components/utils/workflows";
 import {
   DEFAULT_BACKGROUND_MODEL,
   WORKFLOW_OBJECT_LABELS,
-} from "../../../../BulkDownloadListView/constants";
-import cs from "./bulk_download_modal.scss";
+} from "~/components/views/BulkDownloadListView/constants";
+import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
+import cs from "~/components/views/samples/SamplesView/components/BulkDownloadModal/bulk_download_modal.scss";
+import { getURLParamString } from "~/helpers/url";
+import { Entry } from "~/interface/samplesView";
+import { Background, BulkDownloadType } from "~/interface/shared";
 import { BulkDownloadModalFooter } from "./components/BulkDownloadModalFooter";
 import { BulkDownloadModalOptions } from "./components/BulkDownloadModalOptions";
 
 const DEFAULT_CREATION_ERROR =
   "An unknown error occurred. Please contact us for help.";
+
+type SelectedDownloadType = {
+  downloadType: string | null;
+  fields: Record<
+    string,
+    {
+      value: string;
+      displayName: string;
+    }
+  >;
+  validObjectIds: number[];
+  workflow: WorkflowType;
+  workflowEntity?: string;
+};
 
 const assembleSelectedDownload = memoize(
   (
@@ -48,12 +58,10 @@ const assembleSelectedDownload = memoize(
     objectIds,
     workflow,
     workflowEntity,
-  ) => {
-    const fieldValues = get(selectedDownloadTypeName, allSelectedFields);
-    const fieldDisplayNames = get(
-      selectedDownloadTypeName,
-      allSelectedFieldsDisplay,
-    );
+  ): SelectedDownloadType => {
+    const fieldValues = allSelectedFields?.selectedDownloadTypeName;
+    const fieldDisplayNames =
+      allSelectedFieldsDisplay?.selectedDownloadTypeName;
 
     const fields = {};
     if (fieldValues) {
@@ -87,101 +95,159 @@ interface BulkDownloadModalProps {
   workflowEntity?: string;
 }
 
-interface BulkDownloadModalState {
-  bulkDownloadTypes: BulkDownloadType[] | null;
-  selectedFields: Record<string, string>;
-  selectedFieldsDisplay: Record<string, $TSFixMeUnknown>;
-  selectedDownloadTypeName: string | null;
-  validObjectIds: Set<$TSFixMeUnknown>;
-  invalidSampleNames: string[];
-  validationError: string | null;
-  backgroundOptions: $TSFixMeUnknown[];
-  metricsOptions: $TSFixMeUnknown[];
-  allObjectsUploadedByCurrentUser: boolean;
-  loading: boolean;
-  waitingForCreate: boolean;
-  createStatus: string | null;
-  createError: string | null;
-  userIsCollaboratorOnAllSamples: boolean;
-}
-
-export class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
-  state: BulkDownloadModalState = {
-    bulkDownloadTypes: null,
-    // We save the fields for ALL download types.
-    // If the user clicks between different download types, all their selections are saved.
-    selectedFields: {},
-    // For each selected field, we also save a human-readable "display name" for that field.
-    // While the user is in the choose step, we store a field's value and display name separately.
-    // This is to be compatible with <Dropdowns>, which only accept a string or number as the value
-    // (as opposed to an object).
-    // However, after the selected download is "assembled", both the value and display name for each field are stored
-    // in the params. This is also how the bulk download is stored in the database.
-    selectedFieldsDisplay: {},
-    selectedDownloadTypeName: null,
-    validObjectIds: new Set(),
-    invalidSampleNames: [],
-    validationError: null,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-    backgroundOptions: null,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-    metricsOptions: null,
-    allObjectsUploadedByCurrentUser: false,
-    loading: true,
-    waitingForCreate: false,
-    createStatus: null,
-    createError: null,
-    userIsCollaboratorOnAllSamples: false,
-  };
-  static contextType = GlobalContext;
-
-  componentDidMount() {
-    this.fetchSampleOptionsAndValidateSelectedSamples();
-    this.fetchBackgroundAvailability();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.selectedIds !== this.props.selectedIds) {
-      this.fetchBackgroundAvailability();
-    }
-  }
+export const BulkDownloadModal = ({
+  onClose,
+  open,
+  selectedObjects,
+  selectedIds,
+  onGenerate,
+  workflow,
+  workflowEntity,
+}: BulkDownloadModalProps) => {
+  const [bulkDownloadTypes, setBulkDownloadTypes] = useState<
+    BulkDownloadType[] | null
+  >(null);
+  // We save the fields for ALL download types.
+  // If the user clicks between different download types, all their selections are saved.
+  const [selectedFields, setSelectedFields] = useState<Record<string, string>>(
+    {},
+  );
+  // For each selected field, we also save a human-readable "display name" for that field.
+  // While the user is in the choose step, we store a field's value and display name separately.
+  // This is to be compatible with <Dropdowns>, which only accept a string or number as the value
+  // (as opposed to an object).
+  // However, after the selected download is "assembled", both the value and display name for each field are stored
+  // in the params. This is also how the bulk download is stored in the database.
+  const [selectedFieldsDisplay, setSelectedFieldsDisplay] = useState<
+    Record<string, $TSFixMeUnknown>
+  >({});
+  const [selectedDownloadTypeName, setSelectedDownloadTypeName] = useState<
+    string | null
+  >(null);
+  const [validObjectIds, setValidObjectIds] = useState<Set<number | string>>(
+    new Set(),
+  );
+  const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [backgroundOptions, setBackgroundOptions] = useState<
+    $TSFixMeUnknown[] | null
+  >(null);
+  const [metricsOptions, setMetricsOptions] = useState<
+    $TSFixMeUnknown[] | null
+  >(null);
+  const [
+    areAllRequestedObjectsUploadedByCurrentUser,
+    setAreAllRequestedObjectsUploadedByCurrentUser,
+  ] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isWaitingForCreate, setIsWaitingForCreate] = useState<boolean>(false);
+  const [createStatus, setCreateStatus] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [
+    isUserCollaboratorOnAllRequestedSamples,
+    setIsUserCollaboratorOnAllRequestedSamples,
+  ] = useState<boolean>(false);
+  const [
+    shouldEnableMassNormalizedBackgrounds,
+    setShouldEnableMassNormalizedBackgrounds,
+  ] = useState<boolean | undefined>(undefined);
 
   // *** Async requests ***
+  async function fetchValidationInfo({ entityIds, workflow }) {
+    if (!entityIds) return null;
 
-  async fetchSampleOptionsAndValidateSelectedSamples() {
-    const { selectedIds, workflow } = this.props;
-    let {
-      selectedFields: newSelectedFields,
-      selectedFieldsDisplay: newSelectedFieldsDisplay,
-    } = this.state;
+    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
+      ? validateWorkflowRunIds({
+          workflowRunIds: entityIds,
+          workflow,
+        })
+      : validateSampleIds({
+          sampleIds: entityIds,
+          workflow,
+        });
+  }
+
+  async function fetchBackgrounds() {
+    const { backgrounds } = await getBackgrounds();
+    if (!backgrounds) {
+      return [];
+    }
+
+    return backgrounds.map((background: Background) => ({
+      text: background.name,
+      value: background.id,
+      mass_normalized: background.mass_normalized,
+    }));
+  }
+
+  async function checkAllObjectsUploadedByCurrentUser({
+    entityIds,
+    workflowEntity,
+  }) {
+    if (!entityIds) {
+      return false;
+    }
+
+    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
+      ? workflowRunsCreatedByCurrentUser(Array.from(entityIds))
+      : samplesUploadedByCurrentUser(Array.from(entityIds));
+  }
+
+  async function checkUserIsCollaboratorOnAllSamples({
+    entityIds,
+    workflowEntity,
+  }) {
+    if (!entityIds) {
+      return false;
+    }
+    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
+      ? false
+      : userIsCollaboratorOnAllSamples(Array.from(entityIds));
+  }
+
+  async function fetchSampleOptionsAndValidateSelectedSamples({
+    entityIds,
+    workflowEntity,
+    workflow,
+    selectedFields,
+    selectedFieldsDisplay,
+  }: {
+    entityIds?: Set<number>;
+    workflowEntity?: string;
+    workflow: WorkflowType;
+    selectedFields: Record<string, string>;
+    selectedFieldsDisplay: Record<string, $TSFixMeUnknown>;
+  }): Promise<void> {
+    // TODO (ehoops): these should be const and we should fix the updaters below
+    let newSelectedFields = { ...selectedFields };
+    let newSelectedFieldsDisplay = { ...selectedFieldsDisplay };
 
     const bulkDownloadTypesRequest = getBulkDownloadTypes(workflow);
-    const validationInfoRequest = this.fetchValidationInfo({
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-      ids: Array.from(selectedIds),
+    const validationInfoRequest = fetchValidationInfo({
+      entityIds: entityIds && Array.from(entityIds),
       workflow,
     });
-    const backgroundOptionsRequest = this.fetchBackgrounds();
+    const backgroundOptionsRequest = fetchBackgrounds();
     const metricsOptionsRequest = getBulkDownloadMetrics(workflow);
-    const allObjectsUploadedByCurrentUserRequest =
-      this.checkAllObjectsUploadedByCurrentUser();
-    const userIsCollaboratorOnAllSamplesRequest =
-      this.checkUserIsCollaboratorOnAllSamples();
+    const areAllRequestedObjectsUploadedByCurrentUserRequest =
+      checkAllObjectsUploadedByCurrentUser({ entityIds, workflowEntity });
+    const isUserCollaboratorOnAllRequestedSamplesRequest =
+      checkUserIsCollaboratorOnAllSamples({ entityIds, workflowEntity });
 
     const [
       bulkDownloadTypes,
       { validIds, invalidSampleNames, error: validationError },
       backgroundOptions,
       metricsOptions,
-      allObjectsUploadedByCurrentUser,
-      userIsCollaborator,
+      areAllRequestedObjectsUploadedByCurrentUser,
+      isUserCollaboratorOnAllRequestedSamples,
     ] = await Promise.all([
       bulkDownloadTypesRequest,
       validationInfoRequest,
       backgroundOptionsRequest,
       metricsOptionsRequest,
-      allObjectsUploadedByCurrentUserRequest,
-      userIsCollaboratorOnAllSamplesRequest,
+      areAllRequestedObjectsUploadedByCurrentUserRequest,
+      isUserCollaboratorOnAllRequestedSamplesRequest,
     ]);
 
     // Set any default bulk download field values.
@@ -208,84 +274,96 @@ export class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       }
     });
 
-    this.setState({
-      bulkDownloadTypes,
-      validObjectIds: new Set(validIds),
-      invalidSampleNames,
-      validationError,
-      backgroundOptions,
-      metricsOptions,
-      allObjectsUploadedByCurrentUser,
-      selectedFields: newSelectedFields,
-      selectedFieldsDisplay: newSelectedFieldsDisplay,
-      loading: false,
-      userIsCollaboratorOnAllSamples: userIsCollaborator,
-    });
+    setBulkDownloadTypes(bulkDownloadTypes);
+    setValidObjectIds(new Set(validIds));
+    setInvalidSampleNames(invalidSampleNames);
+    setValidationError(validationError);
+    setBackgroundOptions(backgroundOptions);
+    setMetricsOptions(metricsOptions);
+    setAreAllRequestedObjectsUploadedByCurrentUser(
+      areAllRequestedObjectsUploadedByCurrentUser,
+    );
+    setSelectedFields(newSelectedFields);
+    setSelectedFieldsDisplay(newSelectedFieldsDisplay);
+    setIsLoading(false);
+    setIsUserCollaboratorOnAllRequestedSamples(
+      isUserCollaboratorOnAllRequestedSamples,
+    );
   }
 
-  async fetchValidationInfo({ ids, workflow }) {
-    const { workflowEntity } = this.props;
+  async function fetchBackgroundAvailability(selectedIds?: Set<number>) {
+    if (!selectedIds) {
+      return;
+    }
 
-    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-      ? validateWorkflowRunIds({
-          workflowRunIds: ids,
-          workflow,
-        })
-      : validateSampleIds({
-          sampleIds: ids,
-          workflow,
-        });
-  }
-
-  // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
-  async fetchBackgrounds() {
-    const { backgrounds } = await getBackgrounds();
-
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    return backgrounds.map((background: $TSFixMe) => ({
-      text: background.name,
-      value: background.id,
-      mass_normalized: background.mass_normalized,
-    }));
-  }
-
-  async fetchBackgroundAvailability() {
-    const { selectedIds } = this.props;
     const { massNormalizedBackgroundsAvailable } =
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
 
-    this.setState({
-      enableMassNormalizedBackgrounds: massNormalizedBackgroundsAvailable,
+    setShouldEnableMassNormalizedBackgrounds(
+      massNormalizedBackgroundsAvailable,
+    );
+  }
+
+  const trackEvent = useTrackEvent();
+  async function createAndTrackBulkDownload({
+    selectedDownload,
+    workflow,
+    workflowEntity,
+  }: {
+    selectedDownload: SelectedDownloadType;
+    workflow: WorkflowType;
+    workflowEntity?: string;
+  }) {
+    let objectIds;
+
+    if (workflowEntity === WORKFLOW_ENTITIES.SAMPLES) {
+      objectIds = { sampleIds: selectedDownload.validObjectIds };
+    } else if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
+      objectIds = { workflowRunIds: selectedDownload.validObjectIds };
+    }
+
+    setIsWaitingForCreate(true);
+    try {
+      await createBulkDownload(selectedDownload);
+    } catch (e) {
+      setIsWaitingForCreate(false);
+      setCreateStatus("error");
+      setCreateError(e.error || DEFAULT_CREATION_ERROR);
+      return;
+    }
+
+    trackEvent(
+      ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL,
+      {
+        workflow,
+        downloadType: selectedDownload.downloadType,
+        ...objectIds,
+      },
+    );
+
+    onGenerate();
+  }
+
+  // *** Fetching data ***
+  // Run once on mount
+  useEffect(() => {
+    fetchSampleOptionsAndValidateSelectedSamples({
+      entityIds: selectedIds,
+      workflowEntity,
+      workflow,
+      selectedFields,
+      selectedFieldsDisplay,
     });
-  }
+    // We want the empty array here so this only runs once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  async checkAllObjectsUploadedByCurrentUser() {
-    const { selectedIds, workflowEntity } = this.props;
-
-    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-      ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-        workflowRunsCreatedByCurrentUser(Array.from(selectedIds))
-      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-        samplesUploadedByCurrentUser(Array.from(selectedIds));
-  }
-
-  checkUserIsCollaboratorOnAllSamples = () => {
-    const { selectedIds, workflowEntity } = this.props;
-
-    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-      ? false
-      : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-        userIsCollaboratorOnAllSamples(Array.from(selectedIds));
-  };
+  useEffect(() => {
+    fetchBackgroundAvailability(selectedIds);
+  }, [selectedIds]);
 
   // *** Callbacks ***
-
-  handleDownloadRequest = (sampleIds: number[]) => {
-    const { workflow, workflowEntity } = this.props;
-    const { selectedDownloadTypeName, selectedFields, selectedFieldsDisplay } =
-      this.state;
-
+  const handleDownloadRequest = (sampleIds: number[]) => {
     const selectedDownload = assembleSelectedDownload(
       selectedDownloadTypeName,
       selectedFields,
@@ -295,33 +373,26 @@ export class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       workflowEntity,
     );
 
-    this.createBulkDownload(selectedDownload);
+    createAndTrackBulkDownload({ selectedDownload, workflow, workflowEntity });
   };
 
-  handleSelectDownloadType = (newSelectedDownloadTypeName: string) => {
-    const { selectedDownloadTypeName } = this.state;
+  const handleSelectDownloadType = (newSelectedDownloadTypeName: string) => {
     if (newSelectedDownloadTypeName === selectedDownloadTypeName) {
       return;
     }
-
-    this.setState({
-      selectedDownloadTypeName: newSelectedDownloadTypeName,
-    });
+    setSelectedDownloadTypeName(newSelectedDownloadTypeName);
   };
 
-  handleHeatmapLink = () => {
-    const { selectedFields, validObjectIds } = this.state;
+  const handleHeatmapLink = () => {
     const metricList = selectedFields?.["biom_format"]?.["filter_by"];
     const metric = selectedFields?.["biom_format"]?.["metric"];
     const sortMetric = METRIC_OPTIONS.includes(metric); // check heatmap is sortable on selected metric
-    const presets = [];
+    const presets: string[] = [];
 
     if (metricList) {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("thresholdFilters");
     }
     if (sortMetric) {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       presets.push("metric");
     }
 
@@ -344,179 +415,103 @@ export class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     openUrlInNewTab(`/visualizations/heatmap?${params}`);
   };
 
-  handleFieldSelect = (
+  const handleFieldSelect = (
     downloadType: string,
     fieldType: string,
     value: $TSFixMe,
     displayName: string,
   ) => {
-    this.setState(prevState => {
-      // If the value is undefined, delete it from selectedFields.
-      // This allows us to support cases where certain fields are conditionally required;
-      // if the field becomes no longer required, we can unset it.
-      const newSelectedFields =
-        value !== undefined
-          ? // @ts-expect-error Property 'selectedFields' does not exist on type 'Readonly<{}>
-            set([downloadType, fieldType], value, prevState.selectedFields)
-          : // @ts-expect-error Property 'selectedFields' does not exist on type 'Readonly<{}>
-            unset([downloadType, fieldType], prevState.selectedFields);
+    const newSelectedFields = { ...selectedFields };
+    // If the value is undefined, delete it from selectedFields.
+    // This allows us to support cases where certain fields are conditionally required;
+    // if the field becomes no longer required, we can unset it.
+    if (value !== undefined) {
+      set([downloadType, fieldType], value, newSelectedFields);
+    } else {
+      unset([downloadType, fieldType], newSelectedFields);
+    }
 
-      const newSelectedFieldsDisplay =
-        displayName !== undefined
-          ? set(
-              [downloadType, fieldType],
-              displayName,
-              // @ts-expect-error Property 'selectedFields' does not exist on type 'Readonly<{}>
-              prevState.selectedFieldsDisplay,
-            )
-          : // @ts-expect-error Property 'selectedFields' does not exist on type 'Readonly<{}>
-            unset([downloadType, fieldType], prevState.selectedFieldsDisplay);
+    const newSelectedFieldsDisplay = { ...selectedFieldsDisplay };
+    if (displayName !== undefined) {
+      set([downloadType, fieldType], displayName, newSelectedFieldsDisplay);
+    } else {
+      unset([downloadType, fieldType], newSelectedFieldsDisplay);
+    }
 
-      return {
-        selectedFields: newSelectedFields,
-        selectedFieldsDisplay: newSelectedFieldsDisplay,
-      };
-    });
+    setSelectedFields(newSelectedFields);
+    setSelectedFieldsDisplay(newSelectedFieldsDisplay);
   };
 
-  // *** Create bulk download and close modal ***
-
-  createBulkDownload = async (selectedDownload: $TSFixMe) => {
-    const { onGenerate, workflow, workflowEntity } = this.props;
-    const { discoveryProjectIds } = this.context;
-    const globalAnalyticsContext = {
-      projectIds: discoveryProjectIds,
-    };
-
-    let objectIds;
-
-    if (workflowEntity === WORKFLOW_ENTITIES.SAMPLES) {
-      objectIds = { sampleIds: selectedDownload.validObjectIds };
-    } else if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
-      objectIds = { workflowRunIds: selectedDownload.validObjectIds };
-    }
-
-    this.setState({
-      waitingForCreate: true,
-    });
-    try {
-      await createBulkDownload(selectedDownload);
-    } catch (e) {
-      this.setState({
-        waitingForCreate: false,
-        createStatus: "error",
-        createError: e.error || DEFAULT_CREATION_ERROR,
-      });
-      return;
-    }
-
-    trackEventFromClassComponent(
-      globalAnalyticsContext,
-      ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL,
-      {
-        workflow,
-        downloadType: selectedDownload.downloadType,
-        ...objectIds,
+  const numObjects = selectedIds?.size || validObjectIds.size;
+  const objectDownloaded = WORKFLOW_OBJECT_LABELS[workflow];
+  const sampleHostGenomes = selectedObjects
+    .filter(obj => validObjectIds.has(obj.id))
+    .reduce(
+      (result, obj) => {
+        result.push({
+          id: obj.id,
+          name: obj.sample.name,
+          hostGenome: obj.host,
+        });
+        return result;
       },
+      [] as {
+        id: number;
+        name: string;
+        hostGenome: string;
+      }[],
     );
-
-    onGenerate();
-  };
-
-  render() {
-    const { open, onClose, selectedObjects, workflow } = this.props;
-    const {
-      bulkDownloadTypes,
-      validObjectIds,
-      invalidSampleNames,
-      validationError,
-      backgroundOptions,
-      metricsOptions,
-      allObjectsUploadedByCurrentUser,
-      selectedDownloadTypeName,
-      selectedFields,
-      waitingForCreate,
-      createStatus,
-      createError,
-      // @ts-expect-error Property 'enableMassNormalizedBackgrounds' does not exist on type
-      enableMassNormalizedBackgrounds,
-    } = this.state;
-
-    const numObjects = validObjectIds.size;
-    const objectDownloaded = WORKFLOW_OBJECT_LABELS[workflow];
-    const sampleHostGenomes = selectedObjects
-      .filter(obj => validObjectIds.has(obj.id))
-      .reduce(
-        (result, obj) => {
-          result.push({
-            id: obj.id,
-            name: obj.sample.name,
-            hostGenome: obj.host,
-          });
-          return result;
-        },
-        [] as {
-          id: number;
-          name: string;
-          hostGenome: string;
-        }[],
-      );
-
-    return (
-      <Modal narrow open={open} tall onClose={onClose}>
-        <div className={cs.modal}>
-          <div className={cs.header}>
-            <div className={cs.title}>Select a Download Type</div>
-            <div className={cs.tagline}>
-              {numObjects} {objectDownloaded}
-              {numObjects !== 1 ? "s" : ""} selected
-            </div>
-          </div>
-          <div className={cs.options}>
-            <BulkDownloadModalOptions
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              downloadTypes={bulkDownloadTypes}
-              validObjectIds={validObjectIds}
-              backgroundOptions={backgroundOptions}
-              metricsOptions={metricsOptions}
-              allObjectsUploadedByCurrentUser={allObjectsUploadedByCurrentUser}
-              onFieldSelect={this.handleFieldSelect}
-              selectedFields={selectedFields}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              selectedDownloadTypeName={selectedDownloadTypeName}
-              onSelect={this.handleSelectDownloadType}
-              handleHeatmapLink={this.handleHeatmapLink}
-              enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
-              objectDownloaded={objectDownloaded}
-              userIsCollaborator={this.state.userIsCollaboratorOnAllSamples}
-            />
-          </div>
-          <div className={cs.footer}>
-            <BulkDownloadModalFooter
-              loading={!bulkDownloadTypes}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              downloadTypes={bulkDownloadTypes}
-              validObjectIds={validObjectIds}
-              invalidSampleNames={invalidSampleNames}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              validationError={validationError}
-              waitingForCreate={waitingForCreate}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              createStatus={createStatus}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              createError={createError}
-              sampleHostGenomes={sampleHostGenomes}
-              selectedFields={selectedFields}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              selectedDownloadTypeName={selectedDownloadTypeName}
-              onDownloadRequest={(sampleIds: number[]) =>
-                this.handleDownloadRequest(sampleIds)
-              }
-              workflow={workflow}
-            />
+  return (
+    <Modal narrow open={open} tall onClose={onClose}>
+      <div className={cs.modal}>
+        <div className={cs.header}>
+          <div className={cs.title}>Select a Download Type</div>
+          <div className={cs.tagline}>
+            {numObjects} {objectDownloaded}
+            {numObjects !== 1 ? "s" : ""} selected
           </div>
         </div>
-      </Modal>
-    );
-  }
-}
+        <div className={cs.options}>
+          <BulkDownloadModalOptions
+            downloadTypes={bulkDownloadTypes}
+            validObjectIds={validObjectIds}
+            backgroundOptions={backgroundOptions}
+            metricsOptions={metricsOptions}
+            allObjectsUploadedByCurrentUser={
+              areAllRequestedObjectsUploadedByCurrentUser
+            }
+            onFieldSelect={handleFieldSelect}
+            selectedFields={selectedFields}
+            selectedDownloadTypeName={selectedDownloadTypeName}
+            onSelect={handleSelectDownloadType}
+            handleHeatmapLink={handleHeatmapLink}
+            enableMassNormalizedBackgrounds={
+              shouldEnableMassNormalizedBackgrounds
+            }
+            objectDownloaded={objectDownloaded}
+            userIsCollaborator={isUserCollaboratorOnAllRequestedSamples}
+          />
+        </div>
+        <div className={cs.footer}>
+          <BulkDownloadModalFooter
+            loading={isLoading}
+            downloadTypes={bulkDownloadTypes}
+            validObjectIds={validObjectIds}
+            invalidSampleNames={invalidSampleNames}
+            validationError={validationError}
+            waitingForCreate={isWaitingForCreate}
+            createStatus={createStatus}
+            createError={createError}
+            sampleHostGenomes={sampleHostGenomes}
+            selectedFields={selectedFields}
+            selectedDownloadTypeName={selectedDownloadTypeName}
+            onDownloadRequest={(sampleIds: number[]) =>
+              handleDownloadRequest(sampleIds)
+            }
+            workflow={workflow}
+          />
+        </div>
+      </div>
+    </Modal>
+  );
+};

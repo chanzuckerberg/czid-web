@@ -26,19 +26,19 @@ import { TaxonHitSelect } from "./components/TaxonHitSelect/TaxonHitSelect";
 import { ThresholdFilterModal } from "./components/ThresholdFilterModal/ThresholdFilterModal";
 
 interface BulkDownloadModalOptionsProps {
-  downloadTypes?: BulkDownloadType[];
-  selectedDownloadTypeName?: string;
+  downloadTypes?: BulkDownloadType[] | null;
+  selectedDownloadTypeName?: string | null;
   // The selected fields of the currently selected download type.
   selectedFields?: Record<string, string>;
   onFieldSelect: $TSFixMeFunction;
   validObjectIds: Set<$TSFixMeUnknown>;
-  backgroundOptions?: $TSFixMeUnknown[];
-  metricsOptions?: $TSFixMeUnknown[];
+  backgroundOptions?: $TSFixMeUnknown[] | null;
+  metricsOptions?: $TSFixMeUnknown[] | null;
   allObjectsUploadedByCurrentUser?: boolean;
   onSelect: (newSelectedDownloadTypeName: string) => void;
   handleHeatmapLink: () => void;
   enableMassNormalizedBackgrounds?: boolean;
-  objectDownloaded?: string;
+  objectDownloaded?: string | null;
   userIsCollaborator: boolean;
 }
 

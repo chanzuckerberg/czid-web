@@ -2,6 +2,7 @@ import { filter, get, isUndefined, map, reject, size, some } from "lodash/fp";
 import React from "react";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { BulkDownloadType } from "~/interface/shared";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import {
@@ -43,23 +44,13 @@ const triggersConditionalField = (conditionalField, selectedFields) =>
     )
     .some(Boolean);
 
-type BulkDownloadType = {
-  category: string;
-  collaborator_only: boolean;
-  description: string;
-  display_name: string;
-  execution_type: string;
-  type: string;
-  fields: unknown[];
-} | null;
-
 interface BulkDownloadModalFooterProps {
   loading?: boolean;
-  downloadTypes?: $TSFixMeUnknown[];
+  downloadTypes: BulkDownloadType[] | null;
   validObjectIds: Set<$TSFixMeUnknown>;
   invalidSampleNames?: string[];
-  validationError?: string;
-  selectedDownloadTypeName?: string;
+  validationError?: string | null;
+  selectedDownloadTypeName?: string | null;
   sampleHostGenomes: {
     id: number;
     name: string;
@@ -68,8 +59,8 @@ interface BulkDownloadModalFooterProps {
   // The selected fields of the currently selected download type.
   selectedFields?: Record<string, string>;
   waitingForCreate?: boolean;
-  createStatus?: string;
-  createError?: string;
+  createStatus?: string | null;
+  createError?: string | null;
   onDownloadRequest: $TSFixMeFunction;
   workflow: string;
 }
@@ -94,16 +85,15 @@ export function BulkDownloadModalFooter({
   );
   const numSamplesWithHumanHost = size(samplesWithHumanHost);
 
-  const getSelectedDownloadType = (): BulkDownloadType => {
+  const getSelectedDownloadType = (): BulkDownloadType | null => {
     if (!selectedDownloadTypeName) {
       return null;
     }
 
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    return downloadTypes.find(
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2571
-      item => item["type"] === selectedDownloadTypeName,
-    ) as BulkDownloadType;
+    return (
+      downloadTypes?.find(item => item["type"] === selectedDownloadTypeName) ||
+      null
+    );
   };
 
   // Get all the fields we need to validate for the selected download type.
@@ -137,7 +127,7 @@ export function BulkDownloadModalFooter({
   const isSelectedDownloadValid = () => {
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
-    const downloadType: BulkDownloadType = getSelectedDownloadType();
+    const downloadType: BulkDownloadType | null = getSelectedDownloadType();
 
     if (!downloadType || validObjectIds.size < 1) {
       return false;
@@ -152,8 +142,10 @@ export function BulkDownloadModalFooter({
       some(
         Boolean,
         map(
-          // @ts-expect-error Property 'fields' does not exist on type 'unknown'
-          field => isUndefined(get(field.type, selectedFieldsForType)),
+          field =>
+            !field ||
+            isUndefined(field.type) ||
+            isUndefined(selectedFieldsForType?.[field.type]),
           requiredFields,
         ),
       )

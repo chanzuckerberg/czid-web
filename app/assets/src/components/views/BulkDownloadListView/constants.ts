@@ -3,7 +3,7 @@ import {
   BULK_DOWNLOAD_LINK,
   CG_QUALITY_CONTROL_LINK,
 } from "~/components/utils/documentationLinks";
-import { WorkflowType } from "~/components/utils/workflows";
+import { WorkflowConfigType, WorkflowType } from "~/components/utils/workflows";
 
 // Stores information about conditional fields for bulk downloads.
 export const CONDITIONAL_FIELDS = [
@@ -60,10 +60,13 @@ export const BULK_DOWNLOAD_DOCUMENTATION_LINKS = {
   [BULK_DOWNLOAD_TYPES.AMR_RESULTS_BULK_DOWNLOAD]: AMR_BULK_DOWNLOAD_LINK,
 };
 
-export const WORKFLOW_OBJECT_LABELS = {
+export const WORKFLOW_OBJECT_LABELS: WorkflowConfigType<string | null> = {
   [WorkflowType.SHORT_READ_MNGS]: "sample",
   [WorkflowType.AMR]: "sample",
   [WorkflowType.CONSENSUS_GENOME]: "consensus genome",
+  [WorkflowType.LONG_READ_MNGS]: "sample",
+  [WorkflowType.AMR_DEPRECATED]: null,
+  [WorkflowType.BENCHMARK]: null,
 };
 
 export const HOST_GENOME_NAMES = {
