@@ -59,7 +59,6 @@ const getDataRows = ({
 
   const assembleDataForSample = (sample: SampleFromApi) => {
     const sampleHostName = get("name", hostGenomesById[sample.host_genome_id]);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
     const sampleMetadata = metadataBySample[sample.name];
 
     if (sampleHostName === "Human" && "Host Age" in sampleMetadata) {

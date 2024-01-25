@@ -50,13 +50,11 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
   onDrop = (acceptedFiles: SampleFromApi[]) => {
     // Group files by sample name.
     const sampleNamesToFiles = flow(
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       groupBy((file: SampleFromApi) => sampleNameFromFileName(file.name)),
       // Make sure R1 comes before R2 and there are at most 2 files.
       // Sort files by lower case file name, then take the first two.
       mapValues(
         flow(
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           sortBy(file => file.name.toLowerCase()),
           slice(0, 2),
         ),

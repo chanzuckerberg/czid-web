@@ -152,10 +152,8 @@ class MetadataManualInputCC extends React.Component<
     // Existing fields take precedence.
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     samples.forEach(sample => {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       newMetadataFieldsToEdit[sample.name] = merge(
         AUTO_POPULATE_FIELDS,
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         metadataFieldsToEdit[sample.name] || {},
       );
     });
@@ -184,17 +182,14 @@ class MetadataManualInputCC extends React.Component<
   ) => {
     const newHeaders = union<string>([key], this.state.headersToEdit);
     const newFields = set(
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
       [sample.name, key],
       value,
       this.state.metadataFieldsToEdit,
     );
     this.setState({
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       metadataFieldsToEdit: newFields,
       headersToEdit: newHeaders,
       applyToAllCell: {
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         sampleName: sample.name,
         column: key,
       },
@@ -219,7 +214,6 @@ class MetadataManualInputCC extends React.Component<
           column,
         ) &&
           overrideExistingValue) ||
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         get([curSample.name, column], newFields) === undefined
       ) {
         let value = newValue;
@@ -235,7 +229,6 @@ class MetadataManualInputCC extends React.Component<
           value = processLocationSelection(newValue, isHuman);
         }
 
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         newFields = set([curSample.name, column], value, newFields);
       }
     });

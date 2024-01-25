@@ -1,5 +1,7 @@
 import { difference, find, get, map, pick } from "lodash/fp";
 import { markSampleUploaded } from "~/api";
+import { BulkUploadWithMetadata } from "~/components/views/SampleUploadFlow/components/UploadProgressModal/types";
+import { MetadataBasic, SampleFromApi } from "~/interface/shared";
 import { get as httpGet, postWithCSRF } from "./core";
 
 export const MAX_MARK_SAMPLE_RETRIES = 10;
@@ -20,8 +22,10 @@ export const bulkUploadRemote = ({ samples, metadata }: $TSFixMe) =>
 export const initiateBulkUploadLocalWithMetadata = async ({
   samples,
   metadata,
-
-  onCreateSamplesError = (errors: $TSFixMe, erroredSampleNames: $TSFixMe) => {
+  onCreateSamplesError = (
+    errors: $TSFixMeUnknown,
+    erroredSampleNames: string[],
+  ) => {
     console.error(
       "CreateSamplesError",
       errors,
@@ -29,7 +33,14 @@ export const initiateBulkUploadLocalWithMetadata = async ({
       erroredSampleNames,
     );
   },
-}: $TSFixMe) => {
+}: {
+  samples: SampleFromApi[];
+  metadata: MetadataBasic | null;
+  onCreateSamplesError: (
+    errors: $TSFixMeUnknown,
+    erroredSampleNames: string[],
+  ) => void;
+}) => {
   // Only upload these fields from the sample.
   const processedSamples = map(
     pick([
@@ -75,14 +86,14 @@ export const initiateBulkUploadLocalWithMetadata = async ({
     }
   });
 
-  let response;
+  let response: BulkUploadWithMetadata;
 
   try {
     // Creates the Sample objects and assigns a presigned S3 URL so we can upload the sample files to S3 via the URL
     response = await bulkUploadWithMetadata(processedSamples, metadata);
   } catch (e) {
     onCreateSamplesError && onCreateSamplesError([e], map("name", samples));
-    return;
+    return [];
   }
 
   // It's possible that a subset of samples errored out, but other ones can still be uploaded.
@@ -96,7 +107,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
   // The sample files that need to be uploaded to S3 are in the samples argument passed into initiateBulkUploadLocalWithMetadata
   // So we need to fetch the files from samples argument and copy them over to response.samples where they're later uploaded to S3 via uploadSampleFilesToPresignedURL
   response.samples.forEach(
-    (createdSample: $TSFixMe) =>
+    createdSample =>
       (createdSample["filesToUpload"] = get(
         "files",
         find({ name: createdSample.name }, samples),
@@ -132,7 +143,7 @@ export const completeSampleUpload = async ({
 const bulkUploadWithMetadata = async (
   samples: $TSFixMe,
   metadata: $TSFixMe,
-) => {
+): Promise<BulkUploadWithMetadata> => {
   const response = await postWithCSRF(
     `/samples/bulk_upload_with_metadata.json`,
     {

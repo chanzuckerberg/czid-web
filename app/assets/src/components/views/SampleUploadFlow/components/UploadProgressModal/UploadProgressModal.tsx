@@ -14,7 +14,7 @@ interface UploadProgressModalProps {
   guppyBasecallerSetting: string;
   medakaModel: string | null;
   metadata: MetadataBasic | null;
-  onUploadComplete: $TSFixMeFunction;
+  onUploadComplete: () => void;
   project: Project;
   refSeqAccession: RefSeqAccessionDataType | null;
   refSeqFile: File | null;

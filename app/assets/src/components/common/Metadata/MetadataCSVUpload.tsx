@@ -72,7 +72,6 @@ class MetadataCSVUpload extends React.Component<
     if (this.props.samplesAreNew) {
       // We assume that all samples are being uploaded to this.props.project.
       this.setState({
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         lastSampleNamesValidated: map("name", this.props.samples),
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         lastProjectIdValidated: this.props.project.id,

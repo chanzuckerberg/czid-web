@@ -251,7 +251,7 @@ export interface SampleFromApi {
   _selectId: string;
   id: number;
   private_until: DateString;
-  name?: string;
+  name: string;
   host_genome_id: number;
   host_genome_name: string;
   ercc_only: boolean;

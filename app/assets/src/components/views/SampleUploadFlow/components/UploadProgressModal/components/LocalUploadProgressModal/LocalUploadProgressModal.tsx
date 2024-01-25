@@ -4,7 +4,6 @@ import cx from "classnames";
 import {
   constant,
   filter,
-  find,
   isEmpty,
   map,
   omit,
@@ -28,6 +27,7 @@ import { MetadataBasic, Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { UploadWorkflows } from "../../../../constants";
 import { RefSeqAccessionDataType } from "../../../UploadSampleStep/types";
+import { PathToFile, SampleForUpload } from "../../types";
 import cs from "../../upload_progress_modal.scss";
 import {
   addAdditionalInputFilesToSamples,
@@ -45,7 +45,7 @@ interface LocalUploadProgressModalProps {
   guppyBasecallerSetting: string;
   medakaModel: string | null;
   metadata: MetadataBasic | null;
-  onUploadComplete: $TSFixMeFunction;
+  onUploadComplete: () => void;
   project: Project;
   refSeqAccession: RefSeqAccessionDataType | null;
   refSeqFile: File | null;
@@ -86,7 +86,9 @@ export const LocalUploadProgressModal = ({
   const [uploadComplete, setUploadComplete] = useState(false);
 
   // Store samples created in API
-  const [locallyCreatedSamples, setLocallyCreatedSamples] = useState([]);
+  const [locallyCreatedSamples, setLocallyCreatedSamples] = useState<
+    SampleForUpload[]
+  >([]);
 
   // State to track download progress
   const [sampleFileUploadIds, setSampleFileUploadIds] = useState({});
@@ -95,8 +97,8 @@ export const LocalUploadProgressModal = ({
   const [sampleFileCompleted, setSampleFileCompleted] = useState({});
 
   let sampleFilePercentages = {};
-  let wakeLock = null;
-  let heartbeatInterval = null;
+  let wakeLock: WakeLockSentinel | null = null;
+  let heartbeatInterval: NodeJS.Timer | null = null;
 
   const IN_PROGRESS_STATUS = "in progress";
   const ERROR_STATUS = "error";
@@ -123,9 +125,7 @@ export const LocalUploadProgressModal = ({
   const acquireScreenLock = async () => {
     try {
       if ("wakeLock" in navigator) {
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         wakeLock = await navigator.wakeLock.request("screen");
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         wakeLock.addEventListener("release", () => {
           console.warn("Wake lock was released");
         });
@@ -140,6 +140,7 @@ export const LocalUploadProgressModal = ({
   };
 
   const initiateLocalUpload = async () => {
+    if (!samples) return;
     const samplesToUpload = addFlagsToSamples({
       adminOptions,
       bedFileName: bedFile?.name,
@@ -162,14 +163,13 @@ export const LocalUploadProgressModal = ({
       bedFile,
       refSeqFile,
     });
-
     // Create the samples in the db; this does NOT upload files to s3
     const createdSamples = await initiateBulkUploadLocalWithMetadata({
       samples: samplesToUpload,
       metadata,
       onCreateSamplesError: (
-        errors: $TSFixMe,
-        erroredSampleNames: $TSFixMe,
+        errors: $TSFixMeUnknown,
+        erroredSampleNames: string[],
       ) => {
         logError({
           message: "UploadProgressModal: onCreateSamplesError",
@@ -197,9 +197,8 @@ export const LocalUploadProgressModal = ({
     await uploadSamples(createdSamples);
   };
 
-  const uploadSamples = async (samples: $TSFixMe) => {
+  const uploadSamples = async (samples: SampleForUpload[]) => {
     // Ping a heartbeat periodically to say the browser is actively uploading the samples.
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     heartbeatInterval = await startUploadHeartbeat();
 
     // Upload each sample in serial, but upload each sample's input files and parts in parallel.
@@ -212,39 +211,29 @@ export const LocalUploadProgressModal = ({
     // Once the upload is done, release the wake lock
     if (wakeLock !== null) {
       console.warn("Releasing wake lock since upload completed...");
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
       await wakeLock.release();
       wakeLock = null;
     }
 
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     clearInterval(heartbeatInterval);
     trackEvent(
       ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED,
-      {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        sampleIds: map("id", samples),
-      },
-    );
-
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED_ALLISON_TESTING,
       {
         sampleIds: JSON.stringify(map("id", samples)),
       },
     );
   };
 
-  const uploadSample = async (sample: $TSFixMe) => {
+  const uploadSample = async (sample: SampleForUpload) => {
     try {
       // Get the credentials for the sample
       const s3ClientForSample = await getS3Client(sample);
       // Set the upload percentage for the sample to 0
       updateSampleUploadPercentage(sample.name, 0);
 
+      if (!sample.input_files) return;
       await Promise.all(
-        sample.input_files.map(async (inputFile: $TSFixMe) => {
+        sample.input_files.map(async inputFile => {
           // Upload the input file to s3
           // Also updates the upload percentage for the sample
           await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
@@ -254,19 +243,18 @@ export const LocalUploadProgressModal = ({
       // Update the sample upload status (success or error)
       await completeSampleUpload({
         sample,
-        onSampleUploadSuccess: (sample: $TSFixMe) => {
+        onSampleUploadSuccess: (sample: SampleForUpload) => {
           updateSampleUploadStatus(sample.name, "success");
         },
         onMarkSampleUploadedError: handleSampleUploadError,
       });
     } catch (e) {
       handleSampleUploadError(sample, e);
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-      clearInterval(heartbeatInterval);
+      heartbeatInterval && clearInterval(heartbeatInterval);
     }
   };
 
-  const getS3Client = async (sample: $TSFixMe) => {
+  const getS3Client = async (sample: SampleForUpload) => {
     const credentials = await getUploadCredentials(sample.id);
     const {
       access_key_id: accessKeyId,
@@ -289,9 +277,9 @@ export const LocalUploadProgressModal = ({
   };
 
   const uploadInputFileToS3 = async (
-    sample: $TSFixMe,
-    inputFile: $TSFixMe,
-    s3Client: $TSFixMe,
+    sample: SampleForUpload,
+    inputFile: PathToFile,
+    s3Client: S3Client,
   ) => {
     const {
       name: fileName,
@@ -326,13 +314,15 @@ export const LocalUploadProgressModal = ({
       }),
     });
 
-    const removeS3KeyFromUploadIds = (s3Key: $TSFixMe) => {
+    const removeS3KeyFromUploadIds = (s3Key: string) => {
       setSampleFileUploadIds(prevState => omit(s3Key, prevState));
     };
 
     fileUpload.on("httpUploadProgress", progress => {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-      const percentage = progress.loaded / progress.total;
+      const percentage =
+        progress.loaded && progress.total
+          ? progress.loaded / progress.total
+          : 0;
       updateSampleFilePercentage({
         sampleName: sample.name,
         s3Key,
@@ -361,7 +351,7 @@ export const LocalUploadProgressModal = ({
     }));
   };
 
-  const updateSampleUploadStatus = (sampleName: $TSFixMe, status: $TSFixMe) => {
+  const updateSampleUploadStatus = (sampleName: string, status: string) => {
     setSampleUploadStatuses(prevState => ({
       ...prevState,
       [sampleName]: status,
@@ -373,10 +363,16 @@ export const LocalUploadProgressModal = ({
     s3Key,
     percentage = 0,
     fileSize = null,
-  }: $TSFixMe) => {
-    const newSampleKeyState = { percentage };
+  }: {
+    sampleName: string;
+    percentage?: number;
+    s3Key: string;
+    fileSize?: number | null;
+  }) => {
+    const newSampleKeyState: { percentage: number; size?: number } = {
+      percentage,
+    };
     if (fileSize) {
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'size' does not exist on type '{ percenta... Remove this comment to see the full error message
       newSampleKeyState.size = fileSize;
     }
 
@@ -401,8 +397,8 @@ export const LocalUploadProgressModal = ({
   };
 
   const updateSampleUploadPercentage = (
-    sampleName: $TSFixMe,
-    percentage: $TSFixMe,
+    sampleName: string,
+    percentage: number,
   ) => {
     setSampleUploadPercentages(prevState => ({
       ...prevState,
@@ -410,7 +406,9 @@ export const LocalUploadProgressModal = ({
     }));
   };
 
-  const calculatePercentageForSample = (sampleFilePercentage: $TSFixMe) => {
+  const calculatePercentageForSample = (sampleFilePercentage: {
+    [key: string]: { percentage: number; size: number };
+  }) => {
     const uploadedSize = sum(
       map(key => (key.percentage || 0) * key.size, sampleFilePercentage),
     );
@@ -420,7 +418,7 @@ export const LocalUploadProgressModal = ({
     return uploadedSize / totalSize;
   };
 
-  const handleSampleUploadError = (sample: $TSFixMe, error = null) => {
+  const handleSampleUploadError = (sample: SampleForUpload, error = null) => {
     const message =
       "UploadProgressModal: Local sample upload error to S3 occured";
 
@@ -438,9 +436,7 @@ export const LocalUploadProgressModal = ({
   const getLocalSamplesInProgress = () => {
     return filter(
       sample =>
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         sampleUploadStatuses[sample.name] === undefined ||
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         sampleUploadStatuses[sample.name] === IN_PROGRESS_STATUS,
       samples,
     );
@@ -448,93 +444,41 @@ export const LocalUploadProgressModal = ({
 
   const getLocalSamplesFailed = () => {
     return filter(
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
       sample => sampleUploadStatuses[sample.name] === ERROR_STATUS,
       samples,
     );
   };
 
-  const retryFailedSampleUploads = async (failedSamples: $TSFixMe) => {
+  const retryFailedSampleUploads = async (failedSamples: SampleFromApi[]) => {
     setRetryingSampleUpload(true);
     setUploadComplete(false);
+    failedSamples.forEach(failedSample =>
+      updateSampleUploadStatus(failedSample.name, IN_PROGRESS_STATUS),
+    );
+    if (locallyCreatedSamples.length > 0) {
+      const failedLocallyCreatedSamples = failedSamples
+        .map(failedSample => {
+          return locallyCreatedSamples.find(
+            locallyCreatedSample =>
+              locallyCreatedSample.name === failedSample.name,
+          );
+        })
+        .filter(
+          (locallyCreatedSample): locallyCreatedSample is SampleForUpload =>
+            locallyCreatedSample !== undefined,
+        );
 
-    const failedLocallyCreatedSamples = map(failedSample => {
-      updateSampleUploadStatus(failedSample.name, IN_PROGRESS_STATUS);
-
-      return find({ name: failedSample.name }, locallyCreatedSamples);
-    }, failedSamples);
-
-    await uploadSamples(failedLocallyCreatedSamples);
+      await uploadSamples(failedLocallyCreatedSamples);
+    } else {
+      initiateLocalUpload();
+    }
   };
 
   const completeLocalUpload = () => {
     onUploadComplete();
     setUploadComplete(true);
     setRetryingSampleUpload(false);
-
-    // TODO(nina): These analytics events are creating unique table names
-    // for each occurrence and clogging up our analytics pipeline. Commenting
-    // out until we can figure out why and fix the root issue.
-
-    /* const numFailedSamples = size(getLocalSamplesFailed());
-
-    if (numFailedSamples > 0) {
-      const failedSamples = filter(
-        sample => sampleUploadStatuses[sample.name] === "error",
-        samples,
-      );
-      const createdSamples = filter(
-        sample => sampleUploadStatuses[sample.name] !== "error",
-        samples,
-      );
-
-      const getIdForSample = sample => {
-        const localSample = find({ name: sample.name }, locallyCreatedSamples);
-        return localSample?.id;
-      };
-
-      const createdSampleIds = compact(map(getIdForSample, createdSamples));
-
-      const erroredSampleIds = compact(map(getIdForSample, failedSamples));
-
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
-        {
-          createdSampleIds,
-          createdSamples: samples.length - failedSamples.length,
-          createdSamplesFileSizes: sampleNameToFileSizes(createdSamples),
-          erroredSampleIds,
-          erroredSamples: failedSamples.length,
-          erroredSamplesFileSizes: sampleNameToFileSizes(failedSamples),
-          projectId: project.id,
-          uploadType,
-        },
-      );
-    } else {
-      trackEvent(
-        ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
-        {
-          createdSamples: samples.length,
-          createdSampleIds: pluck("id", locallyCreatedSamples),
-          createdSamplesFileSizes: sampleNameToFileSizes(samples),
-          projectId: project.id,
-          uploadType,
-        },
-      );
-    } */
   };
-
-  // Returns a map of sample names to a list of their file sizes
-  /*   const sampleNameToFileSizes = (samples: $TSFixMe) => {
-    return samples.reduce(function(
-      nameToFileSizes: $TSFixMe,
-      sample: $TSFixMe,
-    ) {
-      nameToFileSizes[sample.name] = map(file => file.size, sample.files);
-      return nameToFileSizes;
-    },
-    {});
-  }; */
 
   const hasFailedSamples = !isEmpty(getLocalSamplesFailed());
   const numberOfFailedSamples = size(getLocalSamplesFailed());

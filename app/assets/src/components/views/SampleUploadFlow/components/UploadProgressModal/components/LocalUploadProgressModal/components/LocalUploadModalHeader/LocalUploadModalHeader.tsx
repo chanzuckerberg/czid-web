@@ -40,7 +40,7 @@ export const LocalUploadModalHeader = ({
     : `Uploads completed with ${numberOfFailedSamples} error${
         numberOfFailedSamples > 1 ? "s" : ""
       }`;
-  const isInProgressMode = numLocalSamplesInProgress;
+  const isInProgressMode = numLocalSamplesInProgress > 0;
   const isInFailedMode = !numLocalSamplesInProgress && hasFailedSamples;
   const isInCompletedMode = !numLocalSamplesInProgress && !hasFailedSamples;
   return (

@@ -41,7 +41,7 @@ interface ReviewStepProps {
   medakaModel: string | null;
   metadata: MetadataBasic | null;
   // Triggers when we start or stop uploading. Lets the parent know to disable header link.
-  onUploadComplete: $TSFixMeFunction;
+  onUploadComplete: () => void;
   onUploadStatusChange?: $TSFixMeFunction;
   onStepSelect?(UploadStepType): void;
   originalHostGenomes?: HostGenome[];

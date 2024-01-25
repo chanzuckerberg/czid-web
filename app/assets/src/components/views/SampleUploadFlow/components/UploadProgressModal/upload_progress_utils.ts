@@ -18,7 +18,7 @@ interface addFlagsToSamplesProps {
   refSeqAccession: RefSeqAccessionDataType | null;
   refSeqFileName?: string;
   refSeqTaxon: TaxonOption | null;
-  samples: Partial<SampleFromApi>[] | null;
+  samples: SampleFromApi[];
   skipSampleProcessing: boolean;
   technology: string | null;
   workflows: Set<UploadWorkflows>;
@@ -43,7 +43,7 @@ export const addFlagsToSamples = ({
   technology,
   workflows,
   wetlabProtocol,
-}: addFlagsToSamplesProps) => {
+}: addFlagsToSamplesProps): SampleFromApi[] => {
   const PIPELINE_EXECUTION_STRATEGIES = {
     directed_acyclic_graph: "directed_acyclic_graph",
     step_function: "step_function",
@@ -67,45 +67,42 @@ export const addFlagsToSamples = ({
     UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
   );
   const isNanopore = technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
-  return (
-    samples &&
-    samples.map(sample => ({
-      ...sample,
-      ...adminOptions,
-      technology,
-      do_not_process: skipSampleProcessing,
-      pipeline_execution_strategy: pipelineExecutionStrategy,
-      workflows: workflowsConverted,
-      // Add mNGS specific fields
-      ...(isMetagenomics &&
-        isNanopore && {
-          guppy_basecaller_setting: guppyBasecallerSetting,
-        }),
-      // Add Viral CG specific fields
-      ...(isViralConensusGenome && {
-        ref_fasta: refSeqFileName,
-        ...(refSeqAccession && {
-          accession_id: refSeqAccession.id,
-          accession_name: refSeqAccession.name,
-        }),
-        ...(refSeqTaxon && {
-          taxon_id: refSeqTaxon.id,
-          taxon_name: refSeqTaxon.name,
-        }),
-        ...(bedFileName && {
-          primer_bed: bedFileName,
-        }),
+  return samples.map(sample => ({
+    ...sample,
+    ...adminOptions,
+    technology,
+    do_not_process: skipSampleProcessing,
+    pipeline_execution_strategy: pipelineExecutionStrategy,
+    workflows: workflowsConverted,
+    // Add mNGS specific fields
+    ...(isMetagenomics &&
+      isNanopore && {
+        guppy_basecaller_setting: guppyBasecallerSetting,
       }),
-      // Add Covid CG specific fields
-      ...(isCovidConsensusGenome && {
-        wetlab_protocol: wetlabProtocol,
-        ...(isNanopore && {
-          clearlabs,
-          medaka_model: medakaModel,
-        }),
+    // Add Viral CG specific fields
+    ...(isViralConensusGenome && {
+      ref_fasta: refSeqFileName,
+      ...(refSeqAccession && {
+        accession_id: refSeqAccession.id,
+        accession_name: refSeqAccession.name,
       }),
-    }))
-  );
+      ...(refSeqTaxon && {
+        taxon_id: refSeqTaxon.id,
+        taxon_name: refSeqTaxon.name,
+      }),
+      ...(bedFileName && {
+        primer_bed: bedFileName,
+      }),
+    }),
+    // Add Covid CG specific fields
+    ...(isCovidConsensusGenome && {
+      wetlab_protocol: wetlabProtocol,
+      ...(isNanopore && {
+        clearlabs,
+        medaka_model: medakaModel,
+      }),
+    }),
+  }));
 };
 
 interface addAdditionalInputFilesToSamplesProps {
