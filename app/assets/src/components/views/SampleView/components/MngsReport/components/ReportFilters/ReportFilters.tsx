@@ -30,6 +30,7 @@ import FlagFilter from "~/components/views/report/filters/FlagFilter";
 import MetricPicker from "~/components/views/report/filters/MetricPicker";
 import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
+import ThresholdFilterDropdown from "~/components/views/report/filters/ThresholdFilterDropdown/ThresholdFilterDropdown";
 import {
   CATEGORIES,
   DispatchSelectedOptionsType,
@@ -44,7 +45,6 @@ import {
   SampleReportViewMode,
 } from "~/interface/sampleView";
 import { Background, SampleId } from "~/interface/shared/specific";
-import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
 import cs from "./report_filters.scss";

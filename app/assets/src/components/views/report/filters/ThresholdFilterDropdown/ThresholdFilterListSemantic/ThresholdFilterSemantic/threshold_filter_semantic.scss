@@ -1,0 +1,24 @@
+@import "~styles/themes/typography";
+@import "~@czi-sds/components/dist/variables";
+
+.thresholdFilter {
+  &:not(:first-child) {
+    padding-top: $sds-spaces-l !important;
+  }
+
+  .inputFieldColumn {
+    @include font-body-xs;
+    &:not(:last-child) {
+      margin-right: $sds-spaces-m;
+    }
+  }
+
+  .removeIcon {
+    cursor: pointer;
+    opacity: 0.3;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

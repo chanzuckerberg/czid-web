@@ -1850,8 +1850,7 @@ class SamplesHeatmapViewCC extends React.Component<
 
   getControlOptions = (): OptionsType => ({
     // Server side options
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    metrics: this.props.metrics.filter(metric =>
+    metrics: this.props.metrics?.filter(metric =>
       METRIC_OPTIONS.includes(metric.value),
     ),
     categories: this.props.categories || [],

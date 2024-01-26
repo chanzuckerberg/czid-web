@@ -7,5 +7,4 @@ export { default as MultipleNestedConfirmDropdown } from "./MultipleNestedConfir
 export { default as MultipleNestedDropdown } from "./MultipleNestedDropdown";
 export { default as SubtextDropdown } from "./SubtextDropdown";
 export { default as ThresholdFilter } from "./ThresholdFilter";
-export { default as ThresholdFilterDropdown } from "./ThresholdFilterDropdown";
 export { default as ThresholdFilterList } from "./ThresholdFilterList";

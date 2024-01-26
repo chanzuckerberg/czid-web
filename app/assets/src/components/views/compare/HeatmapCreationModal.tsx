@@ -14,12 +14,9 @@ import { CATEGORIES } from "~/components/views/SampleView/utils";
 import { GlobalContext } from "~/globalContext/reducer";
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
-import {
-  Dropdown,
-  MultipleNestedDropdown,
-  ThresholdFilterDropdown,
-} from "~ui/controls/dropdowns";
+import { Dropdown, MultipleNestedDropdown } from "~ui/controls/dropdowns";
 import { openUrl, openUrlInNewTab } from "~utils/links";
+import ThresholdFilterDropdown from "../report/filters/ThresholdFilterDropdown/ThresholdFilterDropdown";
 import cs from "./heatmap_creation_modal.scss";
 
 interface HeatmapCreationModalProps {

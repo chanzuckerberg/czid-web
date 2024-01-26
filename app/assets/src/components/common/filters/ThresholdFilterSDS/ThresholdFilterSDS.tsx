@@ -88,7 +88,7 @@ export const ThresholdFilterSDS = ({
       ...(Array.isArray(existingThresholds) ? existingThresholds : []),
       {
         metric: firstMetric.value,
-        metricDisplay: firstMetric.text,
+        metricDisplay: firstMetric.text || "",
         operator: filterOperators[0],
         value: "",
       },

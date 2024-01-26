@@ -1,13 +1,16 @@
 import { Icon, Tooltip } from "@czi-sds/components";
 import React, { useContext } from "react";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
+import { MenuOptionWithDisabledTooltip } from "~/components/common/MenuOptionWithDisabledTooltip";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Link from "~/components/ui/controls/Link";
+import { BACKGROUND_MODELS_LINK } from "~/components/utils/documentationLinks";
 import { HEATMAP_KNOWN_PATHOGEN_FILTER } from "~/components/utils/features";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
-import { BACKGROUND_METRICS } from "../../constants";
 import { RawBackground } from "../../SamplesHeatmapView";
+import { metricIsZscore } from "../../utils";
 import SamplesHeatmapBackgroundDropdown from "./components/SamplesHeatmapBackgroundDropdown";
 import SamplesHeatmapCategoryDropdown from "./components/SamplesHeatmapCategoryDropdown";
 import SamplesHeatmapPresetTooltip from "./components/SamplesHeatmapPresetTooltip";
@@ -122,15 +125,13 @@ const SamplesHeatmapFilters = ({
   };
 
   const renderMetricSelect = () => {
-    const backgroundMetricValues = BACKGROUND_METRICS.map(m => m.value);
     const newOptions = options?.metrics?.map((metric: TextValueString) => {
       return {
         ...metric,
-        disabled:
-          !selectedOptions?.background &&
-          backgroundMetricValues.includes(metric.value),
+        disabled: !selectedOptions?.background && metricIsZscore(metric.value),
       };
     });
+
     return (
       <SamplesHeatmapViewOptionsDropdown
         disabled={loading || !data}
@@ -139,6 +140,25 @@ const SamplesHeatmapFilters = ({
         options={optionsToSDSFormat(newOptions || [])}
         selectedOptions={selectedOptions}
         selectedOptionsKey="metric"
+        renderOption={function Option(
+          optionProps: any,
+          option: SDSFormattedOption,
+        ) {
+          return (
+            <MenuOptionWithDisabledTooltip
+              option={option}
+              optionProps={optionProps}
+              tooltipDisplay={
+                <>
+                  To see the Z Score, first choose a background model above.{" "}
+                  <ExternalLink href={BACKGROUND_MODELS_LINK}>
+                    Learn more.
+                  </ExternalLink>
+                </>
+              }
+            />
+          );
+        }}
       />
     );
   };
@@ -182,18 +202,15 @@ const SamplesHeatmapFilters = ({
   const renderThresholdFilterSelect = () => {
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     const isPreset = selectedOptions.presets.includes("thresholdFilters");
-    const disabled = loading || !data || isPreset;
+    const filterDisabled = loading || !data || isPreset;
 
-    const backgroundMetricValues = BACKGROUND_METRICS.map(m =>
-      m.value.replace(".", "_"),
-    );
     const newOptions = options?.thresholdFilters?.targets?.map(
       (metric: TextValueString) => {
+        const disabled =
+          !selectedOptions?.background && metricIsZscore(metric.value);
         return {
           ...metric,
-          disabled:
-            !selectedOptions?.background &&
-            backgroundMetricValues.includes(metric.value),
+          disabled: disabled,
         };
       },
     );
@@ -201,9 +218,8 @@ const SamplesHeatmapFilters = ({
     const thresholdSelect = (
       <>
         <ThresholdFilterSDS
-          isDisabled={disabled}
-          // @ts-expect-error Type 'TextValueString' is not assignable to type 'MetricOption'. Property 'text' is optional in type 'TextValueString' but required in type 'MetricOption'.ts(2322)
-          metricOptions={newOptions}
+          disabled={filterDisabled}
+          metricOptions={newOptions || []}
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           selectedThresholds={selectedOptions["thresholdFilters"]}
           onApply={onThresholdFilterApply}

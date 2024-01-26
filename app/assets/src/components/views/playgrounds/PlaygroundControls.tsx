@@ -1,4 +1,5 @@
 import React from "react";
+import ThresholdFilterDropdown from "~/components/views/report/filters/ThresholdFilterDropdown/ThresholdFilterDropdown";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import Checkbox from "~ui/controls/Checkbox";
@@ -8,7 +9,6 @@ import DownloadButtonDropdown from "~ui/controls/dropdowns/DownloadButtonDropdow
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import MultipleNestedDropdown from "~ui/controls/dropdowns/MultipleNestedDropdown";
-import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import Slider from "~ui/controls/Slider";
 import Toggle from "~ui/controls/Toggle";
 

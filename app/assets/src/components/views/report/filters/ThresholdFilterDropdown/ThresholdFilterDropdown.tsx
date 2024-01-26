@@ -1,12 +1,19 @@
+/* NB(1/2024): This component is only meant to be used on the mNGS sample report.
+It has been duplicated to avoid conflicts with converting the main taxon
+threshold filter component to SDS. This version still uses Semantic UI
+and should be deprecated when all sample report filters are refactored to SDS. */
 import { get } from "lodash/fp";
 import React from "react";
 import { GlobalContext } from "~/globalContext/reducer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { PrimaryButton, SecondaryButton } from "../buttons";
-import DropdownLabel from "./common/DropdownLabel";
-import DropdownTrigger from "./common/DropdownTrigger";
+import {
+  PrimaryButton,
+  SecondaryButton,
+} from "../../../../ui/controls/buttons";
+import DropdownLabel from "../../../../ui/controls/dropdowns/common/DropdownLabel";
+import DropdownTrigger from "../../../../ui/controls/dropdowns/common/DropdownTrigger";
 import cs from "./threshold_filter_dropdown.scss";
-import ThresholdFilterList from "./ThresholdFilterList";
+import ThresholdFilterListSemantic from "./ThresholdFilterListSemantic/ThresholdFilterListSemantic";
 
 interface ThresholdFilterDropdownProps {
   disabled?: boolean;
@@ -217,7 +224,7 @@ class ThresholdFilterDropdown extends React.Component<
         disabled={disabled}
       >
         <div className={cs.container}>
-          <ThresholdFilterList
+          <ThresholdFilterListSemantic
             metrics={this.metrics}
             operators={this.operators}
             thresholds={thresholds}

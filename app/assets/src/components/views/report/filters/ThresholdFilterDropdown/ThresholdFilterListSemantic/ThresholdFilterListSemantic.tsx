@@ -1,13 +1,14 @@
 import React from "react";
+import { Grid } from "semantic-ui-react";
 import {
   MetricOption,
   ThresholdFilterData,
   ThresholdFilterOperator,
 } from "~/interface/dropdown";
-import { ThresholdFilter } from "~ui/controls/dropdowns";
-import cs from "./threshold_filter_list.scss";
+import cs from "./threshold_filter_list_semantic.scss";
+import ThresholdFilterSemantic from "./ThresholdFilterSemantic/ThresholdFilterSemantic";
 
-interface ThresholdFilterListProps {
+interface ThresholdFilterListSemanticProps {
   metrics: MetricOption[];
   operators: ThresholdFilterOperator[];
   thresholds: ThresholdFilterData[];
@@ -19,20 +20,24 @@ interface ThresholdFilterListProps {
   onAddThreshold: () => void;
 }
 
-const ThresholdFilterList = ({
+const ThresholdFilterListSemantic = ({
   metrics,
   operators,
   thresholds,
   onChangeThreshold,
   onRemoveThreshold,
   onAddThreshold,
-}: ThresholdFilterListProps) => {
+}: ThresholdFilterListSemanticProps) => {
   return (
     <div className={cs.thresholdFilterList}>
-      <div className={cs.thresholdFilterGrid}>
+      <Grid
+        className={cs.thresholdFilterGrid}
+        verticalAlign="middle"
+        columns="equal"
+      >
         {Array.isArray(thresholds) &&
           thresholds.map((threshold: ThresholdFilterData, idx: number) => (
-            <ThresholdFilter
+            <ThresholdFilterSemantic
               key={`${threshold.metric}-${idx}`}
               metrics={metrics}
               operators={operators}
@@ -45,29 +50,22 @@ const ThresholdFilterList = ({
               }}
             />
           ))}
-        <div className={cs.addThresholdRow}>
-          <div className={cs.addThresholdColumn}>
+        <Grid.Row className={cs.addThresholdRow}>
+          <Grid.Column className={cs.addThresholdColumn}>
             <span
               data-testid="add-threshold"
               className={cs.addThresholdLink}
               onClick={() => {
                 onAddThreshold();
               }}
-              role="button"
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  onAddThreshold();
-                }
-              }}
-              tabIndex={0}
             >
               + ADD THRESHOLD
             </span>
-          </div>
-        </div>
-      </div>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     </div>
   );
 };
 
-export default ThresholdFilterList;
+export default ThresholdFilterListSemantic;

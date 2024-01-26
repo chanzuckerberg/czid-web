@@ -3,12 +3,6 @@
 
 .thresholdFilterList {
   .thresholdFilterGrid {
-    display: flex;
-    flex-direction: row;
-    padding: 0px;
-    align-items: center;
-    flex-wrap: wrap;
-
     .addThresholdRow {
       padding-top: $sds-spaces-l !important;
 

@@ -2,7 +2,7 @@ export type MetricText = string;
 export type ThresholdFilterOperator = ">=" | "<=";
 
 export interface MetricOption {
-  text: MetricText;
+  text?: MetricText;
   value: string;
   disabled?: boolean;
 }
