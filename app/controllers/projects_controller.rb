@@ -391,6 +391,7 @@ class ProjectsController < ApplicationController
           @project.pin_to_major_versions
         end
         @project.pin_default_alignment_config
+        @project.pin_latest_human_version
         format.html { redirect_to @project, notice: 'Project was successfully created.' }
         format.json { render :show, status: :created, location: @project, project: @project }
       else

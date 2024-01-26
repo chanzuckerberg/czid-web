@@ -53,10 +53,9 @@ class HostGenome < ApplicationRecord
   S3_STAR_INDEX_FILE = "STAR_genome.tar".freeze
   S3_BOWTIE2_INDEX_FILE = "bowtie2_genome.tar".freeze
 
-  # TODO: (Vince) Keeping this in code is very short term: it's just a bridge between
-  # this PR and my next when we'll only use human HG version for selection. But we should
-  # continue to select by it to ensure safety until migration to `version` is confirmed.
-  DEPRECATION_STATUS_HG38_V1_HUMAN = "deprecated, 2023-12-13, v1, HG38".freeze
+  # Attribute key we set/get on for what version of human a project is using.
+  # On project creation, we pin to whatever is currently the latest version of human.
+  HUMAN_HOST = "human_host_genome".freeze
 
   def self.s3_star_index_path_default
     HostGenome::ERCC_PATH_PREFIX + HostGenome::S3_STAR_INDEX_FILE

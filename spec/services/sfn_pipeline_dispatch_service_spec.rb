@@ -68,11 +68,9 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with('SAMPLES_BUCKET_NAME').and_return(FAKE_SAMPLES_BUCKET)
       allow(ENV).to receive(:[]).with('AWS_REGION').and_return(FAKE_REGION)
-      # TODO: (Vince) Use of `version: 0` is temp to  support safe migration
-      # The additional Human host_genome creation here will go away with next PR.
-      create(:host_genome, name: "Human", deprecation_status: HostGenome::DEPRECATION_STATUS_HG38_V1_HUMAN, version: 0)
 
       create(:app_config, key: AppConfig::SFN_MNGS_ARN, value: FAKE_SFN_ARN)
+      create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 1)
     end
 
     context "when SFN has no tag for WDL version" do

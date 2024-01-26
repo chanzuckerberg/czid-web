@@ -25,6 +25,8 @@ class VersionRetrievalService
   def default_version
     if @workflow == AlignmentConfig::NCBI_INDEX
       AlignmentConfig.default_name
+    elsif @workflow == HostGenome::HUMAN_HOST
+      WorkflowVersion.latest_version_of(HostGenome::HUMAN_HOST)
     else
       AppConfigHelper.get_workflow_version(@workflow)
     end

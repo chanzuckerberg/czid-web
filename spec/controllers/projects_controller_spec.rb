@@ -734,6 +734,7 @@ RSpec.describe ProjectsController, type: :controller do
 
         before do
           create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: "2021-01-22")
+          create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 1)
         end
 
         it "successfully creates a project with provided params" do
@@ -992,6 +993,7 @@ RSpec.describe ProjectsController, type: :request do
     before do
       sign_in_auth0 @admin
       create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: "2021-01-22")
+      create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 1)
     end
 
     it 'should get index' do

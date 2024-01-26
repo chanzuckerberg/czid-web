@@ -144,6 +144,11 @@ class Project < ApplicationRecord
     VersionPinningService.call(id, AlignmentConfig::NCBI_INDEX, AlignmentConfig.default_name)
   end
 
+  def pin_latest_human_version
+    latest_human_version = WorkflowVersion.latest_version_of(HostGenome::HUMAN_HOST)
+    VersionPinningService.call(id, HostGenome::HUMAN_HOST, latest_human_version)
+  end
+
   def add_default_metadata_fields
     metadata_fields.push(MetadataField.where(is_default: 1) - metadata_fields)
   end

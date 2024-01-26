@@ -4,6 +4,10 @@ module ErrorHelper
       "WorkflowVersion for workflow=#{workflow} and version_prefix=#{version_prefix} does not exist"
     end
 
+    def self.workflow_name_not_found(workflow)
+      "No WorkflowVersions for workflow=#{workflow} exist."
+    end
+
     def self.workflow_version_deprecated(workflow, version)
       "WorkflowVersion for workflow=#{workflow} and version=#{version} is deprecated"
     end
