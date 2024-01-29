@@ -1,5 +1,5 @@
 import { filter, get, isUndefined, map, reject, size, some } from "lodash/fp";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { BulkDownloadType } from "~/interface/shared";
@@ -79,13 +79,15 @@ export function BulkDownloadModalFooter({
   onDownloadRequest,
   sampleHostGenomes,
 }: BulkDownloadModalFooterProps) {
+  const [isSelectedDownloadValid, setIsSelectedDownloadValid] =
+    useState<boolean>(false);
   const samplesWithHumanHost = filter(
     { hostGenome: HOST_GENOME_NAMES.HUMAN },
     sampleHostGenomes,
   );
   const numSamplesWithHumanHost = size(samplesWithHumanHost);
 
-  const getSelectedDownloadType = (): BulkDownloadType | null => {
+  const getSelectedDownloadType = useCallback((): BulkDownloadType | null => {
     if (!selectedDownloadTypeName) {
       return null;
     }
@@ -94,11 +96,12 @@ export function BulkDownloadModalFooter({
       downloadTypes?.find(item => item["type"] === selectedDownloadTypeName) ||
       null
     );
-  };
+  }, [downloadTypes, selectedDownloadTypeName]);
 
   // Get all the fields we need to validate for the selected download type.
-  const getRequiredFieldsForSelectedType = () => {
-    const selectedFieldsForType = selectedFields?.selectedDownloadTypeName;
+  const getRequiredFieldsForSelectedType = useCallback(() => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+    const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType = getSelectedDownloadType();
 
     if (!downloadType) return null;
@@ -121,10 +124,11 @@ export function BulkDownloadModalFooter({
     });
 
     return requiredFields;
-  };
+  }, [getSelectedDownloadType, selectedDownloadTypeName, selectedFields]);
 
-  const isSelectedDownloadValid = () => {
-    const selectedFieldsForType = selectedFields?.selectedDownloadTypeName;
+  const getIsSelectedDownloadValid = useCallback(() => {
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+    const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType: BulkDownloadType | null = getSelectedDownloadType();
 
     if (!downloadType || validObjectIds.size < 1) {
@@ -152,7 +156,23 @@ export function BulkDownloadModalFooter({
     }
 
     return true;
-  };
+  }, [
+    getRequiredFieldsForSelectedType,
+    getSelectedDownloadType,
+    numSamplesWithHumanHost,
+    selectedDownloadTypeName,
+    selectedFields,
+    validObjectIds.size,
+  ]);
+
+  useEffect(() => {
+    setIsSelectedDownloadValid(getIsSelectedDownloadValid());
+  }, [
+    getIsSelectedDownloadValid,
+    selectedDownloadTypeName,
+    selectedFields,
+    validObjectIds,
+  ]);
 
   const getValidSampleIds = () => {
     if (selectedDownloadTypeName === BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS) {
@@ -216,7 +236,7 @@ export function BulkDownloadModalFooter({
       )}
       {!waitingForCreate && createStatus !== "error" && (
         <PrimaryButton
-          disabled={!isSelectedDownloadValid()}
+          disabled={!isSelectedDownloadValid}
           text="Start Generating Download"
           onClick={() => onDownloadRequest(getValidSampleIds())}
         />

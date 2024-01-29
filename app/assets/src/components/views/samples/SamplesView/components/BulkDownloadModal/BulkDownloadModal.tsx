@@ -1,4 +1,4 @@
-import { set, unset } from "lodash/fp";
+import { set } from "lodash/fp";
 import memoize from "memoize-one";
 import React, { useEffect, useState } from "react";
 import {
@@ -59,9 +59,9 @@ const assembleSelectedDownload = memoize(
     workflow,
     workflowEntity,
   ): SelectedDownloadType => {
-    const fieldValues = allSelectedFields?.selectedDownloadTypeName;
+    const fieldValues = allSelectedFields?.[selectedDownloadTypeName];
     const fieldDisplayNames =
-      allSelectedFieldsDisplay?.selectedDownloadTypeName;
+      allSelectedFieldsDisplay?.[selectedDownloadTypeName];
 
     const fields = {};
     if (fieldValues) {
@@ -218,9 +218,10 @@ export const BulkDownloadModal = ({
     selectedFields: Record<string, string>;
     selectedFieldsDisplay: Record<string, $TSFixMeUnknown>;
   }): Promise<void> {
-    // TODO (ehoops): these should be const and we should fix the updaters below
-    let newSelectedFields = { ...selectedFields };
-    let newSelectedFieldsDisplay = { ...selectedFieldsDisplay };
+    let newSelectedFields = JSON.parse(JSON.stringify(selectedFields));
+    let newSelectedFieldsDisplay = JSON.parse(
+      JSON.stringify(selectedFieldsDisplay),
+    );
 
     const bulkDownloadTypesRequest = getBulkDownloadTypes(workflow);
     const validationInfoRequest = fetchValidationInfo({
@@ -255,14 +256,12 @@ export const BulkDownloadModal = ({
       if (type.fields) {
         type.fields.forEach(field => {
           if (field.default_value) {
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             newSelectedFields = set(
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
               [type.type, field.type],
               field.default_value.value,
               newSelectedFields,
             );
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             newSelectedFieldsDisplay = set(
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
               [type.type, field.type],
@@ -421,25 +420,40 @@ export const BulkDownloadModal = ({
     value: $TSFixMe,
     displayName: string,
   ) => {
-    const newSelectedFields = { ...selectedFields };
-    // If the value is undefined, delete it from selectedFields.
-    // This allows us to support cases where certain fields are conditionally required;
-    // if the field becomes no longer required, we can unset it.
-    if (value !== undefined) {
-      set([downloadType, fieldType], value, newSelectedFields);
-    } else {
-      unset([downloadType, fieldType], newSelectedFields);
-    }
+    setSelectedFields(prevSelectedFields => {
+      const newSelectedFields = JSON.parse(JSON.stringify(prevSelectedFields));
+      // If the value is undefined, delete it from selectedFields.
+      // This allows us to support cases where certain fields are conditionally required;
+      // if the field becomes no longer required, we can unset it.
+      if (value !== undefined) {
+        if (!newSelectedFields[downloadType]) {
+          newSelectedFields[downloadType] = {};
+        }
+        newSelectedFields[downloadType][fieldType] = value;
+      } else {
+        if (newSelectedFields[downloadType]) {
+          newSelectedFields[downloadType][fieldType] = undefined;
+        }
+      }
+      return newSelectedFields;
+    });
 
-    const newSelectedFieldsDisplay = { ...selectedFieldsDisplay };
-    if (displayName !== undefined) {
-      set([downloadType, fieldType], displayName, newSelectedFieldsDisplay);
-    } else {
-      unset([downloadType, fieldType], newSelectedFieldsDisplay);
-    }
-
-    setSelectedFields(newSelectedFields);
-    setSelectedFieldsDisplay(newSelectedFieldsDisplay);
+    setSelectedFieldsDisplay(prevSelectedFieldsDisplay => {
+      const newSelectedFieldsDisplay = JSON.parse(
+        JSON.stringify(prevSelectedFieldsDisplay),
+      );
+      if (displayName !== undefined) {
+        if (!newSelectedFieldsDisplay[downloadType]) {
+          newSelectedFieldsDisplay[downloadType] = {};
+        }
+        newSelectedFieldsDisplay[downloadType][fieldType] = displayName;
+      } else {
+        if (newSelectedFieldsDisplay[downloadType]) {
+          newSelectedFieldsDisplay[downloadType][fieldType] = undefined;
+        }
+      }
+      return newSelectedFieldsDisplay;
+    });
   };
 
   const numObjects = selectedIds?.size || validObjectIds.size;
