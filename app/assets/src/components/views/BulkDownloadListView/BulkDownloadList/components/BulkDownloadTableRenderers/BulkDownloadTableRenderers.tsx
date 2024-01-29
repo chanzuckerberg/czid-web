@@ -39,6 +39,7 @@ export class BulkDownloadTableRenderers extends React.Component {
               className={cs.detailsLink}
               onClick={rowData.onStatusClick}
               data-testid={"download-details-link"}
+              id={rowData?.id}
             >
               Details
             </span>
@@ -79,7 +80,11 @@ export class BulkDownloadTableRenderers extends React.Component {
       return (
         <div className={cs.statusCell}>
           <div className={cs.links}>
-            <div className={cs.link} onClick={rowData.onDownloadFileClick}>
+            <div
+              id={rowData?.id}
+              className={cs.link}
+              onClick={rowData.onDownloadFileClick}
+            >
               Download File
             </div>
           </div>
@@ -92,6 +97,7 @@ export class BulkDownloadTableRenderers extends React.Component {
         <div className={cs.statusCell}>
           <div className={cs.links}>
             <a
+              id={rowData?.id}
               className={cs.link}
               href={CONTACT_US_LINK}
               target="_blank"
@@ -105,7 +111,7 @@ export class BulkDownloadTableRenderers extends React.Component {
     }
 
     return (
-      <div className={cs.statusCell}>
+      <div className={cs.statusCell} id={rowData?.id}>
         <LoadingBar percentage={progress} showHint tiny />
       </div>
     );
