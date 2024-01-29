@@ -93,14 +93,25 @@ task update_tables_for_index_gen: :environment do |_, _args|
 
       echo "Loaded table into taxon_lineages_new. Renaming tables."
       mysql --defaults-extra-file=my.cnf -D #{database} -e "RENAME TABLE taxon_lineages TO taxon_lineages_old, taxon_lineages_new TO taxon_lineages"
+      echo "Renamed tables successfully."
     `
-    if $CHILD_STATUS.success?
-      puts("Re-indexing the taxon lineages table in Elasticsearch.")
-      # Updating elasticsearch took ~18 hours locally
-      Resque.enqueue(ReindexTaxonLineagesTableEs)
+    unless $CHILD_STATUS.success?
+      puts("Failed to load new taxon lineages table.")
     end
   else
     puts("Skipping loading in new taxon lineages table.")
+  end
+
+  # TODO(nina): Re-indexing the taxon lineages table in Elasticsearch should be required but is not
+  # yet implemented with zero downtime. Commenting this out to avoid downtime while testing new
+  # lineage table on staging.
+  re_index_es = prompt("Do you want to re-index the taxon lineages table in Elasticsearch? (y/n): ") == "y"
+  if re_index_es
+    puts("Re-indexing the taxon lineages table in Elasticsearch.")
+    # Updating elasticsearch took ~18 hours locally
+    Resque.enqueue(ReindexTaxonLineagesTableEs)
+  else
+    puts("Skipping re-indexing taxon lineages table in Elasticsearch.")
   end
 
   drop_old_table = prompt("Do you want to drop the old taxon lineages table? (y/n): ") == "y"
