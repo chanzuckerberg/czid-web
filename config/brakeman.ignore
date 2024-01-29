@@ -1,29 +1,6 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "Command Injection",
-      "warning_code": 14,
-      "fingerprint": "37ed138ed3addf4752cc4d715538430a218a0c8fa583082f378e37bfe88de9ea",
-      "check_name": "Execute",
-      "message": "Possible command injection",
-      "file": "app/controllers/identity_controller.rb",
-      "line": 16,
-      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "Open3.capture3(\"python3\", \"scripts/token_auth.py\", \"--create_token\", \"--userid\", User.find(current_user.id).id.to_s)",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "IdentityController",
-        "method": "identify"
-      },
-      "user_input": "User.find(current_user.id)",
-      "confidence": "High",
-      "cwe_id": [
-        77
-      ],
-      "note": "The userId is safe and not a risk for command injection. We double check that current_user is a valid user in the DB before using it in the token_auth service"
-    },
-    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "415f387f9b709a2ebe146a7ffc4884ad89798b04139ab3b60cbe25dd6b21d29f",
@@ -93,6 +70,29 @@
       "note": "role is filtered out if current_user is nonadmin"
     },
     {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "d1a3c9b9a47e3eff690f30cda190ae27cf6628ebfd3987dc8b44d2b9642a3c3c",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/controllers/identity_controller.rb",
+      "line": 105,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "Open3.capture3((\"python3 #{\"scripts/token_auth.py\"} --create_token --userid #{User.find(user_id).id.to_s}\" + \" --project-claims '#{project_claims.to_json}'\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "IdentityController",
+        "method": "generate_token"
+      },
+      "user_input": "User.find(user_id)",
+      "confidence": "High",
+      "cwe_id": [
+        77
+      ],
+      "note": "The userId is safe and not a risk for command injection. We double check that current_user is a valid user in the DB before using it in the token_auth service"
+    },
+    {
       "warning_type": "Mass Assignment",
       "warning_code": 105,
       "fingerprint": "db65d2bccba89c9d3aed06645479b515031f4dd50969619e5c522c9b8fe54b83",
@@ -116,6 +116,6 @@
       "note": ""
     }
   ],
-  "updated": "2023-11-20 11:28:52 -0800",
+  "updated": "2024-01-29 10:01:59 -0800",
   "brakeman_version": "5.4.0"
 }

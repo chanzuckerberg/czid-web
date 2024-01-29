@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   get 'users/register', to: 'users#register'
 
   get "identify", to: "identity#identify"
+  get "enrich_token", to: "identity#enrich_token"
 
   resources :samples do
     member do
