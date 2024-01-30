@@ -33,7 +33,7 @@ __make_release_checklist() {
     echo "_(included commits: ($source_commit)..($target_commit), created on $(date '+%Y-%m-%d %H:%M:%S'))_"
     echo
     echo "# Release/Hot fixes"
-    echo '_Make sure all your release/hot fixes are listed here. Check your commits after testing and cherry-picking to staging/main accordingly:_'
+    echo '_Make sure all your release/hot fixes are listed here. Check your commits after testing and cherry-picking to staging/main accordingly. Do not checkoff commits which have dependencies that are not yet deployed in prod:_'
   )
 
   _log "Creating release checklist..."
