@@ -5,6 +5,7 @@ const HEATMAP_SAMPLE_NAMES = "[class*='columnLabels'] [class*='columnLabel'] tex
 const SAVE_BUTTON = "//button[text()='Save']";
 const TINY_CONFIRMATION = "[class*='tiny basic']";
 const VIEW_OPTIONS = "[class*='listbox'] [class*='option']";
+const AVAILABLE_VIEW_OPTIONS = "[class*='listbox'] [class*='option'][aria-disabled='false']";
 const VIEW_OPTION_LABELS = "[class*='lowerFilterSection'] [class*='viewOption'] div[class*='label']";
 const VIEW_OPTION_SELECTION = (viewFilter: string) => `//div[text()='${viewFilter}']//ancestor::div[contains(@class, 'viewOptions')]/button/div`;
 const HEATMAP = "svg[class*='heatmap']";
@@ -18,10 +19,10 @@ export class HeatmapPage extends PageObject {
 
   // #region Api
   public async getHeatmapMetrics() {
-    const requestUrl = `${process.env.BASEURL}/visualizations/heatmap_metrics.json`;
-    const response = await this.page.context().request.get(requestUrl);
-    const metrics = await response.json();
-    return metrics.slice(0,6); // The first 6 metrics apply
+    await this.page.locator(VIEW_OPTION_LABELS).getByText("Metric").click();
+    const viewOptions = await this.page.locator(AVAILABLE_VIEW_OPTIONS).allTextContents();
+    await this.page.locator(VIEW_OPTION_LABELS).getByText("Metric").click();
+    return viewOptions;
   }
   // #endregion Api
 

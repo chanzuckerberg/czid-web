@@ -261,7 +261,14 @@ export class ProjectPage extends PageObject {
   }
 
   public async clickStartGeneratingDownloadButton() {
-    await this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click();
+    const [response] = await Promise.all([
+      this.page.waitForResponse(response =>
+        response.url().includes("bulk_downloads") && response.request().method() === "POST",
+      ),
+      this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click(),
+    ]);
+    const responseJson = await response.json();
+    return responseJson.id;
   }
 
   public async clickDeleteButton() {

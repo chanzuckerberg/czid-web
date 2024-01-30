@@ -115,12 +115,12 @@ test.describe("Sample Heatmap", () => {
     // #region View by Metric
     const heatmapMetics = await heatmapPage.getHeatmapMetrics();
     for (const metic of heatmapMetics) {
-      await heatmapPage.setMetric(metic.text);
+      await heatmapPage.setMetric(metic);
       const cellsCount = await heatmapPage.getCellsCount();
 
       for (let i = 0; i < cellsCount; i++) {
         const highlightedMetric = await heatmapPage.getHighlightedMetic(i);
-        expect(highlightedMetric["label"]).toEqual(metic.text);
+        expect(highlightedMetric["label"]).toEqual(metic);
       }
     }
     // #endregion View by Metric

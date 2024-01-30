@@ -9,9 +9,9 @@ const CLOSE_ICON = "[class*='closeIcon']";
 const BACKGROUND_VALUE = "[data-testid='background-value']";
 const INCLUDE_SAMPLE_METADATA = "//span[text()='Include sample metadata in this table']/preceding-sibling::input";
 const METRIC_VALUE = "[data-testid='metric-value']";
-const DOWNLOAD_TYPE_METADATA = (downloadType: string) => `//div[text()='${downloadType}']/parent::div/following-sibling::div/*[@data-testid='download-details-link']`;
-const DOWNLOAD_TYPE_ROWS = (downloadType: string) => `//div[text()='${downloadType}']/ancestor::div[@role="row"]`;
-const DOWNLOAD_FILE_BY_ROWINDEX = (rowIndex: string) => `(//div[text()='Download File'])[${rowIndex}]`; // xpath (non-zero index)
+const DOWNLOAD_TYPE_METADATA = (downloadId: string) => `[id='${downloadId}'][data-testid='download-details-link']`;
+const DOWNLOAD_COMPLETE_BY_DOWNLOADID = (downloadId: string) => `//div[contains(@data-testid, 'complete')]/parent::div/following-sibling::div/span[@id='${downloadId}']`;
+const DOWNLOAD_FILE_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}' and text()='Download File']`;
 const DOWNLOAD_STATUS_BY_INDEX = (rowIndex: string) => `(//*[contains(@class, 'downloadStatus')])[${rowIndex}]`;
 const BULK_DOWNLOAD_METRICS = {
   "mngs": "short-read-mngs",
@@ -41,10 +41,10 @@ export class DownloadsPage extends PageObject {
   // #endregion Api
 
   // #region Click
-  public async clickDownloadTypeDetails(downloadType: string, index: number) {
-    const locatorString = DOWNLOAD_TYPE_METADATA(downloadType);
-    await this.page.locator(locatorString).nth(index).waitFor();
-    await this.page.locator(locatorString).nth(index).click();
+  public async clickDownloadTypeDetails(downloadId: number) {
+    const locatorString = DOWNLOAD_TYPE_METADATA(downloadId.toString());
+    await this.page.locator(locatorString).waitFor();
+    await this.page.locator(locatorString).click();
   }
 
   public async clickIncludeSampleMetadata() {
@@ -55,9 +55,11 @@ export class DownloadsPage extends PageObject {
     await this.page.locator(SAMPLES_IN_DOWNLOAD_DROPDOWN).click();
   }
 
-  public async clickDownloadFile(rowIndex: string) {
-    const rowLocator = DOWNLOAD_FILE_BY_ROWINDEX(rowIndex);
+  public async clickDownloadFile(downloadId: string) {
+    const rowLocator = DOWNLOAD_FILE_BY_DOWNLOADID(downloadId);
+    const downloadPromise = this.page.waitForEvent("download");
     await this.page.locator(rowLocator).click();
+    return downloadPromise;
   }
 
   public async clickCloseIcon() {
@@ -99,41 +101,25 @@ export class DownloadsPage extends PageObject {
   // #endregion Get
 
   // #region Macro
-  public async findDownloadRowIndex(sampleNames: Array<string>, downloadType: string) {
-    let rowIndex = null;
-    const downloadTypeCount = await this.getDownloadTypeCount(downloadType);
-    for (let i = 0; i <= downloadTypeCount; i++) {
-      await this.clickDownloadTypeDetails(downloadType, i);
-      await this.clickSamplesInDownloadDropdown();
-      const samplesInDownload = await this.getSamplesInDownloadNames();
-      await this.clickCloseIcon();
-      if (sampleNames.every(name => samplesInDownload.includes(name))) {
-        rowIndex = await this.page.locator(DOWNLOAD_TYPE_ROWS(downloadType)).nth(i).getAttribute("aria-rowindex");
-        break;
-      }
-    }
-    return rowIndex;
-  }
-
-  public async waitForDownloadComplete(sampleNames: Array<string>, downloadType: string) {
+  public async waitForDownloadComplete(downloadId: number, timeout = 30000) {
     const startTime = Date.now();
-    const timeout = 30000;
 
-    let rowIndex = null;
+    let complete = false;
     while ((Date.now() - startTime) < timeout) {
-      rowIndex = await this.findDownloadRowIndex(sampleNames, downloadType);
-      const downloadStatus = await this.getDownloadStatus(rowIndex);
-      if (!downloadStatus.includes("complete")) {
+      complete = await this.page.locator(DOWNLOAD_COMPLETE_BY_DOWNLOADID(downloadId.toString())).isVisible();
+      if (!complete) {
         await this.navigateToDownloads();
+        await this.pause(1);
+        await this.page.locator("[class*='downloadCell']").first().waitFor();
       } else {
         break;
       }
     }
-    return rowIndex;
+    return complete;
   }
   // #endregion Macro
 
-  public async downloadSmokeTest(workflow: string, downloadType: string) {
+  public async downloadSmokeTest(workflow: string, downloadType: string, timeout: number) {
     const projectPage = new ProjectPage(this.page);
     const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
 
@@ -147,7 +133,6 @@ export class DownloadsPage extends PageObject {
       await projectPage.clickHostSearchResult("Human");
     }
 
-    const sampleNamesInBulkDownload = [];
     const completedRowIndexes = await projectPage.getCompletedRowIndexes();
     const maxFiles = 2;
     const samplesToDownload = completedRowIndexes.length > maxFiles ? Math.random() * maxFiles : completedRowIndexes.length;
@@ -155,7 +140,6 @@ export class DownloadsPage extends PageObject {
       const rowIndex = completedRowIndexes[i];
 
       const sampleName = await projectPage.getSampleNameFromRow(rowIndex);
-      sampleNamesInBulkDownload.push(sampleName);
       await projectPage.clickSampleCheckbox(sampleName);
     }
     // #endregion Choose samples
@@ -221,7 +205,7 @@ export class DownloadsPage extends PageObject {
       await this.clickIncludeSampleMetadata();
     }
 
-    await projectPage.clickStartGeneratingDownloadButton();
+    const downloadId = await projectPage.clickStartGeneratingDownloadButton();
     // #endregion Start the sample download
 
     // #region Verify the download alert message
@@ -234,28 +218,26 @@ export class DownloadsPage extends PageObject {
 
     // #region Go to the downloads page and wait for the sample download to be ready
     await this.navigateToDownloads();
-    const downloadRowIndex = await this.waitForDownloadComplete(sampleNamesInBulkDownload, downloadType);
-    expect(downloadRowIndex).not.toBeNull();
+    const downloadComplete = await this.waitForDownloadComplete(downloadId, timeout);
+    expect(downloadComplete).toBeTruthy();
     // #endregion Go to the downloads page and wait for the sample download to be ready
 
     // #region Validate additional download type information
     if (workflow === "mngs" && downloadType === "Sample Taxon Reports") {
-      await this.clickDownloadTypeDetails(downloadType, downloadRowIndex-1);
+      await this.clickDownloadTypeDetails(downloadId);
       expect(await this.getBackgroundValue()).toEqual(background.name);
       await this.clickCloseIcon();
     }
     else if (downloadType === "Combined Sample Taxon Results") {
-      await this.clickDownloadTypeDetails(downloadType, downloadRowIndex-1);
+      await this.clickDownloadTypeDetails(downloadId);
       expect(await this.getMetricValue()).toEqual(bulkDownloadMetric.text);
       await this.clickCloseIcon();
     }
     // #endregion Validate additional download type information
 
     // #region Verify the expected file was downloaded
-    await this.clickDownloadFile(
-      await this.waitForDownloadComplete(sampleNamesInBulkDownload, downloadType),
-    );
-    const download = await this.page.waitForEvent("download");
+    await this.waitForDownloadComplete(downloadId, timeout);
+    const download = await this.clickDownloadFile(downloadId);
 
     expect(`${downloadType}.${expectedFileExtention}`).toMatch(download.suggestedFilename());
     // #endregion Verify the expected file was downloaded
