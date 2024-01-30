@@ -9,6 +9,7 @@ import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
 import { processMetadata } from "~/components/utils/metadata";
 import { WorkflowLabelType, WORKFLOW_TABS } from "~/components/utils/workflows";
+import { usePrevious } from "~/helpers/customHooks/usePrevious";
 import {
   CreateMutable,
   Metadata,
@@ -23,7 +24,7 @@ import { MetadataSectionContentFragment$key } from "./__generated__/MetadataSect
 interface MetadataSectionContentProps {
   additionalInfo: AdditionalInfo | null;
   currentWorkflowTab: WorkflowLabelType;
-  metadataErrors?: { [key: string]: string };
+  metadataErrors?: { [key: string]: string | null };
   metadataTypes: MetadataTypes;
   nameLocal: string;
   onMetadataChange: (key: string, value: any, shouldSave?: boolean) => void;
@@ -34,7 +35,7 @@ interface MetadataSectionContentProps {
   setNameLocal: (name: string) => void;
   snapshotShareId?: string;
   metadataTabFragmentKey: MetadataSectionContentFragment$key;
-  savePending?: boolean;
+  sampleId?: number | string;
 }
 
 export const MetadataSectionContentFragment = graphql`
@@ -73,6 +74,7 @@ export const MetadataSectionContent = ({
   onMetadataChange,
   onMetadataSave,
   nameLocal,
+  sampleId,
   sampleTypes,
   section,
   sectionEditing,
@@ -106,6 +108,18 @@ export const MetadataSectionContent = ({
         }
       });
   }, [metadata, metadataErrors, metadataLocal]);
+
+  const prevProps = usePrevious({
+    sampleId,
+  });
+  const sampleIdChanged = sampleId !== prevProps?.sampleId;
+
+  // If user clicks on a different sample, reset the metadataLocal state with the new metadata
+  useEffect(() => {
+    if (sampleIdChanged) {
+      setMetadataLocal(metadata);
+    }
+  }, [sampleIdChanged, metadata]);
 
   const validKeys = section.keys.filter(key =>
     Object.keys(metadataTypes).includes(key),

@@ -15,6 +15,7 @@ import {
 } from "~/components/utils/urls";
 import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import { ConsensusGenomeDropdown } from "~/components/views/SampleView/components/ConsensusGenomeView/components/ConsensusGenomeHeader/components/ConsensusGenomeDropdown";
+import { usePrevious } from "~/helpers/customHooks/usePrevious";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import {
@@ -194,6 +195,18 @@ export const SampleDetailsMode = ({
   );
   const [nameLocal, setNameLocal] = useState(additionalInfo?.name);
 
+  const prevProps = usePrevious({
+    sampleId,
+  });
+  const isSampleIdChanged = prevProps?.sampleId !== sampleId;
+
+  // If the sampleId is changed, reset the nameLocal to the name of the sample
+  useEffect(() => {
+    if (isSampleIdChanged) {
+      setNameLocal(additionalInfo?.name);
+    }
+  }, [additionalInfo?.name, isSampleIdChanged]);
+
   useEffect(() => {
     getAllSampleTypes().then(fetchedSampleTypes => {
       setSampleTypes(fetchedSampleTypes);
@@ -296,7 +309,7 @@ export const SampleDetailsMode = ({
     if (key === "name") {
       commitUpdateSampleNameMutation({
         variables: {
-          sampleId: id as string,
+          sampleId: id.toString(),
           input: {
             value: String(value),
             authenticityToken: authenticityToken,
@@ -308,7 +321,7 @@ export const SampleDetailsMode = ({
     } else if (key === "notes") {
       commitUpdateSampleNotesMutation({
         variables: {
-          sampleId: id as string,
+          sampleId: id.toString(),
           input: {
             value: String(value),
             authenticityToken: authenticityToken,
@@ -321,7 +334,7 @@ export const SampleDetailsMode = ({
       const sendValue = formatSendValue(value);
       commitUpdateMetadataMutation({
         variables: {
-          sampleId: id as string,
+          sampleId: id.toString(),
           input: {
             field: key,
             value: sendValue,
@@ -351,8 +364,8 @@ export const SampleDetailsMode = ({
           savePending={savePending}
           nameLocal={nameLocal}
           setNameLocal={setNameLocal}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           metadataErrors={metadataErrors}
+          sampleId={sampleId}
           sampleTypes={sampleTypes || []}
           snapshotShareId={snapshotShareId}
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322

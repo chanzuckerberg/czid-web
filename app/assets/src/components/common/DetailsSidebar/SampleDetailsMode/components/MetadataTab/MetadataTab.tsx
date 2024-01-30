@@ -25,7 +25,7 @@ export const MetadataTabMetadataFragment = graphql`
 
 interface MetadataTabProps {
   currentWorkflowTab: WorkflowLabelType;
-  metadataErrors?: { [key: string]: string };
+  metadataErrors?: { [key: string]: string | null };
   metadataTabFragmentKey: unknown;
   metadataTypes: MetadataTypes;
   nameLocal: string;
@@ -35,6 +35,7 @@ interface MetadataTabProps {
   sampleTypes: SampleType[];
   setNameLocal: (name: string) => void;
   snapshotShareId?: string;
+  sampleId?: number | string;
 }
 export interface Section {
   name: string;
@@ -53,6 +54,7 @@ export const MetadataTab = ({
   onMetadataChange,
   onMetadataSave,
   sampleTypes,
+  sampleId,
   savePending,
   setNameLocal,
   snapshotShareId,
@@ -143,6 +145,7 @@ export const MetadataTab = ({
             metadataTabFragmentKey={
               metadataTabFragmentKey as MetadataSectionContentFragment$key
             }
+            sampleId={sampleId}
           />
         </MetadataSection>
       ))}
