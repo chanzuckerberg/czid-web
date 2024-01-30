@@ -251,6 +251,8 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
     ),
   );
 
+  const [showIndexWarning, setShowIndexWarning] = useState<boolean>(false);
+
   const prevPipelineVersion = usePrevious(pipelineVersion);
   const prevSelectedOptions = usePrevious(selectedOptions);
   const prevView = usePrevious(view);
@@ -366,6 +368,15 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
         });
     }
   }, [currentTab]);
+
+  useEffect(() => {
+    if (showIndexWarning && currentTab === WORKFLOW_TABS.SHORT_READ_MNGS) {
+      showNotification(NOTIFICATION_TYPES.multipleIndexVersions, {
+        indexName: pipelineRun?.alignment_config_name,
+      });
+      setShowIndexWarning(false);
+    }
+  }, [showIndexWarning, currentTab, pipelineRun]);
 
   useEffect(() => {
     if (
@@ -548,9 +559,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
         nonMatchingAlignmentConfigs.length > 0 &&
         allowedFeatures.includes(NCBI_COMPRESSED_INDEX)
       ) {
-        showNotification(NOTIFICATION_TYPES.multipleIndexVersions, {
-          indexName: pipelineRun?.alignment_config_name,
-        });
+        setShowIndexWarning(true);
       }
 
       const backgroundIdUsed = backgroundId || selectedBackground?.id || null;
