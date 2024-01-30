@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
-import path from "path";
+import * as path from "path";
 import {
   CONTINUE,
   WORKFLOWS,
@@ -14,16 +14,21 @@ import { expect } from "@playwright/test";
 import { PageObject } from "./page-object";
 
 const REF_FILENAME = "consensus_TEST_SC2.fa";
-const TRIM_PRIMER_FILENAME = "Primer_K.bed";
-const REF_FILE = `./fixtures/reference_sequences/${REF_FILENAME}`;
-const TRIM_PRIMER_FILE = `./fixtures/trim_primers/${TRIM_PRIMER_FILENAME}`;
+export const TRIM_PRIMER_FILENAME = "Primer_K.bed";
+const REF_FILE = (refFilename: string) => `./fixtures/reference_sequences/${refFilename}`;
+const TRIM_PRIMER_FILE = (trimPrimerFilename: string) => `./fixtures/trim_primers/${trimPrimerFilename}`;
 const METADATA_FILE_NAME = "metadata_template.csv";
 
+// Upload Samples
+const CONTINUE_BUTTON = "//button[text()='Continue']";
+const ROW_FILENAMES = "[aria-label='row'] [class*='fileName'] ";
+const FILE_ERROR_INFO_ICON = "[class*='fileName'] svg";
+const COLUMN_TOOLTIP = "[data-testid='column-tooltip']";
+const FILE_INPUT_SELECTOR = "[data-testid='drop-sample-files'] input";
 const SAMPLE_NAME_LOCATOR = "[class*='sampleUploadTable'] [role='gridcell'][title]";
 const COOKIE_BANNER_LOCATOR = "[id='onetrust-accept-btn-handler']:visible";
 const SEARCH_PROJECT_INPUT = 'input[placeholder="Search"]';
 const UPLOAD_CONFIRMATION_TEXT = "[data-testid='drop-sample-files'] div[class*='title']";
-const FILE_INPUT_SELECTOR = "[data-testid='drop-sample-files'] input";
 const SEQUENCING_TECHNOLOGY_PARTIAL_TESTID = "sequencing-technology-";
 const GUPPY_BASECALLER_SETTING_LOCATOR = "//div[text()='Guppy Basecaller Setting:']/following-sibling::div";
 const GUPPY_BASECALLER_SETTING_OPTIONS_TESTIDS = {
@@ -32,6 +37,7 @@ const GUPPY_BASECALLER_SETTING_OPTIONS_TESTIDS = {
   SUPER: "super",
 };
 const UPLOAD_TAXON_FILTER_TESTID = "upload-taxon-filter";
+const UPLOAD_TAXON_FILTER_INPUT = "[label='Search'] [class*='FormControl'] input";
 const CLEAR_UPLOADED_FILE_BUTTON_TESTID = "clear-uploaded-file-button";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
 const REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID = "reference-sequence-file-upload";
@@ -64,7 +70,14 @@ const ANALYSIS_REVIEW_TESTID = "upload-input-review";
 const PROJECT_INFO_REVIEW_LOCATOR = "//span[text()='Project Info']/parent::div/following-sibling::div[1]";
 const TERMS_AGREEMENT_LOCATOR = "[class*='termsAgreement'] [class*='checkbox']";
 const START_UPLOAD_BUTTON_LOCATOR = "//button[text()='Start Upload']";
+
+// Uploads completed
 const UPLOAD_COMPLETE = "Uploads completed!";
+const SENT_TO_PIPELINE = (sampleName: string) => `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/following-sibling::div[contains(@class, 'sampleStatus')]/div[text()='Sent to pipeline']`;
+const UPLOAD_WINDOW_TITLE = "[class*='titleWithIcon-']";
+const GO_TO_PROJECT_BUTTON = "//button[text()='Go to Project']";
+const SAMPLE_UPLOAD_STATUS_BAR = (sampleName: string) => `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/ancestor::div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]`;
+
 
 export class UploadPage extends PageObject {
 
@@ -142,6 +155,10 @@ export class UploadPage extends PageObject {
   // #endregion Samples
 
   // #region Metadata
+  public async hoverOverFileErrorIcon(index = 0) {
+    await this.page.locator(FILE_ERROR_INFO_ICON).nth(index).hover();
+  }
+
   public async clickHostOrganismDropDown(index = 0) {
     await this.page.getByTestId(METADATA_HOST_ORGANISM_TESTID).locator("input").nth(index).click();
   }
@@ -169,9 +186,64 @@ export class UploadPage extends PageObject {
   }
   // #endregion Review
 
+  public async clickGoToProjectButton() {
+    return this.page.locator(GO_TO_PROJECT_BUTTON).click();
+  }
+
   // #endregion Click
 
   // #region Get
+  public async getSampleUploadProgress(sampleName: string) {
+    const styleAttribute = await this.page.locator(SAMPLE_UPLOAD_STATUS_BAR(sampleName)).getAttribute("style");
+    let uploadProgress = 0;
+    if (styleAttribute) {
+      const match = styleAttribute.match(/(\d+(\.\d+)?)/);
+      uploadProgress = match ? parseFloat(match[0]) : uploadProgress;
+    }
+    return uploadProgress;
+  }
+
+  public async getUploadWindowTitle() {
+    return this.page.locator(UPLOAD_WINDOW_TITLE).textContent();
+  }
+
+  public async getColumnTooltip() {
+    return this.page.locator(COLUMN_TOOLTIP).textContent();
+  }
+
+  public async getWarningTable() {
+    const warning = await this.page.locator("[class*='issueGroup'][class*='warning'] [class*='header-']:not([class*='toggleable'])").textContent();
+    await this.page.locator("[class*='issueGroup'][class*='warning'] [class*='toggleContainer']").click();
+    const table = await this.getTable(
+      "[class*='issueGroup'][class*='warning'] th",
+      "[class*='issueGroup'][class*='warning'] tbody tr",
+      "td",
+    );
+    const warningLines = warning.split("\n");
+    for (let i = 0; i < warningLines.length; i++) {
+      warningLines[i] = warningLines[i].trim();
+    }
+
+    return {
+      "message": warningLines.join(" "),
+      "files": table,
+    };
+  }
+
+  public async getErrorTable() {
+    const error = await this.page.locator("[class*='issueGroup'][class*='error'] [class*='header-']:not([class*='toggleable'])").textContent();
+    await this.page.locator("[class*='issueGroup'][class*='error'] [class*='toggleContainer']").click();
+    const table = await this.getTable(
+      "[class*='issueGroup'][class*='error'] th",
+      "[class*='issueGroup'][class*='error'] tbody tr",
+      "td",
+    );
+    return {
+      "message": error.trim(),
+      "files": table,
+    };
+  }
+
   public async getCheckboxForWorkflow(workflow: string) {
     return this.page.getByTestId(`analysis-type-${workflow}`).locator("input");
   }
@@ -367,36 +439,38 @@ export class UploadPage extends PageObject {
     }
   }
 
-  public async uploadRefSequence() {
+  public async uploadRefSequence(fileName = REF_FILENAME) {
     const [refSeqFileChooser] = await Promise.all([
       this.page.waitForEvent("filechooser"),
       this.page.getByTestId(REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID).click(),
     ]);
     await this.pause(2);
-    await refSeqFileChooser.setFiles(path.resolve(REF_FILE));
+    await refSeqFileChooser.setFiles(path.resolve(REF_FILE(fileName)));
   };
 
-  public async uploadTrimPrimer() {
+  public async uploadTrimPrimer(fileName = TRIM_PRIMER_FILENAME) {
     const [trimPrimerFileChooser] = await Promise.all([
       this.page.waitForEvent("filechooser"),
       this.page.locator(TRIM_PRIMERS_FILE_UPLOAD).click(),
     ]);
     await this.pause(2);
-    await trimPrimerFileChooser.setFiles(path.resolve(TRIM_PRIMER_FILE));
+    await trimPrimerFileChooser.setFiles(path.resolve(TRIM_PRIMER_FILE(fileName)));
   };
 
-  public async selectFiles(selector: string, filePath: string, files: string[]) {
+  public async selectFiles(selector: string, filePath: string, files: string[], waitForConfirmation = true) {
     for (let i = 0; i < files.length; i++) {
       const fullPath = await path.join(filePath, files[i]);
       await this.page.setInputFiles(selector, fullPath);
 
-      let confirmationText = "";
-      if (files[i].endsWith("csv")) {
-        confirmationText = `${files[i]} loaded`;
-      } else {
-        confirmationText = `${i + 1} File${i === 0? "": "s"} Selected For Upload`;
+      if (waitForConfirmation) {
+        let confirmationText = "";
+        if (files[i].endsWith("csv")) {
+          confirmationText = `${files[i]} loaded`;
+        } else {
+          confirmationText = `${i + 1} File${i === 0? "": "s"} Selected For Upload`;
+        }
+        await this.page.locator(`text=${confirmationText}`).waitFor();
       }
-      await this.page.locator(`text=${confirmationText}`).waitFor();
     };
   }
 
@@ -406,8 +480,8 @@ export class UploadPage extends PageObject {
     await this.clickProjectName(projectName);
   }
 
-  public async uploadSampleFiles(sampleFiles: Array<string>) {
-    await this.selectFiles(FILE_INPUT_SELECTOR, FIXTURE_DIR, sampleFiles);
+  public async uploadSampleFiles(sampleFiles: Array<string>, waitForConfirmation = true) {
+    await this.selectFiles(FILE_INPUT_SELECTOR, FIXTURE_DIR, sampleFiles, waitForConfirmation);
   }
 
   public async uploadCSVMetaData(metadataFileName: string, inputs: any) {
@@ -440,7 +514,7 @@ export class UploadPage extends PageObject {
     }
   }
 
-  public async setWorkFlow(analysisType: string) {
+  public async setWorkFlow(analysisType: string, includeTrimPrimer = true, taxonName = "Unknown") {
     if (analysisType === WORKFLOWS.MNGS) {
       // Illumina: Short read mNGS
       await this.clickCheckboxForWorkflow(analysisType);
@@ -459,10 +533,12 @@ export class UploadPage extends PageObject {
     }
     if (analysisType === WORKFLOWS.WGS) {
       await this.clickCheckboxForWorkflow(analysisType);
-      await this.setUploadTaxonFilter("Unknown");
+      await this.setUploadTaxonFilter(taxonName);
 
       await this.uploadRefSequence();
-      await this.uploadTrimPrimer();
+      if (includeTrimPrimer) {
+        await this.uploadTrimPrimer();
+      }
     }
     if (analysisType === WORKFLOWS.SC2) {
       await this.clickCheckboxForWorkflow(analysisType);
@@ -480,7 +556,8 @@ export class UploadPage extends PageObject {
 
   public async setUploadTaxonFilter(filterName: string) {
     await this.clickUploadTaxonFilter();
-    await this.page.getByText(filterName).click();
+    await this.page.locator(UPLOAD_TAXON_FILTER_INPUT).fill(filterName);
+    await this.page.getByText(filterName).first().click();
   }
 
   public async setManualInputs(inputs: any)
@@ -497,16 +574,18 @@ export class UploadPage extends PageObject {
     }
   }
 
-  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string) {
+  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown") {
     await this.goto();
     await this.dismissCookieBanner();
 
     await this.selectProject(project.name);
-    await this.setWorkFlow(workflow);
+    await this.setWorkFlow(workflow, includeTrimPrimer, taxonName);
     await this.uploadSampleFiles(sampleFiles);
 
-    const sampleName = await this.getSampleName();
-    const inputs = await this.getRandomizedSampleInputs(sampleFiles, [sampleName]);
+    const sampleNames = await this.getSampleNames();
+    if (inputs === null) {
+      inputs = await this.getRandomizedSampleInputs(sampleFiles, sampleNames);
+    }
 
     // Continue
     await this.clickContinue();
@@ -523,12 +602,22 @@ export class UploadPage extends PageObject {
     await this.clickTermsAgreementCheckbox();
     await this.clickStartUploadButton();
     await this.waitForUploadComplete();
+    return inputs;
   }
   // #endregion Macro
 
   // #region Validation
 
   // #region Samples
+  public async isContinueButtonDisabled() {
+    return this.page.locator(CONTINUE_BUTTON).isDisabled();
+  }
+
+  public async isSampleRowDisabled(index= 0) {
+    const classAttribute = await this.page.locator(ROW_FILENAMES).nth(index).getAttribute("class");
+    return classAttribute.includes(" disabled-");
+
+  }
   public async validateSampleUploadConfirmation(confirmationText: string) {
     await this.page.locator(`text=${confirmationText}`).waitFor({state: "visible", timeout: 30000});
     const actualConfirmationText = await this.page.locator(UPLOAD_CONFIRMATION_TEXT).textContent();
@@ -641,6 +730,15 @@ export class UploadPage extends PageObject {
     }
   }
   // #endregion Review
+
+  public async isGoToProjectButtonEnabled() {
+    return this.page.locator(GO_TO_PROJECT_BUTTON).isEnabled();
+  }
+
+  public async waitForSampleSentToPipeline(sampleName: string) {
+    await this.page.locator(SENT_TO_PIPELINE(sampleName)).waitFor();
+    return this.page.locator(SENT_TO_PIPELINE(sampleName)).isVisible();
+  }
 
   // #endregion Validation
 

@@ -2,9 +2,11 @@ import { expect } from "@playwright/test";
 import { HeatmapPage } from "./heatmap-page";
 import { PageObject } from "./page-object";
 
+const UPLOAD_HEADER_LINK = "[data-testid='menu-item-upload']";
 const HEATMAP_BUTTON = "[class*='actions'] [role='listbox'] [class*='action']:not([data-testid])";
 const TAXON_HEATMAP = "[href*='/heatmap']";
 const SAMPLE_CHECKBOX_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleName}']/ancestor::div[@aria-rowindex]//div[contains(@class, 'checkbox')]`;
+const SAMPLE_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleName}']/ancestor::div[@aria-rowindex]`;
 const DELETE_BUTTON_TESTID = "bulk-delete-trigger";
 const DOWNLOAD_BUTTON_TESTID = "download-icon";
 const DOWNLOAD_TYPES_LOCATOR = "[class*='downloadTypeContainer'] [class*='name']";
@@ -89,10 +91,18 @@ export const RUN_TYPES = {
   "amr": "Antimicrobial Resistance",
 };
 
+const COLUMN_PLUS_BUTTON = "[data-testid='plus-circle']";
+const PLUS_OPTIONS = "[data-testid='plus-circle'] [role='option'] [data-testid*='dropdown']";
+const CHECKED_PLUS_OPTION = (option: string) => `//div[text()='${option}']/ancestor::div[@role='option']//div[@data-testid='checked']`;
+
 
 export class ProjectPage extends PageObject {
 
   // #region Navigate
+  public async navigateToMyData() {
+    await this.page.goto(`${process.env.BASEURL}/my_data`);
+  }
+
   public async navigateToSamples(projectId: number, workflow="", domain="public") {
     const workflowParam = workflow === "" ? workflow : `&workflow=${WORKFLOW_PARAM[workflow]}`;
     const url = `${process.env.BASEURL}/${domain}?projectId=${projectId}&currentTab=samples${workflowParam}`;
@@ -182,6 +192,18 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickUploadHeaderLink() {
+    await this.page.locator(UPLOAD_HEADER_LINK).click();
+  }
+
+  public async clickColumnPlusOptoin(option: string) {
+    await this.page.locator(PLUS_OPTIONS).getByText(option).first().click();
+  }
+
+  public async clickColumnPlusButton() {
+    await this.page.locator(COLUMN_PLUS_BUTTON).click();
+  }
+
   public async clickHostSearchResult(value: string) {
     await this.page.locator(HOST_SEARCH_RESULTS).getByText(value).first().click();
   }
@@ -247,8 +269,12 @@ export class ProjectPage extends PageObject {
     return new HeatmapPage(newPage);
   }
 
+  public async clickSample(sampleName: string) {
+    await this.page.locator(SAMPLE_BY_SAMPLE_NAME(sampleName)).first().click();
+  }
+
   public async clickSampleCheckbox(sampleName: string) {
-    await this.page.locator(SAMPLE_CHECKBOX_BY_SAMPLE_NAME(sampleName)).click();
+    await this.page.locator(SAMPLE_CHECKBOX_BY_SAMPLE_NAME(sampleName)).first().click();
   }
 
   public async clickDownloadType(downloadType: string) {
@@ -310,7 +336,33 @@ export class ProjectPage extends PageObject {
     await this.page.locator(ALERT_MESSAGE).first().waitFor({state: "visible"});
     return this.page.locator(ALERT_MESSAGE).allTextContents();
   }
+
+  public async getSamplesTable() {
+    return this.getTable(
+      "[class*='dataContainer'] [class*='Table__headerColumn'] [class*='label']",
+      "[class*='dataContainer'] [aria-label='row']",
+      "//div[@role='gridcell' and not(@aria-colindex='1') and not(position() = last())]",
+    );
+  }
   // #endregion Get
+
+  // #region Macro
+  public async isPlusColumnOptionChecked(option: string) {
+    const classAttribute = await this.page.locator(CHECKED_PLUS_OPTION(option)).first().getAttribute("class");
+    return classAttribute.includes("checked-");
+  }
+
+  public async selectPlusColumnOptions(options: Array<string>) {
+    await this.clickColumnPlusButton();
+    for (const columnName of options) {
+      const checked = await this.isPlusColumnOptionChecked(columnName);
+      if (!checked) {
+        await this.clickColumnPlusOptoin(columnName);
+      }
+    }
+    await this.pressEscape();
+    await this.pause(1);
+  }
 
   public async pickBackground(backgroundName = null) {
     let background = null;
@@ -335,5 +387,6 @@ export class ProjectPage extends PageObject {
   public async isBackgroundFilterVisible() {
     return this.page.locator(BACKGROUND_FILTER_LABEL).isVisible();
   }
+  // #endregion Macro
 
 }

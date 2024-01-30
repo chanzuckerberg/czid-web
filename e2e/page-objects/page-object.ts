@@ -23,6 +23,31 @@ export abstract class PageObject {
   public async getLocator(locatorString: string) {
     return this.page.locator(locatorString);
   }
+
+  public async getTable(headerColumnLocator: string, tableRowsLocator: string, tableDataLocator: string) {
+    await this.page.locator(headerColumnLocator).first().waitFor();
+    const tableHeaders = await this.page.locator(headerColumnLocator).allTextContents();
+    const tableRowElements = await this.page.locator(tableRowsLocator).all();
+    const tableRowsText = [];
+    for (const row of tableRowElements) {
+      const tdElements = await row.locator(tableDataLocator).all();
+      const tdText = [];
+      for (const td of tdElements) {
+        const tdInnerText = await td.innerText();
+        const innerTextArray = tdInnerText.split("\n");
+        const text = innerTextArray.length === 1 ? innerTextArray[0] : innerTextArray;
+        tdText.push(text);
+      }
+      const tdValues = {};
+      for (let i = 0; i < tableHeaders.length; i++) {
+        tdValues[tableHeaders[i]] = tdText[i];
+      }
+      if (Object.keys(tdValues).length > 0) {
+        tableRowsText.push(tdValues);
+      }
+    }
+    return tableRowsText;
+  }
   // #endregion Get
 
   // #region Click

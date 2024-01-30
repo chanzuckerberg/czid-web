@@ -43,10 +43,32 @@ const ACTION_BUTTONS_LOCATOR = "[class*='actionIcons'] button";
 const BLAST_SELECTION_MODAL_TESTID = "blast-selection-modal";
 const BLAST_SELECTION_OPTIONS = "[data-testid='blast-selection-modal'] [class*='optionText'] [class*='title']";
 const BLAST_TYPES = ["blastn", "blastx"];
+const PIPELINE_VERSION = "[data-testid='pipeline-version-select']";
 const REPORT_TABLE_ROWS = "[class*='reportTable'] [role='row']";
-const SAMPLE_DETAILS_BUTTON = "[data-testid='sample-details']";
 const PIPELINES_TAB = "[data-testid='pipelines']";
 const VIEW_PIPELINE_VISUALIZATION_LINK = "[class*='vizLink'] a";
+const REPORT_IN_PROGRESS = "[class*='reportStatus'][class*='inProgress']";
+const DOWNLOAD_ALL_BUTTON = "//button[text()='Download All']";
+
+// Sample Details
+const SAMPLE_DETAILS_BUTTON = "[data-testid='sample-details']";
+const SAMPLE_DETAILS_HOST_VALUE = "[data-testid='host-value']";
+
+// Is my consensus genome complete?
+// TODO: Add const
+
+// How good is the coverage?
+const REFERENCE_LENGTH = "//div[text()='Reference Length']/parent::div/following-sibling::div";
+const COVERAGE_DEPTH = "//div[text()='Coverage Depth']/parent::div/following-sibling::div";
+const COVERAGE_BREADTH = "//div[text()='Coverage Breadth']/parent::div/following-sibling::div";
+
+// Coverage Viz Histogram Hover Elements
+const HOVER_BASE_PAIR_RANGE = "//div[text()='Base Pair Range']/following-sibling::div";
+const HOVER_COVERAGE_DEPTH = "//div[text()='Coverage Depth']/following-sibling::div";
+const HOVER_COVERAGE_BREADTH = "//div[text()='Coverage Breadth']/following-sibling::div";
+
+// How good is the coverage?
+const CUSTOM_REFERENCE_DOWNLOAD = "[class*='metric'] [class*='downloadLink']";
 
 export class SamplesPage extends PageObject {
 
@@ -67,21 +89,44 @@ export class SamplesPage extends PageObject {
     // #endregion Navigate
 
     // #region Get
+    public async getHoverCoverageBreadth() {
+      return this.page.locator(HOVER_COVERAGE_BREADTH).textContent();
+    }
+
+    public async getHoverCoverageDepth() {
+      return this.page.locator(HOVER_COVERAGE_DEPTH).textContent();
+    }
+
+    public async getHoverBasePairRange() {
+      return this.page.locator(HOVER_BASE_PAIR_RANGE).textContent();
+    }
+
+    public async getCoverageBreadth() {
+      return this.page.locator(COVERAGE_BREADTH).textContent();
+    }
+
+    public async getCoverageDept() {
+      return this.page.locator(COVERAGE_DEPTH).textContent();
+    }
+
+    public async getReferenceLength() {
+      return this.page.locator(REFERENCE_LENGTH).textContent();
+    }
+
+    public async getPipelineVersion() {
+      return this.page.locator(PIPELINE_VERSION).textContent();
+    }
+
     public async getReportFilterTable() {
-      const tableHeaders = await this.page.locator("[class*='Table__headerColumn']").allTextContents();
-      const tableRowElements = await this.page.locator(REPORT_TABLE_ROWS).all();
-      const tableRowsText = [];
-      for (const row of tableRowElements) {
-        const td = await row.locator("[aria-colindex]").allTextContents();
-        const tdValues = {};
-        for (let i = 0; i < td.length; i++) {
-          tdValues[tableHeaders[i]] = td[i];
-        }
-        if (Object.keys(tdValues).length > 0) {
-          tableRowsText.push(tdValues);
-        }
-      }
-      return tableRowsText;
+      return this.getTable("[class*='Table__headerColumn']", REPORT_TABLE_ROWS, "[aria-colindex]");
+    }
+
+    public async getIsMyConsensusGenomeCompleteTable() {
+      return this.getTable(
+        "[class*='metricsTable'] [class*='Table__headerColumn']",
+        "[class*='metricsTable'] [class*='Table__row'][role='row']",
+        "[role*='gridcell']",
+      );
     }
 
     public async getWaitForReportError(sampleId: number) {
@@ -126,6 +171,9 @@ export class SamplesPage extends PageObject {
       let samples = await responseJson.samples;
       if (project !== null) {
         samples = await samples.filter(s => s.project_id === project.id);
+      }
+      if (sampleName !== null) {
+        samples = await samples.filter(s => s.name === sampleName);
       }
       return samples;
     }
@@ -269,9 +317,23 @@ export class SamplesPage extends PageObject {
       }
       return searchResultsArray;
     }
+
+    public async getSampleDetailsMetadataHost() {
+      return this.page.locator(SAMPLE_DETAILS_HOST_VALUE).textContent();
+    }
     // #endregion Get
 
     // #region Click
+    public async clickDownloadAllButton() {
+      await this.page.locator(DOWNLOAD_ALL_BUTTON).click();
+      return this.page.waitForEvent("download");
+    }
+
+    public async clickCustomReferenceDownload() {
+      await this.page.locator(CUSTOM_REFERENCE_DOWNLOAD).click();
+      return this.page.waitForEvent("download");
+    }
+
     public async clickViewPipelineVisualizationLink() {
       await this.page.locator(VIEW_PIPELINE_VISUALIZATION_LINK).click();
       return new PipelineVizPage(this.page);
@@ -418,6 +480,21 @@ export class SamplesPage extends PageObject {
     // #endregion Fill
 
     // #region Macro
+    public async waitForReportComplete(sampleId: number) {
+      await this.navigate(sampleId);
+      await this.pause(4);
+
+      const inProgress = this.page.locator(REPORT_IN_PROGRESS);
+      while(await inProgress.isVisible()) {
+        await this.navigate(sampleId);
+        await this.pause(10);
+      }
+    }
+
+    public async hoverOverCoverageVizHistogram() {
+      this.page.locator(COVERAGE_VIZ_HISTOGRAM_LOCATOR).hover();
+    }
+
     public async isTaxonVisible(name: string) {
       const reportTableRowIndexAttribute = "aria-rowindex";
       const taxonLocatorString = `${TAXONS}:text("${name}")`;
