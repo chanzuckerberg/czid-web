@@ -719,14 +719,14 @@ export class UploadPage extends PageObject {
     for (let i = 0; i < Object.keys(inputs).length; i++) {
       const sampleName = reviewSamples[i];
       const expectedInput = inputs[sampleName];
-      expect(expectedInput["sampleFile"]).toEqual(sampleName);
-      expect(expectedInput["inputFile"]).toEqual(await this.getReviewInputFiles(i));
-      expect(expectedInput["hostOrganism"]).toEqual(await this.getReviewHostOrganismValue(i));
-      expect(expectedInput["sampleTissueType"]).toEqual(await this.getReviewSampleTissueTypeValue(i));
-      expect(expectedInput["waterControl"]).toEqual(await this.getReviewWaterControlValue(i));
-      expect(expectedInput["nucleotideType"]).toEqual(await this.getReviewNucleotideTypeValue(i));
-      expect(expectedInput["collectionDate"]).toEqual(await this.getReviewCollectionDateValue(i));
-      expect(expectedInput["collectionLocation"]).toEqual(await this.getReviewCollectionLocationValue(i));
+      expect(sampleName).toEqual(expectedInput["sampleFile"]);
+      expect(await this.getReviewInputFiles(i)).toEqual(expectedInput["inputFile"]);
+      expect(await this.getReviewHostOrganismValue(i)).toEqual(expectedInput["hostOrganism"]);
+      expect(await this.getReviewSampleTissueTypeValue(i)).toEqual(expectedInput["sampleTissueType"]);
+      expect(await this.getReviewWaterControlValue(i)).toEqual(expectedInput["waterControl"]);
+      expect(await this.getReviewNucleotideTypeValue(i)).toEqual(expectedInput["nucleotideType"]);
+      expect(await this.getReviewCollectionDateValue(i)).toEqual(expectedInput["collectionDate"]);
+      expect(await this.getReviewCollectionLocationValue(i)).toContain(expectedInput["collectionLocation"]); // Full location string contains partial location string
     }
   }
   // #endregion Review
