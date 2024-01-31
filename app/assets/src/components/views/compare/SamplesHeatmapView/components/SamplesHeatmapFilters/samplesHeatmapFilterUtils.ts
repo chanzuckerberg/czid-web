@@ -12,7 +12,7 @@ export const valueToName = (
   if (options.length === 0) {
     return "";
   }
-  if (value === null || value === undefined) {
+  if (value === "" || value === null || value === undefined) {
     return "";
   }
   const matchingNames = options.filter(option => option.value === value);

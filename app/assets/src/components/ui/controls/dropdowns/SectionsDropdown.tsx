@@ -21,7 +21,7 @@ interface SectionsDropdownProps extends DropdownProps {
         disabled?: boolean;
         subtext?: string;
         text?: string;
-        tooltip?: string;
+        tooltip?: string | null;
         value?: string | number;
       }[];
     };

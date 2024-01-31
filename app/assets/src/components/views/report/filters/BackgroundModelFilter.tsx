@@ -4,9 +4,10 @@ import SectionsDropdown from "~ui/controls/dropdowns/SectionsDropdown";
 import SubtextDropdown, {
   Option,
 } from "~ui/controls/dropdowns/SubtextDropdown";
+import { BackgroundOptionType } from "../../samples/SamplesView/components/BulkDownloadModal/types";
 
 interface BackgroundModelFilterProps {
-  allBackgrounds?: RawBackground[];
+  allBackgrounds?: RawBackground[] | BackgroundOptionType[] | null;
   categorizeBackgrounds?: boolean;
   otherBackgrounds?: RawBackground[];
   ownedBackgrounds?: RawBackground[];
@@ -46,13 +47,15 @@ const BackgroundModelFilter = React.memo(
   }: BackgroundModelFilterProps) => {
     let disabled = props.disabled || false;
 
-    const formatBackgroundOptions = (backgrounds: RawBackground[]): Option[] =>
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      backgrounds?.map(background => {
+    const formatBackgroundOptions = (
+      backgrounds?: RawBackground[] | BackgroundOptionType[] | null,
+    ): Option[] => {
+      if (!backgrounds) return [] as Option[];
+      return backgrounds.map(background => {
         const disabledOption =
           !enableMassNormalizedBackgrounds && background.mass_normalized;
         return {
-          text: background.name || background.text,
+          text: background.name || background.text || "",
           subtext: background.mass_normalized
             ? "Normalized by input mass"
             : "Standard",
@@ -63,8 +66,8 @@ const BackgroundModelFilter = React.memo(
             : null,
         };
       });
+    };
 
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     let backgroundOptions: Option[] = formatBackgroundOptions(allBackgrounds);
     if (backgroundOptions.length === 0) {
       backgroundOptions = [
@@ -77,13 +80,11 @@ const BackgroundModelFilter = React.memo(
       const backgroundSections = {
         MY_BACKGROUNDS: {
           displayName: "My Backgrounds",
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           options: formatBackgroundOptions(ownedBackgrounds),
           emptySectionMessage: "You haven't created any backgrounds yet.",
         },
         OTHER_BACKGROUNDS: {
           displayName: "Other Backgrounds",
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
           options: formatBackgroundOptions(otherBackgrounds),
         },
       };

@@ -10,6 +10,7 @@ import {
   HOST_GENOME_NAMES,
   OPTIONAL_FIELDS,
 } from "../../../../../../BulkDownloadListView/constants";
+import { SelectedFieldsType } from "../../types";
 import cs from "./bulk_download_modal_footer.scss";
 import { BulkDownloadWarning } from "./components/BulkDownloadWarning";
 
@@ -57,7 +58,7 @@ interface BulkDownloadModalFooterProps {
     hostGenome: string;
   }[];
   // The selected fields of the currently selected download type.
-  selectedFields?: Record<string, string>;
+  selectedFields?: SelectedFieldsType;
   waitingForCreate?: boolean;
   createStatus?: string | null;
   createError?: string | null;

@@ -32,6 +32,12 @@ import { Entry } from "~/interface/samplesView";
 import { Background, BulkDownloadType } from "~/interface/shared";
 import { BulkDownloadModalFooter } from "./components/BulkDownloadModalFooter";
 import { BulkDownloadModalOptions } from "./components/BulkDownloadModalOptions";
+import {
+  BackgroundOptionType,
+  MetricsOptionType,
+  SelectedFieldsType,
+  SelectedFieldValueType,
+} from "./types";
 
 const DEFAULT_CREATION_ERROR =
   "An unknown error occurred. Please contact us for help.";
@@ -109,9 +115,7 @@ export const BulkDownloadModal = ({
   >(null);
   // We save the fields for ALL download types.
   // If the user clicks between different download types, all their selections are saved.
-  const [selectedFields, setSelectedFields] = useState<Record<string, string>>(
-    {},
-  );
+  const [selectedFields, setSelectedFields] = useState<SelectedFieldsType>({});
   // For each selected field, we also save a human-readable "display name" for that field.
   // While the user is in the choose step, we store a field's value and display name separately.
   // This is to be compatible with <Dropdowns>, which only accept a string or number as the value
@@ -130,10 +134,10 @@ export const BulkDownloadModal = ({
   const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [backgroundOptions, setBackgroundOptions] = useState<
-    $TSFixMeUnknown[] | null
+    BackgroundOptionType[] | null
   >(null);
   const [metricsOptions, setMetricsOptions] = useState<
-    $TSFixMeUnknown[] | null
+    MetricsOptionType[] | null
   >(null);
   const [
     areAllRequestedObjectsUploadedByCurrentUser,
@@ -167,7 +171,7 @@ export const BulkDownloadModal = ({
         });
   }
 
-  async function fetchBackgrounds() {
+  async function fetchBackgrounds(): Promise<BackgroundOptionType[]> {
     const { backgrounds } = await getBackgrounds();
     if (!backgrounds) {
       return [];
@@ -215,7 +219,7 @@ export const BulkDownloadModal = ({
     entityIds?: Set<number>;
     workflowEntity?: string;
     workflow: WorkflowType;
-    selectedFields: Record<string, string>;
+    selectedFields: SelectedFieldsType;
     selectedFieldsDisplay: Record<string, $TSFixMeUnknown>;
   }): Promise<void> {
     let newSelectedFields = JSON.parse(JSON.stringify(selectedFields));
@@ -384,7 +388,7 @@ export const BulkDownloadModal = ({
 
   const handleHeatmapLink = () => {
     const metricList = selectedFields?.["biom_format"]?.["filter_by"];
-    const metric = selectedFields?.["biom_format"]?.["metric"];
+    const metric = selectedFields?.["biom_format"]?.["metric"] as string;
     const sortMetric = METRIC_OPTIONS.includes(metric); // check heatmap is sortable on selected metric
     const presets: string[] = [];
 
@@ -414,12 +418,13 @@ export const BulkDownloadModal = ({
     openUrlInNewTab(`/visualizations/heatmap?${params}`);
   };
 
-  const handleFieldSelect = (
-    downloadType: string,
-    fieldType: string,
-    value: $TSFixMe,
-    displayName: string,
+  const handleSelectField = (
+    downloadType?: string,
+    fieldType?: string,
+    value?: SelectedFieldValueType,
+    displayName?: string,
   ) => {
+    if (!downloadType || !fieldType) return;
     setSelectedFields(prevSelectedFields => {
       const newSelectedFields = JSON.parse(JSON.stringify(prevSelectedFields));
       // If the value is undefined, delete it from selectedFields.
@@ -487,23 +492,26 @@ export const BulkDownloadModal = ({
         </div>
         <div className={cs.options}>
           <BulkDownloadModalOptions
-            downloadTypes={bulkDownloadTypes}
-            validObjectIds={validObjectIds}
-            backgroundOptions={backgroundOptions}
-            metricsOptions={metricsOptions}
-            allObjectsUploadedByCurrentUser={
+            areAllObjectsUploadedByCurrentUser={
               areAllRequestedObjectsUploadedByCurrentUser
             }
-            onFieldSelect={handleFieldSelect}
-            selectedFields={selectedFields}
-            selectedDownloadTypeName={selectedDownloadTypeName}
-            onSelect={handleSelectDownloadType}
-            handleHeatmapLink={handleHeatmapLink}
+            backgroundOptions={backgroundOptions}
+            downloadTypes={bulkDownloadTypes}
             enableMassNormalizedBackgrounds={
               shouldEnableMassNormalizedBackgrounds
             }
+            handleHeatmapLink={handleHeatmapLink}
+            isUserCollaboratorOnAllRequestedSamples={
+              isUserCollaboratorOnAllRequestedSamples
+            }
+            metricsOptions={metricsOptions}
             objectDownloaded={objectDownloaded}
-            userIsCollaborator={isUserCollaboratorOnAllRequestedSamples}
+            onSelectDownloadType={handleSelectDownloadType}
+            onSelectField={handleSelectField}
+            selectedFields={selectedFields}
+            selectedDownloadTypeName={selectedDownloadTypeName}
+            validObjectIds={validObjectIds}
+            workflow={workflow}
           />
         </div>
         <div className={cs.footer}>

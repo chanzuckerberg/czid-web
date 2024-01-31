@@ -31,7 +31,7 @@ export type BulkDownloadType = {
   description?: string;
   displayName?: string;
   executionType?: string;
-  fields?: BulkDownloadTypeField[];
+  fields?: BulkDownloadFieldType[];
   fileTypeDisplay?: string;
   type?: string;
   workflows?: string[];
@@ -42,18 +42,19 @@ export type BulkDownloadType = {
   required_allowed_feature?: string;
 };
 
-export type BulkDownloadTypeField = {
+export type BulkDownloadFieldType = {
   default_value?: {
     value?: string;
     display_name?: string;
   };
   display_name?: string;
   type?: string;
-  options: {
-    value: string;
-    display_name: string;
-  }[];
+  options: BulkDownloadFieldOptionType[];
 };
+
+export type BulkDownloadFieldOptionType =
+  | string
+  | { value: string; display_name: string };
 
 export interface ConsensusGenomeData {
   accessionData?: AccessionData;

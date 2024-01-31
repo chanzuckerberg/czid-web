@@ -7,7 +7,7 @@ import { WorkflowConfigType, WorkflowType } from "~/components/utils/workflows";
 
 // Stores information about conditional fields for bulk downloads.
 export const CONDITIONAL_FIELDS = [
-  // Note: This first field is referenced directly in renderOption, as
+  // Note: This first field is referenced directly in BulkDownloadDataField, as
   // it needs to display a placeholder component. Be careful when modifying.
   {
     field: "file_format",

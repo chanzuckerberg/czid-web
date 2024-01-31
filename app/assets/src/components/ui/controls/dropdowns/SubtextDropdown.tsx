@@ -21,7 +21,7 @@ export interface Option {
   text: string;
   subtext?: string;
   disabled?: boolean;
-  tooltip?: string;
+  tooltip?: string | null;
 }
 
 class SubtextDropdown extends React.Component<SubtextDropdownProps> {

@@ -94,6 +94,7 @@ const ThresholdFilter = ({
             ) {
               return (
                 <MenuOptionWithDisabledTooltip
+                  key={option.value}
                   option={option}
                   optionProps={optionProps}
                   tooltipDisplay={
