@@ -80,4 +80,46 @@ RSpec.describe IdentityController, type: :controller do
       end
     end
   end
+
+  describe "GET #impersonate" do
+    context "when service_identity is provided" do
+      before do
+        @owner_project = create(:project, creator_id: @joe.id)
+        @service_identity = "czid-workflows"
+        @token = controller.send(:generate_token, @joe.id.to_s, {}, @service_identity)["token"]
+        request.headers["Authorization"] = "Bearer #{@token}"
+      end
+
+      it "returns an enriched token with project roles & the service identity" do
+        get :impersonate, params: { user_id: @joe.id }
+        json_response = JSON.parse(response.body)
+
+        enriched_token = json_response["token"]
+        decrypted_enriched_token = controller.send(:decrypt_token, enriched_token)
+        project_roles = decrypted_enriched_token["projects"]
+        service_identity_payload = decrypted_enriched_token["service_identity"]
+
+        expect(response).to have_http_status(:success)
+
+        expect(decrypted_enriched_token["sub"]).to eq(@joe.id.to_s)
+        expect(Time.zone.at(decrypted_enriched_token["exp"].to_i)).to_not be_nil
+        expect(project_roles[@owner_project.id.to_s]).to eq(["owner"])
+        expect(service_identity_payload).to eq(@service_identity) # service identity is preserved
+      end
+    end
+
+    context "when service_identity is missing" do
+      before do
+        @service_identity = ""
+        @token = controller.send(:generate_token, @joe.id.to_s, {}, @service_identity)["token"]
+        request.headers["Authorization"] = "Bearer #{@token}"
+      end
+
+      it "raises a InsufficientPrivilegesError" do
+        expect do
+          get :impersonate, params: { user_id: @joe.id }
+        end.to raise_error(IdentityController::InsufficientPrivilegesError)
+      end
+    end
+  end
 end

@@ -37,6 +37,18 @@ class IdentityController < ApplicationController
     end
   end
 
+  class InsufficientPrivilegesError < StandardError
+    def initialize
+      super("Error: Insufficient privileges to perform this action")
+    end
+  end
+
+  class UserNotFoundError < StandardError
+    def initialize
+      super("Error: User not found")
+    end
+  end
+
   def identify
     token = generate_token(current_user.id)
     expires_at = Time.zone.at(token["expires_at"])
@@ -50,11 +62,28 @@ class IdentityController < ApplicationController
   end
 
   def enrich_token
-    user_id = validate_token
+    user_id, = validate_token
 
     # Enrich the token with project roles & return it as payload
     project_roles = user_project_access(user_id)
     enriched_token = generate_token(user_id, project_roles)
+    render json: {
+      token: enriched_token["token"],
+    }, status: :ok
+  end
+
+  def impersonate
+    _, decrypted_token = validate_token
+    permitted_params = params.permit(:user_id)
+    user_id = permitted_params[:user_id]&.to_i
+
+    service_identity = decrypted_token["service_identity"]
+    raise InsufficientPrivilegesError if service_identity.blank?
+    raise UserNotFoundError unless User.exists?(user_id)
+
+    # Enrich the token with project roles & the same service identity & return it as payload
+    project_roles = user_project_access(user_id)
+    enriched_token = generate_token(user_id, project_roles, service_identity)
     render json: {
       token: enriched_token["token"],
     }, status: :ok
@@ -80,7 +109,7 @@ class IdentityController < ApplicationController
       raise ExpiredTokenReceivedError
     end
 
-    user_id
+    [user_id, decrypted_token]
   end
 
   def decrypt_token(token)
@@ -97,11 +126,12 @@ class IdentityController < ApplicationController
     JSON.parse(stdout)
   end
 
-  def generate_token(user_id, project_claims = nil)
+  def generate_token(user_id, project_claims = nil, service_identity = nil)
     # Verify the user_id provided is valid before generating a token
     user_id = User.find(user_id).id.to_s
     cmd = "python3 #{TOKEN_AUTH_SERVICE} --create_token --userid #{user_id}"
     cmd += " --project-claims '#{project_claims.to_json}'" if project_claims.present?
+    cmd += " --service-identity #{service_identity}" if service_identity.present?
     stdout, stderr, status = Open3.capture3(cmd)
 
     unless status.success?

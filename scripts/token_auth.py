@@ -54,10 +54,16 @@ def get_token_claims(private_key: JWK, token: str) -> dict:
     return decoded_jwt.claims
 
 
-def create_token(private_key: JWK, userid: int, project_claims: ProjectRole = None, expiration: int = 3600) -> str:
+def create_token(
+    private_key: JWK,
+    userid: int,
+    project_claims: ProjectRole = None,
+    service_identity: str = None,
+    expiration: int = 3600,
+) -> str:
     parsed_project_claims = json.loads(project_claims) if project_claims else None
 
-    validate_claims(userid, parsed_project_claims)
+    validate_claims(userid, parsed_project_claims, service_identity)
 
     # Wrap the JWT in a JWE encrypted with alg ECDH-ES and enc A256CBC-HS512.
     expires_at = int(time.time()) + expiration
@@ -67,6 +73,7 @@ def create_token(private_key: JWK, userid: int, project_claims: ProjectRole = No
         "nbf": int(time.time()),
         "exp": expires_at,
         "projects": parsed_project_claims,
+        "service_identity": service_identity,
     }
 
     jwt_headers = {
@@ -91,12 +98,15 @@ def create_token(private_key: JWK, userid: int, project_claims: ProjectRole = No
 
 
 # TODO: Plug in a library to do runtime type checking, so we don't have to manualy do it.
-def validate_claims(user_id: int, projects: ProjectRole):
+def validate_claims(user_id: int, projects: ProjectRole, service_identity: str):
     if user_id:
         int(user_id)  # assert user_id is a valid integer
 
     if projects:
         validate_projects(projects)
+
+    if service_identity and not isinstance(service_identity, str):
+        raise ValueError("service_identity must be a string")
 
 
 def validate_projects(projects: ProjectRole):
@@ -128,6 +138,7 @@ if __name__ == "__main__":
     parser.add_argument("--userid", type=int)
     parser.add_argument("--token", type=str)
     parser.add_argument("--project-claims", type=str)
+    parser.add_argument("--service-identity", type=str)
 
     args = parser.parse_args()
 
@@ -136,6 +147,6 @@ if __name__ == "__main__":
         key = jwk.JWK.from_pem(pemfile.read())
 
     if args.create_token:
-        print(create_token(key, args.userid, args.project_claims, args.expiration))
+        print(create_token(key, args.userid, args.project_claims, args.service_identity, args.expiration))
     elif args.decrypt_token:
         print(get_token_claims(key, args.token))
