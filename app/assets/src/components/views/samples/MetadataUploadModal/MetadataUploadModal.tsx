@@ -165,7 +165,7 @@ class MetadataUploadModal extends React.Component<
         open
         tall
         wide
-        onClose={() => this.props.onClose}
+        onClose={this.props.onClose}
         className={cs.metadataUploadModal}
       >
         <Wizard onComplete={this.handleComplete}>{this.getPages()}</Wizard>
