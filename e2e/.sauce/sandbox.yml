@@ -11,14 +11,14 @@ sauce:
     tags:
       - e2e
       - czid
-      - staging
+      - sandbox
     build: COMMIT $CI_COMMIT_SHORT_SHA
   # comment out when running locally  
   # tunnel:
   #   name: czid-github-sauce-connect 
 playwright:
   version: package.json 
-  configFile: ./staging.config.ts 
+  configFile: ./sandbox.config.ts 
 rootDir: ./
 env:
   CZID_USERNAME: $CZID_USERNAME
