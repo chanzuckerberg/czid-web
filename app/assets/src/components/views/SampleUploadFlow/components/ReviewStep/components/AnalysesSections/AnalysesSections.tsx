@@ -86,7 +86,7 @@ const AnalysesSections = ({
 
         const indexDate = pipelineVersions?.[project.id][NCBI_INDEX];
         const showIndexDate =
-          AnalysisSectionsConfig[workflow] &&
+          AnalysisSectionsConfig[workflow].showIndexVersion &&
           allowedFeatures.includes(NCBI_COMPRESSED_INDEX);
 
         return (
