@@ -14,6 +14,8 @@ const TAXON_NAMES = "[data-testid='row-label']";
 const CELLS = "rect[class*='cell']";
 const HOVER_HIGHLIGHTED_METIC = "//div[contains(@class, 'value')]/b/ancestor::div[contains(@class, 'dataRow')]/div";
 const TOGGLE_SAMPLE_NAMES = "button[class*='toggleNames']";
+const APPCUES_CONTAINER = "[class*='appcues-tooltip-container']";
+const APPCUES_GOT_IT_BUTTON = "[class*='appcues-button-success']";
 
 export class HeatmapPage extends PageObject {
 
@@ -32,6 +34,8 @@ export class HeatmapPage extends PageObject {
   }
 
   public async clickSave() {
+    await this.pause(1);
+    await this.page.locator(SAVE_BUTTON).hover();
     await this.page.locator(SAVE_BUTTON).click();
   }
 
@@ -107,6 +111,15 @@ export class HeatmapPage extends PageObject {
   // #endregion Get
 
   // #region Macro
+  public async dismissAppcuesContainerIfPresent() {
+    await this.page.locator(APPCUES_CONTAINER).waitFor({timeout: 5000});
+    const appcuesContainer = await this.page.locator(APPCUES_CONTAINER).isVisible();
+    if (appcuesContainer) {
+      const iframe = this.page.frameLocator(APPCUES_CONTAINER);
+      await iframe.locator(APPCUES_GOT_IT_BUTTON).click();
+    }
+  }
+
   public async setTaxonLevel(option: string) {
     await this.setViewOption("Taxon Level", option);
   }

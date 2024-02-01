@@ -13,13 +13,15 @@ import {
 import { expect } from "@playwright/test";
 import { PageObject } from "./page-object";
 
-const REF_FILENAME = "consensus_TEST_SC2.fa";
+export const REF_FILENAME = "consensus_TEST_SC2.fa";
 export const TRIM_PRIMER_FILENAME = "Primer_K.bed";
 const REF_FILE = (refFilename: string) => `./fixtures/reference_sequences/${refFilename}`;
 const TRIM_PRIMER_FILE = (trimPrimerFilename: string) => `./fixtures/trim_primers/${trimPrimerFilename}`;
 const METADATA_FILE_NAME = "metadata_template.csv";
 
 // Upload Samples
+const BASESPACE_BUTTON = "[data-testid='basespace']";
+const CONNECT_TO_BASESPACE_BUTTON = "//button[text()='Connect to Basespace']";
 const CONTINUE_BUTTON = "//button[text()='Continue']";
 const ROW_FILENAMES = "[aria-label='row'] [class*='fileName'] ";
 const FILE_ERROR_INFO_ICON = "[class*='fileName'] svg";
@@ -106,6 +108,14 @@ export class UploadPage extends PageObject {
   // #region Click
 
   // #region Samples
+  public async clickConnectToBasespaceButton() {
+    await this.page.locator(CONNECT_TO_BASESPACE_BUTTON).click();
+  }
+
+  public async clickBasespaceButton() {
+    await this.page.locator(BASESPACE_BUTTON).click();
+  }
+
   public async clickSelectProject() {
     await this.page
       .getByText("Select project", { exact: true })
@@ -556,7 +566,11 @@ export class UploadPage extends PageObject {
 
   public async setUploadTaxonFilter(filterName: string) {
     await this.clickUploadTaxonFilter();
-    await this.page.locator(UPLOAD_TAXON_FILTER_INPUT).fill(filterName);
+    let fillValue = filterName;
+    if (filterName.includes("(genus)") || filterName.includes("(species)")) {
+      fillValue = filterName.split("(")[0].trim();
+    }
+    await this.page.locator(UPLOAD_TAXON_FILTER_INPUT).fill(fillValue);
     await this.page.getByText(filterName).first().click();
   }
 

@@ -9,9 +9,11 @@ const CLOSE_ICON = "[class*='closeIcon']";
 const BACKGROUND_VALUE = "[data-testid='background-value']";
 const INCLUDE_SAMPLE_METADATA = "//span[text()='Include sample metadata in this table']/preceding-sibling::input";
 const METRIC_VALUE = "[data-testid='metric-value']";
-const DOWNLOAD_TYPE_METADATA = (downloadId: string) => `[id='${downloadId}'][data-testid='download-details-link']`;
+const DOWNLOAD_DETAILS = (downloadId: string) => `[id='${downloadId}'][data-testid='download-details-link']`;
 const DOWNLOAD_COMPLETE_BY_DOWNLOADID = (downloadId: string) => `//div[contains(@data-testid, 'complete')]/parent::div/following-sibling::div/span[@id='${downloadId}']`;
 const DOWNLOAD_FILE_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}' and text()='Download File']`;
+const DOWNLOAD_DATE_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}']/ancestor::div[contains(@class, '__Table__row tableRow-')]//div[@data-testid='date-created']`;
+const DOWNLOAD_NAME_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}']/ancestor::div[contains(@class, '__Table__row tableRow-')]//div[@data-testid='download-name']`;
 const DOWNLOAD_STATUS_BY_INDEX = (rowIndex: string) => `(//*[contains(@class, 'downloadStatus')])[${rowIndex}]`;
 const BULK_DOWNLOAD_METRICS = {
   "mngs": "short-read-mngs",
@@ -41,8 +43,8 @@ export class DownloadsPage extends PageObject {
   // #endregion Api
 
   // #region Click
-  public async clickDownloadTypeDetails(downloadId: number) {
-    const locatorString = DOWNLOAD_TYPE_METADATA(downloadId.toString());
+  public async clickDownloadDetails(downloadId: number) {
+    const locatorString = DOWNLOAD_DETAILS(downloadId.toString());
     await this.page.locator(locatorString).waitFor();
     await this.page.locator(locatorString).click();
   }
@@ -68,6 +70,14 @@ export class DownloadsPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getDownloadName(downloadId: string) {
+    return this.page.locator(DOWNLOAD_NAME_BY_DOWNLOADID(downloadId)).textContent();
+  }
+
+  public async getDownloadDate(downloadId: string) {
+    return this.page.locator(DOWNLOAD_DATE_BY_DOWNLOADID(downloadId)).textContent();
+  }
+
   public async getMicrobiomeDownloadMetrics() {
     return [
       { text: "NT rPM", value: "NT.rpm" },
@@ -86,7 +96,7 @@ export class DownloadsPage extends PageObject {
   }
 
   public async getDownloadTypeCount(downloadType: string) {
-    const downloadTypes = await this.page.locator(DOWNLOAD_TYPE_METADATA(downloadType)).all();
+    const downloadTypes = await this.page.locator(DOWNLOAD_DETAILS(downloadType)).all();
     return downloadTypes.length;
   }
 
@@ -117,6 +127,8 @@ export class DownloadsPage extends PageObject {
     }
     return complete;
   }
+
+
   // #endregion Macro
 
   public async downloadSmokeTest(workflow: string, downloadType: string, timeout: number) {
@@ -133,15 +145,8 @@ export class DownloadsPage extends PageObject {
       await projectPage.clickHostSearchResult("Human");
     }
 
-    const completedRowIndexes = await projectPage.getCompletedRowIndexes();
-    const maxFiles = 2;
-    const samplesToDownload = completedRowIndexes.length > maxFiles ? Math.random() * maxFiles : completedRowIndexes.length;
-    for (let i = 0; i < samplesToDownload; i++) {
-      const rowIndex = completedRowIndexes[i];
-
-      const sampleName = await projectPage.getSampleNameFromRow(rowIndex);
-      await projectPage.clickSampleCheckbox(sampleName);
-    }
+    const numberOfSamplesToDownload = Math.floor(Math.random() * 2) + 1;
+    await projectPage.selectCompletedSamples(numberOfSamplesToDownload);
     // #endregion Choose samples
 
     // #region Start the sample download
@@ -224,12 +229,12 @@ export class DownloadsPage extends PageObject {
 
     // #region Validate additional download type information
     if (workflow === "mngs" && downloadType === "Sample Taxon Reports") {
-      await this.clickDownloadTypeDetails(downloadId);
+      await this.clickDownloadDetails(downloadId);
       expect(await this.getBackgroundValue()).toEqual(background.name);
       await this.clickCloseIcon();
     }
     else if (downloadType === "Combined Sample Taxon Results") {
-      await this.clickDownloadTypeDetails(downloadId);
+      await this.clickDownloadDetails(downloadId);
       expect(await this.getMetricValue()).toEqual(bulkDownloadMetric.text);
       await this.clickCloseIcon();
     }

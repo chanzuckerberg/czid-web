@@ -121,11 +121,12 @@ export class ProjectPage extends PageObject {
   }
 
   public async getOrCreateProject(projectName: string) {
+    let project = null;
     const userName = process.env.CZID_USERNAME.split("@")[0];
     const userProjectName = `${userName}_${projectName}`;
     const projects = await this.getProjects(userProjectName);
-    let project = null;
-    if (projects.length < 1) {
+    project = await projects.filter(p => p.name === userProjectName)[0];
+    if (project === null || project === undefined) {
       const payload = {
         "project":{
           "name": userProjectName,
@@ -139,8 +140,6 @@ export class ProjectPage extends PageObject {
       project = await this.waitForProject(userProjectName);
       await this.pause(1);
       await this.page.reload();
-    } else {
-      project = await projects.filter(p => p.name === userProjectName)[0];
     }
     return project;
   }
@@ -266,7 +265,10 @@ export class ProjectPage extends PageObject {
       await this.page.locator(TAXON_HEATMAP).click(),
     ]);
     await newPage.waitForLoadState();
-    return new HeatmapPage(newPage);
+    const heatmapPage = new HeatmapPage(newPage);
+
+    await this.pause(3);
+    return heatmapPage;
   }
 
   public async clickSample(sampleName: string) {
@@ -328,7 +330,6 @@ export class ProjectPage extends PageObject {
 
   public async getSampleNameFromRow(index: number) {
     const row = this.page.locator(SAMPLE_NAME_BY_INDEX(index));
-    await row.scrollIntoViewIfNeeded();
     return row.textContent();
   }
 
@@ -344,9 +345,31 @@ export class ProjectPage extends PageObject {
       "//div[@role='gridcell' and not(@aria-colindex='1') and not(position() = last())]",
     );
   }
+
+  public async getSamplesTableOrderedByName() {
+    const samplesTable = await this.getSamplesTable();
+    const samplesTableOrderByName = {};
+    for (const row of samplesTable) {
+      samplesTableOrderByName[row["Sample"][0]] = row;
+    }
+    return samplesTableOrderByName;
+  }
   // #endregion Get
 
   // #region Macro
+  public async selectCompletedSamples(numberToSelect: number) {
+    const selectedSampleNames = [];
+    const completedRowIndexes = await this.getCompletedRowIndexes();
+    for (let i = 0; i < numberToSelect; i++) {
+      const rowIndex = completedRowIndexes[i];
+
+      const sampleName = await this.getSampleNameFromRow(rowIndex);
+      await this.clickSampleCheckbox(sampleName);
+      selectedSampleNames.push(sampleName);
+    }
+    return selectedSampleNames;
+  }
+
   public async isPlusColumnOptionChecked(option: string) {
     const classAttribute = await this.page.locator(CHECKED_PLUS_OPTION(option)).first().getAttribute("class");
     return classAttribute.includes("checked-");

@@ -1,5 +1,4 @@
 # This file instructs saucectl to not package any files mentioned here.
-node_modules/
 .git/
 .github/
 .DS_Store

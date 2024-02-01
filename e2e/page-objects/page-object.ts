@@ -26,6 +26,7 @@ export abstract class PageObject {
 
   public async getTable(headerColumnLocator: string, tableRowsLocator: string, tableDataLocator: string) {
     await this.page.locator(headerColumnLocator).first().waitFor();
+    await this.pause(1);
     const tableHeaders = await this.page.locator(headerColumnLocator).allTextContents();
     const tableRowElements = await this.page.locator(tableRowsLocator).all();
     const tableRowsText = [];
@@ -70,16 +71,16 @@ export abstract class PageObject {
     const scrollAmount = direction === "up" ? -500 : 500;
 
     while ((Date.now() - startTime) < timeout) {
-      await this.page.locator(rowsLocator).last().hover();
-      await this.page.locator(rowsLocator).last().focus();
-
-      const lastRow = await this.page.locator(rowsLocator).last().getAttribute(indexAttribute);
       const element = this.page.locator(locator).first();
       const isElementVisible = await element.isVisible();
 
       if (isElementVisible) {
         break;
       }
+      await this.page.locator(rowsLocator).last().hover();
+      await this.page.locator(rowsLocator).last().focus();
+
+      const lastRow = await this.page.locator(rowsLocator).last().getAttribute(indexAttribute);
 
       await this.page.mouse.wheel(0, scrollAmount);
 

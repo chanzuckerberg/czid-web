@@ -37,6 +37,8 @@ test.describe("Sample Heatmap", () => {
     await projectPage.clickHeatmapButton();
     heatmapPage = await projectPage.clickTaxonHeatmap();
     // #endregion Create a Taxon Heatmap
+
+    await heatmapPage.dismissAppcuesContainerIfPresent();
   });
 
   /**

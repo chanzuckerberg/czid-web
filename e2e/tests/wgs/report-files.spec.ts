@@ -3,7 +3,7 @@ import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sam
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { UploadPage, TRIM_PRIMER_FILENAME } from "@e2e/page-objects/upload-page";
 import { test, expect } from "@playwright/test";
-import AdmZip from "adm-zip";
+import AdmZip = require("adm-zip");
 import { ProjectPage } from "../../page-objects/project-page";
 
 let ranPipeline = false;
