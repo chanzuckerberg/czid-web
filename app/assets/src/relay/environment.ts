@@ -1,14 +1,10 @@
 import type { FetchFunction, IEnvironment } from "relay-runtime";
-import {
-  Environment,
-  Network,
-  Observable,
-  RecordSource,
-  Store,
-} from "relay-runtime";
+import { Environment, Network, RecordSource, Store } from "relay-runtime";
+import { getValidIdentity } from "./identify";
 
 const generateFetchFn = (shouldReadFromNextGen: boolean): FetchFunction => {
-  return (params, variables) => {
+  return async (params, variables) => {
+    await getValidIdentity();
     const response = fetch("/graphqlfed", {
       method: "POST",
       headers: [
@@ -22,7 +18,7 @@ const generateFetchFn = (shouldReadFromNextGen: boolean): FetchFunction => {
       }),
     });
 
-    return Observable.from(response.then(data => data.json()));
+    return response.then(data => data.json());
   };
 };
 

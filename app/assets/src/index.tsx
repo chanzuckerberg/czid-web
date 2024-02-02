@@ -8,7 +8,11 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import "semantic-ui-css/semantic.min.css";
 import "url-search-params-polyfill";
-import { UserContext } from "~/components/common/UserContext";
+import {
+  useAllowedFeatures,
+  UserContext,
+} from "~/components/common/UserContext";
+import { SHOULD_READ_FROM_NEXTGEN } from "./components/utils/features";
 import { initialGlobalContextState } from "./globalContext/initialState";
 import { GlobalContext, globalContextReducer } from "./globalContext/reducer";
 import UserContextType from "./interface/allowedFeatures";
@@ -68,10 +72,14 @@ const ReactComponentWithGlobalContext = ({
     globalContextReducer,
     initialGlobalContextState,
   );
+  const allowedFeatures = useAllowedFeatures();
+  const shouldReadFromNextGen = allowedFeatures.includes(
+    SHOULD_READ_FROM_NEXTGEN,
+  );
   return (
     <Sentry.ErrorBoundary fallback={"An error has occured"}>
       <BrowserRouter>
-        <RelayEnvironment>
+        <RelayEnvironment shouldReadFromNextGen={shouldReadFromNextGen}>
           <UserContext.Provider value={userContext}>
             <GlobalContext.Provider
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
