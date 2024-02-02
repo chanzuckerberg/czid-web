@@ -1,4 +1,3 @@
-import BulkDownloadDetailsMode, { BDDProps } from "./BulkDownloadDetailsMode";
+import { BDDProps, BulkDownloadDetailsMode } from "./BulkDownloadDetailsMode";
 
-export { BDDProps };
-export default BulkDownloadDetailsMode;
+export { BulkDownloadDetailsMode, BDDProps };

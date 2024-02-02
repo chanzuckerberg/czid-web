@@ -1,35 +1,37 @@
 import { get } from "lodash/fp";
 import React from "react";
+import cs from "~/components/common/DetailsSidebar/BulkDownloadDetailsMode/bulk_download_details_mode.scss";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import { Accordion } from "~/components/layout";
 import { BulkDownloadDetails, DownloadType } from "~/interface/shared";
-import cs from "./bulk_download_details_mode.scss";
 
 interface DetailsTabProps {
-  bulkDownload: BulkDownloadDetails;
-  downloadType: DownloadType;
+  bulkDownload?: BulkDownloadDetails;
+  downloadType?: DownloadType;
 }
 
-const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
+export const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
   const fields: { label: string; value: number | string }[] = [];
 
-  const allRuns = bulkDownload.pipeline_runs.concat(bulkDownload.workflow_runs);
+  const allRuns = bulkDownload?.pipeline_runs.concat(
+    bulkDownload?.workflow_runs,
+  );
 
-  if (bulkDownload.num_samples) {
+  if (bulkDownload?.num_samples) {
     fields.push({
       label: "Samples",
-      value: bulkDownload.num_samples,
+      value: bulkDownload?.num_samples,
     });
   }
 
-  if (downloadType.file_type_display) {
+  if (downloadType?.file_type_display) {
     fields.push({
       label: "File Format",
       value: downloadType.file_type_display,
     });
   }
 
-  downloadType.fields &&
+  downloadType?.fields &&
     downloadType.fields.forEach(field => {
       const fieldValue = get(
         ["params", field.type, "displayName"],
@@ -53,12 +55,12 @@ const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
         open
         data-testid="bulk-download-details"
       >
-        {bulkDownload.description && (
+        {bulkDownload?.description && (
           <div className={cs.description}>{bulkDownload.description}</div>
         )}
         <FieldList fields={fields} />
       </Accordion>
-      {allRuns.length > 0 && (
+      {allRuns && allRuns.length > 0 && (
         <Accordion
           className={cs.accordion}
           header={<div className={cs.header}>Samples in this Download</div>}
@@ -80,5 +82,3 @@ const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
     </div>
   );
 };
-
-export default DetailsTab;

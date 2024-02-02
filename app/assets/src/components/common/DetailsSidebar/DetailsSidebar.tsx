@@ -5,7 +5,7 @@
 import { LoadingIndicator } from "@czi-sds/components";
 import React, { Suspense } from "react";
 import Sidebar from "~/components/ui/containers/Sidebar";
-import BulkDownloadDetailsMode, { BDDProps } from "./BulkDownloadDetailsMode";
+import { BDDProps, BulkDownloadDetailsMode } from "./BulkDownloadDetailsMode";
 import cs from "./details_sidebar.scss";
 import GeneDetailsMode, { GDMProps } from "./GeneDetailsMode";
 import PipelineStepDetailsMode, { PSDProps } from "./PipelineStepDetailsMode";

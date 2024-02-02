@@ -9,9 +9,9 @@ import {
   NumberId,
 } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
-import AdvancedDownloadTab from "./AdvancedDownloadTab";
 import cs from "./bulk_download_details_mode.scss";
-import DetailsTab from "./DetailsTab";
+import { AdvancedDownloadTab } from "./components/AdvancedDownloadTab";
+import { DetailsTab } from "./components/DetailsTab";
 
 type TabNames = "Details" | "Advanced Download";
 const TABS: TabNames[] = ["Details", "Advanced Download"];
@@ -20,7 +20,7 @@ export interface BDDProps {
   bulkDownload: NumberId;
 }
 
-const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
+export const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
   const { admin } = useContext(UserContext) ?? {};
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -55,35 +55,6 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
   const { download_name, error_message, execution_type, log_url, id, status } =
     bulkDownloadDetails ?? {};
 
-  const renderNotifications = () => {
-    if (status === "error") {
-      return (
-        <Notification
-          type="error"
-          displayStyle="flat"
-          className={cs.notification}
-        >
-          There was an error generating your download files. Please contact us
-          for help.
-        </Notification>
-      );
-    }
-
-    if (status === "success" && error_message) {
-      return (
-        <Notification
-          type="warning"
-          displayStyle="flat"
-          className={cs.notification}
-        >
-          {error_message}
-        </Notification>
-      );
-    }
-
-    return null;
-  };
-
   if (isLoading) {
     return (
       <div className={cs.content}>
@@ -110,7 +81,25 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
           )}
         </div>
       )}
-      {renderNotifications()}
+      {status === "error" && (
+        <Notification
+          type="error"
+          displayStyle="flat"
+          className={cs.notification}
+        >
+          There was an error generating your download files. Please contact us
+          for help.
+        </Notification>
+      )}
+      {status === "success" && error_message && (
+        <Notification
+          type="warning"
+          displayStyle="flat"
+          className={cs.notification}
+        >
+          {error_message}
+        </Notification>
+      )}
       <Tabs
         className={cs.tabs}
         tabs={TABS}
@@ -119,18 +108,13 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
       />
       {currentTab === "Details" && (
         <DetailsTab
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           bulkDownload={bulkDownloadDetails}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
           downloadType={downloadType}
         />
       )}
       {currentTab === "Advanced Download" && (
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         <AdvancedDownloadTab bulkDownload={bulkDownloadDetails} />
       )}
     </div>
   );
 };
-
-export default BulkDownloadDetailsMode;

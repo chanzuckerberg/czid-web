@@ -5,50 +5,52 @@ import moment from "moment";
 import React, { useState } from "react";
 import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import cs from "~/components/common/DetailsSidebar/BulkDownloadDetailsMode/bulk_download_details_mode.scss";
 import { BulkDownloadDetails } from "~/interface/shared";
-import cs from "./bulk_download_details_mode.scss";
 
 interface AdvancedDownloadTabProps {
-  bulkDownload: BulkDownloadDetails;
+  bulkDownload?: BulkDownloadDetails;
 }
 
-const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
+export const AdvancedDownloadTab = ({
+  bulkDownload,
+}: AdvancedDownloadTabProps) => {
   const withAnalytics = useWithAnalytics();
   const [tooltip, setTooltip] = useState("");
   const hasCLICommand = () => {
     return (
-      bulkDownload.status === "success" &&
-      bulkDownload.presigned_output_url !== null
+      bulkDownload?.status === "success" &&
+      bulkDownload?.presigned_output_url !== null
     );
   };
 
   const getCLICommand = () => {
     if (
-      bulkDownload.status === "waiting" ||
-      bulkDownload.status === "running"
+      bulkDownload?.status === "waiting" ||
+      bulkDownload?.status === "running"
     ) {
       return "Bulk download is not yet complete.";
     }
 
-    if (bulkDownload.status === "error") {
+    if (bulkDownload?.status === "error") {
       return "Bulk download failed. Please contact us for help.";
     }
 
     if (
-      bulkDownload.status === "success" &&
+      bulkDownload?.status === "success" &&
       bulkDownload.presigned_output_url === null
     ) {
       return "Failed to generate command. Please contact us for help.";
     }
 
     const currentTimestamp = moment().format("MM-D-YYYY hh-mm-ssa");
-    const bulkDownloadFileName = `${bulkDownload.download_name}-${currentTimestamp}`;
+    const bulkDownloadFileName = `${bulkDownload?.download_name}-${currentTimestamp}`;
 
-    if (bulkDownload.download_type === "biom_format") {
+    if (bulkDownload?.download_type === "biom_format") {
       return `curl -L "${bulkDownload.presigned_output_url}" > "${bulkDownloadFileName}.biom" `;
     }
 
-    return `curl -L "${bulkDownload.presigned_output_url}" > "${bulkDownloadFileName}.tar.gz"\
+    return `curl -L "${bulkDownload?.presigned_output_url}" > "${bulkDownloadFileName}.tar.gz"\
         && mkdir "${bulkDownloadFileName}"\
         && tar -zvxf "${bulkDownloadFileName}.tar.gz" -C "${bulkDownloadFileName}"\
       `;
@@ -66,8 +68,8 @@ const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
         copyCommandToClipboard,
         ANALYTICS_EVENT_NAMES.ADVANCED_DOWNLOAD_TAB_COPY_CLOUD_COMMAND_LINK_CLICKED,
         {
-          bulkDownloadId: bulkDownload.id,
-          fileSize: bulkDownload.file_size,
+          bulkDownloadId: bulkDownload?.id,
+          fileSize: bulkDownload?.file_size,
         },
       )
     : null;
@@ -94,7 +96,7 @@ const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
       <div className={cs.header}>Download via command line:</div>
       <div className={cs.description}>
         Copy and paste the following command into your terminal to download and
-        extract your files into a folder called {bulkDownload.download_name}:
+        extract your files into a folder called {bulkDownload?.download_name}:
       </div>
       {tooltip ? (
         <BasicPopup
@@ -110,5 +112,3 @@ const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
     </div>
   );
 };
-
-export default AdvancedDownloadTab;
