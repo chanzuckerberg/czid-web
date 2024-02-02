@@ -105,10 +105,8 @@ module ReportHelper
           csv << data_values.values_at(*attribute_names.map(&:to_sym))
         end
       end
-      unless background_id.nil?
-        background_name = Background.find(background_id)&.name
-        csv << ["Background: #{background_name}"]
-      end
+      background_name = background_id.nil? ? "None" : Background.find(background_id)&.name
+      csv << ["Background: #{background_name}"]
     end
   end
 

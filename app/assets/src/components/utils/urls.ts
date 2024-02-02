@@ -21,6 +21,7 @@ export interface TempSelectedOptionsShape {
 }
 
 interface generateUrlOptions {
+  persistDefaultBg?: boolean;
   sampleId: string;
   snapshotShareId?: string | null;
   tempSelectedOptions?: TempSelectedOptionsShape | Record<string, never>;
@@ -35,6 +36,7 @@ const generateUrlToSampleView = ({
   tempSelectedOptions = null,
   workflow = null,
   workflowRunId = null,
+  persistDefaultBg = false,
 }: generateUrlOptions): string => {
   const currentTab = workflow ? WORKFLOWS[workflow]?.label : null;
   const snapshotSharePrefix = snapshotShareId ? `/pub/${snapshotShareId}` : "";
@@ -44,7 +46,10 @@ const generateUrlToSampleView = ({
   if the user isn't intentional about which background they're using
   */
   const defaultBackgroundId = 26;
-  if (tempSelectedOptions?.background === defaultBackgroundId) {
+  if (
+    tempSelectedOptions?.background === defaultBackgroundId &&
+    !persistDefaultBg
+  ) {
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     tempSelectedOptions.background = null;
   }

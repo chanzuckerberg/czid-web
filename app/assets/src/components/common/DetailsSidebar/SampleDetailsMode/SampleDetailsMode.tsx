@@ -9,6 +9,7 @@ import {
 import { getAllSampleTypes } from "~/api";
 import { getCsrfToken } from "~/api/utils";
 import Tabs from "~/components/ui/controls/Tabs";
+import { REMOVE_HEATMAP_DEFAULT_BG } from "~/components/utils/features";
 import {
   generateUrlToSampleView,
   TempSelectedOptionsShape,
@@ -28,6 +29,7 @@ import {
   SnapshotShareId,
 } from "~/interface/shared";
 import { formatSendValue, processMetadataTypes } from "~utils/metadata";
+import { useAllowedFeatures } from "../../UserContext";
 import { SampleDetailsModeSampleMetadataFieldsQuery } from "./__generated__/SampleDetailsModeSampleMetadataFieldsQuery.graphql";
 import { SampleDetailsModeSampleMetadataQuery } from "./__generated__/SampleDetailsModeSampleMetadataQuery.graphql";
 import { SampleDetailsModeUpdateMetadataMutation } from "./__generated__/SampleDetailsModeUpdateMetadataMutation.graphql";
@@ -199,6 +201,11 @@ export const SampleDetailsMode = ({
     sampleId,
   });
   const isSampleIdChanged = prevProps?.sampleId !== sampleId;
+
+  const allowedFeatures = useAllowedFeatures();
+  const hasRemoveHeatmapBgFeature = allowedFeatures.includes(
+    REMOVE_HEATMAP_DEFAULT_BG,
+  );
 
   // If the sampleId is changed, reset the nameLocal to the name of the sample
   useEffect(() => {
@@ -449,6 +456,7 @@ export const SampleDetailsMode = ({
           <a
             href={generateUrlToSampleView({
               sampleId: sampleId.toString(),
+              persistDefaultBg: hasRemoveHeatmapBgFeature,
               tempSelectedOptions,
             })}
             target="_blank"
