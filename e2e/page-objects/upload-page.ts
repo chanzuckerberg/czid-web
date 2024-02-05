@@ -39,7 +39,7 @@ const GUPPY_BASECALLER_SETTING_OPTIONS_TESTIDS = {
   SUPER: "super",
 };
 const UPLOAD_TAXON_FILTER_TESTID = "upload-taxon-filter";
-const UPLOAD_TAXON_FILTER_INPUT = "[label='Search'] [class*='FormControl'] input";
+const UPLOAD_TAXON_FILTER_INPUT = "[class*='FormControl'] input[type='search']";
 const CLEAR_UPLOADED_FILE_BUTTON_TESTID = "clear-uploaded-file-button";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
 const REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID = "reference-sequence-file-upload";
