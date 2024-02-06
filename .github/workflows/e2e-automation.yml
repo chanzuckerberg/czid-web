@@ -17,6 +17,7 @@ on:
         default: 'staging'
         options:
         - staging
+        - sandbox
 
 jobs:
   workflow-e2e:
@@ -46,4 +47,61 @@ jobs:
         working-directory: ./e2e/
         if: failure() || success()
         run: |
-          saucectl run -c ./.sauce/staging.yml
+          saucectl run -c ./.sauce/${{inputs.node-environment}}.yml
+
+      - name: Send custom JSON data to Slack workflow
+        id: slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          # This data can be any valid JSON from a previous step in the GitHub Action
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": ":gear: E2E Automation",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": "*Workflow*: ${{ github.workflow }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": "*Env*: ${{inputs.node-environment}}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": "*Branch*: ${{ github.ref_name }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": "*Commit*: ${{ github.sha }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": "*Results*: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
