@@ -1,7 +1,7 @@
-import { InputText } from "@czi-sds/components";
-import cx from "classnames";
+import { Button, InputText } from "@czi-sds/components";
+import { cx } from "@emotion/css";
 import { some } from "lodash/fp";
-import React from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { SortDirection } from "react-virtualized";
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
@@ -9,16 +9,14 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
+import ImgDownloadPrimary from "~/components/ui/illustrations/ImgDownloadPrimary";
 import Label from "~/components/ui/labels/Label";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { openUrl } from "~/components/utils/links";
 import { Table } from "~/components/visualizations/table";
-import { ColumnProps } from "~/interface/sampleView";
 import { BulkDownloadDetails } from "~/interface/shared";
-import ImgDownloadPrimary from "~ui/illustrations/ImgDownloadPrimary";
 import Notification from "~ui/notifications/Notification";
-import { openUrl } from "~utils/links";
 import cs from "./bulk_download_list.scss";
-import { BulkDownloadTableRenderers } from "./components/BulkDownloadTableRenderers";
+import { getBulkDownloadTableColumns } from "./components/BulkDownloadTableRenderers/bulkDownloadTableColumns";
 
 // The number of times we automatically update the bulk downloads on the page before prompting the user.
 const AUTO_UPDATE_MAX_COUNT = 15;
@@ -65,130 +63,40 @@ const getTooltipText = (bulkDownload: $TSFixMe) => {
   return null;
 };
 
-class BulkDownloadList extends React.Component {
-  state = {
-    bulkDownloads: null,
-    modalOpen: false,
-    selectedBulkDownload: null,
-    autoUpdateCount: 0,
-    sidebarOpen: false,
-    searchBy: null,
-    searchLimit: null,
+const BulkDownloadList = () => {
+  const [autoUpdateCount, setAutoUpdateCount] = useState(0);
+  const [bulkDownloads, setBulkDownloads] = useState<
+    BulkDownloadDetails[] | null
+  >(null);
+  const [isEmpty, setIsEmpty] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSettingAdminFields, setIsSettingAdminFields] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isUrlParsed, setIsUrlParsed] = useState(false);
+  const [selectedBulkDownload, setSelectedBulkDownload] =
+    useState<BulkDownloadDetails | null>(null);
+  const [searchBy, setSearchBy] = useState<string | null>(null);
+  const [searchLimit, setSearchLimit] = useState<string | null>(null);
+
+  const userContext = useContext(UserContext);
+  const isAdmin = userContext.admin;
+
+  const hasInProgressBulkDownloads = some(["status", "running"], bulkDownloads);
+
+  useEffect(() => {
+    setIsEmpty(!!(bulkDownloads && bulkDownloads.length === 0));
+    setIsLoading(bulkDownloads === null);
+  }, [bulkDownloads]);
+
+  const getUrlParams = () => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      searchBy: params.get("searchBy"),
+      searchLimit: params.get("n"),
+    };
   };
 
-  get urlParams() {
-    return new URL(window.location.href).searchParams;
-  }
-
-  componentDidMount() {
-    this.setState({
-      searchBy: this.urlParams.get("searchBy"),
-      searchLimit: this.urlParams.get("n"),
-    });
-    this.autoUpdateBulkDownloads();
-  }
-
-  initiateAutoUpdate = () => {
-    this.setState({
-      autoUpdateCount: 0,
-    });
-
-    this.autoUpdateBulkDownloads();
-  };
-
-  autoUpdateBulkDownloads = async () => {
-    const bulkDownloads = await getBulkDownloads({
-      searchBy: this.urlParams.get("searchBy"),
-      n: this.urlParams.get("n"),
-    });
-    const newAutoUpdateCount = this.state.autoUpdateCount + 1;
-
-    this.setState({
-      bulkDownloads: this.processBulkDownloads(bulkDownloads),
-      autoUpdateCount: newAutoUpdateCount,
-    });
-
-    if (
-      newAutoUpdateCount < AUTO_UPDATE_MAX_COUNT &&
-      this.hasInProgressBulkDownloads()
-    ) {
-      setTimeout(this.autoUpdateBulkDownloads, AUTO_UPDATE_DELAY);
-    }
-  };
-
-  getTableColumns = (): ColumnProps[] => {
-    const { admin } = this.context || {};
-
-    return [
-      {
-        dataKey: "download_name",
-        label: "Download",
-        width: 500,
-        flexGrow: 1,
-        headerClassName: cs.downloadNameHeader,
-        cellRenderer: (cellData: $TSFixMe) =>
-          BulkDownloadTableRenderers.renderDownload(cellData, admin),
-      },
-      {
-        dataKey: "created_at",
-        label: "Date",
-        width: 200,
-        cellRenderer: TableRenderers.renderDateWithElapsed,
-      },
-      {
-        dataKey: "analysis_count",
-        label: "Count",
-        width: 180,
-        cellRenderer: BulkDownloadTableRenderers.renderCount,
-      },
-      {
-        dataKey: "file_size",
-        label: "File Size",
-        width: 200,
-        className: cs.lightCell,
-      },
-      {
-        dataKey: "status",
-        label: "",
-        width: 120,
-        cellRenderer: BulkDownloadTableRenderers.renderStatus,
-        disableSort: true,
-      },
-    ];
-  };
-
-  hasInProgressBulkDownloads = () =>
-    some(["status", "running"], this.state.bulkDownloads);
-
-  processBulkDownloads = (bulkDownloads: $TSFixMe) =>
-    bulkDownloads.map((bulkDownload: $TSFixMe) => ({
-      ...bulkDownload,
-      // Add callback to be used in renderDownload table renderer.
-      onStatusClick: () => {
-        this.handleStatusClick(bulkDownload);
-      },
-      // Add callbacks to be used in renderStatus table renderer.
-      onDownloadFileClick: () => {
-        this.handleDownloadFileClick(bulkDownload);
-      },
-      statusType: getStatusType(bulkDownload),
-      statusDisplay: getStatusDisplay(bulkDownload),
-      tooltipText: getTooltipText(bulkDownload),
-    }));
-
-  isLoading = () => this.state.bulkDownloads === null;
-  isEmpty = () =>
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2339
-    this.state.bulkDownloads && this.state.bulkDownloads.length === 0;
-
-  handleStatusClick = (bulkDownload: BulkDownloadDetails) => {
-    this.setState({
-      selectedBulkDownload: bulkDownload,
-      sidebarOpen: true,
-    });
-  };
-
-  handleDownloadFileClick = async (bulkDownload: $TSFixMe) => {
+  const handleDownloadFileClick = async (bulkDownload: $TSFixMe) => {
     // This should only be clickable when the bulk download has succeeded
     // TODO(mark): Handle error case.
     if (bulkDownload.status === "success") {
@@ -199,39 +107,160 @@ class BulkDownloadList extends React.Component {
     }
   };
 
-  handleSidebarClose = () => {
-    this.setState({
-      sidebarOpen: false,
-    });
+  const handleStatusClick = (bulkDownload: BulkDownloadDetails) => {
+    setSelectedBulkDownload(bulkDownload);
+    setIsSidebarOpen(true);
   };
 
-  getSidebarParams = () => {
-    return {
-      bulkDownload: this.state.selectedBulkDownload,
-    };
+  const processBulkDownloads = useCallback(
+    (bulkDownloadsRaw: $TSFixMe): BulkDownloadDetails[] | null =>
+      bulkDownloadsRaw?.map((bulkDownloadRaw: $TSFixMe) => ({
+        ...bulkDownloadRaw,
+        // Add callback to be used in renderDownload table renderer.
+        onStatusClick: () => {
+          handleStatusClick(bulkDownloadRaw);
+        },
+        // Add callbacks to be used in renderStatus table renderer.
+        onDownloadFileClick: () => {
+          handleDownloadFileClick(bulkDownloadRaw);
+        },
+        statusType: getStatusType(bulkDownloadRaw),
+        statusDisplay: getStatusDisplay(bulkDownloadRaw),
+        tooltipText: getTooltipText(bulkDownloadRaw),
+      })),
+    [],
+  );
+
+  const autoUpdateBulkDownloads = useCallback(
+    async (updateCount: number) => {
+      if (!isUrlParsed || isSettingAdminFields) {
+        return;
+      }
+      const bulkDownloadsRaw = await getBulkDownloads({
+        searchBy: searchBy,
+        n: searchLimit,
+      });
+
+      setBulkDownloads(processBulkDownloads(bulkDownloadsRaw));
+
+      if (updateCount <= AUTO_UPDATE_MAX_COUNT && hasInProgressBulkDownloads) {
+        setTimeout(
+          () => autoUpdateBulkDownloads(updateCount + 1),
+          AUTO_UPDATE_DELAY,
+        );
+      } else {
+        setAutoUpdateCount(updateCount);
+      }
+    },
+    [
+      hasInProgressBulkDownloads,
+      isSettingAdminFields,
+      isUrlParsed,
+      processBulkDownloads,
+      searchBy,
+      searchLimit,
+    ],
+  );
+
+  useEffect(() => {
+    const { searchBy, searchLimit } = getUrlParams();
+    setSearchBy(searchBy);
+    setSearchLimit(searchLimit);
+    setIsUrlParsed(true);
+  }, []);
+
+  // State callbacks
+  const handleSidebarClose = () => {
+    setIsSidebarOpen(false);
   };
 
-  handleSearchKeyDown = event => {
+  const handleSearchByChange = event => {
+    setIsSettingAdminFields(true);
+    setSearchBy(event.target.value);
+    if (event.target.value === "") {
+      setIsSettingAdminFields(false);
+    }
+  };
+
+  const handleSearchLimitChange = event => {
+    setIsSettingAdminFields(true);
+    setSearchLimit(event.target.value);
+    if (event.target.value === "") {
+      setIsSettingAdminFields(false);
+    }
+  };
+
+  const handleSearchKeyDown = event => {
     if (event.key === "Enter") {
-      const { searchBy, searchLimit } = this.state;
       window.location.href = `/bulk_downloads?searchBy=${searchBy}&n=${searchLimit}`;
     }
   };
 
-  renderBody() {
-    const { autoUpdateCount } = this.state;
+  const initiateAutoUpdate = useCallback(() => {
+    setAutoUpdateCount(0);
+    autoUpdateBulkDownloads(0);
+  }, [autoUpdateBulkDownloads]);
 
-    if (this.isLoading()) {
-      return (
+  useEffect(() => {
+    initiateAutoUpdate();
+  }, [initiateAutoUpdate]);
+
+  return (
+    <div
+      className={cx(
+        cs.bulkDownloadList,
+        isEmpty && cs.empty,
+        isLoading && cs.loading,
+      )}
+    >
+      <NarrowContainer>
+        <ViewHeader className={cs.viewHeader}>
+          <ViewHeader.Content>
+            <ViewHeader.Pretitle breadcrumbLink={"/home"}>
+              Back
+            </ViewHeader.Pretitle>
+            <ViewHeader.Title label={"Downloads"} />
+          </ViewHeader.Content>
+          <ViewHeader.Controls>
+            {isAdmin && (
+              <>
+                <Label text="Admin Settings" color="blue" size="mini" />
+                <br />
+                <small>Show downloads for:</small>
+                <InputText
+                  sdsType="textField"
+                  size="small"
+                  id="searchBy"
+                  label="Show downloads for"
+                  hideLabel
+                  defaultValue={searchBy}
+                  onChange={handleSearchByChange}
+                  onKeyDown={handleSearchKeyDown}
+                />
+                <small>Downloads to show:</small>
+                <InputText
+                  sdsType="textField"
+                  size="small"
+                  id="n"
+                  label="Downloads to show"
+                  hideLabel
+                  defaultValue={searchLimit}
+                  onChange={handleSearchLimitChange}
+                  onKeyDown={handleSearchKeyDown}
+                />
+              </>
+            )}
+          </ViewHeader.Controls>
+        </ViewHeader>
+      </NarrowContainer>
+      <Divider />
+      {isLoading && (
         <LoadingMessage
           className={cs.loadingMessage}
           message="Loading Downloads"
         />
-      );
-    }
-
-    if (this.isEmpty()) {
-      return (
+      )}
+      {!isLoading && isEmpty && (
         <div className={cs.blankScreenContainer}>
           <BlankScreenMessage
             message="You don't have any bulk downloads yet"
@@ -240,108 +269,54 @@ class BulkDownloadList extends React.Component {
             textWidth={260}
           />
         </div>
-      );
-    }
-
-    return (
-      <NarrowContainer className={cs.tableContainer}>
-        {autoUpdateCount >= AUTO_UPDATE_MAX_COUNT &&
-          this.hasInProgressBulkDownloads() && (
-            <Notification
-              type="warning"
-              displayStyle="flat"
-              className={cs.autoUpdateWarning}
-            >
-              This page is no longer auto-updating.{" "}
-              <span onClick={this.initiateAutoUpdate} className={cs.link}>
-                Click here to see additional updates.
-              </span>
-            </Notification>
+      )}
+      {!isLoading && !isEmpty && (
+        <NarrowContainer className={cs.tableContainer}>
+          {autoUpdateCount >= AUTO_UPDATE_MAX_COUNT &&
+            hasInProgressBulkDownloads && (
+              <Notification
+                type="warning"
+                displayStyle="flat"
+                className={cs.autoUpdateWarning}
+              >
+                This page is no longer auto-updating.{" "}
+                <Button
+                  sdsType="secondary"
+                  sdsStyle="minimal"
+                  isAllCaps={false}
+                  onClick={initiateAutoUpdate}
+                  className={cs.link}
+                >
+                  Click here to see additional updates.
+                </Button>
+              </Notification>
+            )}
+          {bulkDownloads && (
+            <Table
+              rowClassName={cs.tableRow}
+              headerClassName={cs.tableHeader}
+              className={cs.table}
+              columns={getBulkDownloadTableColumns({ isAdmin })}
+              data={bulkDownloads}
+              defaultRowHeight={70}
+              sortable
+              defaultSortBy="created_at"
+              defaultSortDirection={SortDirection.DESC}
+            />
           )}
-        <Table
-          rowClassName={cs.tableRow}
-          headerClassName={cs.tableHeader}
-          className={cs.table}
-          columns={this.getTableColumns()}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-          data={this.state.bulkDownloads}
-          defaultRowHeight={70}
-          sortable
-          defaultSortBy="created_at"
-          defaultSortDirection={SortDirection.DESC}
-        />
-      </NarrowContainer>
-    );
-  }
-
-  render() {
-    const { admin } = this.context;
-    const { sidebarOpen } = this.state;
-
-    return (
-      <div
-        className={cx(
-          cs.bulkDownloadList,
-          this.isEmpty() && cs.empty,
-          this.isLoading() && cs.loading,
-        )}
-      >
-        <NarrowContainer>
-          <ViewHeader className={cs.viewHeader}>
-            <ViewHeader.Content>
-              <ViewHeader.Pretitle breadcrumbLink={"/home"}>
-                Back
-              </ViewHeader.Pretitle>
-              <ViewHeader.Title label={"Downloads"} />
-            </ViewHeader.Content>
-            <ViewHeader.Controls>
-              {admin && (
-                <>
-                  <Label text="Admin Settings" color="blue" size="mini" />
-                  <br />
-                  <small>Show downloads for:</small>
-                  <InputText
-                    sdsType="textField"
-                    size="small"
-                    id="searchBy"
-                    label="Show downloads for"
-                    hideLabel
-                    defaultValue={this.urlParams.get("searchBy")}
-                    onChange={e => this.setState({ searchBy: e.target.value })}
-                    onKeyDown={this.handleSearchKeyDown}
-                  />
-                  <small>Downloads to show:</small>
-                  <InputText
-                    sdsType="textField"
-                    size="small"
-                    id="n"
-                    label="Downloads to show"
-                    hideLabel
-                    defaultValue={this.urlParams.get("n")}
-                    onChange={e =>
-                      this.setState({ searchLimit: e.target.value })
-                    }
-                    onKeyDown={this.handleSearchKeyDown}
-                  />
-                </>
-              )}
-            </ViewHeader.Controls>
-          </ViewHeader>
         </NarrowContainer>
-        <Divider />
-        {this.renderBody()}
-        <DetailsSidebar
-          visible={sidebarOpen}
-          mode="bulkDownloadDetails"
-          onClose={this.handleSidebarClose}
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-          params={this.getSidebarParams()}
-        />
-      </div>
-    );
-  }
-}
+      )}
 
-BulkDownloadList.contextType = UserContext;
+      <DetailsSidebar
+        visible={isSidebarOpen}
+        mode="bulkDownloadDetails"
+        onClose={handleSidebarClose}
+        params={{
+          bulkDownloadId: selectedBulkDownload?.id,
+        }}
+      />
+    </div>
+  );
+};
 
 export default BulkDownloadList;

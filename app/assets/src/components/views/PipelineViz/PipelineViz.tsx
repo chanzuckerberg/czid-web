@@ -1072,7 +1072,6 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
         <DetailsSidebar
           visible={sidebarVisible}
           mode="pipelineStepDetails"
-          // @ts-expect-errors Type 'object' is not assignable to type
           params={sidebarParams}
           onClose={this.closeSidebar}
         />

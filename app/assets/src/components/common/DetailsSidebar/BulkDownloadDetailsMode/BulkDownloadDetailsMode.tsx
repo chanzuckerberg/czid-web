@@ -3,11 +3,7 @@ import { getBulkDownload } from "~/api/bulk_downloads";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
-import {
-  BulkDownloadDetails,
-  DownloadType,
-  NumberId,
-} from "~/interface/shared";
+import { BulkDownloadDetails, DownloadType } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
 import cs from "./bulk_download_details_mode.scss";
 import { AdvancedDownloadTab } from "./components/AdvancedDownloadTab";
@@ -17,10 +13,10 @@ type TabNames = "Details" | "Advanced Download";
 const TABS: TabNames[] = ["Details", "Advanced Download"];
 
 export interface BDDProps {
-  bulkDownload: NumberId;
+  bulkDownloadId?: number;
 }
 
-export const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
+export const BulkDownloadDetailsMode = ({ bulkDownloadId }: BDDProps) => {
   const { admin } = useContext(UserContext) ?? {};
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -45,8 +41,11 @@ export const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetchBulkDownload(bulkDownload.id);
-  }, [bulkDownload]);
+    if (!bulkDownloadId) {
+      return;
+    }
+    fetchBulkDownload(bulkDownloadId);
+  }, [bulkDownloadId]);
 
   const onTabChange = (tab: TabNames) => {
     setCurrentTab(tab);

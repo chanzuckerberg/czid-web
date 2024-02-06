@@ -24,6 +24,10 @@ export interface BulkDownloadDetails extends NumberId {
   error_message: string;
   execution_type: string;
   log_url: string;
+  id: number;
+  onDownloadClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onStatusClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  tooltipText: string | null;
 }
 
 export type BulkDownloadType = {
