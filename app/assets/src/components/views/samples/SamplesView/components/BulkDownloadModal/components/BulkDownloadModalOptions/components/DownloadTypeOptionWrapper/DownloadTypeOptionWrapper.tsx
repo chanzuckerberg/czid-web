@@ -85,24 +85,26 @@ export const DownloadTypeOptionWrapper = ({
     return (
       <BasicPopup
         key={downloadType.type}
-        trigger={() => (
-          <DownloadTypeOption
-            backgroundOptions={backgroundOptions}
-            downloadType={downloadType}
-            handleHeatmapLink={handleHeatmapLink}
-            isDisabled={disabled}
-            isSelected={selected}
-            metricsOptions={metricsOptions}
-            onSelectField={onSelectField}
-            onSelectDownloadType={onSelectDownloadType}
-            selectedDownloadTypeName={selectedDownloadTypeName}
-            selectedFields={selectedFields}
-            shouldEnableMassNormalizedBackgrounds={
-              shouldEnableMassNormalizedBackgrounds
-            }
-            validObjectIds={validObjectIds}
-          />
-        )}
+        trigger={
+          <span>
+            <DownloadTypeOption
+              backgroundOptions={backgroundOptions}
+              downloadType={downloadType}
+              handleHeatmapLink={handleHeatmapLink}
+              isDisabled={disabled}
+              isSelected={selected}
+              metricsOptions={metricsOptions}
+              onSelectField={onSelectField}
+              onSelectDownloadType={onSelectDownloadType}
+              selectedDownloadTypeName={selectedDownloadTypeName}
+              selectedFields={selectedFields}
+              shouldEnableMassNormalizedBackgrounds={
+                shouldEnableMassNormalizedBackgrounds
+              }
+              validObjectIds={validObjectIds}
+            />
+          </span>
+        }
         content={disabledMessage}
       />
     );
