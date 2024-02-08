@@ -26,7 +26,7 @@ __make_release_checklist() {
 
   declare release_checklist_body; release_checklist_body=$(
     echo "# Release checklist"
-    echo "_Please check your commits after testing:_"
+    echo "_Please check your commits after testing. Do not checkoff commits which have dependencies that are not yet deployed in prod:_"
     git log --date-order --abbrev=8 --pretty=format:$'### %an\t* [ ] %h - % %s %d (%cD)' "${target_commit}..${source_commit}" \
       | awk -F $'\t' '{ a[$1] = a[$1] "\n" $2; } END { for (i in a) print i a[i]; }'
     echo
