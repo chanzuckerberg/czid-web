@@ -465,8 +465,12 @@ module BulkDownloadsHelper
     end
   end
 
+  def self.cg_overview_headers
+    ["Sample Name", "Reference Accession", "Reference Accession ID", *ConsensusGenomeMetricsService::ALL_METRICS.values]
+  end
+
   def self.generate_cg_overview_csv(workflow_runs:, include_metadata: false)
-    csv_headers = ["Sample Name", "Reference Accession", "Reference Accession ID", *ConsensusGenomeMetricsService::ALL_METRICS.values]
+    csv_headers = BulkDownloadsHelper.cg_overview_headers
 
     if include_metadata
       samples = Sample.where(id: workflow_runs.pluck(:sample_id).uniq)
@@ -492,6 +496,36 @@ module BulkDownloadsHelper
         csv << csv_values
       end
     end
+  end
+
+  # Returns an array of arrays containing CG overview data in rows
+  def self.generate_cg_overview_data(workflow_runs:, include_metadata: false)
+    overview_arr = []
+    headers = BulkDownloadsHelper.cg_overview_headers
+
+    if include_metadata
+      samples = Sample.where(id: workflow_runs.pluck(:sample_id).uniq)
+      metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: samples)
+      cg_metadata_headers = ["Wetlab Protocol", "Executed At"]
+      headers.concat(cg_metadata_headers, metadata_headers.map { |h| h.humanize.titleize })
+    end
+
+    overview_arr << headers
+    workflow_runs.includes(:sample).each do |wr|
+      cg_metric_row_values = BulkDownloadsHelper.prepare_workflow_run_metrics_csv_info(workflow_run: wr)
+      wr_row_values = [wr.sample.name, wr.inputs&.[]("accession_name"), wr.inputs&.[]("accession_id")] + cg_metric_row_values
+
+      if include_metadata
+        metadata = metadata_by_sample_id[wr.sample.id] || {}
+        sample_metadata_row_values = metadata.values_at(*metadata_keys)
+        cg_metadata_row_values = [wr.inputs&.[]("wetlab_protocol") || '', wr.executed_at]
+        wr_row_values.concat(cg_metadata_row_values, sample_metadata_row_values)
+      end
+
+      overview_arr << wr_row_values
+    end
+
+    overview_arr
   end
 
   def self.prepare_workflow_run_metrics_csv_info(workflow_run:)

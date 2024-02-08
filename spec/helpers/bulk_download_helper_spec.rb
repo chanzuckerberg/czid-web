@@ -585,4 +585,159 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       end
     end
   end
+
+  describe "#generate_cg_overview_data" do
+    let(:project) { create(:project) }
+    let(:cg_metric_headers) { ["Sample Name", "Reference Accession", "Reference Accession ID", *ConsensusGenomeMetricsService::ALL_METRICS.values] }
+    let(:cg_metadata_headers) { ["Wetlab Protocol", "Executed At"] }
+    let(:inputs_json) do
+      {
+        accession_id: "OV123456.7",
+        accession_name: "Test Accession Name",
+        taxon_id: 5_678_910,
+        taxon_name: "omarvirus",
+        wetlab_protocol: "artic",
+      }
+    end
+
+    context "coverage viz metrics are available" do
+      let(:parsed_results) do
+        {
+          # Creates a hash of where the metrics are the keys and 1 or 2 are the values
+          "coverage_viz" => ConsensusGenomeMetricsService::COVERAGE_METRICS.keys.index_with { |_key| 1 },
+          "quality_metrics" => ConsensusGenomeMetricsService::QUALITY_METRICS.keys.index_with { |_key| 2 },
+          "taxon_info" => {},
+        }
+      end
+      let(:quality_metrics) { parsed_results["quality_metrics"] }
+      let(:coverage_metrics) { parsed_results["coverage_viz"] }
+      let(:cached_results) { parsed_results.to_json }
+
+      context "user selected 1 sample with 3 valid CG but did not select 'include metadata'" do
+        before do
+          create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1, default_for_new_host_genome: 1)
+          # while normally required, this field is expected to be not required here
+          MetadataField.where(name: "collection_location_v2").update(is_required: 0)
+          @sample = create(:sample,
+                           name: "Test Sample 1",
+                           project: project,
+                           metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No" })
+          @workflow_run1 = create(:workflow_run, sample: @sample, cached_results: cached_results, inputs_json: inputs_json.to_json)
+          @workflow_run2 = create(:workflow_run, sample: @sample, cached_results: cached_results, inputs_json: inputs_json.to_json)
+          @workflow_run3 = create(:workflow_run, sample: @sample, cached_results: cached_results, inputs_json: inputs_json.to_json)
+        end
+
+        it "returns correct values without metadata" do
+          consensus_genome_overview_data = BulkDownloadsHelper.generate_cg_overview_data(workflow_runs: @sample.workflow_runs, include_metadata: false)
+
+          expect(consensus_genome_overview_data)
+            .to eq(
+              [
+                cg_metric_headers,
+                ["Test Sample 1", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values),
+                ["Test Sample 1", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values),
+                ["Test Sample 1", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values),
+              ]
+            )
+        end
+      end
+
+      context "user selected 3 samples with each sample containing 2 valid CG and selected 'include metadata'" do
+        before do
+          create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1, default_for_new_host_genome: 1)
+          create(:metadata_field, name: "collection_location_v2", base_type: 3)
+          create(:metadata_field, name: "nucleotide_type", base_type: 0)
+          create(:metadata_field, name: "collection_date", base_type: 0)
+          create(:metadata_field, name: "water_control", base_type: 0)
+
+          # while normally required, this field is expected to be not required here
+          MetadataField.where(name: "collection_location_v2").update(is_required: 0)
+          @sample1 = create(:sample,
+                            name: "Test Sample 1",
+                            project: project,
+                            host_genome_name: "Human",
+                            metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", host_age: MetadataField::MAX_HUMAN_AGE.to_s })
+          @workflow_run1 = create(:workflow_run, sample: @sample1, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
+          @workflow_run2 = create(:workflow_run, sample: @sample1, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
+
+          @sample2 = create(:sample,
+                            name: "Test Sample 2",
+                            project: project,
+                            host_genome_name: "Mosquito",
+                            metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", host_age: MetadataField::MAX_HUMAN_AGE.to_s })
+          @workflow_run3 = create(:workflow_run, sample: @sample2, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
+          @workflow_run4 = create(:workflow_run, sample: @sample2, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
+
+          @sample3 = create(:sample,
+                            name: "Test Sample 3",
+                            project: project,
+                            host_genome_name: "Human",
+                            metadata_fields: { collection_location_v2: "Indio, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", host_age: (MetadataField::MAX_HUMAN_AGE - 1).to_s })
+          @workflow_run5 = create(:workflow_run, sample: @sample3, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
+          @workflow_run6 = create(:workflow_run, sample: @sample3, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
+
+          @samples = [@sample1, @sample2, @sample3]
+          @sample_metadata_headers, @metadata_keys, @metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: @samples)
+        end
+
+        it "returns correct csv values with metadata" do
+          consensus_genome_overview_csv_string = BulkDownloadsHelper.generate_cg_overview_data(workflow_runs: WorkflowRun.where(sample_id: @samples.map(&:id)), include_metadata: true)
+
+          expect(consensus_genome_overview_csv_string)
+            .to eq(
+              [
+                cg_metric_headers.concat(cg_metadata_headers, @sample_metadata_headers.map { |h| h.humanize.titleize }),
+                ["Test Sample 1", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values, [@workflow_run1.inputs["wetlab_protocol"], @workflow_run1.executed_at], @metadata_by_sample_id[@sample1.id].values_at(*@metadata_keys)),
+                ["Test Sample 1", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values, [@workflow_run2.inputs["wetlab_protocol"], @workflow_run2.executed_at], @metadata_by_sample_id[@sample1.id].values_at(*@metadata_keys)),
+                ["Test Sample 2", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values, [@workflow_run3.inputs["wetlab_protocol"], @workflow_run3.executed_at], @metadata_by_sample_id[@sample2.id].values_at(*@metadata_keys)),
+                ["Test Sample 2", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values, [@workflow_run4.inputs["wetlab_protocol"], @workflow_run4.executed_at], @metadata_by_sample_id[@sample2.id].values_at(*@metadata_keys)),
+                ["Test Sample 3", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values, [@workflow_run5.inputs["wetlab_protocol"], @workflow_run5.executed_at], @metadata_by_sample_id[@sample3.id].values_at(*@metadata_keys)),
+                ["Test Sample 3", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, coverage_metrics.values, [@workflow_run6.inputs["wetlab_protocol"], @workflow_run6.executed_at], @metadata_by_sample_id[@sample3.id].values_at(*@metadata_keys)),
+              ]
+            )
+          expect(@metadata_by_sample_id[@sample1.id][:host_age]).to eq("≥ #{MetadataField::MAX_HUMAN_AGE}")
+          expect(@metadata_by_sample_id[@sample2.id][:host_age]).to eq(MetadataField::MAX_HUMAN_AGE.to_s)
+          expect(@metadata_by_sample_id[@sample3.id][:host_age]).to eq((MetadataField::MAX_HUMAN_AGE - 1).to_s)
+        end
+      end
+    end
+
+    context "coverage viz metrics are not available" do
+      let(:parsed_results) do
+        {
+          "coverage_viz" => {},
+          "quality_metrics" => ConsensusGenomeMetricsService::QUALITY_METRICS.keys.index_with { |_key| 1 },
+          "taxon_info" => {},
+        }
+      end
+      let(:quality_metrics) { parsed_results["quality_metrics"] }
+      let(:cached_results) { parsed_results.to_json }
+      let(:empty_coverage_viz_values) { (0...ConsensusGenomeMetricsService::COVERAGE_METRICS.keys.length).map { |_| "" } }
+
+      context "user selected 1 sample with 1 valid CG without cached coverage depth and selected 'include metadata'" do
+        before do
+          create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1, default_for_new_host_genome: 1)
+          create(:metadata_field, name: "collection_location_v2", base_type: 3)
+
+          @sample = create(:sample,
+                           name: "Test Sample 1",
+                           project: project,
+                           metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum" })
+          @workflow_run = create(:workflow_run, sample: @sample, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
+          @sample_metadata_headers, @metadata_keys, @metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: [@sample])
+        end
+
+        it "returns correct csv values with metadata" do
+          consensus_genome_overview_csv_string = BulkDownloadsHelper.generate_cg_overview_data(workflow_runs: @sample.workflow_runs, include_metadata: true)
+          expect(consensus_genome_overview_csv_string)
+            .to eq(
+              [
+                cg_metric_headers.concat(cg_metadata_headers, @sample_metadata_headers.map { |h| h.humanize.titleize }),
+                ["Test Sample 1", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, empty_coverage_viz_values, [@workflow_run.inputs["wetlab_protocol"], @workflow_run.executed_at], @metadata_by_sample_id[@sample.id].values_at(*@metadata_keys)),
+              ]
+            )
+        end
+      end
+    end
+  end
 end

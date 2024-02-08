@@ -115,6 +115,25 @@ class BulkDownloadsController < ApplicationController
     end
   end
 
+  # POST /bulk_downloads/consensus_genome_overview_data.json
+  def consensus_genome_overview_data
+    bulk_download_params = bulk_download_create_params_with_valid_workflow
+    begin
+      workflow_run_ids = get_workflow_run_ids_of_viewable_objects(bulk_download_params)
+    rescue StandardError
+      render json: { error: KICKOFF_FAILURE_HUMAN_READABLE }, status: :unprocessable_entity
+      return
+    end
+
+    workflow_runs = WorkflowRun.where(id: workflow_run_ids)
+    cg_overview_arr = BulkDownloadsHelper.generate_cg_overview_data(
+      workflow_runs: workflow_runs,
+      include_metadata: bulk_download_params[:params]&.[](:include_metadata)&.[](:value)
+    )
+
+    render json: { cg_overview_rows: cg_overview_arr }, status: :ok
+  end
+
   # GET /bulk_downloads
   # GET /bulk_downloads.json
   def index
@@ -238,7 +257,33 @@ class BulkDownloadsController < ApplicationController
     current_power.viewable_bulk_downloads.find(params[:id])
   end
 
+  def bulk_download_create_params_with_valid_workflow
+    create_params = bulk_download_create_params
+    unless create_params.key?(:workflow)
+      create_params[:workflow] = WorkflowRun::WORKFLOW[:short_read_mngs]
+    end
+    create_params
+  end
+
   def bulk_download_create_params
     params.permit(:download_type, :workflow, sample_ids: [], params: {}, workflow_run_ids: [])
+  end
+
+  def get_workflow_run_ids_of_viewable_objects(bulk_download_params)
+    begin
+      viewable_objects = validate_bulk_download_create_params(bulk_download_params, current_user)
+      workflow_run_ids = viewable_objects.active.pluck(:id)
+    rescue StandardError => e
+      # Throw an error if any sample doesn't have a valid pipeline or workflow run.
+      # The user should never see this error, because the validation step should catch any issues.
+      LogUtil.log_error(
+        "BulkDownloadsFailedEvent: Unexpected issue creating bulk download: #{e}",
+        exception: e,
+        params: bulk_download_params
+      )
+      raise
+    end
+
+    workflow_run_ids
   end
 end

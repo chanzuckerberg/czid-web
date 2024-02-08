@@ -419,6 +419,141 @@ RSpec.describe BulkDownloadsController, type: :controller do
       end
     end
 
+    describe "POST #consensus_genome_overview_data" do
+      before do
+        AppConfigHelper.set_app_config(AppConfig::MAX_OBJECTS_BULK_DOWNLOAD, 100)
+      end
+
+      it "handles errors raised when validating params" do
+        sample = create(:sample,
+                        project: @project,
+                        user: @joe,
+                        pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        sample_workflow_run = create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+
+        bulk_download_params = {
+          download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE,
+          workflow_run_ids: [sample_workflow_run.id],
+
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
+        }
+
+        allow_any_instance_of(BulkDownloadsHelper).to receive(:validate_bulk_download_create_params).and_raise(StandardError)
+
+        post :consensus_genome_overview_data, params: bulk_download_params
+        expect(response).to have_http_status(:unprocessable_entity)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE)
+      end
+
+      it "should return the correct data for a consensus genome overview bulk download" do
+        sample1 = create(:sample, project: @project, name: "Test Sample")
+        sample2 = create(:sample, project: @project, name: "Test Sample Two")
+
+        workflow_run1 = create(:workflow_run, sample: sample1, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+        workflow_run2 = create(:workflow_run, sample: sample2, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+
+        fields = {
+          include_metadata: {
+            value: false,
+          },
+        }
+
+        bulk_download_params = {
+          download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE,
+          workflow_run_ids: [workflow_run1.id, workflow_run2.id],
+          params: fields,
+          workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+        }
+
+        post :consensus_genome_overview_data, params: bulk_download_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        cg_overview_rows = json_response["cg_overview_rows"]
+        expect(cg_overview_rows.length).to eq(3)
+        expect(cg_overview_rows[0][0]).to eq("Sample Name")
+        expect(cg_overview_rows[1][0]).to eq(sample1.name)
+        expect(cg_overview_rows[2][0]).to eq(sample2.name)
+      end
+
+      context "when metadata is requested" do
+        before do
+          create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1, default_for_new_host_genome: 1)
+          create(:metadata_field, name: "water_control", base_type: 0)
+
+          @sample1 = create(
+            :sample,
+            name: "Test Sample 1",
+            project: @project,
+            host_genome_name: "Human",
+            metadata_fields: {
+              sample_type: "CSF",
+              water_control: "No",
+            }
+          )
+          @workflow_run1 = create(
+            :workflow_run,
+            sample: @sample1,
+            workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+            status: WorkflowRun::STATUS[:succeeded]
+          )
+
+          @sample2 = create(
+            :sample,
+            name: "Test Sample 2",
+            project: @project,
+            host_genome_name: "Mosquito",
+            metadata_fields: {
+              sample_type: "Serum",
+              water_control: "Yes",
+            }
+          )
+          @workflow_run2 = create(
+            :workflow_run,
+            sample: @sample2,
+            workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+            status: WorkflowRun::STATUS[:succeeded]
+          )
+        end
+
+        it "should include metadata in the data" do
+          fields = {
+            include_metadata: {
+              value: true,
+            },
+          }
+
+          bulk_download_params = {
+            download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE,
+            workflow_run_ids: [@workflow_run1.id, @workflow_run2.id],
+            params: fields,
+            workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+          }
+
+          post :consensus_genome_overview_data, params: bulk_download_params
+
+          expect(response).to have_http_status(200)
+          json_response = JSON.parse(response.body)
+
+          cg_overview_rows = json_response["cg_overview_rows"]
+          num_columns = cg_overview_rows[0].length
+          expect(cg_overview_rows.length).to eq(3)
+          expect(cg_overview_rows[0][0]).to eq("Sample Name")
+          expect(cg_overview_rows[1][0]).to eq(@sample1.name)
+          expect(cg_overview_rows[2][0]).to eq(@sample2.name)
+          expect(cg_overview_rows[0][num_columns - 2]).to eq("Sample Type")
+          expect(cg_overview_rows[1][num_columns - 2]).to eq("CSF")
+          expect(cg_overview_rows[2][num_columns - 2]).to eq("Serum")
+          expect(cg_overview_rows[0][num_columns - 1]).to eq("Water Control")
+          expect(cg_overview_rows[1][num_columns - 1]).to eq("No")
+          expect(cg_overview_rows[2][num_columns - 1]).to eq("Yes")
+        end
+      end
+    end
+
     describe "GET #index" do
       it "should return only bulk downloads viewable to the user" do
         @sample_one = create(:sample, project: @project,
