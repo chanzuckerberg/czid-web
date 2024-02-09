@@ -115,6 +115,7 @@ launch_command() {
     local -a aegea_opts=(
         launch
         --use-imdsv2
+        --storage /=64GB
         --iam-role "${PARSED_OPTIONS[iam-role]}"
         --ami "${PARSED_OPTIONS[ami]:-${PARSED_OPTIONS[iam-role]}}"
         --instance-type "${PARSED_OPTIONS[instance-type]:-t3.small}"

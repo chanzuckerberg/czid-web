@@ -19,8 +19,10 @@ task update_tables_for_index_gen: :environment do |_, _args|
   host = Rails.env.development? ? 'db' : '$RDS_ADDRESS'
   database = "idseq_#{Rails.env}"
 
-  index_name = prompt("Enter the index_name used to run index generation (the folder inside ncbi-indexes-prod containing reference files): ")
-  s3_dir = "s3://#{S3_DATABASE_BUCKET}/ncbi-indexes-prod/#{index_name}/index-generation-2"
+  index_name = prompt("Enter the index name (ex: 2020-06-01): ")
+  s3_dir = prompt("Enter the s3 path that stores the index files (ex: s3://<bucket>/<prefix>/index-generation-2): ")
+  nt_db_name = prompt("Enter the name of the NT database (ex: nt, nt_compressed.fa, nt_compressed_shuffled.fa): ")
+  nr_db_name = prompt("Enter the name of the NR database (ex: nr, nr_compressed.fa, nr_compressed_shuffled.fa): ")
 
   puts("Using S3 path #{s3_dir} for index generation files.")
   should_insert_alignment_config = prompt("Do you want to insert an alignment config to MySQL? (y/n): ") == "y"
@@ -33,9 +35,9 @@ task update_tables_for_index_gen: :environment do |_, _args|
     config = AlignmentConfig.new(
       name: index_name,
       lineage_version: index_name,
-      s3_nt_db_path: "#{s3_dir}/nt",
+      s3_nt_db_path: "#{s3_dir}/#{nt_db_name}",
       s3_nt_loc_db_path: "#{s3_dir}/nt_loc.marisa",
-      s3_nr_db_path: "#{s3_dir}/nr",
+      s3_nr_db_path: "#{s3_dir}/#{nr_db_name}",
       s3_nr_loc_db_path: "#{s3_dir}/nr_loc.marisa",
       s3_lineage_path: "#{s3_dir}/taxid-lineages.marisa",
       s3_accession2taxid_path: "#{s3_dir}/accession2taxid.marisa",
