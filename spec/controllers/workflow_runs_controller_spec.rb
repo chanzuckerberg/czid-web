@@ -899,6 +899,57 @@ RSpec.describe WorkflowRunsController, type: :controller do
       end
     end
 
+    describe "POST /valid_consensus_genome_workflow_runs" do
+      before do
+        project = create(:project, users: [@joe])
+        @sample1 = create(:sample, name: "Joe's good sample", project: project, user: @joe)
+        @valid_workflow_run1 = create(:workflow_run, user_id: @joe.id, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded])
+        @valid_workflow_run2 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:running])
+        @valid_workflow_run3 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:failed])
+
+        @sample2 = create(:sample, name: "Joe's bad sample", project: project, user: @joe)
+        @invalid_workflow_run1 = create(:workflow_run, sample: @sample2, deprecated: true, status: WorkflowRun::STATUS[:failed])
+
+        other_project = create(:project, users: [@admin])
+        @other_sample = create(:sample, name: "Admin's sample", project: other_project, user: @admin)
+        @invalid_workflow_run2 = create(:workflow_run, sample: @other_sample, deprecated: false, status: WorkflowRun::STATUS[:succeeded])
+        @invalid_workflow_run3 = create(:workflow_run, sample: @other_sample, deprecated: false, status: WorkflowRun::STATUS[:running])
+        @invalid_workflow_run4 = create(:workflow_run, sample: @other_sample, deprecated: false, status: WorkflowRun::STATUS[:failed])
+      end
+
+      it "should filter out workflow runs that the user does not have access to" do
+        post :valid_consensus_genome_workflow_runs, params: { workflowRunIds: [@valid_workflow_run1.id, @invalid_workflow_run1.id] }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["workflowRuns"].length).to eq(1)
+      end
+
+      it "should return a list of workflow objects with id, owner and status fields" do
+        post :valid_consensus_genome_workflow_runs, params: { workflowRunIds: [@valid_workflow_run1.id] }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["workflowRuns"].length).to eq(1)
+        expect(json_response["workflowRuns"][0]["id"]).to eq(@valid_workflow_run1.id)
+        expect(json_response["workflowRuns"][0]["owner_user_id"]).to eq(@joe.id)
+        expect(json_response["workflowRuns"][0]["status"]).to eq(WorkflowRun::STATUS[:succeeded])
+      end
+
+      it "should return a list of all workflowRuns that are accessible to the user and not deprecated" do
+        post :valid_consensus_genome_workflow_runs, params: { workflowRunIds: [*@sample1.workflow_runs.pluck(:id), *@sample2.workflow_runs.pluck(:id), *@other_sample.workflow_runs.pluck(:id)] }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["workflowRuns"].length).to eq(3)
+        expect(json_response["workflowRuns"].map { |wr| wr["id"] }).to contain_exactly(@valid_workflow_run1.id, @valid_workflow_run2.id, @valid_workflow_run3.id)
+        expect(json_response["workflowRuns"].map { |wr| wr["status"] }).to contain_exactly(WorkflowRun::STATUS[:succeeded], WorkflowRun::STATUS[:running], WorkflowRun::STATUS[:failed])
+      end
+    end
+
     describe "POST /workflow_runs_info" do
       before do
         project = create(:project, users: [@joe])

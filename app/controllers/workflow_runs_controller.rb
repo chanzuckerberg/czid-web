@@ -129,6 +129,39 @@ class WorkflowRunsController < ApplicationController
     end
   end
 
+  # POST /workflow_runs/valid_consensus_genome_workflow_runs
+  # Returns a list of workflow_run that the user has access to.
+  # For each workflow_run, returns the id, owner and status.
+  # We are adding this - TEMPORARY - endpoint to facilitate moving to NextGen
+  # This method uses POST because hundreds of workflowRunIds can be passed.
+  def valid_consensus_genome_workflow_runs
+    permitted_params = params.permit(workflowRunIds: [])
+    workflow = WorkflowRun::WORKFLOW[:consensus_genome]
+
+    validated_workflow_runs_info = WorkflowRunValidationService.call(query_ids: permitted_params[:workflowRunIds], current_user: current_user)
+    viewable_workflow_runs = validated_workflow_runs_info[:viewable_workflow_runs]
+
+    if validated_workflow_runs_info[:error].nil?
+      valid_workflow_run_fields = viewable_workflow_runs.by_workflow(workflow).non_deprecated.pluck(:id, :user_id, :status).map { |wr| { id: wr[0], owner_user_id: wr[1], status: wr[2] } }
+
+      render(
+        json: {
+          workflowRuns: valid_workflow_run_fields,
+          error: nil,
+        },
+        status: :ok
+      )
+    else
+      render(
+        json: {
+          workflowRuns: [],
+          error: validated_workflow_runs_info[:error],
+        },
+        status: :ok
+      )
+    end
+  end
+
   # POST /workflow_runs/workflow_runs_info
   # Returns sample and taxon information for the given workflow runs.
   # This method uses POST because hundreds of workflowRunIds can be passed.
