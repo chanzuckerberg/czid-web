@@ -112,7 +112,7 @@ export class HeatmapPage extends PageObject {
 
   // #region Macro
   public async dismissAppcuesContainerIfPresent() {
-    await this.page.locator(APPCUES_CONTAINER).waitFor({timeout: 5000});
+    await this.page.locator(APPCUES_CONTAINER).waitFor({timeout: 5000}).catch(() => null);
     const appcuesContainer = await this.page.locator(APPCUES_CONTAINER).isVisible();
     if (appcuesContainer) {
       const iframe = this.page.frameLocator(APPCUES_CONTAINER);
