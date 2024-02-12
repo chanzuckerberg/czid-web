@@ -1,3 +1,4 @@
+import { WorkflowType } from "~/components/utils/workflows";
 import { ThresholdFilterData } from "~/interface/dropdown";
 
 export type DropdownOptionType = {
@@ -23,3 +24,17 @@ export type SelectedFieldValueType =
 export type SelectedFieldType = Record<string, SelectedFieldValueType>;
 
 export type SelectedFieldsType = Record<string, SelectedFieldType>;
+
+export type SelectedDownloadType = {
+  downloadType: string | null;
+  fields: Record<
+    string,
+    {
+      value: string;
+      displayName: string;
+    }
+  >;
+  validObjectIds: number[];
+  workflow: WorkflowType;
+  workflowEntity?: string;
+};

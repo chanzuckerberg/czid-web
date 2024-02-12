@@ -10,7 +10,7 @@ const SAMPLE_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleNam
 const DELETE_BUTTON_TESTID = "bulk-delete-trigger";
 const DOWNLOAD_BUTTON_TESTID = "download-icon";
 const DOWNLOAD_TYPES_LOCATOR = "[class*='downloadTypeContainer'] [class*='name']";
-const START_GENERATING_DOWNLOAD_BUTTON = "//button[text()='Start Generating Download']";
+export const START_GENERATING_DOWNLOAD_BUTTON = "//button[text()='Start Generating Download']";
 const TAXON_FILTER_DROPDOWN = "[class*='taxaWithHitsDropdown'] [data-testid='filters']";
 const TAXON_DROPDOWN_OPTIONS = "[class*='portalDropdown'] [class*='item'] [class*='option']";
 const FILTER_DROPDOWN = "[class*='downloadTypeContainer'] [data-testid='filter-value']";

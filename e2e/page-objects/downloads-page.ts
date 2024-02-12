@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
 import { PageObject } from "./page-object";
 
-import { ProjectPage } from "./project-page";
+import { ProjectPage, START_GENERATING_DOWNLOAD_BUTTON } from "./project-page";
 
 const SAMPLES_IN_DOWNLOAD_DROPDOWN = "//div[text()='Samples in this Download']";
 const SAMPLES_IN_DOWNLOAD_NAMES = "[class*='samplesList'] [class*='sampleName']";
@@ -61,6 +61,12 @@ export class DownloadsPage extends PageObject {
     const rowLocator = DOWNLOAD_FILE_BY_DOWNLOADID(downloadId);
     const downloadPromise = this.page.waitForEvent("download");
     await this.page.locator(rowLocator).click();
+    return downloadPromise;
+  }
+
+  public async clickDownloadButtonForImmediateDownload() {
+    const downloadPromise = this.page.waitForEvent("download");
+    await this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click();
     return downloadPromise;
   }
 
@@ -208,6 +214,12 @@ export class DownloadsPage extends PageObject {
     }
     else if ((downloadType === "Consensus Genome Overview") && includeSampleMetadata) {
       await this.clickIncludeSampleMetadata();
+      // Verify that the download completes immediately
+      expectedFileExtention = "csv";
+      const fileName = "consensus_genome_overview";
+      const download = await this.clickDownloadButtonForImmediateDownload();
+      expect(`${fileName}.${expectedFileExtention}`).toMatch(download.suggestedFilename());
+      return;
     }
 
     const downloadId = await projectPage.clickStartGeneratingDownloadButton();

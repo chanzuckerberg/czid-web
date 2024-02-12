@@ -104,9 +104,9 @@ input BoolComparators {
   _is_null: Int
 }
 
-type BulkDownload {
-  bulk_download: query_BulkDownload_bulk_download
-  download_type: query_BulkDownload_download_type
+type BulkDownloadDetails {
+  bulk_download: query_BulkDownloadDetails_bulk_download
+  download_type: query_BulkDownloadDetails_download_type
 }
 
 type ConsensusGenome implements EntityInterface & Node {
@@ -232,6 +232,132 @@ input ConsensusGenomeWhereClauseMutations {
   id: UUIDComparators
 }
 
+type ConsensusGenomeOverviewRows {
+  cgOverviewRows: [[String]]!
+}
+
+type ConsensusGenome implements EntityInterface & Node {
+  """The Globally Unique ID of this object"""
+  _id: GlobalID!
+  id: ID!
+  producingRunId: Int
+  ownerUserId: Int!
+  collectionId: Int!
+  taxon(where: TaxonWhereClause = null): Taxon
+  sequenceRead(where: SequencingReadWhereClause = null): SequencingRead
+  referenceGenome(where: ReferenceGenomeWhereClause = null): ReferenceGenome
+  sequenceId: ID
+  sequence(where: FileWhereClause = null): File
+  intermediateOutputsId: ID
+  intermediateOutputs(where: FileWhereClause = null): File
+  metrics(
+    where: MetricConsensusGenomeWhereClause = null
+
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): MetricConsensusGenomeConnection!
+  metricsAggregate(where: MetricConsensusGenomeWhereClause = null): MetricConsensusGenomeAggregate
+}
+
+type ConsensusGenomeAggregate {
+  aggregate: ConsensusGenomeAggregateFunctions
+}
+
+type ConsensusGenomeAggregateFunctions {
+  sum: ConsensusGenomeNumericalColumns
+  avg: ConsensusGenomeNumericalColumns
+  min: ConsensusGenomeMinMaxColumns
+  max: ConsensusGenomeMinMaxColumns
+  stddev: ConsensusGenomeNumericalColumns
+  variance: ConsensusGenomeNumericalColumns
+  count(distinct: Boolean = false, columns: ConsensusGenomeCountColumns = null): Int
+}
+
+"""A connection to a list of items."""
+type ConsensusGenomeConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [ConsensusGenomeEdge!]!
+}
+
+enum ConsensusGenomeCountColumns {
+  taxon
+  sequence_read
+  reference_genome
+  sequence
+  intermediate_outputs
+  metrics
+  entity_id
+  id
+  producing_run_id
+  owner_user_id
+  collection_id
+}
+
+input ConsensusGenomeCreateInput {
+  collectionId: Int!
+  taxonId: ID!
+  sequenceReadId: ID!
+  referenceGenomeId: ID!
+  sequenceId: ID = null
+  intermediateOutputsId: ID = null
+}
+
+"""An edge in a connection."""
+type ConsensusGenomeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: ConsensusGenome!
+}
+
+type ConsensusGenomeMinMaxColumns {
+  producingRunId: Int
+  ownerUserId: Int
+  collectionId: Int
+}
+
+type ConsensusGenomeNumericalColumns {
+  producingRunId: Int
+  ownerUserId: Int
+  collectionId: Int
+}
+
+input ConsensusGenomeUpdateInput {
+  collectionId: Int = null
+  taxonId: ID = null
+  sequenceReadId: ID = null
+  referenceGenomeId: ID = null
+  sequenceId: ID = null
+  intermediateOutputsId: ID = null
+}
+
+input ConsensusGenomeWhereClause {
+  id: UUIDComparators
+  producingRunId: IntComparators
+  ownerUserId: IntComparators
+  collectionId: IntComparators
+  taxon: TaxonWhereClause
+  sequenceRead: SequencingReadWhereClause
+  referenceGenome: ReferenceGenomeWhereClause
+  metrics: MetricConsensusGenomeWhereClause
+}
+
+input ConsensusGenomeWhereClauseMutations {
+  id: UUIDComparators
+}
 type ConsensusGenomeWorkflowResults {
   metric_consensus_genome: query_ConsensusGenomeWorkflowResults_metric_consensus_genome
   reference_genome: query_ConsensusGenomeWorkflowResults_reference_genome
@@ -976,6 +1102,7 @@ type MultipartUploadResponse {
 }
 
 type Mutation {
+  CreateBulkDownload(input: mutationInput_CreateBulkDownload_input_Input): JSON
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
   UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleNotes
   UpdateSampleName(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleName
@@ -1062,6 +1189,14 @@ type mutation_KickoffWGSWorkflow_items_parsed_cached_results_quality_metrics {
   insert_size_mean: JSON
   insert_size_standard_deviation: JSON
   percent_remaining: Float
+}
+
+input mutationInput_CreateBulkDownload_input_Input {
+  downloadType: String
+  workflowRunIds: [Int]
+  workflow: String
+  downloadFormat: String
+  authenticityToken: String
 }
 
 input mutationInput_DeleteSamples_input_Input {
@@ -1327,7 +1462,8 @@ type Query {
   AmrDeprecatedResults(sampleId: String): AmrDeprecatedResults
   AmrWorkflowResults(workflowRunId: String): AmrWorkflowResults
   Background(snapshotLinkId: String): Background
-  BulkDownload(bulkDownloadId: String): BulkDownload
+  BulkDownloadDetails(bulkDownloadId: String): BulkDownloadDetails
+  BulkDownloadCGOverview(input: queryInput_BulkDownloadCGOverview_input_Input): ConsensusGenomeOverviewRows
   ConsensusGenomeWorkflowResults(workflowRunId: String): ConsensusGenomeWorkflowResults
   CoverageVizSummary(snapshotLinkId: String, sampleId: String): [query_CoverageVizSummary_items]
   MetadataFields(snapshotLinkId: String, input: queryInput_MetadataFields_input_Input): [query_MetadataFields_items]
@@ -1336,7 +1472,7 @@ type Query {
   Pathogens(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Pathogens_items]
   PersistedBackground(projectId: String): PersistedBackground
   PipelineData(sampleId: String, workflowVersionId: String): PipelineData
-  Samples(snapshotLinkId: String, sampleId: String, projectId: String): Samples
+  samples(input: queryInput_samples_input_Input): [query_samples_items]
   Taxons(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Taxons_items]
   TaxonDist(backgroundId: String, taxonId: String): TaxonDist
   UserBlastAnnotations(sampleId: String, workflowVersionId: String): [query_UserBlastAnnotations_items]
@@ -1432,7 +1568,7 @@ type query_Background_other_backgrounds_items {
   mass_normalized: Boolean
 }
 
-type query_BulkDownload_bulk_download {
+type query_BulkDownloadDetails_bulk_download {
   id: Int
   params_json: String
   download_type: String
@@ -1454,33 +1590,33 @@ type query_BulkDownload_bulk_download {
   user_name: String
   execution_type: String
   log_url: JSON
-  params: query_BulkDownload_bulk_download_params
+  params: query_BulkDownloadDetails_bulk_download_params
   pipeline_runs: [JSON]
   workflow_runs: [JSON]
   presigned_output_url: String
 }
 
-type query_BulkDownload_bulk_download_params {
-  background: query_BulkDownload_bulk_download_params_background
+type query_BulkDownloadDetails_bulk_download_params {
+  background: query_BulkDownloadDetails_bulk_download_params_background
 }
 
-type query_BulkDownload_bulk_download_params_background {
+type query_BulkDownloadDetails_bulk_download_params_background {
   value: Int
   displayName: String
 }
 
-type query_BulkDownload_download_type {
+type query_BulkDownloadDetails_download_type {
   type: String
   display_name: String
   description: String
   category: String
   execution_type: String
-  fields: [query_BulkDownload_download_type_fields_items]
+  fields: [query_BulkDownloadDetails_download_type_fields_items]
   file_type_display: String
   workflows: [String]
 }
 
-type query_BulkDownload_download_type_fields_items {
+type query_BulkDownloadDetails_download_type_fields_items {
   display_name: String
   type: String
 }
@@ -1819,77 +1955,112 @@ input query_SampleMetadata_metadata_items_location_validated_value_oneOf_1_Input
   refetch_adjusted_location: Boolean
 }
 
-type query_Samples_pipeline_runs_items {
-  id: Int
-  pipeline_version: String
-  created_at: String
-  alignment_config_name: String
-  assembled: Int
-  adjusted_remaining_reads: Int
-  total_ercc_reads: Int
-  run_finalized: Boolean
+type query_samples_items {
+  todoRemove: query_samples_items_todoRemove
+  id: String
+  railsSampleId: Int
+  name: String
+  notes: String
+  collectionLocation: String
+  sampleType: String
+  waterControl: Boolean
+  hostTaxon: query_samples_items_hostTaxon
+  collection: query_samples_items_collection
+  ownerUser: query_samples_items_ownerUser
+  metadatas: query_samples_items_metadatas
+  sequencingReads: query_samples_items_sequencingReads
+  required: JSON
 }
 
-type query_Samples_project {
-  id: Int
+type query_samples_items_collection {
+  name: String
+  public: Boolean
+}
+
+type query_samples_items_hostTaxon {
   name: String
 }
 
-type query_Samples_workflow_runs_items {
-  id: Int
-  status: String
-  workflow: String
-  wdl_version: String
-  executed_at: String
-  deprecated: Boolean
-  input_error: JSON
-  inputs: query_Samples_workflow_runs_items_inputs
-  parsed_cached_results: query_Samples_workflow_runs_items_parsed_cached_results
-  run_finalized: Boolean
+type query_samples_items_metadatas {
+  edges: [query_samples_items_metadatas_edges_items]!
 }
 
-type query_Samples_workflow_runs_items_inputs {
-  accession_id: String
-  accession_name: String
-  taxon_id: Int
-  taxon_name: String
+type query_samples_items_metadatas_edges_items {
+  node: query_samples_items_metadatas_edges_items_node!
+}
+
+type query_samples_items_metadatas_edges_items_node {
+  fieldName: String!
+  value: String!
+}
+
+type query_samples_items_ownerUser {
+  name: String
+}
+
+type query_samples_items_sequencingReads {
+  edges: [query_samples_items_sequencingReads_edges_items]!
+}
+
+type query_samples_items_sequencingReads_edges_items {
+  node: query_samples_items_sequencingReads_edges_items_node!
+}
+
+type query_samples_items_sequencingReads_edges_items_node {
+  nucleicAcid: String
+  protocol: String
+  medakaModel: String
   technology: String
-  alignment_config_name: String
-  creation_source: String
+  consensusGenomes: query_samples_items_sequencingReads_edges_items_node_consensusGenomes
+  required: JSON
 }
 
-type query_Samples_workflow_runs_items_parsed_cached_results {
-  coverage_viz: query_Samples_workflow_runs_items_parsed_cached_results_coverage_viz
-  quality_metrics: query_Samples_workflow_runs_items_parsed_cached_results_quality_metrics
-  taxon_info: query_Samples_workflow_runs_items_parsed_cached_results_taxon_info
+type query_samples_items_sequencingReads_edges_items_node_consensusGenomes {
+  edges: [query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items]
+  required: JSON
 }
 
-type query_Samples_workflow_runs_items_parsed_cached_results_coverage_viz {
-  coverage_breadth: Float
-  coverage_depth: Float
-  max_aligned_length: Int
-  total_length: Int
+type query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items {
+  node: query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node!
 }
 
-type query_Samples_workflow_runs_items_parsed_cached_results_quality_metrics {
-  ercc_mapped_reads: Int
-  mapped_reads: Int
-  n_actg: Int
-  n_ambiguous: Int
-  n_missing: Int
-  ref_snps: Int
-  total_reads: Int
-  percent_identity: Float
-  gc_percent: Float
-  percent_genome_called: Float
-  reference_genome_length: Int
+type query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node {
+  taxon: query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_taxon
+  referenceGenome: query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_referenceGenome
+  metric: query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_metric
 }
 
-type query_Samples_workflow_runs_items_parsed_cached_results_taxon_info {
-  accession_id: String
-  accession_name: String
-  taxon_id: Int
-  taxon_name: String
+type query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_metric {
+  coverageDepth: Float
+  totalReads: Int
+  gcPercent: Float
+  refSnps: Int
+  percentIdentity: Float
+  nActg: Int
+  percentGenomeCalled: Float
+  nMissing: Int
+  nAmbiguous: Int
+  referenceGenomeLength: Float
+}
+
+type query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_referenceGenome {
+  accessionId: String
+  accessionName: String
+}
+
+type query_samples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_taxon {
+  name: String!
+}
+
+type query_samples_items_todoRemove {
+  startedAt: String
+  workflowVersion: query_samples_items_todoRemove_workflowVersion
+  creationSource: String
+  status: String
+}
+
+type query_samples_items_todoRemove_workflowVersion {
+  version: String
 }
 
 type query_TaxonDist_merged_NT_NR {
@@ -1932,6 +2103,14 @@ type query_UserBlastAnnotations_items {
   annotation: JSON
 }
 
+input queryInput_BulkDownloadCGOverview_input_Input {
+  downloadType: String!
+  workflowRunIds: [Int]!
+  workflow: String!
+  includeMetadata: Boolean!
+  authenticityToken: String!
+}
+
 input queryInput_MetadataFields_input_Input {
   sampleIds: [String]!
   authenticityToken: String!
@@ -1939,6 +2118,93 @@ input queryInput_MetadataFields_input_Input {
 
 input queryInput_SampleMetadata_input_Input {
   pipelineVersion: String
+}
+
+input queryInput_samples_input_Input {
+  where: queryInput_samples_input_where_Input
+  orderBy: queryInput_samples_input_orderBy_Input
+  sequencingReadsInput: queryInput_samples_input_sequencingReadsInput_Input
+  todoRemove: queryInput_samples_input_todoRemove_Input
+}
+
+input queryInput_samples_input_orderBy_Input {
+  key: String
+  dir: String
+}
+
+input queryInput_samples_input_sequencingReadsInput_Input {
+  where: queryInput_samples_input_sequencingReadsInput_where_Input
+}
+
+input queryInput_samples_input_sequencingReadsInput_where_Input {
+  consensusGenomes: JSON
+}
+
+input queryInput_samples_input_todoRemove_Input {
+  domain: String
+  visibility: String
+  time: [String]
+  taxaLevels: [String]
+  taxons: [Int]
+  offset: Int
+  limit: Int
+  workflow: String
+  projectId: String
+  listAllIds: Boolean
+}
+
+input queryInput_samples_input_where_collectionLocation_Input {
+  _in: [String]
+}
+
+input queryInput_samples_input_where_hostTaxon_Input {
+  upstreamDatabaseIdentifier: queryInput_samples_input_where_hostTaxon_upstreamDatabaseIdentifier_Input
+}
+
+input queryInput_samples_input_where_hostTaxon_upstreamDatabaseIdentifier_Input {
+  _in: [String]
+}
+
+input queryInput_samples_input_where_id_Input {
+  _in: [String]
+}
+
+input queryInput_samples_input_where_Input {
+  id: queryInput_samples_input_where_id_Input
+  name: queryInput_samples_input_where_name_Input
+  collectionLocation: queryInput_samples_input_where_collectionLocation_Input
+  sampleType: queryInput_samples_input_where_sampleType_Input
+  hostTaxon: queryInput_samples_input_where_hostTaxon_Input
+  sequencingReads: queryInput_samples_input_where_sequencingReads_Input
+}
+
+input queryInput_samples_input_where_name_Input {
+  _like: String
+}
+
+input queryInput_samples_input_where_sampleType_Input {
+  _in: [String]
+}
+
+input queryInput_samples_input_where_sequencingReads_consensusGenomes_Input {
+  taxon: queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_Input
+}
+
+input queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_Input {
+  name: queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_name_Input
+  producingRunId: queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_producingRunId_Input
+}
+
+input queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_name_Input {
+  _in: [String]
+}
+
+input queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_producingRunId_Input {
+  _in: [Int]
+}
+
+input queryInput_samples_input_where_sequencingReads_Input {
+  consensusGenomes: queryInput_samples_input_where_sequencingReads_consensusGenomes_Input
 }
 
 input queryInput_ValidateUserCanDeleteObjects_input_Input {
@@ -2321,24 +2587,6 @@ type SampleReadsStats {
 
 type SampleReadsStatsList {
   sampleReadsStats: [SampleReadsStats!]!
-}
-
-type Samples {
-  name: String
-  created_at: String
-  updated_at: String
-  project_id: Int
-  status: String
-  host_genome_id: Int
-  user_id: Int
-  upload_error: JSON
-  initial_workflow: String
-  project: query_Samples_project
-  default_background_id: Int
-  default_pipeline_run_id: Int
-  editable: Boolean
-  pipeline_runs: [query_Samples_pipeline_runs_items]
-  workflow_runs: [query_Samples_workflow_runs_items]
 }
 
 type SampleSteps {

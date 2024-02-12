@@ -28,6 +28,38 @@ const downloadStringToFile = (str: string) => {
   location.href = `${downloadUrl}`;
 };
 
+const downloadFileFromCSV = (
+  csvJson: readonly (
+    | readonly (string | null | undefined)[]
+    | null
+    | undefined
+  )[],
+  fileName: string,
+) => {
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvJson.forEach(function(rowArray) {
+    if (!rowArray) return;
+    const cleanRowArray = rowArray.map(row => {
+      if (!row) return "";
+      // remove new lines and commas from the row to avoid csv parsing issues
+      let singleLineRow = row.toString().replace(/(\r\n|\n|\r)/gm, "");
+      if (singleLineRow.includes(",")) {
+        singleLineRow = `"${singleLineRow}"`;
+      }
+      return singleLineRow;
+    });
+    const row = cleanRowArray.join(",");
+    csvContent += row + "\r\n";
+  });
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `${fileName}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 // Opens a new popup window centered to the current window.
 const openUrlInPopupWindow = (
   url: string,
@@ -68,6 +100,7 @@ const postToUrlWithCSRF = (url: string, params?: Record<string, unknown>) => {
 
 export {
   downloadStringToFile,
+  downloadFileFromCSV,
   openUrl,
   openUrlInNewTab,
   openUrlInPopupWindow,

@@ -1,25 +1,17 @@
 import { set } from "lodash/fp";
-import memoize from "memoize-one";
 import React, { useEffect, useState } from "react";
-import {
-  getBackgrounds,
-  getMassNormalizedBackgroundAvailability,
-  samplesUploadedByCurrentUser,
-  userIsCollaboratorOnAllSamples,
-  workflowRunsCreatedByCurrentUser,
-} from "~/api";
-import {
-  validateSampleIds,
-  validateWorkflowRunIds,
-} from "~/api/access_control";
+import { useMutation, useRelayEnvironment } from "react-relay";
+import { fetchQuery, graphql } from "relay-runtime";
+import { getMassNormalizedBackgroundAvailability } from "~/api";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   createBulkDownload,
   getBulkDownloadMetrics,
   getBulkDownloadTypes,
 } from "~/api/bulk_downloads";
+import { getCsrfToken } from "~/api/utils";
 import Modal from "~/components/ui/containers/Modal";
-import { openUrlInNewTab } from "~/components/utils/links";
+import { downloadFileFromCSV, openUrlInNewTab } from "~/components/utils/links";
 import { WorkflowType, WORKFLOW_ENTITIES } from "~/components/utils/workflows";
 import {
   DEFAULT_BACKGROUND_MODEL,
@@ -29,66 +21,68 @@ import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/co
 import cs from "~/components/views/samples/SamplesView/components/BulkDownloadModal/bulk_download_modal.scss";
 import { getURLParamString } from "~/helpers/url";
 import { Entry } from "~/interface/samplesView";
-import { Background, BulkDownloadType } from "~/interface/shared";
+import { BulkDownloadType } from "~/interface/shared";
+import { BulkDownloadModalMutation as BulkDownloadModalMutationType } from "./__generated__/BulkDownloadModalMutation.graphql";
+import { BulkDownloadModalQuery as BulkDownloadModalQueryType } from "./__generated__/BulkDownloadModalQuery.graphql";
 import { BulkDownloadModalFooter } from "./components/BulkDownloadModalFooter";
 import { BulkDownloadModalOptions } from "./components/BulkDownloadModalOptions";
 import {
   BackgroundOptionType,
   MetricsOptionType,
+  SelectedDownloadType,
   SelectedFieldsType,
   SelectedFieldValueType,
 } from "./types";
+import {
+  assembleSelectedDownload,
+  checkAllObjectsUploadedByCurrentUser,
+  checkUserIsCollaboratorOnAllSamples,
+  DEFAULT_CREATION_ERROR,
+  fetchBackgrounds,
+  fetchValidationInfo,
+} from "./utils";
 
-const DEFAULT_CREATION_ERROR =
-  "An unknown error occurred. Please contact us for help.";
-
-type SelectedDownloadType = {
-  downloadType: string | null;
-  fields: Record<
-    string,
-    {
-      value: string;
-      displayName: string;
-    }
-  >;
-  validObjectIds: number[];
-  workflow: WorkflowType;
-  workflowEntity?: string;
-};
-
-const assembleSelectedDownload = memoize(
-  (
-    selectedDownloadTypeName,
-    allSelectedFields,
-    allSelectedFieldsDisplay,
-    objectIds,
-    workflow,
-    workflowEntity,
-  ): SelectedDownloadType => {
-    const fieldValues = allSelectedFields?.[selectedDownloadTypeName];
-    const fieldDisplayNames =
-      allSelectedFieldsDisplay?.[selectedDownloadTypeName];
-
-    const fields = {};
-    if (fieldValues) {
-      for (const [fieldName, fieldValue] of Object.entries(fieldValues)) {
-        fields[fieldName] = {
-          value: fieldValue,
-          // Use the display name for the value if it exists. Otherwise, use the value.
-          displayName: fieldDisplayNames[fieldName] || fieldValue,
-        };
+const BulkDownloadModalQuery = graphql`
+  query BulkDownloadModalQuery(
+    $workflowRunIds: [Int]!
+    $includeMetadata: Boolean!
+    $downloadType: String!
+    $workflow: String!
+    $authenticityToken: String!
+  ) {
+    BulkDownloadCGOverview(
+      input: {
+        workflowRunIds: $workflowRunIds
+        includeMetadata: $includeMetadata
+        downloadType: $downloadType
+        workflow: $workflow
+        authenticityToken: $authenticityToken
       }
+    ) {
+      cgOverviewRows
     }
+  }
+`;
 
-    return {
-      downloadType: selectedDownloadTypeName,
-      fields,
-      validObjectIds: Array.from(objectIds),
-      workflow,
-      workflowEntity,
-    };
-  },
-);
+const BulkDownloadModalMutation = graphql`
+  mutation BulkDownloadModalMutation(
+    $workflowRunIds: [Int]
+    $downloadFormat: String
+    $downloadType: String!
+    $workflow: String!
+    $authenticityToken: String!
+  ) {
+    CreateBulkDownload(
+      input: {
+        workflowRunIds: $workflowRunIds
+        downloadFormat: $downloadFormat
+        downloadType: $downloadType
+        workflow: $workflow
+        authenticityToken: $authenticityToken
+      }
+    )
+  }
+`;
 
 interface BulkDownloadModalProps {
   onClose: $TSFixMeFunction;
@@ -110,6 +104,7 @@ export const BulkDownloadModal = ({
   workflow,
   workflowEntity,
 }: BulkDownloadModalProps) => {
+  // *** State ***
   const [bulkDownloadTypes, setBulkDownloadTypes] = useState<
     BulkDownloadType[] | null
   >(null);
@@ -156,59 +151,83 @@ export const BulkDownloadModal = ({
     setShouldEnableMassNormalizedBackgrounds,
   ] = useState<boolean | undefined>(undefined);
 
+  // *** Relay Hooks ***
+  const [commitMutation] = useMutation<BulkDownloadModalMutationType>(
+    BulkDownloadModalMutation,
+  );
+  const kickOffBulkDownload = ({
+    workflowRunIds,
+    downloadFormat,
+    downloadType,
+    workflow,
+    authenticityToken,
+  }) => {
+    commitMutation({
+      variables: {
+        workflowRunIds,
+        downloadFormat,
+        downloadType,
+        workflow,
+        authenticityToken,
+      },
+      onCompleted: data => {
+        if (
+          data.CreateBulkDownload != null &&
+          data.CreateBulkDownload.error == null
+        ) {
+          onGenerate();
+        } else {
+          onCreateDownloadError(data.CreateBulkDownload.error);
+        }
+      },
+      onError: error => {
+        console.error(error);
+        onCreateDownloadError(DEFAULT_CREATION_ERROR);
+      },
+    });
+  };
+
+  const environment = useRelayEnvironment();
+  const downloadCSVFile = ({
+    workflowRunIds,
+    workflow,
+    includeMetadata,
+    downloadType,
+    authenticityToken,
+  }) => {
+    fetchQuery<BulkDownloadModalQueryType>(
+      environment,
+      BulkDownloadModalQuery,
+      {
+        workflowRunIds: workflowRunIds,
+        includeMetadata: includeMetadata,
+        downloadType: downloadType,
+        workflow: workflow,
+        authenticityToken: authenticityToken,
+      },
+    ).subscribe({
+      next: data => {
+        if (data?.BulkDownloadCGOverview?.cgOverviewRows) {
+          try {
+            downloadFileFromCSV(
+              data?.BulkDownloadCGOverview?.cgOverviewRows,
+              "consensus_genome_overview",
+            );
+          } catch (e) {
+            console.error(e);
+          }
+          onClose();
+        } else {
+          onCreateDownloadError(DEFAULT_CREATION_ERROR);
+        }
+      },
+      error: (error: Error) => {
+        onCreateDownloadError(error.message || DEFAULT_CREATION_ERROR);
+      },
+    });
+  };
+
   // *** Async requests ***
-  async function fetchValidationInfo({ entityIds, workflow }) {
-    if (!entityIds) return null;
-
-    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-      ? validateWorkflowRunIds({
-          workflowRunIds: entityIds,
-          workflow,
-        })
-      : validateSampleIds({
-          sampleIds: entityIds,
-          workflow,
-        });
-  }
-
-  async function fetchBackgrounds(): Promise<BackgroundOptionType[]> {
-    const { backgrounds } = await getBackgrounds();
-    if (!backgrounds) {
-      return [];
-    }
-
-    return backgrounds.map((background: Background) => ({
-      text: background.name,
-      value: background.id,
-      mass_normalized: background.mass_normalized,
-    }));
-  }
-
-  async function checkAllObjectsUploadedByCurrentUser({
-    entityIds,
-    workflowEntity,
-  }) {
-    if (!entityIds) {
-      return false;
-    }
-
-    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-      ? workflowRunsCreatedByCurrentUser(Array.from(entityIds))
-      : samplesUploadedByCurrentUser(Array.from(entityIds));
-  }
-
-  async function checkUserIsCollaboratorOnAllSamples({
-    entityIds,
-    workflowEntity,
-  }) {
-    if (!entityIds) {
-      return false;
-    }
-    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-      ? false
-      : userIsCollaboratorOnAllSamples(Array.from(entityIds));
-  }
-
   async function fetchSampleOptionsAndValidateSelectedSamples({
     entityIds,
     workflowEntity,
@@ -231,6 +250,7 @@ export const BulkDownloadModal = ({
     const validationInfoRequest = fetchValidationInfo({
       entityIds: entityIds && Array.from(entityIds),
       workflow,
+      workflowEntity,
     });
     const backgroundOptionsRequest = fetchBackgrounds();
     const metricsOptionsRequest = getBulkDownloadMetrics(workflow);
@@ -326,26 +346,55 @@ export const BulkDownloadModal = ({
     }
 
     setIsWaitingForCreate(true);
-    try {
-      await createBulkDownload(selectedDownload);
-    } catch (e) {
-      setIsWaitingForCreate(false);
-      setCreateStatus("error");
-      setCreateError(e.error || DEFAULT_CREATION_ERROR);
-      return;
-    }
 
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL,
-      {
-        workflow,
+    // choose the correct download action based on the download type
+    if (
+      selectedDownload.downloadType === "consensus_genome" ||
+      selectedDownload.downloadType ===
+        "consensus_genome_intermediate_output_files"
+    ) {
+      kickOffBulkDownload({
+        workflowRunIds: selectedDownload.validObjectIds,
+        downloadFormat: selectedDownload?.fields?.download_format?.value,
         downloadType: selectedDownload.downloadType,
-        ...objectIds,
-      },
-    );
+        workflow: workflow,
+        authenticityToken: getCsrfToken(),
+      });
+    } else if (selectedDownload.downloadType === "consensus_genome_overview") {
+      downloadCSVFile({
+        workflowRunIds: selectedDownload.validObjectIds,
+        includeMetadata: selectedDownload?.fields?.include_metadata?.value,
+        downloadType: selectedDownload.downloadType,
+        workflow: workflow,
+        authenticityToken: getCsrfToken(),
+      });
+    } else {
+      try {
+        await createBulkDownload(selectedDownload);
+      } catch (e) {
+        console.error(e);
+        onCreateDownloadError(e.error);
+        return;
+      }
 
-    onGenerate();
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL,
+        {
+          workflow,
+          downloadType: selectedDownload.downloadType,
+          ...objectIds,
+        },
+      );
+
+      onGenerate();
+    }
   }
+
+  const onCreateDownloadError = (error: string) => {
+    setIsWaitingForCreate(false);
+    setCreateStatus("error");
+    setCreateError(error || DEFAULT_CREATION_ERROR);
+  };
 
   // *** Fetching data ***
   // Run once on mount
@@ -383,6 +432,8 @@ export const BulkDownloadModal = ({
     if (newSelectedDownloadTypeName === selectedDownloadTypeName) {
       return;
     }
+    setCreateStatus(null);
+    setCreateError(null);
     setSelectedDownloadTypeName(newSelectedDownloadTypeName);
   };
 
