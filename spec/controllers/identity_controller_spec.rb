@@ -78,6 +78,16 @@ RSpec.describe IdentityController, type: :controller do
         expect(project_roles[@member_project.id.to_s]).to eq(["member", "viewer"])
         expect(project_roles[@viewer_project.id.to_s]).to eq(["viewer"])
       end
+
+      it "should expire after 5 mins (300 seconds)" do
+        get :enrich_token
+        now = Time.zone.now
+        json_response = JSON.parse(response.body)
+        enriched_token = json_response["token"]
+        decrypted_enriched_token = controller.send(:decrypt_token, enriched_token)
+
+        expect(Time.zone.at(decrypted_enriched_token["exp"].to_i)).to be_within(2.seconds).of(now + 300)
+      end
     end
   end
 

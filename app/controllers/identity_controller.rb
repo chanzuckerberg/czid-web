@@ -66,7 +66,8 @@ class IdentityController < ApplicationController
 
     # Enrich the token with project roles & return it as payload
     project_roles = user_project_access(user_id)
-    enriched_token = generate_token(user_id, project_roles)
+    five_minutes_in_seconds = 300
+    enriched_token = generate_token(user_id, project_roles, nil, five_minutes_in_seconds)
     render json: {
       token: enriched_token["token"],
     }, status: :ok
@@ -126,12 +127,13 @@ class IdentityController < ApplicationController
     JSON.parse(stdout)
   end
 
-  def generate_token(user_id, project_claims = nil, service_identity = nil)
+  def generate_token(user_id, project_claims = nil, service_identity = nil, expires_after = 3600)
     # Verify the user_id provided is valid before generating a token
     user_id = User.find(user_id).id.to_s
     cmd = "python3 #{TOKEN_AUTH_SERVICE} --create_token --userid #{user_id}"
     cmd += " --project-claims '#{project_claims.to_json}'" if project_claims.present?
     cmd += " --service-identity #{service_identity}" if service_identity.present?
+    cmd += " --expiration #{expires_after}" # takes in seconds
     stdout, stderr, status = Open3.capture3(cmd)
 
     unless status.success?

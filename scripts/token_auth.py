@@ -66,7 +66,7 @@ def create_token(
     validate_claims(userid, parsed_project_claims, service_identity)
 
     # Wrap the JWT in a JWE encrypted with alg ECDH-ES and enc A256CBC-HS512.
-    expires_at = int(time.time()) + expiration
+    expires_at = int(time.time()) + int(expiration)
     jwt_payload = {
         "sub": str(userid),
         "iat": int(time.time()),

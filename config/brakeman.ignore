@@ -49,13 +49,13 @@
     {
       "warning_type": "Command Injection",
       "warning_code": 14,
-      "fingerprint": "75c8850047c924de57ea2827d90e30e82c798b682a67c1157aa273cd7fd52121",
+      "fingerprint": "4e2874c123067d3edd77f123977654277a6c62e5b5e9b9885cfddb22c8762a78",
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/controllers/identity_controller.rb",
-      "line": 141,
+      "line": 137,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "Open3.capture3(((\"python3 #{\"scripts/token_auth.py\"} --create_token --userid #{User.find(user_id).id.to_s}\" + \" --project-claims '#{project_claims.to_json}'\") + \" --service-identity #{service_identity}\"))",
+      "code": "Open3.capture3((((\"python3 #{\"scripts/token_auth.py\"} --create_token --userid #{User.find(user_id).id.to_s}\" + \" --project-claims '#{project_claims.to_json}'\") + \" --service-identity #{service_identity}\") + \" --expiration #{expires_after}\"))",
       "render_path": null,
       "location": {
         "type": "method",
