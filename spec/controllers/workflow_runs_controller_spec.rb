@@ -302,6 +302,9 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
           response_workflow_run = workflow_runs[0]
           expected_workflow_run = WorkflowRun.find(response_workflow_run["id"])
+          expected_sample = expected_workflow_run.sample
+          expected_sample_attributes = [:id]
+          expected_sample_info = expected_sample.slice(expected_sample_attributes)
 
           expect(json_response.keys).to eq(["workflow_runs"])
           expect(workflow_runs.count).to eq(@expected_workflow_runs.count)
@@ -319,7 +322,10 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         status: expected_workflow_run.status,
                                                         id: expected_workflow_run.id,
                                                         workflow: expected_workflow_run.workflow,
-                                                        wdl_version: expected_workflow_run.wdl_version)
+                                                        wdl_version: expected_workflow_run.wdl_version,
+                                                        sample: {
+                                                          info: expected_sample_info.as_json,
+                                                        }.as_json)
         end
 
         it "sees basic fields with sample info included when 'with_sample_info' mode is specified" do

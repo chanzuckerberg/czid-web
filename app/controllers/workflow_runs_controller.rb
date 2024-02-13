@@ -457,7 +457,9 @@ class WorkflowRunsController < ApplicationController
       sample_attributes = [:id, :created_at, :host_genome_name, :name, :private_until, :project_id, :sample_notes]
       metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids)
       samples_visibility_by_sample_id = get_visibility_by_sample_id(sample_ids)
-      workflow_runs = workflow_runs.includes(sample: [:host_genome, :project, :user])
+      workflow_runs = workflow_runs.includes(:user, sample: [:host_genome, :project, :user])
+    else
+      workflow_runs = workflow_runs.includes(:user)
     end
 
     formatted_workflow_runs = workflow_runs.reduce([]) do |formatted_wrs, wr|
@@ -481,9 +483,9 @@ class WorkflowRunsController < ApplicationController
           end
         end
 
-        if should_include_sample_info
-          wr_sample = wr.sample
-          formatted_wr[:sample] = {}.tap do |formatted_sample|
+        formatted_wr[:sample] = {}.tap do |formatted_sample|
+          if should_include_sample_info
+            wr_sample = wr.sample
             formatted_sample[:info] = wr_sample.slice(sample_attributes)
             formatted_sample[:info][:public] = samples_visibility_by_sample_id[wr_sample.id]
             result_status_description = get_result_status_description_for_errored_sample(wr_sample) if wr_sample.upload_error.present?
@@ -491,6 +493,8 @@ class WorkflowRunsController < ApplicationController
             formatted_sample[:metadata] = metadata_by_sample_id[wr_sample.id]
             formatted_sample[:project_name] = wr_sample.project.name
             formatted_sample[:uploader] = sample_uploader(wr_sample)
+          else
+            formatted_sample[:info] = { id: wr.sample_id }
           end
         end
       end
