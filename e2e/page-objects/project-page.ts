@@ -22,6 +22,7 @@ const BACKGROUND_FILTER_LABEL = "//div[contains(@class, 'downloadType')]//div[te
 const SEARCH_MY_DATA_INPUT = "[class*='header'] [class*='category search'] input";
 const HOST_SEARCH_RESULTS = "[category='host'] [class='title']";
 
+const INCLUDE_SAMPLE_METADATA = "//span[text()='Include sample metadata in this table']/preceding-sibling::input";
 const SAMPLE_METEDATA = "Sample Metadata";
 const SAMPLE_OVERVIEW = "Samples Overview";
 const SAMPLE_TAXON_REPORTS = "Sample Taxon Reports";
@@ -291,12 +292,19 @@ export class ProjectPage extends PageObject {
   public async clickStartGeneratingDownloadButton() {
     const [response] = await Promise.all([
       this.page.waitForResponse(response =>
-        response.url().includes("bulk_downloads") && response.request().method() === "POST",
+        (response.url().includes("bulk_downloads") && response.request().method() === "POST") ||
+        (response.url().includes("graphqlfed") && response.request().method() === "POST"),
       ),
       this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click(),
     ]);
     const responseJson = await response.json();
-    return responseJson.id;
+    if (responseJson.data && responseJson.data.CreateBulkDownload) {
+      // graphqlfed
+      return responseJson.data.CreateBulkDownload.id;
+    } else {
+      // bulk_downloads
+      return responseJson.id;
+    }
   }
 
   public async clickDeleteButton() {
@@ -306,6 +314,10 @@ export class ProjectPage extends PageObject {
   public async clickDeleteConfirmationButton() {
     await this.page.locator(DELETE_CONFIRMATION_BUTTON).waitFor({state: "visible"});
     await this.page.locator(DELETE_CONFIRMATION_BUTTON).click();
+  }
+
+  public async clickIncludeSampleMetadata() {
+    await this.page.locator(INCLUDE_SAMPLE_METADATA).click();
   }
   // #endregion Click
 

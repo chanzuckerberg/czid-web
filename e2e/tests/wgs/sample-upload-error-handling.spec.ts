@@ -49,33 +49,29 @@ test.describe("Data Validation: P-0", () => {
     const columnTooltip = await uploadPage.getColumnTooltip();
     expect(columnTooltip).toEqual("This file does not match the sequencing technology selected. Please make sure that you have selected the correct sequencing technology for this file.");
     expect(await uploadPage.isSampleRowDisabled()).toBeTruthy();
-    expect(await uploadPage.isContinueButtonDisabled()).toBeTruthy();
     // #endregion 8. Observe and verify selected Sample row
 
     // #region 9. Observe and verify error messages
-    /*
-    Yellow box error message reads:
-    1 file will not be uploaded. You selected Illumina as the sequencing platform, but the file does not appear to be an Illumina output.
-    File Name
-    {Sample file name}
-    */
+    // Yellow box error message reads:
+    // 1 file will not be uploaded. You selected Illumina as the sequencing platform, but the file does not appear to be an Illumina output.
     const warnings = await uploadPage.getWarningTable();
     expect(warnings["message"]).toEqual("1 file will not be uploaded. You selected Illumina as the sequencing platform, but the file does not appear to be an Illumina output.");
+    // File Name
+    // {Sample file name}
     expect(warnings["files"].length).toEqual(1);
     expect(warnings["files"][0]["File Name"]).toEqual(nonIlluminaSampleFile);
 
-    /*
-    Red box error message reads:
-    There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at our Help Center for assistance.
-    File Name
-    {Sample file name}
-
-    Continue button is disabled
-    */
+    // Red box error message reads:
+    // There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at our Help Center for assistance.
     const errors = await uploadPage.getErrorTable();
     expect(errors["message"]).toEqual("There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at our Help Center for assistance.");
+    // File Name
+    // {Sample file name}
     expect(errors["files"].length).toEqual(1);
     expect(errors["files"][0]["File Name"]).toEqual(nonIlluminaSampleFile);
+
+    // Continue button is disabled
+    expect(await uploadPage.isContinueButtonDisabled()).toBeTruthy();
     // #endregion 9. Observe and verify error messages
   });
 

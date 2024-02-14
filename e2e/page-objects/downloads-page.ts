@@ -7,7 +7,6 @@ const SAMPLES_IN_DOWNLOAD_DROPDOWN = "//div[text()='Samples in this Download']";
 const SAMPLES_IN_DOWNLOAD_NAMES = "[class*='samplesList'] [class*='sampleName']";
 const CLOSE_ICON = "[class*='closeIcon']";
 const BACKGROUND_VALUE = "[data-testid='background-value']";
-const INCLUDE_SAMPLE_METADATA = "//span[text()='Include sample metadata in this table']/preceding-sibling::input";
 const METRIC_VALUE = "[data-testid='metric-value']";
 const DOWNLOAD_DETAILS = (downloadId: string) => `[id='${downloadId}'][data-testid='download-details-link']`;
 const DOWNLOAD_COMPLETE_BY_DOWNLOADID = (downloadId: string) => `//div[contains(@data-testid, 'complete')]/parent::div/following-sibling::div/span[@id='${downloadId}']`;
@@ -47,10 +46,6 @@ export class DownloadsPage extends PageObject {
     const locatorString = DOWNLOAD_DETAILS(downloadId.toString());
     await this.page.locator(locatorString).waitFor();
     await this.page.locator(locatorString).click();
-  }
-
-  public async clickIncludeSampleMetadata() {
-    await this.page.locator(INCLUDE_SAMPLE_METADATA).click();
   }
 
   public async clickSamplesInDownloadDropdown() {
@@ -213,7 +208,10 @@ export class DownloadsPage extends PageObject {
       await projectPage.clickFilterOption(option);
     }
     else if ((downloadType === "Consensus Genome Overview") && includeSampleMetadata) {
-      await this.clickIncludeSampleMetadata();
+      await projectPage.clickIncludeSampleMetadata();
+    }
+
+    if (downloadType.includes("Consensus Genome Overview") ){
       // Verify that the download completes immediately
       expectedFileExtention = "csv";
       const fileName = "consensus_genome_overview";
@@ -221,8 +219,8 @@ export class DownloadsPage extends PageObject {
       expect(`${fileName}.${expectedFileExtention}`).toMatch(download.suggestedFilename());
       return;
     }
-
     const downloadId = await projectPage.clickStartGeneratingDownloadButton();
+
     // #endregion Start the sample download
 
     // #region Verify the download alert message
