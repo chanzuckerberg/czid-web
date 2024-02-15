@@ -9,7 +9,6 @@ import {
   map,
   reduce,
   size,
-  union,
 } from "lodash/fp";
 import React, {
   forwardRef,
@@ -177,7 +176,9 @@ const SamplesView = forwardRef(function SamplesView(
   const [heatmapCreationModalOpen, setHeatmapCreationModalOpen] =
     useState(false);
   const [nextcladeModalOpen, setNextcladeModalOpen] = useState(false);
-  const [metadataFields, setMetadataFields] = useState<MetadataType[]>([]);
+  const [metadataFields, setMetadataFields] = useState<
+    MetadataType[] | undefined
+  >();
   const [loading, setLoading] = useState(true);
 
   /*
@@ -234,22 +235,27 @@ const SamplesView = forwardRef(function SamplesView(
   setupWorkflowConfigs();
 
   const fetchMetadataFieldsBySampleIds = async () => {
-    if (selectableIds && showAllMetadata) {
+    if (!showAllMetadata) {
+      setLoading(false);
+      return;
+    }
+    if (metadataFields === undefined && selectableIds !== undefined) {
       let metadataFields = [] as MetadataType[];
-
+      // TODO(bchu): Make CG also hit /samples for NextGen integration. We'll need to give Rails
+      // the old Rails IDs.
       if (workflowIsWorkflowRunEntity(workflow)) {
         metadataFields = await getWorkflowRunMetadataFields(selectableIds);
       } else {
         metadataFields = await getSampleMetadataFields(selectableIds);
       }
       setMetadataFields(metadataFields);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
     fetchMetadataFieldsBySampleIds();
-  }, []);
+  }, [selectableIds]);
 
   // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   const selectedObjects = getSelectedObjects({ selectedIds, objects });
@@ -287,22 +293,12 @@ const SamplesView = forwardRef(function SamplesView(
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     setReferenceSelectId(value);
 
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onUpdateSelectedIds(newSelected);
   };
 
   const handleSelectAllRows = (checked: boolean) => {
     setReferenceSelectId(null);
-    const newSelected = new Set(
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-      checked
-        ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-          union(Array.from(selectedIds), selectableIds)
-        : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-          difference(Array.from(selectedIds), selectableIds),
-    );
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-    onUpdateSelectedIds(newSelected);
+    onUpdateSelectedIds(checked ? new Set(selectableIds) : new Set());
   };
 
   const handleSortColumn = ({
@@ -327,7 +323,6 @@ const SamplesView = forwardRef(function SamplesView(
       projectId: projectId,
     });
     onDeleteSample();
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
     onUpdateSelectedIds(new Set());
   };
 
@@ -923,10 +918,10 @@ const SamplesView = forwardRef(function SamplesView(
             count={
               hasAtLeastOneFilterApplied
                 ? {
-                    numerator: selectableIds?.length ?? 0,
+                    numerator: selectableIds?.length ?? "-",
                     denominator: totalNumberOfObjects,
                   }
-                : selectableIds?.length ?? 0
+                : selectableIds?.length ?? "-"
             }
             workflowDisplayText={
               totalNumberOfObjects === 1

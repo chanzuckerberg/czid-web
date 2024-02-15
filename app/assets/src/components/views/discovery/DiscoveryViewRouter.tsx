@@ -10,7 +10,6 @@ import React, { Suspense, useContext } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
-import { DiscoveryView } from "~/components/views/discovery/DiscoveryView";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
 import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
@@ -23,6 +22,7 @@ import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoti
 import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";
 import TermsOfUsePreview from "~/components/views/support/TermsOfUsePreview";
 import AdminSettings from "../admin_settings/AdminSettings";
+import { DiscoveryViewFC } from "./DiscoveryViewFC";
 
 // These props come from Rails .html.erb views via the react_component function in app/assets/src/index.tsx (the entrypoint)
 interface DiscoveryViewRouterProps {
@@ -94,7 +94,7 @@ const DiscoveryViewRouter = ({
       <Route
         path="/pub/:snapshotShareId"
         render={({ match }) => (
-          <DiscoveryView
+          <DiscoveryViewFC
             domain={domain}
             projectId={projectId}
             snapshotProjectDescription={snapshotProjectDescription}
@@ -124,7 +124,7 @@ const DiscoveryViewRouter = ({
       {userSignedIn ? (
         <Route
           render={({ match }) => (
-            <DiscoveryView
+            <DiscoveryViewFC
               admin={admin}
               domain={domain}
               mapTilerKey={mapTilerKey}

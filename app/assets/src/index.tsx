@@ -67,7 +67,6 @@ const ReactComponentWithGlobalContext = ({
   props: any;
   userContext: UserContextType;
 }) => {
-  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
   const [globalContextState, globalContextDispatch] = useReducer(
     globalContextReducer,
     initialGlobalContextState,
@@ -82,7 +81,6 @@ const ReactComponentWithGlobalContext = ({
         <RelayEnvironment shouldReadFromNextGen={shouldReadFromNextGen}>
           <UserContext.Provider value={userContext}>
             <GlobalContext.Provider
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               value={{ globalContextState, globalContextDispatch }}
             >
               <StyledEngineProvider injectFirst>

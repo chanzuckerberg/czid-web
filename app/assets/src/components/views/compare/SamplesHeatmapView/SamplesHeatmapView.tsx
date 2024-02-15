@@ -2389,7 +2389,6 @@ const SamplesHeatmapView = (props: SamplesHeatmapViewProps) => {
   const dispatch = globalContext.globalContextDispatch;
 
   const updateDiscoveryProjectId = (projectIds: number[] | null) => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     dispatch(createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectIds));
   };
 

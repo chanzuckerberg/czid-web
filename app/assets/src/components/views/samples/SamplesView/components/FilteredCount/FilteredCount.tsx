@@ -2,7 +2,10 @@ import React from "react";
 
 type FilteredCountProps = {
   workflowDisplayText: string;
-  count: number | { numerator: number; denominator: number };
+  count:
+    | number
+    | string
+    | { numerator: number | string; denominator: number | string };
 };
 
 export const FilteredCount = ({
@@ -11,9 +14,9 @@ export const FilteredCount = ({
 }: FilteredCountProps) => {
   return (
     <>
-      {typeof count === "number"
-        ? count
-        : `${count.numerator} out of ${count.denominator}`}{" "}
+      {typeof count === "object"
+        ? `${count.numerator} out of ${count.denominator}`
+        : count}{" "}
       {workflowDisplayText}
     </>
   );

@@ -3,8 +3,8 @@ import { SortDirectionType } from "react-virtualized";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import { WorkflowCount, WorkflowType } from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
-import { FilterList } from "./samplesView";
-import { MustHaveId, Project } from "./shared";
+import { FilterList, ObjectType } from "./samplesView";
+import { Project } from "./shared";
 
 export interface DiscoveryViewProps extends RouteComponentProps {
   admin?: boolean;
@@ -70,6 +70,7 @@ export interface DiscoveryViewState {
   emptyStateModalOpen: boolean;
   filteredProjectCount: number;
   filteredProjectDimensions: Dimension[];
+  /** @deprecated Use getFilteredSampleCount() during the migration. */
   filteredSampleCountsByWorkflow: WorkflowCount;
   filteredSampleDimensions: Dimension[];
   filteredSampleStats: { count?: number };
@@ -99,6 +100,7 @@ export interface DiscoveryViewState {
   sampleWasDeleted: string | null;
   search: string;
   selectableSampleIds: number[];
+  /** @deprecated Use getSelectableWorkflowRunIds() during the migration. */
   selectableWorkflowRunIds: number[];
   selectedSampleIdsByWorkflow: WorkflowSets;
   showFilters: boolean;
@@ -113,23 +115,27 @@ export interface DiscoveryViewState {
   workflowEntity: string;
 }
 
-export interface ConfigForWorkflow<T extends MustHaveId> {
+export interface ConfigForWorkflow {
   bannerTitle: string;
-  objectCollection: ObjectCollectionView<T>;
+  objectCollection: ObjectCollectionView<ObjectType>;
   noDataLinks: {
     external?: boolean;
     href: string;
     text: string;
   }[];
   noDataMessage: string;
+  // For NextGen migration:
+  fetchWorkflowRuns: (conditions: Conditions) => void;
+  getSelectableWorkflowRunIds: () => number[] | undefined;
+  getFilteredSampleCount: () => number | undefined;
 }
 
 export interface Conditions {
   projectId: number;
   snapshotShareId: string;
   search: string;
-  orderBy: string;
-  orderDir: SortDirectionType;
+  orderBy?: string;
+  orderDir?: SortDirectionType;
   filters: FilterList & { workflow: WorkflowType };
   sampleIds?: string[];
 }

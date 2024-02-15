@@ -24,11 +24,10 @@ import {
 } from "lodash/fp";
 import moment from "moment";
 import { nanoid } from "nanoid";
-import React, { ReactNode, Suspense, useContext } from "react";
+import React, { ReactNode, Suspense } from "react";
 import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
 import { trackPageTransition } from "~/api/analytics";
-import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { IconLoading } from "~/components/ui/icons";
@@ -68,11 +67,6 @@ import {
   NOTIFICATION_TYPES,
   showNotification,
 } from "~/components/views/SampleView/utils";
-import {
-  ActionType,
-  createAction,
-  GlobalContext,
-} from "~/globalContext/reducer";
 import { loadState } from "~/helpers/storage";
 import {
   Conditions,
@@ -145,6 +139,12 @@ import {
 
 const SAMPLES_UPLOAD_URL = "/samples/upload";
 
+const WORKFLOWS_SERVICE_SORT_COLUMNS = [
+  "createdAt",
+  "wdl_version",
+  "creation_source",
+];
+
 // Data available
 // (A) non-filtered dimensions: for filter options
 // (B) filtered dimensions: for sidebar
@@ -164,20 +164,14 @@ const SAMPLES_UPLOAD_URL = "/samples/upload";
 //   - load (A) non-filtered dimensions, (B) filtered dimensions and (C) filtered stats
 //     (synchronous data not needed for now because we do not show projects and visualizations)
 
-class DiscoveryViewCC extends React.Component<
-  DiscoveryViewWithContextProps,
+export class DiscoveryView extends React.Component<
+  DiscoveryViewWithFCProps,
   DiscoveryViewState
 > {
   amrWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
   benchmarkWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
   cgWorkflowRuns: ObjectCollectionView<CGRun>;
-  configForWorkflow: {
-    amr: ConfigForWorkflow<BaseWorkflowRun>;
-    benchmark: ConfigForWorkflow<BaseWorkflowRun>;
-    "consensus-genome": ConfigForWorkflow<CGRun>;
-    "short-read-mngs": ConfigForWorkflow<PipelineTypeRun>;
-    "long-read-mngs": ConfigForWorkflow<PipelineTypeRun>;
-  };
+  configForWorkflow: Record<WorkflowType, ConfigForWorkflow>;
   dataLayer: DiscoveryDataLayer;
   longReadMngsSamples: ObjectCollectionView<PipelineTypeRun>;
   mapPreviewProjects: ObjectCollectionView<Project>;
@@ -191,7 +185,7 @@ class DiscoveryViewCC extends React.Component<
   visualizations: ObjectCollectionView<Visualization>;
   visualizationsView: VisualizationsView;
   workflowEntity: string;
-  constructor(props: DiscoveryViewWithContextProps) {
+  constructor(props: DiscoveryViewWithFCProps) {
     super(props);
     const { domain, projectId, updateDiscoveryProjectId } = this.props;
 
@@ -295,7 +289,7 @@ class DiscoveryViewCC extends React.Component<
         WorkflowType.CONSENSUS_GENOME,
       ),
       onViewChange: () => {
-        this.refreshWorkflowRunData(WorkflowType.CONSENSUS_GENOME);
+        // We don't need to update ID list related state for CG b/c that now comes from props.
       },
       displayName: WorkflowType.CONSENSUS_GENOME,
     });
@@ -355,6 +349,9 @@ class DiscoveryViewCC extends React.Component<
     this.visualizationsView = null;
 
     // preload first pages
+    this.props.fetchCgWorkflowRuns(
+      this.getConditionsFor(TAB_SAMPLES, WorkflowType.CONSENSUS_GENOME),
+    );
     this.samples.loadPage(0);
     if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
       this.projects.loadPage(0);
@@ -386,6 +383,12 @@ class DiscoveryViewCC extends React.Component<
         noDataMessage:
           `No samples were processed by the AMR Pipeline. ` +
           "You can upload new samples or rerun mNGS samples through the AMR pipeline.",
+        fetchWorkflowRuns: () => {
+          // Not migrated to NextGen yet.
+        },
+        getSelectableWorkflowRunIds: () => this.amrWorkflowRuns.getIds(),
+        getFilteredSampleCount: () =>
+          this.state.filteredSampleCountsByWorkflow[WorkflowType.AMR],
       },
       [WorkflowType.BENCHMARK]: {
         bannerTitle: `${WorkflowType.BENCHMARK.toUpperCase()} Samples`,
@@ -399,6 +402,12 @@ class DiscoveryViewCC extends React.Component<
         noDataMessage:
           `No samples were processed by the Benchmark Pipeline. ` +
           "You can Benchmark samples by selecting them in the mNGS table and clicking the 'Benchmark' icon.",
+        fetchWorkflowRuns: () => {
+          // Not migrated to NextGen yet.
+        },
+        getSelectableWorkflowRunIds: () => this.benchmarkWorkflowRuns.getIds(),
+        getFilteredSampleCount: () =>
+          this.state.filteredSampleCountsByWorkflow[WorkflowType.BENCHMARK],
       },
       [WorkflowType.CONSENSUS_GENOME]: {
         bannerTitle: WORKFLOWS[WorkflowType.CONSENSUS_GENOME].pluralizedLabel,
@@ -409,6 +418,12 @@ class DiscoveryViewCC extends React.Component<
         noDataMessage: this.getNoDataBannerMessage(
           WORKFLOW_TABS.CONSENSUS_GENOME,
         ),
+        fetchWorkflowRuns: (conditions: Conditions) => {
+          this.props.fetchCgWorkflowRuns(conditions);
+        },
+        getSelectableWorkflowRunIds: () =>
+          this.props.cgWorkflowRuns?.map(run => Number(run.id)),
+        getFilteredSampleCount: () => this.props.cgWorkflowRuns?.length,
       },
       [WorkflowType.SHORT_READ_MNGS]: {
         bannerTitle: `${WORKFLOW_TABS.SHORT_READ_MNGS} Samples`,
@@ -419,6 +434,14 @@ class DiscoveryViewCC extends React.Component<
         noDataMessage: this.getNoDataBannerMessage(
           WORKFLOW_TABS.SHORT_READ_MNGS,
         ),
+        fetchWorkflowRuns: () => {
+          // Not migrated to NextGen yet.
+        },
+        getSelectableWorkflowRunIds: () => this.samples.getIds(),
+        getFilteredSampleCount: () =>
+          this.state.filteredSampleCountsByWorkflow[
+            WorkflowType.SHORT_READ_MNGS
+          ],
       },
       [WorkflowType.LONG_READ_MNGS]: {
         bannerTitle: `${WORKFLOW_TABS.LONG_READ_MNGS} Samples`,
@@ -429,7 +452,17 @@ class DiscoveryViewCC extends React.Component<
         noDataMessage: this.getNoDataBannerMessage(
           WORKFLOW_TABS.LONG_READ_MNGS,
         ),
+        fetchWorkflowRuns: () => {
+          // Not migrated to NextGen yet.
+        },
+        getSelectableWorkflowRunIds: () => this.longReadMngsSamples.getIds(),
+        getFilteredSampleCount: () =>
+          this.state.filteredSampleCountsByWorkflow[
+            WorkflowType.LONG_READ_MNGS
+          ],
       },
+      // @ts-expect-error This value is unused.
+      [WorkflowType.AMR_DEPRECATED]: {},
     };
   };
 
@@ -500,8 +533,7 @@ class DiscoveryViewCC extends React.Component<
     };
   }
 
-  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-  getConditionsFor = (tab: string, workflow: WorkflowType = null) => {
+  getConditionsFor = (tab: string, workflow?: WorkflowType): Conditions => {
     return {
       ...this.getConditions(workflow),
       ...this.getDataLayerOrderStateFieldsFor(tab, workflow),
@@ -558,8 +590,7 @@ class DiscoveryViewCC extends React.Component<
 
   getOrderStateFieldsFor = (
     tab: string,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-    workflow: WorkflowType = null,
+    workflow?: WorkflowType,
   ): {
     orderBy: string | undefined;
     orderDirection: SortDirectionType | undefined;
@@ -572,11 +603,7 @@ class DiscoveryViewCC extends React.Component<
     return { orderBy, orderDirection };
   };
 
-  getDataLayerOrderStateFieldsFor = (
-    tab: string,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-    workflow: WorkflowType = null,
-  ) => {
+  getDataLayerOrderStateFieldsFor = (tab: string, workflow?: WorkflowType) => {
     const { orderBy, orderDirection: orderDir } = this.getOrderStateFieldsFor(
       tab,
       workflow,
@@ -789,7 +816,7 @@ class DiscoveryViewCC extends React.Component<
   };
 
   resetData = ({ callback }: { callback?(): void } = {}) => {
-    const { allowedFeatures, domain } = this.props;
+    const { allowedFeatures, domain, fetchCgWorkflowRuns } = this.props;
     const conditions = this.getConditions();
 
     this.samples.reset({
@@ -801,6 +828,10 @@ class DiscoveryViewCC extends React.Component<
     });
 
     if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
+      fetchCgWorkflowRuns(
+        this.getConditionsFor(TAB_SAMPLES, WorkflowType.CONSENSUS_GENOME),
+      );
+
       this.projects.reset({
         conditions: this.getConditionsFor(TAB_PROJECTS),
         loadFirstPage: true,
@@ -939,11 +970,19 @@ class DiscoveryViewCC extends React.Component<
   };
 
   resetSamplesData = () => {
-    const { workflow } = this.state;
+    const { currentTab, workflow } = this.state;
     const conditions = this.getConditions(workflow);
 
-    const workflowObjects = this.configForWorkflow[workflow].objectCollection;
-    workflowObjects.reset({
+    if (
+      currentTab === TAB_SAMPLES &&
+      conditions.orderBy !== undefined &&
+      WORKFLOWS_SERVICE_SORT_COLUMNS.includes(conditions.orderBy)
+    ) {
+      // This method is only called on sort change, in which case we need to refetch the order if
+      // it's by a field in Workflows Service.
+      this.configForWorkflow[workflow].fetchWorkflowRuns(conditions);
+    }
+    this.configForWorkflow[workflow].objectCollection.reset({
       conditions,
       loadFirstPage: true,
     });
@@ -1085,7 +1124,6 @@ class DiscoveryViewCC extends React.Component<
 
       // Make sure workflow has not change from when this function was invoked
       const currentWorkflowIsTypeToUpdate = workflow === workflowTypeToUpdate;
-
       const shouldUpdateSelectableIds =
         workflowIsWorkflowRunEntity(workflow) && currentWorkflowIsTypeToUpdate;
 
@@ -1790,7 +1828,9 @@ class DiscoveryViewCC extends React.Component<
     // Fetch stats and dimensions for the map sidebar. Special request with the current filters
     // and the previewed location.
     const params = this.getConditions();
-    params.filters["locationV2"] = mapLocationData[mapPreviewedLocationId].name;
+    params.filters["locationV2"] = [
+      mapLocationData[mapPreviewedLocationId].name,
+    ];
     const [{ sampleStats }, { projectDimensions, sampleDimensions }] =
       await Promise.all([
         getDiscoveryStats({ domain, ...params }),
@@ -2199,11 +2239,7 @@ class DiscoveryViewCC extends React.Component<
         WorkflowType.CONSENSUS_GENOME,
         <Suspense fallback="-">
           <ConsensusGenomesTabCount
-            count={
-              this.state.filteredSampleCountsByWorkflow[
-                WorkflowType.CONSENSUS_GENOME
-              ] ?? "-"
-            }
+            count={this.props.cgWorkflowRuns?.length ?? "-"}
           />
         </Suspense>,
       ),
@@ -2288,14 +2324,12 @@ class DiscoveryViewCC extends React.Component<
       currentDisplay,
       currentTab,
       filteredProjectCount,
-      filteredSampleCountsByWorkflow,
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
       projectId,
       sampleActiveColumnsByWorkflow,
       selectableSampleIds,
-      selectableWorkflowRunIds,
       selectedSampleIdsByWorkflow,
       showFilters,
       showStats,
@@ -2314,14 +2348,11 @@ class DiscoveryViewCC extends React.Component<
       workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
 
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
-    const amrHasLoaded = !this.amrWorkflowRuns.isLoading();
-    const benchmarkHasLoaded = !this.benchmarkWorkflowRuns.isLoading();
-    const longReadSamplesHaveLoaded = !this.longReadMngsSamples.isLoading();
 
     const tableHasLoaded =
-      amrHasLoaded &&
-      benchmarkHasLoaded &&
-      longReadSamplesHaveLoaded &&
+      !this.amrWorkflowRuns.isLoading() &&
+      !this.benchmarkWorkflowRuns.isLoading() &&
+      !this.longReadMngsSamples.isLoading() &&
       !this.cgWorkflowRuns.isLoading() &&
       !this.samples.isLoading() &&
       currentDisplay === "table";
@@ -2329,7 +2360,7 @@ class DiscoveryViewCC extends React.Component<
     const hideAllTriggers = !!snapshotShareId;
 
     const selectableIds = isWorkflowRunEntity
-      ? selectableWorkflowRunIds
+      ? this.configForWorkflow[workflow].getSelectableWorkflowRunIds()
       : selectableSampleIds;
     const selectedIds = selectedSampleIdsByWorkflow[workflow];
     const updateSelectedIds = this.handleSelectedSamplesUpdate;
@@ -2457,7 +2488,7 @@ class DiscoveryViewCC extends React.Component<
             </div>
             {userDataCounts &&
             userDataCounts.sampleCountByWorkflow[workflow] &&
-            !filteredSampleCountsByWorkflow[workflow] &&
+            this.configForWorkflow[workflow].getFilteredSampleCount() === 0 &&
             tableHasLoaded
               ? this.renderNoSearchResultsBanner(TAB_SAMPLES)
               : null}
@@ -2727,33 +2758,20 @@ class DiscoveryViewCC extends React.Component<
 // Using a function component wrapper provides a semi-hacky way to
 // access useContext without the class component to function component
 // conversion.  We should move this when we refactor DiscoveryView
-interface DiscoveryViewWithContextProps extends DiscoveryViewProps {
+interface DiscoveryViewWithFCProps extends DiscoveryViewProps {
   allowedFeatures: string[];
   isAdmin: boolean;
   updateDiscoveryProjectId: (projectIds: number | null) => void;
+  fetchCgWorkflowRuns: (params: Conditions) => void;
+  cgWorkflowRuns?: WorkflowRunRow[];
 }
 
-export const DiscoveryView = (props: DiscoveryViewProps) => {
-  // Some queries in discovery view are significantly slower than others, so fire queries
-  // separately in parallel to allow the faster parts of the page to load first.
-  // TODO(bchu): Kick off parallel queries here.
-
-  const { admin, allowedFeatures } = useContext(UserContext);
-  const globalContext = useContext(GlobalContext);
-  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
-  const dispatch = globalContext.globalContextDispatch;
-
-  const updateDiscoveryProjectId = (projectId: number | null) => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-    dispatch(createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectId));
-  };
-
-  return (
-    <DiscoveryViewCC
-      {...props}
-      allowedFeatures={allowedFeatures}
-      isAdmin={admin}
-      updateDiscoveryProjectId={updateDiscoveryProjectId}
-    />
-  );
-};
+/** Flattened version of a workflowRun object returned by Workflows Service. */
+export interface WorkflowRunRow {
+  id: string;
+  startedAt?: string;
+  status?: string;
+  version?: string;
+  workflowName?: string;
+  sampleId?: string;
+}

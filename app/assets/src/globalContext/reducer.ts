@@ -1,7 +1,10 @@
-import { createContext } from "react";
+import { createContext, Dispatch } from "react";
 import { GlobalContextStateType } from "./initialState";
 
-export const GlobalContext = createContext(null);
+export const GlobalContext = createContext<{
+  globalContextState: GlobalContextStateType;
+  globalContextDispatch: Dispatch<Action>;
+} | null>(null);
 
 export enum ActionType {
   UPDATE_DISCOVERY_PROJECT_IDS = "UPDATE_DISCOVERY_PROJECT_IDS",
@@ -9,12 +12,12 @@ export enum ActionType {
 
 type Action = {
   type: ActionType;
-  payload: object | string | number;
+  payload: number | number[] | null;
 };
 
 export const createAction = (
   type: ActionType,
-  payload: object | number | string,
+  payload: number | number[] | null,
 ) => {
   return {
     type,

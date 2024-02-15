@@ -1,7 +1,6 @@
 import { isEqual, isNull, size, startCase } from "lodash/fp";
 import React from "react";
 import { getBackgrounds, getMassNormalizedBackgroundAvailability } from "~/api";
-import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import {
@@ -11,7 +10,6 @@ import {
 } from "~/components/views/compare/SamplesHeatmapView/constants";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { CATEGORIES } from "~/components/views/SampleView/utils";
-import { GlobalContext } from "~/globalContext/reducer";
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
 import { Dropdown, MultipleNestedDropdown } from "~ui/controls/dropdowns";
@@ -55,7 +53,6 @@ export default class HeatmapCreationModal extends React.Component<
       selectedThresholdFilters: [],
     };
   }
-  static contextType = GlobalContext;
 
   componentDidMount() {
     this.fetchBackgrounds();
@@ -361,6 +358,3 @@ export default class HeatmapCreationModal extends React.Component<
 HeatmapCreationModal.defaultProps = {
   continueInNewTab: false,
 };
-
-// @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-HeatmapCreationModal.contextType = UserContext;

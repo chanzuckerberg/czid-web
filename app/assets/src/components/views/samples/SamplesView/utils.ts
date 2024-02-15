@@ -1,6 +1,7 @@
 import { countBy, identity } from "lodash/fp";
-import { Entry, ObjectsType } from "~/interface/samplesView";
+import { Entry, ObjectType } from "~/interface/samplesView";
 import { WORKFLOW_ENTITIES } from "~utils/workflows";
+import { ObjectCollectionView } from "../../discovery/DiscoveryDataLayer";
 import { PipelineRunStatuses, UPLOAD_FAILED } from "./constants";
 
 export const getSelectedObjects = ({
@@ -8,7 +9,7 @@ export const getSelectedObjects = ({
   objects,
 }: {
   selectedIds: Set<number>;
-  objects: ObjectsType;
+  objects: ObjectCollectionView<ObjectType>;
 }) => {
   if (!selectedIds || !objects) return [];
 

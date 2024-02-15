@@ -6,11 +6,6 @@ import { AnnotationValue } from "~/interface/discovery";
 import { LocationObject } from "~/interface/shared";
 import { DateString } from "~/interface/shared/generic";
 
-export type ObjectsType =
-  | ObjectCollectionView<PipelineTypeRun>
-  | ObjectCollectionView<BaseWorkflowRun>
-  | ObjectCollectionView<CGRun>;
-
 export type ObjectType = PipelineTypeRun | BaseWorkflowRun | CGRun;
 
 export interface SamplesViewProps {
@@ -32,7 +27,7 @@ export interface SamplesViewProps {
   mapPreviewedLocationId?: number;
   mapTilerKey?: string;
   numOfMngsSamples?: number;
-  objects?: ObjectsType;
+  objects?: ObjectCollectionView<ObjectType>;
   onActiveColumnsChange?(activeColumns: string[]): void;
   onClearFilters?(): void;
   onDeleteSample(): void;
@@ -47,7 +42,7 @@ export interface SamplesViewProps {
     object: Entry;
     currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>;
   }): void;
-  onUpdateSelectedIds?(selectedSampleIds: Set<number>): void;
+  onUpdateSelectedIds(selectedSampleIds: Set<number>): void;
   onSortColumn?(param: {
     sortBy: string;
     sortDirection: SortDirectionType;
@@ -87,7 +82,7 @@ export interface ViewProps {
 export interface FilterList {
   annotations: Array<{ name: AnnotationValue }>;
   host: Array<number>;
-  locationV2: Array<string> | string;
+  locationV2: Array<string>;
   taxon: Array<number>;
   taxonThresholds: Array<ThresholdForAPI>;
   taxaLevels: Array<string>;
