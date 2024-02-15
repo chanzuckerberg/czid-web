@@ -63,23 +63,18 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Uploads completed! message displayed
     - Go to Project button enabled / displayed
     */
-    const host1SentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleNames[0]);
-    expect(host1SentToPipeline).toBeTruthy();
+    for (const sampleName of sampleNames) {
+      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleName);
+      expect(hostSentToPipeline).toBeTruthy();
 
-    const host2SentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleNames[1]);
-    expect(host2SentToPipeline).toBeTruthy();
-
+      const hostUploadProgress = await uploadPage.getSampleUploadProgress(sampleName);
+      expect(hostUploadProgress).toEqual(100);
+    }
     const uploadWindowTitle = await uploadPage.getUploadWindowTitle();
     expect(uploadWindowTitle).toEqual(UPLOAD_COMPLETE_LITERAL);
 
     const goToProjectButtonEnabled = await uploadPage.isGoToProjectButtonEnabled();
     expect(goToProjectButtonEnabled).toBeTruthy();
-
-    const host1UploadProgress = await uploadPage.getSampleUploadProgress(sampleNames[0]);
-    expect(host1UploadProgress).toEqual(100);
-
-    const host2UploadProgress = await uploadPage.getSampleUploadProgress(sampleNames[1]);
-    expect(host2UploadProgress).toEqual(100);
     // #endregion 8. Check on Terms and Privacy policies checkbox and click Start Upload
 
     // #region 9. Click on Go to Project in Uploads completed! page
@@ -154,23 +149,18 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Uploads completed! message displayed
     - Go to Project button enabled / displayed
     */
-    const host1SentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleNames[0]);
-    expect(host1SentToPipeline).toBeTruthy();
+    for (const sampleName of sampleNames) {
+      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleName);
+      expect(hostSentToPipeline).toBeTruthy();
 
-    const host2SentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleNames[1]);
-    expect(host2SentToPipeline).toBeTruthy();
-
+      const hostUploadProgress = await uploadPage.getSampleUploadProgress(sampleName);
+      expect(hostUploadProgress).toEqual(100);
+    }
     const uploadWindowTitle = await uploadPage.getUploadWindowTitle();
     expect(uploadWindowTitle).toEqual(UPLOAD_COMPLETE_LITERAL);
 
     const goToProjectButtonEnabled = await uploadPage.isGoToProjectButtonEnabled();
     expect(goToProjectButtonEnabled).toBeTruthy();
-
-    const host1UploadProgress = await uploadPage.getSampleUploadProgress(sampleNames[0]);
-    expect(host1UploadProgress).toEqual(100);
-
-    const host2UploadProgress = await uploadPage.getSampleUploadProgress(sampleNames[1]);
-    expect(host2UploadProgress).toEqual(100);
     // #endregion 9. Check on Terms and Privacy policies checkbox and click Start Upload
 
     // #region 10. Click on Go to Project in Uploads completed! page
@@ -249,23 +239,18 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Uploads completed! message displayed
     - Go to Project button enabled / displayed
     */
-    const host1SentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleNames[0]);
-    expect(host1SentToPipeline).toBeTruthy();
+    for (const sampleName of sampleNames) {
+      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleName);
+      expect(hostSentToPipeline).toBeTruthy();
 
-    const host2SentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleNames[1]);
-    expect(host2SentToPipeline).toBeTruthy();
-
+      const hostUploadProgress = await uploadPage.getSampleUploadProgress(sampleName);
+      expect(hostUploadProgress).toEqual(100);
+    }
     const uploadWindowTitle = await uploadPage.getUploadWindowTitle();
     expect(uploadWindowTitle).toEqual(UPLOAD_COMPLETE_LITERAL);
 
     const goToProjectButtonEnabled = await uploadPage.isGoToProjectButtonEnabled();
     expect(goToProjectButtonEnabled).toBeTruthy();
-
-    const host1UploadProgress = await uploadPage.getSampleUploadProgress(sampleNames[0]);
-    expect(host1UploadProgress).toEqual(100);
-
-    const host2UploadProgress = await uploadPage.getSampleUploadProgress(sampleNames[1]);
-    expect(host2UploadProgress).toEqual(100);
     // #endregion 10. Check on Terms and Privacy policies checkbox and click Start Upload
 
     // #region 11. Click on Go to Project in Uploads completed! page
@@ -348,23 +333,18 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Uploads completed! message displayed
     - Go to Project button enabled / displayed
     */
-    const host1SentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleNames[0]);
-    expect(host1SentToPipeline).toBeTruthy();
+    for (const sampleName of sampleNames) {
+      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleName);
+      expect(hostSentToPipeline).toBeTruthy();
 
-    const host2SentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleNames[1]);
-    expect(host2SentToPipeline).toBeTruthy();
-
+      const hostUploadProgress = await uploadPage.getSampleUploadProgress(sampleName);
+      expect(hostUploadProgress).toEqual(100);
+    }
     const uploadWindowTitle = await uploadPage.getUploadWindowTitle();
     expect(uploadWindowTitle).toEqual(UPLOAD_COMPLETE_LITERAL);
 
     const goToProjectButtonEnabled = await uploadPage.isGoToProjectButtonEnabled();
     expect(goToProjectButtonEnabled).toBeTruthy();
-
-    const host1UploadProgress = await uploadPage.getSampleUploadProgress(sampleNames[0]);
-    expect(host1UploadProgress).toEqual(100);
-
-    const host2UploadProgress = await uploadPage.getSampleUploadProgress(sampleNames[1]);
-    expect(host2UploadProgress).toEqual(100);
     // #endregion 11. Check on Terms and Privacy policies checkbox and click Start Upload
 
     // #region 12. Click on Go to Project in Uploads completed! page
