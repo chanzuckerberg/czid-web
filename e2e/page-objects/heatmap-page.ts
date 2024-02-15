@@ -16,6 +16,7 @@ const HOVER_HIGHLIGHTED_METIC = "//div[contains(@class, 'value')]/b/ancestor::di
 const TOGGLE_SAMPLE_NAMES = "button[class*='toggleNames']";
 const APPCUES_CONTAINER = "[class*='appcues-tooltip-container']";
 const APPCUES_GOT_IT_BUTTON = "[class*='appcues-button-success']";
+const NOTIFICATION_CONTAINER = "[class*='notificationContainer']";
 
 export class HeatmapPage extends PageObject {
 
@@ -52,6 +53,10 @@ export class HeatmapPage extends PageObject {
   // #endregion Hover
 
   // #region Get
+  public async getNotificationContainerText() {
+    return this.page.locator(NOTIFICATION_CONTAINER).textContent();
+  }
+
   public async getCellsCount() {
     await this.page.locator(CELLS).first().waitFor();
     const cells = await this.page.locator(CELLS).all();
@@ -161,5 +166,19 @@ export class HeatmapPage extends PageObject {
 
     expect(heatmapSampleNames).toEqual(expectedTruncatedNames);
   }
+
+  public async validateNotificationContainerIsNotPresent() {
+    await this.page.locator(NOTIFICATION_CONTAINER).waitFor({timeout: 2}).catch(() => null);
+    if (await this.isNotificationContainerPresent()) {
+      const notification = await this.getNotificationContainerText();
+      expect(notification).toBeUndefined();
+    }
+  }
   // #endregion Validation
+
+  // #region Bool
+  public async isNotificationContainerPresent() {
+    return this.page.locator(NOTIFICATION_CONTAINER).isVisible();
+  }
+  // #endregion Bool
 }

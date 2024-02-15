@@ -39,6 +39,10 @@ test.describe("Sample Heatmap", () => {
     // #endregion Create a Taxon Heatmap
 
     await heatmapPage.dismissAppcuesContainerIfPresent();
+
+    // There should be no warning notification at this point
+    // KNOWN ISSUE: https://czi-sci.slack.com/archives/C05NKGCD2E8/p1706897133210019
+    await heatmapPage.validateNotificationContainerIsNotPresent();
   });
 
   /**
