@@ -18,7 +18,7 @@ sauce:
   #   name: czid-github-sauce-connect 
 playwright:
   version: package.json 
-  configFile: ./sandbox.config.ts 
+  configFile: ./setup/sandbox.config.ts 
 rootDir: ./
 env:
   CZID_USERNAME: $CZID_USERNAME

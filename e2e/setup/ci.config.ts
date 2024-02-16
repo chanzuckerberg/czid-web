@@ -2,11 +2,13 @@ import { devices, PlaywrightTestConfig } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
   expect: {
-    timeout: 120000,
+    timeout: 9000,
   },
+
   fullyParallel: true,
-  globalSetup: "./globalSetup",
+  globalSetup: "./setup/globalSetup",
   outputDir: "../playwright-report",
+
   projects: [
     {
       name: "chromium",
@@ -17,26 +19,28 @@ const config: PlaywrightTestConfig = {
     },
   ],
   reporter: [
-    ["github"],
     [
       "html",
       {
         open: "never",
-        outputFolder: "../html-reports",
+        outputFolder: "__assets__/html-report/",
+        attachmentsBaseURL: "./",
       },
     ],
   ],
   testDir: "../tests",
-  timeout: 120000,
+  timeout: 90000,
   use: {
-    actionTimeout: 0,
+    channel: "chromium",
     baseURL: "http://localhost:3000",
-    headless: true,
-    ignoreHTTPSErrors: false,
+    ignoreHTTPSErrors: true,
+    screenshot: "only-on-failure",
     storageState: "/tmp/state.json",
-    trace: "retain-on-failure",
-    video: "on",
+    trace: "on",
+    viewport: { width: 800, height: 7200 },
     permissions: ["clipboard-read"],
   },
+  workers: 10,
 };
+
 export default config;

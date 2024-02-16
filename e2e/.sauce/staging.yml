@@ -18,7 +18,7 @@ sauce:
   #   name: czid-github-sauce-connect 
 playwright:
   version: package.json 
-  configFile: ./staging.config.ts 
+  configFile: ./setup/staging.config.ts
 rootDir: ./
 env:
   CZID_USERNAME: $CZID_USERNAME

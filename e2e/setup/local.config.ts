@@ -5,7 +5,7 @@ const config: PlaywrightTestConfig = {
     timeout: 120000,
   },
   fullyParallel: true,
-  globalSetup: "./globalSetup",
+  globalSetup: "./setup/globalSetup",
   outputDir: "../playwright-report",
   projects: [
     {
