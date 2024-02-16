@@ -16,7 +16,7 @@ if ENV['SENTRY_DSN_BACKEND']
     config.current_environment = ENV['RAILS_ENV'] || Rails.env
     # We only want to send events to Sentry in staging and prod environments
     # To send events from development, add 'development' to config.environments
-    config.environments = ['staging', 'prod']
+    config.environments = ['sandbox', 'staging', 'prod']
   end
 
   # Reporting Failures
