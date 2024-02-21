@@ -5,8 +5,14 @@ on:
     inputs:
       node-environment:
         type: string
+        description: 'Environment'
         required: true
         default: 'staging'
+      test-category:
+          type: string
+          description: 'Test Category'
+          required: true
+          default: 'smoke'
 
   workflow_dispatch:
     inputs:

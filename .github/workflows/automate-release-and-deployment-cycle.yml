@@ -50,6 +50,7 @@ jobs:
     uses: ./.github/workflows/e2e-automation.yml
     with:
       node-environment: "staging"
+      test-category: "smoke"
     secrets: inherit
 
   # Separated make-release-checklist into it's own job to prevent the failure of it from blocking deployment
