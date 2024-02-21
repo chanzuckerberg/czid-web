@@ -1,4 +1,3 @@
-import { get } from "lodash/fp";
 import React from "react";
 import cs from "~/components/common/DetailsSidebar/BulkDownloadDetailsMode/bulk_download_details_mode.scss";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
@@ -33,10 +32,13 @@ export const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
 
   downloadType?.fields &&
     downloadType.fields.forEach(field => {
-      const fieldValue = get(
-        ["params", field.type, "displayName"],
-        bulkDownload,
-      );
+      const paramsField = bulkDownload?.params[field.type];
+
+      // fieldValue must be a string. In some cases, the field has a displayName, such as for filter values.
+      // In other cases, the field just has a value, such as the download format. The stringify is here just
+      // in case the value is not a string - for example the list of filters.
+      const fieldValue =
+        paramsField?.displayName ?? JSON.stringify(paramsField?.value);
 
       if (fieldValue) {
         fields.push({
