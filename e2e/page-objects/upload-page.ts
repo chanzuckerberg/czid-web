@@ -11,6 +11,7 @@ import {
   SEQUENCING_PLATFORMS,
 } from "@e2e/constants/common";
 import { expect } from "@playwright/test";
+import { IlluminaPage } from "./illumina-page";
 import { PageObject } from "./page-object";
 
 export const REF_FILENAME = "consensus_TEST_SC2.fa";
@@ -20,6 +21,12 @@ const TRIM_PRIMER_FILE = (trimPrimerFilename: string) => `./fixtures/trim_primer
 const METADATA_FILE_NAME = "metadata_template.csv";
 
 // Upload Samples
+const SELECT_BASESPACE_PROJECT_DROPDOWN = "[class*='basespaceSampleImport'] [class*='dropdownTrigger']";
+const SELECT_BASESPACE_PROJECT_OPTIONS = "[class*='basespaceSampleImport'] [role*='option']";
+const BASESPACE_UPLOAD_WINDOW_TITLE = "[class*='titleWithIcon']";
+const BASESPACE_UPLOAD_WINDOW_DESCRIPTION = "[class*='instructions']";
+const BASESPACE_AUTHORIZE = "//button[text()='Authorize']";
+const BASESPACE_CONNECT_TO_PROJECT = "//button[text()='Connect to Project']";
 const BASESPACE_BUTTON = "[data-testid='basespace']";
 const CONNECT_TO_BASESPACE_BUTTON = "//button[text()='Connect to Basespace']";
 const CONTINUE_BUTTON = "//button[text()='Continue']";
@@ -79,6 +86,7 @@ const SENT_TO_PIPELINE = (sampleName: string) => `//div[contains(@class, 'sample
 const UPLOAD_WINDOW_TITLE = "[class*='titleWithIcon-']";
 const GO_TO_PROJECT_BUTTON = "//button[text()='Go to Project']";
 const SAMPLE_UPLOAD_STATUS_BAR = (sampleName: string) => `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/ancestor::div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]`;
+const LOADING_BARS = "//div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]";
 
 
 export class UploadPage extends PageObject {
@@ -108,8 +116,37 @@ export class UploadPage extends PageObject {
   // #region Click
 
   // #region Samples
+  public async clickSelectBasespaceProjectDropdown() {
+    await this.page.locator(SELECT_BASESPACE_PROJECT_DROPDOWN).click();
+  }
+
+  public async clickSelectBasespaceProjectOption(option: string) {
+    await this.page.locator(SELECT_BASESPACE_PROJECT_OPTIONS).getByText(option, {exact: true}).click();
+  }
+
   public async clickConnectToBasespaceButton() {
-    await this.page.locator(CONNECT_TO_BASESPACE_BUTTON).click();
+    const [newPage] = await Promise.all([
+      this.page.context().waitForEvent("page"),
+      await this.page.locator(CONNECT_TO_BASESPACE_BUTTON).click(),
+    ]);
+    await newPage.waitForLoadState();
+    return new IlluminaPage(newPage);
+  }
+
+  public async clickAuthorize() {
+    const [newPage] = await Promise.all([
+      this.page.context().waitForEvent("page"),
+      await this.page.locator(BASESPACE_AUTHORIZE).click(),
+    ]);
+    await newPage.waitForLoadState();
+    return new IlluminaPage(newPage);
+  }
+
+  public async clickConnectToProject() {
+    await this.page.locator(BASESPACE_CONNECT_TO_PROJECT).click();
+
+    const illuminaPage = await this.clickAuthorize();
+    await illuminaPage.clickCloseWindowButton();
   }
 
   public async clickBasespaceButton() {
@@ -197,12 +234,21 @@ export class UploadPage extends PageObject {
   // #endregion Review
 
   public async clickGoToProjectButton() {
-    return this.page.locator(GO_TO_PROJECT_BUTTON).click();
+    await this.page.locator(GO_TO_PROJECT_BUTTON).click();
+    await this.pause(4);
   }
 
   // #endregion Click
 
   // #region Get
+  public async getBasespaceUploadWindowTitle() {
+    return this.page.locator(BASESPACE_UPLOAD_WINDOW_TITLE).textContent();
+  }
+
+  public async getBasespaceUploadWindowDescription() {
+    return this.page.locator(BASESPACE_UPLOAD_WINDOW_DESCRIPTION).textContent();
+  }
+
   public async getSampleUploadProgress(sampleName: string) {
     const styleAttribute = await this.page.locator(SAMPLE_UPLOAD_STATUS_BAR(sampleName)).getAttribute("style");
     let uploadProgress = 0;
@@ -322,7 +368,8 @@ export class UploadPage extends PageObject {
   // #endregion Review
 
   // #region Metadata
-  private async getMetadataSampleNames() {
+  public async getMetadataSampleNames() {
+    await this.page.locator(METADATA_SAMPLE_NAMES).first().waitFor();
     return this.page.locator(METADATA_SAMPLE_NAMES).allTextContents();
   }
 
@@ -442,6 +489,11 @@ export class UploadPage extends PageObject {
   // #endregion Fill
 
   // #region Macro
+  public async selectBasespaceProject(option: string) {
+    await this.clickSelectBasespaceProjectDropdown();
+    await this.clickSelectBasespaceProjectOption(option);
+  }
+
   public async dismissCookieBanner() {
     const cookieBanner = await this.getLocator(COOKIE_BANNER_LOCATOR);
     if (await cookieBanner.count() > 0) {
@@ -759,6 +811,10 @@ export class UploadPage extends PageObject {
   // #region Wait
   public async waitForUploadComplete() {
     await this.page.getByText(UPLOAD_COMPLETE).waitFor();
+  }
+
+  public async waitForBasespaceUploadComplete() {
+    await this.page.locator(LOADING_BARS).last().waitFor({state: "detached"});
   }
   // #endregion Wait
 }

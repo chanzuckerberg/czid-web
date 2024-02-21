@@ -5,7 +5,7 @@ const config: PlaywrightTestConfig = {
     timeout: 120000,
   },
   fullyParallel: true,
-  globalSetup: "./setup/globalSetup",
+  globalSetup: require.resolve("@e2e/setup/globalSetup"),
   outputDir: "../playwright-report",
   projects: [
     {
@@ -28,7 +28,7 @@ const config: PlaywrightTestConfig = {
       },
     ],
   ],
-  testDir: "../tests",
+  testDir: "../",
   timeout: 600000,
   use: {
     actionTimeout: 30000,

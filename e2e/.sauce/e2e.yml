@@ -1,0 +1,113 @@
+# See https://docs.saucelabs.com/web-apps/automated-testing/playwright/#supported-testing-platforms for a list of supported versions.
+# See https://docs.saucelabs.com/web-apps/automated-testing/playwright/yaml/#configfile for a list of supported configuration files.
+
+apiVersion: v1alpha
+kind: playwright
+showConsoleLog: true
+sauce:
+  region: us-west-1
+  concurrency: 5 
+  metadata:
+    tags:
+      - e2e
+      - czid
+      - $NODE_ENV
+    build: COMMIT $CI_COMMIT_SHORT_SHA
+  # comment out when running locally  
+  # tunnel:
+  #   name: czid-github-sauce-connect 
+playwright:
+  version: package.json 
+  configFile: ./setup/$NODE_ENV.config.ts 
+rootDir: ./
+env:
+  BASESPACE_USERNAME: $BASESPACE_USERNAME
+  BASESPACE_PASSWORD: $BASESPACE_PASSWORD
+  CZID_USERNAME: $CZID_USERNAME
+  CZID_PASSWORD: $CZID_PASSWORD
+  NODE_ENV: $NODE_ENV
+suites:
+  - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 5: Basespace Viral Consensus Genome - No trim"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload-basespace.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 5:"
+    shard: concurrency
+  - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 6: Basespace Viral Consensus Genome - with trim"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload-basespace.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 6:"
+    shard: concurrency
+  - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 7: Basespace Viral Consensus Genome - No trim with mNGS - Ilumina"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload-basespace.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 7:"
+    shard: concurrency
+  - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 8: Basespace Viral Consensus Genome - with trim with mNGS - Ilumina"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload-basespace.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 8:"
+    shard: concurrency
+  - name: "Functional: P-0: WGS - Sample upload: SNo 1: Viral Consensus Genome - No trim"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1:"
+    shard: concurrency
+  - name: "Functional: P-0: WGS - Sample upload: SNo 2: Viral Consensus Genome - with trim"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 2:"
+    shard: concurrency
+  - name: "Functional: P-0: WGS - Sample upload: SNo 3: Viral Consensus Genome - No trim with mNGS - Ilumina"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 3:"
+    shard: concurrency
+  - name: "Functional: P-0: WGS - Sample upload: SNo 4: Viral Consensus Genome - with trim with mNGS - Ilumina"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 4:"
+    shard: concurrency
+artifacts:
+  cleanup: true
+  download:
+    when: always
+    match:
+      - "*"
+    directory: ./artifacts/
+npm:
+  dependencies:
+    - adm-zip
+    - moment-timezone
+    - tar

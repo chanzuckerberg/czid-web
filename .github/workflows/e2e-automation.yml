@@ -18,6 +18,14 @@ on:
         options:
         - staging
         - sandbox
+      test-category:
+        type: choice
+        description: 'Test Category'
+        required: true
+        default: 'smoke'
+        options:
+        - smoke
+        - e2e
 
 jobs:
   workflow-e2e:
@@ -31,6 +39,8 @@ jobs:
       CZID_USERNAME: ${{secrets.CZID_USERNAME}}
       CZID_PASSWORD: ${{secrets.CZID_PASSWORD}}
       NODE_ENV: ${{inputs.node-environment}}
+      BASESPACE_USERNAME: ${{secrets.BASESPACE_USERNAME}}
+      BASESPACE_PASSWORD: ${{secrets.BASESPACE_PASSWORD}}
 
     steps:
       - name: Checkout
@@ -47,7 +57,7 @@ jobs:
         working-directory: ./e2e/
         if: failure() || success()
         run: |
-          saucectl run -c ./.sauce/${{inputs.node-environment}}.yml
+          saucectl run -c ./.sauce/${{inputs.test-category}}.yml
 
       - name: Send custom JSON data to Slack workflow
         id: slack

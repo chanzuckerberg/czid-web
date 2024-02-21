@@ -20,15 +20,18 @@
     "@playwright/test": "^1.35.1",
     "@types/adm-zip": "^0.5.5",
     "@types/lodash": "^4.14.182",
+    "@types/tar": "^6.1.11",
     "adm-zip": "^0.5.10",
     "dotenv": "^16.0.1",
     "junit2json": "^3.1.2",
     "lodash": "^4.14.182",
+    "moment-timezone": "^0.5.45",
     "playwright": "^1.38.0",
     "playwright-chromium": "^1.35.1",
     "playwright-json-summary-reporter": "^1.0.0",
     "prettier": "^2.8.2",
-    "saucectl": "^0.151.0"
+    "saucectl": "^0.151.0",
+    "tar": "^6.2.0"
   },
   "browserslist": {
     "development": [

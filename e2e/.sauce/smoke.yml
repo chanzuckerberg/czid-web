@@ -11,34 +11,42 @@ sauce:
     tags:
       - e2e
       - czid
-      - staging
+      - $NODE_ENV
     build: COMMIT $CI_COMMIT_SHORT_SHA
   # comment out when running locally  
   # tunnel:
   #   name: czid-github-sauce-connect 
 playwright:
   version: package.json 
-  configFile: ./setup/staging.config.ts
+  configFile: ./setup/$NODE_ENV.config.ts 
 rootDir: ./
 env:
   CZID_USERNAME: $CZID_USERNAME
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
-  - name: "Functional: P-0"
+  - name: "Functional: P-0: WGS - Downloads"
     platformName: "macOS 12"
     screenResolution: "1440x900"
-    testMatch: ['tests/wgs/sample-upload.spec.ts']
+    testMatch: ['tests/wgs/downloads.spec.ts']
     params:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
-      retries: 2
+    shard: concurrency
+  - name: "Functional: P-0: WGS - Downloads (CURL)"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/downloads-curl.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Functional: P-0"
     shard: concurrency
   - name: "Data Validation: P-0"
     platformName: "macOS 12"
     screenResolution: "1440x900"
-    testMatch: ['tests/wgs/report-files.spec.ts', 'wgs/sample-report-values-and-data-type.spec.ts', 'wgs/sample-report.spec.ts', 'wgs/sample-upload-error-handling.spec.ts']
+    testMatch: ['tests/wgs/report-files.spec.ts', 'tests/wgs/sample-report-values-and-data-type.spec.ts', 'tests/wgs/sample-report.spec.ts', 'tests/wgs/sample-upload-error-handling.spec.ts']
     params:
       browserName: "chromium"
       project: "chromium"
@@ -118,7 +126,7 @@ suites:
   - name: "Sample Upload Smoke Tests"
     platformName: "macOS 12"
     screenResolution: "1440x900"
-    testMatch: ['tests/upload/upload-smoke.spec.ts']
+    testMatch: ['upload/upload-smoke.spec.ts']
     params:
       browserName: "chromium"
       project: "chromium"
@@ -155,3 +163,5 @@ artifacts:
 npm:
   dependencies:
     - adm-zip
+    - moment-timezone
+    - tar

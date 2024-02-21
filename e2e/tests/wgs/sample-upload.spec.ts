@@ -1,5 +1,6 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { UploadPage, REF_FILENAME } from "@e2e/page-objects/upload-page";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
@@ -7,16 +8,17 @@ import { ProjectPage } from "../../page-objects/project-page";
 const UPLOAD_COMPLETE_LITERAL = "Uploads completed!";
 const REFERENCE_ACCESSION_LITERAL = "Reference Accession";
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
-const TEST_TIMEOUT = 60 * 1000 * 5;
+
+const TEST_TIMEOUT = 60 * 1000 * 60;
 
 /*
  * WGS - Sample upload
  * Local file
  */
 test.describe("WGS - Sample upload | Functional: P-0", () => {
-  test.setTimeout(TEST_TIMEOUT); // Inclease default timeout for uploads to complete
 
   test("SNo 1: Viral Consensus Genome - No trim", async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT); // Inclease default timeout for reports to complete
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -87,17 +89,20 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Sample uploads COMPLETE status (in green)
     - Reference Accession reads: (dashes)
     */
+    const samplesPage = new SamplesPage(page);
+    await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       const row = samplesTable[sampleName];
-      expect(row["Sample"][1]).toEqual("RUNNING");
+      expect(row["Sample"][1]).toEqual("COMPLETE");
       expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual([ "—", "—" ]);
     }
     // #endregion 10. Verify Samples Status and Reference Accession value once finished processing
   });
 
   test("SNo 2: Viral Consensus Genome - with trim", async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT); // Inclease default timeout for reports to complete
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -173,17 +178,20 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Sample uploads COMPLETE status (in green)
     - Reference Accession reads: (dash) + Betacoronavirus 1 (species)
     */
+    const samplesPage = new SamplesPage(page);
+    await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       const row = samplesTable[sampleName];
-      expect(row["Sample"][1]).toEqual("RUNNING");
+      expect(row["Sample"][1]).toEqual("COMPLETE");
       expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual([ "—", "Betacoronavirus 1 (species)" ]);
     }
     // #endregion 11. Verify Samples Status and Reference Accession value once finished processing
   });
 
   test("SNo 3: Viral Consensus Genome - No trim + mNGS - Ilumina", async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT); // Inclease default timeout for reports to complete
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -263,17 +271,20 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Sample uploads COMPLETE status (in green)
     - Reference Accession reads: (dashes)
     */
+    const samplesPage = new SamplesPage(page);
+    await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       const row = samplesTable[sampleName];
-      expect(row["Sample"][1]).toEqual("RUNNING");
+      expect(row["Sample"][1]).toEqual("COMPLETE");
       expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual(["—", "—"]);
     }
     // #endregion 12. Verify Samples Status and Reference Accession value once finished processing
   });
 
   test("SNo 4: Viral Consensus Genome - with trim + mNGS - Ilumina", async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT); // Inclease default timeout for reports to complete
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -358,11 +369,13 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Sample uploads COMPLETE status (in green)
     - Reference Accession reads: (dash) + Betacoronavirus (genus)
     */
+    const samplesPage = new SamplesPage(page);
+    await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       const row = samplesTable[sampleName];
-      expect(row["Sample"][1]).toEqual("RUNNING");
+      expect(row["Sample"][1]).toEqual("COMPLETE");
       expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual([ "—", "Betacoronavirus (genus)" ]);
     }
     // #endregion 13. Verify Samples Status and Reference Accession value once finished processing

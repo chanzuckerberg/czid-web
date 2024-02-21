@@ -480,9 +480,29 @@ export class SamplesPage extends PageObject {
     // #endregion Fill
 
     // #region Macro
+    public async waitForAllSamplesComplete(sampleIds: Array<number>) {
+      const samples = [];
+      for (const sampleId of sampleIds) {
+        await this.waitForReportComplete(sampleId);
+      }
+      return samples;
+    }
+
+    public async waitForAllReportsComplete(projectName: string, sampleNames: Array<string>) {
+      const samples = [];
+      for (const sampleName of sampleNames) {
+        samples.push((await this.getSamples(projectName, sampleName))[0]);
+      }
+      for (const sample of samples) {
+        await this.waitForReportComplete(sample.id);
+      }
+      await this.waitForAllSamplesComplete(samples);
+      return samples;
+    }
+
     public async waitForReportComplete(sampleId: number) {
       await this.navigate(sampleId);
-      await this.pause(4);
+      await this.pause(10);
 
       const inProgress = this.page.locator(REPORT_IN_PROGRESS);
       while(await inProgress.isVisible()) {

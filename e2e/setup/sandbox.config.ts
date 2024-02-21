@@ -6,7 +6,7 @@ const config: PlaywrightTestConfig = {
   },
 
   fullyParallel: true,
-  globalSetup: "./setup/globalSetup",
+  globalSetup: require.resolve("@e2e/setup/globalSetup"),
   outputDir: "../playwright-report",
 
   projects: [
@@ -28,7 +28,7 @@ const config: PlaywrightTestConfig = {
       },
     ],
   ],
-  testDir: "../tests",
+  testDir: "../",
   timeout: 90000,
   use: {
     channel: "chromium",

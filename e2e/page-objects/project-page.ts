@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+import { DownloadsPage } from "./downloads-page";
 import { HeatmapPage } from "./heatmap-page";
 import { PageObject } from "./page-object";
 
@@ -8,6 +9,7 @@ const TAXON_HEATMAP = "[href*='/heatmap']";
 const SAMPLE_CHECKBOX_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleName}']/ancestor::div[@aria-rowindex]//div[contains(@class, 'checkbox')]`;
 const SAMPLE_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleName}']/ancestor::div[@aria-rowindex]`;
 const DELETE_BUTTON_TESTID = "bulk-delete-trigger";
+const DOWNLOADS_LINK = "[class*='message'] [href='/bulk_downloads']";
 const DOWNLOAD_BUTTON_TESTID = "download-icon";
 const DOWNLOAD_TYPES_LOCATOR = "[class*='downloadTypeContainer'] [class*='name']";
 export const START_GENERATING_DOWNLOAD_BUTTON = "//button[text()='Start Generating Download']";
@@ -192,6 +194,11 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickDownloadsLink() {
+    await this.page.locator(DOWNLOADS_LINK).click();
+    return new DownloadsPage(this.page);
+  }
+
   public async clickUploadHeaderLink() {
     await this.page.locator(UPLOAD_HEADER_LINK).click();
   }
@@ -230,6 +237,10 @@ export class ProjectPage extends PageObject {
     await options.getByText(value).hover();
 
     await options.getByText(value).click();
+  }
+
+  public async clickIncludeSampleMetadata() {
+    await this.page.locator(INCLUDE_SAMPLE_METADATA).click();
   }
 
   public async clickBackgroundSearchOption(value: string) {
@@ -315,10 +326,6 @@ export class ProjectPage extends PageObject {
     await this.page.locator(DELETE_CONFIRMATION_BUTTON).waitFor({state: "visible"});
     await this.page.locator(DELETE_CONFIRMATION_BUTTON).click();
   }
-
-  public async clickIncludeSampleMetadata() {
-    await this.page.locator(INCLUDE_SAMPLE_METADATA).click();
-  }
   // #endregion Click
 
   // #region Get
@@ -369,6 +376,27 @@ export class ProjectPage extends PageObject {
   // #endregion Get
 
   // #region Macro
+  public async waitForSamplesComplete(sampleNames: Array<string>, waitTime = 30 * 1000) {
+    for (const sampleName of sampleNames) {
+      await this.waitForSampleComplete(sampleName, waitTime);
+    }
+  }
+
+  public async waitForSampleComplete(sampleName: string, waitTime = 30 * 1000) {
+    let samplesTable = await this.getSamplesTableOrderedByName();
+    let sampleStatus = samplesTable[sampleName]["Sample"][1];
+    const startTime = Date.now();
+
+    while ((Date.now() - startTime) < waitTime) {
+      if (sampleStatus.includes("COMPLETE")) {
+        break;
+      }
+      samplesTable = await this.getSamplesTableOrderedByName();
+      sampleStatus = samplesTable[sampleName]["Sample"][1];
+      this.page.reload();
+    }
+  }
+
   public async selectCompletedSamples(numberToSelect: number) {
     const selectedSampleNames = [];
     const completedRowIndexes = await this.getCompletedRowIndexes();

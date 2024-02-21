@@ -8,11 +8,14 @@ const SAMPLES_IN_DOWNLOAD_NAMES = "[class*='samplesList'] [class*='sampleName']"
 const CLOSE_ICON = "[class*='closeIcon']";
 const BACKGROUND_VALUE = "[data-testid='background-value']";
 const METRIC_VALUE = "[data-testid='metric-value']";
+const ADVANCED_DOWNLOAD_TAB = "[data-testid='advanced-download']";
+const CLIPBOARD_ICON = "[class*='command']";
 const DOWNLOAD_DETAILS = (downloadId: string) => `[id='${downloadId}'][data-testid='download-details-link']`;
 const DOWNLOAD_COMPLETE_BY_DOWNLOADID = (downloadId: string) => `//div[contains(@data-testid, 'complete')]/parent::div/following-sibling::div/span[@id='${downloadId}']`;
 const DOWNLOAD_FILE_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}' and text()='Download File']`;
 const DOWNLOAD_DATE_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}']/ancestor::div[contains(@class, '__Table__row tableRow-')]//div[@data-testid='date-created']`;
 const DOWNLOAD_NAME_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}']/ancestor::div[contains(@class, '__Table__row tableRow-')]//div[@data-testid='download-name']`;
+const DOWNLOAD_COUNT_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}']/ancestor::div[contains(@class, '__Table__row tableRow-')]//div[@aria-colindex='3']/div`;
 const DOWNLOAD_STATUS_BY_INDEX = (rowIndex: string) => `(//*[contains(@class, 'downloadStatus')])[${rowIndex}]`;
 const BULK_DOWNLOAD_METRICS = {
   "mngs": "short-read-mngs",
@@ -42,6 +45,15 @@ export class DownloadsPage extends PageObject {
   // #endregion Api
 
   // #region Click
+  public async clickClipboardIcon() {
+    await this.page.locator(CLIPBOARD_ICON).click();
+    return this.page.evaluate(() => navigator.clipboard.readText());
+  }
+
+  public async clickAdvancedDownloadTab() {
+    await this.page.locator(ADVANCED_DOWNLOAD_TAB).click();
+  }
+
   public async clickDownloadDetails(downloadId: number) {
     const locatorString = DOWNLOAD_DETAILS(downloadId.toString());
     await this.page.locator(locatorString).waitFor();
@@ -71,6 +83,10 @@ export class DownloadsPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getDownloadCount(downloadId: string) {
+    return (await this.page.locator(DOWNLOAD_COUNT_BY_DOWNLOADID(downloadId)).textContent()).split(" ")[0];
+  }
+
   public async getDownloadName(downloadId: string) {
     return this.page.locator(DOWNLOAD_NAME_BY_DOWNLOADID(downloadId)).textContent();
   }
