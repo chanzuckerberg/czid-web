@@ -20,6 +20,8 @@ env:
   AWS_REGION: us-west-2
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
+run-name: Deploy ${{ github.event.inputs.source }} to ${{ github.event.inputs.destination }}
+
 jobs:
   run_deployment:
     name: Deploy ${{ github.event.inputs.source }} to ${{ github.event.inputs.destination }}

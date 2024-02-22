@@ -33,6 +33,8 @@ on:
         - smoke
         - e2e
 
+run-name: "Run ${{inputs.test-category}} tests on ${{inputs.node-environment}} environment"
+
 jobs:
   workflow-e2e:
     runs-on: ubuntu-latest
