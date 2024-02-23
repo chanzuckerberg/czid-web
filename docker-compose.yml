@@ -130,6 +130,7 @@ services:
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
       - ./graphql_schema:/app/graphql_schema
+      - ./test/fixtures/czid-private-key.pem:/tmp/czid-private-key.pem
     ports:
       - 3001:3001
     depends_on:
@@ -149,6 +150,7 @@ services:
       - ./tmp:/app/tmp
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
+      - ./test/fixtures/czid-private-key.pem:/tmp/czid-private-key.pem
     depends_on:
       - db
       - redis
@@ -213,6 +215,7 @@ services:
       - ./tmp:/app/tmp
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
+      - ./test/fixtures/czid-private-key.pem:/tmp/czid-private-key.pem
     environment:
       <<: [*web-variables, *aws-variables]
       SFN_NOTIFICATIONS_QUEUE_ARN:

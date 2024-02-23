@@ -68,15 +68,15 @@ RSpec.describe IdentityController, type: :controller do
         json_response = JSON.parse(response.body)
         enriched_token = json_response["token"]
         decrypted_enriched_token = controller.send(:decrypt_token, enriched_token)
-        project_roles = decrypted_enriched_token["projects"]
+        project_roles = decrypted_enriched_token["project_roles"]
 
         expect(response).to have_http_status(:success)
 
         expect(decrypted_enriched_token["sub"]).to eq(@joe.id.to_s)
         expect(Time.zone.at(decrypted_enriched_token["exp"].to_i)).to_not be_nil
-        expect(project_roles[@owner_project.id.to_s]).to eq(["owner"])
-        expect(project_roles[@member_project.id.to_s]).to eq(["member", "viewer"])
-        expect(project_roles[@viewer_project.id.to_s]).to eq(["viewer"])
+        expect(project_roles["owner"]).to eq([@owner_project.id])
+        expect(project_roles["member"]).to eq([@member_project.id])
+        expect(project_roles["viewer"]).to eq([@member_project.id, @viewer_project.id])
       end
 
       it "should expire after 5 mins (300 seconds)" do
@@ -106,14 +106,14 @@ RSpec.describe IdentityController, type: :controller do
 
         enriched_token = json_response["token"]
         decrypted_enriched_token = controller.send(:decrypt_token, enriched_token)
-        project_roles = decrypted_enriched_token["projects"]
+        project_roles = decrypted_enriched_token["project_roles"]
         service_identity_payload = decrypted_enriched_token["service_identity"]
 
         expect(response).to have_http_status(:success)
 
         expect(decrypted_enriched_token["sub"]).to eq(@joe.id.to_s)
         expect(Time.zone.at(decrypted_enriched_token["exp"].to_i)).to_not be_nil
-        expect(project_roles[@owner_project.id.to_s]).to eq(["owner"])
+        expect(project_roles["owner"]).to eq([@owner_project.id])
         expect(service_identity_payload).to eq(@service_identity) # service identity is preserved
       end
     end

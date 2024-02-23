@@ -152,15 +152,9 @@ class IdentityController < ApplicationController
     user = User.find(user_id)
 
     project_roles = {}
-    owner = Project.where(creator_id: user.id).pluck(:id).index_with { "owner" }
-    member = Project.editable(user).pluck(:id).index_with { "member" }
-    viewer = Project.viewable(user).pluck(:id).index_with { "viewer" }
-
-    [owner, member, viewer].each do |hash|
-      hash.each do |key, val|
-        project_roles.key?(key) ? project_roles[key] << val : project_roles[key] = [val]
-      end
-    end
+    project_roles["owner"] = Project.where(creator_id: user.id).pluck(:id)
+    project_roles["member"] = Project.editable(user).pluck(:id)
+    project_roles["viewer"] = Project.viewable(user).pluck(:id)
 
     project_roles
   end

@@ -50,7 +50,9 @@ def get_token_claims(private_key: JWK, token: str) -> dict:
     unpacked_token.decrypt(private_key)
     decrypted_payload = unpacked_token.payload.decode("utf-8")
     required_claims = {"exp": None, "iat": None, "nbf": None}
-    decoded_jwt = jwt.JWT(key=private_key, jwt=decrypted_payload, check_claims=required_claims)
+    decoded_jwt = jwt.JWT(
+        key=private_key, jwt=decrypted_payload, check_claims=required_claims
+    )
     return decoded_jwt.claims
 
 
@@ -72,7 +74,7 @@ def create_token(
         "iat": int(time.time()),
         "nbf": int(time.time()),
         "exp": expires_at,
-        "projects": parsed_project_claims,
+        "project_roles": parsed_project_claims,
         "service_identity": service_identity,
     }
 
@@ -94,7 +96,9 @@ def create_token(
         "kid": private_key.thumbprint(),
     }
     jwe_token = jwe.JWE(jwe_payload, recipient=private_key, protected=protected_header)
-    return json.dumps({"token": jwe_token.serialize(compact=True), "expires_at": expires_at})
+    return json.dumps(
+        {"token": jwe_token.serialize(compact=True), "expires_at": expires_at}
+    )
 
 
 # TODO: Plug in a library to do runtime type checking, so we don't have to manualy do it.
@@ -113,24 +117,23 @@ def validate_projects(projects: ProjectRole):
     if not isinstance(projects, dict):
         raise ValueError("projects must be a dictionary")
 
-    for project_id, roles in projects.items():
-        int(project_id)  # assert user_id is a valid integer
+    for role, project_ids in projects.items():
+        if not isinstance(project_ids, list):
+            raise ValueError("project_ids must be a list")
 
-        if not isinstance(roles, list):
-            raise ValueError("roles must be a list")
+        for project_id in project_ids:
+            int(project_id)  # assert project_id is a valid integer
 
-        for role in roles:
-            valid_roles = set(["owner", "member", "viewer"])
-            if not isinstance(role, str):
-                raise ValueError("role must be a string")
+        valid_roles = set(["owner", "member", "viewer"])
 
-            if role not in valid_roles:
-                raise ValueError("role must be one of owner, member, or viewer")
+        if role not in valid_roles:
+            raise ValueError("role must be one of owner, member, or viewer")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Handle token generation & decryption", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description="Handle token generation & decryption",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--create_token", action="store_true", help="Create a token")
     parser.add_argument("--decrypt_token", action="store_true", help="Decrypt a token")
@@ -147,6 +150,14 @@ if __name__ == "__main__":
         key = jwk.JWK.from_pem(pemfile.read())
 
     if args.create_token:
-        print(create_token(key, args.userid, args.project_claims, args.service_identity, args.expiration))
+        print(
+            create_token(
+                key,
+                args.userid,
+                args.project_claims,
+                args.service_identity,
+                args.expiration,
+            )
+        )
     elif args.decrypt_token:
         print(get_token_claims(key, args.token))
