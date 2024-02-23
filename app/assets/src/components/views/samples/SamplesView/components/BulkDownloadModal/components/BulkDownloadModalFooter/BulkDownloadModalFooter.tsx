@@ -188,13 +188,19 @@ export function BulkDownloadModalFooter({
   const numNonHumanHostSamples =
     size(validObjectIds) - size(samplesWithHumanHost);
 
+  const trimmedInvalidSampleNames =
+    invalidSampleNames?.filter(name => name !== "") ?? [];
+  const nUnlistedInvalidSampleNames =
+    invalidSampleNames?.length ?? 0 - trimmedInvalidSampleNames?.length;
+  trimmedInvalidSampleNames.push(`...and ${nUnlistedInvalidSampleNames} more`);
+
   return (
     <div className={cs.footer}>
       <div className={cs.notifications}>
         {invalidSampleNames && invalidSampleNames.length > 0 && (
           <BulkDownloadWarning
             message=" because they either failed or are still processing:"
-            sampleNames={invalidSampleNames}
+            sampleNames={trimmedInvalidSampleNames}
           />
         )}
         {numNonHumanHostSamples > 0 &&

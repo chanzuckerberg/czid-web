@@ -1,5 +1,5 @@
 import { set } from "lodash/fp";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useMutation, useRelayEnvironment } from "react-relay";
 import { fetchQuery, graphql } from "relay-runtime";
 import { getMassNormalizedBackgroundAvailability } from "~/api";
@@ -10,6 +10,7 @@ import {
   getBulkDownloadTypes,
 } from "~/api/bulk_downloads";
 import { getCsrfToken } from "~/api/utils";
+import { UserContext } from "~/components/common/UserContext";
 import Modal from "~/components/ui/containers/Modal";
 import { downloadFileFromCSV, openUrlInNewTab } from "~/components/utils/links";
 import { WorkflowType, WORKFLOW_ENTITIES } from "~/components/utils/workflows";
@@ -35,12 +36,11 @@ import {
 } from "./types";
 import {
   assembleSelectedDownload,
-  checkAllObjectsUploadedByCurrentUser,
   checkUserIsCollaboratorOnAllSamples,
   DEFAULT_CREATION_ERROR,
   fetchBackgrounds,
-  fetchValidationInfo,
 } from "./utils";
+import { BulkDownloadModalConfig } from "./workflowTypeConfig";
 
 const BulkDownloadModalQuery = graphql`
   query BulkDownloadModalQuery(
@@ -60,6 +60,24 @@ const BulkDownloadModalQuery = graphql`
       }
     ) {
       cgOverviewRows
+    }
+  }
+`;
+
+const BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery = graphql`
+  query BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery(
+    $workflowRunIds: [String]
+    $authenticityToken: String
+  ) {
+    workflowRuns(
+      input: {
+        where: { id: { _in: $workflowRunIds } }
+        todoRemove: { authenticityToken: $authenticityToken }
+      }
+    ) {
+      id
+      ownerUserId
+      status
     }
   }
 `;
@@ -104,6 +122,7 @@ export const BulkDownloadModal = ({
   workflow,
   workflowEntity,
 }: BulkDownloadModalProps) => {
+  const userContext = useContext(UserContext);
   // *** State ***
   const [bulkDownloadTypes, setBulkDownloadTypes] = useState<
     BulkDownloadType[] | null
@@ -247,21 +266,30 @@ export const BulkDownloadModal = ({
     );
 
     const bulkDownloadTypesRequest = getBulkDownloadTypes(workflow);
-    const validationInfoRequest = fetchValidationInfo({
-      entityIds: entityIds && Array.from(entityIds),
+    const validationInfoRequest = BulkDownloadModalConfig[
+      workflow
+    ].fetchValidationInfoFunction({
+      entityIds,
+      environment,
+      BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery,
+      authenticityToken: getCsrfToken(),
       workflow,
       workflowEntity,
     });
     const backgroundOptionsRequest = fetchBackgrounds();
     const metricsOptionsRequest = getBulkDownloadMetrics(workflow);
+
     const areAllRequestedObjectsUploadedByCurrentUserRequest =
-      checkAllObjectsUploadedByCurrentUser({ entityIds, workflowEntity });
+      BulkDownloadModalConfig[workflow].fetchAreAllObjectsUploadedByCurrentUser(
+        { entityIds },
+      );
+
     const isUserCollaboratorOnAllRequestedSamplesRequest =
       checkUserIsCollaboratorOnAllSamples({ entityIds, workflowEntity });
 
     const [
       bulkDownloadTypes,
-      { validIds, invalidSampleNames, error: validationError },
+      validationInfo,
       backgroundOptions,
       metricsOptions,
       areAllRequestedObjectsUploadedByCurrentUser,
@@ -297,15 +325,29 @@ export const BulkDownloadModal = ({
       }
     });
 
-    setBulkDownloadTypes(bulkDownloadTypes);
-    setValidObjectIds(new Set(validIds));
-    setInvalidSampleNames(invalidSampleNames);
-    setValidationError(validationError);
-    setBackgroundOptions(backgroundOptions);
-    setMetricsOptions(metricsOptions);
-    setAreAllRequestedObjectsUploadedByCurrentUser(
+    // Parse the validation info - this is different for rails vs. nextgen
+    const { validIds, invalidSampleNames, validationError } =
+      BulkDownloadModalConfig[workflow].validationParser(
+        validationInfo,
+        selectedObjects,
+      );
+
+    // Check if the user is the owner of all the requested objects - this is different for rails vs. nextgen
+    const isUserOwnerOfAllObjects = BulkDownloadModalConfig[
+      workflow
+    ].isUserOwnerParser(
+      validationInfo,
+      userContext?.userId,
       areAllRequestedObjectsUploadedByCurrentUser,
     );
+
+    setBulkDownloadTypes(bulkDownloadTypes);
+    setValidObjectIds(new Set(validIds));
+    setInvalidSampleNames(invalidSampleNames ?? []);
+    setValidationError(validationError ?? null);
+    setBackgroundOptions(backgroundOptions);
+    setMetricsOptions(metricsOptions);
+    setAreAllRequestedObjectsUploadedByCurrentUser(isUserOwnerOfAllObjects);
     setSelectedFields(newSelectedFields);
     setSelectedFieldsDisplay(newSelectedFieldsDisplay);
     setIsLoading(false);
@@ -531,6 +573,7 @@ export const BulkDownloadModal = ({
         hostGenome: string;
       }[],
     );
+
   return (
     <Modal narrow open={open} tall onClose={onClose}>
       <div className={cs.modal}>
