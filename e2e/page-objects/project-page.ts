@@ -107,6 +107,7 @@ export class ProjectPage extends PageObject {
   }
 
   public async navigateToSamples(projectId: number, workflow="", domain="public") {
+    await this.pause(1);
     const workflowParam = workflow === "" ? workflow : `&workflow=${WORKFLOW_PARAM[workflow]}`;
     const url = `${process.env.BASEURL}/${domain}?projectId=${projectId}&currentTab=samples${workflowParam}`;
     await this.page.goto(url);
@@ -368,32 +369,44 @@ export class ProjectPage extends PageObject {
   public async getSamplesTableOrderedByName() {
     const samplesTable = await this.getSamplesTable();
     const samplesTableOrderByName = {};
-    for (const row of samplesTable) {
-      samplesTableOrderByName[row["Sample"][0]] = row;
+    if (samplesTable.length > 0) {
+      for (const row of samplesTable) {
+        if (row["Sample"]) {
+          samplesTableOrderByName[row["Sample"][0]] = row;
+        }
+      }
     }
     return samplesTableOrderByName;
   }
   // #endregion Get
 
   // #region Macro
-  public async waitForSamplesComplete(sampleNames: Array<string>, waitTime = 30 * 1000) {
+  public async waitForSamplesComplete(projectId: number, workflow: string, sampleNames: Array<string>, waitTime = 30 * 1000) {
     for (const sampleName of sampleNames) {
-      await this.waitForSampleComplete(sampleName, waitTime);
+      await this.waitForSampleComplete(projectId, workflow, sampleName, waitTime);
     }
   }
 
-  public async waitForSampleComplete(sampleName: string, waitTime = 30 * 1000) {
+  public async waitForSampleComplete(projectId: number, workflow: string, sampleName: string, waitTime = 30 * 1000) {
+    let sampleStatus = "";
+    await this.navigateToSamples(projectId, workflow);
     let samplesTable = await this.getSamplesTableOrderedByName();
-    let sampleStatus = samplesTable[sampleName]["Sample"][1];
+    if ((Object.keys(samplesTable).length > 0) && samplesTable[sampleName]) {
+      sampleStatus = samplesTable[sampleName]["Sample"][1];
+    }
     const startTime = Date.now();
 
     while ((Date.now() - startTime) < waitTime) {
       if (sampleStatus.includes("COMPLETE")) {
         break;
       }
+      await this.pause(10);
+
+      await this.navigateToSamples(projectId, workflow);
       samplesTable = await this.getSamplesTableOrderedByName();
-      sampleStatus = samplesTable[sampleName]["Sample"][1];
-      this.page.reload();
+      if ((Object.keys(samplesTable).length > 0) && samplesTable[sampleName]) {
+        sampleStatus = samplesTable[sampleName]["Sample"][1];
+      }
     }
   }
 

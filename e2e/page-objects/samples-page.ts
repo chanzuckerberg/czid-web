@@ -84,7 +84,11 @@ export class SamplesPage extends PageObject {
 
     // #region Navigate
     public async navigate(sampleId: number) {
-      await this.page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
+      await this.pause(1);
+      await this.page.goto(
+        `${process.env.BASEURL}/samples/${sampleId}`, {timeout: 30 * 1000},
+      ).catch(() => this.page.reload());
+      await this.pause(1);
     }
     // #endregion Navigate
 

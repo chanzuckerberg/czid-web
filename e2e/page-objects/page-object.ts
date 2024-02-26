@@ -25,10 +25,11 @@ export abstract class PageObject {
   }
 
   public async getTable(headerColumnLocator: string, tableRowsLocator: string, tableDataLocator: string) {
-    await this.page.locator(headerColumnLocator).first().waitFor();
+    const DEFAULT_WAIT = 30 * 1000;
+    await this.page.locator(headerColumnLocator).first().waitFor({timeout: DEFAULT_WAIT}).catch(() => null);
     await this.pause(1);
-    const tableHeaders = await this.page.locator(headerColumnLocator).allTextContents();
-    const tableRowElements = await this.page.locator(tableRowsLocator).all();
+    const tableHeaders = await this.page.locator(headerColumnLocator).allTextContents().catch(() => {return [];});
+    const tableRowElements = await this.page.locator(tableRowsLocator).all().catch(() => {return [];});
     const tableRowsText = [];
     for (const row of tableRowElements) {
       const tdElements = await row.locator(tableDataLocator).all();

@@ -218,7 +218,6 @@ test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
     const expectedExtractedContents = [
       "aligned_reads.bam",
       "consensus.fa",
-      "consensus_TEST_SC2.fa",
       "depths.png",
       "ercc_stats.txt",
       "report.tsv",

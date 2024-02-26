@@ -14,6 +14,8 @@ import { expect } from "@playwright/test";
 import { IlluminaPage } from "./illumina-page";
 import { PageObject } from "./page-object";
 
+export const SARS_COV2_REF_FILENAME = "wgs_SARS_CoV2_reference.fa";
+export const SARS_COV2_TRIM_PRIMER_FILENAME = "wgs_SARS_CoV2_primers_regions.bed";
 export const REF_FILENAME = "consensus_TEST_SC2.fa";
 export const TRIM_PRIMER_FILENAME = "Primer_K.bed";
 const REF_FILE = (refFilename: string) => `./fixtures/reference_sequences/${refFilename}`;
@@ -143,6 +145,7 @@ export class UploadPage extends PageObject {
   }
 
   public async clickConnectToProject() {
+    await this.pause(4);
     await this.page.locator(BASESPACE_CONNECT_TO_PROJECT).click();
 
     const illuminaPage = await this.clickAuthorize();

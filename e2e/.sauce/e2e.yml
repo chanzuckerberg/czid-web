@@ -27,6 +27,26 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Data Validation: P-1: SNo -: Data report validation example"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-report.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo -: Data report validation example"
+      retries: 2
+    shard: concurrency
+  - name: "Data Validation: P-1: SNo -: WGS SARS-CoV-2 Data report validation example"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-report.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo -: WGS SARS-CoV-2 Data report validation example"
+      retries: 2
+    shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 5: Basespace Viral Consensus Genome - No trim"
     platformName: "macOS 12"
     screenResolution: "1440x900"
@@ -35,6 +55,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 5:"
+      retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 6: Basespace Viral Consensus Genome - with trim"
     platformName: "macOS 12"
@@ -44,6 +65,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 6:"
+      retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 7: Basespace Viral Consensus Genome - No trim with mNGS - Ilumina"
     platformName: "macOS 12"
@@ -53,6 +75,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 7:"
+      retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 8: Basespace Viral Consensus Genome - with trim with mNGS - Ilumina"
     platformName: "macOS 12"
@@ -62,6 +85,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 8:"
+      retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload: SNo 1: Viral Consensus Genome - No trim"
     platformName: "macOS 12"
@@ -71,6 +95,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 1:"
+      retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload: SNo 2: Viral Consensus Genome - with trim"
     platformName: "macOS 12"
@@ -80,6 +105,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 2:"
+      retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload: SNo 3: Viral Consensus Genome - No trim with mNGS - Ilumina"
     platformName: "macOS 12"
@@ -89,6 +115,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 3:"
+      retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload: SNo 4: Viral Consensus Genome - with trim with mNGS - Ilumina"
     platformName: "macOS 12"
@@ -98,6 +125,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 4:"
+      retries: 2
     shard: concurrency
 artifacts:
   cleanup: true

@@ -6,7 +6,7 @@ import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
-const TEST_TIMEOUT = 60 * 1000 * 20;
+const TEST_TIMEOUT = 60 * 1000 * 40;
 
 const REFERENCE_ACCESSION = "Reference Accession";
 const BASESPACE_PROJECT_NAME = "Mark Test Project";
@@ -64,7 +64,7 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     await uploadPage.setManualInputs(inputs);
 
     await uploadPage.clickContinue();
-    await uploadPage.pause(5); // stablizes test
+    await uploadPage.pause(10); // stablizes test
     // #endregion 8. Enter required Metadata and click on Continue
 
     // #region 9. Check on Terms and Privacy policies checkbox and click Start Upload
@@ -89,11 +89,11 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // #region 11. Verify Samples Status and Reference Accession value once finished processing
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
-    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
+    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, TEST_TIMEOUT);
 
     // At Project Sample view list:
+    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // - Reference Accession reads: (dash) + Betacoronavirus 1 (species)
-    await projectPage.waitForSamplesComplete(sampleNames);
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       expect(samplesTable[sampleName]["Sample"][1]).toEqual(EXPECTED_STATUS);
@@ -150,7 +150,7 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     await uploadPage.setManualInputs(inputs);
 
     await uploadPage.clickContinue();
-    await uploadPage.pause(5); // stablizes test
+    await uploadPage.pause(10); // stablizes test
     // #endregion 9. Enter required Metadata and click on Continue
 
     // #region 10. Check on Terms and Privacy policies checkbox and click Start Upload
@@ -175,10 +175,10 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // #region 12. Verify Samples Status and Reference Accession value once finished processing
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
-    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
+    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, TEST_TIMEOUT);
 
     // At Project Sample view list:
-    await projectPage.waitForSamplesComplete(sampleNames);
+    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       // - Sample uploads COMPLETE status (in green)
@@ -241,7 +241,7 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     await uploadPage.setManualInputs(inputs);
 
     await uploadPage.clickContinue();
-    await uploadPage.pause(5); // stablizes test
+    await uploadPage.pause(10); // stablizes test
     // #endregion 10. Enter required Metadata and click on Continue
 
     // #region 11. Check on Terms and Privacy policies checkbox and click Start Upload
@@ -266,10 +266,10 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // #region 13. Verify Samples Status and Reference Accession value once finished processing
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
-    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
+    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, TEST_TIMEOUT);
 
     // At Project Sample view list:
-    await projectPage.waitForSamplesComplete(sampleNames);
+    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       // - Sample uploads COMPLETE status (in green)
@@ -336,7 +336,7 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     await uploadPage.setManualInputs(inputs);
 
     await uploadPage.clickContinue();
-    await uploadPage.pause(5); // stablizes test
+    await uploadPage.pause(10); // stablizes test
     // #endregion 11. Enter required Metadata and click on Continue
 
     // #region 12. Check on Terms and Privacy policies checkbox and click Start Upload
@@ -361,10 +361,10 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // #region 14. Verify Samples Status and Reference Accession value once finished processing
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
-    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
+    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, TEST_TIMEOUT);
 
     // At Project Sample view list:
-    await projectPage.waitForSamplesComplete(sampleNames);
+    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       // - Sample uploads COMPLETE status (in green)

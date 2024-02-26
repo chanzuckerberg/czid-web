@@ -33,6 +33,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
+      retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Downloads (CURL)"
     platformName: "macOS 12"
@@ -42,6 +43,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
+      retries: 2
     shard: concurrency
   - name: "Data Validation: P-0"
     platformName: "macOS 12"

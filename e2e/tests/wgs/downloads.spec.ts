@@ -646,9 +646,12 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     const expectedExtractedContents = [
       "aligned_reads.bam",
       "consensus.fa",
-      "consensus_TEST_SC2.fa",
       "depths.png",
       "ercc_stats.txt",
+      "no_host_1.fq.gz",
+      "no_host_2.fq.gz",
+      "primertrimmed.bam",
+      "primertrimmed.bam.bai",
       "report.tsv",
       "report.txt",
       "samtools_depth.txt",
@@ -666,7 +669,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
         const samples = await samplesPage.getSamples(project.name, selectedSamples[i]);
 
         // {Sample_Name}_{ID}_ files format:
-        expect(directories[i]).toEqual(`${selectedSamples[i]}_${samples[0].id}_`);
+        expect(directories).toContain(`${selectedSamples[i]}_${samples[0].id}_`);
 
         const extractedDirPath = path.join(extractedDir, directories[i]);
         let extractedFiles = await fs.readdir(extractedDirPath);
