@@ -8,10 +8,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import "semantic-ui-css/semantic.min.css";
 import "url-search-params-polyfill";
-import {
-  useAllowedFeatures,
-  UserContext,
-} from "~/components/common/UserContext";
+import { UserContext } from "~/components/common/UserContext";
 import { SHOULD_READ_FROM_NEXTGEN } from "./components/utils/features";
 import { initialGlobalContextState } from "./globalContext/initialState";
 import { GlobalContext, globalContextReducer } from "./globalContext/reducer";
@@ -71,8 +68,7 @@ const ReactComponentWithGlobalContext = ({
     globalContextReducer,
     initialGlobalContextState,
   );
-  const allowedFeatures = useAllowedFeatures();
-  const shouldReadFromNextGen = allowedFeatures.includes(
+  const shouldReadFromNextGen = userContext?.allowedFeatures.includes(
     SHOULD_READ_FROM_NEXTGEN,
   );
   return (
