@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<783490cc4a9dfd49c3c98d889dbb4b38>>
+ * @generated SignedSource<<75c0eeb61a8f297093e69232aaf806bf>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,7 +14,7 @@ export type BulkDownloadModalMutation$variables = {
   downloadFormat?: string | null | undefined;
   downloadType: string;
   workflow: string;
-  workflowRunIds?: ReadonlyArray<number | null | undefined> | null | undefined;
+  workflowRunIds?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
 export type BulkDownloadModalMutation$data = {
   readonly CreateBulkDownload: any | null | undefined;
@@ -121,16 +121,16 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "be1f5e4193332c97e26635f8242acdf6",
+    "cacheID": "9681b9e8ed7a948752a8af574deb70d0",
     "id": null,
     "metadata": {},
     "name": "BulkDownloadModalMutation",
     "operationKind": "mutation",
-    "text": "mutation BulkDownloadModalMutation(\n  $workflowRunIds: [Int]\n  $downloadFormat: String\n  $downloadType: String!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  CreateBulkDownload(input: {workflowRunIds: $workflowRunIds, downloadFormat: $downloadFormat, downloadType: $downloadType, workflow: $workflow, authenticityToken: $authenticityToken})\n}\n"
+    "text": "mutation BulkDownloadModalMutation(\n  $workflowRunIds: [String]\n  $downloadFormat: String\n  $downloadType: String!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  CreateBulkDownload(input: {workflowRunIds: $workflowRunIds, downloadFormat: $downloadFormat, downloadType: $downloadType, workflow: $workflow, authenticityToken: $authenticityToken})\n}\n"
   }
 };
 })();
 
-(node as any).hash = "fe315481ce68a17b1a8bcc521fac4a85";
+(node as any).hash = "aedaa19ddd156bf04bbdbf7ba5fac6fa";
 
 export default node;

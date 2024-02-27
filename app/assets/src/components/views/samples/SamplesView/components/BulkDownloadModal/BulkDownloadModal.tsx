@@ -84,7 +84,7 @@ const BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery = graphql`
 
 const BulkDownloadModalMutation = graphql`
   mutation BulkDownloadModalMutation(
-    $workflowRunIds: [Int]
+    $workflowRunIds: [String]
     $downloadFormat: String
     $downloadType: String!
     $workflow: String!

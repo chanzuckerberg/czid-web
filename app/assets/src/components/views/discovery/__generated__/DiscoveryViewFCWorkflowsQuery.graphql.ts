@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ca3d22d3e8b8459caeaaae4517138644>>
+ * @generated SignedSource<<4d0401c58dff55b1d729632577364179>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -16,9 +16,12 @@ export type queryInput_workflowRuns_input_Input = {
   where?: queryInput_workflowRuns_input_where_Input | null | undefined;
 };
 export type queryInput_workflowRuns_input_todoRemove_Input = {
+  authenticityToken?: string | null | undefined;
   domain?: string | null | undefined;
   host?: ReadonlyArray<number | null | undefined> | null | undefined;
   locationV2?: ReadonlyArray<string | null | undefined> | null | undefined;
+  orderBy?: string | null | undefined;
+  orderDir?: string | null | undefined;
   projectId?: string | null | undefined;
   search?: string | null | undefined;
   taxon?: ReadonlyArray<number | null | undefined> | null | undefined;
@@ -30,6 +33,14 @@ export type queryInput_workflowRuns_input_todoRemove_Input = {
 };
 export type queryInput_workflowRuns_input_orderBy_Input = {
   startedAt?: string | null | undefined;
+  workflowVersion?: queryInput_workflowRuns_input_orderBy_workflowVersion_Input | null | undefined;
+};
+export type queryInput_workflowRuns_input_orderBy_workflowVersion_Input = {
+  version?: string | null | undefined;
+  workflow?: queryInput_workflowRuns_input_orderBy_workflowVersion_workflow_Input | null | undefined;
+};
+export type queryInput_workflowRuns_input_orderBy_workflowVersion_workflow_Input = {
+  name?: string | null | undefined;
 };
 export type queryInput_workflowRuns_input_where_Input = {
   collectionId?: queryInput_workflowRuns_input_where_collectionId_Input | null | undefined;
