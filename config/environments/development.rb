@@ -78,6 +78,7 @@ Rails.application.configure do
   # web is the container name for the rails server in our docker config
   # Rails > 6 requires hosts to be explicitly allow listed
   config.hosts << "web"
+  config.hosts << "web.czidnet"
 
   # Development logging configuration
   logger           = ActiveSupport::Logger.new(STDOUT)

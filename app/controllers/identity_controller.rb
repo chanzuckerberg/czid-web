@@ -1,5 +1,6 @@
 class IdentityController < ApplicationController
   before_action :login_required, only: [:identify]
+  skip_before_action :authenticate_user!, only: [:enrich_token, :impersonate]
 
   TOKEN_AUTH_SERVICE = "scripts/token_auth.py".freeze
 
