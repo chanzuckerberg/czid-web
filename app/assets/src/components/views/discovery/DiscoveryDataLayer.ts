@@ -159,18 +159,18 @@ class ObjectCollectionView<T extends MustHaveId> {
     if (this._activePromises[key]) {
       // @ts-expect-error Type 'number[]' cannot be used as an index type.
       return this._activePromises[key];
-    } else {
-      const promiseLoadObjectRows = this.fetchObjectRows({
-        startIndex,
-        stopIndex,
-      });
-      // @ts-expect-error Type 'any[]' cannot be used as an index type.
-      this._activePromises[key] = promiseLoadObjectRows;
-      const result = await promiseLoadObjectRows;
-      // @ts-expect-error Type 'any[]' cannot be used as an index type.
-      delete this._activePromises[key];
-      return result;
     }
+
+    const promiseLoadObjectRows = this.fetchObjectRows({
+      startIndex,
+      stopIndex,
+    });
+    // @ts-expect-error Type 'any[]' cannot be used as an index type.
+    this._activePromises[key] = promiseLoadObjectRows;
+    const result = await promiseLoadObjectRows;
+    // @ts-expect-error Type 'any[]' cannot be used as an index type.
+    delete this._activePromises[key];
+    return result;
   };
 
   fetchObjectRows = async ({

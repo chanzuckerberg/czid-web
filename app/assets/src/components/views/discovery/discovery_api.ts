@@ -167,7 +167,7 @@ const processRawSample = (sample: $TSFixMe) => {
   };
 };
 
-const formatWetlabProtocol = (str: $TSFixMe) =>
+export const formatWetlabProtocol = (str: $TSFixMe) =>
   replace(/_/g, " ", toUpper(str));
 
 const processConsensusGenomeWorkflowRun = (cgWorkflowRun: $TSFixMe) => {

@@ -89,7 +89,7 @@ import {
 } from "./constants";
 import cs from "./samples_view.scss";
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
-import { getSelectedObjects, getStatusCounts } from "./utils";
+import { getStatusCounts } from "./utils";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
@@ -112,6 +112,7 @@ const SamplesView = forwardRef(function SamplesView(
     domain,
     filters,
     filtersSidebarOpen,
+    getRows,
     handleNewWorkflowRunsCreated,
     hasAtLeastOneFilterApplied,
     hideAllTriggers,
@@ -119,7 +120,6 @@ const SamplesView = forwardRef(function SamplesView(
     mapLocationData,
     mapPreviewedLocationId,
     mapTilerKey,
-    objects,
     onActiveColumnsChange,
     onClearFilters,
     onDeleteSample,
@@ -257,8 +257,9 @@ const SamplesView = forwardRef(function SamplesView(
     fetchMetadataFieldsBySampleIds();
   }, [selectableIds]);
 
-  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-  const selectedObjects = getSelectedObjects({ selectedIds, objects });
+  const selectedObjects = getRows().filter((row): boolean =>
+    Boolean(selectedIds?.has(row.id)),
+  );
 
   const handleSelectRow = (
     value: number,
@@ -268,11 +269,13 @@ const SamplesView = forwardRef(function SamplesView(
     // If the user is holding shift, we want to select all the rows between the last selected row and the current row.
     const newSelected = new Set(selectedIds);
     if (event.shiftKey && referenceSelectId) {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-      const ids = objects.getIntermediateIds({
-        id1: referenceSelectId,
-        id2: value,
-      });
+      const ids = selectableIds?.slice(
+        selectableIds.findIndex(id => id === referenceSelectId || id === value),
+        selectableIds.findLastIndex(
+          id => id === referenceSelectId || id === value,
+        ) + 1,
+      );
+
       if (checked) {
         forEach((v: number) => {
           newSelected.add(v);
@@ -437,8 +440,7 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderCollectionTrigger = () => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    const targetSamples = objects.loaded;
+    const targetSamples = getRows();
 
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
     return selectedIds.size < 2 ? (
@@ -1096,8 +1098,7 @@ const SamplesView = forwardRef(function SamplesView(
     event: React.MouseEvent<HTMLDivElement, MouseEvent>;
     rowData: { id: number };
   }) => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    const object = objects.get(rowData.id);
+    const object = getRows().find(row => row.id === rowData.id);
     onObjectSelected && onObjectSelected({ object, currentEvent: event });
 
     trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_ROW_CLICKED, {
@@ -1182,3 +1183,73 @@ const SamplesView = forwardRef(function SamplesView(
 });
 
 export default SamplesView;
+
+/** Combined from Workflows and Entities Services. */
+export type CgRow = WorkflowRunRow & CgEntityRow;
+
+/**
+ * Fields returned by Workflows Service formatted into the legacy processRaw() format (so we can
+ * continue to use the old renderers during the migration).
+ */
+export interface WorkflowRunRow {
+  // TODO: Lookup username from Entities via WorkflowRun's ownerUserId (to replicate
+  // "sample?.userNameWhoInitiatedWorkflowRun || sample.user" in TableRenderers.tsx). For now just
+  // render the sample's user.
+  id: number; // TODO: Make IDs strings
+  inputSequencingReadId: string;
+  status?: string;
+  createdAt?: string;
+  workflow: string;
+  wdl_version?: string;
+  creation_source?: string;
+}
+
+/**
+ * Fields returned by Entities Service (excludes custom metadata).
+ *
+ * The order of properties follows that of processRawWorkflowRun().
+ */
+export interface CgEntityRow {
+  sequencingReadId: string;
+  consensusGenomeProducingRunId?: string;
+  sample: {
+    id: number; // TODO: Make IDs strings
+    railsSampleId?: number;
+    // processRawWorkflowRun():
+    name: string;
+    project?: string;
+    publicAccess?: boolean;
+    uploadError?: string;
+    userId?: number;
+    userNameWhoInitiatedWorkflowRun?: string;
+  };
+  host?: string;
+  notes?: string;
+  // processConsensusGenomeWorkflowRun():
+  medakaModel?: string;
+  technology: string;
+  wetlabProtocol?: string;
+  referenceAccession?: {
+    accessionName?: string;
+    referenceAccessionId?: string;
+    taxonName?: string;
+  };
+  // get("cached_results", cgWorkflowRun):
+  coverageDepth?: number;
+  totalReadsCG?: number;
+  gcPercent?: number;
+  refSnps?: number;
+  percentIdentity?: number;
+  nActg?: number;
+  percentGenomeCalled?: number;
+  nMissing?: number;
+  nAmbiguous?: number;
+  referenceAccessionLength?: number;
+  // getSampleField(["metadata"]):
+  collection_location_v2: string;
+  nucleotide_type: string;
+  sample_type: string;
+  water_control?: string;
+}
+/** Encapsulates custom metadata fields. */
+export type Metadata = { [key: string]: NonNullable<any> };

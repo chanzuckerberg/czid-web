@@ -10,7 +10,7 @@ export interface DropdownOption {
 }
 
 export interface MustHaveId {
-  id: number;
+  id: number | string;
 }
 
 export interface NumberId {

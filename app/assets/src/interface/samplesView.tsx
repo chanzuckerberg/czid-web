@@ -1,7 +1,6 @@
 import { SortDirectionType } from "react-virtualized";
 import { ThresholdForAPI } from "~/components/utils/ThresholdMap";
 import { WorkflowType } from "~/components/utils/workflows";
-import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { AnnotationValue } from "~/interface/discovery";
 import { LocationObject } from "~/interface/shared";
 import { DateString } from "~/interface/shared/generic";
@@ -16,6 +15,7 @@ export interface SamplesViewProps {
   domain?: string;
   filters?: FilterList;
   filtersSidebarOpen?: boolean;
+  getRows: () => any[];
   hasAtLeastOneFilterApplied?: boolean;
   handleNewWorkflowRunsCreated?(param: {
     numWorkflowRunsCreated: number;
@@ -27,7 +27,6 @@ export interface SamplesViewProps {
   mapPreviewedLocationId?: number;
   mapTilerKey?: string;
   numOfMngsSamples?: number;
-  objects?: ObjectCollectionView<ObjectType>;
   onActiveColumnsChange?(activeColumns: string[]): void;
   onClearFilters?(): void;
   onDeleteSample(): void;

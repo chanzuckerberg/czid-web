@@ -8,4 +8,12 @@ declare global {
     GIT_RELEASE_SHA;
     react_component;
   }
+
+  // TODO: Remove this after upgrading to TS v5.
+  interface Array<T> {
+    findLastIndex(
+      predicate: (value: T, index: number, obj: T[]) => unknown,
+      thisArg?: any,
+    ): number;
+  }
 }

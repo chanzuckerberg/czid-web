@@ -100,8 +100,6 @@ export interface DiscoveryViewState {
   sampleWasDeleted: string | null;
   search: string;
   selectableSampleIds: number[];
-  /** @deprecated Use getSelectableWorkflowRunIds() during the migration. */
-  selectableWorkflowRunIds: number[];
   selectedSampleIdsByWorkflow: WorkflowSets;
   showFilters: boolean;
   showStats: boolean;
@@ -117,7 +115,7 @@ export interface DiscoveryViewState {
 
 export interface ConfigForWorkflow {
   bannerTitle: string;
-  objectCollection: ObjectCollectionView<ObjectType>;
+  objectCollection?: ObjectCollectionView<ObjectType>;
   noDataLinks: {
     external?: boolean;
     href: string;
@@ -125,9 +123,14 @@ export interface ConfigForWorkflow {
   }[];
   noDataMessage: string;
   // For NextGen migration:
-  fetchWorkflowRuns: (conditions: Conditions) => void;
-  getSelectableWorkflowRunIds: () => number[] | undefined;
+  getSelectableIds: () => number[] | undefined;
   getFilteredSampleCount: () => number | undefined;
+  getRows: () => any[];
+  fetchWorkflowRuns: (conditions: Conditions) => void;
+  fetchPage: (range: {
+    startIndex: number;
+    stopIndex: number;
+  }) => Promise<any[]>;
 }
 
 export interface Conditions {
