@@ -44,7 +44,7 @@ RSpec.describe IdentityController, type: :controller do
 
     context "when token is expired" do
       before do
-        token = controller.send(:generate_token, @joe.id.to_s)
+        token = TokenCreationService.call(user_id: @joe.id)
         # Set the current time to be 1 second after the token expires
         allow(Time.zone).to receive(:now).and_return(Time.zone.at(token["expires_at"].to_i + 1))
         request.headers["Authorization"] = "Bearer #{token['token']}"
@@ -59,7 +59,7 @@ RSpec.describe IdentityController, type: :controller do
 
     context "when token is valid" do
       before do
-        token = controller.send(:generate_token, @joe.id.to_s)["token"]
+        token = TokenCreationService.call(user_id: @joe.id.to_s)["token"]
         request.headers["Authorization"] = "Bearer #{token}"
       end
 
@@ -95,9 +95,10 @@ RSpec.describe IdentityController, type: :controller do
     context "when service_identity is provided" do
       before do
         @owner_project = create(:project, creator_id: @joe.id)
-        @service_identity = "czid-workflows"
-        @token = controller.send(:generate_token, @joe.id.to_s, {}, @service_identity)["token"]
-        request.headers["Authorization"] = "Bearer #{@token}"
+        @service_identity = "workflows"
+
+        service_identity_token = TokenCreationService.call(service_identity: @service_identity)["token"]
+        request.headers["Authorization"] = "Bearer #{service_identity_token}"
       end
 
       it "returns an enriched token with project roles & the service identity" do
@@ -121,8 +122,8 @@ RSpec.describe IdentityController, type: :controller do
     context "when service_identity is missing" do
       before do
         @service_identity = ""
-        @token = controller.send(:generate_token, @joe.id.to_s, {}, @service_identity)["token"]
-        request.headers["Authorization"] = "Bearer #{@token}"
+        service_identity_token = TokenCreationService.call(service_identity: @service_identity)["token"]
+        request.headers["Authorization"] = "Bearer #{service_identity_token}"
       end
 
       it "raises a InsufficientPrivilegesError" do

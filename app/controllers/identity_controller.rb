@@ -51,7 +51,7 @@ class IdentityController < ApplicationController
   end
 
   def identify
-    token = generate_token(current_user.id)
+    token = TokenCreationService.call(user_id: current_user.id)
     expires_at = Time.zone.at(token["expires_at"])
 
     cookies[:czid_services_token] = {
@@ -66,9 +66,7 @@ class IdentityController < ApplicationController
     user_id, = validate_token
 
     # Enrich the token with project roles & return it as payload
-    project_roles = user_project_access(user_id)
-    five_minutes_in_seconds = 300
-    enriched_token = generate_token(user_id, project_roles, nil, five_minutes_in_seconds)
+    enriched_token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true)
     render json: {
       token: enriched_token["token"],
     }, status: :ok
@@ -84,8 +82,7 @@ class IdentityController < ApplicationController
     raise UserNotFoundError unless User.exists?(user_id)
 
     # Enrich the token with project roles & the same service identity & return it as payload
-    project_roles = user_project_access(user_id)
-    enriched_token = generate_token(user_id, project_roles, service_identity)
+    enriched_token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true, service_identity: service_identity)
     render json: {
       token: enriched_token["token"],
     }, status: :ok
@@ -126,37 +123,5 @@ class IdentityController < ApplicationController
     end
 
     JSON.parse(stdout)
-  end
-
-  def generate_token(user_id, project_claims = nil, service_identity = nil, expires_after = 3600)
-    # Verify the user_id provided is valid before generating a token
-    user_id = User.find(user_id).id.to_s
-    cmd = "python3 #{TOKEN_AUTH_SERVICE} --create_token --userid #{user_id}"
-    cmd += " --project-claims '#{project_claims.to_json}'" if project_claims.present?
-    cmd += " --service-identity #{service_identity}" if service_identity.present?
-    cmd += " --expiration #{expires_after}" # takes in seconds
-    stdout, stderr, status = Open3.capture3(cmd)
-
-    unless status.success?
-      LogUtil.log_error(TokenCreationError.new(stderr))
-      raise TokenCreationError
-    end
-
-    JSON.parse(stdout)
-  end
-
-  def user_project_access(user_id)
-    # There are 3 levels of access in a project:
-    # 1. Project owner - the user created the project. A project can only have owner
-    # 2. Project member - the user is a member of the project. A project can have many members.
-    # 3. Project viewer - the user can view the project. All users can view public projects.
-    user = User.find(user_id)
-
-    project_roles = {}
-    project_roles["owner"] = Project.where(creator_id: user.id).pluck(:id)
-    project_roles["member"] = Project.editable(user).pluck(:id)
-    project_roles["viewer"] = Project.viewable(user).pluck(:id)
-
-    project_roles
   end
 end
