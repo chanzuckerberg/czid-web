@@ -75,6 +75,8 @@ class AppConfig < ApplicationRecord
   # The default alignment config to use when dispatching an mNGS run.
   # Initially set to "2021-01-22".
   DEFAULT_ALIGNMENT_CONFIG_NAME = "default_alignment_config_name".freeze
+  # When this is "1", automatically delete old BulkDownloads via scheduled job.
+  AUTO_DELETE_OLD_BULK_DOWNLOADS = "auto_delete_old_bulk_downloads".freeze
 
   after_save :clear_cached_record
 

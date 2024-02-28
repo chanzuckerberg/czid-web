@@ -22,6 +22,8 @@ class BulkDownload < ApplicationRecord
   OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
   PROGRESS_UPDATE_DELAY = 15 # Minimum number of seconds between progress updates.
   ECS_TASK_NAME = "bulk_downloads".freeze
+  # [CZID-9274] We auto-delete BulkDownload and its S3 files via DeleteOldBulkDownloads job.
+  AUTO_DELETE_AFTER_NUM_DAYS = 7
 
   before_save :convert_params_to_json
 
