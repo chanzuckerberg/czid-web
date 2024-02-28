@@ -58,9 +58,9 @@ const DiscoveryViewFCWorkflowsQuery = graphql`
 
 const DiscoveryViewFCSequencingReadsQuery = graphql`
   query DiscoveryViewFCSequencingReadsQuery(
-    $input: queryInput_sequencingReads_input_Input
+    $input: queryInput_fedSequencingReads_input_Input
   ) {
-    sequencingReads(input: $input) {
+    fedSequencingReads(input: $input) {
       id
       nucleicAcid
       protocol
@@ -236,7 +236,7 @@ async function querySequencingReadsByIds(
       },
     },
   ).toPromise();
-  if (data?.sequencingReads == null) {
+  if (data?.fedSequencingReads == null) {
     throw new Error(
       `Missing CG data: ${search} ${orderBy} ${orderDir} ${JSON.stringify(
         filters,
@@ -244,92 +244,95 @@ async function querySequencingReadsByIds(
     );
   }
 
-  return data.sequencingReads.filter(isNotNullish).flatMap(sequencingRead => {
-    const sample = sequencingRead.sample;
-    if (sample == null) {
-      throw new Error(
-        `Sequencing read's sample was nullish: ${JSON.stringify(
-          sequencingRead,
-        )}`,
-      );
-    }
-
-    const rows: Array<CgEntityRow & Metadata> = [];
-
-    const sequencingReadAndSampleFields: CgEntityRow = {
-      sequencingReadId: sequencingRead.id,
-      sample: {
-        // TODO: Use NextGen ID when samples are no longer dual-written.
-        id: sample.railsSampleId != null ? Number(sample.railsSampleId) : 0,
-        railsSampleId: sample.railsSampleId ?? undefined,
-        name: sample.name,
-        project: sample.collection?.name ?? undefined,
-        publicAccess: sample.collection?.public ?? undefined,
-        uploadError: sample.uploadError ?? undefined,
-        userId: sample.ownerUserId ?? undefined,
-        // TODO: Make a separate query to Rails to get usernames from WorkflowRun ownerUserIds,
-        // which are currently not being read.
-        userNameWhoInitiatedWorkflowRun: sample.ownerUserName ?? undefined,
-      },
-      host: sample.hostOrganism?.name,
-      notes: sample.notes ?? undefined,
-      medakaModel: sequencingRead.medakaModel ?? undefined,
-      technology: sequencingRead.technology,
-      wetlabProtocol:
-        sequencingRead.protocol != null
-          ? formatWetlabProtocol(sequencingRead.protocol)
-          : undefined,
-      collection_location_v2: sample.collectionLocation ?? undefined,
-      nucleotide_type: sequencingRead.nucleicAcid,
-      sample_type: sample.sampleType ?? undefined,
-      water_control:
-        sample.waterControl != null
-          ? sample.waterControl
-            ? "Yes"
-            : "No"
-          : undefined,
-    };
-    const metadataFields = Object.fromEntries(
-      sample.metadatas.edges
-        .filter(isNotNullish)
-        .map(edge => [edge.node.fieldName, edge.node.value]),
-    );
-    rows.push({
-      ...sequencingReadAndSampleFields,
-      ...metadataFields,
-    });
-
-    for (const consensusGenomeEdge of sequencingRead.consensusGenomes.edges) {
-      if (consensusGenomeEdge == null) {
-        continue;
+  return data.fedSequencingReads
+    .filter(isNotNullish)
+    .flatMap(sequencingRead => {
+      const sample = sequencingRead.sample;
+      if (sample == null) {
+        throw new Error(
+          `Sequencing read's sample was nullish: ${JSON.stringify(
+            sequencingRead,
+          )}`,
+        );
       }
-      const node = consensusGenomeEdge.node;
-      const metrics = node.metrics;
+
+      const rows: Array<CgEntityRow & Metadata> = [];
+
+      const sequencingReadAndSampleFields: CgEntityRow = {
+        sequencingReadId: sequencingRead.id,
+        sample: {
+          // TODO: Use NextGen ID when samples are no longer dual-written.
+          id: sample.railsSampleId != null ? Number(sample.railsSampleId) : 0,
+          railsSampleId: sample.railsSampleId ?? undefined,
+          name: sample.name,
+          project: sample.collection?.name ?? undefined,
+          publicAccess: sample.collection?.public ?? undefined,
+          uploadError: sample.uploadError ?? undefined,
+          userId: sample.ownerUserId ?? undefined,
+          // TODO: Make a separate query to Rails to get usernames from WorkflowRun ownerUserIds,
+          // which are currently not being read.
+          userNameWhoInitiatedWorkflowRun: sample.ownerUserName ?? undefined,
+        },
+        host: sample.hostOrganism?.name,
+        notes: sample.notes ?? undefined,
+        medakaModel: sequencingRead.medakaModel ?? undefined,
+        technology: sequencingRead.technology,
+        wetlabProtocol:
+          sequencingRead.protocol != null
+            ? formatWetlabProtocol(sequencingRead.protocol)
+            : undefined,
+        collection_location_v2: sample.collectionLocation ?? undefined,
+        nucleotide_type: sequencingRead.nucleicAcid,
+        sample_type: sample.sampleType ?? undefined,
+        water_control:
+          sample.waterControl != null
+            ? sample.waterControl
+              ? "Yes"
+              : "No"
+            : undefined,
+      };
+      const metadataFields = Object.fromEntries(
+        sample.metadatas.edges
+          .filter(isNotNullish)
+          .map(edge => [edge.node.fieldName, edge.node.value]),
+      );
       rows.push({
         ...sequencingReadAndSampleFields,
         ...metadataFields,
-        consensusGenomeProducingRunId: node.producingRunId ?? undefined,
-        referenceAccession: {
-          accessionName: node.referenceGenome?.accessionName ?? undefined,
-          referenceAccessionId: node.referenceGenome?.accessionId ?? undefined,
-          taxonName:
-            sequencingRead.taxon?.name ?? node.taxon?.name ?? undefined,
-        },
-        coverageDepth: metrics?.coverageDepth ?? undefined,
-        totalReadsCG: metrics?.totalReads ?? undefined,
-        gcPercent: metrics?.gcPercent ?? undefined,
-        refSnps: metrics?.refSnps ?? undefined,
-        percentIdentity: metrics?.percentIdentity ?? undefined,
-        nActg: metrics?.nActg ?? undefined,
-        percentGenomeCalled: metrics?.percentGenomeCalled ?? undefined,
-        nMissing: metrics?.nMissing ?? undefined,
-        nAmbiguous: metrics?.nAmbiguous ?? undefined,
-        referenceAccessionLength: metrics?.referenceGenomeLength ?? undefined,
       });
-    }
 
-    return rows;
-  });
+      for (const consensusGenomeEdge of sequencingRead.consensusGenomes.edges) {
+        if (consensusGenomeEdge == null) {
+          continue;
+        }
+        const node = consensusGenomeEdge.node;
+        const metrics = node.metrics;
+        rows.push({
+          ...sequencingReadAndSampleFields,
+          ...metadataFields,
+          consensusGenomeProducingRunId: node.producingRunId ?? undefined,
+          referenceAccession: {
+            accessionName: node.referenceGenome?.accessionName ?? undefined,
+            referenceAccessionId:
+              node.referenceGenome?.accessionId ?? undefined,
+            taxonName:
+              sequencingRead.taxon?.name ?? node.taxon?.name ?? undefined,
+          },
+          coverageDepth: metrics?.coverageDepth ?? undefined,
+          totalReadsCG: metrics?.totalReads ?? undefined,
+          gcPercent: metrics?.gcPercent ?? undefined,
+          refSnps: metrics?.refSnps ?? undefined,
+          percentIdentity: metrics?.percentIdentity ?? undefined,
+          nActg: metrics?.nActg ?? undefined,
+          percentGenomeCalled: metrics?.percentGenomeCalled ?? undefined,
+          nMissing: metrics?.nMissing ?? undefined,
+          nAmbiguous: metrics?.nAmbiguous ?? undefined,
+          referenceAccessionLength: metrics?.referenceGenomeLength ?? undefined,
+        });
+      }
+
+      return rows;
+    });
 }
 
 /**

@@ -1346,14 +1346,14 @@ type Query {
   Pathogens(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Pathogens_items]
   PersistedBackground(projectId: String): PersistedBackground
   PipelineData(sampleId: String, workflowVersionId: String): PipelineData
-  samples(where: SampleWhereClause = null): [Sample!]!
-  sequencingReads(input: queryInput_sequencingReads_input_Input): [query_sequencingReads_items]
+  fedSamples(input: queryInput_fedSamples_input_Input): [query_fedSamples_items]
+  fedSequencingReads(input: queryInput_fedSequencingReads_input_Input): [query_fedSequencingReads_items]
   Taxons(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Taxons_items]
   TaxonDist(backgroundId: String, taxonId: String): TaxonDist
   UserBlastAnnotations(sampleId: String, workflowVersionId: String): [query_UserBlastAnnotations_items]
   ValidateUserCanDeleteObjects(input: queryInput_ValidateUserCanDeleteObjects_input_Input): ValidateUserCanDeleteObjects
   workflowRuns(input: queryInput_workflowRuns_input_Input): [query_workflowRuns_items]
-  workflowRunsAggregate(input: queryInput_workflowRunsAggregate_input_Input): [query_workflowRunsAggregate_items]
+  fedWorkflowRunsAggregate(input: queryInput_fedWorkflowRunsAggregate_input_Input): [query_fedWorkflowRunsAggregate_items]
   ZipLink(workflowRunId: String): ZipLink
   node(
     """The ID of the object."""
@@ -1364,6 +1364,7 @@ type Query {
     ids: [GlobalID!]!
   ): [Node!]!
   files(where: FileWhereClause = null): [File!]!
+  samples(where: SampleWhereClause = null): [Sample!]!
   genomicRanges(where: GenomicRangeWhereClause = null): [GenomicRange!]!
   referenceGenomes(where: ReferenceGenomeWhereClause = null): [ReferenceGenome!]!
   sequenceAlignmentIndices(where: SequenceAlignmentIndexWhereClause = null): [SequenceAlignmentIndex!]!
@@ -1607,6 +1608,107 @@ type query_CoverageVizSummary_items {
   score: Int
   coverage_breadth: JSON
   coverage_depth: JSON
+}
+
+type query_fedSamples_items {
+  id: String!
+  railsSampleId: Int
+}
+
+type query_fedSequencingReads_items {
+  id: String!
+  nucleicAcid: String!
+  protocol: String
+  medakaModel: String
+  technology: String!
+  taxon: query_fedSequencingReads_items_taxon
+  sample: query_fedSequencingReads_items_sample
+  consensusGenomes: query_fedSequencingReads_items_consensusGenomes!
+}
+
+type query_fedSequencingReads_items_consensusGenomes {
+  edges: [query_fedSequencingReads_items_consensusGenomes_edges_items]!
+}
+
+type query_fedSequencingReads_items_consensusGenomes_edges_items {
+  node: query_fedSequencingReads_items_consensusGenomes_edges_items_node!
+}
+
+type query_fedSequencingReads_items_consensusGenomes_edges_items_node {
+  producingRunId: String
+  taxon: query_fedSequencingReads_items_consensusGenomes_edges_items_node_taxon
+  referenceGenome: query_fedSequencingReads_items_consensusGenomes_edges_items_node_referenceGenome
+  metrics: query_fedSequencingReads_items_consensusGenomes_edges_items_node_metrics
+}
+
+type query_fedSequencingReads_items_consensusGenomes_edges_items_node_metrics {
+  coverageDepth: Float
+  totalReads: Int
+  gcPercent: Float
+  refSnps: Int
+  percentIdentity: Float
+  nActg: Int
+  percentGenomeCalled: Float
+  nMissing: Int
+  nAmbiguous: Int
+  referenceGenomeLength: Float
+}
+
+type query_fedSequencingReads_items_consensusGenomes_edges_items_node_referenceGenome {
+  accessionId: String
+  accessionName: String
+}
+
+type query_fedSequencingReads_items_consensusGenomes_edges_items_node_taxon {
+  name: String!
+}
+
+type query_fedSequencingReads_items_sample {
+  railsSampleId: Int
+  name: String!
+  notes: String
+  collectionLocation: String!
+  sampleType: String!
+  waterControl: Boolean
+  uploadError: String
+  hostOrganism: query_fedSequencingReads_items_sample_hostOrganism
+  collection: query_fedSequencingReads_items_sample_collection
+  ownerUserId: Float
+  ownerUserName: String
+  metadatas: query_fedSequencingReads_items_sample_metadatas!
+}
+
+type query_fedSequencingReads_items_sample_collection {
+  name: String
+  public: Boolean
+}
+
+type query_fedSequencingReads_items_sample_hostOrganism {
+  name: String!
+}
+
+type query_fedSequencingReads_items_sample_metadatas {
+  edges: [query_fedSequencingReads_items_sample_metadatas_edges_items]!
+}
+
+type query_fedSequencingReads_items_sample_metadatas_edges_items {
+  node: query_fedSequencingReads_items_sample_metadatas_edges_items_node!
+}
+
+type query_fedSequencingReads_items_sample_metadatas_edges_items_node {
+  fieldName: String!
+  value: String!
+}
+
+type query_fedSequencingReads_items_taxon {
+  name: String!
+}
+
+type query_fedWorkflowRunsAggregate_items {
+  collectionId: String!
+  mngsRunsCount: Int!
+  cgRunsCount: Int!
+  amrRunsCount: Int!
 }
 
 type query_MetadataFields_items {
@@ -1897,100 +1999,6 @@ input query_SampleMetadata_metadata_items_location_validated_value_oneOf_1_Input
   refetch_adjusted_location: Boolean
 }
 
-type query_samples_items {
-  id: String!
-  railsSampleId: Int
-}
-
-type query_sequencingReads_items {
-  id: String!
-  nucleicAcid: String!
-  protocol: String
-  medakaModel: String
-  technology: String!
-  taxon: query_sequencingReads_items_taxon
-  sample: query_sequencingReads_items_sample
-  consensusGenomes: query_sequencingReads_items_consensusGenomes!
-}
-
-type query_sequencingReads_items_consensusGenomes {
-  edges: [query_sequencingReads_items_consensusGenomes_edges_items]!
-}
-
-type query_sequencingReads_items_consensusGenomes_edges_items {
-  node: query_sequencingReads_items_consensusGenomes_edges_items_node!
-}
-
-type query_sequencingReads_items_consensusGenomes_edges_items_node {
-  producingRunId: String
-  taxon: query_sequencingReads_items_consensusGenomes_edges_items_node_taxon
-  referenceGenome: query_sequencingReads_items_consensusGenomes_edges_items_node_referenceGenome
-  metrics: query_sequencingReads_items_consensusGenomes_edges_items_node_metrics
-}
-
-type query_sequencingReads_items_consensusGenomes_edges_items_node_metrics {
-  coverageDepth: Float
-  totalReads: Int
-  gcPercent: Float
-  refSnps: Int
-  percentIdentity: Float
-  nActg: Int
-  percentGenomeCalled: Float
-  nMissing: Int
-  nAmbiguous: Int
-  referenceGenomeLength: Float
-}
-
-type query_sequencingReads_items_consensusGenomes_edges_items_node_referenceGenome {
-  accessionId: String
-  accessionName: String
-}
-
-type query_sequencingReads_items_consensusGenomes_edges_items_node_taxon {
-  name: String!
-}
-
-type query_sequencingReads_items_sample {
-  railsSampleId: Int
-  name: String!
-  notes: String
-  collectionLocation: String!
-  sampleType: String!
-  waterControl: Boolean
-  uploadError: String
-  hostOrganism: query_sequencingReads_items_sample_hostOrganism
-  collection: query_sequencingReads_items_sample_collection
-  ownerUserId: Float
-  ownerUserName: String
-  metadatas: query_sequencingReads_items_sample_metadatas!
-}
-
-type query_sequencingReads_items_sample_collection {
-  name: String
-  public: Boolean
-}
-
-type query_sequencingReads_items_sample_hostOrganism {
-  name: String!
-}
-
-type query_sequencingReads_items_sample_metadatas {
-  edges: [query_sequencingReads_items_sample_metadatas_edges_items]!
-}
-
-type query_sequencingReads_items_sample_metadatas_edges_items {
-  node: query_sequencingReads_items_sample_metadatas_edges_items_node!
-}
-
-type query_sequencingReads_items_sample_metadatas_edges_items_node {
-  fieldName: String!
-  value: String!
-}
-
-type query_sequencingReads_items_taxon {
-  name: String!
-}
-
 type query_TaxonDist_merged_NT_NR {
   tax_level: Int
   mean: Float
@@ -2062,13 +2070,6 @@ type query_workflowRuns_items_workflowVersion_workflow {
   name: String
 }
 
-type query_workflowRunsAggregate_items {
-  collectionId: String!
-  mngsRunsCount: Int!
-  cgRunsCount: Int!
-  amrRunsCount: Int!
-}
-
 input queryInput_BulkDownloadCGOverview_input_Input {
   downloadType: String!
   workflowRunIds: [Int]!
@@ -2136,57 +2137,48 @@ input queryInput_consensusGenomes_input_where_producingRunId_Input {
   _in: [String]
 }
 
-input queryInput_MetadataFields_input_Input {
-  sampleIds: [String]!
-  authenticityToken: String!
+input queryInput_fedSamples_input_Input {
+  where: queryInput_fedSamples_input_where_Input
+  orderBy: queryInput_fedSamples_input_orderBy_Input
+  sequencingReadsInput: queryInput_fedSamples_input_sequencingReadsInput_Input
+  todoRemove: queryInput_fedSamples_input_todoRemove_Input
 }
 
-input queryInput_SampleMetadata_input_Input {
-  pipelineVersion: String
-}
-
-input queryInput_samples_input_Input {
-  where: queryInput_samples_input_where_Input
-  orderBy: queryInput_samples_input_orderBy_Input
-  sequencingReadsInput: queryInput_samples_input_sequencingReadsInput_Input
-  todoRemove: queryInput_samples_input_todoRemove_Input
-}
-
-input queryInput_samples_input_orderBy_Input {
+input queryInput_fedSamples_input_orderBy_Input {
   key: String
   dir: String
 }
 
-input queryInput_samples_input_sequencingReadsInput_Input {
-  where: queryInput_samples_input_sequencingReadsInput_where_Input
+input queryInput_fedSamples_input_sequencingReadsInput_Input {
+  where: queryInput_fedSamples_input_sequencingReadsInput_where_Input
 }
 
-input queryInput_samples_input_sequencingReadsInput_where_consensusGenomes_Input {
-  taxon: queryInput_samples_input_sequencingReadsInput_where_consensusGenomes_taxon_Input
+input queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_Input {
+  taxon: queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_taxon_Input
 }
 
-input queryInput_samples_input_sequencingReadsInput_where_consensusGenomes_taxon_Input {
-  name: queryInput_samples_input_sequencingReadsInput_where_consensusGenomes_taxon_name_Input
+input queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_taxon_Input {
+  name: queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_taxon_name_Input
 }
 
-input queryInput_samples_input_sequencingReadsInput_where_consensusGenomes_taxon_name_Input {
+input queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_taxon_name_Input {
   _in: [String]
 }
 
-input queryInput_samples_input_sequencingReadsInput_where_Input {
-  taxon: queryInput_samples_input_sequencingReadsInput_where_taxon_Input
-  consensusGenomes: queryInput_samples_input_sequencingReadsInput_where_consensusGenomes_Input
+input queryInput_fedSamples_input_sequencingReadsInput_where_Input {
+  taxon: queryInput_fedSamples_input_sequencingReadsInput_where_taxon_Input
+  consensusGenomes: queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_Input
 }
 
-input queryInput_samples_input_sequencingReadsInput_where_taxon_Input {
-  name: queryInput_samples_input_sequencingReadsInput_where_taxon_name_Input
+input queryInput_fedSamples_input_sequencingReadsInput_where_taxon_Input {
+  name: queryInput_fedSamples_input_sequencingReadsInput_where_taxon_name_Input
 }
 
-input queryInput_samples_input_sequencingReadsInput_where_taxon_name_Input {
+input queryInput_fedSamples_input_sequencingReadsInput_where_taxon_name_Input {
   _in: [String]
 }
 
-input queryInput_samples_input_todoRemove_Input {
+input queryInput_fedSamples_input_todoRemove_Input {
   domain: String
   visibility: String
   time: [String]
@@ -2199,113 +2191,113 @@ input queryInput_samples_input_todoRemove_Input {
   listAllIds: Boolean
 }
 
-input queryInput_samples_input_where_collectionLocation_Input {
+input queryInput_fedSamples_input_where_collectionLocation_Input {
   _in: [String]
 }
 
-input queryInput_samples_input_where_hostOrganism_Input {
-  name: queryInput_samples_input_where_hostOrganism_name_Input
+input queryInput_fedSamples_input_where_hostOrganism_Input {
+  name: queryInput_fedSamples_input_where_hostOrganism_name_Input
 }
 
-input queryInput_samples_input_where_hostOrganism_name_Input {
+input queryInput_fedSamples_input_where_hostOrganism_name_Input {
   _in: [String]
 }
 
-input queryInput_samples_input_where_id_Input {
+input queryInput_fedSamples_input_where_id_Input {
   _in: [String]
 }
 
-input queryInput_samples_input_where_Input {
-  id: queryInput_samples_input_where_id_Input
-  name: queryInput_samples_input_where_name_Input
-  collectionLocation: queryInput_samples_input_where_collectionLocation_Input
-  sampleType: queryInput_samples_input_where_sampleType_Input
-  hostOrganism: queryInput_samples_input_where_hostOrganism_Input
-  sequencingReads: queryInput_samples_input_where_sequencingReads_Input
+input queryInput_fedSamples_input_where_Input {
+  id: queryInput_fedSamples_input_where_id_Input
+  name: queryInput_fedSamples_input_where_name_Input
+  collectionLocation: queryInput_fedSamples_input_where_collectionLocation_Input
+  sampleType: queryInput_fedSamples_input_where_sampleType_Input
+  hostOrganism: queryInput_fedSamples_input_where_hostOrganism_Input
+  sequencingReads: queryInput_fedSamples_input_where_sequencingReads_Input
 }
 
-input queryInput_samples_input_where_name_Input {
+input queryInput_fedSamples_input_where_name_Input {
   _like: String
 }
 
-input queryInput_samples_input_where_sampleType_Input {
+input queryInput_fedSamples_input_where_sampleType_Input {
   _in: [String]
 }
 
-input queryInput_samples_input_where_sequencingReads_consensusGenomes_Input {
-  taxon: queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_Input
+input queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_Input {
+  taxon: queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_taxon_Input
 }
 
-input queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_Input {
-  name: queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_name_Input
+input queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_taxon_Input {
+  name: queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_taxon_name_Input
 }
 
-input queryInput_samples_input_where_sequencingReads_consensusGenomes_taxon_name_Input {
+input queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_taxon_name_Input {
   _in: [String]
 }
 
-input queryInput_samples_input_where_sequencingReads_Input {
-  taxon: queryInput_samples_input_where_sequencingReads_taxon_Input
-  consensusGenomes: queryInput_samples_input_where_sequencingReads_consensusGenomes_Input
+input queryInput_fedSamples_input_where_sequencingReads_Input {
+  taxon: queryInput_fedSamples_input_where_sequencingReads_taxon_Input
+  consensusGenomes: queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_Input
 }
 
-input queryInput_samples_input_where_sequencingReads_taxon_Input {
-  name: queryInput_samples_input_where_sequencingReads_taxon_name_Input
+input queryInput_fedSamples_input_where_sequencingReads_taxon_Input {
+  name: queryInput_fedSamples_input_where_sequencingReads_taxon_name_Input
 }
 
-input queryInput_samples_input_where_sequencingReads_taxon_name_Input {
+input queryInput_fedSamples_input_where_sequencingReads_taxon_name_Input {
   _in: [String]
 }
 
-input queryInput_sequencingReads_input_consensusGenomesInput_Input {
-  where: queryInput_sequencingReads_input_consensusGenomesInput_where_Input
+input queryInput_fedSequencingReads_input_consensusGenomesInput_Input {
+  where: queryInput_fedSequencingReads_input_consensusGenomesInput_where_Input
 }
 
-input queryInput_sequencingReads_input_consensusGenomesInput_where_Input {
-  producingRunId: queryInput_sequencingReads_input_consensusGenomesInput_where_producingRunId_Input
+input queryInput_fedSequencingReads_input_consensusGenomesInput_where_Input {
+  producingRunId: queryInput_fedSequencingReads_input_consensusGenomesInput_where_producingRunId_Input
 }
 
-input queryInput_sequencingReads_input_consensusGenomesInput_where_producingRunId_Input {
+input queryInput_fedSequencingReads_input_consensusGenomesInput_where_producingRunId_Input {
   _in: [String]
 }
 
-input queryInput_sequencingReads_input_Input {
+input queryInput_fedSequencingReads_input_Input {
   limit: Int
   offset: Int
-  where: queryInput_sequencingReads_input_where_Input
-  orderBy: queryInput_sequencingReads_input_orderBy_Input
-  consensusGenomesInput: queryInput_sequencingReads_input_consensusGenomesInput_Input
-  todoRemove: queryInput_sequencingReads_input_todoRemove_Input
+  where: queryInput_fedSequencingReads_input_where_Input
+  orderBy: queryInput_fedSequencingReads_input_orderBy_Input
+  consensusGenomesInput: queryInput_fedSequencingReads_input_consensusGenomesInput_Input
+  todoRemove: queryInput_fedSequencingReads_input_todoRemove_Input
 }
 
-input queryInput_sequencingReads_input_orderBy_Input {
+input queryInput_fedSequencingReads_input_orderBy_Input {
   protocol: String
   technology: String
   medakaModel: String
   nucleicAcid: String
-  sample: queryInput_sequencingReads_input_orderBy_sample_Input
+  sample: queryInput_fedSequencingReads_input_orderBy_sample_Input
 }
 
-input queryInput_sequencingReads_input_orderBy_sample_hostOrganism_Input {
+input queryInput_fedSequencingReads_input_orderBy_sample_hostOrganism_Input {
   name: String
 }
 
-input queryInput_sequencingReads_input_orderBy_sample_Input {
+input queryInput_fedSequencingReads_input_orderBy_sample_Input {
   name: String
   notes: String
   sampleType: String
   waterControl: String
   collectionLocation: String
-  hostOrganism: queryInput_sequencingReads_input_orderBy_sample_hostOrganism_Input
-  metadata: queryInput_sequencingReads_input_orderBy_sample_metadata_Input
+  hostOrganism: queryInput_fedSequencingReads_input_orderBy_sample_hostOrganism_Input
+  metadata: queryInput_fedSequencingReads_input_orderBy_sample_metadata_Input
 }
 
-input queryInput_sequencingReads_input_orderBy_sample_metadata_Input {
+input queryInput_fedSequencingReads_input_orderBy_sample_metadata_Input {
   fieldName: String
   dir: String
 }
 
-input queryInput_sequencingReads_input_todoRemove_Input {
+input queryInput_fedSequencingReads_input_todoRemove_Input {
   domain: String
   workflow: String
   projectId: String
@@ -2321,12 +2313,60 @@ input queryInput_sequencingReads_input_todoRemove_Input {
   orderDir: String
 }
 
-input queryInput_sequencingReads_input_where_id_Input {
+input queryInput_fedSequencingReads_input_where_id_Input {
   _in: [String]
 }
 
-input queryInput_sequencingReads_input_where_Input {
-  id: queryInput_sequencingReads_input_where_id_Input
+input queryInput_fedSequencingReads_input_where_Input {
+  id: queryInput_fedSequencingReads_input_where_id_Input
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_Input {
+  where: queryInput_fedWorkflowRunsAggregate_input_where_Input
+  todoRemove: queryInput_fedWorkflowRunsAggregate_input_todoRemove_Input
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_todoRemove_annotations_items_Input {
+  name: String
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_todoRemove_Input {
+  projectId: String
+  domain: String
+  host: [Int]
+  locationV2: [String]
+  taxonThresholds: [queryInput_fedWorkflowRunsAggregate_input_todoRemove_taxonThresholds_items_Input]
+  annotations: [queryInput_fedWorkflowRunsAggregate_input_todoRemove_annotations_items_Input]
+  tissue: [String]
+  visibility: String
+  time: [String]
+  taxaLevels: [String]
+  taxon: [Int]
+  search: String
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_todoRemove_taxonThresholds_items_Input {
+  metric: String
+  count_type: String
+  operator: String
+  value: String
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_where_id_Input {
+  _in: [String]
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_where_Input {
+  id: queryInput_fedWorkflowRunsAggregate_input_where_id_Input
+}
+
+input queryInput_MetadataFields_input_Input {
+  sampleIds: [String]!
+  authenticityToken: String!
+}
+
+input queryInput_SampleMetadata_input_Input {
+  pipelineVersion: String
 }
 
 input queryInput_ValidateUserCanDeleteObjects_input_Input {
@@ -2419,45 +2459,6 @@ input queryInput_workflowRuns_input_where_workflowVersion_workflow_Input {
 
 input queryInput_workflowRuns_input_where_workflowVersion_workflow_name_Input {
   _in: [String]
-}
-
-input queryInput_workflowRunsAggregate_input_Input {
-  where: queryInput_workflowRunsAggregate_input_where_Input
-  todoRemove: queryInput_workflowRunsAggregate_input_todoRemove_Input
-}
-
-input queryInput_workflowRunsAggregate_input_todoRemove_annotations_items_Input {
-  name: String
-}
-
-input queryInput_workflowRunsAggregate_input_todoRemove_Input {
-  projectId: String
-  domain: String
-  host: [Int]
-  locationV2: [String]
-  taxonThresholds: [queryInput_workflowRunsAggregate_input_todoRemove_taxonThresholds_items_Input]
-  annotations: [queryInput_workflowRunsAggregate_input_todoRemove_annotations_items_Input]
-  tissue: [String]
-  visibility: String
-  time: [String]
-  taxaLevels: [String]
-  taxon: [Int]
-  search: String
-}
-
-input queryInput_workflowRunsAggregate_input_todoRemove_taxonThresholds_items_Input {
-  metric: String
-  count_type: String
-  operator: String
-  value: String
-}
-
-input queryInput_workflowRunsAggregate_input_where_id_Input {
-  _in: [String]
-}
-
-input queryInput_workflowRunsAggregate_input_where_Input {
-  id: queryInput_workflowRunsAggregate_input_where_id_Input
 }
 
 type ReferenceGenome implements EntityInterface & Node {

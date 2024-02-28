@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2b247ce00d2a7cadd7b9146df423ec2b>>
+ * @generated SignedSource<<b64a618c8813ec21fd5868c378cc792a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,53 +9,53 @@
 // @ts-nocheck
 
 import { ConcreteRequest, Query } from 'relay-runtime';
-export type queryInput_sequencingReads_input_Input = {
-  consensusGenomesInput?: queryInput_sequencingReads_input_consensusGenomesInput_Input | null | undefined;
+export type queryInput_fedSequencingReads_input_Input = {
+  consensusGenomesInput?: queryInput_fedSequencingReads_input_consensusGenomesInput_Input | null | undefined;
   limit?: number | null | undefined;
   offset?: number | null | undefined;
-  orderBy?: queryInput_sequencingReads_input_orderBy_Input | null | undefined;
-  todoRemove?: queryInput_sequencingReads_input_todoRemove_Input | null | undefined;
-  where?: queryInput_sequencingReads_input_where_Input | null | undefined;
+  orderBy?: queryInput_fedSequencingReads_input_orderBy_Input | null | undefined;
+  todoRemove?: queryInput_fedSequencingReads_input_todoRemove_Input | null | undefined;
+  where?: queryInput_fedSequencingReads_input_where_Input | null | undefined;
 };
-export type queryInput_sequencingReads_input_where_Input = {
-  id?: queryInput_sequencingReads_input_where_id_Input | null | undefined;
+export type queryInput_fedSequencingReads_input_where_Input = {
+  id?: queryInput_fedSequencingReads_input_where_id_Input | null | undefined;
 };
-export type queryInput_sequencingReads_input_where_id_Input = {
+export type queryInput_fedSequencingReads_input_where_id_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
-export type queryInput_sequencingReads_input_orderBy_Input = {
+export type queryInput_fedSequencingReads_input_orderBy_Input = {
   medakaModel?: string | null | undefined;
   nucleicAcid?: string | null | undefined;
   protocol?: string | null | undefined;
-  sample?: queryInput_sequencingReads_input_orderBy_sample_Input | null | undefined;
+  sample?: queryInput_fedSequencingReads_input_orderBy_sample_Input | null | undefined;
   technology?: string | null | undefined;
 };
-export type queryInput_sequencingReads_input_orderBy_sample_Input = {
+export type queryInput_fedSequencingReads_input_orderBy_sample_Input = {
   collectionLocation?: string | null | undefined;
-  hostOrganism?: queryInput_sequencingReads_input_orderBy_sample_hostOrganism_Input | null | undefined;
-  metadata?: queryInput_sequencingReads_input_orderBy_sample_metadata_Input | null | undefined;
+  hostOrganism?: queryInput_fedSequencingReads_input_orderBy_sample_hostOrganism_Input | null | undefined;
+  metadata?: queryInput_fedSequencingReads_input_orderBy_sample_metadata_Input | null | undefined;
   name?: string | null | undefined;
   notes?: string | null | undefined;
   sampleType?: string | null | undefined;
   waterControl?: string | null | undefined;
 };
-export type queryInput_sequencingReads_input_orderBy_sample_hostOrganism_Input = {
+export type queryInput_fedSequencingReads_input_orderBy_sample_hostOrganism_Input = {
   name?: string | null | undefined;
 };
-export type queryInput_sequencingReads_input_orderBy_sample_metadata_Input = {
+export type queryInput_fedSequencingReads_input_orderBy_sample_metadata_Input = {
   dir?: string | null | undefined;
   fieldName?: string | null | undefined;
 };
-export type queryInput_sequencingReads_input_consensusGenomesInput_Input = {
-  where?: queryInput_sequencingReads_input_consensusGenomesInput_where_Input | null | undefined;
+export type queryInput_fedSequencingReads_input_consensusGenomesInput_Input = {
+  where?: queryInput_fedSequencingReads_input_consensusGenomesInput_where_Input | null | undefined;
 };
-export type queryInput_sequencingReads_input_consensusGenomesInput_where_Input = {
-  producingRunId?: queryInput_sequencingReads_input_consensusGenomesInput_where_producingRunId_Input | null | undefined;
+export type queryInput_fedSequencingReads_input_consensusGenomesInput_where_Input = {
+  producingRunId?: queryInput_fedSequencingReads_input_consensusGenomesInput_where_producingRunId_Input | null | undefined;
 };
-export type queryInput_sequencingReads_input_consensusGenomesInput_where_producingRunId_Input = {
+export type queryInput_fedSequencingReads_input_consensusGenomesInput_where_producingRunId_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
-export type queryInput_sequencingReads_input_todoRemove_Input = {
+export type queryInput_fedSequencingReads_input_todoRemove_Input = {
   domain?: string | null | undefined;
   host?: ReadonlyArray<number | null | undefined> | null | undefined;
   locationV2?: ReadonlyArray<string | null | undefined> | null | undefined;
@@ -71,10 +71,10 @@ export type queryInput_sequencingReads_input_todoRemove_Input = {
   workflow?: string | null | undefined;
 };
 export type DiscoveryViewFCSequencingReadsQuery$variables = {
-  input?: queryInput_sequencingReads_input_Input | null | undefined;
+  input?: queryInput_fedSequencingReads_input_Input | null | undefined;
 };
 export type DiscoveryViewFCSequencingReadsQuery$data = {
-  readonly sequencingReads: ReadonlyArray<{
+  readonly fedSequencingReads: ReadonlyArray<{
     readonly consensusGenomes: {
       readonly edges: ReadonlyArray<{
         readonly node: {
@@ -170,9 +170,9 @@ v3 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "query_sequencingReads_items",
+    "concreteType": "query_fedSequencingReads_items",
     "kind": "LinkedField",
-    "name": "sequencingReads",
+    "name": "fedSequencingReads",
     "plural": true,
     "selections": [
       {
@@ -213,7 +213,7 @@ v3 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "query_sequencingReads_items_taxon",
+        "concreteType": "query_fedSequencingReads_items_taxon",
         "kind": "LinkedField",
         "name": "taxon",
         "plural": false,
@@ -223,7 +223,7 @@ v3 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "query_sequencingReads_items_sample",
+        "concreteType": "query_fedSequencingReads_items_sample",
         "kind": "LinkedField",
         "name": "sample",
         "plural": false,
@@ -274,7 +274,7 @@ v3 = [
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_sequencingReads_items_sample_hostOrganism",
+            "concreteType": "query_fedSequencingReads_items_sample_hostOrganism",
             "kind": "LinkedField",
             "name": "hostOrganism",
             "plural": false,
@@ -284,7 +284,7 @@ v3 = [
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_sequencingReads_items_sample_collection",
+            "concreteType": "query_fedSequencingReads_items_sample_collection",
             "kind": "LinkedField",
             "name": "collection",
             "plural": false,
@@ -317,7 +317,7 @@ v3 = [
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_sequencingReads_items_sample_metadatas",
+            "concreteType": "query_fedSequencingReads_items_sample_metadatas",
             "kind": "LinkedField",
             "name": "metadatas",
             "plural": false,
@@ -325,7 +325,7 @@ v3 = [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "query_sequencingReads_items_sample_metadatas_edges_items",
+                "concreteType": "query_fedSequencingReads_items_sample_metadatas_edges_items",
                 "kind": "LinkedField",
                 "name": "edges",
                 "plural": true,
@@ -333,7 +333,7 @@ v3 = [
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "query_sequencingReads_items_sample_metadatas_edges_items_node",
+                    "concreteType": "query_fedSequencingReads_items_sample_metadatas_edges_items_node",
                     "kind": "LinkedField",
                     "name": "node",
                     "plural": false,
@@ -367,7 +367,7 @@ v3 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "query_sequencingReads_items_consensusGenomes",
+        "concreteType": "query_fedSequencingReads_items_consensusGenomes",
         "kind": "LinkedField",
         "name": "consensusGenomes",
         "plural": false,
@@ -375,7 +375,7 @@ v3 = [
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_sequencingReads_items_consensusGenomes_edges_items",
+            "concreteType": "query_fedSequencingReads_items_consensusGenomes_edges_items",
             "kind": "LinkedField",
             "name": "edges",
             "plural": true,
@@ -383,7 +383,7 @@ v3 = [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "query_sequencingReads_items_consensusGenomes_edges_items_node",
+                "concreteType": "query_fedSequencingReads_items_consensusGenomes_edges_items_node",
                 "kind": "LinkedField",
                 "name": "node",
                 "plural": false,
@@ -398,7 +398,7 @@ v3 = [
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "query_sequencingReads_items_consensusGenomes_edges_items_node_taxon",
+                    "concreteType": "query_fedSequencingReads_items_consensusGenomes_edges_items_node_taxon",
                     "kind": "LinkedField",
                     "name": "taxon",
                     "plural": false,
@@ -408,7 +408,7 @@ v3 = [
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "query_sequencingReads_items_consensusGenomes_edges_items_node_referenceGenome",
+                    "concreteType": "query_fedSequencingReads_items_consensusGenomes_edges_items_node_referenceGenome",
                     "kind": "LinkedField",
                     "name": "referenceGenome",
                     "plural": false,
@@ -433,7 +433,7 @@ v3 = [
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "query_sequencingReads_items_consensusGenomes_edges_items_node_metrics",
+                    "concreteType": "query_fedSequencingReads_items_consensusGenomes_edges_items_node_metrics",
                     "kind": "LinkedField",
                     "name": "metrics",
                     "plural": false,
@@ -542,16 +542,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "b1d74eba8336213f5931730af57153cf",
+    "cacheID": "59e05731e96363ff329489a1a8cca568",
     "id": null,
     "metadata": {},
     "name": "DiscoveryViewFCSequencingReadsQuery",
     "operationKind": "query",
-    "text": "query DiscoveryViewFCSequencingReadsQuery(\n  $input: queryInput_sequencingReads_input_Input\n) {\n  sequencingReads(input: $input) {\n    id\n    nucleicAcid\n    protocol\n    medakaModel\n    technology\n    taxon {\n      name\n    }\n    sample {\n      railsSampleId\n      name\n      notes\n      collectionLocation\n      sampleType\n      waterControl\n      uploadError\n      hostOrganism {\n        name\n      }\n      collection {\n        name\n        public\n      }\n      ownerUserId\n      ownerUserName\n      metadatas {\n        edges {\n          node {\n            fieldName\n            value\n          }\n        }\n      }\n    }\n    consensusGenomes {\n      edges {\n        node {\n          producingRunId\n          taxon {\n            name\n          }\n          referenceGenome {\n            accessionId\n            accessionName\n          }\n          metrics {\n            coverageDepth\n            totalReads\n            gcPercent\n            refSnps\n            percentIdentity\n            nActg\n            percentGenomeCalled\n            nMissing\n            nAmbiguous\n            referenceGenomeLength\n          }\n        }\n      }\n    }\n  }\n}\n"
+    "text": "query DiscoveryViewFCSequencingReadsQuery(\n  $input: queryInput_fedSequencingReads_input_Input\n) {\n  fedSequencingReads(input: $input) {\n    id\n    nucleicAcid\n    protocol\n    medakaModel\n    technology\n    taxon {\n      name\n    }\n    sample {\n      railsSampleId\n      name\n      notes\n      collectionLocation\n      sampleType\n      waterControl\n      uploadError\n      hostOrganism {\n        name\n      }\n      collection {\n        name\n        public\n      }\n      ownerUserId\n      ownerUserName\n      metadatas {\n        edges {\n          node {\n            fieldName\n            value\n          }\n        }\n      }\n    }\n    consensusGenomes {\n      edges {\n        node {\n          producingRunId\n          taxon {\n            name\n          }\n          referenceGenome {\n            accessionId\n            accessionName\n          }\n          metrics {\n            coverageDepth\n            totalReads\n            gcPercent\n            refSnps\n            percentIdentity\n            nActg\n            percentGenomeCalled\n            nMissing\n            nAmbiguous\n            referenceGenomeLength\n          }\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5eba273dcfc96e3c4fe023285288d30a";
+(node as any).hash = "b729aedfb50e8ae8a837173102396c23";
 
 export default node;
