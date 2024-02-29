@@ -14,11 +14,12 @@ RSpec.describe IdentityController, type: :controller do
       get :identify
       json_response = JSON.parse(response.body)
       token = response.cookies["czid_services_token"]
+      token_from_response = json_response["token_value"]
       expires_at = json_response["expires_at"]
 
       expect(response).to have_http_status(:success)
       expect(expires_at).to_not be_nil
-      expect(token).to_not be_nil
+      expect(token).to eq(token_from_response)
 
       decrypted_token = controller.send(:decrypt_token, token)
       expect(decrypted_token["sub"]).to eq(@joe.id.to_s)

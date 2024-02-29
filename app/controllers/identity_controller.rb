@@ -52,14 +52,15 @@ class IdentityController < ApplicationController
 
   def identify
     token = TokenCreationService.call(user_id: current_user.id)
+    token_value = token["token"]
     expires_at = Time.zone.at(token["expires_at"])
 
     cookies[:czid_services_token] = {
-      value: token["token"],
+      value: token_value,
       expires: expires_at,
     }
 
-    render json: { expires_at: expires_at }, status: :ok
+    render json: { token_value: token_value, expires_at: expires_at }, status: :ok
   end
 
   def enrich_token
