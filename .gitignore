@@ -84,3 +84,6 @@ blessclientconfig.yml
 # local dev controls
 .env.localdev
 .database_imported
+
+# Ignore czid-private-key.pem
+/test/fixtures/czid-private-key.pem
