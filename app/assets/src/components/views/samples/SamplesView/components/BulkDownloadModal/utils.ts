@@ -1,21 +1,18 @@
 import { get } from "lodash/fp";
 import memoize from "memoize-one";
-import { fetchQuery } from "relay-runtime";
-import { getBackgrounds, userIsCollaboratorOnAllSamples } from "~/api";
+import {
+  getBackgrounds,
+  samplesUploadedByCurrentUser,
+  userIsCollaboratorOnAllSamples,
+  workflowRunsCreatedByCurrentUser,
+} from "~/api";
 import {
   validateSampleIds,
   validateWorkflowRunIds,
 } from "~/api/access_control";
 import { WORKFLOW_ENTITIES } from "~/components/utils/workflows";
-import { Entry } from "~/interface/samplesView";
 import { Background } from "~/interface/shared";
-import { BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery as BulkDownloadModalValidConsensusGenomeWorkflowRunsQueryType } from "./__generated__/BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery.graphql";
-import {
-  BackgroundOptionType,
-  RunValidationType,
-  SelectedDownloadType,
-  WorkflowRunStatusType,
-} from "./types";
+import { BackgroundOptionType, SelectedDownloadType } from "./types";
 
 export const triggersCondtionalFieldMetricList = (
   conditionalField,
@@ -94,6 +91,21 @@ export async function fetchBackgrounds(): Promise<BackgroundOptionType[]> {
   }));
 }
 
+export async function checkAllObjectsUploadedByCurrentUser({
+  entityIds,
+  workflowEntity,
+}: {
+  entityIds?: Set<number>;
+  workflowEntity?: string;
+}): Promise<boolean> {
+  if (!entityIds) {
+    return false;
+  }
+  return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
+    ? workflowRunsCreatedByCurrentUser(Array.from(entityIds))
+    : samplesUploadedByCurrentUser(Array.from(entityIds));
+}
+
 export async function checkUserIsCollaboratorOnAllSamples({
   entityIds,
   workflowEntity,
@@ -109,102 +121,20 @@ export async function checkUserIsCollaboratorOnAllSamples({
     : userIsCollaboratorOnAllSamples(Array.from(entityIds));
 }
 
-export async function fetchRailsValidationInfo({
+export async function fetchValidationInfo({
   entityIds,
   workflow,
   workflowEntity,
 }) {
   if (!entityIds) return null;
-  const entityIdsArray = Array.from(entityIds);
 
   return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
     ? validateWorkflowRunIds({
-        workflowRunIds: entityIdsArray,
+        workflowRunIds: entityIds,
         workflow,
       })
     : validateSampleIds({
-        sampleIds: entityIdsArray,
+        sampleIds: entityIds,
         workflow,
       });
 }
-
-export async function fetchValidationInfo({
-  environment,
-  BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery,
-  entityIds,
-  authenticityToken,
-}) {
-  return fetchQuery<BulkDownloadModalValidConsensusGenomeWorkflowRunsQueryType>(
-    environment,
-    BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery,
-    {
-      workflowRunIds: entityIds
-        ? Array.from(entityIds).map((id: number) => id.toString())
-        : [],
-      authenticityToken,
-    },
-  ).toPromise();
-}
-
-export const parseRailsValidationInfo = (validationInfo: {
-  validIds: number[];
-  invalidSampleNames: string[];
-  error: string | null;
-}) => {
-  const validIds = validationInfo.validIds.map(id => id.toString());
-  const { invalidSampleNames, error: validationError } = validationInfo;
-
-  return { validIds, invalidSampleNames, validationError };
-};
-
-export const parseValidationInfo = (
-  validationInfo: {
-    workflowRuns?: RunValidationType[];
-    error?: string;
-  },
-  selectedObjects: Entry[],
-) => {
-  const { workflowRuns, error: validationError } = validationInfo;
-
-  const validIds =
-    workflowRuns
-      ?.filter(run => run.status === WorkflowRunStatusType.SUCCEEDED)
-      .map(run => run.id) ?? [];
-
-  const invalidSampleNames =
-    workflowRuns
-      ?.filter(run => run.status !== WorkflowRunStatusType.SUCCEEDED)
-      .map(
-        run =>
-          selectedObjects.find(obj => obj.id.toString() === run.id)?.sample
-            .name ?? "",
-      ) ?? [];
-
-  return {
-    validIds,
-    invalidSampleNames,
-    validationError: validationError ?? null,
-  };
-};
-
-// this argument is here because both of the parsers need to have the same arguments
-export const parseRailsIsUserOwnerOfAllObjects = (
-  _,
-  __,
-  isUserOwnerOfAllObjects: boolean | null,
-) => isUserOwnerOfAllObjects ?? false;
-
-export const parseIsUserOwnerOfAllObjects = (
-  validationInfo: {
-    workflowRuns?: RunValidationType[];
-    error?: string;
-  },
-  currentUserId?: number | null,
-) => {
-  const { workflowRuns } = validationInfo;
-  if (!currentUserId || !workflowRuns) {
-    return false;
-  }
-
-  return workflowRuns.every(run => run.ownerUserId === currentUserId);
-};

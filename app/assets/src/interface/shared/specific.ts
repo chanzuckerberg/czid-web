@@ -10,21 +10,13 @@ export interface AccessionData {
   best_accessions: AccessionsSummary[];
   num_accessions: number;
 }
-
-export enum BulkDownloadStatusType {
-  ERROR = "error",
-  RUNNING = "running",
-  SUCCESS = "success",
-  WAITING = "waiting",
-}
-
 export interface BulkDownloadDetails extends NumberId {
   num_samples: number;
   params: { [key: string]: DownloadTypeParam };
   presigned_output_url: string;
   download_name: string;
   file_size: string;
-  status: BulkDownloadStatusType;
+  status: "success" | "waiting" | "running" | "error";
   download_type: string;
   pipeline_runs: { id: number; sample_name: string }[];
   workflow_runs: Array<$TSFixMe>;

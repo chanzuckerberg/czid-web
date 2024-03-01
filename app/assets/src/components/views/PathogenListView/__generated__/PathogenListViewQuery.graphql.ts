@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5fdaf831fe866a82a587b45421a12a70>>
+ * @generated SignedSource<<b31ddb16be827b82d03c1fdccffed644>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -129,6 +129,13 @@ return {
               }
             ],
             "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "id",
+            "storageKey": null
           }
         ],
         "storageKey": null
@@ -136,12 +143,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "18b9bfb879a33babbfbfdbdc010ff0c1",
+    "cacheID": "dd275fde5f321cf72e9d4a9670273701",
     "id": null,
     "metadata": {},
     "name": "PathogenListViewQuery",
     "operationKind": "query",
-    "text": "query PathogenListViewQuery {\n  pathogenList {\n    version\n    citations\n    updatedAt\n    ...AnchorMenuFragment\n    ...SectionNavigationFragment\n  }\n}\n\nfragment AnchorMenuFragment on PathogenList {\n  pathogens {\n    category\n    name\n    taxId\n  }\n}\n\nfragment SectionNavigationFragment on PathogenList {\n  pathogens {\n    category\n    name\n  }\n}\n"
+    "text": "query PathogenListViewQuery {\n  pathogenList {\n    version\n    citations\n    updatedAt\n    ...AnchorMenuFragment\n    ...SectionNavigationFragment\n    id\n  }\n}\n\nfragment AnchorMenuFragment on PathogenList {\n  pathogens {\n    category\n    name\n    taxId\n  }\n}\n\nfragment SectionNavigationFragment on PathogenList {\n  pathogens {\n    category\n    name\n  }\n}\n"
   }
 };
 })();

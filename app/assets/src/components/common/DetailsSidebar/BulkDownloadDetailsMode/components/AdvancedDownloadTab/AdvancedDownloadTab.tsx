@@ -6,10 +6,7 @@ import React, { useState } from "react";
 import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import cs from "~/components/common/DetailsSidebar/BulkDownloadDetailsMode/bulk_download_details_mode.scss";
-import {
-  BulkDownloadDetails,
-  BulkDownloadStatusType,
-} from "~/interface/shared";
+import { BulkDownloadDetails } from "~/interface/shared";
 
 interface AdvancedDownloadTabProps {
   bulkDownload?: BulkDownloadDetails;
@@ -22,25 +19,25 @@ export const AdvancedDownloadTab = ({
   const [tooltip, setTooltip] = useState("");
   const hasCLICommand = () => {
     return (
-      bulkDownload?.status === BulkDownloadStatusType.SUCCESS &&
+      bulkDownload?.status === "success" &&
       bulkDownload?.presigned_output_url !== null
     );
   };
 
   const getCLICommand = () => {
     if (
-      bulkDownload?.status === BulkDownloadStatusType.WAITING ||
-      bulkDownload?.status === BulkDownloadStatusType.RUNNING
+      bulkDownload?.status === "waiting" ||
+      bulkDownload?.status === "running"
     ) {
       return "Bulk download is not yet complete.";
     }
 
-    if (bulkDownload?.status === BulkDownloadStatusType.ERROR) {
+    if (bulkDownload?.status === "error") {
       return "Bulk download failed. Please contact us for help.";
     }
 
     if (
-      bulkDownload?.status === BulkDownloadStatusType.SUCCESS &&
+      bulkDownload?.status === "success" &&
       bulkDownload.presigned_output_url === null
     ) {
       return "Failed to generate command. Please contact us for help.";
