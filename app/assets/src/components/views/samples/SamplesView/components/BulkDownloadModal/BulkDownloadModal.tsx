@@ -66,7 +66,7 @@ const BulkDownloadModalQuery = graphql`
 
 const BulkDownloadModalMutation = graphql`
   mutation BulkDownloadModalMutation(
-    $workflowRunIds: [String]
+    $workflowRunIds: [Int]
     $downloadFormat: String
     $downloadType: String!
     $workflow: String!
