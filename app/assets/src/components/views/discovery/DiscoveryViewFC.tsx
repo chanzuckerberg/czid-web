@@ -23,8 +23,8 @@ import {
 import { DiscoveryViewFCSequencingReadsQuery as DiscoveryViewFCSequencingReadsQueryType } from "./__generated__/DiscoveryViewFCSequencingReadsQuery.graphql";
 import {
   DiscoveryViewFCWorkflowsQuery as DiscoveryViewFCWorkflowsQueryType,
-  queryInput_workflowRuns_input_Input,
-  queryInput_workflowRuns_input_where_Input,
+  queryInput_fedWorkflowRuns_input_Input,
+  queryInput_fedWorkflowRuns_input_where_Input,
 } from "./__generated__/DiscoveryViewFCWorkflowsQuery.graphql";
 import { formatWetlabProtocol } from "./discovery_api";
 import { DiscoveryView } from "./DiscoveryView";
@@ -32,9 +32,9 @@ import { DiscoveryView } from "./DiscoveryView";
 // TODO(bchu): Add entityInputsInput.
 const DiscoveryViewFCWorkflowsQuery = graphql`
   query DiscoveryViewFCWorkflowsQuery(
-    $input: queryInput_workflowRuns_input_Input
+    $input: queryInput_fedWorkflowRuns_input_Input
   ) {
-    workflowRuns(input: $input) {
+    fedWorkflowRuns(input: $input) {
       id
       startedAt
       status
@@ -134,13 +134,13 @@ async function queryWorkflowRuns(
   // TODO: Filter out deprecateds.
   // Do not include NextGen argument fields that are null/empty arrays. NextGen will interpret them
   // as return nothing.
-  const where: queryInput_workflowRuns_input_where_Input = {
+  const where: queryInput_fedWorkflowRuns_input_where_Input = {
     workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
   };
   if (projectId != null) {
     where.collectionId = { _in: [projectId] };
   }
-  const input: queryInput_workflowRuns_input_Input = {
+  const input: queryInput_fedWorkflowRuns_input_Input = {
     where,
     todoRemove: {
       domain: props.domain,
@@ -167,7 +167,7 @@ async function queryWorkflowRuns(
       input,
     },
   ).toPromise();
-  if (data?.workflowRuns == null) {
+  if (data?.fedWorkflowRuns == null) {
     throw new Error(
       `Missing data: ${JSON.stringify(data)} ${JSON.stringify(
         workflow,
@@ -177,24 +177,28 @@ async function queryWorkflowRuns(
     );
   }
 
-  return data.workflowRuns.filter(isNotNullish).map((run): WorkflowRunRow => {
-    const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
-    if (sequencingReadId == null) {
-      throw new Error(`Couldn't find an entity input: ${JSON.stringify(run)}`);
-    }
-    return {
-      id: Number(run.id), // TODO: Make IDs strings
-      createdAt: run.startedAt ?? undefined,
-      status: run.status != null ? toLower(run.status) : undefined,
-      workflow: "consensus-genome", // TODO: Get this from the correct field in NextGen
-      wdl_version:
-        run.workflowVersion?.version != null
-          ? formatSemanticVersion(run.workflowVersion.version)
-          : undefined,
-      creation_source: run.workflowVersion?.workflow?.name ?? undefined,
-      inputSequencingReadId: sequencingReadId,
-    };
-  });
+  return data.fedWorkflowRuns
+    .filter(isNotNullish)
+    .map((run): WorkflowRunRow => {
+      const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
+      if (sequencingReadId == null) {
+        throw new Error(
+          `Couldn't find an entity input: ${JSON.stringify(run)}`,
+        );
+      }
+      return {
+        id: Number(run.id), // TODO: Make IDs strings
+        createdAt: run.startedAt ?? undefined,
+        status: run.status != null ? toLower(run.status) : undefined,
+        workflow: "consensus-genome", // TODO: Get this from the correct field in NextGen
+        wdl_version:
+          run.workflowVersion?.version != null
+            ? formatSemanticVersion(run.workflowVersion.version)
+            : undefined,
+        creation_source: run.workflowVersion?.workflow?.name ?? undefined,
+        inputSequencingReadId: sequencingReadId,
+      };
+    });
 }
 
 async function querySequencingReadsByIds(

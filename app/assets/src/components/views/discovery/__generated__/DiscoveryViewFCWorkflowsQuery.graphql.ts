@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4d0401c58dff55b1d729632577364179>>
+ * @generated SignedSource<<fad76ab45b71da81eaa57f7fd0230d5f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,13 +9,13 @@
 // @ts-nocheck
 
 import { ConcreteRequest, Query } from 'relay-runtime';
-export type queryInput_workflowRuns_input_Input = {
-  entityInputsInput?: queryInput_workflowRuns_input_entityInputsInput_Input | null | undefined;
-  orderBy?: queryInput_workflowRuns_input_orderBy_Input | null | undefined;
-  todoRemove?: queryInput_workflowRuns_input_todoRemove_Input | null | undefined;
-  where?: queryInput_workflowRuns_input_where_Input | null | undefined;
+export type queryInput_fedWorkflowRuns_input_Input = {
+  entityInputsInput?: queryInput_fedWorkflowRuns_input_entityInputsInput_Input | null | undefined;
+  orderBy?: queryInput_fedWorkflowRuns_input_orderBy_Input | null | undefined;
+  todoRemove?: queryInput_fedWorkflowRuns_input_todoRemove_Input | null | undefined;
+  where?: queryInput_fedWorkflowRuns_input_where_Input | null | undefined;
 };
-export type queryInput_workflowRuns_input_todoRemove_Input = {
+export type queryInput_fedWorkflowRuns_input_todoRemove_Input = {
   authenticityToken?: string | null | undefined;
   domain?: string | null | undefined;
   host?: ReadonlyArray<number | null | undefined> | null | undefined;
@@ -31,59 +31,59 @@ export type queryInput_workflowRuns_input_todoRemove_Input = {
   visibility?: string | null | undefined;
   workflow?: string | null | undefined;
 };
-export type queryInput_workflowRuns_input_orderBy_Input = {
+export type queryInput_fedWorkflowRuns_input_orderBy_Input = {
   startedAt?: string | null | undefined;
-  workflowVersion?: queryInput_workflowRuns_input_orderBy_workflowVersion_Input | null | undefined;
+  workflowVersion?: queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_Input | null | undefined;
 };
-export type queryInput_workflowRuns_input_orderBy_workflowVersion_Input = {
+export type queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_Input = {
   version?: string | null | undefined;
-  workflow?: queryInput_workflowRuns_input_orderBy_workflowVersion_workflow_Input | null | undefined;
+  workflow?: queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_workflow_Input | null | undefined;
 };
-export type queryInput_workflowRuns_input_orderBy_workflowVersion_workflow_Input = {
+export type queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_workflow_Input = {
   name?: string | null | undefined;
 };
-export type queryInput_workflowRuns_input_where_Input = {
-  collectionId?: queryInput_workflowRuns_input_where_collectionId_Input | null | undefined;
-  id?: queryInput_workflowRuns_input_where_id_Input | null | undefined;
-  ownerUserId?: queryInput_workflowRuns_input_where_ownerUserId_Input | null | undefined;
-  startedAt?: queryInput_workflowRuns_input_where_startedAt_Input | null | undefined;
-  workflowVersion?: queryInput_workflowRuns_input_where_workflowVersion_Input | null | undefined;
+export type queryInput_fedWorkflowRuns_input_where_Input = {
+  collectionId?: queryInput_fedWorkflowRuns_input_where_collectionId_Input | null | undefined;
+  id?: queryInput_fedWorkflowRuns_input_where_id_Input | null | undefined;
+  ownerUserId?: queryInput_fedWorkflowRuns_input_where_ownerUserId_Input | null | undefined;
+  startedAt?: queryInput_fedWorkflowRuns_input_where_startedAt_Input | null | undefined;
+  workflowVersion?: queryInput_fedWorkflowRuns_input_where_workflowVersion_Input | null | undefined;
 };
-export type queryInput_workflowRuns_input_where_id_Input = {
+export type queryInput_fedWorkflowRuns_input_where_id_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
-export type queryInput_workflowRuns_input_where_ownerUserId_Input = {
+export type queryInput_fedWorkflowRuns_input_where_ownerUserId_Input = {
   _eq?: number | null | undefined;
 };
-export type queryInput_workflowRuns_input_where_startedAt_Input = {
+export type queryInput_fedWorkflowRuns_input_where_startedAt_Input = {
   _gte?: string | null | undefined;
 };
-export type queryInput_workflowRuns_input_where_collectionId_Input = {
+export type queryInput_fedWorkflowRuns_input_where_collectionId_Input = {
   _in?: ReadonlyArray<number | null | undefined> | null | undefined;
 };
-export type queryInput_workflowRuns_input_where_workflowVersion_Input = {
-  workflow?: queryInput_workflowRuns_input_where_workflowVersion_workflow_Input | null | undefined;
+export type queryInput_fedWorkflowRuns_input_where_workflowVersion_Input = {
+  workflow?: queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_Input | null | undefined;
 };
-export type queryInput_workflowRuns_input_where_workflowVersion_workflow_Input = {
-  name?: queryInput_workflowRuns_input_where_workflowVersion_workflow_name_Input | null | undefined;
+export type queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_Input = {
+  name?: queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_name_Input | null | undefined;
 };
-export type queryInput_workflowRuns_input_where_workflowVersion_workflow_name_Input = {
+export type queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_name_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
-export type queryInput_workflowRuns_input_entityInputsInput_Input = {
-  where?: queryInput_workflowRuns_input_entityInputsInput_where_Input | null | undefined;
+export type queryInput_fedWorkflowRuns_input_entityInputsInput_Input = {
+  where?: queryInput_fedWorkflowRuns_input_entityInputsInput_where_Input | null | undefined;
 };
-export type queryInput_workflowRuns_input_entityInputsInput_where_Input = {
-  fieldName?: queryInput_workflowRuns_input_entityInputsInput_where_fieldName_Input | null | undefined;
+export type queryInput_fedWorkflowRuns_input_entityInputsInput_where_Input = {
+  fieldName?: queryInput_fedWorkflowRuns_input_entityInputsInput_where_fieldName_Input | null | undefined;
 };
-export type queryInput_workflowRuns_input_entityInputsInput_where_fieldName_Input = {
+export type queryInput_fedWorkflowRuns_input_entityInputsInput_where_fieldName_Input = {
   _eq?: string | null | undefined;
 };
 export type DiscoveryViewFCWorkflowsQuery$variables = {
-  input?: queryInput_workflowRuns_input_Input | null | undefined;
+  input?: queryInput_fedWorkflowRuns_input_Input | null | undefined;
 };
 export type DiscoveryViewFCWorkflowsQuery$data = {
-  readonly workflowRuns: ReadonlyArray<{
+  readonly fedWorkflowRuns: ReadonlyArray<{
     readonly entityInputs: {
       readonly edges: ReadonlyArray<{
         readonly node: {
@@ -126,9 +126,9 @@ v1 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "query_workflowRuns_items",
+    "concreteType": "query_fedWorkflowRuns_items",
     "kind": "LinkedField",
-    "name": "workflowRuns",
+    "name": "fedWorkflowRuns",
     "plural": true,
     "selections": [
       {
@@ -155,7 +155,7 @@ v1 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "query_workflowRuns_items_workflowVersion",
+        "concreteType": "query_fedWorkflowRuns_items_workflowVersion",
         "kind": "LinkedField",
         "name": "workflowVersion",
         "plural": false,
@@ -170,7 +170,7 @@ v1 = [
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_workflowRuns_items_workflowVersion_workflow",
+            "concreteType": "query_fedWorkflowRuns_items_workflowVersion_workflow",
             "kind": "LinkedField",
             "name": "workflow",
             "plural": false,
@@ -191,7 +191,7 @@ v1 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "query_workflowRuns_items_entityInputs",
+        "concreteType": "query_fedWorkflowRuns_items_entityInputs",
         "kind": "LinkedField",
         "name": "entityInputs",
         "plural": false,
@@ -199,7 +199,7 @@ v1 = [
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_workflowRuns_items_entityInputs_edges_items",
+            "concreteType": "query_fedWorkflowRuns_items_entityInputs_edges_items",
             "kind": "LinkedField",
             "name": "edges",
             "plural": true,
@@ -207,7 +207,7 @@ v1 = [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "query_workflowRuns_items_entityInputs_edges_items_node",
+                "concreteType": "query_fedWorkflowRuns_items_entityInputs_edges_items_node",
                 "kind": "LinkedField",
                 "name": "node",
                 "plural": false,
@@ -257,16 +257,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "06a4ea9f60398423cf72f5a68958ac7d",
+    "cacheID": "806458228b436e85fe93c9dd869e6621",
     "id": null,
     "metadata": {},
     "name": "DiscoveryViewFCWorkflowsQuery",
     "operationKind": "query",
-    "text": "query DiscoveryViewFCWorkflowsQuery(\n  $input: queryInput_workflowRuns_input_Input\n) {\n  workflowRuns(input: $input) {\n    id\n    startedAt\n    status\n    workflowVersion {\n      version\n      workflow {\n        name\n      }\n    }\n    entityInputs {\n      edges {\n        node {\n          inputEntityId\n          entityType\n        }\n      }\n    }\n  }\n}\n"
+    "text": "query DiscoveryViewFCWorkflowsQuery(\n  $input: queryInput_fedWorkflowRuns_input_Input\n) {\n  fedWorkflowRuns(input: $input) {\n    id\n    startedAt\n    status\n    workflowVersion {\n      version\n      workflow {\n        name\n      }\n    }\n    entityInputs {\n      edges {\n        node {\n          inputEntityId\n          entityType\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "24c745549a072cb8b28f79d1a2ad7c6b";
+(node as any).hash = "b013cd118ffde9f0c2cc85fa8822180d";
 
 export default node;

@@ -1560,22 +1560,6 @@ type MultipartUploadResponse {
 }
 
 type Mutation {
-  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
-  createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
-  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
-  deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
-  createWorkflow(input: WorkflowCreateInput!): Workflow!
-  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
-  deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
-  createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
-  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
-  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
-  createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
-  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
-  runWorkflowVersion(input: RunWorkflowVersionInput!): WorkflowRun!
-  runWorkflowRun(workflowRunId: ID!): WorkflowRun!
   createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
   uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
   uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
@@ -1616,6 +1600,22 @@ type Mutation {
   deleteIndexFile(where: IndexFileWhereClauseMutations!): [IndexFile!]!
   createBulkDownload(input: BulkDownloadCreateInput!): BulkDownload!
   deleteBulkDownload(where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
+  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
+  createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
+  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  createWorkflow(input: WorkflowCreateInput!): Workflow!
+  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
+  deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
+  createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
+  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
+  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
+  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
+  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
+  createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
+  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
+  runWorkflowVersion(input: RunWorkflowVersionInput!): WorkflowRun!
+  runWorkflowRun(workflowRunId: ID!): WorkflowRun!
   CreateBulkDownload(input: mutationInput_CreateBulkDownload_input_Input): JSON
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
   UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleNotes
@@ -1834,13 +1834,6 @@ type Project {
 }
 
 type Query {
-  appConfig(id: ID!): AppConfig
-  pathogenList(version: String): PathogenList!
-  project(id: Int!): Project!
-  sample(sampleId: Int!): Sample!
-  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
-  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
-  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   node(
     """The ID of the object."""
     id: GlobalID!
@@ -1849,16 +1842,6 @@ type Query {
     """The IDs of the objects."""
     ids: [GlobalID!]!
   ): [Node!]!
-  tempWorkflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = []): [WorkflowRun!]!
-  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = []): [Workflow!]!
-  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = []): [WorkflowRunStep!]!
-  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = []): [WorkflowRunEntityInput!]!
-  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = []): [WorkflowVersion!]!
-  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
-  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
-  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
-  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
-  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
   files(where: FileWhereClause = null): [File!]!
   samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = []): [Sample!]!
   sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = []): [SequencingRead!]!
@@ -1886,6 +1869,23 @@ type Query {
   upstreamDatabasesAggregate(where: UpstreamDatabaseWhereClause = null): UpstreamDatabaseAggregate!
   indexFilesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate!
   bulkDownloadsAggregate(where: BulkDownloadWhereClause = null): BulkDownloadAggregate!
+  appConfig(id: ID!): AppConfig
+  pathogenList(version: String): PathogenList!
+  project(id: Int!): Project!
+  sample(sampleId: Int!): Sample!
+  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
+  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
+  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
+  tempWorkflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = []): [WorkflowRun!]!
+  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = []): [Workflow!]!
+  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = []): [WorkflowRunStep!]!
+  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = []): [WorkflowRunEntityInput!]!
+  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = []): [WorkflowVersion!]!
+  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
+  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
+  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
+  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
+  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
   AmrDeprecatedResults(sampleId: String): AmrDeprecatedResults
   AmrWorkflowResults(workflowRunId: String): AmrWorkflowResults
   Background(snapshotLinkId: String): Background
@@ -1907,7 +1907,7 @@ type Query {
   UserBlastAnnotations(sampleId: String, workflowVersionId: String): [query_UserBlastAnnotations_items]
   ValidateUserCanDeleteObjects(input: queryInput_ValidateUserCanDeleteObjects_input_Input): ValidateUserCanDeleteObjects
   workflowRuns(input: queryInput_workflowRuns_input_Input): [query_workflowRuns_items]
-  fedWorkflowRuns(input: queryInput_workflowRuns_input_Input): [query_workflowRuns_items]
+  fedWorkflowRuns(input: queryInput_fedWorkflowRuns_input_Input): [query_fedWorkflowRuns_items]
   fedWorkflowRunsAggregate(input: queryInput_fedWorkflowRunsAggregate_input_Input): [query_fedWorkflowRunsAggregate_items]
   ZipLink(workflowRunId: String): ZipLink
   GraphQLFederationVersion: GraphQLFederationVersion
@@ -2219,6 +2219,37 @@ type query_fedSequencingReads_items_sample_metadatas_edges_items_node {
 
 type query_fedSequencingReads_items_taxon {
   name: String!
+}
+
+type query_fedWorkflowRuns_items {
+  id: String!
+  ownerUserId: Int!
+  startedAt: String
+  status: String
+  workflowVersion: query_fedWorkflowRuns_items_workflowVersion
+  entityInputs: query_fedWorkflowRuns_items_entityInputs!
+}
+
+type query_fedWorkflowRuns_items_entityInputs {
+  edges: [query_fedWorkflowRuns_items_entityInputs_edges_items]!
+}
+
+type query_fedWorkflowRuns_items_entityInputs_edges_items {
+  node: query_fedWorkflowRuns_items_entityInputs_edges_items_node!
+}
+
+type query_fedWorkflowRuns_items_entityInputs_edges_items_node {
+  inputEntityId: String
+  entityType: String
+}
+
+type query_fedWorkflowRuns_items_workflowVersion {
+  version: String
+  workflow: query_fedWorkflowRuns_items_workflowVersion_workflow
+}
+
+type query_fedWorkflowRuns_items_workflowVersion_workflow {
+  name: String
 }
 
 type query_fedWorkflowRunsAggregate_items {
@@ -2822,6 +2853,92 @@ input queryInput_fedSequencingReads_input_where_Input {
   id: queryInput_fedSequencingReads_input_where_id_Input
 }
 
+input queryInput_fedWorkflowRuns_input_entityInputsInput_Input {
+  where: queryInput_fedWorkflowRuns_input_entityInputsInput_where_Input
+}
+
+input queryInput_fedWorkflowRuns_input_entityInputsInput_where_fieldName_Input {
+  _eq: String
+}
+
+input queryInput_fedWorkflowRuns_input_entityInputsInput_where_Input {
+  fieldName: queryInput_fedWorkflowRuns_input_entityInputsInput_where_fieldName_Input
+}
+
+input queryInput_fedWorkflowRuns_input_Input {
+  todoRemove: queryInput_fedWorkflowRuns_input_todoRemove_Input
+  orderBy: queryInput_fedWorkflowRuns_input_orderBy_Input
+  where: queryInput_fedWorkflowRuns_input_where_Input
+  entityInputsInput: queryInput_fedWorkflowRuns_input_entityInputsInput_Input
+}
+
+input queryInput_fedWorkflowRuns_input_orderBy_Input {
+  startedAt: String
+  workflowVersion: queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_Input
+}
+
+input queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_Input {
+  version: String
+  workflow: queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_workflow_Input
+}
+
+input queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_workflow_Input {
+  name: String
+}
+
+input queryInput_fedWorkflowRuns_input_todoRemove_Input {
+  domain: String
+  projectId: String
+  search: String
+  host: [Int]
+  locationV2: [String]
+  taxon: [Int]
+  taxonLevels: [String]
+  time: [String]
+  tissue: [String]
+  visibility: String
+  workflow: String
+  orderBy: String
+  orderDir: String
+  authenticityToken: String
+}
+
+input queryInput_fedWorkflowRuns_input_where_collectionId_Input {
+  _in: [Int]
+}
+
+input queryInput_fedWorkflowRuns_input_where_id_Input {
+  _in: [String]
+}
+
+input queryInput_fedWorkflowRuns_input_where_Input {
+  id: queryInput_fedWorkflowRuns_input_where_id_Input
+  ownerUserId: queryInput_fedWorkflowRuns_input_where_ownerUserId_Input
+  startedAt: queryInput_fedWorkflowRuns_input_where_startedAt_Input
+  collectionId: queryInput_fedWorkflowRuns_input_where_collectionId_Input
+  workflowVersion: queryInput_fedWorkflowRuns_input_where_workflowVersion_Input
+}
+
+input queryInput_fedWorkflowRuns_input_where_ownerUserId_Input {
+  _eq: Int
+}
+
+input queryInput_fedWorkflowRuns_input_where_startedAt_Input {
+  _gte: String
+}
+
+input queryInput_fedWorkflowRuns_input_where_workflowVersion_Input {
+  workflow: queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_Input
+}
+
+input queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_Input {
+  name: queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_name_Input
+}
+
+input queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_name_Input {
+  _in: [String]
+}
+
 input queryInput_fedWorkflowRunsAggregate_input_Input {
   where: queryInput_fedWorkflowRunsAggregate_input_where_Input
   todoRemove: queryInput_fedWorkflowRunsAggregate_input_todoRemove_Input
@@ -3087,48 +3204,11 @@ input RunWorkflowVersionInput {
 }
 
 type Sample implements EntityInterface & Node {
-  alignmentConfigName: String
-  basespaceAccessToken: String
-  createdAt: DateTime!
-  dagVars: String
-  defaultBackgroundId: Int
-  defaultPipelineRunId: Int
-  details: SampleDetails!
-  doNotProcess: Boolean!
-  editable: Boolean
-  hostGenome: HostGenome
-  hostGenomeId: Int
-  id: ID!
-  initialWorkflow: String!
-  maxInputFragments: Int
-  name: String!
-  pipelineBranch: String
-  pipelineCommit: String
-  pipelineExecutionStrategy: String
-  pipelineRuns: [PipelineRun!]
-  privateUntil: ISO8601DateTime
-  project: Project
-  projectId: Int
-  public: Int!
-  s3Bowtie2IndexPath: String
-  s3PreloadResultPath: String
-  s3StarIndexPath: String
-  sampleDeletable: Boolean
-  sampleNotes: String
-  status: String
-  subsample: Int
-  updatedAt: DateTime
-  uploadError: String
-  uploadedFromBasespace: Int
-  useTaxonWhitelist: Boolean!
-  user: User
-  userId: Int
-  webCommit: String
-  workflowRuns: [WorkflowRun!]
-
   """The Globally Unique ID of this object"""
   _id: GlobalID!
+  id: ID!
   railsSampleId: Int
+  name: String!
   hostOrganism(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = []): HostOrganism
   sequencingReads(
     where: SequencingReadWhereClause = null
@@ -3167,6 +3247,42 @@ type Sample implements EntityInterface & Node {
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
+  createdAt: ISO8601DateTime
+  updatedAt: ISO8601DateTime
+  alignmentConfigName: String
+  basespaceAccessToken: String
+  dagVars: String
+  defaultBackgroundId: Int
+  defaultPipelineRunId: Int
+  details: SampleDetails!
+  doNotProcess: Boolean!
+  editable: Boolean
+  hostGenome: HostGenome
+  hostGenomeId: Int
+  initialWorkflow: String!
+  maxInputFragments: Int
+  pipelineBranch: String
+  pipelineCommit: String
+  pipelineExecutionStrategy: String
+  pipelineRuns: [PipelineRun!]
+  privateUntil: ISO8601DateTime
+  project: Project
+  projectId: Int
+  public: Int!
+  s3Bowtie2IndexPath: String
+  s3PreloadResultPath: String
+  s3StarIndexPath: String
+  sampleDeletable: Boolean
+  sampleNotes: String
+  status: String
+  subsample: Int
+  uploadError: String
+  uploadedFromBasespace: Int
+  useTaxonWhitelist: Boolean!
+  user: User
+  userId: Int
+  webCommit: String
+  workflowRuns: [WorkflowRun!]
 }
 
 type SampleAggregate {
