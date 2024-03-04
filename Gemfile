@@ -173,6 +173,7 @@ gem "shoryuken"
 # GraphQL-related
 gem 'graphiql-rails', group: :development
 gem "graphql"
+gem 'graphql-client'
 
 # required for Ruby 3 upgrade
 # https://stackoverflow.com/questions/70500220/rails-7-ruby-3-1-loaderror-cannot-load-such-file-net-smtp

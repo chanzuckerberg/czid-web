@@ -140,6 +140,7 @@ services:
       - shoryuken
     environment:
       <<: [*web-variables, *aws-variables, *auth0-variables, *env-variables]
+      GRAPHQL_FEDERATION_SERVICE_URL: http://web-proxy:3000/graphqlfed
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3001"
   resque:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
