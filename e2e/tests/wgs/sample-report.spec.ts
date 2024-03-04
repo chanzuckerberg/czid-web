@@ -15,6 +15,7 @@ const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const NO_HOST_1 = "no_host_1";
 const NO_HOST_2 = "no_host_2";
 const WGS_SAMPLE_NAMES = [NO_HOST_1, NO_HOST_2];
+const OUTPUT_PATH = (filename: string) => `./fixtures/outputs/${filename}`;
 // #endregion Expected data
 
 
@@ -81,7 +82,7 @@ test.describe("Data Validation: P-0", () => {
  */
 test.describe("Data Validation: P-1", () => {
 
-  test("SNo -: Data report validation example", async ({ page }) => {
+  test("SNo e1: Data report validation example", async ({ page }) => {
     const WAIT_TIME = 60 * 1000 * 40;
     test.setTimeout(WAIT_TIME);
 
@@ -138,6 +139,7 @@ test.describe("Data Validation: P-1", () => {
 
     // #region 4. Verify "Is my consensus genome complete?" and "How good is the coverage?" section data
     await projectPage.clickSample(sampleNames[0]);
+    await samplePage.clickConsensusGenomeTab();
 
     // ""wgs_SARS_CoV2_no_host"" DATA
     // ""Is my consensus genome complete?"" data is consistent with below values:
@@ -245,10 +247,24 @@ test.describe("Data Validation: P-1", () => {
     expectedZippedFiles = expectedZippedFiles.sort();
     zippedFileNames = zippedFileNames.sort();
     expect(zippedFileNames).toEqual(expectedZippedFiles);
+
+    for (const content of zipContents) {
+      let contentName = content.name;
+      const analysisOutputData = content.getData();
+
+      if (contentName.endsWith(".muscle.out.fasta")) {
+        // This name is dynamic. `${sampleNames[0]}.muscle.out.fasta`
+        contentName = "wgs_SARS_CoV2_no_host.muscle.out.fasta"; // Static name in fixtures
+      }
+      const fixtureFilePath = OUTPUT_PATH(contentName);
+      const baselineData = await fs.readFile(fixtureFilePath);
+
+      expect(analysisOutputData).toEqual(baselineData);
+    }
     // #endregion 8. Verify the specified data file outputs against baseline outputs
   });
 
-  test("SNo -: WGS SARS-CoV-2 Data report validation example", async ({ page }) => {
+  test("SNo e2: WGS SARS-CoV-2 Data report validation example", async ({ page }) => {
     const WAIT_TIME = 60 * 1000 * 40;
     test.setTimeout(WAIT_TIME);
 
@@ -301,6 +317,7 @@ test.describe("Data Validation: P-1", () => {
 
     // #region 4. Verify ""Is my consensus genome complete?"" and ""How good is the coverage?"" section data
     await projectPage.clickSample(sampleNames[0]);
+    await samplePage.clickConsensusGenomeTab();
 
     // wgs_SARS_CoV2_no_host" DATA
     // Is my consensus genome complete?" data is consistent with below values:
@@ -403,6 +420,20 @@ test.describe("Data Validation: P-1", () => {
     expectedZippedFiles = expectedZippedFiles.sort();
     zippedFileNames = zippedFileNames.sort();
     expect(zippedFileNames).toEqual(expectedZippedFiles);
+
+    for (const content of zipContents) {
+      let contentName = content.name;
+      const analysisOutputData = content.getData();
+
+      if (contentName.endsWith(".muscle.out.fasta")) {
+        // This name is dynamic. `${sampleNames[0]}.muscle.out.fasta`
+        contentName = "wgs_SARS_CoV2_no_host.muscle.out.fasta"; // Static name in fixtures
+      }
+      const fixtureFilePath = OUTPUT_PATH(contentName);
+      const baselineData = await fs.readFile(fixtureFilePath);
+
+      expect(analysisOutputData).toEqual(baselineData);
+    }
     // #endregion 8. Verify the specified data file outputs against baseline outputs"
   });
 

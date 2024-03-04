@@ -699,11 +699,11 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // #region 4. Open ""no_host_1"" WGS sample report
     await projectPage.clickSample(NO_HOST_1);
+    const samplesPage = new SamplesPage(page);
+    await samplesPage.clickConsensusGenomeTab();
     // #endregion 4. Open ""no_host_1"" WGS sample report
 
     // #region 5. Click on Download All button
-    const samplesPage = new SamplesPage(page);
-
     // - Download All button works ((.zip) file downloaded)
     const download = await samplesPage.clickDownloadAllButton();
     // #endregion 5. Click on Download All button

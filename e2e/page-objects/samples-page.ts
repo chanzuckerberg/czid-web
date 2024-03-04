@@ -49,6 +49,9 @@ const PIPELINES_TAB = "[data-testid='pipelines']";
 const VIEW_PIPELINE_VISUALIZATION_LINK = "[class*='vizLink'] a";
 const REPORT_IN_PROGRESS = "[class*='reportStatus'][class*='inProgress']";
 const DOWNLOAD_ALL_BUTTON = "//button[text()='Download All']";
+const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genome']";
+const SHARE_BUTTON = "//button[text()='Share']";
+const LEARN_MORE_ABOUT_CONSENSUS_GENOMES_LINK = "//a[contains(text(), 'Learn more about consensus genomes')]";
 
 // Sample Details
 const SAMPLE_DETAILS_BUTTON = "[data-testid='sample-details']";
@@ -61,6 +64,10 @@ const SAMPLE_DETAILS_HOST_VALUE = "[data-testid='host-value']";
 const REFERENCE_LENGTH = "//div[text()='Reference Length']/parent::div/following-sibling::div";
 const COVERAGE_DEPTH = "//div[text()='Coverage Depth']/parent::div/following-sibling::div";
 const COVERAGE_BREADTH = "//div[text()='Coverage Breadth']/parent::div/following-sibling::div";
+const IS_MY_CONSENSUS_GENOME_COMPLETE_TOOLTIP = "//div[text()='Is my consensus genome complete?']//*[contains(@class, 'SvgIcon')]";
+const IS_MY_CONSENSUS_GENOME_COMPLETE_HEADERS = "[class*='metricsTable'] [class*='tableHeaderLabel']";
+const TOOLTIP_CONTAINER = "[class*='tooltip']";
+const TOOLTIP_LEARN_MORE_LINK = "//*[contains(@class, 'tooltip')]//*[text()='Learn more.']";
 
 // Coverage Viz Histogram Hover Elements
 const HOVER_BASE_PAIR_RANGE = "//div[text()='Base Pair Range']/following-sibling::div";
@@ -69,6 +76,9 @@ const HOVER_COVERAGE_BREADTH = "//div[text()='Coverage Breadth']/following-sibli
 
 // How good is the coverage?
 const CUSTOM_REFERENCE_DOWNLOAD = "[class*='metric'] [class*='downloadLink']";
+const HOW_GOOD_IS_THE_COVERAGE_TOOLTIP = "//div[text()='How good is the coverage?']//*[contains(@class, 'MuiSvgIcon')]";
+const HOW_GOOD_IS_THE_COVERAGE_HEADERS = "[class*='coverageContainer'] [class*='metric'] [class*='label']";
+const NONHEADER_TOOLTIP_CONTAINER = "[class='content']";
 
 export class SamplesPage extends PageObject {
 
@@ -93,6 +103,10 @@ export class SamplesPage extends PageObject {
     // #endregion Navigate
 
     // #region Get
+    public async getShareMessage() {
+      return this.page.locator(NONHEADER_TOOLTIP_CONTAINER).textContent();
+    }
+
     public async getHoverCoverageBreadth() {
       return this.page.locator(HOVER_COVERAGE_BREADTH).textContent();
     }
@@ -153,7 +167,23 @@ export class SamplesPage extends PageObject {
       return response.json();
     }
 
-    public async getSamples(projectName = null, sampleName = null) {
+    private async getSamplesInArray(projectName: string, sampleNames: Array<string>) {
+      const samples = [];
+      for (const sampleName of sampleNames) {
+        samples.push((await this.getProjectSamples(projectName, sampleName))[0]);
+      }
+      return samples;
+    }
+
+    public async getSamples(projectName = null, sampleNames = null) {
+      if (Array.isArray(sampleNames)) {
+        return this.getSamplesInArray(projectName, sampleNames);
+      } else {
+        return this.getProjectSamples(projectName, sampleNames);
+      }
+    }
+
+    private async getProjectSamples(projectName = null, sampleName = null) {
       const urlParams = new URLSearchParams();
       let project = null;
       if (projectName !== null) {
@@ -328,6 +358,36 @@ export class SamplesPage extends PageObject {
     // #endregion Get
 
     // #region Click
+    public async clickLearnMoreAboutConsensusGenomesLink() {
+      const [newPage] = await Promise.all([
+        this.page.context().waitForEvent("page"),
+        await this.page.locator(LEARN_MORE_ABOUT_CONSENSUS_GENOMES_LINK).click(),
+      ]);
+      await newPage.waitForLoadState();
+      return new ArticlesPage(newPage);
+    }
+
+    public async clickTooltipLearnMore() {
+      const [newPage] = await Promise.all([
+        this.page.context().waitForEvent("page"),
+        await this.page.locator(TOOLTIP_LEARN_MORE_LINK).click(),
+      ]);
+      await newPage.waitForLoadState();
+      return new ArticlesPage(newPage);
+    }
+
+    public async clickShareButton() {
+      await this.pause(1);
+      await this.page.locator(SHARE_BUTTON).click();
+
+      await this.pause(1);
+      return this.page.evaluate(() => navigator.clipboard.readText());
+    }
+
+    public async clickConsensusGenomeTab() {
+      await this.page.locator(CONSENSUS_GENOME_TAB).click();
+    }
+
     public async clickDownloadAllButton() {
       await this.page.locator(DOWNLOAD_ALL_BUTTON).click();
       return this.page.waitForEvent("download");
@@ -483,6 +543,17 @@ export class SamplesPage extends PageObject {
     }
     // #endregion Fill
 
+    // #region Hover
+    public async hoverOverIsMyConsensusGenomeCompleteTooltip() {
+      await this.page.locator(IS_MY_CONSENSUS_GENOME_COMPLETE_TOOLTIP).hover();
+    }
+
+    public async hoverOverHowGoodIsTheCoverageTooltip() {
+      await this.page.locator(HOW_GOOD_IS_THE_COVERAGE_TOOLTIP).hover();
+    }
+
+    // #endregion Hover
+
     // #region Macro
     public async waitForAllSamplesComplete(sampleIds: Array<number>) {
       const samples = [];
@@ -515,8 +586,39 @@ export class SamplesPage extends PageObject {
       }
     }
 
+    public async getIsMyConsensusGenomeCompleteTooltip() {
+      await this.hoverOverIsMyConsensusGenomeCompleteTooltip();
+      return this.page.locator(TOOLTIP_CONTAINER).textContent();
+    }
+
+    public async getHowGoodIsTheCoverageTooltip() {
+      await this.hoverOverHowGoodIsTheCoverageTooltip();
+      await this.pause(1);
+      return this.page.locator(TOOLTIP_CONTAINER).textContent();
+    }
+
+    /*
+     * "Is my consensus genome complete?"" information tooltips displayed for:
+     * - Taxon / Mapped Reads / GC Content / SNPs / %id / Informative Nucleotides / %Genome Called / Missing Bases / Ambiguous Bases
+     */
+    public async getOverIsMyConsensusGenomeCompleteHeaderTooltip(index: number) {
+      await this.page.locator(IS_MY_CONSENSUS_GENOME_COMPLETE_HEADERS).nth(index).hover();
+      await this.pause(1);
+      return this.page.locator(TOOLTIP_CONTAINER).textContent();
+    }
+
+    /*
+     * "How good is the coverage?"" information tooltips displayed for:
+     * Custom Reference / Reference Length / Coverage Depth / Coverage Breadth
+     */
+    public async getHowGoodIsTheCoverageHeaders(index: number) {
+      await this.page.locator(HOW_GOOD_IS_THE_COVERAGE_HEADERS).nth(index).hover();
+      await this.pause(1);
+      return this.page.locator(NONHEADER_TOOLTIP_CONTAINER).textContent();
+    }
+
     public async hoverOverCoverageVizHistogram() {
-      this.page.locator(COVERAGE_VIZ_HISTOGRAM_LOCATOR).hover();
+      await this.page.locator(COVERAGE_VIZ_HISTOGRAM_LOCATOR).hover();
     }
 
     public async isTaxonVisible(name: string) {

@@ -82,13 +82,14 @@ test.describe("Data Validation: P-0", () => {
     // #endregion 3. Select "Consensus Genomes" tab
 
     const expectedDataHuman = expectedData;
+    const samplesPage = new SamplesPage(page);
     for (const sampleName of Object.keys(expectedDataHuman)) {
       // #region 4. Click on "no_host_x" WGS sample
       await projectPage.clickSample(sampleName);
+      await samplesPage.clickConsensusGenomeTab();
       // #endregion 4. Click on "no_host_x" WGS sample
 
       // #region 5. Verify "Is my consensuos genome complete?" and "How good is the coverage?" section data
-      const samplesPage = new SamplesPage(page);
       const actualConsensusGenomeData = await samplesPage.getIsMyConsensusGenomeCompleteTable();
       const expectedConsensusGenomeData = expectedDataHuman[sampleName]["ConsensusGenomeData"];
       expect(actualConsensusGenomeData).toEqual(expectedConsensusGenomeData);
@@ -116,7 +117,7 @@ test.describe("Data Validation: P-0", () => {
       await samplesPage.hoverOverCoverageVizHistogram();
 
       // Base Pair Range - integer - integer
-      const expectedHoverBasePairRange = /[1-9]+–[1-9]+/;
+      const expectedHoverBasePairRange = /[0-9]+–[0-9]+/;
       const actualHoverBasePairRange = await samplesPage.getHoverBasePairRange();
       expect(actualHoverBasePairRange).toMatch(expectedHoverBasePairRange);
 
@@ -242,13 +243,14 @@ test.describe("Data Validation: P-0", () => {
     // #endregion 3. Select "Consensus Genomes" tab
 
     const expectedDataERCCOnly = expectedData;
+    const samplesPage = new SamplesPage(page);
     for (const sampleName of Object.keys(expectedDataERCCOnly)) {
       // #region 4. Click on "no_host_x" WGS sample
       await projectPage.clickSample(sampleName);
+      await samplesPage.clickConsensusGenomeTab();
       // #endregion 4. Click on "no_host_x" WGS sample
 
       // #region 5. Verify "Is my consensuos genome complete?" and "How good is the coverage?" section data
-      const samplesPage = new SamplesPage(page);
       const actualConsensusGenomeData = await samplesPage.getIsMyConsensusGenomeCompleteTable();
       const expectedConsensusGenomeData = expectedDataERCCOnly[sampleName]["ConsensusGenomeData"];
       expect(actualConsensusGenomeData).toEqual(expectedConsensusGenomeData);
@@ -276,7 +278,7 @@ test.describe("Data Validation: P-0", () => {
       await samplesPage.hoverOverCoverageVizHistogram();
 
       // Base Pair Range - integer - integer
-      const expectedHoverBasePairRange = /[1-9]+–[1-9]+/;
+      const expectedHoverBasePairRange = /[0-9]+–[0-9]+/;
       const actualHoverBasePairRange = await samplesPage.getHoverBasePairRange();
       expect(actualHoverBasePairRange).toMatch(expectedHoverBasePairRange);
 
@@ -324,13 +326,14 @@ test.describe("Data Validation: P-0", () => {
     expectedData["no_host_1"]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
     expectedData["no_host_2"]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
     const expectedDataChikungunyaVirus = expectedData;
+    const samplesPage = new SamplesPage(page);
     for (const sampleName of Object.keys(expectedDataChikungunyaVirus)) {
       // #region 4. Click on "no_host_x" WGS sample
       await projectPage.clickSample(sampleName);
+      await samplesPage.clickConsensusGenomeTab();
       // #endregion 4. Click on "no_host_x" WGS sample
 
       // #region 5. Verify "Is my consensuos genome complete?" and "How good is the coverage?" section data
-      const samplesPage = new SamplesPage(page);
       const actualConsensusGenomeData = await samplesPage.getIsMyConsensusGenomeCompleteTable();
       const expectedConsensusGenomeData = expectedDataChikungunyaVirus[sampleName]["ConsensusGenomeData"];
       expect(actualConsensusGenomeData).toEqual(expectedConsensusGenomeData);
@@ -358,7 +361,7 @@ test.describe("Data Validation: P-0", () => {
       await samplesPage.hoverOverCoverageVizHistogram();
 
       // Base Pair Range - integer - integer
-      const expectedHoverBasePairRange = /[1-9]+–[1-9]+/;
+      const expectedHoverBasePairRange = /[0-9]+–[0-9]+/;
       const actualHoverBasePairRange = await samplesPage.getHoverBasePairRange();
       expect(actualHoverBasePairRange).toMatch(expectedHoverBasePairRange);
 
@@ -406,13 +409,14 @@ test.describe("Data Validation: P-0", () => {
     expectedData["no_host_1"]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
     expectedData["no_host_2"]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
     const expectedDataERCCOnlyChikungunyaVirus = expectedData;
+    const samplesPage = new SamplesPage(page);
     for (const sampleName of Object.keys(expectedDataERCCOnlyChikungunyaVirus)) {
       // #region 4. Click on "no_host_x" WGS sample
       await projectPage.clickSample(sampleName);
+      await samplesPage.clickConsensusGenomeTab();
       // #endregion 4. Click on "no_host_x" WGS sample
 
       // #region 5. Verify "Is my consensuos genome complete?" and "How good is the coverage?" section data
-      const samplesPage = new SamplesPage(page);
       const actualConsensusGenomeData = await samplesPage.getIsMyConsensusGenomeCompleteTable();
       const expectedConsensusGenomeData = expectedDataERCCOnlyChikungunyaVirus[sampleName]["ConsensusGenomeData"];
       expect(actualConsensusGenomeData).toEqual(expectedConsensusGenomeData);
@@ -440,7 +444,7 @@ test.describe("Data Validation: P-0", () => {
       await samplesPage.hoverOverCoverageVizHistogram();
 
       // Base Pair Range - integer - integer
-      const expectedHoverBasePairRange = /[1-9]+–[1-9]+/;
+      const expectedHoverBasePairRange = /[0-9]+–[0-9]+/;
       const actualHoverBasePairRange = await samplesPage.getHoverBasePairRange();
       expect(actualHoverBasePairRange).toMatch(expectedHoverBasePairRange);
 

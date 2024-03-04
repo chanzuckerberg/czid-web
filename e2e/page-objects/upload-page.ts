@@ -14,6 +14,7 @@ import { expect } from "@playwright/test";
 import { IlluminaPage } from "./illumina-page";
 import { PageObject } from "./page-object";
 
+const CONSENSUS_GENOME_PIPELINE_VERSION = "3.5.0";
 export const SARS_COV2_REF_FILENAME = "wgs_SARS_CoV2_reference.fa";
 export const SARS_COV2_TRIM_PRIMER_FILENAME = "wgs_SARS_CoV2_primers_regions.bed";
 export const REF_FILENAME = "consensus_TEST_SC2.fa";
@@ -678,6 +679,10 @@ export class UploadPage extends PageObject {
   // #region Validation
 
   // #region Samples
+  public async isSequencingTechnologyDisabled(workflow: string) {
+    return (await this.getCheckboxForWorkflow(workflow.toLocaleLowerCase())).isDisabled();
+  }
+
   public async isContinueButtonDisabled() {
     return this.page.locator(CONTINUE_BUTTON).isDisabled();
   }
@@ -740,7 +745,7 @@ export class UploadPage extends PageObject {
       expectedResults = {
         "Sequencing Platform": "Illumina",
         "Analysis Type": "Metagenomics",
-        "Pipeline Version": "8.3.0",
+        "Pipeline Version": "8.3.1",
       };
     }
     else if (sampleType === WORKFLOWS.LMNGS) {
@@ -754,7 +759,7 @@ export class UploadPage extends PageObject {
     else if (sampleType === WORKFLOWS.AMR) {
       expectedResults = {
         "Analysis Type": "Antimicrobial Resistance",
-        "Pipeline Version": "1.3.2",
+        "Pipeline Version": "1.4.0",
       };
     }
     else if (sampleType === WORKFLOWS.WGS) {
@@ -764,7 +769,7 @@ export class UploadPage extends PageObject {
         "Taxon Name": "unknown",
         "Reference Sequence": "consensus_TEST_SC2.fa",
         "Trim Primer": "Primer_K.bed",
-        "Pipeline Version": "3.4.18",
+        "Pipeline Version": CONSENSUS_GENOME_PIPELINE_VERSION,
       };
     }
     else if (sampleType === WORKFLOWS.SC2) {
@@ -772,7 +777,7 @@ export class UploadPage extends PageObject {
         "Analysis Type": "SARS-CoV-2 Consensus Genome",
         "Sequencing Platform": "Illumina",
         "Wetlab Protocol": "VarSkip",
-        "Pipeline Version": "3.4.18",
+        "Pipeline Version": CONSENSUS_GENOME_PIPELINE_VERSION,
       };
     }
     else {

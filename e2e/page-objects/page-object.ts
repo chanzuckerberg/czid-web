@@ -62,6 +62,10 @@ export abstract class PageObject {
     this.page.close();
   }
 
+  public async url() {
+    return this.page.url();
+  }
+
   public async pause(seconds: number) {
     await this.page.waitForTimeout(seconds * 1000);
   }

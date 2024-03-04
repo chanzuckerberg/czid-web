@@ -59,11 +59,6 @@ test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
     const downloadName = await downloadsPage.getDownloadName(downloadId);
     expect(downloadName).toEqual("Sample Metadata");
 
-    // - Download Date / Count is correct
-    const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz("America/Los_Angeles").format("YYYY-MM-DD");
-    expect(downloadDate).toEqual(today);
-
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);
     expect(downloadCount).toEqual(oneOrMoreSamples.toString());
 

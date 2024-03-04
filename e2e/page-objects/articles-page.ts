@@ -7,4 +7,5 @@ export class ArticlesPage extends PageObject {
     const pageUrl = this.page.url();
     expect(pageUrl.includes(linkText)).toBeTruthy();
   }
+
 }
