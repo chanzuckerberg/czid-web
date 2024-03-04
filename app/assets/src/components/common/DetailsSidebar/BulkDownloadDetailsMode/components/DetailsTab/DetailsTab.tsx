@@ -38,9 +38,10 @@ export const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
       // In other cases, the field just has a value, such as the download format. The stringify is here just
       // in case the value is not a string - for example the list of filters.
       const fieldValue =
-        paramsField?.displayName ?? typeof paramsField?.value === "string" // if there's a displayName, use it
+        paramsField?.displayName ?? // if there's a displayName, use it
+        (typeof paramsField?.value === "string"
           ? (paramsField.value as string) // if value is a string, use it
-          : JSON.stringify(paramsField?.value); // something is probably wrong if we're here, but stringify so the page doesn't crash
+          : JSON.stringify(paramsField?.value)); // something is probably wrong if we're here, but stringify so the page doesn't crash
 
       if (fieldValue) {
         fields.push({
