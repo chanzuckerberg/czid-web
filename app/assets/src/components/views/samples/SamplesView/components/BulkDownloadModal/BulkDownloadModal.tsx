@@ -88,7 +88,7 @@ interface BulkDownloadModalProps {
   onClose: $TSFixMeFunction;
   open?: boolean;
   selectedObjects: Entry[];
-  selectedIds?: Set<number>;
+  selectedIds?: Set<string>;
   // called when a bulk download has successfully been kicked off
   onGenerate: $TSFixMeFunction;
   workflow: WorkflowType;
@@ -123,9 +123,7 @@ export const BulkDownloadModal = ({
   const [selectedDownloadTypeName, setSelectedDownloadTypeName] = useState<
     string | null
   >(null);
-  const [validObjectIds, setValidObjectIds] = useState<Set<number | string>>(
-    new Set(),
-  );
+  const [validObjectIds, setValidObjectIds] = useState<Set<number>>(new Set());
   const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [backgroundOptions, setBackgroundOptions] = useState<
@@ -235,7 +233,7 @@ export const BulkDownloadModal = ({
     selectedFields,
     selectedFieldsDisplay,
   }: {
-    entityIds?: Set<number>;
+    entityIds?: Set<string>;
     workflowEntity?: string;
     workflow: WorkflowType;
     selectedFields: SelectedFieldsType;
@@ -299,8 +297,8 @@ export const BulkDownloadModal = ({
 
     setBulkDownloadTypes(bulkDownloadTypes);
     setValidObjectIds(new Set(validIds));
-    setInvalidSampleNames(invalidSampleNames);
-    setValidationError(validationError);
+    setInvalidSampleNames(invalidSampleNames ?? []);
+    setValidationError(validationError ?? null);
     setBackgroundOptions(backgroundOptions);
     setMetricsOptions(metricsOptions);
     setAreAllRequestedObjectsUploadedByCurrentUser(
@@ -314,7 +312,7 @@ export const BulkDownloadModal = ({
     );
   }
 
-  async function fetchBackgroundAvailability(selectedIds?: Set<number>) {
+  async function fetchBackgroundAvailability(selectedIds?: Set<string>) {
     if (!selectedIds) {
       return;
     }
@@ -515,7 +513,7 @@ export const BulkDownloadModal = ({
   const numObjects = selectedIds?.size || validObjectIds.size;
   const objectDownloaded = WORKFLOW_OBJECT_LABELS[workflow];
   const sampleHostGenomes = selectedObjects
-    .filter(obj => validObjectIds.has(obj.id))
+    .filter(obj => validObjectIds.has(Number(obj.id))) // TODO: Convert validObjectIds to strings.
     .reduce(
       (result, obj) => {
         result.push({
@@ -526,7 +524,7 @@ export const BulkDownloadModal = ({
         return result;
       },
       [] as {
-        id: number;
+        id: string;
         name: string;
         hostGenome: string;
       }[],

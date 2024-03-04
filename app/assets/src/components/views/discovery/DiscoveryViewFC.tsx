@@ -187,7 +187,7 @@ async function queryWorkflowRuns(
         );
       }
       return {
-        id: Number(run.id), // TODO: Make IDs strings
+        id: run.id,
         createdAt: run.startedAt ?? undefined,
         status: run.status != null ? toLower(run.status) : undefined,
         workflow: "consensus-genome", // TODO: Get this from the correct field in NextGen
@@ -266,7 +266,7 @@ async function querySequencingReadsByIds(
         sequencingReadId: sequencingRead.id,
         sample: {
           // TODO: Use NextGen ID when samples are no longer dual-written.
-          id: sample.railsSampleId != null ? Number(sample.railsSampleId) : 0,
+          id: sample.railsSampleId?.toString() ?? "",
           railsSampleId: sample.railsSampleId ?? undefined,
           name: sample.name,
           project: sample.collection?.name ?? undefined,
@@ -300,11 +300,11 @@ async function querySequencingReadsByIds(
           .filter(isNotNullish)
           .map(edge => [edge.node.fieldName, edge.node.value]),
       );
+
       rows.push({
         ...sequencingReadAndSampleFields,
         ...metadataFields,
       });
-
       for (const consensusGenomeEdge of sequencingRead.consensusGenomes.edges) {
         if (consensusGenomeEdge == null) {
           continue;
@@ -372,7 +372,7 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
 
   // STATE:
   const [cgWorkflowRunIds, setCgWorkflowRunIds] = useState<
-    number[] | undefined // TODO: Make IDs strings
+    string[] | undefined
   >();
   const [cgFullRows, setCgFullRows] = useState<Array<CgRow | undefined>>([]);
 
@@ -437,8 +437,7 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     const workflowRuns = await workflowRunsPromise.current;
     const sequencingReads = await querySequencingReadsByIds(
       offset, // TODO: Remove.
-      // TODO: Make IDs strings
-      workflowRuns.slice(offset, offset + 50).map(run => run.id.toString()),
+      workflowRuns.slice(offset, offset + 50).map(run => run.id),
       cgConditions.current,
       props,
       environment,
@@ -452,7 +451,7 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       );
       const matchingSequencingRead =
         sequencingReadRows?.find(
-          row => row.consensusGenomeProducingRunId === run.id.toString(), // TODO: Make IDs strings
+          row => row.consensusGenomeProducingRunId === run.id,
         ) ??
         sequencingReadRows?.find(
           row => row.consensusGenomeProducingRunId === undefined,

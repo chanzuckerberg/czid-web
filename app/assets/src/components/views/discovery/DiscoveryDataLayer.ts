@@ -1,6 +1,5 @@
 import { findIndex, findLastIndex, range, slice } from "lodash/fp";
 import { ViewProps } from "~/interface/samplesView";
-import { MustHaveId } from "~/interface/shared";
 import {
   getDiscoveryProjects,
   getDiscoverySamples,
@@ -8,10 +7,9 @@ import {
   getDiscoveryWorkflowRuns,
 } from "./discovery_api";
 
-class ObjectCollection<T extends MustHaveId> {
-  _displayName: string;
+class ObjectCollection<T extends { id: ID }, ID extends string | number> {
   domain: string;
-  entries: { [id: number]: T } | Record<string, never>;
+  entries: Map<ID, T>;
   fetchDataCallback: (
     params,
   ) => Promise<{ fetchedObjects: T[]; fetchedObjectIds: number[] }>;
@@ -26,37 +24,33 @@ class ObjectCollection<T extends MustHaveId> {
     // - offset: number of results to skip
     // - listAllIds: boolean that indicates if it should retrieve
     //   a list of all possible IDs
-    fetchDataCallback: ObjectCollection<T>["fetchDataCallback"],
-    // name of the view: mostly used for debug
-    displayName = "",
+    fetchDataCallback: ObjectCollection<T, ID>["fetchDataCallback"],
   ) {
     this.domain = domain;
-    this.entries = {};
+    this.entries = new Map();
     this.fetchDataCallback = fetchDataCallback;
-    this._displayName = displayName;
   }
 
   createView = (viewProps: ViewProps) => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-    return new ObjectCollectionView(this, viewProps);
+    return new ObjectCollectionView<T, ID>(this, viewProps);
   };
 
   update = (entry: T) => {
-    this.entries[entry.id] = entry;
+    this.entries.set(entry.id, entry);
   };
 }
 
-class ObjectCollectionView<T extends MustHaveId> {
-  _activePromises: object;
-  _collection: ObjectCollection<T>;
-  _conditions: ViewProps["conditions"];
-  _displayName: ViewProps["displayName"];
-  _loading: boolean;
-  _onViewChange: ViewProps["onViewChange"];
-  _orderedIds: number[];
-  _pageSize: ViewProps["pageSize"];
+class ObjectCollectionView<T extends { id: ID }, ID extends string | number> {
+  private _activePromises: object;
+  private _collection: ObjectCollection<T, ID>;
+  private _conditions: ViewProps["conditions"];
+  private _shouldConvertIdToString: ViewProps["shouldConvertIdToString"];
+  private _loading: boolean;
+  private _onViewChange: ViewProps["onViewChange"];
+  private _orderedIds: ID[];
+  private _pageSize: ViewProps["pageSize"];
   constructor(
-    collection: ObjectCollection<T>,
+    collection: ObjectCollection<T, ID>,
     {
       // conditions: Extra conditions to use for this view.
       // These will be sent to the fetchDataCallback of the corresponding collection when requesting new data.
@@ -65,9 +59,8 @@ class ObjectCollectionView<T extends MustHaveId> {
       pageSize = 50,
       // callbacks to notify the client when changes occur
       // onViewChange: triggered when the view finishes loading new object ids (the full list of ids in the view)
-      onViewChange = null,
-      // name of the view: mostly used for debug
-      displayName = "",
+      onViewChange,
+      shouldConvertIdToString,
     },
   ) {
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
@@ -77,36 +70,23 @@ class ObjectCollectionView<T extends MustHaveId> {
     this._conditions = conditions;
     this._activePromises = {};
     this._pageSize = pageSize;
-    this._displayName = displayName;
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
+    this._shouldConvertIdToString = shouldConvertIdToString;
     this._onViewChange = onViewChange;
   }
 
   get loaded() {
     return (this._orderedIds || [])
-      .filter(id => id in this._collection.entries)
-      .map(id => this._collection.entries[id]);
+      .filter(id => this._collection.entries.has(id))
+      .map(id => this._collection.entries.get(id));
   }
 
   get length() {
     return (this._orderedIds || []).length;
   }
 
-  get displayName() {
-    return this._displayName;
-  }
-
-  get entries() {
-    return this._collection.entries;
-  }
-
-  get = (id: number) => this._collection.entries[id];
+  get = (id: ID) => this._collection.entries.get(id);
 
   getIds = () => this._orderedIds || [];
-
-  getViewLength = () => {
-    return Object.keys(this._collection.entries).length;
-  };
 
   getIntermediateIds = ({ id1, id2 }: { id1: number; id2: number }) => {
     const start = findIndex(v => v === id1 || v === id2, this._orderedIds);
@@ -120,7 +100,7 @@ class ObjectCollectionView<T extends MustHaveId> {
     conditions,
     loadFirstPage = false,
   }: {
-    conditions?: ObjectCollectionView<T>["_conditions"];
+    conditions?: ObjectCollectionView<T, ID>["_conditions"];
     loadFirstPage?: boolean;
   } = {}) => {
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
@@ -188,7 +168,7 @@ class ObjectCollectionView<T extends MustHaveId> {
     let missingIdxs = range(startIndex, minStopIndex + 1);
     if (this._orderedIds) {
       missingIdxs = missingIdxs.filter(
-        (idx: $TSFixMe) => !(this._orderedIds[idx] in this._collection.entries),
+        idx => !this._collection.entries.has(this._orderedIds[idx]),
       );
     }
     if (missingIdxs.length > 0) {
@@ -206,7 +186,14 @@ class ObjectCollectionView<T extends MustHaveId> {
         });
 
       fetchedObjects.forEach((object: $TSFixMe) => {
-        this._collection.entries[object.id] = object;
+        if (this._shouldConvertIdToString) {
+          this._collection.entries.set(object.id.toString(), {
+            ...object,
+            id: object.id.toString(),
+          });
+        } else {
+          this._collection.entries.set(object.id, object);
+        }
       });
 
       // We currently load the ids of ALL objects in the view. This allows using a simple solution to
@@ -214,7 +201,11 @@ class ObjectCollectionView<T extends MustHaveId> {
       // It currently works with minimal performance impact, but might need to review in the future, as the number
       // of objects in these views increases
       if (fetchedObjectIds) {
-        this._orderedIds = fetchedObjectIds;
+        this._orderedIds = (
+          this._shouldConvertIdToString
+            ? fetchedObjectIds.map(id => id.toString())
+            : fetchedObjectIds
+        ) as ID[];
         this._loading = false;
         this._onViewChange && this._onViewChange();
       } else {
@@ -224,19 +215,18 @@ class ObjectCollectionView<T extends MustHaveId> {
 
     return range(startIndex, minStopIndex + 1)
       .filter(idx => idx in this._orderedIds)
-      .map(idx => this._collection.entries[this._orderedIds[idx]]);
+      .map(idx => this._collection.entries.get(this._orderedIds[idx]));
   };
 }
 
 class DiscoveryDataLayer {
-  amrWorkflowRuns: $TSFixMe;
-  benchmarkWorkflowRuns: ObjectCollection<any>;
-  cgWorkflowRuns: $TSFixMe;
+  amrWorkflowRuns: ObjectCollection<any, string>;
+  benchmarkWorkflowRuns: ObjectCollection<any, string>;
   domain: string;
-  longReadMngsSamples: $TSFixMe;
-  projects: $TSFixMe;
-  samples: $TSFixMe;
-  visualizations: $TSFixMe;
+  longReadMngsSamples: ObjectCollection<any, string>;
+  projects: ObjectCollection<any, number>;
+  samples: ObjectCollection<any, string>;
+  visualizations: ObjectCollection<any, number>;
   constructor(domain: string) {
     // TODO: Move domain to conditions object
     this.domain = domain;
@@ -248,7 +238,6 @@ class DiscoveryDataLayer {
       domain,
       this.fetchVisualizations,
     );
-    this.cgWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
     this.amrWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
     this.benchmarkWorkflowRuns = new ObjectCollection(
       domain,
@@ -288,4 +277,4 @@ class DiscoveryDataLayer {
   };
 }
 
-export { DiscoveryDataLayer, ObjectCollection, ObjectCollectionView };
+export { DiscoveryDataLayer, ObjectCollectionView };

@@ -41,7 +41,7 @@ export interface SamplesViewProps {
     object: Entry;
     currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>;
   }): void;
-  onUpdateSelectedIds(selectedSampleIds: Set<number>): void;
+  onUpdateSelectedIds(selectedSampleIds: Set<string>): void;
   onSortColumn?(param: {
     sortBy: string;
     sortDirection: SortDirectionType;
@@ -49,8 +49,8 @@ export interface SamplesViewProps {
   projectId?: number;
   protectedColumns?: string[];
   sampleStatsSidebarOpen?: boolean;
-  selectableIds?: number[];
-  selectedIds?: Set<number>;
+  selectableIds?: string[];
+  selectedIds?: Set<string>;
   showAllMetadata?: boolean;
   sortBy?: string;
   sortDirection?: SortDirectionType;
@@ -75,7 +75,7 @@ export interface ViewProps {
   conditions?: Conditions;
   pageSize?: number;
   onViewChange: () => void;
-  displayName: string;
+  shouldConvertIdToString: boolean; // TODO: Remove when all workflows have been migrated to NextGen.
 }
 
 export interface FilterList {
@@ -98,7 +98,7 @@ export interface Entry {
   erccReads: number;
   host: string;
   host_sex: string;
-  id: number;
+  id: string;
   medakaModel: string;
   notes: string;
   nucleotide_type: string;
@@ -129,7 +129,7 @@ export interface BaseRun {
   createdAt: DateString;
   erccReads: number;
   host: string;
-  id: number;
+  id: string;
   notes: string;
   nucleotide_type: string;
   privateUntil: DateString;

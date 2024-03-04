@@ -42,7 +42,7 @@ export interface Visualization {
 
 interface VisualizationsViewProps {
   currentDisplay: string;
-  visualizations: ObjectCollectionView<Visualization>;
+  visualizations: ObjectCollectionView<Visualization, number>;
   onLoadRows: $TSFixMeFunction;
   onSortColumn?: $TSFixMeFunction;
   sortBy?: string;

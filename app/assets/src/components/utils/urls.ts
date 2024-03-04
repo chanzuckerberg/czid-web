@@ -26,7 +26,7 @@ interface generateUrlOptions {
   snapshotShareId?: string | null;
   tempSelectedOptions?: TempSelectedOptionsShape | Record<string, never>;
   workflow?: WorkflowType | null;
-  workflowRunId?: number | null;
+  workflowRunId?: string | null;
 }
 
 const generateUrlToSampleView = ({

@@ -31,15 +31,15 @@ interface MapPreviewSidebarProps {
   onFilterClick?: $TSFixMeFunction;
   onProjectSelected?: $TSFixMeFunction;
   onSampleClicked?: $TSFixMeFunction;
-  onSelectionUpdate: $TSFixMeFunction;
+  onSelectionUpdate: (selectedIds: Set<string>) => void;
   onTabChange?: $TSFixMeFunction;
   projectDimensions?: DimensionsDetailed;
-  projects?: ObjectCollectionView<Project>;
+  projects?: ObjectCollectionView<Project, number>;
   projectStats?: object;
   sampleDimensions?: DimensionsDetailed;
-  samples?: ObjectCollectionView<PipelineTypeRun>;
+  samples?: ObjectCollectionView<PipelineTypeRun, string>;
   sampleStats?: object;
-  selectedSampleIds?: Set<$TSFixMeUnknown>;
+  selectedSampleIds?: Set<string>;
 }
 
 export default class MapPreviewSidebar extends React.Component<MapPreviewSidebarProps> {

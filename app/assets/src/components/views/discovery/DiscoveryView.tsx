@@ -81,7 +81,6 @@ import {
 } from "~/interface/discoveryView";
 import {
   BaseWorkflowRun,
-  Entry,
   FilterList,
   PipelineTypeRun,
   SamplesViewHandle,
@@ -162,20 +161,20 @@ export class DiscoveryView extends React.Component<
   DiscoveryViewWithFCProps,
   DiscoveryViewState
 > {
-  amrWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
-  benchmarkWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
+  amrWorkflowRuns: ObjectCollectionView<BaseWorkflowRun, string>;
+  benchmarkWorkflowRuns: ObjectCollectionView<BaseWorkflowRun, string>;
   configForWorkflow: Record<WorkflowType, ConfigForWorkflow>;
   dataLayer: DiscoveryDataLayer;
-  longReadMngsSamples: ObjectCollectionView<PipelineTypeRun>;
-  mapPreviewProjects: ObjectCollectionView<Project>;
-  mapPreviewSamples: ObjectCollectionView<PipelineTypeRun>;
+  longReadMngsSamples: ObjectCollectionView<PipelineTypeRun, string>;
+  mapPreviewProjects: ObjectCollectionView<Project, number>;
+  mapPreviewSamples: ObjectCollectionView<PipelineTypeRun, string>;
   mapPreviewSidebar: MapPreviewSidebar;
-  projects: ObjectCollectionView<Project>;
+  projects: ObjectCollectionView<Project, number>;
   projectsView: ProjectsView;
-  samples: ObjectCollectionView<PipelineTypeRun>;
+  samples: ObjectCollectionView<PipelineTypeRun, string>;
   samplesView: React.RefObject<SamplesViewHandle>;
   urlParser: UrlQueryParser;
-  visualizations: ObjectCollectionView<Visualization>;
+  visualizations: ObjectCollectionView<Visualization, number>;
   visualizationsView: VisualizationsView;
   workflowEntity: string;
   constructor(props: DiscoveryViewWithFCProps) {
@@ -271,7 +270,7 @@ export class DiscoveryView extends React.Component<
       onViewChange: () => {
         this.refreshSampleData(WorkflowType.SHORT_READ_MNGS);
       },
-      displayName: WorkflowType.SHORT_READ_MNGS,
+      shouldConvertIdToString: true,
     });
 
     this.amrWorkflowRuns = this.dataLayer.amrWorkflowRuns.createView({
@@ -282,7 +281,7 @@ export class DiscoveryView extends React.Component<
       onViewChange: () => {
         this.refreshWorkflowRunData(WorkflowType.AMR);
       },
-      displayName: WorkflowType.AMR,
+      shouldConvertIdToString: true,
     });
 
     this.benchmarkWorkflowRuns =
@@ -294,8 +293,8 @@ export class DiscoveryView extends React.Component<
         onViewChange: () => {
           this.refreshWorkflowRunData(WorkflowType.BENCHMARK);
         },
-        displayName: WorkflowType.BENCHMARK,
-      }) as ObjectCollectionView<Entry>;
+        shouldConvertIdToString: true,
+      });
 
     this.longReadMngsSamples = this.dataLayer.longReadMngsSamples.createView({
       conditions: this.getConditionsWithSessionStorage(
@@ -305,19 +304,19 @@ export class DiscoveryView extends React.Component<
       onViewChange: () => {
         this.refreshSampleData(WorkflowType.LONG_READ_MNGS);
       },
-      displayName: WorkflowType.LONG_READ_MNGS,
+      shouldConvertIdToString: true,
     });
 
     this.projects = this.dataLayer.projects.createView({
       conditions: this.getConditionsWithSessionStorage(TAB_PROJECTS),
       onViewChange: this.refreshProjectData,
-      displayName: "ProjectsViewBase",
+      shouldConvertIdToString: false,
     });
 
     this.visualizations = this.dataLayer.visualizations.createView({
       conditions: this.getConditionsWithSessionStorage(TAB_VISUALIZATIONS),
       onViewChange: this.refreshVisualizationData,
-      displayName: "VisualizationsViewBase",
+      shouldConvertIdToString: false,
     });
 
     this.setupWorkflowConfigs();
@@ -1075,7 +1074,11 @@ export class DiscoveryView extends React.Component<
 
     this.setState({
       filteredProjectCount: this.projects.length,
-      project: this.projects.get(projectId),
+      project: this.projects.get(projectId) ?? {
+        id: projectId,
+        name: "",
+        editable: false,
+      },
     });
   };
 
@@ -1404,12 +1407,19 @@ export class DiscoveryView extends React.Component<
         break;
       }
       case "sample": {
-        this.handleObjectSelected({ object: { id: value }, currentEvent });
+        this.handleObjectSelected({
+          object: { id: value.toString() },
+          currentEvent,
+        });
         break;
       }
       case "project": {
         this.handleProjectSelected({
-          project: this.projects.get(value) || { id: value },
+          project: this.projects.get(value) ?? {
+            id: value,
+            editable: false,
+            name: "",
+          },
         });
         break;
       }
@@ -1496,7 +1506,7 @@ export class DiscoveryView extends React.Component<
     object,
     currentEvent,
   }: {
-    object: { id: number };
+    object: { id: string };
     currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>;
   }) => {
     const { snapshotShareId, history: RouterHistory } = this.props;
@@ -1504,8 +1514,8 @@ export class DiscoveryView extends React.Component<
     const { annotationsSelected, taxonSelected, taxonThresholdsSelected } =
       filters;
 
-    let sampleId: number;
-    let workflowRunId: number;
+    let sampleId: string;
+    let workflowRunId: string | undefined;
     let tempSelectedOptions: TempSelectedOptionsShape;
 
     if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
@@ -1536,7 +1546,6 @@ export class DiscoveryView extends React.Component<
     const url = generateUrlToSampleView({
       workflow,
       sampleId: sampleId.toString(),
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       workflowRunId,
       snapshotShareId,
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
@@ -1721,7 +1730,7 @@ export class DiscoveryView extends React.Component<
       this.mapPreviewSamples = this.dataLayer.samples.createView({
         conditions,
         onViewChange: this.refreshMapSidebarSampleData,
-        displayName: "MapPreviewSamplesView",
+        shouldConvertIdToString: true,
       });
       this.mapPreviewSamples.loadPage(0);
     }
@@ -1749,7 +1758,7 @@ export class DiscoveryView extends React.Component<
       this.mapPreviewSamples = this.dataLayer.samples.createView({
         conditions,
         onViewChange: this.refreshMapSidebarSampleData,
-        displayName: "MapPreviewSamplesView",
+        shouldConvertIdToString: true,
       });
       this.mapPreviewSamples.loadPage(0);
     } else {
@@ -1795,7 +1804,7 @@ export class DiscoveryView extends React.Component<
       this.mapPreviewProjects = this.dataLayer.projects.createView({
         conditions,
         onViewChange: this.refreshMapSidebarProjectData,
-        displayName: "MapPreviewProjectsView",
+        shouldConvertIdToString: false,
       });
       this.mapPreviewProjects.loadPage(0);
     }
@@ -1834,7 +1843,7 @@ export class DiscoveryView extends React.Component<
     this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
   };
 
-  handleSelectedSamplesUpdate = (selectedSampleIds: Set<number>) => {
+  handleSelectedSamplesUpdate = (selectedSampleIds: Set<string>) => {
     const { workflow, selectedSampleIdsByWorkflow } = this.state;
     this.setState({
       selectedSampleIdsByWorkflow: {
@@ -2745,7 +2754,7 @@ interface DiscoveryViewWithFCProps extends DiscoveryViewProps {
   isAdmin: boolean;
   updateDiscoveryProjectId: (projectIds: number | null) => void;
   // NextGen props:
-  cgWorkflowIds?: number[]; // TODO: Make IDs strings
+  cgWorkflowIds?: string[];
   cgRows: Array<CgRow | undefined>;
   fetchCgWorkflowRuns: (conditions: Conditions) => void;
   fetchCgPage: (offset: number) => Promise<Array<CgRow | undefined>>;

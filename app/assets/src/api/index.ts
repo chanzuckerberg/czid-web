@@ -652,7 +652,7 @@ const getTaxaWithContigsSuggestions = (query: $TSFixMe, sampleIds: $TSFixMe) =>
   });
 
 const samplesUploadedByCurrentUser = async (
-  sampleIds: number[],
+  sampleIds: string[],
 ): Promise<boolean> => {
   const { uploaded_by_current_user: allSamplesUploadedByCurrentUser } =
     await postWithCSRF("samples/uploaded_by_current_user", {
@@ -663,7 +663,7 @@ const samplesUploadedByCurrentUser = async (
 };
 
 const workflowRunsCreatedByCurrentUser = async (
-  workflowRunIds: number[],
+  workflowRunIds: string[],
 ): Promise<boolean> => {
   const { created_by_current_user: allWorkflowRunsCreatedByCurrentUser } =
     await postWithCSRF("workflow_runs/created_by_current_user", {
@@ -673,7 +673,7 @@ const workflowRunsCreatedByCurrentUser = async (
   return allWorkflowRunsCreatedByCurrentUser;
 };
 
-const userIsCollaboratorOnAllSamples = async (sampleIds: number[]) => {
+const userIsCollaboratorOnAllSamples = async (sampleIds: string[]) => {
   const { user_is_collaborator: userIsCollaborator } = await postWithCSRF(
     "samples/user_is_collaborator.json",
     {

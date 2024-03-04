@@ -262,7 +262,7 @@ const SamplesView = forwardRef(function SamplesView(
   );
 
   const handleSelectRow = (
-    value: number,
+    value: string,
     checked: boolean,
     event: { shiftKey: boolean },
   ) => {
@@ -277,11 +277,11 @@ const SamplesView = forwardRef(function SamplesView(
       );
 
       if (checked) {
-        forEach((v: number) => {
+        forEach(v => {
           newSelected.add(v);
         }, ids);
       } else {
-        forEach((v: number) => {
+        forEach(v => {
           newSelected.delete(v);
         }, ids);
       }
@@ -462,7 +462,13 @@ const SamplesView = forwardRef(function SamplesView(
             popupText="Background Model"
           />
         }
-        selectedSampleIds={selectedIds}
+        selectedSampleIds={
+          selectedIds !== undefined
+            ? // TODO: Make these strings when we migrate MNGS to NextGen.
+              // This function is only called in MNGS.
+              new Set(Array.from(selectedIds).map(id => Number(id)))
+            : undefined
+        }
         fetchedSamples={targetSamples.filter(sample =>
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
           selectedIds.has(sample.id),
@@ -554,7 +560,12 @@ const SamplesView = forwardRef(function SamplesView(
     );
 
     if (size(amrPipelineEligibility.eligible) > 0) {
-      const sampleIdsToKickoffAmr = map("id", amrPipelineEligibility.eligible);
+      // TODO: Make these strings when we migrate MNGS to NextGen.
+      // This function is only called in MNGS.
+      const sampleIdsToKickoffAmr = map(
+        "id",
+        amrPipelineEligibility.eligible,
+      ).map(id => Number(id));
       kickoffAmrPipelineForSamples(sampleIdsToKickoffAmr);
       renderAmrPipelineBulkKickedOffNotification();
 
@@ -613,7 +624,9 @@ const SamplesView = forwardRef(function SamplesView(
     // `recentlyKickedOffAmrWorkflowRunsForSampleIds` only gets updated when the user sucessfully
     // kicks off new AMR workflow runs by clicking the BulkKickoffAmr trigger
     const alreadyKickedOffAmrWorkflowRun =
-      recentlyKickedOffAmrWorkflowRunsForSampleIds.has(sample.id);
+      // TODO: Make these strings when we migrate MNGS to NextGen.
+      // This function is only called in MNGS.
+      recentlyKickedOffAmrWorkflowRunsForSampleIds.has(Number(sample.id));
 
     const amrNotAvailableForPipelineVersion = !isPipelineFeatureAvailable(
       AMR_PIPELINE,
@@ -671,7 +684,11 @@ const SamplesView = forwardRef(function SamplesView(
     );
 
     if (size(benchmarkEligibility.eligible) > 0) {
-      const sampleIds = map("id", benchmarkEligibility.eligible);
+      // TODO: Make these strings when we migrate MNGS to NextGen.
+      // This function is only called in MNGS.
+      const sampleIds = map("id", benchmarkEligibility.eligible).map(id =>
+        Number(id),
+      );
       kickoffBenchmark({
         sampleIds,
         groundTruthFilePath: fullGroundTruthFilePath,
@@ -1195,7 +1212,7 @@ export interface WorkflowRunRow {
   // TODO: Lookup username from Entities via WorkflowRun's ownerUserId (to replicate
   // "sample?.userNameWhoInitiatedWorkflowRun || sample.user" in TableRenderers.tsx). For now just
   // render the sample's user.
-  id: number; // TODO: Make IDs strings
+  id: string;
   inputSequencingReadId: string;
   status?: string;
   createdAt?: string;
@@ -1213,7 +1230,7 @@ export interface CgEntityRow {
   sequencingReadId: string;
   consensusGenomeProducingRunId?: string;
   sample: {
-    id: number; // TODO: Make IDs strings
+    id: string;
     railsSampleId?: number;
     // processRawWorkflowRun():
     name: string;

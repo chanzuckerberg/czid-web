@@ -53,7 +53,7 @@ interface BulkDownloadModalFooterProps {
   validationError?: string | null;
   selectedDownloadTypeName?: string | null;
   sampleHostGenomes: {
-    id: number;
+    id: string;
     name: string;
     hostGenome: string;
   }[];

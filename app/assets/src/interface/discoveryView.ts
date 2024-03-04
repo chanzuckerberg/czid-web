@@ -54,7 +54,7 @@ export type SelectedFilters = {
 };
 
 export type WorkflowSets = {
-  [K in WorkflowType]: Set<number>;
+  [K in WorkflowType]: Set<string>;
 };
 
 export type MapEntry = {
@@ -99,7 +99,7 @@ export interface DiscoveryViewState {
   sampleDimensions: DimensionsDetailed;
   sampleWasDeleted: string | null;
   search: string;
-  selectableSampleIds: number[];
+  selectableSampleIds: string[];
   selectedSampleIdsByWorkflow: WorkflowSets;
   showFilters: boolean;
   showStats: boolean;
@@ -115,7 +115,7 @@ export interface DiscoveryViewState {
 
 export interface ConfigForWorkflow {
   bannerTitle: string;
-  objectCollection?: ObjectCollectionView<ObjectType>;
+  objectCollection?: ObjectCollectionView<ObjectType, string>;
   noDataLinks: {
     external?: boolean;
     href: string;
@@ -123,7 +123,7 @@ export interface ConfigForWorkflow {
   }[];
   noDataMessage: string;
   // For NextGen migration:
-  getSelectableIds: () => number[] | undefined;
+  getSelectableIds: () => string[] | undefined;
   getFilteredSampleCount: () => number | undefined;
   getRows: () => any[];
   fetchWorkflowRuns: (conditions: Conditions) => void;

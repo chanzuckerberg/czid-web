@@ -95,7 +95,7 @@ export async function checkAllObjectsUploadedByCurrentUser({
   entityIds,
   workflowEntity,
 }: {
-  entityIds?: Set<number>;
+  entityIds?: Set<string>;
   workflowEntity?: string;
 }): Promise<boolean> {
   if (!entityIds) {
@@ -110,7 +110,7 @@ export async function checkUserIsCollaboratorOnAllSamples({
   entityIds,
   workflowEntity,
 }: {
-  entityIds?: Set<number>;
+  entityIds?: Set<string>;
   workflowEntity?: string;
 }): Promise<boolean> {
   if (!entityIds) {
