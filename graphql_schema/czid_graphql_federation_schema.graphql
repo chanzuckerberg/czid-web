@@ -600,6 +600,9 @@ type File {
   fileFormat: String!
   compressionType: Int
   size: Int
+  uploadError: String
+  createdAt: DateTime!
+  updatedAt: DateTime
   downloadLink(expiration: Int! = 3600): SignedURL
   contents: String
 }
@@ -1198,6 +1201,11 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+input LimitOffsetClause {
+  limit: Int
+  offset: Int
+}
+
 type Metadatum implements EntityInterface & Node {
   """The Globally Unique ID of this object"""
   _id: GlobalID!
@@ -1560,6 +1568,21 @@ type MultipartUploadResponse {
 }
 
 type Mutation {
+  createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
+  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  createWorkflow(input: WorkflowCreateInput!): Workflow!
+  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
+  deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
+  createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
+  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
+  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
+  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
+  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
+  createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
+  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
+  runWorkflowVersion(input: RunWorkflowVersionInput!): WorkflowRun!
+  runWorkflowRun(workflowRunId: ID!): WorkflowRun!
   createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
   uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
   uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
@@ -1600,21 +1623,6 @@ type Mutation {
   deleteIndexFile(where: IndexFileWhereClauseMutations!): [IndexFile!]!
   createBulkDownload(input: BulkDownloadCreateInput!): BulkDownload!
   deleteBulkDownload(where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
-  createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
-  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
-  deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
-  createWorkflow(input: WorkflowCreateInput!): Workflow!
-  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
-  deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
-  createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
-  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
-  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
-  createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
-  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
-  runWorkflowVersion(input: RunWorkflowVersionInput!): WorkflowRun!
-  runWorkflowRun(workflowRunId: ID!): WorkflowRun!
   createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
   CreateBulkDownload(input: mutationInput_CreateBulkDownload_input_Input): JSON
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
@@ -1667,6 +1675,7 @@ type mutation_KickoffWGSWorkflow_items_parsed_cached_results_quality_metrics {
 input mutationInput_CreateBulkDownload_input_Input {
   downloadType: String
   workflowRunIds: [Int]
+  workflowRunIdsStrings: [String]
   workflow: String
   downloadFormat: String
   authenticityToken: String
@@ -1842,20 +1851,30 @@ type Query {
     """The IDs of the objects."""
     ids: [GlobalID!]!
   ): [Node!]!
+  workflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRun!]!
+  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Workflow!]!
+  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunStep!]!
+  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunEntityInput!]!
+  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowVersion!]!
+  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
+  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
+  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
+  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
+  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
   files(where: FileWhereClause = null): [File!]!
-  samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = []): [Sample!]!
-  sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = []): [SequencingRead!]!
-  genomicRanges(where: GenomicRangeWhereClause = null, orderBy: [GenomicRangeOrderByClause!] = []): [GenomicRange!]!
-  referenceGenomes(where: ReferenceGenomeWhereClause = null, orderBy: [ReferenceGenomeOrderByClause!] = []): [ReferenceGenome!]!
-  accessions(where: AccessionWhereClause = null, orderBy: [AccessionOrderByClause!] = []): [Accession!]!
-  hostOrganisms(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = []): [HostOrganism!]!
-  metadatas(where: MetadatumWhereClause = null, orderBy: [MetadatumOrderByClause!] = []): [Metadatum!]!
-  consensusGenomes(where: ConsensusGenomeWhereClause = null, orderBy: [ConsensusGenomeOrderByClause!] = []): [ConsensusGenome!]!
-  metricsConsensusGenomes(where: MetricConsensusGenomeWhereClause = null, orderBy: [MetricConsensusGenomeOrderByClause!] = []): [MetricConsensusGenome!]!
-  taxa(where: TaxonWhereClause = null, orderBy: [TaxonOrderByClause!] = []): [Taxon!]!
-  upstreamDatabases(where: UpstreamDatabaseWhereClause = null, orderBy: [UpstreamDatabaseOrderByClause!] = []): [UpstreamDatabase!]!
-  indexFiles(where: IndexFileWhereClause = null, orderBy: [IndexFileOrderByClause!] = []): [IndexFile!]!
-  bulkDownloads(where: BulkDownloadWhereClause = null, orderBy: [BulkDownloadOrderByClause!] = []): [BulkDownload!]!
+  samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Sample!]!
+  sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [SequencingRead!]!
+  genomicRanges(where: GenomicRangeWhereClause = null, orderBy: [GenomicRangeOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [GenomicRange!]!
+  referenceGenomes(where: ReferenceGenomeWhereClause = null, orderBy: [ReferenceGenomeOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [ReferenceGenome!]!
+  accessions(where: AccessionWhereClause = null, orderBy: [AccessionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Accession!]!
+  hostOrganisms(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [HostOrganism!]!
+  metadatas(where: MetadatumWhereClause = null, orderBy: [MetadatumOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Metadatum!]!
+  consensusGenomes(where: ConsensusGenomeWhereClause = null, orderBy: [ConsensusGenomeOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [ConsensusGenome!]!
+  metricsConsensusGenomes(where: MetricConsensusGenomeWhereClause = null, orderBy: [MetricConsensusGenomeOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [MetricConsensusGenome!]!
+  taxa(where: TaxonWhereClause = null, orderBy: [TaxonOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Taxon!]!
+  upstreamDatabases(where: UpstreamDatabaseWhereClause = null, orderBy: [UpstreamDatabaseOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [UpstreamDatabase!]!
+  indexFiles(where: IndexFileWhereClause = null, orderBy: [IndexFileOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [IndexFile!]!
+  bulkDownloads(where: BulkDownloadWhereClause = null, orderBy: [BulkDownloadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [BulkDownload!]!
   samplesAggregate(where: SampleWhereClause = null): SampleAggregate!
   sequencingReadsAggregate(where: SequencingReadWhereClause = null): SequencingReadAggregate!
   genomicRangesAggregate(where: GenomicRangeWhereClause = null): GenomicRangeAggregate!
@@ -1869,16 +1888,6 @@ type Query {
   upstreamDatabasesAggregate(where: UpstreamDatabaseWhereClause = null): UpstreamDatabaseAggregate!
   indexFilesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate!
   bulkDownloadsAggregate(where: BulkDownloadWhereClause = null): BulkDownloadAggregate!
-  tempWorkflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = []): [WorkflowRun!]!
-  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = []): [Workflow!]!
-  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = []): [WorkflowRunStep!]!
-  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = []): [WorkflowRunEntityInput!]!
-  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = []): [WorkflowVersion!]!
-  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
-  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
-  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
-  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
-  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
   appConfig(id: ID!): AppConfig
   pathogenList(version: String): PathogenList!
   project(id: Int!): Project!
@@ -1906,7 +1915,6 @@ type Query {
   TaxonDist(backgroundId: String, taxonId: String): TaxonDist
   UserBlastAnnotations(sampleId: String, workflowVersionId: String): [query_UserBlastAnnotations_items]
   ValidateUserCanDeleteObjects(input: queryInput_ValidateUserCanDeleteObjects_input_Input): ValidateUserCanDeleteObjects
-  workflowRuns(input: queryInput_workflowRuns_input_Input): [query_workflowRuns_items]
   fedWorkflowRuns(input: queryInput_fedWorkflowRuns_input_Input): [query_fedWorkflowRuns_items]
   fedWorkflowRunsAggregate(input: queryInput_fedWorkflowRunsAggregate_input_Input): [query_fedWorkflowRunsAggregate_items]
   ZipLink(workflowRunId: String): ZipLink
@@ -2051,12 +2059,22 @@ type query_fedConsensusGenomes_items {
   producingRunId: String
   taxon: query_fedConsensusGenomes_items_taxon
   referenceGenome: query_fedConsensusGenomes_items_referenceGenome
+  accession: query_fedConsensusGenomes_items_accession
   metrics: query_fedConsensusGenomes_items_metrics
   sequencingRead: query_fedConsensusGenomes_items_sequencingRead
 }
 
+type query_fedConsensusGenomes_items_accession {
+  accessionId: String
+  accessionName: String
+}
+
 type query_fedConsensusGenomes_items_metrics {
   coverageDepth: Float
+  coverageBreadth: Float
+  coverageTotalLength: Float
+  coverageViz: [[Float]]
+  coverageBinSize: Float
   totalReads: Int
   gcPercent: Float
   refSnps: Int
@@ -2066,6 +2084,7 @@ type query_fedConsensusGenomes_items_metrics {
   nMissing: Int
   nAmbiguous: Int
   referenceGenomeLength: Float
+  mappedReads: Int
 }
 
 type query_fedConsensusGenomes_items_referenceGenome {
@@ -2125,6 +2144,8 @@ type query_fedConsensusGenomes_items_sequencingRead_taxon {
 
 type query_fedConsensusGenomes_items_taxon {
   name: String!
+  id: String
+  commonName: String
 }
 
 type query_fedSamples_items {
@@ -2571,40 +2592,10 @@ type query_UserBlastAnnotations_items {
   annotation: JSON
 }
 
-type query_workflowRuns_items {
-  id: String!
-  ownerUserId: Int!
-  startedAt: String
-  status: String
-  workflowVersion: query_workflowRuns_items_workflowVersion
-  entityInputs: query_workflowRuns_items_entityInputs!
-}
-
-type query_workflowRuns_items_entityInputs {
-  edges: [query_workflowRuns_items_entityInputs_edges_items]!
-}
-
-type query_workflowRuns_items_entityInputs_edges_items {
-  node: query_workflowRuns_items_entityInputs_edges_items_node!
-}
-
-type query_workflowRuns_items_entityInputs_edges_items_node {
-  inputEntityId: String
-  entityType: String
-}
-
-type query_workflowRuns_items_workflowVersion {
-  version: String
-  workflow: query_workflowRuns_items_workflowVersion_workflow
-}
-
-type query_workflowRuns_items_workflowVersion_workflow {
-  name: String
-}
-
 input queryInput_BulkDownloadCGOverview_input_Input {
   downloadType: String!
-  workflowRunIds: [Int]!
+  workflowRunIds: [Int]
+  workflowRunIdsStrings: [String]
   workflow: String!
   includeMetadata: Boolean!
   authenticityToken: String!
@@ -2667,6 +2658,7 @@ input queryInput_fedConsensusGenomes_input_where_Input {
 
 input queryInput_fedConsensusGenomes_input_where_producingRunId_Input {
   _in: [String]
+  _eq: String
 }
 
 input queryInput_fedSamples_input_Input {
@@ -2991,92 +2983,6 @@ input queryInput_ValidateUserCanDeleteObjects_input_Input {
   selectedIds: [Int]
   workflow: String
   authenticityToken: String
-}
-
-input queryInput_workflowRuns_input_entityInputsInput_Input {
-  where: queryInput_workflowRuns_input_entityInputsInput_where_Input
-}
-
-input queryInput_workflowRuns_input_entityInputsInput_where_fieldName_Input {
-  _eq: String
-}
-
-input queryInput_workflowRuns_input_entityInputsInput_where_Input {
-  fieldName: queryInput_workflowRuns_input_entityInputsInput_where_fieldName_Input
-}
-
-input queryInput_workflowRuns_input_Input {
-  todoRemove: queryInput_workflowRuns_input_todoRemove_Input
-  orderBy: queryInput_workflowRuns_input_orderBy_Input
-  where: queryInput_workflowRuns_input_where_Input
-  entityInputsInput: queryInput_workflowRuns_input_entityInputsInput_Input
-}
-
-input queryInput_workflowRuns_input_orderBy_Input {
-  startedAt: String
-  workflowVersion: queryInput_workflowRuns_input_orderBy_workflowVersion_Input
-}
-
-input queryInput_workflowRuns_input_orderBy_workflowVersion_Input {
-  version: String
-  workflow: queryInput_workflowRuns_input_orderBy_workflowVersion_workflow_Input
-}
-
-input queryInput_workflowRuns_input_orderBy_workflowVersion_workflow_Input {
-  name: String
-}
-
-input queryInput_workflowRuns_input_todoRemove_Input {
-  domain: String
-  projectId: String
-  search: String
-  host: [Int]
-  locationV2: [String]
-  taxon: [Int]
-  taxonLevels: [String]
-  time: [String]
-  tissue: [String]
-  visibility: String
-  workflow: String
-  orderBy: String
-  orderDir: String
-  authenticityToken: String
-}
-
-input queryInput_workflowRuns_input_where_collectionId_Input {
-  _in: [Int]
-}
-
-input queryInput_workflowRuns_input_where_id_Input {
-  _in: [String]
-}
-
-input queryInput_workflowRuns_input_where_Input {
-  id: queryInput_workflowRuns_input_where_id_Input
-  ownerUserId: queryInput_workflowRuns_input_where_ownerUserId_Input
-  startedAt: queryInput_workflowRuns_input_where_startedAt_Input
-  collectionId: queryInput_workflowRuns_input_where_collectionId_Input
-  workflowVersion: queryInput_workflowRuns_input_where_workflowVersion_Input
-}
-
-input queryInput_workflowRuns_input_where_ownerUserId_Input {
-  _eq: Int
-}
-
-input queryInput_workflowRuns_input_where_startedAt_Input {
-  _gte: String
-}
-
-input queryInput_workflowRuns_input_where_workflowVersion_Input {
-  workflow: queryInput_workflowRuns_input_where_workflowVersion_workflow_Input
-}
-
-input queryInput_workflowRuns_input_where_workflowVersion_workflow_Input {
-  name: queryInput_workflowRuns_input_where_workflowVersion_workflow_name_Input
-}
-
-input queryInput_workflowRuns_input_where_workflowVersion_workflow_name_Input {
-  _in: [String]
 }
 
 type ReferenceGenome implements EntityInterface & Node {
