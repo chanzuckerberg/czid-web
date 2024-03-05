@@ -18,3 +18,9 @@ DeleteUnclaimedUserAccounts:
   class: DeleteUnclaimedUserAccounts
   queue: delete_unclaimed_user_accounts
   description: "This job queries the Auth0 client for unclaimed user accounts that are 21+ days old and deletes them."
+
+DeleteOldBulkDownloads:
+  cron: "30 23 * * *" # 11:30pm PT daily (spaced out from other hourly/daily jobs)
+  class: DeleteOldBulkDownloads
+  queue: delete_old_bulk_downloads
+  description: "This job deletes all BulkDownloads (and associated S3 files) that are 7+ days old."
