@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b025aa3f1a350afdafe4fe1fb504799f>>
+ * @generated SignedSource<<12fd5fe542950c81b5eb26abfcca8fac>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,9 +14,9 @@ export type ConsensusGenomeReportQuery$variables = {
   workflowRunId?: string | null | undefined;
 };
 export type ConsensusGenomeReportQuery$data = {
-  readonly ConsensusGenomeWorkflowResults: {
+  readonly fedConsensusGenomes: ReadonlyArray<{
     readonly " $fragmentSpreads": FragmentRefs<"ConsensusGenomeCoverageViewFragment" | "ConsensusGenomeHistogramFragment" | "ConsensusGenomeMetricsTableFragment">;
-  } | null | undefined;
+  } | null | undefined> | null | undefined;
 };
 export type ConsensusGenomeReportQuery = {
   response: ConsensusGenomeReportQuery$data;
@@ -33,9 +33,27 @@ var v0 = [
 ],
 v1 = [
   {
-    "kind": "Variable",
-    "name": "workflowRunId",
-    "variableName": "workflowRunId"
+    "fields": [
+      {
+        "fields": [
+          {
+            "fields": [
+              {
+                "kind": "Variable",
+                "name": "_eq",
+                "variableName": "workflowRunId"
+              }
+            ],
+            "kind": "ObjectValue",
+            "name": "producingRunId"
+          }
+        ],
+        "kind": "ObjectValue",
+        "name": "where"
+      }
+    ],
+    "kind": "ObjectValue",
+    "name": "input"
   }
 ];
 return {
@@ -48,10 +66,10 @@ return {
       {
         "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "ConsensusGenomeWorkflowResults",
+        "concreteType": "query_fedConsensusGenomes_items",
         "kind": "LinkedField",
-        "name": "ConsensusGenomeWorkflowResults",
-        "plural": false,
+        "name": "fedConsensusGenomes",
+        "plural": true,
         "selections": [
           {
             "args": null,
@@ -84,56 +102,31 @@ return {
       {
         "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "ConsensusGenomeWorkflowResults",
+        "concreteType": "query_fedConsensusGenomes_items",
         "kind": "LinkedField",
-        "name": "ConsensusGenomeWorkflowResults",
-        "plural": false,
+        "name": "fedConsensusGenomes",
+        "plural": true,
         "selections": [
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_ConsensusGenomeWorkflowResults_reference_genome",
+            "concreteType": "query_fedConsensusGenomes_items_taxon",
             "kind": "LinkedField",
-            "name": "reference_genome",
+            "name": "taxon",
             "plural": false,
             "selections": [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "query_ConsensusGenomeWorkflowResults_reference_genome_taxon",
-                "kind": "LinkedField",
-                "name": "taxon",
-                "plural": false,
-                "selections": [
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "name",
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "id",
-                    "storageKey": null
-                  }
-                ],
+                "kind": "ScalarField",
+                "name": "commonName",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "accession_id",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "accession_name",
+                "name": "id",
                 "storageKey": null
               }
             ],
@@ -142,111 +135,125 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_ConsensusGenomeWorkflowResults_metric_consensus_genome",
+            "concreteType": "query_fedConsensusGenomes_items_metrics",
             "kind": "LinkedField",
-            "name": "metric_consensus_genome",
+            "name": "metrics",
             "plural": false,
             "selections": [
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "mapped_reads",
+                "name": "mappedReads",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "n_actg",
+                "name": "nActg",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "n_ambiguous",
+                "name": "nAmbiguous",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "n_missing",
+                "name": "nMissing",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "ref_snps",
+                "name": "refSnps",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "percent_identity",
+                "name": "percentIdentity",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "gc_percent",
+                "name": "gcPercent",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "percent_genome_called",
+                "name": "percentGenomeCalled",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "query_ConsensusGenomeWorkflowResults_metric_consensus_genome_coverage_viz",
-                "kind": "LinkedField",
-                "name": "coverage_viz",
-                "plural": false,
-                "selections": [
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "coverage_breadth",
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "coverage_depth",
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "total_length",
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "coverage",
-                    "storageKey": null
-                  },
-                  {
-                    "alias": null,
-                    "args": null,
-                    "kind": "ScalarField",
-                    "name": "coverage_bin_size",
-                    "storageKey": null
-                  }
-                ],
+                "kind": "ScalarField",
+                "name": "coverageBreadth",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "coverageDepth",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "coverageTotalLength",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "coverageViz",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "coverageBinSize",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "query_fedConsensusGenomes_items_accession",
+            "kind": "LinkedField",
+            "name": "accession",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "accessionId",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "accessionName",
                 "storageKey": null
               }
             ],
@@ -258,16 +265,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "93024901bbd1b0281334c34bb27549f9",
+    "cacheID": "5ba5c08386e5b2129be4e2c30aa87624",
     "id": null,
     "metadata": {},
     "name": "ConsensusGenomeReportQuery",
     "operationKind": "query",
-    "text": "query ConsensusGenomeReportQuery(\n  $workflowRunId: String\n) {\n  ConsensusGenomeWorkflowResults(workflowRunId: $workflowRunId) {\n    ...ConsensusGenomeMetricsTableFragment\n    ...ConsensusGenomeCoverageViewFragment\n    ...ConsensusGenomeHistogramFragment\n  }\n}\n\nfragment ConsensusGenomeCoverageViewFragment on ConsensusGenomeWorkflowResults {\n  reference_genome {\n    accession_id\n    taxon {\n      name\n      id\n    }\n  }\n  metric_consensus_genome {\n    coverage_viz {\n      coverage_breadth\n      coverage_depth\n      total_length\n    }\n  }\n}\n\nfragment ConsensusGenomeHistogramFragment on ConsensusGenomeWorkflowResults {\n  reference_genome {\n    accession_id\n    accession_name\n    taxon {\n      name\n    }\n  }\n  metric_consensus_genome {\n    coverage_viz {\n      coverage\n      coverage_bin_size\n      total_length\n    }\n  }\n}\n\nfragment ConsensusGenomeMetricsTableFragment on ConsensusGenomeWorkflowResults {\n  reference_genome {\n    taxon {\n      name\n    }\n  }\n  metric_consensus_genome {\n    mapped_reads\n    n_actg\n    n_ambiguous\n    n_missing\n    ref_snps\n    percent_identity\n    gc_percent\n    percent_genome_called\n  }\n}\n"
+    "text": "query ConsensusGenomeReportQuery(\n  $workflowRunId: String\n) {\n  fedConsensusGenomes(input: {where: {producingRunId: {_eq: $workflowRunId}}}) {\n    ...ConsensusGenomeMetricsTableFragment\n    ...ConsensusGenomeCoverageViewFragment\n    ...ConsensusGenomeHistogramFragment\n  }\n}\n\nfragment ConsensusGenomeCoverageViewFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n  }\n  taxon {\n    commonName\n    id\n  }\n  metrics {\n    coverageBreadth\n    coverageDepth\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeHistogramFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n    accessionName\n  }\n  taxon {\n    commonName\n  }\n  metrics {\n    coverageViz\n    coverageBinSize\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeMetricsTableFragment on query_fedConsensusGenomes_items {\n  taxon {\n    commonName\n  }\n  metrics {\n    mappedReads\n    nActg\n    nAmbiguous\n    nMissing\n    refSnps\n    percentIdentity\n    gcPercent\n    percentGenomeCalled\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "16337102fc8050e88f45cc70d98d2562";
+(node as any).hash = "65f1531af9d86e07e204588ed0bb86ca";
 
 export default node;

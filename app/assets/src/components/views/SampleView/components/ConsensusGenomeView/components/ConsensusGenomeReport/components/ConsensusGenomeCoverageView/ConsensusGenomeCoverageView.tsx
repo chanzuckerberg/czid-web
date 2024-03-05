@@ -2,6 +2,7 @@ import { Button, Icon } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import React from "react";
 import { graphql, useFragment } from "react-relay";
+import { FragmentRefs } from "relay-runtime";
 import BasicPopup from "~/components/BasicPopup";
 import { HelpIcon } from "~/components/ui/containers";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -12,25 +13,23 @@ import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils
 import cs from "~/components/views/SampleView/components/ConsensusGenomeView/consensus_genome_view.scss";
 import { WorkflowRun } from "~/interface/sample";
 import { SampleId } from "~/interface/shared";
-import { ConsensusGenomeReportQuery$data } from "../../__generated__/ConsensusGenomeReportQuery.graphql";
 import { ConsensusGenomeCoverageViewFragment$key } from "./__generated__/ConsensusGenomeCoverageViewFragment.graphql";
 import { ConsensusGenomeHistogram } from "./components/ConsensusGenomeHistogram";
 
 export const ConsensusGenomeCoverageViewFragment = graphql`
-  fragment ConsensusGenomeCoverageViewFragment on ConsensusGenomeWorkflowResults {
-    reference_genome {
-      accession_id
-      taxon {
-        name
-        id
-      }
+  fragment ConsensusGenomeCoverageViewFragment on query_fedConsensusGenomes_items
+  @relay(plural: true) {
+    accession {
+      accessionId
     }
-    metric_consensus_genome {
-      coverage_viz {
-        coverage_breadth
-        coverage_depth
-        total_length
-      }
+    taxon {
+      commonName
+      id
+    }
+    metrics {
+      coverageBreadth
+      coverageDepth
+      coverageTotalLength
     }
   }
 `;
@@ -38,9 +37,13 @@ interface ConsensusGenomeCoverageViewProps {
   helpLinkUrl: string;
   sampleId: SampleId;
   workflowRun: WorkflowRun;
-  workflowRunResultsData: NonNullable<
-    ConsensusGenomeReportQuery$data["ConsensusGenomeWorkflowResults"]
-  >;
+  workflowRunResultsData: ReadonlyArray<{
+    readonly " $fragmentSpreads": FragmentRefs<
+      | "ConsensusGenomeCoverageViewFragment"
+      | "ConsensusGenomeHistogramFragment"
+      | "ConsensusGenomeMetricsTableFragment"
+    >;
+  }>;
 }
 
 export const ConsensusGenomeCoverageView = ({
@@ -53,17 +56,20 @@ export const ConsensusGenomeCoverageView = ({
     ConsensusGenomeCoverageViewFragment,
     workflowRunResultsData,
   );
+
+  if (!data) {
+    return null;
+  }
+
+  const accessionId = data[0]?.accession?.accessionId;
+  const taxon = data[0]?.taxon;
+
+  const { commonName: taxonName, id: taxonId } = taxon || {};
   const {
-    reference_genome: referenceGenome,
-    metric_consensus_genome: metricConsensusGenome,
-  } = data || {};
-  const { accession_id: accessionId, taxon } = referenceGenome || {};
-  const { name: taxonName, id: taxonId } = taxon || {};
-  const {
-    coverage_breadth: coverageBreadthRaw,
-    coverage_depth: coverageDepthRaw,
-    total_length: totalLength,
-  } = metricConsensusGenome?.coverage_viz || {};
+    coverageBreadth: coverageBreadthRaw,
+    coverageDepth: coverageDepthRaw,
+    coverageTotalLength: totalLength,
+  } = data[0]?.metrics || {};
 
   if (!coverageBreadthRaw || !coverageDepthRaw || !totalLength) {
     return null;

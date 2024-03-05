@@ -68,7 +68,7 @@ const ReactComponentWithGlobalContext = ({
     globalContextReducer,
     initialGlobalContextState,
   );
-  const shouldReadFromNextGen = userContext?.allowedFeatures.includes(
+  const shouldReadFromNextGen = userContext?.allowedFeatures?.includes(
     SHOULD_READ_FROM_NEXTGEN,
   );
   return (

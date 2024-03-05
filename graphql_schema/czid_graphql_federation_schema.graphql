@@ -2652,8 +2652,13 @@ input queryInput_fedConsensusGenomes_input_todoRemove_Input {
   orderDir: String
 }
 
+input queryInput_fedConsensusGenomes_input_where_id_Input {
+  _eq: String
+}
+
 input queryInput_fedConsensusGenomes_input_where_Input {
   producingRunId: queryInput_fedConsensusGenomes_input_where_producingRunId_Input
+  id: queryInput_fedConsensusGenomes_input_where_id_Input
 }
 
 input queryInput_fedConsensusGenomes_input_where_producingRunId_Input {
@@ -3110,11 +3115,48 @@ input RunWorkflowVersionInput {
 }
 
 type Sample implements EntityInterface & Node {
+  alignmentConfigName: String
+  basespaceAccessToken: String
+  createdAt: DateTime!
+  dagVars: String
+  defaultBackgroundId: Int
+  defaultPipelineRunId: Int
+  details: SampleDetails!
+  doNotProcess: Boolean!
+  editable: Boolean
+  hostGenome: HostGenome
+  hostGenomeId: Int
+  id: ID!
+  initialWorkflow: String!
+  maxInputFragments: Int
+  name: String!
+  pipelineBranch: String
+  pipelineCommit: String
+  pipelineExecutionStrategy: String
+  pipelineRuns: [PipelineRun!]
+  privateUntil: ISO8601DateTime
+  project: Project
+  projectId: Int
+  public: Int!
+  s3Bowtie2IndexPath: String
+  s3PreloadResultPath: String
+  s3StarIndexPath: String
+  sampleDeletable: Boolean
+  sampleNotes: String
+  status: String
+  subsample: Int
+  updatedAt: DateTime
+  uploadError: String
+  uploadedFromBasespace: Int
+  useTaxonWhitelist: Boolean!
+  user: User
+  userId: Int
+  webCommit: String
+  workflowRuns: [WorkflowRun!]
+
   """The Globally Unique ID of this object"""
   _id: GlobalID!
-  id: ID!
   railsSampleId: Int
-  name: String!
   hostOrganism(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = []): HostOrganism
   sequencingReads(
     where: SequencingReadWhereClause = null
@@ -3153,42 +3195,6 @@ type Sample implements EntityInterface & Node {
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
-  createdAt: ISO8601DateTime
-  updatedAt: ISO8601DateTime
-  alignmentConfigName: String
-  basespaceAccessToken: String
-  dagVars: String
-  defaultBackgroundId: Int
-  defaultPipelineRunId: Int
-  details: SampleDetails!
-  doNotProcess: Boolean!
-  editable: Boolean
-  hostGenome: HostGenome
-  hostGenomeId: Int
-  initialWorkflow: String!
-  maxInputFragments: Int
-  pipelineBranch: String
-  pipelineCommit: String
-  pipelineExecutionStrategy: String
-  pipelineRuns: [PipelineRun!]
-  privateUntil: ISO8601DateTime
-  project: Project
-  projectId: Int
-  public: Int!
-  s3Bowtie2IndexPath: String
-  s3PreloadResultPath: String
-  s3StarIndexPath: String
-  sampleDeletable: Boolean
-  sampleNotes: String
-  status: String
-  subsample: Int
-  uploadError: String
-  uploadedFromBasespace: Int
-  useTaxonWhitelist: Boolean!
-  user: User
-  userId: Int
-  webCommit: String
-  workflowRuns: [WorkflowRun!]
 }
 
 type SampleAggregate {

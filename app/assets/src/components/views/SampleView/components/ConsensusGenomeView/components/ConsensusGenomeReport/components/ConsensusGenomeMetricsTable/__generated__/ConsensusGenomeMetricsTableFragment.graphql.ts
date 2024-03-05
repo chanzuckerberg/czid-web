@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9ed965951daf5094d119fb3bf0ed8dd0>>
+ * @generated SignedSource<<aee13ea2427d6e42a12747419d3eba46>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,59 +10,48 @@
 
 import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type ConsensusGenomeMetricsTableFragment$data = {
-  readonly metric_consensus_genome: {
-    readonly gc_percent: number | null | undefined;
-    readonly mapped_reads: number | null | undefined;
-    readonly n_actg: number | null | undefined;
-    readonly n_ambiguous: number | null | undefined;
-    readonly n_missing: number | null | undefined;
-    readonly percent_genome_called: number | null | undefined;
-    readonly percent_identity: number | null | undefined;
-    readonly ref_snps: number | null | undefined;
+export type ConsensusGenomeMetricsTableFragment$data = ReadonlyArray<{
+  readonly metrics: {
+    readonly gcPercent: number | null | undefined;
+    readonly mappedReads: number | null | undefined;
+    readonly nActg: number | null | undefined;
+    readonly nAmbiguous: number | null | undefined;
+    readonly nMissing: number | null | undefined;
+    readonly percentGenomeCalled: number | null | undefined;
+    readonly percentIdentity: number | null | undefined;
+    readonly refSnps: number | null | undefined;
   } | null | undefined;
-  readonly reference_genome: {
-    readonly taxon: {
-      readonly name: string | null | undefined;
-    } | null | undefined;
+  readonly taxon: {
+    readonly commonName: string | null | undefined;
   } | null | undefined;
   readonly " $fragmentType": "ConsensusGenomeMetricsTableFragment";
-};
-export type ConsensusGenomeMetricsTableFragment$key = {
+}>;
+export type ConsensusGenomeMetricsTableFragment$key = ReadonlyArray<{
   readonly " $data"?: ConsensusGenomeMetricsTableFragment$data;
   readonly " $fragmentSpreads": FragmentRefs<"ConsensusGenomeMetricsTableFragment">;
-};
+}>;
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
-  "metadata": null,
+  "metadata": {
+    "plural": true
+  },
   "name": "ConsensusGenomeMetricsTableFragment",
   "selections": [
     {
       "alias": null,
       "args": null,
-      "concreteType": "query_ConsensusGenomeWorkflowResults_reference_genome",
+      "concreteType": "query_fedConsensusGenomes_items_taxon",
       "kind": "LinkedField",
-      "name": "reference_genome",
+      "name": "taxon",
       "plural": false,
       "selections": [
         {
           "alias": null,
           "args": null,
-          "concreteType": "query_ConsensusGenomeWorkflowResults_reference_genome_taxon",
-          "kind": "LinkedField",
-          "name": "taxon",
-          "plural": false,
-          "selections": [
-            {
-              "alias": null,
-              "args": null,
-              "kind": "ScalarField",
-              "name": "name",
-              "storageKey": null
-            }
-          ],
+          "kind": "ScalarField",
+          "name": "commonName",
           "storageKey": null
         }
       ],
@@ -71,75 +60,75 @@ const node: ReaderFragment = {
     {
       "alias": null,
       "args": null,
-      "concreteType": "query_ConsensusGenomeWorkflowResults_metric_consensus_genome",
+      "concreteType": "query_fedConsensusGenomes_items_metrics",
       "kind": "LinkedField",
-      "name": "metric_consensus_genome",
+      "name": "metrics",
       "plural": false,
       "selections": [
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "mapped_reads",
+          "name": "mappedReads",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "n_actg",
+          "name": "nActg",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "n_ambiguous",
+          "name": "nAmbiguous",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "n_missing",
+          "name": "nMissing",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "ref_snps",
+          "name": "refSnps",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "percent_identity",
+          "name": "percentIdentity",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "gc_percent",
+          "name": "gcPercent",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "percent_genome_called",
+          "name": "percentGenomeCalled",
           "storageKey": null
         }
       ],
       "storageKey": null
     }
   ],
-  "type": "ConsensusGenomeWorkflowResults",
+  "type": "query_fedConsensusGenomes_items",
   "abstractKey": null
 };
 
-(node as any).hash = "996fc5f7f1c09b262bbebefc5bb8a853";
+(node as any).hash = "2e48ea98ae4732eab410b94dfe415d4e";
 
 export default node;

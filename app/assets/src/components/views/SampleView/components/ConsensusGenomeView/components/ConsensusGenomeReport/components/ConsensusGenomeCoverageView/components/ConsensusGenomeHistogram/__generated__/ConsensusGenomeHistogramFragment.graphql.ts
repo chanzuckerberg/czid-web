@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<da0d22a4eb515913553778bd4dc6a606>>
+ * @generated SignedSource<<9c958948f451c57ad978a7c8166b2a4b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,72 +10,54 @@
 
 import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type ConsensusGenomeHistogramFragment$data = {
-  readonly metric_consensus_genome: {
-    readonly coverage_viz: {
-      readonly coverage: ReadonlyArray<ReadonlyArray<number | null | undefined> | null | undefined>;
-      readonly coverage_bin_size: number;
-      readonly total_length: number;
-    } | null | undefined;
+export type ConsensusGenomeHistogramFragment$data = ReadonlyArray<{
+  readonly accession: {
+    readonly accessionId: string | null | undefined;
+    readonly accessionName: string | null | undefined;
   } | null | undefined;
-  readonly reference_genome: {
-    readonly accession_id: string | null | undefined;
-    readonly accession_name: string | null | undefined;
-    readonly taxon: {
-      readonly name: string | null | undefined;
-    } | null | undefined;
+  readonly metrics: {
+    readonly coverageBinSize: number;
+    readonly coverageTotalLength: number;
+    readonly coverageViz: ReadonlyArray<ReadonlyArray<number | null | undefined> | null | undefined>;
+  } | null | undefined;
+  readonly taxon: {
+    readonly commonName: string | null | undefined;
   } | null | undefined;
   readonly " $fragmentType": "ConsensusGenomeHistogramFragment";
-};
-export type ConsensusGenomeHistogramFragment$key = {
+}>;
+export type ConsensusGenomeHistogramFragment$key = ReadonlyArray<{
   readonly " $data"?: ConsensusGenomeHistogramFragment$data;
   readonly " $fragmentSpreads": FragmentRefs<"ConsensusGenomeHistogramFragment">;
-};
+}>;
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
-  "metadata": null,
+  "metadata": {
+    "plural": true
+  },
   "name": "ConsensusGenomeHistogramFragment",
   "selections": [
     {
       "alias": null,
       "args": null,
-      "concreteType": "query_ConsensusGenomeWorkflowResults_reference_genome",
+      "concreteType": "query_fedConsensusGenomes_items_accession",
       "kind": "LinkedField",
-      "name": "reference_genome",
+      "name": "accession",
       "plural": false,
       "selections": [
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "accession_id",
+          "name": "accessionId",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "accession_name",
-          "storageKey": null
-        },
-        {
-          "alias": null,
-          "args": null,
-          "concreteType": "query_ConsensusGenomeWorkflowResults_reference_genome_taxon",
-          "kind": "LinkedField",
-          "name": "taxon",
-          "plural": false,
-          "selections": [
-            {
-              "alias": null,
-              "args": null,
-              "kind": "ScalarField",
-              "name": "name",
-              "storageKey": null
-            }
-          ],
+          "name": "accessionName",
           "storageKey": null
         }
       ],
@@ -84,66 +66,73 @@ const node: ReaderFragment = {
     {
       "alias": null,
       "args": null,
-      "concreteType": "query_ConsensusGenomeWorkflowResults_metric_consensus_genome",
+      "concreteType": "query_fedConsensusGenomes_items_taxon",
       "kind": "LinkedField",
-      "name": "metric_consensus_genome",
+      "name": "taxon",
       "plural": false,
       "selections": [
         {
           "alias": null,
           "args": null,
-          "concreteType": "query_ConsensusGenomeWorkflowResults_metric_consensus_genome_coverage_viz",
-          "kind": "LinkedField",
-          "name": "coverage_viz",
-          "plural": false,
-          "selections": [
-            {
-              "kind": "RequiredField",
-              "field": {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "coverage",
-                "storageKey": null
-              },
-              "action": "LOG",
-              "path": "metric_consensus_genome.coverage_viz.coverage"
-            },
-            {
-              "kind": "RequiredField",
-              "field": {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "coverage_bin_size",
-                "storageKey": null
-              },
-              "action": "LOG",
-              "path": "metric_consensus_genome.coverage_viz.coverage_bin_size"
-            },
-            {
-              "kind": "RequiredField",
-              "field": {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "total_length",
-                "storageKey": null
-              },
-              "action": "LOG",
-              "path": "metric_consensus_genome.coverage_viz.total_length"
-            }
-          ],
+          "kind": "ScalarField",
+          "name": "commonName",
           "storageKey": null
+        }
+      ],
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "concreteType": "query_fedConsensusGenomes_items_metrics",
+      "kind": "LinkedField",
+      "name": "metrics",
+      "plural": false,
+      "selections": [
+        {
+          "kind": "RequiredField",
+          "field": {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "coverageViz",
+            "storageKey": null
+          },
+          "action": "LOG",
+          "path": "metrics.coverageViz"
+        },
+        {
+          "kind": "RequiredField",
+          "field": {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "coverageBinSize",
+            "storageKey": null
+          },
+          "action": "LOG",
+          "path": "metrics.coverageBinSize"
+        },
+        {
+          "kind": "RequiredField",
+          "field": {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "coverageTotalLength",
+            "storageKey": null
+          },
+          "action": "LOG",
+          "path": "metrics.coverageTotalLength"
         }
       ],
       "storageKey": null
     }
   ],
-  "type": "ConsensusGenomeWorkflowResults",
+  "type": "query_fedConsensusGenomes_items",
   "abstractKey": null
 };
 
-(node as any).hash = "0f9146cb058c705389f2552aefaf4c94";
+(node as any).hash = "d077513c249eebf4cc0d9a57da03cb8b";
 
 export default node;

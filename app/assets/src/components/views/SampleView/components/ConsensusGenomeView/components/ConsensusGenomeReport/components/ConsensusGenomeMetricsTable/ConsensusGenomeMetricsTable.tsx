@@ -7,23 +7,21 @@ import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import cs from "~/components/views/SampleView/components/ConsensusGenomeView/consensus_genome_view.scss";
 import { Table } from "~/components/visualizations/table";
 import { ConsensusGenomeMetricsTableFragment$key } from "./__generated__/ConsensusGenomeMetricsTableFragment.graphql";
-
 export const ConsensusGenomeMetricsTableFragment = graphql`
-  fragment ConsensusGenomeMetricsTableFragment on ConsensusGenomeWorkflowResults {
-    reference_genome {
-      taxon {
-        name
-      }
+  fragment ConsensusGenomeMetricsTableFragment on query_fedConsensusGenomes_items
+  @relay(plural: true) {
+    taxon {
+      commonName
     }
-    metric_consensus_genome {
-      mapped_reads
-      n_actg
-      n_ambiguous
-      n_missing
-      ref_snps
-      percent_identity
-      gc_percent
-      percent_genome_called
+    metrics {
+      mappedReads
+      nActg
+      nAmbiguous
+      nMissing
+      refSnps
+      percentIdentity
+      gcPercent
+      percentGenomeCalled
     }
   }
 `;
@@ -40,7 +38,6 @@ export const ConsensusGenomeMetricsTable = ({
     ConsensusGenomeMetricsTableFragment,
     workflowRunResultsData,
   );
-
   const computeQualityMetricColumns = useCallback(() => {
     const renderRowCell = (
       { cellData }: $TSFixMe,
@@ -116,14 +113,18 @@ export const ConsensusGenomeMetricsTable = ({
     return columns;
   }, []);
 
+  if (!data) {
+    return null;
+  }
+
   const metricsData = {
-    taxon_name: data?.reference_genome?.taxon?.name,
-    ...data?.metric_consensus_genome,
+    taxonName: data[0]?.taxon?.commonName,
+    ...data[0]?.metrics,
   };
 
   // This is a note to future developers.
   // If you are seeing a blank screen here, it is likely because we only save the metric_consensus_genome data 6 months on staging/local.
-  if (metricsData.taxon_name && !metricsData.percent_identity) {
+  if (metricsData.taxonName && !metricsData.percentIdentity) {
     console.warn(
       "You may be seeing a blank screen here because of the data retention policy on staging. Try looking at a more recently run workflow.",
     );

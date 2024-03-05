@@ -10,14 +10,15 @@ import { ConsensusGenomeMetricsTable } from "./components/ConsensusGenomeMetrics
 
 const ConsensusGenomeReportQuery = graphql`
   query ConsensusGenomeReportQuery($workflowRunId: String) {
-    ConsensusGenomeWorkflowResults(workflowRunId: $workflowRunId) {
+    fedConsensusGenomes(
+      input: { where: { producingRunId: { _eq: $workflowRunId } } }
+    ) {
       ...ConsensusGenomeMetricsTableFragment
       ...ConsensusGenomeCoverageViewFragment
       ...ConsensusGenomeHistogramFragment
     }
   }
 `;
-
 interface ConsensusGenomeReportProps {
   sample: Sample;
   workflowRun: WorkflowRun;
@@ -34,7 +35,16 @@ export const ConsensusGenomeReport = ({
     },
   );
 
-  const workflowRunResultsData = data.ConsensusGenomeWorkflowResults;
+  // check that there is a value in the first position of the array
+  // since we are calling for only one consensus genome we only expect one response
+  const allworkflowRunResultsData = data.fedConsensusGenomes;
+
+  if (!(allworkflowRunResultsData && allworkflowRunResultsData.length)) {
+    console.error("No Data to Display");
+    return null;
+  }
+  const workflowRunResultsData = allworkflowRunResultsData[0];
+
   const helpLinkUrl = getConsensusGenomeHelpLink(
     workflowRun.inputs?.accession_id,
   );
@@ -60,13 +70,13 @@ export const ConsensusGenomeReport = ({
         <div className={cs.resultsContainer}>
           <ConsensusGenomeMetricsTable
             helpLinkUrl={helpLinkUrl}
-            workflowRunResultsData={workflowRunResultsData}
+            workflowRunResultsData={workflowRunResultsData[0]}
           />
           <ConsensusGenomeCoverageView
             helpLinkUrl={helpLinkUrl}
             sampleId={sample.id}
             workflowRun={workflowRun}
-            workflowRunResultsData={workflowRunResultsData}
+            workflowRunResultsData={workflowRunResultsData[0]}
           />
         </div>
       )}
