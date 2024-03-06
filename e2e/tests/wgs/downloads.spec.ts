@@ -15,7 +15,6 @@ const NO_HOST_1 = "no_host_1";
 const NO_HOST_2 = "no_host_2";
 const WGS_SAMPLE_NAMES = [NO_HOST_1, NO_HOST_2];
 const CONSENSUS_GENOME = "Consensus Genome";
-const TIME_ZONE = "America/Los_Angeles";
 const DATE_FORMAT = "YYYY-MM-DD";
 const CONSENSUS_GENOME_OVERVIEW = "Consensus Genome Overview";
 
@@ -86,7 +85,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz(TIME_ZONE).format(DATE_FORMAT);
+    const today = moment().utc().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
 
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);
@@ -212,7 +211,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz(TIME_ZONE).format(DATE_FORMAT);
+    const today = moment().utc().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);
     expect(downloadCount).toEqual(moreThanOneSample.toString());
@@ -310,7 +309,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz(TIME_ZONE).format(DATE_FORMAT);
+    const today = moment().utc().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);
     expect(downloadCount).toEqual(oneOrMoreSamples.toString());
@@ -410,7 +409,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz(TIME_ZONE).format(DATE_FORMAT);
+    const today = moment().utc().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
 
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);
@@ -509,7 +508,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz(TIME_ZONE).format(DATE_FORMAT);
+    const today = moment().utc().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
 
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);
@@ -617,7 +616,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz(TIME_ZONE).format(DATE_FORMAT);
+    const today = moment().utc().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
 
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);

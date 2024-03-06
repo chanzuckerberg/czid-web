@@ -114,7 +114,7 @@ test.describe("Viral CG (WGS) - Sample report: Functional: P-2", () => {
 
     // #region 4. Click on Share button
     const samplesPage = new SamplesPage(page);
-    const sampleUrl = samplesPage.page.url();
+    const sample = (await samplesPage.getSamples(project.name, sampleName))[0];
 
     const clipboardText = await samplesPage.clickShareButton();
     // #endregion 4. Click on Share button
@@ -143,7 +143,7 @@ test.describe("Viral CG (WGS) - Sample report: Functional: P-2", () => {
     );
 
     const newUrl = samplesPage.page.url();
-    expect(newUrl).toEqual(sampleUrl);
+    expect(newUrl).toContain(`${process.env.BASEURL}/samples/${sample.id}?currentTab=Consensus%20Genome`);
     // #endregion 5. Open a new browser tab and Paste-Go the URL in clipboard
   });
 

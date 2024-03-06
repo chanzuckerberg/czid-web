@@ -71,7 +71,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz("America/Los_Angeles").format("YYYY-MM-DD");
+    const today = moment().utc().format("YYYY-MM-DD");
     expect(downloadDate).toEqual(today);
 
     // - Download file status as COMPLETE
@@ -169,8 +169,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
     // #endregion 13. Open storing folder, open the fasta files (notepad suggested) and observe data displayed
   });
 
-  // FAILS: The Consensus Genome Overview download has a bug with it and it doesn’t work
-  test.skip("SNo 17: Consensus Genome (Consensus Genome.fa) - Single file (Concatenated) (CURL)", async ({ page }) => {
+  test("SNo 17: Consensus Genome (Consensus Genome.fa) - Single file (Concatenated) (CURL)", async ({ page }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -221,7 +220,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().tz("America/Los_Angeles").format("YYYY-MM-DD");
+    const today = moment().utc().format("YYYY-MM-DD");
     expect(downloadDate).toEqual(today);
 
     // - Download file status as COMPLETE
