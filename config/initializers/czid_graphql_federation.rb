@@ -26,9 +26,12 @@ module CzidGraphqlFederation
 
   Client = GraphQL::Client.new(schema: Schema, execute: HttpAdapter)
 
-  def self.query_with_token(user_id, query, variables: {}, context: {})
-    token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true, service_identity: "rails")["token"]
-    context[:token] = token
+  def self.query_with_token(user_id, query, variables: {}, context: {}, token: nil)
+    context[:token] = if !token.nil?
+                        token
+                      else
+                        TokenCreationService.call(user_id: user_id, should_include_project_claims: true, service_identity: "rails")["token"]
+                      end
 
     Client.query(query, variables: variables, context: context)
   end
