@@ -20,16 +20,21 @@ import {
   Metadata,
   WorkflowRunRow,
 } from "../samples/SamplesView/SamplesView";
-import { DiscoveryViewFCSequencingReadsQuery as DiscoveryViewFCSequencingReadsQueryType } from "./__generated__/DiscoveryViewFCSequencingReadsQuery.graphql";
+import {
+  DiscoveryViewFCSequencingReadsQuery as DiscoveryViewFCSequencingReadsQueryType,
+  queryInput_fedSequencingReads_input_orderBy_Input,
+} from "./__generated__/DiscoveryViewFCSequencingReadsQuery.graphql";
 import {
   DiscoveryViewFCWorkflowsQuery as DiscoveryViewFCWorkflowsQueryType,
   queryInput_fedWorkflowRuns_input_Input,
+  queryInput_fedWorkflowRuns_input_orderByArray_items_Input,
   queryInput_fedWorkflowRuns_input_where_Input,
 } from "./__generated__/DiscoveryViewFCWorkflowsQuery.graphql";
 import { formatWetlabProtocol } from "./discovery_api";
 import { DiscoveryView } from "./DiscoveryView";
 
 // TODO(bchu): Add entityInputsInput.
+// TODO(bchu): Add creationSource.
 const DiscoveryViewFCWorkflowsQuery = graphql`
   query DiscoveryViewFCWorkflowsQuery(
     $input: queryInput_fedWorkflowRuns_input_Input
@@ -38,6 +43,7 @@ const DiscoveryViewFCWorkflowsQuery = graphql`
       id
       startedAt
       status
+      rawInputsJson
       workflowVersion {
         version
         workflow {
@@ -102,7 +108,7 @@ const DiscoveryViewFCSequencingReadsQuery = graphql`
             taxon {
               name
             }
-            referenceGenome {
+            accession {
               accessionId
               accessionName
             }
@@ -132,8 +138,6 @@ async function queryWorkflowRuns(
   environment: RelayModernEnvironment,
 ): Promise<WorkflowRunRow[]> {
   // TODO: Filter out deprecateds.
-  // Do not include NextGen argument fields that are null/empty arrays. NextGen will interpret them
-  // as return nothing.
   const where: queryInput_fedWorkflowRuns_input_where_Input = {
     workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
   };
@@ -142,6 +146,7 @@ async function queryWorkflowRuns(
   }
   const input: queryInput_fedWorkflowRuns_input_Input = {
     where,
+    orderByArray: getWorkflowRunsOrderBys(orderBy, orderDir), // TODO: Delete old non-Array orderBy
     todoRemove: {
       domain: props.domain,
       projectId: projectId?.toString(),
@@ -157,7 +162,6 @@ async function queryWorkflowRuns(
       orderDir,
       workflow,
     },
-    orderBy: { startedAt: orderBy === "createdAt" ? orderDir : null },
   };
 
   const data = await fetchQuery<DiscoveryViewFCWorkflowsQueryType>(
@@ -177,7 +181,7 @@ async function queryWorkflowRuns(
     );
   }
 
-  return data.fedWorkflowRuns
+  const result = data.fedWorkflowRuns
     .filter(isNotNullish)
     .map((run): WorkflowRunRow => {
       const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
@@ -185,6 +189,12 @@ async function queryWorkflowRuns(
         throw new Error(
           `Couldn't find an entity input: ${JSON.stringify(run)}`,
         );
+      }
+      let parsedRawInput;
+      try {
+        parsedRawInput = JSON.parse(run.rawInputsJson ?? "");
+      } catch (e) {
+        parsedRawInput = {};
       }
       return {
         id: run.id,
@@ -195,10 +205,44 @@ async function queryWorkflowRuns(
           run.workflowVersion?.version != null
             ? formatSemanticVersion(run.workflowVersion.version)
             : undefined,
-        creation_source: run.workflowVersion?.workflow?.name ?? undefined,
+        creation_source: parsedRawInput?.["creation_source"] ?? undefined,
         inputSequencingReadId: sequencingReadId,
       };
     });
+  // TODO: Make BE do this.
+  if (orderBy === "creation_source") {
+    result.sort((run1, run2) =>
+      (run1.creation_source ?? "").localeCompare(run2.creation_source ?? ""),
+    );
+  }
+
+  return result;
+}
+
+function getWorkflowRunsOrderBys(
+  orderBy?: string,
+  orderDir?: string,
+): queryInput_fedWorkflowRuns_input_orderByArray_items_Input[] {
+  orderDir = orderDir?.toLowerCase() ?? "desc";
+  switch (orderBy) {
+    case undefined:
+    case "createdAt":
+      return [
+        {
+          startedAt: orderDir,
+        },
+      ];
+    case "wdl_version":
+      return [
+        {
+          workflowVersion: {
+            version: orderDir,
+          },
+        },
+      ];
+    default:
+      return [];
+  }
 }
 
 async function querySequencingReadsByIds(
@@ -208,20 +252,22 @@ async function querySequencingReadsByIds(
   props: DiscoveryViewProps,
   environment: RelayModernEnvironment,
 ): Promise<Array<CgEntityRow & Metadata>> {
-  // TODO: Do not include argument fields that are null/empty arrays. NextGen will interpret them
-  // as return nothing.
   const data = await fetchQuery<DiscoveryViewFCSequencingReadsQueryType>(
     environment,
     DiscoveryViewFCSequencingReadsQuery,
     {
       input: {
-        limit: 50,
-        offset,
+        limitOffset: {
+          limit: 50,
+          offset,
+        },
         where: {
           id: {
             _in: filteredIds,
           },
         },
+        // TODO: Delete old non-Array orderBy
+        orderByArray: getSequencingReadsOrderBys(orderBy, orderDir),
         todoRemove: {
           domain: props.domain,
           projectId: projectId?.toString(),
@@ -316,9 +362,8 @@ async function querySequencingReadsByIds(
           ...metadataFields,
           consensusGenomeProducingRunId: node.producingRunId ?? undefined,
           referenceAccession: {
-            accessionName: node.referenceGenome?.accessionName ?? undefined,
-            referenceAccessionId:
-              node.referenceGenome?.accessionId ?? undefined,
+            accessionName: node.accession?.accessionName ?? undefined,
+            referenceAccessionId: node.accession?.accessionId ?? undefined,
             taxonName:
               sequencingRead.taxon?.name ?? node.taxon?.name ?? undefined,
           },
@@ -337,6 +382,54 @@ async function querySequencingReadsByIds(
 
       return rows;
     });
+}
+
+function getSequencingReadsOrderBys(
+  orderBy?: string,
+  orderDir?: string,
+): queryInput_fedSequencingReads_input_orderBy_Input[] {
+  orderDir = orderDir?.toLowerCase() ?? "desc";
+  switch (orderBy) {
+    case "technology":
+    case "medakaModel":
+      return [
+        {
+          [orderBy]: orderDir,
+        },
+      ];
+    case "wetlabProtocol":
+      return [
+        {
+          protocol: orderDir,
+        },
+      ];
+    case "nucleotide_type":
+      return [
+        {
+          nucleicAcid: orderDir,
+        },
+      ];
+    case "sample":
+      return [
+        {
+          sample: {
+            name: orderDir,
+          },
+        },
+      ];
+    case "host":
+      return [
+        {
+          sample: {
+            hostOrganism: {
+              name: orderDir,
+            },
+          },
+        },
+      ];
+    default:
+      return [];
+  }
 }
 
 /**

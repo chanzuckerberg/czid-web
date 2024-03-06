@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<532187534e8dcdd4dec4dfb9087af18c>>
+ * @generated SignedSource<<2542af86c3667ee385bbbf4a3243bcde>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,7 @@ import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type ConsensusGenomeCoverageViewFragment$data = ReadonlyArray<{
   readonly accession: {
-    readonly accessionId: string | null | undefined;
+    readonly accessionId: string;
   } | null | undefined;
   readonly metrics: {
     readonly coverageBreadth: number | null | undefined;

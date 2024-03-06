@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<fad76ab45b71da81eaa57f7fd0230d5f>>
+ * @generated SignedSource<<6df087773898f81c622cfa6525d5971e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,6 +12,7 @@ import { ConcreteRequest, Query } from 'relay-runtime';
 export type queryInput_fedWorkflowRuns_input_Input = {
   entityInputsInput?: queryInput_fedWorkflowRuns_input_entityInputsInput_Input | null | undefined;
   orderBy?: queryInput_fedWorkflowRuns_input_orderBy_Input | null | undefined;
+  orderByArray?: ReadonlyArray<queryInput_fedWorkflowRuns_input_orderByArray_items_Input | null | undefined> | null | undefined;
   todoRemove?: queryInput_fedWorkflowRuns_input_todoRemove_Input | null | undefined;
   where?: queryInput_fedWorkflowRuns_input_where_Input | null | undefined;
 };
@@ -33,14 +34,13 @@ export type queryInput_fedWorkflowRuns_input_todoRemove_Input = {
 };
 export type queryInput_fedWorkflowRuns_input_orderBy_Input = {
   startedAt?: string | null | undefined;
-  workflowVersion?: queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_Input | null | undefined;
 };
-export type queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_Input = {
+export type queryInput_fedWorkflowRuns_input_orderByArray_items_Input = {
+  startedAt?: string | null | undefined;
+  workflowVersion?: queryInput_fedWorkflowRuns_input_orderByArray_items_workflowVersion_Input | null | undefined;
+};
+export type queryInput_fedWorkflowRuns_input_orderByArray_items_workflowVersion_Input = {
   version?: string | null | undefined;
-  workflow?: queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_workflow_Input | null | undefined;
-};
-export type queryInput_fedWorkflowRuns_input_orderBy_workflowVersion_workflow_Input = {
-  name?: string | null | undefined;
 };
 export type queryInput_fedWorkflowRuns_input_where_Input = {
   collectionId?: queryInput_fedWorkflowRuns_input_where_collectionId_Input | null | undefined;
@@ -93,6 +93,7 @@ export type DiscoveryViewFCWorkflowsQuery$data = {
       } | null | undefined>;
     };
     readonly id: string;
+    readonly rawInputsJson: string | null | undefined;
     readonly startedAt: string | null | undefined;
     readonly status: string | null | undefined;
     readonly workflowVersion: {
@@ -150,6 +151,13 @@ v1 = [
         "args": null,
         "kind": "ScalarField",
         "name": "status",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "rawInputsJson",
         "storageKey": null
       },
       {
@@ -257,16 +265,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "806458228b436e85fe93c9dd869e6621",
+    "cacheID": "2f55a75dce5cb8b405a0202d128884de",
     "id": null,
     "metadata": {},
     "name": "DiscoveryViewFCWorkflowsQuery",
     "operationKind": "query",
-    "text": "query DiscoveryViewFCWorkflowsQuery(\n  $input: queryInput_fedWorkflowRuns_input_Input\n) {\n  fedWorkflowRuns(input: $input) {\n    id\n    startedAt\n    status\n    workflowVersion {\n      version\n      workflow {\n        name\n      }\n    }\n    entityInputs {\n      edges {\n        node {\n          inputEntityId\n          entityType\n        }\n      }\n    }\n  }\n}\n"
+    "text": "query DiscoveryViewFCWorkflowsQuery(\n  $input: queryInput_fedWorkflowRuns_input_Input\n) {\n  fedWorkflowRuns(input: $input) {\n    id\n    startedAt\n    status\n    rawInputsJson\n    workflowVersion {\n      version\n      workflow {\n        name\n      }\n    }\n    entityInputs {\n      edges {\n        node {\n          inputEntityId\n          entityType\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "b013cd118ffde9f0c2cc85fa8822180d";
+(node as any).hash = "d1536dce178d7cdd478978ee3f7af05c";
 
 export default node;
