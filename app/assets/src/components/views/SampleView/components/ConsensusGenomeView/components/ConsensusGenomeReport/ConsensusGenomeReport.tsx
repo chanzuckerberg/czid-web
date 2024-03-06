@@ -35,15 +35,15 @@ export const ConsensusGenomeReport = ({
     },
   );
 
-  // check that there is a value in the first position of the array
-  // since we are calling for only one consensus genome we only expect one response
-  const allworkflowRunResultsData = data.fedConsensusGenomes;
-
-  if (!(allworkflowRunResultsData && allworkflowRunResultsData.length)) {
-    console.error("No Data to Display");
+  const workflowRunResultsDataNullable = data.fedConsensusGenomes;
+  if (!workflowRunResultsDataNullable) {
     return null;
   }
-  const workflowRunResultsData = allworkflowRunResultsData[0];
+  // filter out null values from the array
+  const workflowRunResultsData = workflowRunResultsDataNullable.filter(
+    (value): value is NonNullable<(typeof workflowRunResultsDataNullable)[0]> =>
+      !!value,
+  );
 
   const helpLinkUrl = getConsensusGenomeHelpLink(
     workflowRun.inputs?.accession_id,
@@ -70,13 +70,13 @@ export const ConsensusGenomeReport = ({
         <div className={cs.resultsContainer}>
           <ConsensusGenomeMetricsTable
             helpLinkUrl={helpLinkUrl}
-            workflowRunResultsData={workflowRunResultsData[0]}
+            workflowRunResultsData={workflowRunResultsData}
           />
           <ConsensusGenomeCoverageView
             helpLinkUrl={helpLinkUrl}
             sampleId={sample.id}
             workflowRun={workflowRun}
-            workflowRunResultsData={workflowRunResultsData[0]}
+            workflowRunResultsData={workflowRunResultsData}
           />
         </div>
       )}

@@ -1,5 +1,4 @@
 import { cx } from "@emotion/css";
-import { camelCase } from "lodash/fp";
 import React, { useCallback } from "react";
 import { graphql, useFragment } from "react-relay";
 import { HelpIcon } from "~/components/ui/containers";
@@ -51,47 +50,47 @@ export const ConsensusGenomeMetricsTable = ({
     const columns = [
       {
         className: cs.taxonName,
-        dataKey: "taxon_name",
+        dataKey: "taxonName",
         headerClassName: cs.primaryHeader,
         label: "Taxon",
         width: 320,
       },
       {
-        dataKey: "mapped_reads",
+        dataKey: "mappedReads",
         width: 80,
       },
       {
         cellRenderer: (cellData: $TSFixMe) =>
           renderRowCell(cellData, { percent: true }),
-        dataKey: "gc_percent",
+        dataKey: "gcPercent",
         width: 60,
       },
       {
-        dataKey: "ref_snps",
+        dataKey: "refSnps",
         width: 20,
       },
       {
         cellRenderer: (cellData: $TSFixMe) =>
           renderRowCell(cellData, { percent: true }),
-        dataKey: "percent_identity",
+        dataKey: "percentIdentity",
         width: 30,
       },
       {
-        dataKey: "n_actg",
+        dataKey: "nActg",
         width: 135,
       },
       {
         cellRenderer: (cellData: $TSFixMe) =>
           renderRowCell(cellData, { percent: true }),
-        dataKey: "percent_genome_called",
+        dataKey: "percentGenomeCalled",
         width: 100,
       },
       {
-        dataKey: "n_missing",
+        dataKey: "nMissing",
         width: 75,
       },
       {
-        dataKey: "n_ambiguous",
+        dataKey: "nAmbiguous",
         width: 100,
       },
     ];
@@ -103,8 +102,7 @@ export const ConsensusGenomeMetricsTable = ({
       }
       col["flexGrow"] = 1;
 
-      // TODO: Convert to send in camelCase from the backend.
-      const key = camelCase(col["dataKey"]);
+      const key = col["dataKey"];
       if (key in FIELDS_METADATA) {
         col["columnData"] = FIELDS_METADATA[key];
         col["label"] = FIELDS_METADATA[key].label;
