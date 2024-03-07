@@ -20,7 +20,13 @@ class DeletionValidationService
       Rails.logger.warn("DeletionValidationService called with query_ids = nil")
       @query_ids = []
     else
-      @query_ids = query_ids.map(&:to_i)
+      # Expect to get either array of integers (read from Rails) or array of UUID strings (read from NextGen).
+      # Only convert to integers if we receive Rails IDs, not UUIDs.
+      @query_ids = if ArrayUtil.all_integers?(query_ids)
+                     query_ids.map(&:to_i)
+                   else
+                     query_ids
+                   end
     end
 
     if workflow.nil?
@@ -95,6 +101,12 @@ class DeletionValidationService
   def validate_workflow_runs_for_deletion(user:, workflow_run_ids:, workflow:)
     current_power = Power.new(user)
 
+    # Handle case where `workflow_run_ids` is an array of CG UUIDs from NextGen
+    if BulkDeletionServiceNextgen.nextgen_workflow?(workflow, workflow_run_ids)
+      return BulkDeletionServiceNextgen.get_invalid_workflows(user.id, workflow_run_ids)
+    end
+
+    # Otherwise, workflow_run_ids is an array of integers from Rails
     deletable_workflow_run_ids = current_power.deletable_workflow_runs
                                               .where(id: workflow_run_ids)
                                               .by_workflow(workflow)

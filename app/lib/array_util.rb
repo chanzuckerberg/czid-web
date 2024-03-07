@@ -17,4 +17,9 @@ class ArrayUtil
 
     return (arr1 + arr2).uniq
   end
+
+  # Check if all elements of an array of strings are integers
+  def self.all_integers?(arr)
+    arr.all? { |str| str.to_i.to_s == str.to_s }
+  end
 end

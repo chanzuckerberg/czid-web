@@ -118,4 +118,28 @@ RSpec.describe ArrayUtil do
       expect { ArrayUtil.merge_arrays_uniq(a, b) }.to raise_error(ArgumentError)
     end
   end
+
+  describe "#all_integers?" do
+    it "checks that all elements can be interpreted as integers" do
+      actual = ArrayUtil.all_integers?([1, 2, 3])
+      expected = true
+      expect(actual).to eq(expected)
+
+      actual = ArrayUtil.all_integers?([1, 2, 3, "4"])
+      expected = true
+      expect(actual).to eq(expected)
+
+      actual = ArrayUtil.all_integers?([1, 2, 3, "abc"])
+      expected = false
+      expect(actual).to eq(expected)
+
+      actual = ArrayUtil.all_integers?([1, 2, 3, "1.23"])
+      expected = false
+      expect(actual).to eq(expected)
+
+      actual = ArrayUtil.all_integers?([1, 2, 3, 1.23])
+      expected = false
+      expect(actual).to eq(expected)
+    end
+  end
 end
