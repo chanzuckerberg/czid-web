@@ -49,6 +49,13 @@ export const AdvancedDownloadTab = ({
     if (bulkDownload?.download_type === "biom_format") {
       return `curl -L "${bulkDownload.presigned_output_url}" > "${bulkDownloadFileName}.biom" `;
     }
+    if (
+      bulkDownload?.download_type === "consensus_genome" &&
+      bulkDownload?.params?.download_format?.value ===
+        "Single File (Concatenated)"
+    ) {
+      return `curl -L "${bulkDownload.presigned_output_url}" > "${bulkDownloadFileName}.fa" `;
+    }
 
     return `curl -L "${bulkDownload?.presigned_output_url}" > "${bulkDownloadFileName}.tar.gz"\
         && mkdir "${bulkDownloadFileName}"\
