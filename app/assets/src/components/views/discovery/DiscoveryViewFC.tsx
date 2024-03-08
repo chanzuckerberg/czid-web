@@ -3,6 +3,7 @@ import React, { useContext, useRef, useState } from "react";
 import { useRelayEnvironment } from "react-relay";
 import { fetchQuery, graphql } from "relay-runtime";
 import RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironment";
+import { getProjects } from "~/api";
 import { UserContext } from "~/components/common/UserContext";
 import { logError } from "~/components/utils/logUtil";
 import { isNotNullish } from "~/components/utils/typeUtils";
@@ -30,11 +31,13 @@ import {
   queryInput_fedWorkflowRuns_input_orderByArray_items_Input,
   queryInput_fedWorkflowRuns_input_where_Input,
 } from "./__generated__/DiscoveryViewFCWorkflowsQuery.graphql";
-import { formatWetlabProtocol } from "./discovery_api";
+import {
+  DISCOVERY_DOMAIN_ALL_DATA,
+  formatWetlabProtocol,
+} from "./discovery_api";
 import { DiscoveryView } from "./DiscoveryView";
 
 // TODO(bchu): Add entityInputsInput.
-// TODO(bchu): Add creationSource.
 const DiscoveryViewFCWorkflowsQuery = graphql`
   query DiscoveryViewFCWorkflowsQuery(
     $input: queryInput_fedWorkflowRuns_input_Input
@@ -131,18 +134,62 @@ const DiscoveryViewFCSequencingReadsQuery = graphql`
   }
 `;
 
+/**
+ * Whether we have to first hitting Rails for the list of collection IDs to filter the workflowRuns
+ * query:
+ *  - Visibility always requires Rails, NextGen has no collection data.
+ *  - Project ID means we're only filtering by 1 project, so don't need Rails.
+ *  - All Data means everything, so no collection IDs needed.
+ *  - Public is the equivalent of a visibility filter.
+ *  - My Data also needs to filter by the user's collections.
+ */
+function mustFetchProjectIds(
+  domain: string,
+  conditions: Partial<Conditions>,
+): boolean {
+  if (conditions.filters?.visibility != null) {
+    return true;
+  }
+  if (conditions.projectId != null) {
+    return false;
+  }
+  if (domain === DISCOVERY_DOMAIN_ALL_DATA) {
+    return false;
+  }
+
+  return true;
+}
+
+async function fetchProjectIds(
+  domain: string,
+  conditions: Partial<Conditions>,
+): Promise<number[]> {
+  return getProjects({
+    domain,
+    filters: {
+      visibility: conditions.filters?.visibility,
+    },
+    limit: 0,
+    offset: 0,
+    listAllIds: true,
+  }).then(response => response.all_projects_ids);
+}
+
 async function queryWorkflowRuns(
   workflow: WorkflowType,
   { projectId, search, orderBy, orderDir, filters }: Partial<Conditions>,
   props: DiscoveryViewProps,
   environment: RelayModernEnvironment,
+  projectIds?: number[],
 ): Promise<WorkflowRunRow[]> {
-  // TODO: Filter out deprecateds.
   const where: queryInput_fedWorkflowRuns_input_where_Input = {
     workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
+    deprecatedById: { _is_null: false },
   };
   if (projectId != null) {
     where.collectionId = { _in: [parseInt(projectId)] };
+  } else if (projectIds !== undefined) {
+    where.collectionId = { _in: projectIds };
   }
   const input: queryInput_fedWorkflowRuns_input_Input = {
     where,
@@ -225,6 +272,7 @@ function getWorkflowRunsOrderBys(
 ): queryInput_fedWorkflowRuns_input_orderByArray_items_Input[] {
   orderDir = orderDir?.toLowerCase() ?? "desc";
   switch (orderBy) {
+    case null:
     case undefined:
     case "createdAt":
       return [
@@ -490,15 +538,19 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     conditions: Conditions,
   ): Promise<void> => {
     reset();
-    // TODO: Conditionally query project IDs.
-    // TODO: Add the rest of the workflows.
     cgConditions.current = conditions;
     try {
-      workflowRunsPromise.current = queryWorkflowRuns(
-        WorkflowType.CONSENSUS_GENOME,
-        conditions,
-        props,
-        environment,
+      const projectIdsPromise = mustFetchProjectIds(props.domain, conditions)
+        ? fetchProjectIds(props.domain, conditions)
+        : Promise.resolve();
+      workflowRunsPromise.current = projectIdsPromise.then(projectIds =>
+        queryWorkflowRuns(
+          WorkflowType.CONSENSUS_GENOME,
+          conditions,
+          props,
+          environment,
+          projectIds,
+        ),
       );
       const workflowRuns = await workflowRunsPromise.current;
       setCgWorkflowRunIds(workflowRuns.map(run => run.id));
@@ -533,7 +585,9 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     const workflowRuns = await workflowRunsPromise.current;
     const sequencingReads = await querySequencingReadsByIds(
       offset, // TODO: Remove.
-      workflowRuns.slice(offset, offset + 50).map(run => run.id),
+      workflowRuns
+        .slice(offset, offset + 50)
+        .map(run => run.inputSequencingReadId),
       cgConditions.current,
       props,
       environment,
