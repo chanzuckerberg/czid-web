@@ -90,7 +90,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   def results(cacheable_only: false)
     {
       coverage_viz: coverage_viz(cacheable_only: cacheable_only),
-      quality_metrics: quality_metrics,
+      quality_metrics: parsed_cached_results&.[]("quality_metrics") || quality_metrics,
       taxon_info: taxon_info,
     }
   end
