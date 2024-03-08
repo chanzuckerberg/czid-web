@@ -28,13 +28,15 @@ import { InvalidSampleDeletionWarning } from "./InvalidSampleDeletionWarning";
 
 const BulkDeleteModalQuery = graphql`
   query BulkDeleteModalQuery(
-    $selectedIds: [Int!]!
+    $selectedIds: [Int]
+    $selectedIdsStrings: [String]
     $workflow: String!
     $authenticityToken: String!
   ) {
     ValidateUserCanDeleteObjects(
       input: {
         selectedIds: $selectedIds
+        selectedIdsStrings: $selectedIdsStrings
         workflow: $workflow
         authenticityToken: $authenticityToken
       }
@@ -48,13 +50,15 @@ const BulkDeleteModalQuery = graphql`
 
 const BulkDeleteModalMutation = graphql`
   mutation BulkDeleteModalMutation(
-    $ids: [Int!]!
+    $ids: [Int]
+    $idsStrings: [String]
     $workflow: String!
     $authenticityToken: String!
   ) {
     DeleteSamples(
       input: {
         ids: $ids
+        idsStrings: $idsStrings
         workflow: $workflow
         authenticityToken: $authenticityToken
       }
@@ -86,7 +90,7 @@ const BulkDeleteModalComponent = ({
   // Relay hooks:
   const { ValidateUserCanDeleteObjects: data } =
     useLazyLoadQuery<BulkDeleteModalQueryType>(BulkDeleteModalQuery, {
-      selectedIds: selectedIds.map((id: SampleId) => Number(id)),
+      selectedIdsStrings: selectedIds.map((id: SampleId) => id.toString()),
       workflow: getWorkflowTypeFromLabel(workflowLabel),
       authenticityToken: getCsrfToken(),
     });
@@ -121,7 +125,7 @@ const BulkDeleteModalComponent = ({
   const deleteSamples = async () => {
     commit({
       variables: {
-        ids: validIds,
+        idsStrings: validIds.map(id => id.toString()),
         workflow: getWorkflowTypeFromLabel(workflowLabel),
         authenticityToken: getCsrfToken(),
       },

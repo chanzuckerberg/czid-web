@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f0505c0ba0798790c7e29b76a2a3f47f>>
+ * @generated SignedSource<<149d101e28df10f9a0d6b12cd524eece>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,8 @@
 import { ConcreteRequest, Query } from 'relay-runtime';
 export type BulkDeleteModalQuery$variables = {
   authenticityToken: string;
-  selectedIds: ReadonlyArray<number>;
+  selectedIds?: ReadonlyArray<number | null | undefined> | null | undefined;
+  selectedIdsStrings?: ReadonlyArray<string | null | undefined> | null | undefined;
   workflow: string;
 };
 export type BulkDeleteModalQuery$data = {
@@ -40,9 +41,14 @@ v1 = {
 v2 = {
   "defaultValue": null,
   "kind": "LocalArgument",
+  "name": "selectedIdsStrings"
+},
+v3 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
   "name": "workflow"
 },
-v3 = [
+v4 = [
   {
     "alias": null,
     "args": [
@@ -57,6 +63,11 @@ v3 = [
             "kind": "Variable",
             "name": "selectedIds",
             "variableName": "selectedIds"
+          },
+          {
+            "kind": "Variable",
+            "name": "selectedIdsStrings",
+            "variableName": "selectedIdsStrings"
           },
           {
             "kind": "Variable",
@@ -103,12 +114,13 @@ return {
     "argumentDefinitions": [
       (v0/*: any*/),
       (v1/*: any*/),
-      (v2/*: any*/)
+      (v2/*: any*/),
+      (v3/*: any*/)
     ],
     "kind": "Fragment",
     "metadata": null,
     "name": "BulkDeleteModalQuery",
-    "selections": (v3/*: any*/),
+    "selections": (v4/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -117,23 +129,24 @@ return {
     "argumentDefinitions": [
       (v1/*: any*/),
       (v2/*: any*/),
+      (v3/*: any*/),
       (v0/*: any*/)
     ],
     "kind": "Operation",
     "name": "BulkDeleteModalQuery",
-    "selections": (v3/*: any*/)
+    "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "f88fafdceb581c118b9ccbde9f865b22",
+    "cacheID": "e3c8ec553c732b52705f6de6f9cc60d8",
     "id": null,
     "metadata": {},
     "name": "BulkDeleteModalQuery",
     "operationKind": "query",
-    "text": "query BulkDeleteModalQuery(\n  $selectedIds: [Int!]!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  ValidateUserCanDeleteObjects(input: {selectedIds: $selectedIds, workflow: $workflow, authenticityToken: $authenticityToken}) {\n    validIds\n    invalidSampleNames\n    error\n  }\n}\n"
+    "text": "query BulkDeleteModalQuery(\n  $selectedIds: [Int]\n  $selectedIdsStrings: [String]\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  ValidateUserCanDeleteObjects(input: {selectedIds: $selectedIds, selectedIdsStrings: $selectedIdsStrings, workflow: $workflow, authenticityToken: $authenticityToken}) {\n    validIds\n    invalidSampleNames\n    error\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "05bcbc06d3b7ac4e21cd5560b2e499f7";
+(node as any).hash = "0e1f86a1e727d9cef4a2e5850c5f7e42";
 
 export default node;
