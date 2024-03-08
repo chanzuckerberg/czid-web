@@ -227,7 +227,7 @@ input BoolComparators {
   _gte: Int
   _lt: Int
   _lte: Int
-  _is_null: Int
+  _is_null: Boolean
 }
 
 type BulkDownload implements EntityInterface & Node {
@@ -328,7 +328,7 @@ input BulkDownloadTypeEnumComparators {
   _gte: BulkDownloadType
   _lt: BulkDownloadType
   _lte: BulkDownloadType
-  _is_null: BulkDownloadType
+  _is_null: Boolean
 }
 
 input BulkDownloadWhereClause {
@@ -513,7 +513,7 @@ input DatetimeComparators {
   _gte: DateTime
   _lt: DateTime
   _lte: DateTime
-  _is_null: DateTime
+  _is_null: Boolean
 }
 
 type DbSample {
@@ -636,7 +636,7 @@ input FileStatusEnumComparators {
   _gte: FileStatus
   _lt: FileStatus
   _lte: FileStatus
-  _is_null: FileStatus
+  _is_null: Boolean
 }
 
 input FileUpload {
@@ -667,7 +667,7 @@ input FloatComparators {
   _gte: Float
   _lt: Float
   _lte: Float
-  _is_null: Float
+  _is_null: Boolean
 }
 
 type GenomicRange implements EntityInterface & Node {
@@ -886,7 +886,7 @@ input HostOrganismCategoryEnumComparators {
   _gte: HostOrganismCategory
   _lt: HostOrganismCategory
   _lte: HostOrganismCategory
-  _is_null: HostOrganismCategory
+  _is_null: Boolean
 }
 
 enum HostOrganismCountColumns {
@@ -1165,7 +1165,7 @@ input IndexTypesEnumComparators {
   _gte: IndexTypes
   _lt: IndexTypes
   _lte: IndexTypes
-  _is_null: IndexTypes
+  _is_null: Boolean
 }
 
 type InputFile {
@@ -1190,7 +1190,7 @@ input IntComparators {
   _gte: Int
   _lt: Int
   _lte: Int
-  _is_null: Int
+  _is_null: Boolean
 }
 
 """An ISO 8601-encoded datetime"""
@@ -1568,6 +1568,7 @@ type MultipartUploadResponse {
 }
 
 type Mutation {
+  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
   createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
   updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
   deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
@@ -1581,9 +1582,8 @@ type Mutation {
   deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
   createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
   deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
-  runWorkflowVersion(input: RunWorkflowVersionInput!): WorkflowRun!
-  runWorkflowRun(workflowRunId: ID!): WorkflowRun!
-  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
+  runWorkflowVersion(input: RunWorkflowVersionInput!, executionId: String = null): WorkflowRun!
+  runWorkflowRun(workflowRunId: ID!, executionId: String = null): WorkflowRun!
   createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
   uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
   uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
@@ -1844,6 +1844,13 @@ type Project {
 }
 
 type Query {
+  appConfig(id: ID!): AppConfig
+  pathogenList(version: String): PathogenList!
+  project(id: Int!): Project!
+  sample(sampleId: Int!): Sample!
+  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
+  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
+  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   node(
     """The ID of the object."""
     id: GlobalID!
@@ -1862,13 +1869,6 @@ type Query {
   workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
   workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
   workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
-  appConfig(id: ID!): AppConfig
-  pathogenList(version: String): PathogenList!
-  project(id: Int!): Project!
-  sample(sampleId: Int!): Sample!
-  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
-  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
-  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   files(where: FileWhereClause = null): [File!]!
   samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Sample!]!
   sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [SequencingRead!]!
@@ -3496,7 +3496,7 @@ input SequencingProtocolEnumComparators {
   _gte: SequencingProtocol
   _lt: SequencingProtocol
   _lte: SequencingProtocol
-  _is_null: SequencingProtocol
+  _is_null: Boolean
 }
 
 type SequencingRead implements EntityInterface & Node {
@@ -3688,7 +3688,7 @@ input SequencingTechnologyEnumComparators {
   _gte: SequencingTechnology
   _lt: SequencingTechnology
   _lte: SequencingTechnology
-  _is_null: SequencingTechnology
+  _is_null: Boolean
 }
 
 type SignedURL {
@@ -3704,7 +3704,7 @@ input StrComparators {
   _neq: String
   _in: [String!]
   _nin: [String!]
-  _is_null: Int
+  _is_null: Boolean
   _gt: String
   _gte: String
   _lt: String
@@ -3908,7 +3908,7 @@ input TaxonLevelEnumComparators {
   _gte: TaxonLevel
   _lt: TaxonLevel
   _lte: TaxonLevel
-  _is_null: TaxonLevel
+  _is_null: Boolean
 }
 
 type TaxonMinMaxColumns {
@@ -3980,6 +3980,15 @@ input TaxonWhereClause {
   upstreamDatabase: UpstreamDatabaseWhereClause
   upstreamDatabaseIdentifier: StrComparators
   level: TaxonLevelEnumComparators
+  taxParentId: UUIDComparators
+  taxSpeciesId: UUIDComparators
+  taxGenusId: UUIDComparators
+  taxFamilyId: UUIDComparators
+  taxOrderId: UUIDComparators
+  taxClassId: UUIDComparators
+  taxPhylumId: UUIDComparators
+  taxKingdomId: UUIDComparators
+  taxSuperkingdomId: UUIDComparators
   consensusGenomes: ConsensusGenomeWhereClause
   sequencingReads: SequencingReadWhereClause
   id: UUIDComparators
@@ -4182,6 +4191,7 @@ input UUIDComparators {
   _gte: UUID
   _lt: UUID
   _lte: UUID
+  _is_null: Boolean
 }
 
 type ValidateUserCanDeleteObjects {
@@ -4292,6 +4302,23 @@ input WorkflowOrderByClause {
 }
 
 type WorkflowRun implements EntityInterface & Node {
+  cachedResults: String
+  createdAt: DateTime!
+  deprecated: Boolean!
+  errorMessage: String
+  executedAt: ISO8601DateTime
+  inputsJson: String
+  rerunFrom: Int
+  s3OutputPrefix: String
+  sample: Sample
+  sampleId: Int
+  sfnExecutionArn: String
+  status: WorkflowRunStatus
+  timeToFinalized: Int
+  updatedAt: DateTime
+  wdlVersion: String
+  workflow: String!
+
   """The Globally Unique ID of this object"""
   _id: GlobalID!
   id: ID!
@@ -4301,7 +4328,6 @@ type WorkflowRun implements EntityInterface & Node {
   executionId: String
   outputsJson: String
   workflowRunnerInputsJson: String
-  status: String!
   workflowVersion(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = []): WorkflowVersion
   steps(
     where: WorkflowRunStepWhereClause = null
@@ -4340,21 +4366,6 @@ type WorkflowRun implements EntityInterface & Node {
   rawInputsJson: String
   ownerUserId: Int!
   collectionId: Int!
-  createdAt: ISO8601DateTime!
-  updatedAt: ISO8601DateTime!
-  cachedResults: String
-  deprecated: Boolean!
-  errorMessage: String
-  executedAt: ISO8601DateTime
-  inputsJson: String
-  rerunFrom: Int
-  s3OutputPrefix: String
-  sample: Sample
-  sampleId: Int
-  sfnExecutionArn: String
-  timeToFinalized: Int
-  wdlVersion: String
-  workflow: String!
 }
 
 type WorkflowRunAggregate {
@@ -4389,6 +4400,7 @@ enum WorkflowRunCountColumns {
   outputsJson
   workflowRunnerInputsJson
   status
+  errorMessage
   workflowVersion
   steps
   entityInputs
@@ -4539,6 +4551,7 @@ type WorkflowRunGroupByOptions {
   outputsJson: String
   workflowRunnerInputsJson: String
   status: WorkflowRunStatus
+  errorMessage: String
   workflowVersion: WorkflowVersionGroupByOptions
   rawInputsJson: String
   deprecatedBy: WorkflowRunGroupByOptions
@@ -4556,6 +4569,7 @@ type WorkflowRunMinMaxColumns {
   executionId: String
   outputsJson: String
   workflowRunnerInputsJson: String
+  errorMessage: String
   rawInputsJson: String
   ownerUserId: Int
   collectionId: Int
@@ -4577,6 +4591,7 @@ input WorkflowRunOrderByClause {
   outputsJson: orderBy
   workflowRunnerInputsJson: orderBy
   status: orderBy
+  errorMessage: orderBy
   workflowVersion: WorkflowVersionOrderByClause
   rawInputsJson: orderBy
   deprecatedBy: orderBy
@@ -4608,7 +4623,7 @@ input WorkflowRunStatusEnumComparators {
   _gte: WorkflowRunStatus
   _lt: WorkflowRunStatus
   _lte: WorkflowRunStatus
-  _is_null: WorkflowRunStatus
+  _is_null: Boolean
 }
 
 type WorkflowRunStep implements EntityInterface & Node {
@@ -4730,7 +4745,7 @@ input WorkflowRunStepStatusEnumComparators {
   _gte: WorkflowRunStepStatus
   _lt: WorkflowRunStepStatus
   _lte: WorkflowRunStepStatus
-  _is_null: WorkflowRunStepStatus
+  _is_null: Boolean
 }
 
 input WorkflowRunStepUpdateInput {
@@ -4760,6 +4775,7 @@ input WorkflowRunUpdateInput {
   outputsJson: String = null
   workflowRunnerInputsJson: String = null
   status: WorkflowRunStatus = null
+  errorMessage: String = null
   deprecatedById: ID = null
 }
 
@@ -4771,10 +4787,12 @@ input WorkflowRunWhereClause {
   outputsJson: StrComparators
   workflowRunnerInputsJson: StrComparators
   status: WorkflowRunStatusEnumComparators
+  errorMessage: StrComparators
   workflowVersion: WorkflowVersionWhereClause
   steps: WorkflowRunStepWhereClause
   entityInputs: WorkflowRunEntityInputWhereClause
   rawInputsJson: StrComparators
+  deprecatedById: UUIDComparators
   id: UUIDComparators
   ownerUserId: IntComparators
   collectionId: IntComparators
@@ -4801,6 +4819,7 @@ type WorkflowVersion implements EntityInterface & Node {
   version: String
   manifest: String
   workflow(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = []): Workflow
+  deprecated: Boolean
   runs(
     where: WorkflowRunWhereClause = null
     orderBy: [WorkflowRunOrderByClause!] = []
@@ -4854,6 +4873,7 @@ enum WorkflowVersionCountColumns {
   version
   manifest
   workflow
+  deprecated
   runs
   id
   ownerUserId
@@ -4868,6 +4888,7 @@ input WorkflowVersionCreateInput {
   version: String = null
   manifest: String = null
   workflowId: ID = null
+  deprecated: Boolean = null
   collectionId: Int!
 }
 
@@ -4886,6 +4907,7 @@ type WorkflowVersionGroupByOptions {
   version: String
   manifest: String
   workflow: WorkflowGroupByOptions
+  deprecated: Boolean
   id: UUID
   ownerUserId: Int
   collectionId: Int
@@ -4915,6 +4937,7 @@ input WorkflowVersionOrderByClause {
   version: orderBy
   manifest: orderBy
   workflow: WorkflowOrderByClause
+  deprecated: orderBy
   id: orderBy
   ownerUserId: orderBy
   collectionId: orderBy
@@ -4928,6 +4951,7 @@ input WorkflowVersionWhereClause {
   version: StrComparators
   manifest: StrComparators
   workflow: WorkflowWhereClause
+  deprecated: BoolComparators
   runs: WorkflowRunWhereClause
   id: UUIDComparators
   ownerUserId: IntComparators
