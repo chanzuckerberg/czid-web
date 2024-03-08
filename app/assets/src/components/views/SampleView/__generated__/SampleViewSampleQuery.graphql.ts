@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f6eb39288f25d6bb29df1ca642805d5f>>
+ * @generated SignedSource<<104ef39c8ab043624b50bb264c5f521c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,7 @@ export type SampleViewSampleQuery$data = {
   readonly SampleForReport: {
     readonly created_at: string | null | undefined;
     readonly default_background_id: number | null | undefined;
-    readonly default_pipeline_run_id: number | null | undefined;
+    readonly default_pipeline_run_id: string | null | undefined;
     readonly editable: boolean | null | undefined;
     readonly host_genome_id: number | null | undefined;
     readonly id: string | null | undefined;

@@ -310,7 +310,7 @@ export class DiscoveryView extends React.Component<
     this.projects = this.dataLayer.projects.createView({
       conditions: this.getConditionsWithSessionStorage(TAB_PROJECTS),
       onViewChange: this.refreshProjectData,
-      shouldConvertIdToString: false,
+      shouldConvertIdToString: true,
     });
 
     this.visualizations = this.dataLayer.visualizations.createView({

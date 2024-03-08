@@ -3352,7 +3352,7 @@ type SampleForReport {
   initial_workflow: String
   project: query_SampleForReport_project
   default_background_id: Int
-  default_pipeline_run_id: Int
+  default_pipeline_run_id: String
   editable: Boolean
   pipeline_runs: [query_SampleForReport_pipeline_runs_items]
   workflow_runs: [query_SampleForReport_workflow_runs_items]

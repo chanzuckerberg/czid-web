@@ -42,9 +42,9 @@ import {
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { getCoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/utils";
-import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import { IconLoading } from "~/components/ui/icons";
 import {
   computeMngsReportTableValuesForCSV,
   createCSVObjectURL,
@@ -64,6 +64,7 @@ import {
   WorkflowType,
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
+import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
 import {
   ActionType,
   createAction,
@@ -96,6 +97,7 @@ import {
   PipelineRun,
   Taxon,
 } from "~/interface/shared";
+import { SampleMessage } from "../components/SampleMessage";
 import { SampleViewSampleQuery } from "./__generated__/SampleViewSampleQuery.graphql";
 import { initialAmrContext } from "./components/AmrView/amrContext/initialState";
 import {
@@ -1371,7 +1373,16 @@ export const SampleView = ({
   snapshotShareId,
 }: SampleViewWrapperProps) => {
   return (
-    <Suspense fallback={<LoadingPage />}>
+    <Suspense
+      fallback={
+        <SampleMessage
+          icon={<IconLoading className={csSampleMessage.icon} />}
+          message={"Loading report data."}
+          status={"Loading"}
+          type={"inProgress"}
+        />
+      }
+    >
       <SampleViewComponent
         sampleId={sampleId}
         snapshotShareId={snapshotShareId}
