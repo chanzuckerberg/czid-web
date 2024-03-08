@@ -76,7 +76,7 @@ local-import-staging-data: .env.localdev ## Import staging data into the local m
 	    $(docker_compose_simple) exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz; \
 	fi
 	export $$(cat .env.localdev); bin/clam staging 'mysqldump --no-data -h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging | gzip -c' > idseq_staging_tables.sql.gz
-	export $$(cat .env.localdev); bin/clam staging 'mysqldump --no-create-info '\
+	export $$(cat .env.localdev); bin/clam staging 'mysqldump --lock-tables=false --no-create-info '\
 	    '--ignore-table=idseq_staging._new_names '\
 	    '--ignore-table=idseq_staging._new_taxid_lineages '\
 	    '--ignore-table=idseq_staging._new_taxon_lineages '\
@@ -99,7 +99,7 @@ local-import-staging-data-all: .env.localdev ## Import staging data into the loc
 	    $(docker_compose_simple) exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz; \
 	fi
 	export $$(cat .env.localdev); bin/clam staging 'mysqldump --no-data -h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging | gzip -c' > idseq_staging_tables.sql.gz
-	export $$(cat .env.localdev); bin/clam staging 'mysqldump --no-create-info '\
+	export $$(cat .env.localdev); bin/clam staging 'mysqldump --lock-tables=false --no-create-info '\
 	    '-h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging '\
 	    '| gzip -c' > idseq_staging_data.sql.gz
 	$(docker_compose) run --rm web "gzip -dc idseq_staging_tables.sql.gz | mysql -vvv -h db -u root --database idseq_development"
