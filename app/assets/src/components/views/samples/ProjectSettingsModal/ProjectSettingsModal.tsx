@@ -17,7 +17,7 @@ interface ProjectSettingsModalProps {
   onUserAdded?: $TSFixMeFunction;
   onProjectPublished?: $TSFixMeFunction;
   project: {
-    id?: number;
+    id?: string;
     creator_id?: number;
     name?: string;
     public_access?: boolean | number;

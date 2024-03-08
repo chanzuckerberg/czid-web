@@ -63,7 +63,7 @@ export const SampleViewHeader = ({
   const getAllRunsPerWorkflow = () => {
     const runsByType =
       sample?.workflow_runs &&
-      sample.workflow_runs.filter(run => run.workflow === workflow);
+      sample.workflow_runs.filter(run => run?.workflow === workflow);
     return isMngsWorkflow(workflow) ? get("pipeline_runs", sample) : runsByType;
   };
 

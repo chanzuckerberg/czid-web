@@ -327,7 +327,7 @@ const saveProjectName = (projectId: $TSFixMe, projectName: $TSFixMe) =>
   });
 
 const validateProjectName = (
-  projectId: number,
+  projectId: string,
   projectName: string,
 ): Promise<{ valid: boolean; sanitizedName: string; message: string }> =>
   get(`/projects/${projectId}/validate_project_name.json`, {
@@ -455,7 +455,7 @@ const getWorkflowRunsInfo = (workflowRunIds: $TSFixMe) =>
   postWithCSRF("/workflow_runs/workflow_runs_info", { workflowRunIds });
 
 const getWorkflowRunResults = (
-  workflowRunId: number,
+  workflowRunId: string,
 ): Promise<AmrWorkflowResult | BenchmarkWorkflowRunResults> =>
   get(`/workflow_runs/${workflowRunId}/results`);
 

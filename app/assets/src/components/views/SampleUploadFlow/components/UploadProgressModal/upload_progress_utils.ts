@@ -159,6 +159,6 @@ export const addAdditionalInputFilesToSamples = ({
   return samples;
 };
 
-export const redirectToProject = (projectId: number) => {
+export const redirectToProject = (projectId: string) => {
   location.href = `/home?project_id=${projectId}`;
 };

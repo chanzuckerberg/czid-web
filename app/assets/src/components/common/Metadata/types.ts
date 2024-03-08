@@ -6,9 +6,9 @@ import {
   MetadataType,
   MetadataTypes,
   MetadataValue,
-  NameId,
   SampleFromApi,
   SampleType,
+  StringNameId,
 } from "~/interface/shared";
 
 export interface Issues {
@@ -42,7 +42,7 @@ export interface MetadataCSVUploadState {
   metadata: CSV;
   validatingCSV: boolean;
   lastSampleNamesValidated: string[];
-  lastProjectIdValidated: number;
+  lastProjectIdValidated: string;
 }
 
 export interface MetadataInputProps {
@@ -121,7 +121,7 @@ export interface MetadataUploadProps {
     validatingCSV?: boolean;
   }) => void;
   onShowCSVInstructions: $TSFixMeFunction;
-  project?: NameId;
+  project?: StringNameId;
   className?: string;
   samples?: SampleFromApi[];
   visible?: boolean;

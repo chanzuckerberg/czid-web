@@ -224,7 +224,7 @@ class DiscoveryDataLayer {
   benchmarkWorkflowRuns: ObjectCollection<any, string>;
   domain: string;
   longReadMngsSamples: ObjectCollection<any, string>;
-  projects: ObjectCollection<any, number>;
+  projects: ObjectCollection<any, string>;
   samples: ObjectCollection<any, string>;
   visualizations: ObjectCollection<any, number>;
   constructor(domain: string) {

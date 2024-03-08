@@ -6,7 +6,7 @@ import { SubtextDropdown } from "~ui/controls/dropdowns";
 
 interface ProjectSelectProps {
   projects: Project[];
-  value: number; // the project id
+  value: string; // the project id
   onChange: $TSFixMeFunction; // the entire project object is returned
   disabled?: boolean;
   erred?: boolean;

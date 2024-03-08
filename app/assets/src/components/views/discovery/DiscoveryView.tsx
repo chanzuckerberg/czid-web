@@ -166,10 +166,10 @@ export class DiscoveryView extends React.Component<
   configForWorkflow: Record<WorkflowType, ConfigForWorkflow>;
   dataLayer: DiscoveryDataLayer;
   longReadMngsSamples: ObjectCollectionView<PipelineTypeRun, string>;
-  mapPreviewProjects: ObjectCollectionView<Project, number>;
+  mapPreviewProjects: ObjectCollectionView<Project, string>;
   mapPreviewSamples: ObjectCollectionView<PipelineTypeRun, string>;
   mapPreviewSidebar: MapPreviewSidebar;
-  projects: ObjectCollectionView<Project, number>;
+  projects: ObjectCollectionView<Project, string>;
   projectsView: ProjectsView;
   samples: ObjectCollectionView<PipelineTypeRun, string>;
   samplesView: React.RefObject<SamplesViewHandle>;
@@ -1362,7 +1362,7 @@ export class DiscoveryView extends React.Component<
       sdsTaxonFilterData,
     }: {
       key: string;
-      value: number;
+      value: string;
       text: string;
       sdsTaxonFilterData: {
         id: number;
@@ -2752,7 +2752,7 @@ export class DiscoveryView extends React.Component<
 interface DiscoveryViewWithFCProps extends DiscoveryViewProps {
   allowedFeatures: string[];
   isAdmin: boolean;
-  updateDiscoveryProjectId: (projectIds: number | null) => void;
+  updateDiscoveryProjectId: (projectIds: string | null) => void;
   // NextGen props:
   cgWorkflowIds?: string[];
   cgRows: Array<CgRow | undefined>;

@@ -30,7 +30,7 @@ export const getNonNumericColumns = (
   isPhyloTreeAllowed: boolean,
   pipelineRunId: number | string | null,
   pipelineVersion: string,
-  projectId: number,
+  projectId: string,
   sampleId: SampleId,
   handlePhyloTreeModalOpen: (
     phyloTreeModalParams: PhyloTreeModalParamsType,

@@ -4,7 +4,7 @@ import React from "react";
 import { getSamples } from "~/api";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { showToast } from "~/components/utils/toast";
-import { NameId, SampleFromApi } from "~/interface/shared";
+import { SampleFromApi, StringNameId } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import Wizard from "~ui/containers/Wizard";
 import ListNotification from "~ui/notifications/ListNotification";
@@ -16,7 +16,7 @@ import UploadPage from "./UploadPage";
 interface MetadataUploadModalProps {
   onClose?: $TSFixMeFunction;
   onComplete?: $TSFixMeFunction;
-  project?: NameId;
+  project?: StringNameId;
   workflow?: string;
 }
 

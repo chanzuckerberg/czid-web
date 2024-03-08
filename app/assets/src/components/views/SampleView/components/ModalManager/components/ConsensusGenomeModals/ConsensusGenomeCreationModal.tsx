@@ -102,7 +102,7 @@ export const ConsensusGenomeCreationModal = ({
               taxon_id: consensusGenomeCreationParams.taxonId?.toString(),
               taxon_name: consensusGenomeCreationParams.taxonName,
               alignment_config_name:
-                sample?.pipeline_runs[0]?.alignment_config_name,
+                sample?.pipeline_runs?.[0]?.alignment_config_name,
               technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
             },
             authenticityToken: getCsrfToken(),

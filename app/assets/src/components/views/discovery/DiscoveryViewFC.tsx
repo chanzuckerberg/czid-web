@@ -142,7 +142,7 @@ async function queryWorkflowRuns(
     workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
   };
   if (projectId != null) {
-    where.collectionId = { _in: [projectId] };
+    where.collectionId = { _in: [parseInt(projectId)] };
   }
   const input: queryInput_fedWorkflowRuns_input_Input = {
     where,
@@ -469,9 +469,12 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   >();
   const [cgFullRows, setCgFullRows] = useState<Array<CgRow | undefined>>([]);
 
-  const updateDiscoveryProjectId = (projectId: number | null) => {
+  const updateDiscoveryProjectId = (projectId: string | null) => {
     globalContext?.globalContextDispatch(
-      createAction(ActionType.UPDATE_DISCOVERY_PROJECT_IDS, projectId),
+      createAction(
+        ActionType.UPDATE_DISCOVERY_PROJECT_IDS,
+        projectId ? parseInt(projectId) : null,
+      ),
     );
   };
 

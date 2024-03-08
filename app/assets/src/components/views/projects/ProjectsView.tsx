@@ -37,7 +37,7 @@ interface ProjectsViewProps {
   onMapTooltipTitleClick?: $TSFixMeFunction;
   onProjectSelected?: $TSFixMeFunction;
   onSortColumn?: $TSFixMeFunction;
-  projects: ObjectCollectionView<Project, number>;
+  projects: ObjectCollectionView<Project, string>;
   sortable?: boolean;
   sortBy?: string;
   sortDirection?: SortDirectionType;

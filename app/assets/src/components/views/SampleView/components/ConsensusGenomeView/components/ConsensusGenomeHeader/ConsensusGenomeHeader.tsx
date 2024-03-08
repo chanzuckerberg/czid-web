@@ -1,6 +1,7 @@
 import cx from "classnames";
 import { find, size } from "lodash/fp";
 import React from "react";
+import { isNotNullish } from "~/components/utils/typeUtils";
 import { WorkflowType } from "~/components/utils/workflows";
 import { RUNNING_STATE } from "~/components/views/SampleView/utils";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -25,9 +26,9 @@ export const ConsensusGenomeHeader = ({
     workflowRun?.inputs?.accession_id,
   );
 
-  const consensusGenomeWorkflowRuns = sample.workflow_runs?.filter(
-    run => run.workflow === WorkflowType.CONSENSUS_GENOME,
-  );
+  const consensusGenomeWorkflowRuns = sample.workflow_runs
+    ?.filter(isNotNullish)
+    .filter(run => run?.workflow === WorkflowType.CONSENSUS_GENOME);
 
   const shouldRenderCGDropdown = size(consensusGenomeWorkflowRuns) > 1;
 

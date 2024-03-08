@@ -22,6 +22,11 @@ export interface NameId extends NumberId {
   name: string;
 }
 
+export interface StringNameId {
+  name: string;
+  id: string;
+}
+
 export interface LabelVal {
   label: string;
   value: string;

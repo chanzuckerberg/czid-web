@@ -1,4 +1,5 @@
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
+import Project from "~/interface/project";
 import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
@@ -10,7 +11,7 @@ import {
   Lineage,
   SampleReportViewMode,
 } from "~/interface/sampleView";
-import { Background, NumberId, PipelineRun, Taxon } from "~/interface/shared";
+import { Background, PipelineRun, Taxon } from "~/interface/shared";
 import { DispatchSelectedOptionsType } from "../../utils";
 
 export interface ReportPanelProps {
@@ -37,7 +38,7 @@ export interface ReportPanelProps {
   loadingReport: boolean;
   ownedBackgrounds: Background[];
   otherBackgrounds: Background[];
-  project: NumberId | null;
+  project: Project | null;
   reportData: Taxon[];
   reportMetadata: ReportMetadata;
   sample: Sample | null;

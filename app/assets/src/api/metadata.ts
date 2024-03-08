@@ -32,7 +32,7 @@ const getSampleMetadataFields = (ids: $TSFixMe, snapshotShareId?: $TSFixMe) =>
   );
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
-const getProjectMetadataFields = (ids: number | number[]) =>
+const getProjectMetadataFields = (ids: string | string[]) =>
   get("/projects/metadata_fields", {
     params: {
       projectIds: flatten([ids]),

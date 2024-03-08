@@ -7,7 +7,7 @@ import cs from "./public_project_confirmation_modal.scss";
 interface PublicProjectConfirmationModalProps {
   onConfirm: $TSFixMeFunction;
   project: {
-    id?: number;
+    id?: string;
     name?: string;
     public_access?: boolean | number;
   };

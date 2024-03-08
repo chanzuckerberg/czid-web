@@ -10,7 +10,7 @@ export interface DiscoveryViewProps extends RouteComponentProps {
   admin?: boolean;
   domain: string;
   mapTilerKey?: string;
-  projectId?: number;
+  projectId?: string;
   snapshotProjectDescription?: string;
   snapshotProjectName?: string;
   snapshotShareId?: string;
@@ -92,7 +92,7 @@ export interface DiscoveryViewState {
   orderDirection: SortDirectionType;
   project: Project;
   projectDimensions: DimensionsDetailed;
-  projectId: number;
+  projectId: string;
   plqcPreviewedSamples?: string[];
   rawMapLocationData: Record<string, MapEntry>;
   sampleActiveColumnsByWorkflow: { [workflow: string]: string[] };
@@ -134,7 +134,7 @@ export interface ConfigForWorkflow {
 }
 
 export interface Conditions {
-  projectId: number;
+  projectId: string;
   snapshotShareId: string;
   search: string;
   orderBy?: string;

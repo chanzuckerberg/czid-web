@@ -30,7 +30,7 @@ interface GeneLevelDownloadOptionProps {
   geneName: string;
   option: SDSFormattedDropdownOption;
   reads: string | null;
-  workflowRunId: number;
+  workflowRunId: string;
   workflowWdlVersion: string;
 }
 

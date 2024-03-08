@@ -16,7 +16,7 @@ import LandingV2 from "~/components/views/LandingV2";
 import MetadataDictionary from "~/components/views/metadata/MetadataDictionary";
 import { PathogenListView } from "~/components/views/PathogenListView/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
-import SampleView from "~/components/views/SampleView/SampleView";
+import SampleView from "~/components/views/SampleView";
 import FAQPage from "~/components/views/support/FAQPage";
 import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoticeForUserResearch";
 import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";
@@ -29,7 +29,7 @@ interface DiscoveryViewRouterProps {
   admin: boolean;
   domain: string;
   mapTilerKey: string;
-  projectId: number;
+  projectId: string;
   snapshotProjectDescription: string;
   snapshotProjectName: string;
   snapshotShareId: string;

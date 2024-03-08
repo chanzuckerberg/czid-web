@@ -1,4 +1,5 @@
 import React from "react";
+import { isNotNullish } from "~/components/utils/typeUtils";
 import { WORKFLOWS, WorkflowType } from "~/components/utils/workflows";
 import {
   FINALIZED_SAMPLE_UPLOAD_ERRORS,
@@ -38,9 +39,10 @@ export const SampleViewOverflowMenu = ({
       currentTab,
     });
   if (!isVisible) return <></>;
-  const workflowRuns = sample?.workflow_runs || [];
+  const workflowRuns = sample?.workflow_runs?.filter(isNotNullish) || [];
+  const pipelineRuns = sample?.pipeline_runs?.filter(isNotNullish) || [];
   const redirectOnSuccess =
-    sample && [...sample.pipeline_runs, ...workflowRuns].length === 1;
+    sample && [...pipelineRuns, ...workflowRuns].length === 1;
   const runFinalized =
     currentRun?.run_finalized ||
     FINALIZED_SAMPLE_UPLOAD_ERRORS.includes(

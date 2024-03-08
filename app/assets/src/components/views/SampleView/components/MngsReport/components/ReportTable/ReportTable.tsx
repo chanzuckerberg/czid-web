@@ -22,6 +22,7 @@ import {
   TAX_LEVEL_SPECIES,
 } from "~/components/views/SampleView/utils";
 import { Table } from "~/components/visualizations/table";
+import { WorkflowRun } from "~/interface/sample";
 import {
   BlastData,
   ColumnProps,
@@ -62,7 +63,7 @@ interface ReportTableProps {
   // Needed only for hover actions
   // Consider adding a callback to render the hover actions
   currentTab: CurrentTabSample;
-  consensusGenomeData?: Record<string, object[]>;
+  consensusGenomeData?: Record<string, (WorkflowRun | null | undefined)[]>;
   isAlignVizAvailable: boolean;
   isConsensusGenomeEnabled: boolean;
   isFastaDownloadEnabled: boolean;
@@ -74,7 +75,7 @@ interface ReportTableProps {
   onPreviousConsensusGenomeClick: (params: ConsensusGenomeClick) => void;
   pipelineRunId?: number | string | null;
   pipelineVersion?: string | null;
-  projectId?: number;
+  projectId?: string;
   projectName?: string;
   sampleId?: SampleId;
   snapshotShareId?: string;

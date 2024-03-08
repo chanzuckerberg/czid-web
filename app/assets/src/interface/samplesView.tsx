@@ -46,7 +46,7 @@ export interface SamplesViewProps {
     sortBy: string;
     sortDirection: SortDirectionType;
   }): void;
-  projectId?: number;
+  projectId?: string;
   protectedColumns?: string[];
   sampleStatsSidebarOpen?: boolean;
   selectableIds?: string[];
@@ -65,7 +65,7 @@ export interface Conditions {
   filters?: FilterList;
   orderBy?: string;
   orderDir?: SortDirectionType;
-  projectId?: number;
+  projectId?: string;
   search?: string;
   snapshotShareId?: string;
   workflow?: WorkflowType;

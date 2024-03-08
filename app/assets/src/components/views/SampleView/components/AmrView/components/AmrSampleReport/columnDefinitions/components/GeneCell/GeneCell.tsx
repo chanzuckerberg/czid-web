@@ -16,7 +16,7 @@ interface GeneCellProps {
   setDetailsSidebarGeneName: (geneName: string | null) => void;
   geneId: string;
   reads: string | null;
-  workflowRunId: number;
+  workflowRunId: string;
   workflowWdlVersion: string;
 }
 

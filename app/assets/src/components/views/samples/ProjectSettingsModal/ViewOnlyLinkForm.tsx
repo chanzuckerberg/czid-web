@@ -23,7 +23,7 @@ import cs from "./view_only_link_form.scss";
 
 interface ViewOnlyLinkFormProps {
   project: {
-    id?: number;
+    id?: string;
   };
 }
 

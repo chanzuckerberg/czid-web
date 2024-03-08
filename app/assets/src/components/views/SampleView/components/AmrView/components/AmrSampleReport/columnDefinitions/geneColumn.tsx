@@ -7,7 +7,7 @@ import { GENE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export function getGeneColumn(
   setDetailsSidebarGeneName: (setDetailsSidebarGeneName: string | null) => void,
-  workflowRunId: number,
+  workflowRunId: string,
   workflowWdlVersion: string,
 ) {
   return {

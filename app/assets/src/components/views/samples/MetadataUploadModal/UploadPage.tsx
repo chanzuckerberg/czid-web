@@ -1,13 +1,13 @@
 import React from "react";
 import { validateManualMetadataForProject } from "~/api/metadata";
 import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
-import { NameId, SampleFromApi } from "~/interface/shared";
+import { SampleFromApi, StringNameId } from "~/interface/shared";
 import Instructions from "./Instructions";
 import cs from "./metadata_upload_modal.scss";
 
 interface UploadPageProps {
   onMetadataChange: $TSFixMeFunction;
-  project?: NameId;
+  project?: StringNameId;
   wizardEnableContinue?: $TSFixMeFunction;
   wizardSetOnContinueValidation?: $TSFixMeFunction;
   wizardSetOverlay?: $TSFixMeFunction;

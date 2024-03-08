@@ -34,7 +34,7 @@ interface MapPreviewSidebarProps {
   onSelectionUpdate: (selectedIds: Set<string>) => void;
   onTabChange?: $TSFixMeFunction;
   projectDimensions?: DimensionsDetailed;
-  projects?: ObjectCollectionView<Project, number>;
+  projects?: ObjectCollectionView<Project, string>;
   projectStats?: object;
   sampleDimensions?: DimensionsDetailed;
   samples?: ObjectCollectionView<PipelineTypeRun, string>;

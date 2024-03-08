@@ -10,7 +10,11 @@ import { PipelineVersionSelectConfig } from "./workflowTypeConfig";
 
 interface PipelineVersionSelectProps {
   currentRun?: WorkflowRun | PipelineRun;
-  allRuns?: WorkflowRun[] | PipelineRun[] | string[];
+  allRuns?:
+    | readonly (PipelineRun | null | undefined)[]
+    | (WorkflowRun | null | undefined)[]
+    | string[]
+    | null;
   workflowType: WorkflowType;
   onVersionChange: (x: string) => void;
 }
@@ -32,9 +36,9 @@ export const PipelineVersionSelect = ({
   if (!lastProcessedAt || !currentPipelineVersion) return null;
 
   const allPipelineVersions: string[] =
-    allRuns.length > 0 && typeof allRuns[0] === "string"
-      ? allRuns
-      : [...new Set(allRuns?.map(run => run[versionKey]))];
+    allRuns && allRuns.length > 0 && typeof allRuns[0] === "string"
+      ? (allRuns as string[])
+      : ([...new Set(allRuns?.map(run => run[versionKey]))] as string[]);
 
   const otherPipelineVersions = allPipelineVersions.filter(
     (otherPipelineVersion: string) =>

@@ -7,7 +7,7 @@ import cs from "./project_upload_menu.scss";
 interface ProjectUploadMenuProps {
   onMetadataUpdated?: $TSFixMeFunction;
   project?: {
-    id?: number;
+    id?: string;
     name?: string;
   };
   workflow?: string;

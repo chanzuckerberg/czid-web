@@ -27,7 +27,7 @@ export const getWorkflowCount = (sample: Sample): WorkflowCount => {
         break;
       case WORKFLOW_ENTITIES.WORKFLOW_RUNS:
         count[workflow] = size(
-          sample.workflow_runs?.filter(run => run.workflow === workflow),
+          sample.workflow_runs?.filter(run => run?.workflow === workflow),
         );
         break;
     }

@@ -11,7 +11,7 @@ interface UserManagementFormProps {
   csrf?: string;
   onUserAdded?: $TSFixMeFunction;
   project: {
-    id?: number;
+    id?: string;
     name?: string;
     public_access?: boolean | number;
   };

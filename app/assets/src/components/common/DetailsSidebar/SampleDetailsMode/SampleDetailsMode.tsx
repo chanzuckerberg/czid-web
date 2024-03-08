@@ -10,6 +10,7 @@ import { getAllSampleTypes } from "~/api";
 import { getCsrfToken } from "~/api/utils";
 import Tabs from "~/components/ui/controls/Tabs";
 import { REMOVE_HEATMAP_DEFAULT_BG } from "~/components/utils/features";
+import { isNotNullish } from "~/components/utils/typeUtils";
 import {
   generateUrlToSampleView,
   TempSelectedOptionsShape,
@@ -400,9 +401,9 @@ export const SampleDetailsMode = ({
 
       const consensusGenomeWorkflowRuns =
         sample &&
-        sample.workflow_runs?.filter(
-          run => run.workflow === WorkflowType.CONSENSUS_GENOME,
-        );
+        sample.workflow_runs
+          ?.filter(isNotNullish)
+          .filter(run => run.workflow === WorkflowType.CONSENSUS_GENOME);
 
       return (
         <>

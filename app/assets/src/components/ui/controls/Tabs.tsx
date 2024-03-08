@@ -56,6 +56,7 @@ const Tabs = ({
   const normalizedTabs = tabs.map(tab => {
     return typeof tab === "string" ? { value: tab, label: tab } : tab;
   });
+
   return (
     <div className={cx(cs.tabs, className)}>
       <div className={cx(cs.tabWrapper)}>

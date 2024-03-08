@@ -11,6 +11,7 @@ import {
   uniq,
 } from "lodash/fp";
 import React, {
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -18,11 +19,12 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useLazyLoadQuery } from "react-relay";
 import { toast } from "react-toastify";
+import { graphql } from "relay-runtime";
 import {
   getBackgrounds,
   getCoverageVizSummary,
-  getSample,
   getSampleReportData,
   getSamples,
 } from "~/api";
@@ -40,6 +42,7 @@ import {
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { getCoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/utils";
+import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
@@ -71,6 +74,7 @@ import {
   getAllGeneraPathogenCounts,
   getGeneraPathogenCounts,
 } from "~/helpers/taxon";
+import Project from "~/interface/project";
 import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
@@ -89,10 +93,10 @@ import {
   AccessionData,
   Background,
   ConsensusGenomeData,
-  NumberId,
   PipelineRun,
   Taxon,
 } from "~/interface/shared";
+import { SampleViewSampleQuery } from "./__generated__/SampleViewSampleQuery.graphql";
 import { initialAmrContext } from "./components/AmrView/amrContext/initialState";
 import {
   AmrContext,
@@ -146,7 +150,68 @@ import {
 //  4.  Whenever selectedOptions or other fields stored in the url change, the component needs to update the URL.
 //  5.  If the user manually changes selectedOptions (e.g. by clicking on a filter) then the component needs to update the local storage
 
-const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
+const SampleQuery = graphql`
+  query SampleViewSampleQuery($railsSampleId: String, $snapshotLinkId: String) {
+    SampleForReport(
+      railsSampleId: $railsSampleId
+      snapshotLinkId: $snapshotLinkId
+    ) {
+      id
+      created_at
+      default_background_id
+      default_pipeline_run_id
+      editable
+      host_genome_id
+      initial_workflow
+      name
+      pipeline_runs {
+        adjusted_remaining_reads
+        alignment_config_name
+        assembled
+        created_at
+        id
+        pipeline_version
+        run_finalized
+        total_ercc_reads
+        wdl_version
+      }
+      project {
+        id
+        name
+      }
+      project_id
+      railsSampleId
+      status
+      updated_at
+      upload_error
+      user_id
+      workflow_runs {
+        deprecated
+        executed_at
+        id
+        input_error
+        inputs {
+          accession_id
+          accession_name
+          creation_source
+          ref_fasta
+          taxon_id
+          taxon_name
+          technology
+        }
+        run_finalized
+        status
+        wdl_version
+        workflow
+      }
+    }
+  }
+`;
+
+const SampleViewComponent = ({
+  snapshotShareId,
+  sampleId,
+}: SampleViewProps) => {
   const trackEvent = useRef<TrackEventType | null>(null);
   trackEvent.current = useTrackEvent();
   const { allowedFeatures } = useContext(UserContext) || {};
@@ -160,7 +225,6 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
     workflowRunIdFromUrl,
     currentTabFromUrl,
   } = getStateFromUrlandLocalStorage(location, localStorage);
-
   const initialCurrentTab = useRef(currentTabFromUrl);
 
   const [pipelineVersion, setPipelineVersion] = useState<string>(
@@ -182,7 +246,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   const [view, setView] = useState<SampleReportViewMode>(
     viewFromUrl || ("table" as const),
   );
-  const [workflowRunId, setWorkflowRunId] = useState<number | null>(
+  const [workflowRunId, setWorkflowRunId] = useState<string | null>(
     workflowRunIdFromUrl || null,
   );
   const [backgrounds, setBackgrounds] = useState<Background[]>([]);
@@ -193,8 +257,8 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   >(null);
   const [isCreatingPersistedBackground, setIsCreatingPersistedBackground] =
     useState(false);
-  const [sample, setSample] = useState<Sample | null>(null);
-  const [project, setProject] = useState<NumberId | null>(null);
+  const [sample, setSample] = useState<Readonly<Sample> | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [projectSamples, setProjectSamples] = useState<
     Pick<Sample, "id" | "name">[]
   >([]);
@@ -252,6 +316,17 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   );
 
   const [showIndexWarning, setShowIndexWarning] = useState<boolean>(false);
+
+  const sampleData = useLazyLoadQuery<SampleViewSampleQuery>(SampleQuery, {
+    railsSampleId: sampleId?.toString(),
+    snapshotLinkId: snapshotShareId,
+  });
+
+  useEffect(() => {
+    if (sampleData?.SampleForReport) {
+      setSample(sampleData.SampleForReport as unknown as Sample);
+    }
+  }, [sampleData]);
 
   const prevPipelineVersion = usePrevious(pipelineVersion);
   const prevSelectedOptions = usePrevious(selectedOptions);
@@ -329,34 +404,26 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   }, []);
 
   useEffect(() => {
-    const fetchSample = async (sampleId: number) => {
-      setLoadingReport(true);
-      const sample = await getSample({ snapshotShareId, sampleId });
-      sample.id = sampleId.toString();
-
-      setSample(sample);
-      setProject(sample.project);
-
-      const pipelineRun = getPiplineRunByVersionOrId(pipelineVersion, sample);
-      const enableMassNormalizedBackgrounds =
-        shouldEnableMassNormalizedBackgrounds(pipelineRun);
-      setPipelineRun(pipelineRun);
-      setEnableMassNormalizedBackgrounds(enableMassNormalizedBackgrounds);
-
-      const newCurrentTab = determineInitialTab({
-        initialWorkflow: sample.initial_workflow,
-        workflowCount: getWorkflowCount(sample),
-        currentTab: initialCurrentTab.current,
-      });
-
-      setCurrentTab(newCurrentTab);
-    };
-    if (sampleId) {
-      fetchSample(sampleId).catch(error => {
-        console.error(error);
-      });
+    if (!sample) {
+      return;
     }
-  }, [snapshotShareId, sampleId, pipelineVersion]);
+
+    setProject(sample.project);
+
+    const pipelineRun = getPiplineRunByVersionOrId(pipelineVersion, sample);
+    const enableMassNormalizedBackgrounds =
+      shouldEnableMassNormalizedBackgrounds(pipelineRun);
+    setPipelineRun(pipelineRun);
+    setEnableMassNormalizedBackgrounds(enableMassNormalizedBackgrounds);
+
+    const newCurrentTab = determineInitialTab({
+      initialWorkflow: sample.initial_workflow,
+      workflowCount: getWorkflowCount(sample),
+      currentTab: initialCurrentTab.current,
+    });
+
+    setCurrentTab(newCurrentTab);
+  }, [snapshotShareId, sampleId, pipelineVersion, sample]);
 
   useEffect(() => {
     // track Clicks on tabs
@@ -458,9 +525,9 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       !ignoreProjectBackground &&
       hasPersistedBackground === null
     ) {
-      fetchPersistedBackground({ projectId: project.id });
+      fetchPersistedBackground({ projectId: project && parseInt(project.id) });
     }
-  }, [project?.id, ignoreProjectBackground, hasPersistedBackground]);
+  }, [project, project?.id, ignoreProjectBackground, hasPersistedBackground]);
 
   const processRawSampleReportData = useCallback(
     (rawReportData: RawReportData) => {
@@ -624,7 +691,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
         }
 
         await persistBackgroundApi({
-          projectId: project?.id,
+          projectId: parseInt(project.id),
           backgroundId: newBackgroundId,
         })
           .then(() => {
@@ -731,8 +798,8 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   );
 
   useEffect(() => {
-    project?.id && updateDiscoveryProjectId(project.id);
-  }, [project?.id, updateDiscoveryProjectId]);
+    project?.id && updateDiscoveryProjectId(project && parseInt(project.id));
+  }, [project, project?.id, updateDiscoveryProjectId]);
 
   useEffect(() => {
     const fetchProjectSamples = async (
@@ -750,9 +817,11 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       setProjectSamples(projectSamples.samples);
     };
     project?.id &&
-      fetchProjectSamples(project.id, snapshotShareId).catch(error => {
-        console.error("Error fetching project samples", error);
-      });
+      fetchProjectSamples(parseInt(project.id), snapshotShareId).catch(
+        error => {
+          console.error("Error fetching project samples", error);
+        },
+      );
   }, [project?.id, snapshotShareId]);
 
   useEffect(() => {
@@ -882,13 +951,17 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       ? "pipeline_runs"
       : "workflow_runs";
 
-    const runs: { id: number | string | null | undefined }[] =
-      sample[runType] || [];
+    const runs: readonly (
+      | { id: number | string | null | undefined }
+      | null
+      | undefined
+    )[] = sample[runType] || [];
 
     // filter out the current run
     const currentRun = getCurrentRun();
+
     const newRuns =
-      (currentRun && runs.filter(run => run.id !== currentRun.id)) || [];
+      (currentRun && runs.filter(run => run?.id !== currentRun.id)) || [];
 
     // update the workflowCount object
     const count = workflowCount[workflow];
@@ -1109,7 +1182,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       // if there is a pipeline version, use that to choose which workflow run to return
       if (pipelineVersion) {
         return sample?.workflow_runs?.find(run => {
-          if (run.workflow === workflowType && !!run.wdl_version) {
+          if (run && run.workflow === workflowType && !!run.wdl_version) {
             return run.wdl_version === pipelineVersion;
           } else {
             return false;
@@ -1118,7 +1191,7 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
       } else {
         // otherwise return the first workflow run of the currentTab workflow type
         return head(
-          sample?.workflow_runs?.filter(run => run.workflow === workflowType),
+          sample?.workflow_runs?.filter(run => run?.workflow === workflowType),
         );
       }
     }
@@ -1288,4 +1361,21 @@ const SampleView = ({ snapshotShareId, sampleId }: SampleViewProps) => {
   );
 };
 
-export default SampleView;
+interface SampleViewWrapperProps {
+  sampleId: number;
+  snapshotShareId?: string;
+}
+
+export const SampleView = ({
+  sampleId,
+  snapshotShareId,
+}: SampleViewWrapperProps) => {
+  return (
+    <Suspense fallback={<LoadingPage />}>
+      <SampleViewComponent
+        sampleId={sampleId}
+        snapshotShareId={snapshotShareId}
+      />
+    </Suspense>
+  );
+};

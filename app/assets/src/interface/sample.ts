@@ -3,7 +3,7 @@ import { PipelineRun, SampleId } from "./shared";
 import { DateString } from "./shared/generic";
 
 export interface WorkflowRun {
-  id: number;
+  id: string;
   wdl_version: string;
   executed_at: DateString;
   workflow: WorkflowType;
@@ -63,8 +63,8 @@ export enum SampleStatus {
 export default interface Sample {
   error_message?: string;
   known_user_error?: string;
-  pipeline_runs: PipelineRun[];
-  workflow_runs?: WorkflowRun[];
+  pipeline_runs?: ReadonlyArray<PipelineRun> | null;
+  workflow_runs?: ReadonlyArray<WorkflowRun> | null;
   id: SampleId;
   name: string;
   created_at: DateString;
@@ -77,7 +77,7 @@ export default interface Sample {
   user_id: number;
   host_genome_id: number;
   project: {
-    id: number;
+    id: string;
     name: string;
   };
   project_id: number;

@@ -100,7 +100,7 @@ const QualityControlQuery = graphql`
 
 interface QualityControlProps {
   filters?: { host: number[] };
-  projectId: number;
+  projectId: string;
   handleBarClick: $TSFixMeFunction;
   sampleStatsSidebarOpen?: boolean;
   filtersSidebarOpen?: boolean;
@@ -129,7 +129,7 @@ function QualityControl({
   } | null>(null);
   const [tooltipClass, setTooltipClass] = useState(null);
   const data = useLazyLoadQuery<QualityControlQueryType>(QualityControlQuery, {
-    projectId: projectId,
+    projectId: parseInt(projectId), // TODO: this should be a string, but the query expects an int
     workflow: WorkflowType.SHORT_READ_MNGS,
     hostIds: filters?.host,
     ...filters,

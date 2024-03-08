@@ -1905,6 +1905,7 @@ type Query {
   CoverageVizSummary(snapshotLinkId: String, sampleId: String): [query_CoverageVizSummary_items]
   MetadataFields(snapshotLinkId: String, input: queryInput_MetadataFields_input_Input): [query_MetadataFields_items]
   SampleMetadata(snapshotLinkId: String, sampleId: String, input: queryInput_SampleMetadata_input_Input): SampleMetadata
+  SampleForReport(snapshotLinkId: String, railsSampleId: String): SampleForReport
   MngsWorkflowResults(snapshotLinkId: String, sampleId: String, workflowVersionId: String, _backgroundId: String): MngsWorkflowResults
   Pathogens(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Pathogens_items]
   PersistedBackground(projectId: String): PersistedBackground
@@ -2390,6 +2391,45 @@ type query_PipelineData_stages_items_steps_items_inputVariables_items {
 type query_PipelineData_stages_items_steps_items_outputFiles_items {
   displayName: String
   url: JSON
+}
+
+type query_SampleForReport_pipeline_runs_items {
+  id: String
+  pipeline_version: String
+  wdl_version: String
+  created_at: String
+  alignment_config_name: String
+  assembled: Int
+  adjusted_remaining_reads: Int
+  total_ercc_reads: Int
+  run_finalized: Boolean
+}
+
+type query_SampleForReport_project {
+  id: String
+  name: String
+}
+
+type query_SampleForReport_workflow_runs_items {
+  id: String
+  status: String
+  workflow: String
+  wdl_version: String
+  executed_at: String
+  deprecated: Boolean
+  input_error: String
+  inputs: query_SampleForReport_workflow_runs_items_inputs
+  run_finalized: Boolean
+}
+
+type query_SampleForReport_workflow_runs_items_inputs {
+  accession_id: String
+  accession_name: String
+  taxon_id: String
+  taxon_name: String
+  technology: String
+  ref_fasta: String
+  creation_source: String
 }
 
 type query_SampleMetadata_additional_info {
@@ -3289,6 +3329,26 @@ type SampleEdge {
 
   """The item at the end of the edge"""
   node: Sample!
+}
+
+type SampleForReport {
+  id: String
+  railsSampleId: String
+  name: String
+  created_at: String
+  updated_at: String
+  project_id: Int
+  status: String
+  host_genome_id: Int
+  user_id: Int
+  upload_error: String
+  initial_workflow: String
+  project: query_SampleForReport_project
+  default_background_id: Int
+  default_pipeline_run_id: Int
+  editable: Boolean
+  pipeline_runs: [query_SampleForReport_pipeline_runs_items]
+  workflow_runs: [query_SampleForReport_workflow_runs_items]
 }
 
 type SampleGroupByOptions {

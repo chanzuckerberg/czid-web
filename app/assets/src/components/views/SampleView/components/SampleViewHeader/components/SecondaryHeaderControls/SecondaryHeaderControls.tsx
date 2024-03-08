@@ -10,7 +10,11 @@ import cs from "./secondary_header_controls.scss";
 interface SecondaryHeaderControlsProps {
   sample: Sample | null;
   currentRun?: WorkflowRun | PipelineRun | null;
-  getAllRuns: () => WorkflowRun[] | PipelineRun[] | undefined;
+  getAllRuns: () =>
+    | readonly (PipelineRun | null | undefined)[]
+    | (WorkflowRun | null | undefined)[]
+    | null
+    | undefined;
   workflow: WorkflowType;
   onPipelineVersionChange: (newPipelineVersion: string) => void;
   onDetailsClick: () => void;
@@ -29,7 +33,7 @@ export const SecondaryHeaderControls = ({
       {currentRun && (
         <PipelineVersionSelect
           currentRun={currentRun}
-          allRuns={getAllRuns()}
+          allRuns={getAllRuns && getAllRuns()}
           workflowType={workflow}
           onVersionChange={onPipelineVersionChange}
         />

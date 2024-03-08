@@ -5,6 +5,7 @@ import {
   SEQUENCING_TECHNOLOGY_OPTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
 import { ThresholdFilterData } from "../dropdown";
+import { WorkflowRun } from "../sample";
 import { BooleanNums, DateString, NameId, NumberId } from "./generic";
 export interface AccessionData {
   best_accessions: AccessionsSummary[];
@@ -66,7 +67,7 @@ export interface ConsensusGenomeData {
   taxId?: number;
   taxName?: string;
   usedAccessions?: string[];
-  previousRuns?: object[];
+  previousRuns?: WorkflowRun[];
 }
 
 export interface DownloadType {
@@ -225,7 +226,7 @@ export interface Project {
   description?: string;
   editable: boolean;
   hosts?: string[];
-  id: number;
+  id: string;
   locations?: string[];
   number_of_samples?: number;
   name: string;

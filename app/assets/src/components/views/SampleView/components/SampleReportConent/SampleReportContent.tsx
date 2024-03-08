@@ -5,7 +5,7 @@ import {
   CREATED_STATE,
   RUNNING_STATE,
   SUCCEEDED_STATE,
-} from "~/components/views/SampleView/utils/";
+} from "~/components/views/SampleView/utils";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { FailedMessage } from "./components/FailedMessage";
 import cs from "./sample_report_content.scss";

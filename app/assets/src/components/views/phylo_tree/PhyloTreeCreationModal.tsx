@@ -50,7 +50,7 @@ import PhyloTreeChecks from "./PhyloTreeChecks";
 interface PhyloTreeCreationModalProps {
   admin?: number;
   onClose?: $TSFixMeFunction;
-  projectId?: number;
+  projectId?: string;
   projectName?: string;
   minCoverageBreadth?: number;
   taxonId?: number;
@@ -80,7 +80,7 @@ interface PhyloTreeCreationModalState {
   projectList: Project[];
   taxonId: number;
   taxonName: string;
-  projectId: number;
+  projectId: string;
   projectName: string;
   showErrorTaxonAndProject: boolean;
   showErrorName: boolean;

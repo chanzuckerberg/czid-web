@@ -17,7 +17,7 @@ export enum DownloadOptions {
   INTERMEDIATE_FILES_LABEL = "Download Intermediate Files (.zip)",
 }
 
-const generateDownloadUrl = (workflowRunId: number, downloadType: string) =>
+const generateDownloadUrl = (workflowRunId: string, downloadType: string) =>
   `/workflow_runs/${workflowRunId}/amr_report_downloads?downloadType=${downloadType}`;
 
 // Get a map of download option to download path and
@@ -57,7 +57,7 @@ export const downloadAmrGeneLevelData = (
   downloadType: string,
   indexId: string,
   geneName: string,
-  workflowRunId: number,
+  workflowRunId: string,
 ) => {
   const params = getURLParamString({
     downloadType: downloadType,
