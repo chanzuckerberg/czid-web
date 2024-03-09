@@ -36,6 +36,19 @@ import {
   formatWetlabProtocol,
 } from "./discovery_api";
 import { DiscoveryView } from "./DiscoveryView";
+import { STATUS_TYPE } from "./TableRenderers";
+
+const NEXT_GEN_TO_LEGACY_STATUS: Record<string, keyof typeof STATUS_TYPE> = {
+  SUCCEEDED: "complete",
+  SUCCEEDED_WITH_ISSUE: "complete - issue",
+  TIMED_OUT: "timed out",
+  ABORTED: "aborted",
+  FAILED: "failed",
+  CREATED: "running",
+  PENDING: "waiting",
+  STARTED: "running",
+  RUNNING: "running",
+};
 
 // TODO(bchu): Add entityInputsInput.
 const DiscoveryViewFCWorkflowsQuery = graphql`
@@ -246,7 +259,10 @@ async function queryWorkflowRuns(
       return {
         id: run.id,
         createdAt: run.startedAt ?? undefined,
-        status: run.status != null ? toLower(run.status) : undefined,
+        status:
+          run.status != null
+            ? NEXT_GEN_TO_LEGACY_STATUS[run.status] ?? toLower(run.status)
+            : undefined,
         workflow: "consensus-genome", // TODO: Get this from the correct field in NextGen
         wdl_version:
           run.workflowVersion?.version != null

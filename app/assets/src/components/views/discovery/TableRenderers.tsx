@@ -9,17 +9,20 @@ import StatusLabel from "~ui/labels/StatusLabel";
 // CSS file must be loaded after any elements you might want to override
 import cs from "./table_renderers.scss";
 
-const STATUS_TYPE = {
+export const STATUS_TYPE = {
   complete: "success",
   failed: "error",
+  aborted: "error",
+  "timed out": "error",
   "complete - issue": "warning",
   "complete*": "warning",
   "post processing": "default",
   "host filtering": "default",
   alignment: "default",
+  running: "default",
   waiting: "default",
   skipped: "info",
-};
+} as const;
 
 class TableRenderers extends React.Component {
   static renderItemDetails = ({
