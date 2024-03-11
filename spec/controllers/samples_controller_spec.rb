@@ -990,6 +990,50 @@ RSpec.describe SamplesController, type: :controller do
                                    pipeline_runs_data: [{ finalized: 0, technology: illumina }])
 
         @sample_ids = [@sample1.id, @sample2.id]
+
+        # NextGen mocks: 1 workflow belonging to the user, the rest do not. Workflow UUID3 also
+        # has a pointer to rails_sample_id, which means we should fetch the sample name from Rails.
+        get_workflow_runs = JSON.parse({
+          "data": {
+            "workflow_runs": [
+              { "id": "Workflow-UUID1", "owner_user_id": @joe.id, "rails_workflow_run_id": "123" },
+              { "id": "Workflow-UUID2", "owner_user_id": 111, "rails_workflow_run_id": "456" },
+              { "id": "Workflow-UUID3", "owner_user_id": 111, "rails_workflow_run_id": "456" },
+            ],
+            "workflow_run_entity_inputs": [
+              { "workflow_run": { "id": "Workflow-UUID1" }, "input_entity_id": "Sample-UUID1" },
+              { "workflow_run": { "id": "Workflow-UUID2" }, "input_entity_id": "Sample-UUID2" },
+              { "workflow_run": { "id": "Workflow-UUID3" }, "input_entity_id": "Sample-UUID3" },
+            ],
+          },
+        }.to_json, object_class: OpenStruct)
+
+        get_samples = JSON.parse({
+          "data": {
+            "samples": [
+              { "id": "Sample-UUID2", "rails_sample_id": nil, "name": "Sample 2 in NextGen" },
+              { "id": "Sample-UUID3", "rails_sample_id": @sample2.id, "name": "Sample 3 in NextGen" },
+            ],
+          },
+        }.to_json, object_class: OpenStruct)
+
+        allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetWorkflowRuns, { variables: { workflow_run_ids: ["Workflow-UUID1", "Workflow-UUID2", "Workflow-UUID3"] } }).and_return(get_workflow_runs)
+        allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetSamples, { variables: { sample_ids: ["Sample-UUID2", "Sample-UUID3"] } }).and_return(get_samples)
+      end
+
+      context "when workflow is CG and NextGen UUIDs are passed in" do
+        it "returns valid UUIDs and invalid sample names" do
+          params = {
+            workflow: "consensus-genome",
+            selectedIds: ["Workflow-UUID1", "Workflow-UUID2", "Workflow-UUID3"],
+          }
+
+          post :validate_user_can_delete_objects, params: params
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:validIds]).to eq(["Workflow-UUID1"])
+          expect(json_response[:invalidSampleNames]).to eq(["Sample 2 in NextGen", @sample2.name])
+        end
       end
 
       context "when the workflow is mNGS and sample ids are passed in" do
