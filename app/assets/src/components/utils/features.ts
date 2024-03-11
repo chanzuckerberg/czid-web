@@ -30,4 +30,5 @@ export const PIN_PIPELINE_VERSIONS = "pin_pipeline_version";
 export const NCBI_COMPRESSED_INDEX = "ncbi_compressed_index";
 export const REMOVE_HEATMAP_DEFAULT_BG = "remove_heatmap_default_bg";
 // WGS to NextGen pipeline migration
+export const CREATE_NEXT_GEN_ENTITIES = "create_next_gen_entities";
 export const SHOULD_READ_FROM_NEXTGEN = "should_read_from_nextgen";

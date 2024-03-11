@@ -845,6 +845,26 @@ class SamplesController < ApplicationController
       resp = { samples: v2_samples, errors: errors }
     end
 
+    # Create entities in nextGen for WGS samples
+    if current_user.allowed_feature?("create_next_gen_entities")
+      all_sample_ids = samples.pluck(:id)
+      cg_sample_ids = Sample
+                      .where(id: all_sample_ids)
+                      .joins(:workflow_runs)
+                      .where(
+                        workflow_runs: {
+                          workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                          deprecated: false,
+                        }
+                      )
+                      .pluck(:id)
+                      .uniq
+      cg_samples = samples.select { |sample| cg_sample_ids.include?(sample.id) }
+      cg_samples.each do |sample|
+        SampleEntityCreationService.call(current_user.id, sample, sample.workflow_runs.last)
+      end
+    end
+
     samples.each do |sample|
       MetricUtil.log_analytics_event(
         EventDictionary::SAMPLE_UPLOAD_STARTED,
@@ -1455,6 +1475,13 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @sample.update(sample_params)
+        if current_user.allowed_feature?("create_next_gen_entities")
+          # Call service object to create file entity and link to sequencing read for WGS samples
+          if @sample.workflow_runs.any? { |wr| wr.workflow == WorkflowRun::WORKFLOW[:consensus_genome] }
+            SampleFileEntityLinkCreationService.call(current_user.id, @sample)
+          end
+        end
+
         format.html { redirect_to @sample, notice: 'Sample was successfully updated.' }
         format.json { render :show, status: :ok, location: @sample }
       else
