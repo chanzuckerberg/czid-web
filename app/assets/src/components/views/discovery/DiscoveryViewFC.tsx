@@ -197,7 +197,7 @@ async function queryWorkflowRuns(
 ): Promise<WorkflowRunRow[]> {
   const where: queryInput_fedWorkflowRuns_input_where_Input = {
     workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
-    deprecatedById: { _is_null: false },
+    deprecatedById: { _is_null: true },
   };
   if (projectId != null) {
     where.collectionId = { _in: [parseInt(projectId)] };
