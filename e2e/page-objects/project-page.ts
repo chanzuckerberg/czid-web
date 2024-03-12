@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { DownloadsPage } from "./downloads-page";
 import { HeatmapPage } from "./heatmap-page";
+import { NextcladePage } from "./nextclade-page";
 import { PageObject } from "./page-object";
 
 const UPLOAD_HEADER_LINK = "[data-testid='menu-item-upload']";
@@ -10,6 +11,10 @@ const SAMPLE_CHECKBOX_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${
 const SAMPLE_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleName}']/ancestor::div[@aria-rowindex]`;
 const DELETE_BUTTON_TESTID = "bulk-delete-trigger";
 const DOWNLOADS_LINK = "[class*='message'] [href='/bulk_downloads']";
+const NEXTCLADE_TREE_BUTTON = "[class*='action'] > div:not([data-testid])";
+const NEXTCLADE_OPTIONS = "[class*='treeTypeContainer'] [class*='name']";
+const VIEW_QC_IN_NEXTCLADE = "//button[text()='View QC in Nextclade']";
+const NEXTCLADE_CONFIRM_BUTTON = "//button[text()='Confirm']";
 const DOWNLOAD_BUTTON_TESTID = "download-icon";
 const DOWNLOAD_TYPES_LOCATOR = "[class*='downloadTypeContainer'] [class*='name']";
 export const START_GENERATING_DOWNLOAD_BUTTON = "//button[text()='Start Generating Download']";
@@ -23,6 +28,7 @@ const BACKGROUND_SEARCH_RESULTS = "[class*='optionText']";
 const BACKGROUND_FILTER_LABEL = "//div[contains(@class, 'downloadType')]//div[text()='Background' and contains(@class, 'label')]";
 const SEARCH_MY_DATA_INPUT = "[class*='header'] [class*='category search'] input";
 const HOST_SEARCH_RESULTS = "[category='host'] [class='title']";
+const PROJECT_SEARCH_RESULTS = "[category='Project'] [class='title']";
 
 const INCLUDE_SAMPLE_METADATA = "//span[text()='Include sample metadata in this table']/preceding-sibling::input";
 const SAMPLE_METEDATA = "Sample Metadata";
@@ -80,7 +86,9 @@ const COMPLETED_ROWS = "//div[contains(@class, 'sampleStatus') and @data-testid=
 const ROWS = "//div[contains(@class, 'sampleStatus')]//ancestor::div[@aria-rowindex]";
 const SAMPLE_NAME_BY_INDEX = (index: number) => `//div[contains(@class, "sampleStatus")]//ancestor::div[@aria-rowindex="${index}"]//div[contains(@class, "sampleName-")]`;
 const DELETE_CONFIRMATION_BUTTON = "//button[text()='Delete']";
+const ERROR_MESSAGE = "[class*='errorMessage']";
 const ALERT_MESSAGE = "[role='alert'][class*='toast-body']";
+const NOTIFICATION_MESSAGE = "[class*='notificationContainer']";
 const WORKFLOW_PARAM = {
   "ONT": "long-read-mngs",
   "mngs": "short-read-mngs",
@@ -212,6 +220,10 @@ export class ProjectPage extends PageObject {
     await this.page.locator(COLUMN_PLUS_BUTTON).click();
   }
 
+  public async clickProjectSearchResult(value: string) {
+    await this.page.locator(PROJECT_SEARCH_RESULTS).getByText(value).first().click();
+  }
+
   public async clickHostSearchResult(value: string) {
     await this.page.locator(HOST_SEARCH_RESULTS).getByText(value).first().click();
   }
@@ -296,6 +308,31 @@ export class ProjectPage extends PageObject {
     await this.page.locator(DOWNLOAD_TYPES_LOCATOR).getByText(downloadType).first().click();
   }
 
+  public async clickNextcladeTreeButton() {
+    await this.page.locator(NEXTCLADE_TREE_BUTTON).click();
+    await this.pause(1);
+  }
+
+  public async clickNextcladeDefaultTree() {
+    await this.page.locator(NEXTCLADE_OPTIONS).getByText("Nextclade Default Tree").click();
+  }
+
+  public async clickViewQCInNextcladeButton() {
+    await this.page.locator(VIEW_QC_IN_NEXTCLADE).click();
+  }
+
+  public async clickNextcladeConfirmButton() {
+    const [newPage] = await Promise.all([
+      this.page.context().waitForEvent("page"),
+      await this.page.locator(NEXTCLADE_CONFIRM_BUTTON).click(),
+    ]);
+    await newPage.waitForLoadState();
+    const nextcladePage = new NextcladePage(newPage);
+
+    await this.pause(3);
+    return nextcladePage;
+  }
+
   public async clickDownloadButton() {
     await this.page.getByTestId(DOWNLOAD_BUTTON_TESTID).click();
     await this.pause(1);
@@ -353,9 +390,23 @@ export class ProjectPage extends PageObject {
     return row.textContent();
   }
 
+  public async getErrorMessages() {
+    await this.page.locator(ERROR_MESSAGE).first().waitFor({timeout: 10000}).catch(() => null);
+    return this.page.locator(ERROR_MESSAGE).allTextContents();
+  }
+
   public async getAlertMessages() {
     await this.page.locator(ALERT_MESSAGE).first().waitFor({state: "visible"});
     return this.page.locator(ALERT_MESSAGE).allTextContents();
+  }
+
+  public async getNotificationMessages() {
+    const notificationLocator = this.page.locator(NOTIFICATION_MESSAGE).first();
+    await notificationLocator.waitFor({state: "visible"});
+    if (notificationLocator.isVisible()) {
+      await notificationLocator.locator("[class*='toggleContainer']").click();
+    }
+    return this.page.locator(NOTIFICATION_MESSAGE).allTextContents();
   }
 
   public async getSamplesTable() {
@@ -411,7 +462,7 @@ export class ProjectPage extends PageObject {
   }
 
   public async selectCompletedSamples(numberToSelect: number) {
-    const selectedSampleNames = [];
+    const selectedSampleNames = new Array<string>();
     const completedRowIndexes = await this.getCompletedRowIndexes();
     for (let i = 0; i < numberToSelect; i++) {
       const rowIndex = completedRowIndexes[i];

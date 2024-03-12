@@ -22,6 +22,7 @@ export const TRIM_PRIMER_FILENAME = "Primer_K.bed";
 const REF_FILE = (refFilename: string) => `./fixtures/reference_sequences/${refFilename}`;
 const TRIM_PRIMER_FILE = (trimPrimerFilename: string) => `./fixtures/trim_primers/${trimPrimerFilename}`;
 const METADATA_FILE_NAME = "metadata_template.csv";
+const WETLAB_PROTOCOL = "ARTIC v4/ARTIC v4.1";
 
 // Upload Samples
 const SELECT_BASESPACE_PROJECT_DROPDOWN = "[class*='basespaceSampleImport'] [class*='dropdownTrigger']";
@@ -561,7 +562,7 @@ export class UploadPage extends PageObject {
     try {
       for (const sampleName of Object.keys(inputs)) {
         const row = [
-          inputs[sampleName].sampleFile,
+          sampleName,
           inputs[sampleName].hostOrganism,
           inputs[sampleName].sampleTissueType,
           inputs[sampleName].nucleotideType,
@@ -608,11 +609,17 @@ export class UploadPage extends PageObject {
     }
     if (analysisType === WORKFLOWS.SC2) {
       await this.clickCheckboxForWorkflow(analysisType);
+      await this.pause(1);
       await this.clickSequencingPlatform(SEQUENCING_PLATFORMS.MNGS);
+      await this.pause(1);
 
-      await this.setTaxonFilter("VarSkip");
+      await this.setWetLabFilter(WETLAB_PROTOCOL);
     }
     await this.pause(2); // Pause to stabilze test performance
+  }
+
+  public async setWetLabFilter(filterName: string) {
+    await this.setTaxonFilter(filterName); // Same locators as wet lab filter
   }
 
   public async setTaxonFilter(filterName: string) {
@@ -655,6 +662,14 @@ export class UploadPage extends PageObject {
     const sampleNames = await this.getSampleNames();
     if (inputs === null) {
       inputs = await this.getRandomizedSampleInputs(sampleFiles, sampleNames);
+    } else {
+      const keys = Object.keys(inputs);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const newKey = sampleNames[i];
+        inputs[newKey] = inputs[key];
+        delete inputs[key];
+      }
     }
 
     // Continue
@@ -776,7 +791,7 @@ export class UploadPage extends PageObject {
       expectedResults = {
         "Analysis Type": "SARS-CoV-2 Consensus Genome",
         "Sequencing Platform": "Illumina",
-        "Wetlab Protocol": "VarSkip",
+        "Wetlab Protocol": WETLAB_PROTOCOL,
         "Pipeline Version": CONSENSUS_GENOME_PIPELINE_VERSION,
       };
     }
