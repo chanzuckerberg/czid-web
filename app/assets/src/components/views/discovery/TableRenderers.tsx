@@ -1,13 +1,15 @@
 import { Icon } from "@czi-sds/components";
 import cx from "classnames";
-import { at, get, isNil } from "lodash/fp";
+import { get } from "lodash/fp";
 import moment from "moment";
-import React from "react";
+import React, { Suspense } from "react";
+import { PreloadedQuery } from "react-relay";
 import BasicPopup from "~/components/BasicPopup";
 import { numberWithCommas } from "~/helpers/strings";
 import StatusLabel from "~ui/labels/StatusLabel";
-// CSS file must be loaded after any elements you might want to override
+import { DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType } from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
 import cs from "./table_renderers.scss";
+import { WorkflowCounts } from "./WorkflowCounts";
 
 export const STATUS_TYPE = {
   complete: "success",
@@ -73,45 +75,33 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderSampleCounts = ({ cellData: counts }) => {
-    const [
-      numberOfSamples,
-      mngsAnalysisRunsCount,
-      cgAnlaysisRunsCount,
-      amrAnalysisRunsCount,
-    ] = at(
-      [
-        "number_of_samples",
-        "mngs_runs_count",
-        "cg_runs_count",
-        "amr_runs_count",
-      ],
-      counts,
-    );
+  static renderSampleCounts = ({
+    cellData,
+    projectWorkflowsAggregateQueryRef,
+  }: {
+    cellData: any;
+    projectWorkflowsAggregateQueryRef:
+      | PreloadedQuery<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>
+      | null
+      | undefined;
+  }) => {
+    const numberOfSamples: number = get("number_of_samples", cellData);
+    const projectId: number = get("projectId", cellData);
 
-    const hasAllCounts =
-      !isNil(numberOfSamples) &&
-      !isNil(mngsAnalysisRunsCount) &&
-      !isNil(cgAnlaysisRunsCount) &&
-      !isNil(amrAnalysisRunsCount);
     return (
-      hasAllCounts && (
-        <div className={cs.counts}>
-          <div
-            className={cs.sampleCount}
-            data-testid="sample-counts"
-          >{`${numberOfSamples} Sample${
-            numberOfSamples !== 1 ? "s" : ""
-          }`}</div>
-          <div
-            className={cs.analysesCounts}
-            data-testid="nmgs-cg-sample-counts"
-          >
-            {`${mngsAnalysisRunsCount} mNGS`} | {`${cgAnlaysisRunsCount} CG`}
-            {` | ${amrAnalysisRunsCount} AMR`}
-          </div>
-        </div>
-      )
+      <div className={cs.base}>
+        <Suspense fallback={<div className={cs.loadingBackgroundAnimation} />}>
+          {projectWorkflowsAggregateQueryRef && cellData && (
+            <WorkflowCounts
+              projectWorkflowsAggregateQueryRef={
+                projectWorkflowsAggregateQueryRef
+              }
+              numberOfSamples={numberOfSamples}
+              projectId={projectId}
+            />
+          )}
+        </Suspense>
+      </div>
     );
   };
 

@@ -588,6 +588,10 @@ input EntityWhereClause {
   collectionId: IntComparators
 }
 
+type fedWorkflowRunsAggregate {
+  aggregate: [query_fedWorkflowRunsAggregate_aggregate_items]
+}
+
 type File {
   id: ID!
   entityId: ID!
@@ -1918,7 +1922,7 @@ type Query {
   UserBlastAnnotations(sampleId: String, workflowVersionId: String): [query_UserBlastAnnotations_items]
   ValidateUserCanDeleteObjects(input: queryInput_ValidateUserCanDeleteObjects_input_Input): ValidateUserCanDeleteObjects
   fedWorkflowRuns(input: queryInput_fedWorkflowRuns_input_Input): [query_fedWorkflowRuns_items]
-  fedWorkflowRunsAggregate(input: queryInput_fedWorkflowRunsAggregate_input_Input): [query_fedWorkflowRunsAggregate_items]
+  fedWorkflowRunsAggregate(input: queryInput_fedWorkflowRunsAggregate_input_Input): fedWorkflowRunsAggregate
   ZipLink(workflowRunId: String): ZipLink
   GraphQLFederationVersion: GraphQLFederationVersion
 }
@@ -2276,11 +2280,22 @@ type query_fedWorkflowRuns_items_workflowVersion_workflow {
   name: String
 }
 
-type query_fedWorkflowRunsAggregate_items {
-  collectionId: String!
-  mngsRunsCount: Int!
-  cgRunsCount: Int!
-  amrRunsCount: Int!
+type query_fedWorkflowRunsAggregate_aggregate_items {
+  groupBy: query_fedWorkflowRunsAggregate_aggregate_items_groupBy!
+  count: Int!
+}
+
+type query_fedWorkflowRunsAggregate_aggregate_items_groupBy {
+  collectionId: Int!
+  workflowVersion: query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion!
+}
+
+type query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion {
+  workflow: query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion_workflow!
+}
+
+type query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion_workflow {
+  name: String!
 }
 
 type query_MetadataFields_items {
@@ -3049,6 +3064,19 @@ input queryInput_fedWorkflowRunsAggregate_input_where_id_Input {
 
 input queryInput_fedWorkflowRunsAggregate_input_where_Input {
   id: queryInput_fedWorkflowRunsAggregate_input_where_id_Input
+  workflowVersion: queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_Input
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_Input {
+  workflow: queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_Input
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_Input {
+  name: queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_name_Input
+}
+
+input queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_name_Input {
+  _in: [String]
 }
 
 input queryInput_MetadataFields_input_Input {

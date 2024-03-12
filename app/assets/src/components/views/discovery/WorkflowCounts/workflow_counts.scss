@@ -1,0 +1,18 @@
+@import "~styles/themes/typography";
+@import "~@czi-sds/components/dist/variables";
+
+.counts {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  .sampleCount {
+    @include font-header-xs;
+  }
+
+  .analysesCounts {
+    @include font-body-xxxs;
+    margin-top: $sds-spaces-xxxs;
+    color: $sds-color-gray-500;
+  }
+}

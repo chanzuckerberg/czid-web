@@ -1,6 +1,10 @@
 import { toLower } from "lodash/fp";
 import React, { useContext, useRef, useState } from "react";
-import { useRelayEnvironment } from "react-relay";
+import {
+  useQueryLoader,
+  UseQueryLoaderLoadQueryOptions,
+  useRelayEnvironment,
+} from "react-relay";
 import { fetchQuery, graphql } from "relay-runtime";
 import RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironment";
 import { getProjects } from "~/api";
@@ -21,6 +25,10 @@ import {
   Metadata,
   WorkflowRunRow,
 } from "../samples/SamplesView/SamplesView";
+import {
+  DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType,
+  DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
+} from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
 import {
   DiscoveryViewFCSequencingReadsQuery as DiscoveryViewFCSequencingReadsQueryType,
   queryInput_fedSequencingReads_input_orderBy_Input,
@@ -142,6 +150,26 @@ const DiscoveryViewFCSequencingReadsQuery = graphql`
             }
           }
         }
+      }
+    }
+  }
+`;
+
+export const DiscoveryViewFCFedWorkflowRunsAggregateQuery = graphql`
+  query DiscoveryViewFCFedWorkflowRunsAggregateQuery(
+    $input: queryInput_fedWorkflowRunsAggregate_input_Input
+  ) {
+    fedWorkflowRunsAggregate(input: $input) {
+      aggregate {
+        groupBy {
+          collectionId
+          workflowVersion {
+            workflow {
+              name
+            }
+          }
+        }
+        count
       }
     }
   }
@@ -504,6 +532,40 @@ function getSequencingReadsOrderBys(
   }
 }
 
+async function queryWorkflowRunsAggregate(
+  { projectId, search, filters }: Conditions,
+  props: DiscoveryViewProps,
+  workflowRunIds: string[],
+  workflows: WorkflowType[],
+  loadAggregateQuery: (
+    variables: DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
+    options?: UseQueryLoaderLoadQueryOptions | undefined,
+  ) => void,
+) {
+  loadAggregateQuery({
+    input: {
+      where: {
+        id: { _in: workflowRunIds },
+        workflowVersion: { workflow: { name: { _in: workflows } } },
+      },
+      todoRemove: {
+        domain: props.domain,
+        projectId: projectId?.toString(),
+        search: search,
+        annotations: filters.annotations,
+        host: filters.host,
+        locationV2: filters.locationV2,
+        taxon: filters.taxon,
+        taxaLevels: filters.taxaLevels,
+        taxonThresholds: filters.taxonThresholds,
+        time: filters.time,
+        tissue: filters.tissue,
+        visibility: filters.visibility,
+      },
+    },
+  });
+}
+
 /**
  *  _____  _                                __      ___
  * |  __ \(_)                               \ \    / (_)
@@ -525,6 +587,13 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   // RELAY HOOKS:
   // TODO(bchu): Use useQueryLoader() here for parallel queries like aggregation, stats, etc. that
   // shouldn't block the entire page:
+  const [
+    projectWorkflowsAggregateQueryRef,
+    loadAggregateQuery,
+    disposeAggregateQuery,
+  ] = useQueryLoader<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>(
+    DiscoveryViewFCFedWorkflowRunsAggregateQuery,
+  );
 
   // REFS:
   const workflowRunsPromise = useRef<Promise<WorkflowRunRow[]>>(
@@ -554,13 +623,14 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     // TODO: dispose() stale queryReferences.
     cgFirstPagePromise.current = undefined;
     cgConditions.current = {};
+    disposeAggregateQuery();
     setCgWorkflowRunIds(undefined);
     setCgFullRows([]);
   };
 
   const fetchCgFilteredWorkflowRuns = async (
     conditions: Conditions,
-  ): Promise<void> => {
+  ): Promise<string[]> => {
     reset();
     cgConditions.current = conditions;
     try {
@@ -577,15 +647,35 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
         ),
       );
       const workflowRuns = await workflowRunsPromise.current;
-      setCgWorkflowRunIds(workflowRuns.map(run => run.id));
+      const workflowRunIds = workflowRuns.map(run => run.id);
+      setCgWorkflowRunIds(workflowRunIds);
       fetchCgPage(/* offset */ 0);
-      // TODO: Query aggregates, stats, etc.
+      // TODO: Query stats, etc.
+      return workflowRunIds;
     } catch (error) {
       logError({
         message: "[DiscoveryViewError] fetchCgFilteredWorkflowRuns() failed",
         details: { error },
       });
+      return [];
     }
+  };
+
+  const fetchNextGenWorkflowRuns = async (
+    conditions: Conditions,
+  ): Promise<void> => {
+    // TODO: fetch more workflows from NextGen
+    // The conditions object contains workflow but we aren't using it
+    // so we can (probably?) use the same conditions to fetch multiple workflows.
+    fetchCgFilteredWorkflowRuns(conditions).then((workflowRunIds: string[]) => {
+      queryWorkflowRunsAggregate(
+        conditions,
+        props,
+        workflowRunIds,
+        [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
+        loadAggregateQuery,
+      );
+    });
   };
 
   const fetchCgPage = async (
@@ -655,6 +745,8 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       cgRows={cgFullRows}
       fetchCgWorkflowRuns={fetchCgFilteredWorkflowRuns}
       fetchCgPage={fetchCgPage}
+      fetchNextGenWorkflowRuns={fetchNextGenWorkflowRuns}
+      projectWorkflowsAggregateQueryRef={projectWorkflowsAggregateQueryRef}
     />
   );
 };

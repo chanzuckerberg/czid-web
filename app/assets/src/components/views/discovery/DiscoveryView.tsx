@@ -25,6 +25,7 @@ import {
 import moment from "moment";
 import { nanoid } from "nanoid";
 import React, { ReactNode, Suspense } from "react";
+import { PreloadedQuery } from "react-relay";
 import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
 import { trackPageTransition } from "~/api/analytics";
@@ -99,6 +100,7 @@ import SamplesView, { CgRow } from "../samples/SamplesView/SamplesView";
 import VisualizationsView, {
   Visualization,
 } from "../visualizations/VisualizationsView";
+import { DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType } from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
 import { ConsensusGenomesTabCount } from "./components/ConsensusGenomesTabCount";
 import { SamplesTabCount } from "./components/SamplesTabCount";
 import {
@@ -334,7 +336,7 @@ export class DiscoveryView extends React.Component<
     this.visualizationsView = null;
 
     // preload first pages
-    this.props.fetchCgWorkflowRuns(
+    this.props.fetchNextGenWorkflowRuns(
       this.getConditionsWithSessionStorage(
         TAB_SAMPLES,
         WorkflowType.CONSENSUS_GENOME,
@@ -817,7 +819,7 @@ export class DiscoveryView extends React.Component<
   };
 
   resetData = ({ callback }: { callback?(): void } = {}) => {
-    const { allowedFeatures, domain, fetchCgWorkflowRuns } = this.props;
+    const { allowedFeatures, domain, fetchNextGenWorkflowRuns } = this.props;
     const conditions = this.getConditions();
 
     this.samples.reset({
@@ -829,7 +831,7 @@ export class DiscoveryView extends React.Component<
     });
 
     if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
-      fetchCgWorkflowRuns(
+      fetchNextGenWorkflowRuns(
         this.getConditionsWithSessionStorage(
           TAB_SAMPLES,
           WorkflowType.CONSENSUS_GENOME,
@@ -2333,8 +2335,16 @@ export class DiscoveryView extends React.Component<
       workflowEntity,
     } = this.state;
 
-    const { isAdmin, domain, mapTilerKey, snapshotShareId } = this.props;
-    const { allowedFeatures, cgWorkflowIds } = this.props;
+    const {
+      isAdmin,
+      domain,
+      mapTilerKey,
+      snapshotShareId,
+      projectWorkflowsAggregateQueryRef,
+      allowedFeatures,
+      cgWorkflowIds,
+    } = this.props;
+
     const { projects, visualizations } = this;
 
     const isWorkflowRunEntity =
@@ -2386,6 +2396,9 @@ export class DiscoveryView extends React.Component<
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <ProjectsView
+                projectWorkflowsAggregateQueryRef={
+                  projectWorkflowsAggregateQueryRef
+                }
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
                 filteredProjectCount={filteredProjectCount}
@@ -2758,4 +2771,9 @@ interface DiscoveryViewWithFCProps extends DiscoveryViewProps {
   cgRows: Array<CgRow | undefined>;
   fetchCgWorkflowRuns: (conditions: Conditions) => void;
   fetchCgPage: (offset: number) => Promise<Array<CgRow | undefined>>;
+  fetchNextGenWorkflowRuns: (conditions: Conditions) => void;
+  projectWorkflowsAggregateQueryRef:
+    | PreloadedQuery<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>
+    | null
+    | undefined;
 }
