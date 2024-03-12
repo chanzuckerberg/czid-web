@@ -1,22 +1,13 @@
 class SampleEntityCreationService
   include Callable
 
-  GetHostOrganismQuery = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    query($host_genome_id: Int!) {
-      hostOrganisms(where: {railsHostGenomeId: {_eq: $host_genome_id}}) {
-        id
-      }
-    }
-  GRAPHQL
-
   CreateSampleMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    mutation($sample_name: String!, $collection_id: Int!, $rails_sample_id: Int!, $host_organism_id: ID!) {
+    mutation($sample_name: String!, $collection_id: Int!, $rails_sample_id: Int!) {
       createSample(
         input: {
           name: $sample_name,
           collectionId: $collection_id,
           railsSampleId: $rails_sample_id,
-          hostOrganismId: $host_organism_id,
         }
       ) {
         id
@@ -105,16 +96,6 @@ class SampleEntityCreationService
   end
 
   def call
-    response = CzidGraphqlFederation
-               .query_with_token(
-                 @user_id,
-                 GetHostOrganismQuery,
-                 variables: {
-                   host_genome_id: @sample.host_genome_id,
-                 }
-               )
-    host_organism_id = response.data.host_organisms.first.id
-
     # Create the new Sample
     response = CzidGraphqlFederation
                .query_with_token(
@@ -124,7 +105,6 @@ class SampleEntityCreationService
                    sample_name: @sample.name,
                    collection_id: @sample.project_id,
                    rails_sample_id: @sample.id,
-                   host_organism_id: host_organism_id,
                  }
                )
     nextgen_sample_id = response.data.create_sample.id

@@ -297,7 +297,7 @@ module MetadataHelper
 
     if extract_host_genome_from_metadata
       host_genomes, host_genome_index, new_host_genomes =
-        find_or_create_host_genomes(metadata, allow_new_host_genomes, samples[0].project_id)
+        find_or_create_host_genomes(metadata, allow_new_host_genomes)
     end
 
     processed_samples = []
@@ -436,7 +436,7 @@ module MetadataHelper
     }
   end
 
-  def find_or_create_host_genomes(metadata, allow_new_host_genomes, project_id)
+  def find_or_create_host_genomes(metadata, allow_new_host_genomes)
     new_host_genomes = []
     host_genome_index = metadata["headers"].find_index { |header| MetadataField::HOST_GENOME_SYNONYMS.include?(header) }
     # same name rules as before_validation
@@ -453,11 +453,6 @@ module MetadataHelper
                    else
                      HostGenome.where(name: host_genome_names).includes(:metadata_fields)
                    end
-
-    if current_user.allowed_feature?("create_next_gen_entities")
-      # If the host_genomes don't exist, we also need to create the HostOrganisms in nextGen.
-      HostOrganismEntityCreationService.call(current_user.id, project_id, new_host_genomes.pluck(:name)) if new_host_genomes.any?
-    end
 
     [host_genomes.to_a, host_genome_index, new_host_genomes]
   end
