@@ -311,7 +311,8 @@ function getWorkflowRunsOrderBys(
 
 async function querySequencingReadsByIds(
   offset: number,
-  filteredIds: string[],
+  sequencingReadIds: string[],
+  workflowRunIds: string[],
   { projectId, search, orderBy, orderDir, filters }: Partial<Conditions>,
   props: DiscoveryViewProps,
   environment: RelayModernEnvironment,
@@ -327,11 +328,18 @@ async function querySequencingReadsByIds(
         },
         where: {
           id: {
-            _in: filteredIds,
+            _in: sequencingReadIds,
           },
         },
         // TODO: Delete old non-Array orderBy
         orderByArray: getSequencingReadsOrderBys(orderBy, orderDir),
+        consensusGenomesInput: {
+          where: {
+            producingRunId: {
+              _in: workflowRunIds,
+            },
+          },
+        },
         todoRemove: {
           domain: props.domain,
           projectId: projectId?.toString(),
@@ -598,19 +606,20 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     offset: number,
   ): Promise<Array<CgRow | undefined>> => {
     // TODO: Await projects query first.
-    const workflowRuns = await workflowRunsPromise.current;
+    const workflowRunsPage = (await workflowRunsPromise.current).slice(
+      offset,
+      offset + 50,
+    );
     const sequencingReads = await querySequencingReadsByIds(
       offset, // TODO: Remove.
-      workflowRuns
-        .slice(offset, offset + 50)
-        .map(run => run.inputSequencingReadId),
+      workflowRunsPage.map(run => run.inputSequencingReadId),
+      workflowRunsPage.map(run => run.id),
       cgConditions.current,
       props,
       environment,
     );
     const newRows: Array<CgRow | undefined> = [];
-    for (let i = offset; i < Math.min(offset + 50, workflowRuns.length); i++) {
-      const run = workflowRuns[i];
+    for (const run of workflowRunsPage) {
       const sequencingReadRows = sequencingReads.filter(
         sequencingRead =>
           sequencingRead.sequencingReadId === run.inputSequencingReadId,
