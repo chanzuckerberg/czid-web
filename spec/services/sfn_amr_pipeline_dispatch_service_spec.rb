@@ -88,6 +88,30 @@ end
         )
         expect(@workflow_run.reload.wdl_version).to eq(pre_mhf_amr_version)
       end
+
+      it "uses the project's pinned version of human HostGenome" do
+        # This test needs special set up of additional human versions
+        unique_value_for_test = "s3://unique_string_we_tie_only_to_human_v2_for_this_test"
+        create(:host_genome, name: "Human", version: 2, s3_bowtie2_index_path: unique_value_for_test)
+        create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 2)
+        create(:host_genome, name: "Human", version: 3) # v3 does NOT use the unique name
+        create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 3)
+        # Pin this project to Human v2, then verify it really used Human v2.
+        VersionPinningService.call(@project.id, HostGenome::HUMAN_HOST, 2)
+
+        expect(subject).to include_json(
+          sfn_input_json: {
+            Input: {
+              Run: {
+                "host_filter_stage.bowtie2_genome": unique_value_for_test,
+                # ^^^ Because the test sample's host is Human, the unique value appears here.
+                "host_filter_stage.human_bowtie2_genome": unique_value_for_test,
+                # ^^^ The unique value also shows up here regardless of sample's host.
+              },
+            },
+          }
+        )
+      end
     end
 
     context "when the project uses modern host filtering" do
@@ -98,6 +122,30 @@ end
           }
         )
         expect(@workflow_run.reload.wdl_version).to eq(modern_amr_version)
+      end
+
+      it "uses the project's pinned version of human HostGenome" do
+        # This test needs special set up of additional human versions
+        unique_value_for_test = "s3://unique_string_we_tie_only_to_human_v2_for_this_test"
+        create(:host_genome, name: "Human", version: 2, s3_bowtie2_index_path_v2: unique_value_for_test)
+        create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 2)
+        create(:host_genome, name: "Human", version: 3) # v3 does NOT use the unique name
+        create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 3)
+        # Pin this project to Human v2, then verify it really used Human v2.
+        VersionPinningService.call(@project.id, HostGenome::HUMAN_HOST, 2)
+
+        expect(subject).to include_json(
+          sfn_input_json: {
+            Input: {
+              Run: {
+                "host_filter_stage.bowtie2_index_tar": unique_value_for_test,
+                # ^^^ Because the test sample's host is Human, the unique value appears here.
+                "host_filter_stage.human_bowtie2_index_tar": unique_value_for_test,
+                # ^^^ The unique value also shows up here regardless of sample's host.
+              },
+            },
+          }
+        )
       end
     end
   end

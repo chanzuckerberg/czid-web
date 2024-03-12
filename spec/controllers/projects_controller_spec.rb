@@ -734,7 +734,8 @@ RSpec.describe ProjectsController, type: :controller do
 
         before do
           create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: "2021-01-22")
-          create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 1)
+          create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: "1")
+          create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: "2")
         end
 
         it "successfully creates a project with provided params" do
@@ -746,6 +747,15 @@ RSpec.describe ProjectsController, type: :controller do
           expect(created.public_access).to eq(fake_access)
           expect(created.description).to eq(fake_description)
           expect(created.creator_id).to eq(@user.id)
+        end
+
+        it "pins latest available human version to the created project" do
+          post :create, params: { format: "json", project: create_params }
+          expect(response).to have_http_status(:success)
+
+          created_project = Project.last
+          project_human_version = VersionRetrievalService.call(created_project.id, HostGenome::HUMAN_HOST)
+          expect(project_human_version).to eq("2")
         end
       end
 

@@ -146,6 +146,30 @@ RSpec.describe SfnLongReadMngsPipelineDispatchService, type: :service do
           )
         end
 
+        it "uses the project's pinned version of human HostGenome" do
+          # This test needs special set up of additional human versions
+          unique_value_for_test = "s3://unique_string_we_tie_only_to_human_v2_for_this_test"
+          create(:host_genome, name: "Human", version: 2, s3_minimap2_dna_index_path: unique_value_for_test)
+          create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 2)
+          create(:host_genome, name: "Human", version: 3) # v3 does NOT use the unique name
+          create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 3)
+          # Pin this project to Human v2, then verify it really used Human v2.
+          VersionPinningService.call(@project.id, HostGenome::HUMAN_HOST, 2)
+
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  minimap_host_db: unique_value_for_test,
+                  # ^^^ Because the test sample's host is Human, the unique value appears here.
+                  minimap_human_db: unique_value_for_test,
+                  # ^^^ The unique value also shows up here regardless of sample's host.
+                },
+              },
+            }
+          )
+        end
+
         it "raises original exception when start-execution or dispatch fails" do
           @mock_aws_clients[:states].stub_responses(:start_execution, Aws::States::Errors::InvalidArn.new(nil, nil))
           expect { subject }.to raise_error(Aws::States::Errors::InvalidArn)
@@ -174,6 +198,30 @@ RSpec.describe SfnLongReadMngsPipelineDispatchService, type: :service do
               Input: {
                 Run: {
                   minimap_host_db: @sample.host_genome.s3_minimap2_rna_index_path,
+                },
+              },
+            }
+          )
+        end
+
+        it "uses the project's pinned version of human HostGenome" do
+          # This test needs special set up of additional human versions
+          unique_value_for_test = "s3://unique_string_we_tie_only_to_human_v2_for_this_test"
+          create(:host_genome, name: "Human", version: 2, s3_minimap2_rna_index_path: unique_value_for_test)
+          create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 2)
+          create(:host_genome, name: "Human", version: 3) # v3 does NOT use the unique name
+          create(:workflow_version, workflow: HostGenome::HUMAN_HOST, version: 3)
+          # Pin this project to Human v2, then verify it really used Human v2.
+          VersionPinningService.call(@project.id, HostGenome::HUMAN_HOST, 2)
+
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  minimap_host_db: unique_value_for_test,
+                  # ^^^ Because the test sample's host is Human, the unique value appears here.
+                  minimap_human_db: unique_value_for_test,
+                  # ^^^ The unique value also shows up here regardless of sample's host.
                 },
               },
             }
