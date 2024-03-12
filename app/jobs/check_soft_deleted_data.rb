@@ -12,7 +12,7 @@ class CheckSoftDeletedData
 
   class SoftDeletedDataError < StandardError
     def initialize
-      super("Hard deletion failed: soft deleted data found in database.")
+      super("ACTION REQUIRED: Hard deletion failed. Soft deleted data found in database. Manual deletion by on-call required.")
     end
   end
 
