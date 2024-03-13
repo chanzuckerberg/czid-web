@@ -7,7 +7,7 @@ import { ProjectPage } from "../../page-objects/project-page";
  * WGS - Sample upload
  * Local file (error handling)
  */
-test.describe("Data Validation: P-0", () => {
+test.describe("WGS - Sample upload: Error handling: Data Validation: P-0", () => {
 
   test("SNo 37: Viral Consensus Genome - Attempt to upload non-Illumina sample files", async ({ page }) => {
     // #region 1. Login to CZ ID staging

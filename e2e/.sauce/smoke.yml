@@ -95,10 +95,40 @@ suites:
       grep: "Functional: P-0"
       retries: 2
     shard: concurrency
-  - name: "Data Validation: P-0"
+  - name: "Data Validation: P-0: Viral CG (WGS) - Report files"
     platformName: "macOS 12"
     screenResolution: "1440x900"
-    testMatch: ['tests/wgs/report-files.spec.ts', 'tests/wgs/sample-report-values-and-data-type.spec.ts', 'tests/wgs/sample-report.spec.ts', 'tests/wgs/sample-upload-error-handling.spec.ts']
+    testMatch: ['tests/wgs/report-files.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Data Validation: P-0"
+      retries: 2
+    shard: concurrency
+  - name: "Data Validation: P-0: Viral CG (WGS) - Sample report: Values & Data type"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-report-values-and-data-type.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Data Validation: P-0"
+      retries: 2
+    shard: concurrency
+  - name: "Data Validation: P-0: WGS - Sample report"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-report-p0.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Data Validation: P-0"
+      retries: 2
+    shard: concurrency
+  - name: "Data Validation: P-0: WGS - Sample upload: Error handling"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-upload-error-handling.spec.ts']
     params:
       browserName: "chromium"
       project: "chromium"

@@ -659,7 +659,10 @@ export class UploadPage extends PageObject {
     await this.setWorkFlow(workflow, includeTrimPrimer, taxonName);
     await this.uploadSampleFiles(sampleFiles);
 
-    const sampleNames = await this.getSampleNames();
+    // Continue
+    await this.clickContinue();
+
+    const sampleNames = await this.getMetadataSampleNames();
     if (inputs === null) {
       inputs = await this.getRandomizedSampleInputs(sampleFiles, sampleNames);
     } else {
@@ -671,9 +674,6 @@ export class UploadPage extends PageObject {
         delete inputs[key];
       }
     }
-
-    // Continue
-    await this.clickContinue();
 
     // Click CSV Upload
     await this.clickCSVUpload();
@@ -768,7 +768,7 @@ export class UploadPage extends PageObject {
         "Sequencing Platform": "Nanopore",
         "Analysis Type": "Metagenomics",
         "Guppy Basecaller Setting": "fast",
-        "Pipeline Version": "0.7.5",
+        "Pipeline Version": "0.7.6",
       };
     }
     else if (sampleType === WORKFLOWS.AMR) {

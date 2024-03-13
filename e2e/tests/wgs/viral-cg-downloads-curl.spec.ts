@@ -262,21 +262,11 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
       });
       const filesInTempDir = await fs.readdir(tempDir);
 
-      // - (.fa) file contains Sample(s) selected (concatenated)
-      const extractedContents = [];
-      let downloadedFile = null;
-      for (const content of filesInTempDir) {
-        if (content.endsWith(".fa")) {
-          downloadedFile = path.join(tempDir, content);
-        } else {
-          extractedContents.push(content);
-        }
-      }
       // - CURL command works (file(s) downloaded)
-      expect(downloadedFile).not.toBeNull();
-      expect(extractedContents.length).toBeGreaterThanOrEqual(1);
+      expect(filesInTempDir.length).toEqual(1);
 
-      const fileContent = await fs.readFile(downloadedFile, {encoding: "utf-8"});
+      // Per each ">" split the file into acgtnContents. Each section is a sample
+      const fileContent = await fs.readFile(path.join(tempDir, filesInTempDir[0]), {encoding: "utf-8"});
       const splitContents = fileContent.trim().split(/>/);
       let acgtnContents = [];
       for (const content of splitContents) {
@@ -289,6 +279,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
       // - [N] amount of sample names selected are included in CG.fa file starting with "">"" character
       expect(sampleNames.length).toEqual(acgtnContents.length);
 
+      // - (.fa) file contains Sample(s) selected (concatenated)
       for (const i in acgtnContents) {
         const lines = acgtnContents[i].split(/\r?\n/);
 

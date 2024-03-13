@@ -22,10 +22,13 @@ const WGS_SAMPLE_NAMES = [NO_HOST_1, NO_HOST_2];
 
 
 /*
- * WGS - Report files
+ * Viral CG (WGS) - Report files
  */
-test.describe("Data Validation: P-0", () => {
+test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
 
+  /**
+   * WGS - 28: Viral CG (WGS) - Report files
+   */
   test("SNo 30: Compare trim primers files", async ({ page }) => {
     await runPipelineIfNeeded(page, "Test_SNo_30");
     if (!ranPipeline) {

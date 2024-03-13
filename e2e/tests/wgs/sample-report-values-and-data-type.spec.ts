@@ -62,7 +62,7 @@ const CHIKUNGUNYA_VIRUS_SPECIES = "Chikungunya virus (species)";
 
 
 /*
- * WGS - Sample report Values & Data type
+ * Viral CG (WGS) - Sample report: Values & Data type
  */
 test.describe("Data Validation: P-0", () => {
 

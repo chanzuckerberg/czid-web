@@ -132,8 +132,6 @@ async function runPipelineIfNeeded(page: any, projectName: string, hostOrganism:
   let ranPipeline = false;
   const noHostSample = await samplesPage.getSamples(sc2_project.name, SARS_CoV2_SAMPLE_NAMES[0]);
   if ((noHostSample.length <= 0) || RUN_PIPELINE) {
-    test.setTimeout(60 * 1000 * 20); // Inclease the test runtime to let the piepline run
-
     const uploadPage = new UploadPage(page);
     const sampleNames = [];
     const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, SARS_CoV2_SAMPLE_NAMES);
@@ -147,6 +145,7 @@ async function runPipelineIfNeeded(page: any, projectName: string, hostOrganism:
   }
 
   if (ranPipeline && WAIT_FOR_PIPELINE) {
+    test.setTimeout(60 * 1000 * 20); // Inclease the test runtime to let the piepline run
     const sampleIds = samples.map(sample => sample.id);
     await samplesPage.waitForAllSamplesComplete(sampleIds);
   }
