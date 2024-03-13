@@ -4,6 +4,6 @@
     snapshotShareId: '<%= @share_id %>',
     snapshotProjectName: '<%= @project_name %>',
     snapshotProjectDescription: JSON.parse('<%= raw escape_json(@project_description) %>'),
-    projectId: <%= @project_id %>,
+    projectId: <%= raw("\"#{@project_id}\"") %>,
   }, 'page_content', JSON.parse('<%= raw escape_json(user_context)%>'));
 <% end %>

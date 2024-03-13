@@ -185,7 +185,7 @@ export class DiscoveryView extends React.Component<
 
     this.urlParser = new UrlQueryParser({
       filters: "object",
-      projectId: "number",
+      projectId: "string",
       showFilters: "boolean",
       showStats: "boolean",
     });
