@@ -77,8 +77,10 @@ jobs:
         working-directory: ./e2e/
         run: |
           if [[ ${{inputs.should-run-with-feature-flags}} == 'true' ]]; then
-            echo "CZID_USERNAME=${${{ secrets.CZID_USERNAME_WITH_FF }}}" >> $GITHUB_ENV
-            echo "CZID_PASSWORD=${${{ secrets.CZID_PASSWORD_WITH_FF }}}" >> $GITHUB_ENV
+            CZID_USERNAME_WITH_FF=${{secrets.CZID_USERNAME_WITH_FF}}
+            CZID_PASSWORD_WITH_FF=${{secrets.CZID_PASSWORD_WITH_FF}}
+            echo "CZID_USERNAME=${CZID_USERNAME_WITH_FF}" >> $GITHUB_ENV
+            echo "CZID_PASSWORD=${CZID_PASSWORD_WITH_FF}" >> $GITHUB_ENV
             echo "Running tests with feature flags"
           else
             echo "Running tests without feature flags"
