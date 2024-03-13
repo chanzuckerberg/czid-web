@@ -51,6 +51,7 @@ jobs:
     with:
       node-environment: "staging"
       test-category: "smoke"
+      should-run-with-feature-flags: "false"
     secrets: inherit
 
   # Separated make-release-checklist into it's own job to prevent the failure of it from blocking deployment

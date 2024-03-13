@@ -41,4 +41,5 @@ jobs:
     with:
       node-environment: "staging"
       test-category: "smoke"
+      should-run-with-feature-flags: "false"
     secrets: inherit

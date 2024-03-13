@@ -13,6 +13,11 @@ on:
           description: 'Test Category'
           required: true
           default: 'smoke'
+      should-run-with-feature-flags:
+          type: string
+          description: 'Run with feature flags?'
+          required: true
+          default: 'false'
 
   workflow_dispatch:
     inputs:
@@ -32,8 +37,16 @@ on:
         options:
         - smoke
         - e2e
+      should-run-with-feature-flags:
+        type: choice
+        description: 'Run with feature flags?'
+        required: true
+        default: 'false'
+        options:
+          - 'true'
+          - 'false'
 
-run-name: "Run ${{inputs.test-category}} tests on ${{inputs.node-environment}} environment"
+run-name: "Run ${{inputs.test-category}} tests on ${{inputs.node-environment}} environment (with feature flags: ${{inputs.should-run-with-feature-flags}})"
 
 jobs:
   workflow-e2e:
@@ -60,7 +73,16 @@ jobs:
           npm install
           npm i -g saucectl
           npm i -g @playwright/test
-
+      - name: Configure user for test
+        working-directory: ./e2e/
+        run: |
+          if [[ ${{inputs.should-run-with-feature-flags}} == 'true' ]]; then
+            echo "CZID_USERNAME=${${{ secrets.CZID_USERNAME_WITH_FF }}}" >> $GITHUB_ENV
+            echo "CZID_PASSWORD=${${{ secrets.CZID_PASSWORD_WITH_FF }}}" >> $GITHUB_ENV
+            echo "Running tests with feature flags"
+          else
+            echo "Running tests without feature flags"
+          fi
       - name: Use saucectl
         working-directory: ./e2e/
         if: failure() || success()
