@@ -353,22 +353,26 @@ async function querySequencingReadsByIds(
   props: DiscoveryViewProps,
   environment: RelayModernEnvironment,
 ): Promise<Array<CgEntityRow & Metadata>> {
+  const orderBys = getSequencingReadsOrderBys(orderBy, orderDir);
   const data = await fetchQuery<DiscoveryViewFCSequencingReadsQueryType>(
     environment,
     DiscoveryViewFCSequencingReadsQuery,
     {
       input: {
-        limitOffset: {
-          limit: 50,
-          offset,
-        },
+        limitOffset:
+          orderBys.length > 0
+            ? {
+                limit: 50,
+                offset,
+              }
+            : null,
         where: {
           id: {
             _in: sequencingReadIds,
           },
         },
         // TODO: Delete old non-Array orderBy
-        orderByArray: getSequencingReadsOrderBys(orderBy, orderDir),
+        orderByArray: orderBys,
         consensusGenomesInput: {
           where: {
             producingRunId: {
@@ -703,7 +707,6 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   const doFetchCgPage = async (
     offset: number,
   ): Promise<Array<CgRow | undefined>> => {
-    // TODO: Await projects query first.
     const workflowRunsPage = (await workflowRunsPromise.current).slice(
       offset,
       offset + 50,
