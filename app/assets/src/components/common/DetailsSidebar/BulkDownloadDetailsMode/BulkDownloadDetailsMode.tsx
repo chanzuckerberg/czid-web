@@ -3,7 +3,11 @@ import { getBulkDownload } from "~/api/bulk_downloads";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
-import { BulkDownloadDetails, DownloadType } from "~/interface/shared";
+import {
+  BulkDownloadDetails,
+  BulkDownloadStatusType,
+  DownloadType,
+} from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
 import cs from "./bulk_download_details_mode.scss";
 import { AdvancedDownloadTab } from "./components/AdvancedDownloadTab";
@@ -80,7 +84,7 @@ export const BulkDownloadDetailsMode = ({ bulkDownloadId }: BDDProps) => {
           )}
         </div>
       )}
-      {status === "error" && (
+      {status === BulkDownloadStatusType.ERROR && (
         <Notification
           type="error"
           displayStyle="flat"
@@ -90,7 +94,7 @@ export const BulkDownloadDetailsMode = ({ bulkDownloadId }: BDDProps) => {
           for help.
         </Notification>
       )}
-      {status === "success" && error_message && (
+      {status === BulkDownloadStatusType.SUCCESS && error_message && (
         <Notification
           type="warning"
           displayStyle="flat"

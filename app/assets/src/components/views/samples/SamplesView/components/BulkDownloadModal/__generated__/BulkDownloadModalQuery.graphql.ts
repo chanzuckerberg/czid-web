@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1aa1324f820b09de4d6858f66dd22707>>
+ * @generated SignedSource<<cbfb8c6999980ba8a93bab60e3efa47b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,7 +14,7 @@ export type BulkDownloadModalQuery$variables = {
   downloadType: string;
   includeMetadata: boolean;
   workflow: string;
-  workflowRunIds: ReadonlyArray<number | null | undefined>;
+  workflowRunIdsStrings?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
 export type BulkDownloadModalQuery$data = {
   readonly BulkDownloadCGOverview: {
@@ -50,7 +50,7 @@ v3 = {
 v4 = {
   "defaultValue": null,
   "kind": "LocalArgument",
-  "name": "workflowRunIds"
+  "name": "workflowRunIdsStrings"
 },
 v5 = [
   {
@@ -80,8 +80,8 @@ v5 = [
           },
           {
             "kind": "Variable",
-            "name": "workflowRunIds",
-            "variableName": "workflowRunIds"
+            "name": "workflowRunIdsStrings",
+            "variableName": "workflowRunIdsStrings"
           }
         ],
         "kind": "ObjectValue",
@@ -134,16 +134,16 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "685ed8602156ec175864e1c44c441cd3",
+    "cacheID": "884ca446270ea638658e0efb106a96b5",
     "id": null,
     "metadata": {},
     "name": "BulkDownloadModalQuery",
     "operationKind": "query",
-    "text": "query BulkDownloadModalQuery(\n  $workflowRunIds: [Int]!\n  $includeMetadata: Boolean!\n  $downloadType: String!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  BulkDownloadCGOverview(input: {workflowRunIds: $workflowRunIds, includeMetadata: $includeMetadata, downloadType: $downloadType, workflow: $workflow, authenticityToken: $authenticityToken}) {\n    cgOverviewRows\n  }\n}\n"
+    "text": "query BulkDownloadModalQuery(\n  $workflowRunIdsStrings: [String]\n  $includeMetadata: Boolean!\n  $downloadType: String!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  BulkDownloadCGOverview(input: {workflowRunIdsStrings: $workflowRunIdsStrings, includeMetadata: $includeMetadata, downloadType: $downloadType, workflow: $workflow, authenticityToken: $authenticityToken}) {\n    cgOverviewRows\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "fdcdc7a2646afdbd902d9fad6b3ed797";
+(node as any).hash = "20951dadce7836e8207ee210b7b22a03";
 
 export default node;

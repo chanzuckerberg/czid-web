@@ -34,7 +34,20 @@ export type SelectedDownloadType = {
       displayName: string;
     }
   >;
-  validObjectIds: number[];
+  validObjectIds: string[];
   workflow: WorkflowType;
   workflowEntity?: string;
+};
+
+export enum WorkflowRunStatusType {
+  SUCCEEDED = "SUCCEEDED",
+  SUCCEEDED_WITH_ISSUE = "SUCCEEDED_WITH_ISSUE",
+  IN_PROGRESS = "SUCCEEDED",
+  FAILED = "FAILED",
+}
+
+export type RunValidationType = {
+  id: string;
+  status: WorkflowRunStatusType;
+  ownerUserId: number;
 };

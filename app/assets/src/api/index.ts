@@ -652,11 +652,15 @@ const getTaxaWithContigsSuggestions = (query: $TSFixMe, sampleIds: $TSFixMe) =>
   });
 
 const samplesUploadedByCurrentUser = async (
-  sampleIds: string[],
+  entityIds?: string[],
 ): Promise<boolean> => {
+  const sampleIds = entityIds;
+  if (!sampleIds) {
+    return false;
+  }
   const { uploaded_by_current_user: allSamplesUploadedByCurrentUser } =
     await postWithCSRF("samples/uploaded_by_current_user", {
-      sampleIds,
+      sampleIds: sampleIds,
     });
 
   return allSamplesUploadedByCurrentUser;
