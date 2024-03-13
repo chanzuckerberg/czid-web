@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5477d8580d366e5eb45abcc92e3221dc>>
+ * @generated SignedSource<<df4c921f23177dfba244c6e3733b1d38>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -133,35 +133,35 @@ v12 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "id",
+  "name": "qc_percent",
   "storageKey": null
 },
 v13 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "qc_percent",
+  "name": "sample_id",
   "storageKey": null
 },
 v14 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "sample_id",
+  "name": "unmapped_reads",
   "storageKey": null
 },
 v15 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "unmapped_reads",
+  "name": "updated_at",
   "storageKey": null
 },
 v16 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "updated_at",
+  "name": "id",
   "storageKey": null
 };
 return {
@@ -402,7 +402,6 @@ return {
                     "name": "fraction_subsampled_bases",
                     "storageKey": null
                   },
-                  (v12/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -445,7 +444,7 @@ return {
                     "name": "pipeline_version",
                     "storageKey": null
                   },
-                  (v13/*: any*/),
+                  (v12/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -460,7 +459,7 @@ return {
                     "name": "s3_output_prefix",
                     "storageKey": null
                   },
-                  (v14/*: any*/),
+                  (v13/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -538,8 +537,8 @@ return {
                     "name": "unmapped_bases",
                     "storageKey": null
                   },
+                  (v14/*: any*/),
                   (v15/*: any*/),
-                  (v16/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -620,7 +619,7 @@ return {
                     "name": "percent_remaining",
                     "storageKey": null
                   },
-                  (v13/*: any*/),
+                  (v12/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -656,7 +655,7 @@ return {
                     "name": "reads_after_hisat2_host_filtered",
                     "storageKey": null
                   },
-                  (v15/*: any*/)
+                  (v14/*: any*/)
                 ],
                 "storageKey": null
               }
@@ -706,7 +705,7 @@ return {
                 "name": "metadata_field_id",
                 "storageKey": null
               },
-              (v14/*: any*/),
+              (v13/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -714,8 +713,8 @@ return {
                 "name": "string_validated_value",
                 "storageKey": null
               },
+              (v15/*: any*/),
               (v16/*: any*/),
-              (v12/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -750,7 +749,7 @@ return {
                     "kind": "InlineFragment",
                     "selections": [
                       (v2/*: any*/),
-                      (v12/*: any*/)
+                      (v16/*: any*/)
                     ],
                     "type": "query_SampleMetadata_metadata_items_location_validated_value_oneOf_1",
                     "abstractKey": null
@@ -775,12 +774,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "96608243e682b2551a9eadd545c154fc",
+    "cacheID": "7df73e7dbdc425b1bc59c563d74e565b",
     "id": null,
     "metadata": {},
     "name": "SampleDetailsModeSampleMetadataQuery",
     "operationKind": "query",
-    "text": "query SampleDetailsModeSampleMetadataQuery(\n  $sampleId: String!\n  $snapshotLinkId: String\n) {\n  SampleMetadata(sampleId: $sampleId, snapshotLinkId: $snapshotLinkId) {\n    ...MetadataTabMetadataFragment\n    ...NotesTabFragment\n    ...MetadataSectionContentFragment\n    additional_info {\n      name\n      ...PipelineTabFragment\n      editable\n      project_id\n      project_name\n      host_genome_taxa_category\n      host_genome_name\n      upload_date\n    }\n  }\n}\n\nfragment MetadataSectionContentFragment on SampleMetadata {\n  metadata {\n    location_id\n    raw_value\n    key\n    number_validated_value\n    metadata_field_id\n    sample_id\n    string_validated_value\n    updated_at\n    id\n    date_validated_value\n    location_validated_value {\n      __typename\n      ... on query_SampleMetadata_metadata_items_location_validated_value_oneOf_0 {\n        name\n      }\n      ... on query_SampleMetadata_metadata_items_location_validated_value_oneOf_1 {\n        name\n        id\n      }\n    }\n    created_at\n    base_type\n  }\n}\n\nfragment MetadataTabMetadataFragment on SampleMetadata {\n  additional_info {\n    name\n    editable\n    project_id\n    project_name\n    host_genome_taxa_category\n    host_genome_name\n    upload_date\n  }\n}\n\nfragment NotesTabFragment on SampleMetadata {\n  additional_info {\n    notes\n    editable\n  }\n}\n\nfragment PipelineTabFragment on query_SampleMetadata_additional_info {\n  ercc_comparison {\n    actual\n    expected\n    name\n  }\n  pipeline_run {\n    error_message\n    guppy_basecaller_setting\n    host_subtracted\n    job_status\n    mapped_reads\n    adjusted_remaining_reads\n    alert_sent\n    alignment_config_id\n    assembled\n    compression_ratio\n    created_at\n    dag_vars\n    deleted_at\n    deprecated\n    executed_at\n    finalized\n    fraction_subsampled\n    fraction_subsampled_bases\n    id\n    known_user_error\n    max_input_fragments\n    pipeline_branch\n    pipeline_commit\n    pipeline_execution_strategy\n    pipeline_version\n    qc_percent\n    results_finalized\n    s3_output_prefix\n    sample_id\n    sfn_execution_arn\n    subsample\n    technology\n    time_to_finalized\n    time_to_results_finalized\n    total_bases\n    total_ercc_reads\n    total_reads\n    truncated\n    truncated_bases\n    unmapped_bases\n    unmapped_reads\n    updated_at\n    use_taxon_whitelist\n    wdl_version\n    version {\n      alignment_db\n      pipeline\n    }\n  }\n  summary_stats {\n    adjusted_remaining_reads\n    compression_ratio\n    insert_size_mean\n    insert_size_standard_deviation\n    last_processed_at\n    percent_remaining\n    qc_percent\n    reads_after_bowtie2_ercc_filtered\n    reads_after_bowtie2_host_filtered\n    reads_after_czid_dedup\n    reads_after_fastp\n    reads_after_hisat2_host_filtered\n    unmapped_reads\n  }\n}\n"
+    "text": "query SampleDetailsModeSampleMetadataQuery(\n  $sampleId: String!\n  $snapshotLinkId: String\n) {\n  SampleMetadata(sampleId: $sampleId, snapshotLinkId: $snapshotLinkId) {\n    ...MetadataTabMetadataFragment\n    ...NotesTabFragment\n    ...MetadataSectionContentFragment\n    additional_info {\n      name\n      ...PipelineTabFragment\n      editable\n      project_id\n      project_name\n      host_genome_taxa_category\n      host_genome_name\n      upload_date\n    }\n  }\n}\n\nfragment MetadataSectionContentFragment on SampleMetadata {\n  metadata {\n    location_id\n    raw_value\n    key\n    number_validated_value\n    metadata_field_id\n    sample_id\n    string_validated_value\n    updated_at\n    id\n    date_validated_value\n    location_validated_value {\n      __typename\n      ... on query_SampleMetadata_metadata_items_location_validated_value_oneOf_0 {\n        name\n      }\n      ... on query_SampleMetadata_metadata_items_location_validated_value_oneOf_1 {\n        name\n        id\n      }\n    }\n    created_at\n    base_type\n  }\n}\n\nfragment MetadataTabMetadataFragment on SampleMetadata {\n  additional_info {\n    name\n    editable\n    project_id\n    project_name\n    host_genome_taxa_category\n    host_genome_name\n    upload_date\n  }\n}\n\nfragment NotesTabFragment on SampleMetadata {\n  additional_info {\n    notes\n    editable\n  }\n}\n\nfragment PipelineTabFragment on query_SampleMetadata_additional_info {\n  ercc_comparison {\n    actual\n    expected\n    name\n  }\n  pipeline_run {\n    error_message\n    guppy_basecaller_setting\n    host_subtracted\n    job_status\n    mapped_reads\n    adjusted_remaining_reads\n    alert_sent\n    alignment_config_id\n    assembled\n    compression_ratio\n    created_at\n    dag_vars\n    deleted_at\n    deprecated\n    executed_at\n    finalized\n    fraction_subsampled\n    fraction_subsampled_bases\n    known_user_error\n    max_input_fragments\n    pipeline_branch\n    pipeline_commit\n    pipeline_execution_strategy\n    pipeline_version\n    qc_percent\n    results_finalized\n    s3_output_prefix\n    sample_id\n    sfn_execution_arn\n    subsample\n    technology\n    time_to_finalized\n    time_to_results_finalized\n    total_bases\n    total_ercc_reads\n    total_reads\n    truncated\n    truncated_bases\n    unmapped_bases\n    unmapped_reads\n    updated_at\n    use_taxon_whitelist\n    wdl_version\n    version {\n      alignment_db\n      pipeline\n    }\n  }\n  summary_stats {\n    adjusted_remaining_reads\n    compression_ratio\n    insert_size_mean\n    insert_size_standard_deviation\n    last_processed_at\n    percent_remaining\n    qc_percent\n    reads_after_bowtie2_ercc_filtered\n    reads_after_bowtie2_host_filtered\n    reads_after_czid_dedup\n    reads_after_fastp\n    reads_after_hisat2_host_filtered\n    unmapped_reads\n  }\n}\n"
   }
 };
 })();

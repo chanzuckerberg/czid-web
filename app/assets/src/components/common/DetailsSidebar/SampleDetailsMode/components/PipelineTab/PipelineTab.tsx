@@ -78,7 +78,6 @@ export const PipelineTabFragment = graphql`
       finalized
       fraction_subsampled
       fraction_subsampled_bases
-      id
       known_user_error
       max_input_fragments
       pipeline_branch

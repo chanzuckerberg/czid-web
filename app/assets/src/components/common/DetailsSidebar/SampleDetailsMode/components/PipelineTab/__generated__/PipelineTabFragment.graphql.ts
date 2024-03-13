@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f01593689432bfc6a1e9da8d9569a6d3>>
+ * @generated SignedSource<<4e18c5897fda9fc6da663b7ae034c144>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -33,7 +33,6 @@ export type PipelineTabFragment$data = {
     readonly fraction_subsampled_bases: any | null | undefined;
     readonly guppy_basecaller_setting: any | null | undefined;
     readonly host_subtracted: string | null | undefined;
-    readonly id: string | null | undefined;
     readonly job_status: string | null | undefined;
     readonly known_user_error: any | null | undefined;
     readonly mapped_reads: any | null | undefined;
@@ -275,13 +274,6 @@ return {
           "args": null,
           "kind": "ScalarField",
           "name": "fraction_subsampled_bases",
-          "storageKey": null
-        },
-        {
-          "alias": null,
-          "args": null,
-          "kind": "ScalarField",
-          "name": "id",
           "storageKey": null
         },
         {
@@ -559,6 +551,6 @@ return {
 };
 })();
 
-(node as any).hash = "f5cc4ff1cb262a207b2ae80a78588308";
+(node as any).hash = "369ff7376a432fe967d42047d6722aa5";
 
 export default node;
