@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b46f2090610d98ae19f4ff8f06c6c50f>>
+ * @generated SignedSource<<d19e4cbc61a5a55b70d0c7adb90c52f1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -45,6 +45,7 @@ export type queryInput_fedWorkflowRuns_input_orderByArray_items_workflowVersion_
 export type queryInput_fedWorkflowRuns_input_where_Input = {
   collectionId?: queryInput_fedWorkflowRuns_input_where_collectionId_Input | null | undefined;
   deprecatedById?: queryInput_fedWorkflowRuns_input_where_deprecatedById_Input | null | undefined;
+  entityInputs?: queryInput_fedWorkflowRuns_input_where_entityInputs_Input | null | undefined;
   id?: queryInput_fedWorkflowRuns_input_where_id_Input | null | undefined;
   ownerUserId?: queryInput_fedWorkflowRuns_input_where_ownerUserId_Input | null | undefined;
   startedAt?: queryInput_fedWorkflowRuns_input_where_startedAt_Input | null | undefined;
@@ -64,6 +65,16 @@ export type queryInput_fedWorkflowRuns_input_where_startedAt_Input = {
 };
 export type queryInput_fedWorkflowRuns_input_where_collectionId_Input = {
   _in?: ReadonlyArray<number | null | undefined> | null | undefined;
+};
+export type queryInput_fedWorkflowRuns_input_where_entityInputs_Input = {
+  entityType?: queryInput_fedWorkflowRuns_input_where_entityInputs_entityType_Input | null | undefined;
+  inputEntityId?: queryInput_fedWorkflowRuns_input_where_entityInputs_inputEntityId_Input | null | undefined;
+};
+export type queryInput_fedWorkflowRuns_input_where_entityInputs_entityType_Input = {
+  _eq?: string | null | undefined;
+};
+export type queryInput_fedWorkflowRuns_input_where_entityInputs_inputEntityId_Input = {
+  _is_null?: boolean | null | undefined;
 };
 export type queryInput_fedWorkflowRuns_input_where_workflowVersion_Input = {
   workflow?: queryInput_fedWorkflowRuns_input_where_workflowVersion_workflow_Input | null | undefined;

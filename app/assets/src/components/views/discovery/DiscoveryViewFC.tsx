@@ -226,6 +226,14 @@ async function queryWorkflowRuns(
   const where: queryInput_fedWorkflowRuns_input_where_Input = {
     workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
     deprecatedById: { _is_null: true },
+    entityInputs: {
+      entityType: {
+        _eq: "sequencing_read",
+      },
+      inputEntityId: {
+        _is_null: false,
+      },
+    },
   };
   if (projectId != null) {
     where.collectionId = { _in: [parseInt(projectId)] };

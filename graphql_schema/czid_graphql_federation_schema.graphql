@@ -2994,6 +2994,19 @@ input queryInput_fedWorkflowRuns_input_where_deprecatedById_Input {
   _is_null: Boolean
 }
 
+input queryInput_fedWorkflowRuns_input_where_entityInputs_entityType_Input {
+  _eq: String
+}
+
+input queryInput_fedWorkflowRuns_input_where_entityInputs_Input {
+  entityType: queryInput_fedWorkflowRuns_input_where_entityInputs_entityType_Input
+  inputEntityId: queryInput_fedWorkflowRuns_input_where_entityInputs_inputEntityId_Input
+}
+
+input queryInput_fedWorkflowRuns_input_where_entityInputs_inputEntityId_Input {
+  _is_null: Boolean
+}
+
 input queryInput_fedWorkflowRuns_input_where_id_Input {
   _in: [String]
 }
@@ -3004,6 +3017,7 @@ input queryInput_fedWorkflowRuns_input_where_Input {
   ownerUserId: queryInput_fedWorkflowRuns_input_where_ownerUserId_Input
   startedAt: queryInput_fedWorkflowRuns_input_where_startedAt_Input
   collectionId: queryInput_fedWorkflowRuns_input_where_collectionId_Input
+  entityInputs: queryInput_fedWorkflowRuns_input_where_entityInputs_Input
   workflowVersion: queryInput_fedWorkflowRuns_input_where_workflowVersion_Input
 }
 
