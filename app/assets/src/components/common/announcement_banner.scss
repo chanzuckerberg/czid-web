@@ -9,7 +9,7 @@
   height: 40px;
   position: relative;
   text-align: center;
-  z-index: 900;
+  z-index: 10;
 
   &.inverted {
     background: $sds-color-primary-400;

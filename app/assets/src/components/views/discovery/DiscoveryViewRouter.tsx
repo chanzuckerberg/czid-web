@@ -8,8 +8,13 @@
 
 import React, { Suspense, useContext } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
+import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
+import {
+  CREATE_NEXT_GEN_ENTITIES,
+  SHOULD_READ_FROM_NEXTGEN,
+} from "~/components/utils/features";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
 import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
@@ -48,105 +53,124 @@ const DiscoveryViewRouter = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
-  const { userSignedIn } = useContext(UserContext);
+  const {
+    userSignedIn,
+    allowedFeatures,
+    admin: isAdmin,
+  } = useContext(UserContext);
+  const shouldReadFromNextGen = allowedFeatures.includes(
+    SHOULD_READ_FROM_NEXTGEN,
+  );
+  const createNextGenEntities = allowedFeatures.includes(
+    CREATE_NEXT_GEN_ENTITIES,
+  );
   const history = useHistory();
   const location = useLocation();
 
   return (
-    <Switch>
-      <Route exact path="/user_profile_form">
-        <UserProfileForm />
-      </Route>
-      <Route exact path="/impact">
-        <ImpactPage />
-      </Route>
-      <Route exact path="/pathogen_list">
-        <Suspense fallback={<LoadingPage />}>
-          <PathogenListView />
-        </Suspense>
-      </Route>
-      <Route exact path="/privacy_notice_for_user_research">
-        <PrivacyNoticeForUserResearch />
-      </Route>
-      <Route
-        path="/phylo_tree_ngs/:id"
-        render={({ match }) => (
-          <PhyloTreeListView
-            selectedPhyloTreeNgId={parseInt(match.params.id)}
-          />
-        )}
+    <>
+      <AnnouncementBanner
+        id="nextGenEnabled"
+        visible={isAdmin}
+        message={`Read from Next Gen ${
+          shouldReadFromNextGen ? "✅" : "⛔️"
+        } ~ Create Next Gen Entities ${createNextGenEntities ? "✅" : "⛔️"}`}
       />
-      <Route
-        path="/samples/:id"
-        render={({ match }) => (
-          <SampleView sampleId={parseInt(match.params.id)} />
-        )}
-      />
-      <Route
-        path="/pub/:snapshotShareId/samples/:sampleId"
-        render={({ match }) => (
-          <SampleView
-            sampleId={parseInt(match.params.sampleId)}
-            snapshotShareId={match.params.snapshotShareId}
-          />
-        )}
-      />
-      <Route
-        path="/pub/:snapshotShareId"
-        render={({ match }) => (
-          <DiscoveryViewFC
-            domain={domain}
-            projectId={projectId}
-            snapshotProjectDescription={snapshotProjectDescription}
-            snapshotProjectName={snapshotProjectName}
-            snapshotShareId={match.params.snapshotShareId}
-            history={history}
-            location={location}
-            match={match}
-          />
-        )}
-      />
-      <Route exact path="/privacy_preview">
-        <PrivacyNoticePreview />
-      </Route>
-      <Route exact path="/terms_preview">
-        <TermsOfUsePreview />
-      </Route>
-      <Route exact path="/metadata/dictionary">
-        <MetadataDictionary />
-      </Route>
-      <Route exact path="/faqs">
-        <FAQPage />
-      </Route>
-      <Route exact path="/admin_settings">
-        <AdminSettings />
-      </Route>
-      {userSignedIn ? (
+      <Switch>
+        <Route exact path="/user_profile_form">
+          <UserProfileForm />
+        </Route>
+        <Route exact path="/impact">
+          <ImpactPage />
+        </Route>
+        <Route exact path="/pathogen_list">
+          <Suspense fallback={<LoadingPage />}>
+            <PathogenListView />
+          </Suspense>
+        </Route>
+        <Route exact path="/privacy_notice_for_user_research">
+          <PrivacyNoticeForUserResearch />
+        </Route>
         <Route
+          path="/phylo_tree_ngs/:id"
+          render={({ match }) => (
+            <PhyloTreeListView
+              selectedPhyloTreeNgId={parseInt(match.params.id)}
+            />
+          )}
+        />
+        <Route
+          path="/samples/:id"
+          render={({ match }) => (
+            <SampleView sampleId={parseInt(match.params.id)} />
+          )}
+        />
+        <Route
+          path="/pub/:snapshotShareId/samples/:sampleId"
+          render={({ match }) => (
+            <SampleView
+              sampleId={parseInt(match.params.sampleId)}
+              snapshotShareId={match.params.snapshotShareId}
+            />
+          )}
+        />
+        <Route
+          path="/pub/:snapshotShareId"
           render={({ match }) => (
             <DiscoveryViewFC
-              admin={admin}
               domain={domain}
-              mapTilerKey={mapTilerKey}
               projectId={projectId}
               snapshotProjectDescription={snapshotProjectDescription}
               snapshotProjectName={snapshotProjectName}
-              snapshotShareId={snapshotShareId}
+              snapshotShareId={match.params.snapshotShareId}
               history={history}
               location={location}
               match={match}
             />
           )}
         />
-      ) : (
-        <Route>
-          <LandingV2
-            announcementBannerEnabled={announcementBannerEnabled}
-            emergencyBannerMessage={emergencyBannerMessage}
-          />
+        <Route exact path="/privacy_preview">
+          <PrivacyNoticePreview />
         </Route>
-      )}
-    </Switch>
+        <Route exact path="/terms_preview">
+          <TermsOfUsePreview />
+        </Route>
+        <Route exact path="/metadata/dictionary">
+          <MetadataDictionary />
+        </Route>
+        <Route exact path="/faqs">
+          <FAQPage />
+        </Route>
+        <Route exact path="/admin_settings">
+          <AdminSettings />
+        </Route>
+        {userSignedIn ? (
+          <Route
+            render={({ match }) => (
+              <DiscoveryViewFC
+                admin={admin}
+                domain={domain}
+                mapTilerKey={mapTilerKey}
+                projectId={projectId}
+                snapshotProjectDescription={snapshotProjectDescription}
+                snapshotProjectName={snapshotProjectName}
+                snapshotShareId={snapshotShareId}
+                history={history}
+                location={location}
+                match={match}
+              />
+            )}
+          />
+        ) : (
+          <Route>
+            <LandingV2
+              announcementBannerEnabled={announcementBannerEnabled}
+              emergencyBannerMessage={emergencyBannerMessage}
+            />
+          </Route>
+        )}
+      </Switch>
+    </>
   );
 };
 
