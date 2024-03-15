@@ -416,7 +416,7 @@ export class DiscoveryView extends React.Component<
         getFilteredSampleCount: () => this.props.cgWorkflowIds?.length,
         // When we're reading from Rails, it's possible for rows to be undefined if a workflow was
         // executed between the 2 calls. FC still needs to return the undefined rows to
-        // <InfiniteTable> to satisfy the 50 rows per request requirement, but getRows() doesn't
+        // <InfiniteTable> to satisfy the 20 rows per request requirement, but getRows() doesn't
         // expect undefineds.
         getRows: () => this.props.cgRows.filter(isNotNullish),
       },

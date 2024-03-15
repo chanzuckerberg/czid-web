@@ -12,6 +12,7 @@ import { UserContext } from "~/components/common/UserContext";
 import { logError } from "~/components/utils/logUtil";
 import { isNotNullish } from "~/components/utils/typeUtils";
 import { WorkflowType } from "~/components/utils/workflows";
+import { DEFAULT_PAGE_SIZE } from "~/components/visualizations/table/constants";
 import {
   ActionType,
   createAction,
@@ -362,7 +363,7 @@ async function querySequencingReadsByIds(
         limitOffset:
           orderBys.length > 0
             ? {
-                limit: 50,
+                limit: DEFAULT_PAGE_SIZE,
                 offset,
               }
             : null,
@@ -709,7 +710,7 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   ): Promise<Array<CgRow | undefined>> => {
     const workflowRunsPage = (await workflowRunsPromise.current).slice(
       offset,
-      offset + 50,
+      offset + DEFAULT_PAGE_SIZE,
     );
     const sequencingReads = await querySequencingReadsByIds(
       offset, // TODO: Remove.

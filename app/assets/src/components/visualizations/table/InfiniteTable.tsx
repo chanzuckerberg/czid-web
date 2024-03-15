@@ -7,6 +7,7 @@ import {
   TableRowProps,
 } from "react-virtualized";
 import BaseTable, { BaseTableProps } from "./BaseTable";
+import { DEFAULT_PAGE_SIZE } from "./constants";
 import cs from "./infinite_table.scss";
 
 const STATUS_LOADING = 1;
@@ -261,10 +262,10 @@ class InfiniteTable extends React.Component<
 
 // @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 InfiniteTable.defaultProps = {
-  minimumBatchSize: 50,
+  minimumBatchSize: DEFAULT_PAGE_SIZE,
   // should be at least as high as the minimumBatchSize
-  rowCount: 50,
-  threshold: 50,
+  rowCount: DEFAULT_PAGE_SIZE,
+  threshold: DEFAULT_PAGE_SIZE,
 };
 
 export default InfiniteTable;

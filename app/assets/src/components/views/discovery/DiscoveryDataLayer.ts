@@ -1,4 +1,5 @@
 import { findIndex, findLastIndex, range, slice } from "lodash/fp";
+import { DEFAULT_PAGE_SIZE } from "~/components/visualizations/table/constants";
 import { ViewProps } from "~/interface/samplesView";
 import {
   getDiscoveryProjects,
@@ -56,7 +57,7 @@ class ObjectCollectionView<T extends { id: ID }, ID extends string | number> {
       // These will be sent to the fetchDataCallback of the corresponding collection when requesting new data.
       conditions = {},
       // pageSize: Size of the page for this view.
-      pageSize = 50,
+      pageSize = DEFAULT_PAGE_SIZE,
       // callbacks to notify the client when changes occur
       // onViewChange: triggered when the view finishes loading new object ids (the full list of ids in the view)
       onViewChange,
