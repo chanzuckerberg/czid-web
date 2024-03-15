@@ -92,6 +92,12 @@ class SampleEntityCreationService
     @user_id = user_id
     @sample = sample
     @workflow_run = workflow_run
+    @token = TokenCreationService
+             .call(
+               user_id: @user_id,
+               should_include_project_claims: true,
+               service_identity: "rails"
+             )["token"]
   end
 
   def call
@@ -104,7 +110,8 @@ class SampleEntityCreationService
                    sample_name: @sample.name,
                    collection_id: @sample.project_id,
                    rails_sample_id: @sample.id,
-                 }
+                 },
+                 token: @token
                )
     nextgen_sample_id = response.data.create_sample.id
 
@@ -120,7 +127,8 @@ class SampleEntityCreationService
                    medaka_model: @workflow_run.get_input("medaka_model"),
                    protocol: @workflow_run.get_input("wetlab_protocol"),
                    sample_id: nextgen_sample_id,
-                 }
+                 },
+                 token: @token
                )
     sequencing_read_id = response.data.create_sequencing_read.id
 
@@ -133,7 +141,8 @@ class SampleEntityCreationService
                  variables: {
                    workflow_name: @workflow_run.workflow,
                    version: wdl_version,
-                 }
+                 },
+                 token: @token
                )
     workflow_version_id = response.data.workflow_versions.first.id
 
@@ -151,7 +160,16 @@ class SampleEntityCreationService
       # Add reference genome (if present) to workflow run entity inputs
       reference_sequence = @sample.input_files.where(file_type: InputFile::FILE_TYPE_REFERENCE_SEQUENCE).first
       if reference_sequence.present?
-        response = CzidGraphqlFederation.query_with_token(@user_id, CreateReferenceGenomeMutation, variables: { name: reference_sequence.name, collection_id: @sample.project_id })
+        response = CzidGraphqlFederation
+                   .query_with_token(
+                     @user_id,
+                     CreateReferenceGenomeMutation,
+                     variables: {
+                       name: reference_sequence.name,
+                       collection_id: @sample.project_id,
+                     },
+                     token: @token
+                   )
         reference_genome_id = response.data.create_reference_genome.id
         create_workflow_run_entity_inputs.push(
           {
@@ -165,7 +183,15 @@ class SampleEntityCreationService
       # Add next gen taxon entity (if present) to workflow run entity inputs
       workflow_run_taxon_id = @workflow_run.get_input("taxon_id")
       if workflow_run_taxon_id
-        response = CzidGraphqlFederation.query_with_token(@user_id, GetTaxonByUpstreamDatabaseIdentifier, variables: { upstream_database_identifier: @workflow_run.get_input("taxon_id").to_s })
+        response = CzidGraphqlFederation
+                   .query_with_token(
+                     @user_id,
+                     GetTaxonByUpstreamDatabaseIdentifier,
+                     variables: {
+                       upstream_database_identifier: @workflow_run.get_input("taxon_id").to_s,
+                     },
+                     token: @token
+                   )
         next_gen_taxon_id = response.data.taxa.first&.id
         if next_gen_taxon_id
           create_workflow_run_entity_inputs.push(
@@ -186,7 +212,8 @@ class SampleEntityCreationService
                                    GetAccessionId,
                                    variables: {
                                      accession_id: workflow_run_accession_id,
-                                   }
+                                   },
+                                   token: @token
                                  )
         next_gen_accession_id = get_accession_response.data.accessions.first&.id
         if next_gen_accession_id
@@ -219,7 +246,8 @@ class SampleEntityCreationService
                    railsWorkflowRunId: @workflow_run.id,
                    entityInputs: create_workflow_run_entity_inputs,
                    rawInputJson: JSON.dump(create_workflow_run_raw_inputs_hash),
-                 }
+                 },
+                 token: @token
                )
     next_gen_workflow_run_id = response.data.create_workflow_run.id
     next_gen_workflow_run_id

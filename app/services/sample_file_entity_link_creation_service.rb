@@ -71,11 +71,25 @@ class SampleFileEntityLinkCreationService
     @user_id = user_id
     @sample = sample
     @workflow_run = @sample.workflow_runs.last
+    @token = TokenCreationService
+             .call(
+               user_id: @user_id,
+               should_include_project_claims: true,
+               service_identity: "rails"
+             )["token"]
   end
 
   def call
     # Get the nextGen workflow run info
-    response = CzidGraphqlFederation.query_with_token(@user_id, FetchWorkflowRun, variables: { workflow_run_id: @workflow_run.id })
+    response = CzidGraphqlFederation
+               .query_with_token(
+                 @user_id,
+                 FetchWorkflowRun,
+                 variables: {
+                   workflow_run_id: @workflow_run.id,
+                 },
+                 token: @token
+               )
 
     # Store workflow run ID for kicking off workflow
     next_gen_workflow_run_id = response.data.workflow_runs.first.id
@@ -86,15 +100,51 @@ class SampleFileEntityLinkCreationService
     workflow_run_reference_genome_id = is_reference_genome_input ? workflow_run_entity_inputs.first.node.id : nil
 
     # Get the SequencingRead ID so we can link the files to it
-    response = CzidGraphqlFederation.query_with_token(@user_id, GetSequencingReadQuery, variables: { sample_id: @sample.id })
+    response = CzidGraphqlFederation
+               .query_with_token(
+                 @user_id,
+                 GetSequencingReadQuery,
+                 variables: {
+                   sample_id: @sample.id,
+                 },
+                 token: @token
+               )
     sequencing_read_id = response.data.sequencing_reads.first.id
 
     # Create the r1 and r2 files, link them to SequencingRead
     input_fastqs = @sample.input_files.where(file_type: InputFile::FILE_TYPE_FASTQ).sort_by(&:name)
-    CzidGraphqlFederation.query_with_token(@user_id, CreateLinkedFileMutation, variables: { entity_id: sequencing_read_id, field_name: "r1_file", file_name: input_fastqs[0].name, protocol: "s3", file_path: input_fastqs[0].file_path, file_type: input_fastqs[0].file_type, namespace: ENV["SAMPLES_BUCKET_NAME"] })
+    CzidGraphqlFederation
+      .query_with_token(
+        @user_id,
+        CreateLinkedFileMutation,
+        variables: {
+          entity_id: sequencing_read_id,
+          field_name: "r1_file",
+          file_name: input_fastqs[0].name,
+          protocol: "s3",
+          file_path: input_fastqs[0].file_path,
+          file_type: input_fastqs[0].file_type,
+          namespace: ENV["SAMPLES_BUCKET_NAME"],
+        },
+        token: @token
+      )
 
     if input_fastqs.length > 1
-      CzidGraphqlFederation.query_with_token(@user_id, CreateLinkedFileMutation, variables: { entity_id: sequencing_read_id, field_name: "r2_file", file_name: input_fastqs[1].name, protocol: "s3", file_path: input_fastqs[1].file_path, file_type: input_fastqs[1].file_type, namespace: ENV["SAMPLES_BUCKET_NAME"] })
+      CzidGraphqlFederation
+        .query_with_token(
+          @user_id,
+          CreateLinkedFileMutation,
+          variables: {
+            entity_id: sequencing_read_id,
+            field_name: "r2_file",
+            file_name: input_fastqs[1].name,
+            protocol: "s3",
+            file_path: input_fastqs[1].file_path,
+            file_type: input_fastqs[1].file_type,
+            namespace: ENV["SAMPLES_BUCKET_NAME"],
+          },
+          token: @token
+        )
     end
 
     # When there is a primer bed, create GenomicRange and link to appropriate entities
@@ -105,7 +155,8 @@ class SampleFileEntityLinkCreationService
                    @user_id, CreateGenomicRangeMutation,
                    variables: {
                      collection_id: @sample.project_id,
-                   }
+                   },
+                   token: @token
                  )
       genomic_range_id = response.data.create_genomic_range.id
 
@@ -122,7 +173,8 @@ class SampleFileEntityLinkCreationService
             file_path: primer_bed.file_path,
             file_type: primer_bed.file_type,
             namespace: ENV["SAMPLES_BUCKET_NAME"],
-          }
+          },
+          token: @token
         )
 
       # Link GenomicRange to SequencingRead
@@ -133,7 +185,8 @@ class SampleFileEntityLinkCreationService
           variables: {
             primer_file_id: genomic_range_id,
             sequencing_read_id: sequencing_read_id,
-          }
+          },
+          token: @token
         )
     end
 
@@ -144,14 +197,20 @@ class SampleFileEntityLinkCreationService
     end
 
     # Kick off the workflow run
-    CzidGraphqlFederation
-      .query_with_token(
-        @user_id,
-        KickoffWorkflowRun,
-        variables: {
-          workflow_run_id: next_gen_workflow_run_id,
-          execution_id: @workflow_run.sfn_execution_arn,
-        }
-      )
+    run_workflow_response = CzidGraphqlFederation
+                            .query_with_token(
+                              @user_id,
+                              KickoffWorkflowRun,
+                              variables: {
+                                workflow_run_id: next_gen_workflow_run_id,
+                                execution_id: @workflow_run.sfn_execution_arn,
+                              },
+                              token: @token
+                            )
+
+    if run_workflow_response.errors.any?
+      message = response.errors.messages&.[]("data") || "Failed to kick off workflow run"
+      LogUtil.log_error(message, details: response.errors.details)
+    end
   end
 end
