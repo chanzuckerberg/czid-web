@@ -190,7 +190,7 @@ class SampleFileEntityLinkCreationService
         )
     end
 
-    # Create ReferenceGenome, link file to ReferenceGenome
+    # Link reference sequence file to ReferenceGenome
     reference_sequence = @sample.input_files.where(file_type: InputFile::FILE_TYPE_REFERENCE_SEQUENCE).first
     if reference_sequence.present? && workflow_run_reference_genome_id.present?
       CzidGraphqlFederation.query_with_token(@user_id, CreateLinkedFileMutation, variables: { entity_id: workflow_run_reference_genome_id, field_name: "file", file_name: reference_sequence.name, protocol: "s3", file_path: reference_sequence.file_path, file_type: "fastq", namespace: ENV["SAMPLES_BUCKET_NAME"] })

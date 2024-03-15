@@ -158,6 +158,7 @@ services:
       - redis
     environment:
       <<: [*web-variables, *aws-variables]
+      GRAPHQL_FEDERATION_SERVICE_URL: http://web-proxy:3000/graphqlfed
     command: bundle exec "COUNT=2 rake resque:workers"
   resque-scheduler:
     # See config/resque_schedule.yml for usages.

@@ -466,6 +466,13 @@ class Sample < ApplicationRecord
 
     self.status = STATUS_UPLOADED
     save! # this triggers pipeline command
+
+    if user.allowed_feature?("create_next_gen_entities")
+      # Link uploaded files and kickoff workflow in workflows service
+      if workflow_runs.any? { |wr| wr.workflow == WorkflowRun::WORKFLOW[:consensus_genome] }
+        SampleFileEntityLinkCreationService.call(user.id, self)
+      end
+    end
   rescue StandardError => e
     LogUtil.log_error(
       "SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}",
