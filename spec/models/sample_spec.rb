@@ -229,6 +229,42 @@ describe Sample, type: :model do
         expect(@sample.input_files.length).to be 0
       end
     end
+
+    context "for samples with consensus genome workflow runs" do
+      before do
+        @workflow_run = create(:workflow_run, sample: @sample)
+      end
+
+      context "when create_next_gen_entities feature is off" do
+        it "does not call next gen file entity linking service" do
+          expect(@sample).to receive(:files_for_basespace_dataset).exactly(1).times.and_return(fake_files_for_basespace_dataset_response)
+          expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(2).times.and_return(true)
+          expect(@sample).to receive(:kickoff_pipeline).exactly(1).times
+          allow_any_instance_of(WorkflowRun).to receive(:dispatch)
+
+          expect(SampleFileEntityLinkCreationService).to receive(:call).exactly(0).times
+
+          @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
+        end
+      end
+
+      context "when create_next_gen_entities feature is on" do
+        before do
+          @sample.user.add_allowed_feature("create_next_gen_entities")
+        end
+
+        it "does call next gen file entity linking service" do
+          expect(@sample).to receive(:files_for_basespace_dataset).exactly(1).times.and_return(fake_files_for_basespace_dataset_response)
+          expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(2).times.and_return(true)
+          expect(@sample).to receive(:kickoff_pipeline).exactly(1).times
+          allow_any_instance_of(WorkflowRun).to receive(:dispatch)
+
+          expect(SampleFileEntityLinkCreationService).to receive(:call).exactly(1).times
+
+          @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
+        end
+      end
+    end
   end
 
   context "#status_url" do
@@ -238,8 +274,8 @@ describe Sample, type: :model do
     end
 
     it "returns the url to the sample status page" do
-      skip "The actual URL depends on the execution environment"
-      expect(@sample.status_url).to eq("http://localhost:3000/samples/8/pipeline_runs")
+      base_url = UrlUtil.absolute_base_url
+      expect(@sample.status_url).to eq("#{base_url}/samples/#{@sample.id}/pipeline_runs")
     end
   end
 

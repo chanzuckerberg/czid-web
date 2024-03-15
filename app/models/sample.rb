@@ -565,6 +565,13 @@ class Sample < ApplicationRecord
 
     self.status = STATUS_UPLOADED
     save!
+
+    if user.allowed_feature?("create_next_gen_entities")
+      # Link uploaded files and kickoff workflow in workflows service
+      if workflow_runs.any? { |wr| wr.workflow == WorkflowRun::WORKFLOW[:consensus_genome] }
+        SampleFileEntityLinkCreationService.call(user_id, self)
+      end
+    end
   rescue StandardError => e
     Rails.logger.info(e)
     LogUtil.log_error(
