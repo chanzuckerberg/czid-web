@@ -1,10 +1,6 @@
 import { toLower } from "lodash/fp";
 import React, { useContext, useRef, useState } from "react";
-import {
-  useQueryLoader,
-  UseQueryLoaderLoadQueryOptions,
-  useRelayEnvironment,
-} from "react-relay";
+import { useQueryLoader, useRelayEnvironment } from "react-relay";
 import { fetchQuery, graphql } from "relay-runtime";
 import RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironment";
 import { getProjects } from "~/api";
@@ -26,18 +22,21 @@ import {
   Metadata,
   WorkflowRunRow,
 } from "../samples/SamplesView/SamplesView";
+import { DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType } from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
 import {
-  DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType,
-  DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
-} from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
+  DiscoveryViewFCSequencingReadIdsQuery as DiscoveryViewFCSequencingReadIdsQueryType,
+  DiscoveryViewFCSequencingReadIdsQuery$data,
+} from "./__generated__/DiscoveryViewFCSequencingReadIdsQuery.graphql";
 import {
   DiscoveryViewFCSequencingReadsQuery as DiscoveryViewFCSequencingReadsQueryType,
   queryInput_fedSequencingReads_input_orderBy_Input,
+  queryInput_fedSequencingReads_input_where_Input,
 } from "./__generated__/DiscoveryViewFCSequencingReadsQuery.graphql";
 import {
   DiscoveryViewFCWorkflowsQuery as DiscoveryViewFCWorkflowsQueryType,
   queryInput_fedWorkflowRuns_input_Input,
   queryInput_fedWorkflowRuns_input_orderByArray_items_Input,
+  queryInput_fedWorkflowRuns_input_where_collectionId_Input,
   queryInput_fedWorkflowRuns_input_where_Input,
 } from "./__generated__/DiscoveryViewFCWorkflowsQuery.graphql";
 import {
@@ -83,6 +82,16 @@ const DiscoveryViewFCWorkflowsQuery = graphql`
           }
         }
       }
+    }
+  }
+`;
+
+const DiscoveryViewFCSequencingReadIdsQuery = graphql`
+  query DiscoveryViewFCSequencingReadIdsQuery(
+    $input: queryInput_fedSequencingReads_input_Input
+  ) {
+    fedSequencingReads(input: $input) {
+      id
     }
   }
 `;
@@ -224,9 +233,44 @@ async function queryWorkflowRuns(
   environment: RelayModernEnvironment,
   projectIds?: number[],
 ): Promise<WorkflowRunRow[]> {
-  const where: queryInput_fedWorkflowRuns_input_where_Input = {
+  // WHERES:
+  let collectionIdInput: queryInput_fedWorkflowRuns_input_where_collectionId_Input | null =
+    null;
+  if (projectId != null) {
+    collectionIdInput = { _in: [parseInt(projectId)] };
+  } else if (projectIds !== undefined) {
+    collectionIdInput = { _in: projectIds };
+  }
+  let entitiesWhere:
+    | queryInput_fedSequencingReads_input_where_Input
+    | undefined;
+  if (
+    filters?.locationV2?.length ||
+    filters?.host?.length ||
+    filters?.tissue?.length
+  ) {
+    entitiesWhere = {
+      collectionId: collectionIdInput,
+      sample: {
+        collectionLocation: filters.locationV2.length
+          ? { _in: filters.locationV2 }
+          : null,
+        hostOrganism: filters.host.length
+          ? {
+              name: {
+                // TODO: Send names when NextGen supports hostOrganism.
+                _in: filters.host.map(hostId => hostId.toString()),
+              },
+            }
+          : null,
+        sampleType: filters.tissue.length ? { _in: filters.tissue } : null,
+      },
+    };
+  }
+  const workflowsWhere: queryInput_fedWorkflowRuns_input_where_Input = {
     workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
     deprecatedById: { _is_null: true },
+    collectionId: collectionIdInput,
     entityInputs: {
       entityType: {
         _eq: "sequencing_read",
@@ -236,13 +280,8 @@ async function queryWorkflowRuns(
       },
     },
   };
-  if (projectId != null) {
-    where.collectionId = { _in: [parseInt(projectId)] };
-  } else if (projectIds !== undefined) {
-    where.collectionId = { _in: projectIds };
-  }
-  const input: queryInput_fedWorkflowRuns_input_Input = {
-    where,
+  const workflowsInput: queryInput_fedWorkflowRuns_input_Input = {
+    where: workflowsWhere,
     orderByArray: getWorkflowRunsOrderBys(orderBy, orderDir), // TODO: Delete old non-Array orderBy
     todoRemove: {
       domain: props.domain,
@@ -261,16 +300,38 @@ async function queryWorkflowRuns(
     },
   };
 
-  const data = await fetchQuery<DiscoveryViewFCWorkflowsQueryType>(
+  // QUERIES:
+  let entitiesPromise:
+    | Promise<DiscoveryViewFCSequencingReadIdsQuery$data | undefined>
+    | undefined;
+  if (entitiesWhere !== undefined) {
+    entitiesPromise = fetchQuery<DiscoveryViewFCSequencingReadIdsQueryType>(
+      environment,
+      DiscoveryViewFCSequencingReadIdsQuery,
+      { input: { where: entitiesWhere } },
+    ).toPromise();
+  }
+  const workflowsPromise = fetchQuery<DiscoveryViewFCWorkflowsQueryType>(
     environment,
     DiscoveryViewFCWorkflowsQuery,
     {
-      input,
+      input: workflowsInput,
     },
   ).toPromise();
-  if (data?.fedWorkflowRuns == null) {
+  const entitiesData =
+    entitiesPromise !== undefined ? await entitiesPromise : undefined;
+  const workflowsData = await workflowsPromise;
+  if (
+    entitiesPromise !== undefined &&
+    entitiesData?.fedSequencingReads == null
+  ) {
     throw new Error(
-      `Missing data: ${JSON.stringify(data)} ${JSON.stringify(
+      `Missing filtered Entities data: ${JSON.stringify(entitiesData)}`,
+    );
+  }
+  if (workflowsData?.fedWorkflowRuns == null) {
+    throw new Error(
+      `Missing data: ${JSON.stringify(workflowsData)} ${JSON.stringify(
         workflow,
       )} ${search} ${orderBy} ${orderDir} ${JSON.stringify(
         filters,
@@ -278,15 +339,31 @@ async function queryWorkflowRuns(
     );
   }
 
-  const result = data.fedWorkflowRuns
+  // RESPONSE TRANSFORM:
+  const sequencingReadIds =
+    entitiesData !== undefined
+      ? new Set(
+          entitiesData.fedSequencingReads
+            ?.filter(isNotNullish)
+            .map(sequencingRead => sequencingRead.id),
+        )
+      : undefined;
+  const result = workflowsData.fedWorkflowRuns
     .filter(isNotNullish)
-    .map((run): WorkflowRunRow => {
+    .filter(run => {
       const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
       if (sequencingReadId == null) {
         throw new Error(
           `Couldn't find an entity input: ${JSON.stringify(run)}`,
         );
       }
+      if (sequencingReadIds === undefined) {
+        return true;
+      }
+      return sequencingReadIds.has(sequencingReadId);
+    })
+    .map((run): WorkflowRunRow => {
+      const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
       let parsedRawInput;
       try {
         parsedRawInput = JSON.parse(run.rawInputsJson ?? "");
@@ -306,7 +383,7 @@ async function queryWorkflowRuns(
             ? formatSemanticVersion(run.workflowVersion.version)
             : undefined,
         creation_source: parsedRawInput?.["creation_source"] ?? undefined,
-        inputSequencingReadId: sequencingReadId,
+        inputSequencingReadId: sequencingReadId as string,
       };
     });
   // TODO: Make BE do this.
@@ -360,6 +437,9 @@ async function querySequencingReadsByIds(
     DiscoveryViewFCSequencingReadsQuery,
     {
       input: {
+        // limit and offset are for Rails only (they should be in todoRemove)
+        limit: DEFAULT_PAGE_SIZE,
+        offset,
         limitOffset:
           orderBys.length > 0
             ? {
@@ -545,39 +625,40 @@ function getSequencingReadsOrderBys(
   }
 }
 
-async function queryWorkflowRunsAggregate(
-  { projectId, search, filters }: Conditions,
-  props: DiscoveryViewProps,
-  workflowRunIds: string[],
-  workflows: WorkflowType[],
-  loadAggregateQuery: (
-    variables: DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
-    options?: UseQueryLoaderLoadQueryOptions | undefined,
-  ) => void,
-) {
-  loadAggregateQuery({
-    input: {
-      where: {
-        id: { _in: workflowRunIds },
-        workflowVersion: { workflow: { name: { _in: workflows } } },
-      },
-      todoRemove: {
-        domain: props.domain,
-        projectId: projectId?.toString(),
-        search: search,
-        annotations: filters.annotations,
-        host: filters.host,
-        locationV2: filters.locationV2,
-        taxon: filters.taxon,
-        taxaLevels: filters.taxaLevels,
-        taxonThresholds: filters.taxonThresholds,
-        time: filters.time,
-        tissue: filters.tissue,
-        visibility: filters.visibility,
-      },
-    },
-  });
-}
+// TODO(bchu): Comment this back! Just experimenting in staging to see if this is related to the performance.
+// async function queryWorkflowRunsAggregate(
+//   { projectId, search, filters }: Conditions,
+//   props: DiscoveryViewProps,
+//   workflowRunIds: string[],
+//   workflows: WorkflowType[],
+//   loadAggregateQuery: (
+//     variables: DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
+//     options?: UseQueryLoaderLoadQueryOptions | undefined,
+//   ) => void,
+// ) {
+//   loadAggregateQuery({
+//     input: {
+//       where: {
+//         id: { _in: workflowRunIds },
+//         workflowVersion: { workflow: { name: { _in: workflows } } },
+//       },
+//       todoRemove: {
+//         domain: props.domain,
+//         projectId: projectId?.toString(),
+//         search: search,
+//         annotations: filters.annotations,
+//         host: filters.host,
+//         locationV2: filters.locationV2,
+//         taxon: filters.taxon,
+//         taxaLevels: filters.taxaLevels,
+//         taxonThresholds: filters.taxonThresholds,
+//         time: filters.time,
+//         tissue: filters.tissue,
+//         visibility: filters.visibility,
+//       },
+//     },
+//   });
+// }
 
 /**
  *  _____  _                                __      ___
@@ -602,8 +683,9 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   // shouldn't block the entire page:
   const [
     projectWorkflowsAggregateQueryRef,
-    loadAggregateQuery,
-    disposeAggregateQuery,
+    // TODO(bchu): Comment this back! Just experimenting in staging to see if this is related to the performance.
+    // loadAggregateQuery,
+    // disposeAggregateQuery,
   ] = useQueryLoader<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>(
     DiscoveryViewFCFedWorkflowRunsAggregateQuery,
   );
@@ -636,7 +718,8 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     // TODO: dispose() stale queryReferences.
     cgFirstPagePromise.current = undefined;
     cgConditions.current = {};
-    disposeAggregateQuery();
+    // TODO(bchu): Comment this back! Just experimenting in staging to see if this is related to the performance.
+    // disposeAggregateQuery();
     setCgWorkflowRunIds(undefined);
     setCgFullRows([]);
   };
@@ -680,15 +763,17 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     // TODO: fetch more workflows from NextGen
     // The conditions object contains workflow but we aren't using it
     // so we can (probably?) use the same conditions to fetch multiple workflows.
-    fetchCgFilteredWorkflowRuns(conditions).then((workflowRunIds: string[]) => {
-      queryWorkflowRunsAggregate(
-        conditions,
-        props,
-        workflowRunIds,
-        [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
-        loadAggregateQuery,
-      );
-    });
+    fetchCgFilteredWorkflowRuns(conditions);
+    // TODO(bchu): Comment this back! Just experimenting in staging to see if this is related to the performance.
+    // .then((workflowRunIds: string[]) => {
+    //   queryWorkflowRunsAggregate(
+    //     conditions,
+    //     props,
+    //     workflowRunIds,
+    //     [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
+    //     loadAggregateQuery,
+    //   );
+    // });
   };
 
   const fetchCgPage = async (

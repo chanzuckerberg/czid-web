@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<297dc3d63e1f6ebb5eb38e2fa3616c51>>
+ * @generated SignedSource<<aca3896aac621fdca655cd21899fb9f4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -24,9 +24,48 @@ export type queryInput_fedSequencingReads_input_limitOffset_Input = {
   offset?: number | null | undefined;
 };
 export type queryInput_fedSequencingReads_input_where_Input = {
+  collectionId?: queryInput_fedSequencingReads_input_where_collectionId_Input | null | undefined;
+  consensusGenomes?: queryInput_fedSequencingReads_input_where_consensusGenomes_Input | null | undefined;
   id?: queryInput_fedSequencingReads_input_where_id_Input | null | undefined;
+  sample?: queryInput_fedSequencingReads_input_where_sample_Input | null | undefined;
+  taxon?: queryInput_fedSequencingReads_input_where_taxon_Input | null | undefined;
 };
 export type queryInput_fedSequencingReads_input_where_id_Input = {
+  _in?: ReadonlyArray<string | null | undefined> | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_collectionId_Input = {
+  _in?: ReadonlyArray<number | null | undefined> | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_sample_Input = {
+  collectionLocation?: queryInput_fedSequencingReads_input_where_sample_collectionLocation_Input | null | undefined;
+  hostOrganism?: queryInput_fedSequencingReads_input_where_sample_hostOrganism_Input | null | undefined;
+  sampleType?: queryInput_fedSequencingReads_input_where_sample_sampleType_Input | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_sample_collectionLocation_Input = {
+  _in?: ReadonlyArray<string | null | undefined> | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_sample_hostOrganism_Input = {
+  name?: queryInput_fedSequencingReads_input_where_sample_hostOrganism_name_Input | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_sample_hostOrganism_name_Input = {
+  _in?: ReadonlyArray<string | null | undefined> | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_sample_sampleType_Input = {
+  _in?: ReadonlyArray<string | null | undefined> | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_taxon_Input = {
+  name?: queryInput_fedSequencingReads_input_where_taxon_name_Input | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_taxon_name_Input = {
+  _in?: ReadonlyArray<string | null | undefined> | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_consensusGenomes_Input = {
+  taxon?: queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_Input | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_Input = {
+  name?: queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_name_Input | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_name_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
 export type queryInput_fedSequencingReads_input_orderBy_Input = {
