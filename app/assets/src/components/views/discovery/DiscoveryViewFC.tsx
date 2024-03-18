@@ -1,6 +1,10 @@
 import { toLower } from "lodash/fp";
 import React, { useContext, useRef, useState } from "react";
-import { useQueryLoader, useRelayEnvironment } from "react-relay";
+import {
+  useQueryLoader,
+  UseQueryLoaderLoadQueryOptions,
+  useRelayEnvironment,
+} from "react-relay";
 import { fetchQuery, graphql } from "relay-runtime";
 import RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironment";
 import { getProjects } from "~/api";
@@ -22,7 +26,10 @@ import {
   Metadata,
   WorkflowRunRow,
 } from "../samples/SamplesView/SamplesView";
-import { DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType } from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
+import {
+  DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType,
+  DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
+} from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
 import {
   DiscoveryViewFCSequencingReadIdsQuery as DiscoveryViewFCSequencingReadIdsQueryType,
   DiscoveryViewFCSequencingReadIdsQuery$data,
@@ -252,10 +259,10 @@ async function queryWorkflowRuns(
     entitiesWhere = {
       collectionId: collectionIdInput,
       sample: {
-        collectionLocation: filters.locationV2.length
+        collectionLocation: filters.locationV2?.length
           ? { _in: filters.locationV2 }
           : null,
-        hostOrganism: filters.host.length
+        hostOrganism: filters.host?.length
           ? {
               name: {
                 // TODO: Send names when NextGen supports hostOrganism.
@@ -263,7 +270,7 @@ async function queryWorkflowRuns(
               },
             }
           : null,
-        sampleType: filters.tissue.length ? { _in: filters.tissue } : null,
+        sampleType: filters.tissue?.length ? { _in: filters.tissue } : null,
       },
     };
   }
@@ -625,40 +632,39 @@ function getSequencingReadsOrderBys(
   }
 }
 
-// TODO(bchu): Comment this back! Just experimenting in staging to see if this is related to the performance.
-// async function queryWorkflowRunsAggregate(
-//   { projectId, search, filters }: Conditions,
-//   props: DiscoveryViewProps,
-//   workflowRunIds: string[],
-//   workflows: WorkflowType[],
-//   loadAggregateQuery: (
-//     variables: DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
-//     options?: UseQueryLoaderLoadQueryOptions | undefined,
-//   ) => void,
-// ) {
-//   loadAggregateQuery({
-//     input: {
-//       where: {
-//         id: { _in: workflowRunIds },
-//         workflowVersion: { workflow: { name: { _in: workflows } } },
-//       },
-//       todoRemove: {
-//         domain: props.domain,
-//         projectId: projectId?.toString(),
-//         search: search,
-//         annotations: filters.annotations,
-//         host: filters.host,
-//         locationV2: filters.locationV2,
-//         taxon: filters.taxon,
-//         taxaLevels: filters.taxaLevels,
-//         taxonThresholds: filters.taxonThresholds,
-//         time: filters.time,
-//         tissue: filters.tissue,
-//         visibility: filters.visibility,
-//       },
-//     },
-//   });
-// }
+async function queryWorkflowRunsAggregate(
+  { projectId, search, filters }: Conditions,
+  props: DiscoveryViewProps,
+  workflowRunIds: string[],
+  workflows: WorkflowType[],
+  loadAggregateQuery: (
+    variables: DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
+    options?: UseQueryLoaderLoadQueryOptions | undefined,
+  ) => void,
+) {
+  loadAggregateQuery({
+    input: {
+      where: {
+        id: { _in: workflowRunIds },
+        workflowVersion: { workflow: { name: { _in: workflows } } },
+      },
+      todoRemove: {
+        domain: props.domain,
+        projectId: projectId?.toString(),
+        search: search,
+        annotations: filters.annotations,
+        host: filters.host,
+        locationV2: filters.locationV2,
+        taxon: filters.taxon,
+        taxaLevels: filters.taxaLevels,
+        taxonThresholds: filters.taxonThresholds,
+        time: filters.time,
+        tissue: filters.tissue,
+        visibility: filters.visibility,
+      },
+    },
+  });
+}
 
 /**
  *  _____  _                                __      ___
@@ -683,9 +689,8 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   // shouldn't block the entire page:
   const [
     projectWorkflowsAggregateQueryRef,
-    // TODO(bchu): Comment this back! Just experimenting in staging to see if this is related to the performance.
-    // loadAggregateQuery,
-    // disposeAggregateQuery,
+    loadAggregateQuery,
+    disposeAggregateQuery,
   ] = useQueryLoader<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>(
     DiscoveryViewFCFedWorkflowRunsAggregateQuery,
   );
@@ -718,8 +723,7 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     // TODO: dispose() stale queryReferences.
     cgFirstPagePromise.current = undefined;
     cgConditions.current = {};
-    // TODO(bchu): Comment this back! Just experimenting in staging to see if this is related to the performance.
-    // disposeAggregateQuery();
+    disposeAggregateQuery();
     setCgWorkflowRunIds(undefined);
     setCgFullRows([]);
   };
@@ -763,17 +767,15 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     // TODO: fetch more workflows from NextGen
     // The conditions object contains workflow but we aren't using it
     // so we can (probably?) use the same conditions to fetch multiple workflows.
-    fetchCgFilteredWorkflowRuns(conditions);
-    // TODO(bchu): Comment this back! Just experimenting in staging to see if this is related to the performance.
-    // .then((workflowRunIds: string[]) => {
-    //   queryWorkflowRunsAggregate(
-    //     conditions,
-    //     props,
-    //     workflowRunIds,
-    //     [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
-    //     loadAggregateQuery,
-    //   );
-    // });
+    fetchCgFilteredWorkflowRuns(conditions).then((workflowRunIds: string[]) => {
+      queryWorkflowRunsAggregate(
+        conditions,
+        props,
+        workflowRunIds,
+        [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
+        loadAggregateQuery,
+      );
+    });
   };
 
   const fetchCgPage = async (
