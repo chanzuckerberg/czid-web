@@ -1,7 +1,6 @@
 import { Button, Icon } from "@czi-sds/components";
 import { merge, pick } from "lodash/fp";
 import React from "react";
-import { PreloadedQuery } from "react-relay";
 import { SortDirectionType } from "react-virtualized";
 import { trackEventFromClassComponent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -11,8 +10,8 @@ import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { GlobalContext } from "~/globalContext/reducer";
 import { Project } from "~/interface/shared";
-import { DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType } from "../discovery/__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
+import { ProjectCountsType } from "../discovery/DiscoveryViewFC";
 import {
   DEFAULT_ROW_HEIGHT,
   MAX_PROJECT_ROW_HEIGHT,
@@ -22,10 +21,7 @@ import {
 import cs from "./projects_view.scss";
 
 interface ProjectsViewProps {
-  projectWorkflowsAggregateQueryRef:
-    | PreloadedQuery<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>
-    | null
-    | undefined;
+  workflowRunsProjectAggregates?: ProjectCountsType;
   currentDisplay: string;
   currentTab: string;
   filteredProjectCount?: number;
@@ -110,8 +106,8 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
         cellRenderer: ({ cellData }) =>
           TableRenderers.renderSampleCounts({
             cellData,
-            projectWorkflowsAggregateQueryRef:
-              this.props.projectWorkflowsAggregateQueryRef,
+            workflowRunsProjectAggregates:
+              this.props.workflowRunsProjectAggregates,
           }),
       },
     ];

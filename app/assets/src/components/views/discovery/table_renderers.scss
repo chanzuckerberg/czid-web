@@ -393,11 +393,3 @@
   font: $sds-font-body-xs-400-font;
   margin: 0px;
 }
-
-.loadingBackgroundAnimation {
-  @include loadingAnimation;
-
-  padding: $sds-spaces-xxs 0;
-  background-clip: content-box;
-  height: 20px;
-}

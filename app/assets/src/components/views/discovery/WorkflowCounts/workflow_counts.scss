@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~@czi-sds/components/dist/variables";
+@import "~styles/themes/elements";
 
 .counts {
   display: flex;
@@ -15,4 +16,12 @@
     margin-top: $sds-spaces-xxxs;
     color: $sds-color-gray-500;
   }
+}
+
+.loadingBackgroundAnimation {
+  @include loadingAnimation;
+
+  padding: $sds-spaces-xxs 0;
+  background-clip: content-box;
+  height: 20px;
 }

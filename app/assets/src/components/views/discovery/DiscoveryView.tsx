@@ -25,7 +25,6 @@ import {
 import moment from "moment";
 import { nanoid } from "nanoid";
 import React, { ReactNode, Suspense } from "react";
-import { PreloadedQuery } from "react-relay";
 import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
 import { trackPageTransition } from "~/api/analytics";
@@ -100,7 +99,6 @@ import SamplesView, { CgRow } from "../samples/SamplesView/SamplesView";
 import VisualizationsView, {
   Visualization,
 } from "../visualizations/VisualizationsView";
-import { DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType } from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
 import { ConsensusGenomesTabCount } from "./components/ConsensusGenomesTabCount";
 import { SamplesTabCount } from "./components/SamplesTabCount";
 import {
@@ -127,6 +125,7 @@ import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
 import DiscoveryFilters from "./DiscoveryFilters";
 import DiscoveryHeader from "./DiscoveryHeader";
 import DiscoverySidebar from "./DiscoverySidebar";
+import { ProjectCountsType } from "./DiscoveryViewFC";
 import InfoBanner from "./InfoBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 import ModalFirstTimeUser from "./ModalFirstTimeUser";
@@ -2340,7 +2339,7 @@ export class DiscoveryView extends React.Component<
       domain,
       mapTilerKey,
       snapshotShareId,
-      projectWorkflowsAggregateQueryRef,
+      workflowRunsProjectAggregates,
       allowedFeatures,
       cgWorkflowIds,
     } = this.props;
@@ -2396,9 +2395,7 @@ export class DiscoveryView extends React.Component<
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <ProjectsView
-                projectWorkflowsAggregateQueryRef={
-                  projectWorkflowsAggregateQueryRef
-                }
+                workflowRunsProjectAggregates={workflowRunsProjectAggregates}
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
                 filteredProjectCount={filteredProjectCount}
@@ -2772,8 +2769,5 @@ interface DiscoveryViewWithFCProps extends DiscoveryViewProps {
   fetchCgWorkflowRuns: (conditions: Conditions) => void;
   fetchCgPage: (offset: number) => Promise<Array<CgRow | undefined>>;
   fetchNextGenWorkflowRuns: (conditions: Conditions) => void;
-  projectWorkflowsAggregateQueryRef:
-    | PreloadedQuery<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>
-    | null
-    | undefined;
+  workflowRunsProjectAggregates?: ProjectCountsType;
 }

@@ -2,12 +2,11 @@ import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import { get } from "lodash/fp";
 import moment from "moment";
-import React, { Suspense } from "react";
-import { PreloadedQuery } from "react-relay";
+import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import { numberWithCommas } from "~/helpers/strings";
 import StatusLabel from "~ui/labels/StatusLabel";
-import { DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType } from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
+import { ProjectCountsType } from "./DiscoveryViewFC";
 import cs from "./table_renderers.scss";
 import { WorkflowCounts } from "./WorkflowCounts";
 
@@ -77,30 +76,23 @@ class TableRenderers extends React.Component {
 
   static renderSampleCounts = ({
     cellData,
-    projectWorkflowsAggregateQueryRef,
+    workflowRunsProjectAggregates,
   }: {
     cellData: any;
-    projectWorkflowsAggregateQueryRef:
-      | PreloadedQuery<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>
-      | null
-      | undefined;
+    workflowRunsProjectAggregates?: ProjectCountsType;
   }) => {
     const numberOfSamples: number = get("number_of_samples", cellData);
     const projectId: number = get("projectId", cellData);
 
     return (
       <div className={cs.base}>
-        <Suspense fallback={<div className={cs.loadingBackgroundAnimation} />}>
-          {projectWorkflowsAggregateQueryRef && cellData && (
-            <WorkflowCounts
-              projectWorkflowsAggregateQueryRef={
-                projectWorkflowsAggregateQueryRef
-              }
-              numberOfSamples={numberOfSamples}
-              projectId={projectId}
-            />
-          )}
-        </Suspense>
+        {cellData && (
+          <WorkflowCounts
+            workflowRunsProjectAggregates={workflowRunsProjectAggregates}
+            numberOfSamples={numberOfSamples}
+            projectId={projectId}
+          />
+        )}
       </div>
     );
   };

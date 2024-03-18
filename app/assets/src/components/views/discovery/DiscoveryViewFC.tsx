@@ -1,10 +1,6 @@
 import { toLower } from "lodash/fp";
 import React, { useContext, useRef, useState } from "react";
-import {
-  useQueryLoader,
-  UseQueryLoaderLoadQueryOptions,
-  useRelayEnvironment,
-} from "react-relay";
+import { useRelayEnvironment } from "react-relay";
 import { fetchQuery, graphql } from "relay-runtime";
 import RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironment";
 import { getProjects } from "~/api";
@@ -28,7 +24,7 @@ import {
 } from "../samples/SamplesView/SamplesView";
 import {
   DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType,
-  DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
+  DiscoveryViewFCFedWorkflowRunsAggregateQuery$data,
 } from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
 import {
   DiscoveryViewFCSequencingReadIdsQuery as DiscoveryViewFCSequencingReadIdsQueryType,
@@ -52,6 +48,12 @@ import {
 } from "./discovery_api";
 import { DiscoveryView } from "./DiscoveryView";
 import { STATUS_TYPE } from "./TableRenderers";
+
+export type ProjectCountsType = {
+  [key: number]: {
+    [key: string]: number;
+  };
+};
 
 const NEXT_GEN_TO_LEGACY_STATUS: Record<string, keyof typeof STATUS_TYPE> = {
   SUCCEEDED: "complete",
@@ -637,12 +639,9 @@ async function queryWorkflowRunsAggregate(
   props: DiscoveryViewProps,
   workflowRunIds: string[],
   workflows: WorkflowType[],
-  loadAggregateQuery: (
-    variables: DiscoveryViewFCFedWorkflowRunsAggregateQuery$variables,
-    options?: UseQueryLoaderLoadQueryOptions | undefined,
-  ) => void,
-) {
-  loadAggregateQuery({
+  environment: RelayModernEnvironment,
+): Promise<ProjectCountsType | undefined> {
+  const input = {
     input: {
       where: {
         id: { _in: workflowRunIds },
@@ -663,8 +662,44 @@ async function queryWorkflowRunsAggregate(
         visibility: filters.visibility,
       },
     },
-  });
+  };
+  const workflowsAggregate =
+    await fetchQuery<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>(
+      environment,
+      DiscoveryViewFCFedWorkflowRunsAggregateQuery,
+      input,
+    ).toPromise();
+
+  return parseAggregateCounts(workflowsAggregate);
 }
+
+const parseAggregateCounts = (
+  rawWorkflowsAggregateData:
+    | DiscoveryViewFCFedWorkflowRunsAggregateQuery$data
+    | undefined,
+): ProjectCountsType | undefined => {
+  const aggregateCounts =
+    rawWorkflowsAggregateData?.fedWorkflowRunsAggregate?.aggregate;
+
+  if (!aggregateCounts) {
+    throw new Error(
+      `Missing project workflows aggregate data: ${JSON.stringify(
+        rawWorkflowsAggregateData,
+      )}`,
+    );
+  }
+
+  const projectCounts = {};
+  aggregateCounts.filter(isNotNullish).forEach(({ count, groupBy }) => {
+    const { collectionId, workflowVersion } = groupBy;
+    const { name } = workflowVersion.workflow;
+    projectCounts[collectionId] = {
+      ...projectCounts[collectionId],
+      [name]: count,
+    };
+  });
+  return projectCounts;
+};
 
 /**
  *  _____  _                                __      ___
@@ -687,13 +722,6 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   // RELAY HOOKS:
   // TODO(bchu): Use useQueryLoader() here for parallel queries like aggregation, stats, etc. that
   // shouldn't block the entire page:
-  const [
-    projectWorkflowsAggregateQueryRef,
-    loadAggregateQuery,
-    disposeAggregateQuery,
-  ] = useQueryLoader<DiscoveryViewFCFedWorkflowRunsAggregateQueryType>(
-    DiscoveryViewFCFedWorkflowRunsAggregateQuery,
-  );
 
   // REFS:
   const workflowRunsPromise = useRef<Promise<WorkflowRunRow[]>>(
@@ -709,6 +737,8 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     string[] | undefined
   >();
   const [cgFullRows, setCgFullRows] = useState<Array<CgRow | undefined>>([]);
+  const [workflowRunsProjectAggregates, setWorkflowRunsProjectAggregates] =
+    useState<ProjectCountsType | undefined>(undefined);
 
   const updateDiscoveryProjectId = (projectId: string | null) => {
     globalContext?.globalContextDispatch(
@@ -723,9 +753,9 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     // TODO: dispose() stale queryReferences.
     cgFirstPagePromise.current = undefined;
     cgConditions.current = {};
-    disposeAggregateQuery();
     setCgWorkflowRunIds(undefined);
     setCgFullRows([]);
+    setWorkflowRunsProjectAggregates(undefined);
   };
 
   const fetchCgFilteredWorkflowRuns = async (
@@ -767,15 +797,18 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     // TODO: fetch more workflows from NextGen
     // The conditions object contains workflow but we aren't using it
     // so we can (probably?) use the same conditions to fetch multiple workflows.
-    fetchCgFilteredWorkflowRuns(conditions).then((workflowRunIds: string[]) => {
-      queryWorkflowRunsAggregate(
-        conditions,
-        props,
-        workflowRunIds,
-        [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
-        loadAggregateQuery,
-      );
-    });
+    fetchCgFilteredWorkflowRuns(conditions).then(
+      async (workflowRunIds: string[]) => {
+        const workflowRunsAggregate = await queryWorkflowRunsAggregate(
+          conditions,
+          props,
+          workflowRunIds,
+          [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
+          environment,
+        );
+        setWorkflowRunsProjectAggregates(workflowRunsAggregate);
+      },
+    );
   };
 
   const fetchCgPage = async (
@@ -845,7 +878,7 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       fetchCgWorkflowRuns={fetchCgFilteredWorkflowRuns}
       fetchCgPage={fetchCgPage}
       fetchNextGenWorkflowRuns={fetchNextGenWorkflowRuns}
-      projectWorkflowsAggregateQueryRef={projectWorkflowsAggregateQueryRef}
+      workflowRunsProjectAggregates={workflowRunsProjectAggregates}
     />
   );
 };
