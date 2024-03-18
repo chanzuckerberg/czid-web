@@ -29,18 +29,17 @@ import {
 import {
   DiscoveryViewFCSequencingReadIdsQuery as DiscoveryViewFCSequencingReadIdsQueryType,
   DiscoveryViewFCSequencingReadIdsQuery$data,
+  queryInput_fedSequencingReads_input_Input,
 } from "./__generated__/DiscoveryViewFCSequencingReadIdsQuery.graphql";
 import {
   DiscoveryViewFCSequencingReadsQuery as DiscoveryViewFCSequencingReadsQueryType,
   queryInput_fedSequencingReads_input_orderBy_Input,
-  queryInput_fedSequencingReads_input_where_Input,
 } from "./__generated__/DiscoveryViewFCSequencingReadsQuery.graphql";
 import {
   DiscoveryViewFCWorkflowsQuery as DiscoveryViewFCWorkflowsQueryType,
   queryInput_fedWorkflowRuns_input_Input,
   queryInput_fedWorkflowRuns_input_orderByArray_items_Input,
   queryInput_fedWorkflowRuns_input_where_collectionId_Input,
-  queryInput_fedWorkflowRuns_input_where_Input,
 } from "./__generated__/DiscoveryViewFCWorkflowsQuery.graphql";
 import {
   DISCOVERY_DOMAIN_ALL_DATA,
@@ -242,7 +241,7 @@ async function queryWorkflowRuns(
   environment: RelayModernEnvironment,
   projectIds?: number[],
 ): Promise<WorkflowRunRow[]> {
-  // WHERES:
+  // INPUTS:
   let collectionIdInput: queryInput_fedWorkflowRuns_input_where_collectionId_Input | null =
     null;
   if (projectId != null) {
@@ -250,52 +249,64 @@ async function queryWorkflowRuns(
   } else if (projectIds !== undefined) {
     collectionIdInput = { _in: projectIds };
   }
-  let entitiesWhere:
-    | queryInput_fedSequencingReads_input_where_Input
-    | undefined;
+  let entitiesInput: queryInput_fedSequencingReads_input_Input | undefined;
   if (
     filters?.locationV2?.length ||
     filters?.host?.length ||
     filters?.tissue?.length
   ) {
-    entitiesWhere = {
-      collectionId: collectionIdInput,
-      sample: {
-        collectionLocation: filters.locationV2?.length
-          ? { _in: filters.locationV2 }
-          : null,
-        hostOrganism: filters.host?.length
-          ? {
-              name: {
-                // TODO: Send names when NextGen supports hostOrganism.
-                _in: filters.host.map(hostId => hostId.toString()),
-              },
-            }
-          : null,
-        sampleType: filters.tissue?.length ? { _in: filters.tissue } : null,
+    entitiesInput = {
+      where: {
+        collectionId: collectionIdInput,
+        sample: {
+          collectionLocation: filters.locationV2?.length
+            ? { _in: filters.locationV2 }
+            : null,
+          hostOrganism: filters.host?.length
+            ? {
+                name: {
+                  // TODO: Send names when NextGen supports hostOrganism.
+                  _in: filters.host.map(hostId => hostId.toString()),
+                },
+              }
+            : null,
+          sampleType: filters.tissue?.length ? { _in: filters.tissue } : null,
+        },
+      },
+      todoRemove: {
+        domain: props.domain,
+        projectId: projectId?.toString(),
+        search,
+        host: filters?.host,
+        locationV2: filters?.locationV2,
+        taxons: filters?.taxon,
+        taxaLevels: filters?.taxaLevels,
+        time: filters?.time,
+        tissue: filters?.tissue,
+        visibility: filters?.visibility,
+        workflow: WorkflowType.CONSENSUS_GENOME,
       },
     };
   }
-  const workflowsWhere: queryInput_fedWorkflowRuns_input_where_Input = {
-    workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
-    deprecatedById: { _is_null: true },
-    collectionId: collectionIdInput,
-    entityInputs: {
-      entityType: {
-        _eq: "sequencing_read",
-      },
-      inputEntityId: {
-        _is_null: false,
+  const workflowsInput: queryInput_fedWorkflowRuns_input_Input = {
+    where: {
+      workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
+      deprecatedById: { _is_null: true },
+      collectionId: collectionIdInput,
+      entityInputs: {
+        entityType: {
+          _eq: "sequencing_read",
+        },
+        inputEntityId: {
+          _is_null: false,
+        },
       },
     },
-  };
-  const workflowsInput: queryInput_fedWorkflowRuns_input_Input = {
-    where: workflowsWhere,
     orderByArray: getWorkflowRunsOrderBys(orderBy, orderDir), // TODO: Delete old non-Array orderBy
     todoRemove: {
       domain: props.domain,
       projectId: projectId?.toString(),
-      search: search,
+      search,
       host: filters?.host,
       locationV2: filters?.locationV2,
       taxon: filters?.taxon,
@@ -313,19 +324,17 @@ async function queryWorkflowRuns(
   let entitiesPromise:
     | Promise<DiscoveryViewFCSequencingReadIdsQuery$data | undefined>
     | undefined;
-  if (entitiesWhere !== undefined) {
+  if (entitiesInput !== undefined) {
     entitiesPromise = fetchQuery<DiscoveryViewFCSequencingReadIdsQueryType>(
       environment,
       DiscoveryViewFCSequencingReadIdsQuery,
-      { input: { where: entitiesWhere } },
+      { input: entitiesInput },
     ).toPromise();
   }
   const workflowsPromise = fetchQuery<DiscoveryViewFCWorkflowsQueryType>(
     environment,
     DiscoveryViewFCWorkflowsQuery,
-    {
-      input: workflowsInput,
-    },
+    { input: workflowsInput },
   ).toPromise();
   const entitiesData =
     entitiesPromise !== undefined ? await entitiesPromise : undefined;
@@ -432,7 +441,7 @@ function getWorkflowRunsOrderBys(
   }
 }
 
-async function querySequencingReadsByIds(
+async function querySequencingReadObjects(
   offset: number,
   sequencingReadIds: string[],
   workflowRunIds: string[],
@@ -473,7 +482,7 @@ async function querySequencingReadsByIds(
         todoRemove: {
           domain: props.domain,
           projectId: projectId?.toString(),
-          search: search,
+          search,
           host: filters?.host,
           locationV2: filters?.locationV2,
           taxons: filters?.taxon,
@@ -832,7 +841,7 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       offset,
       offset + DEFAULT_PAGE_SIZE,
     );
-    const sequencingReads = await querySequencingReadsByIds(
+    const sequencingReads = await querySequencingReadObjects(
       offset, // TODO: Remove.
       workflowRunsPage.map(run => run.inputSequencingReadId),
       workflowRunsPage.map(run => run.id),
