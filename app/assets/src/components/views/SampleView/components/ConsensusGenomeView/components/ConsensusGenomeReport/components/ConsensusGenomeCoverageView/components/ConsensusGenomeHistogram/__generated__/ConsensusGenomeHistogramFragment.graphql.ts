@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0b1eccd7152fe23607dc48bd086f69fa>>
+ * @generated SignedSource<<3610bf36b345e98d97cc663e0c439b75>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -21,7 +21,7 @@ export type ConsensusGenomeHistogramFragment$data = ReadonlyArray<{
     readonly coverageViz: ReadonlyArray<ReadonlyArray<number | null | undefined> | null | undefined>;
   } | null | undefined;
   readonly taxon: {
-    readonly commonName: string | null | undefined;
+    readonly name: string;
   } | null | undefined;
   readonly " $fragmentType": "ConsensusGenomeHistogramFragment";
 }>;
@@ -75,7 +75,7 @@ const node: ReaderFragment = {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "commonName",
+          "name": "name",
           "storageKey": null
         }
       ],
@@ -133,6 +133,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "d077513c249eebf4cc0d9a57da03cb8b";
+(node as any).hash = "692ab97bd3d92d99d43b9d9ea48d70c2";
 
 export default node;

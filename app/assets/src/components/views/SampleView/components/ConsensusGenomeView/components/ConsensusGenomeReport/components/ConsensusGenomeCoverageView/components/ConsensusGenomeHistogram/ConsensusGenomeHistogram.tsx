@@ -26,7 +26,7 @@ export const ConsensusGenomeHistogramFragment = graphql`
       accessionName
     }
     taxon {
-      commonName
+      name
     }
     metrics {
       coverageViz @required(action: LOG)
@@ -60,7 +60,7 @@ export const ConsensusGenomeHistogram = ({
   const accessionName = data[0]?.accession?.accessionName;
   const taxon = data[0]?.taxon;
 
-  const taxonName = taxon?.commonName;
+  const taxonName = taxon?.name;
   const coverageViz = metrics?.coverageViz;
   const coverageBinSize = metrics?.coverageBinSize;
   const coverageTotalLength = metrics?.coverageTotalLength;

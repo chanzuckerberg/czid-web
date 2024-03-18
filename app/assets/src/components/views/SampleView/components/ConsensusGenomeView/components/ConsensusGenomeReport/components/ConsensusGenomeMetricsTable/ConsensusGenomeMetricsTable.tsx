@@ -10,7 +10,7 @@ export const ConsensusGenomeMetricsTableFragment = graphql`
   fragment ConsensusGenomeMetricsTableFragment on query_fedConsensusGenomes_items
   @relay(plural: true) {
     taxon {
-      commonName
+      name
     }
     metrics {
       mappedReads
@@ -116,7 +116,7 @@ export const ConsensusGenomeMetricsTable = ({
   }
 
   const metricsData = {
-    taxonName: data[0]?.taxon?.commonName,
+    taxonName: data[0]?.taxon?.name,
     ...data[0]?.metrics,
   };
 

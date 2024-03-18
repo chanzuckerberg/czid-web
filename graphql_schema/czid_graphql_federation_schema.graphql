@@ -1,43 +1,82 @@
-"""Exposes a URL that specifies the behavior of this scalar."""
+"""
+Exposes a URL that specifies the behavior of this scalar.
+"""
 directive @specifiedBy(
-  """The URL that specifies the behavior of this scalar."""
+  """
+  The URL that specifies the behavior of this scalar.
+  """
   url: String!
 ) on SCALAR
 
 directive @oneOf on OBJECT | INTERFACE | INPUT_OBJECT
 
-directive @example(subgraph: String, value: ObjMap) on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+directive @example(
+  subgraph: String
+  value: ObjMap
+) on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
-directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: ObjMap, httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean) on FIELD_DEFINITION
+directive @httpOperation(
+  subgraph: String
+  path: String
+  operationSpecificHeaders: ObjMap
+  httpMethod: HTTPMethod
+  isBinary: Boolean
+  requestBaseBody: ObjMap
+  queryParamArgMap: ObjMap
+  queryStringOptionsByParam: ObjMap
+  jsonApiFields: Boolean
+) on FIELD_DEFINITION
 
-directive @transport(subgraph: String, kind: String, location: String, headers: ObjMap, queryStringOptions: ObjMap, queryParams: ObjMap) on OBJECT
+directive @transport(
+  subgraph: String
+  kind: String
+  location: String
+  headers: ObjMap
+  queryStringOptions: ObjMap
+  queryParams: ObjMap
+) on OBJECT
 
 type Accession implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   accessionId: String!
   accessionName: String!
-  upstreamDatabase(where: UpstreamDatabaseWhereClause = null, orderBy: [UpstreamDatabaseOrderByClause!] = []): UpstreamDatabase
+  upstreamDatabase(
+    where: UpstreamDatabaseWhereClause = null
+    orderBy: [UpstreamDatabaseOrderByClause!] = []
+  ): UpstreamDatabase
   consensusGenomes(
     where: ConsensusGenomeWhereClause = null
     orderBy: [ConsensusGenomeOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): ConsensusGenomeConnection!
-  consensusGenomesAggregate(where: ConsensusGenomeWhereClause = null): ConsensusGenomeAggregate
+  consensusGenomesAggregate(
+    where: ConsensusGenomeWhereClause = null
+  ): ConsensusGenomeAggregate
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
@@ -60,12 +99,18 @@ type AccessionAggregateFunctions {
   count(distinct: Boolean = false, columns: AccessionCountColumns = null): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type AccessionConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [AccessionEdge!]!
 }
 
@@ -90,12 +135,18 @@ input AccessionCreateInput {
   collectionId: Int!
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type AccessionEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: Accession!
 }
 
@@ -231,7 +282,9 @@ input BoolComparators {
 }
 
 type BulkDownload implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   downloadType: BulkDownloadType!
@@ -257,7 +310,10 @@ type BulkDownloadAggregateFunctions {
   min: BulkDownloadMinMaxColumns
   max: BulkDownloadMinMaxColumns
   groupBy: BulkDownloadGroupByOptions
-  count(distinct: Boolean = false, columns: BulkDownloadCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: BulkDownloadCountColumns = null
+  ): Int
 }
 
 enum BulkDownloadCountColumns {
@@ -347,16 +403,33 @@ input BulkDownloadWhereClauseMutations {
 }
 
 type ConsensusGenome implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
-  taxon(where: TaxonWhereClause = null, orderBy: [TaxonOrderByClause!] = []): Taxon
-  sequencingRead(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = []): SequencingRead
-  referenceGenome(where: ReferenceGenomeWhereClause = null, orderBy: [ReferenceGenomeOrderByClause!] = []): ReferenceGenome
-  accession(where: AccessionWhereClause = null, orderBy: [AccessionOrderByClause!] = []): Accession
+  taxon(
+    where: TaxonWhereClause = null
+    orderBy: [TaxonOrderByClause!] = []
+  ): Taxon
+  sequencingRead(
+    where: SequencingReadWhereClause = null
+    orderBy: [SequencingReadOrderByClause!] = []
+  ): SequencingRead
+  referenceGenome(
+    where: ReferenceGenomeWhereClause = null
+    orderBy: [ReferenceGenomeOrderByClause!] = []
+  ): ReferenceGenome
+  accession(
+    where: AccessionWhereClause = null
+    orderBy: [AccessionOrderByClause!] = []
+  ): Accession
   sequenceId: ID
   sequence(where: FileWhereClause = null): File
-  metrics(where: MetricConsensusGenomeWhereClause = null, orderBy: [MetricConsensusGenomeOrderByClause!] = []): MetricConsensusGenome
+  metrics(
+    where: MetricConsensusGenomeWhereClause = null
+    orderBy: [MetricConsensusGenomeOrderByClause!] = []
+  ): MetricConsensusGenome
   intermediateOutputsId: ID
   intermediateOutputs(where: FileWhereClause = null): File
   producingRunId: ID
@@ -378,15 +451,24 @@ type ConsensusGenomeAggregateFunctions {
   min: ConsensusGenomeMinMaxColumns
   max: ConsensusGenomeMinMaxColumns
   groupBy: ConsensusGenomeGroupByOptions
-  count(distinct: Boolean = false, columns: ConsensusGenomeCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: ConsensusGenomeCountColumns = null
+  ): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type ConsensusGenomeConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [ConsensusGenomeEdge!]!
 }
 
@@ -415,12 +497,18 @@ input ConsensusGenomeCreateInput {
   collectionId: Int!
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type ConsensusGenomeEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: ConsensusGenome!
 }
 
@@ -490,7 +578,9 @@ type ConsensusGenomeWorkflowResults {
   reference_genome: query_ConsensusGenomeWorkflowResults_reference_genome
 }
 
-"""Autogenerated return type of CreateUser."""
+"""
+Autogenerated return type of CreateUser.
+"""
 type CreateUserPayload {
   archetypes: String
   email: String
@@ -501,7 +591,9 @@ type CreateUserPayload {
   sendActivation: Boolean
 }
 
-"""Date with time (isoformat)"""
+"""
+Date with time (isoformat)
+"""
 scalar DateTime
 
 input DatetimeComparators {
@@ -576,7 +668,9 @@ input EntityInputType {
 }
 
 interface EntityInterface {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
 }
 
@@ -675,7 +769,9 @@ input FloatComparators {
 }
 
 type GenomicRange implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   fileId: ID
@@ -684,19 +780,29 @@ type GenomicRange implements EntityInterface & Node {
     where: SequencingReadWhereClause = null
     orderBy: [SequencingReadOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): SequencingReadConnection!
-  sequencingReadsAggregate(where: SequencingReadWhereClause = null): SequencingReadAggregate
+  sequencingReadsAggregate(
+    where: SequencingReadWhereClause = null
+  ): SequencingReadAggregate
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
@@ -716,7 +822,10 @@ type GenomicRangeAggregateFunctions {
   min: GenomicRangeMinMaxColumns
   max: GenomicRangeMinMaxColumns
   groupBy: GenomicRangeGroupByOptions
-  count(distinct: Boolean = false, columns: GenomicRangeCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: GenomicRangeCountColumns = null
+  ): Int
 }
 
 enum GenomicRangeCountColumns {
@@ -810,7 +919,9 @@ type HostGenome {
 }
 
 type HostOrganism implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   railsHostGenomeId: Int
@@ -822,16 +933,24 @@ type HostOrganism implements EntityInterface & Node {
     where: IndexFileWhereClause = null
     orderBy: [IndexFileOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): IndexFileConnection!
   indexesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate
@@ -839,16 +958,24 @@ type HostOrganism implements EntityInterface & Node {
     where: SampleWhereClause = null
     orderBy: [SampleOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): SampleConnection!
   samplesAggregate(where: SampleWhereClause = null): SampleAggregate
@@ -871,7 +998,10 @@ type HostOrganismAggregateFunctions {
   min: HostOrganismMinMaxColumns
   max: HostOrganismMinMaxColumns
   groupBy: HostOrganismGroupByOptions
-  count(distinct: Boolean = false, columns: HostOrganismCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: HostOrganismCountColumns = null
+  ): Int
 }
 
 enum HostOrganismCategory {
@@ -1003,15 +1133,23 @@ enum HTTPMethod {
 }
 
 type IndexFile implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   name: IndexTypes!
   version: String!
   fileId: ID
   file(where: FileWhereClause = null): File
-  upstreamDatabase(where: UpstreamDatabaseWhereClause = null, orderBy: [UpstreamDatabaseOrderByClause!] = []): UpstreamDatabase
-  hostOrganism(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = []): HostOrganism
+  upstreamDatabase(
+    where: UpstreamDatabaseWhereClause = null
+    orderBy: [UpstreamDatabaseOrderByClause!] = []
+  ): UpstreamDatabase
+  hostOrganism(
+    where: HostOrganismWhereClause = null
+    orderBy: [HostOrganismOrderByClause!] = []
+  ): HostOrganism
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
@@ -1034,12 +1172,18 @@ type IndexFileAggregateFunctions {
   count(distinct: Boolean = false, columns: IndexFileCountColumns = null): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type IndexFileConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [IndexFileEdge!]!
 }
 
@@ -1067,12 +1211,18 @@ input IndexFileCreateInput {
   collectionId: Int!
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type IndexFileEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: IndexFile!
 }
 
@@ -1197,7 +1347,9 @@ input IntComparators {
   _is_null: Boolean
 }
 
-"""An ISO 8601-encoded datetime"""
+"""
+An ISO 8601-encoded datetime
+"""
 scalar ISO8601DateTime
 
 """
@@ -1211,10 +1363,15 @@ input LimitOffsetClause {
 }
 
 type Metadatum implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
-  sample(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = []): Sample
+  sample(
+    where: SampleWhereClause = null
+    orderBy: [SampleOrderByClause!] = []
+  ): Sample
   fieldName: String!
   value: String!
   producingRunId: ID
@@ -1239,12 +1396,18 @@ type MetadatumAggregateFunctions {
   count(distinct: Boolean = false, columns: MetadatumCountColumns = null): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type MetadatumConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [MetadatumEdge!]!
 }
 
@@ -1268,12 +1431,18 @@ input MetadatumCreateInput {
   collectionId: Int!
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type MetadatumEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: Metadatum!
 }
 
@@ -1336,10 +1505,15 @@ input MetadatumWhereClauseMutations {
 }
 
 type MetricConsensusGenome implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
-  consensusGenome(where: ConsensusGenomeWhereClause = null, orderBy: [ConsensusGenomeOrderByClause!] = []): ConsensusGenome
+  consensusGenome(
+    where: ConsensusGenomeWhereClause = null
+    orderBy: [ConsensusGenomeOrderByClause!] = []
+  ): ConsensusGenome
   referenceGenomeLength: Float
   percentGenomeCalled: Float
   percentIdentity: Float
@@ -1374,7 +1548,10 @@ type MetricConsensusGenomeAggregateFunctions {
   min: MetricConsensusGenomeMinMaxColumns
   max: MetricConsensusGenomeMinMaxColumns
   groupBy: MetricConsensusGenomeGroupByOptions
-  count(distinct: Boolean = false, columns: MetricConsensusGenomeCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: MetricConsensusGenomeCountColumns = null
+  ): Int
 }
 
 enum MetricConsensusGenomeCountColumns {
@@ -1573,68 +1750,155 @@ type MultipartUploadResponse {
 
 type Mutation {
   createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
-  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  updateWorkflowRun(
+    input: WorkflowRunUpdateInput!
+    where: WorkflowRunWhereClauseMutations!
+  ): [WorkflowRun!]!
   deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
   createWorkflow(input: WorkflowCreateInput!): Workflow!
-  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
+  updateWorkflow(
+    input: WorkflowUpdateInput!
+    where: WorkflowWhereClauseMutations!
+  ): [Workflow!]!
   deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
   createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
-  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
-  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
+  updateWorkflowRunStep(
+    input: WorkflowRunStepUpdateInput!
+    where: WorkflowRunStepWhereClauseMutations!
+  ): [WorkflowRunStep!]!
+  deleteWorkflowRunStep(
+    where: WorkflowRunStepWhereClauseMutations!
+  ): [WorkflowRunStep!]!
+  createWorkflowRunEntityInput(
+    input: WorkflowRunEntityInputCreateInput!
+  ): WorkflowRunEntityInput!
+  deleteWorkflowRunEntityInput(
+    where: WorkflowRunEntityInputWhereClauseMutations!
+  ): [WorkflowRunEntityInput!]!
   createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
-  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
-  runWorkflowVersion(input: RunWorkflowVersionInput!, executionId: String = null): WorkflowRun!
+  deleteWorkflowVersion(
+    where: WorkflowVersionWhereClauseMutations!
+  ): [WorkflowVersion!]!
+  runWorkflowVersion(
+    input: RunWorkflowVersionInput!
+    executionId: String = null
+  ): WorkflowRun!
   runWorkflowRun(workflowRunId: ID!, executionId: String = null): WorkflowRun!
-  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
   createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
-  uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
+  uploadFile(
+    entityId: ID!
+    entityFieldName: String!
+    file: FileUpload!
+    expiration: Int! = 3600
+  ): MultipartUploadResponse!
   uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
   markUploadComplete(fileId: ID!): File!
   concatenateFiles(ids: [UUID!]!): SignedURL!
   createSample(input: SampleCreateInput!): Sample!
-  updateSample(input: SampleUpdateInput!, where: SampleWhereClauseMutations!): [Sample!]!
+  updateSample(
+    input: SampleUpdateInput!
+    where: SampleWhereClauseMutations!
+  ): [Sample!]!
   deleteSample(where: SampleWhereClauseMutations!): [Sample!]!
   createSequencingRead(input: SequencingReadCreateInput!): SequencingRead!
-  updateSequencingRead(input: SequencingReadUpdateInput!, where: SequencingReadWhereClauseMutations!): [SequencingRead!]!
-  deleteSequencingRead(where: SequencingReadWhereClauseMutations!): [SequencingRead!]!
+  updateSequencingRead(
+    input: SequencingReadUpdateInput!
+    where: SequencingReadWhereClauseMutations!
+  ): [SequencingRead!]!
+  deleteSequencingRead(
+    where: SequencingReadWhereClauseMutations!
+  ): [SequencingRead!]!
   createGenomicRange(input: GenomicRangeCreateInput!): GenomicRange!
   deleteGenomicRange(where: GenomicRangeWhereClauseMutations!): [GenomicRange!]!
   createReferenceGenome(input: ReferenceGenomeCreateInput!): ReferenceGenome!
-  updateReferenceGenome(input: ReferenceGenomeUpdateInput!, where: ReferenceGenomeWhereClauseMutations!): [ReferenceGenome!]!
-  deleteReferenceGenome(where: ReferenceGenomeWhereClauseMutations!): [ReferenceGenome!]!
+  updateReferenceGenome(
+    input: ReferenceGenomeUpdateInput!
+    where: ReferenceGenomeWhereClauseMutations!
+  ): [ReferenceGenome!]!
+  deleteReferenceGenome(
+    where: ReferenceGenomeWhereClauseMutations!
+  ): [ReferenceGenome!]!
   createAccession(input: AccessionCreateInput!): Accession!
-  updateAccession(input: AccessionUpdateInput!, where: AccessionWhereClauseMutations!): [Accession!]!
+  updateAccession(
+    input: AccessionUpdateInput!
+    where: AccessionWhereClauseMutations!
+  ): [Accession!]!
   deleteAccession(where: AccessionWhereClauseMutations!): [Accession!]!
   createHostOrganism(input: HostOrganismCreateInput!): HostOrganism!
-  updateHostOrganism(input: HostOrganismUpdateInput!, where: HostOrganismWhereClauseMutations!): [HostOrganism!]!
+  updateHostOrganism(
+    input: HostOrganismUpdateInput!
+    where: HostOrganismWhereClauseMutations!
+  ): [HostOrganism!]!
   deleteHostOrganism(where: HostOrganismWhereClauseMutations!): [HostOrganism!]!
   createMetadatum(input: MetadatumCreateInput!): Metadatum!
-  updateMetadatum(input: MetadatumUpdateInput!, where: MetadatumWhereClauseMutations!): [Metadatum!]!
+  updateMetadatum(
+    input: MetadatumUpdateInput!
+    where: MetadatumWhereClauseMutations!
+  ): [Metadatum!]!
   deleteMetadatum(where: MetadatumWhereClauseMutations!): [Metadatum!]!
   createConsensusGenome(input: ConsensusGenomeCreateInput!): ConsensusGenome!
-  deleteConsensusGenome(where: ConsensusGenomeWhereClauseMutations!): [ConsensusGenome!]!
-  createMetricConsensusGenome(input: MetricConsensusGenomeCreateInput!): MetricConsensusGenome!
-  deleteMetricConsensusGenome(where: MetricConsensusGenomeWhereClauseMutations!): [MetricConsensusGenome!]!
+  deleteConsensusGenome(
+    where: ConsensusGenomeWhereClauseMutations!
+  ): [ConsensusGenome!]!
+  createMetricConsensusGenome(
+    input: MetricConsensusGenomeCreateInput!
+  ): MetricConsensusGenome!
+  deleteMetricConsensusGenome(
+    where: MetricConsensusGenomeWhereClauseMutations!
+  ): [MetricConsensusGenome!]!
   createTaxon(input: TaxonCreateInput!): Taxon!
-  updateTaxon(input: TaxonUpdateInput!, where: TaxonWhereClauseMutations!): [Taxon!]!
+  updateTaxon(
+    input: TaxonUpdateInput!
+    where: TaxonWhereClauseMutations!
+  ): [Taxon!]!
   deleteTaxon(where: TaxonWhereClauseMutations!): [Taxon!]!
   createUpstreamDatabase(input: UpstreamDatabaseCreateInput!): UpstreamDatabase!
-  updateUpstreamDatabase(input: UpstreamDatabaseUpdateInput!, where: UpstreamDatabaseWhereClauseMutations!): [UpstreamDatabase!]!
-  deleteUpstreamDatabase(where: UpstreamDatabaseWhereClauseMutations!): [UpstreamDatabase!]!
+  updateUpstreamDatabase(
+    input: UpstreamDatabaseUpdateInput!
+    where: UpstreamDatabaseWhereClauseMutations!
+  ): [UpstreamDatabase!]!
+  deleteUpstreamDatabase(
+    where: UpstreamDatabaseWhereClauseMutations!
+  ): [UpstreamDatabase!]!
   createIndexFile(input: IndexFileCreateInput!): IndexFile!
-  updateIndexFile(input: IndexFileUpdateInput!, where: IndexFileWhereClauseMutations!): [IndexFile!]!
+  updateIndexFile(
+    input: IndexFileUpdateInput!
+    where: IndexFileWhereClauseMutations!
+  ): [IndexFile!]!
   deleteIndexFile(where: IndexFileWhereClauseMutations!): [IndexFile!]!
   createBulkDownload(input: BulkDownloadCreateInput!): BulkDownload!
   deleteBulkDownload(where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
+  createUser(
+    archetypes: String
+    email: String!
+    institution: String
+    name: String
+    role: Int
+    segments: String
+    sendActivation: Boolean
+  ): CreateUserPayload!
   CreateBulkDownload(input: mutationInput_CreateBulkDownload_input_Input): JSON
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
-  UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleNotes
-  UpdateSampleName(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleName
-  KickoffWGSWorkflow(sampleId: String, input: mutationInput_KickoffWGSWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
-  KickoffAMRWorkflow(sampleId: String, input: mutationInput_KickoffAMRWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
-  UpdateMetadata(sampleId: String, input: mutationInput_UpdateMetadata_input_Input): UpdateMetadataReponse
+  UpdateSampleNotes(
+    sampleId: String
+    input: mutationInput_UpdateSampleNotes_input_Input
+  ): UpdateSampleNotes
+  UpdateSampleName(
+    sampleId: String
+    input: mutationInput_UpdateSampleNotes_input_Input
+  ): UpdateSampleName
+  KickoffWGSWorkflow(
+    sampleId: String
+    input: mutationInput_KickoffWGSWorkflow_input_Input
+  ): [mutation_KickoffWGSWorkflow_items]
+  KickoffAMRWorkflow(
+    sampleId: String
+    input: mutationInput_KickoffAMRWorkflow_input_Input
+  ): [mutation_KickoffWGSWorkflow_items]
+  UpdateMetadata(
+    sampleId: String
+    input: mutationInput_UpdateMetadata_input_Input
+  ): UpdateMetadataReponse
 }
 
 type mutation_KickoffWGSWorkflow_items {
@@ -1733,9 +1997,13 @@ input mutationInput_UpdateSampleNotes_input_Input {
   authenticityToken: String!
 }
 
-"""An object with a Globally Unique ID"""
+"""
+An object with a Globally Unique ID
+"""
 interface Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
 }
 
@@ -1750,18 +2018,28 @@ enum orderBy {
   desc_nulls_last
 }
 
-"""Information to aid in pagination."""
+"""
+Information to aid in pagination.
+"""
 type PageInfo {
-  """When paginating forwards, are there more items?"""
+  """
+  When paginating forwards, are there more items?
+  """
   hasNextPage: Boolean!
 
-  """When paginating backwards, are there more items?"""
+  """
+  When paginating backwards, are there more items?
+  """
   hasPreviousPage: Boolean!
 
-  """When paginating backwards, the cursor to continue."""
+  """
+  When paginating backwards, the cursor to continue.
+  """
   startCursor: String
 
-  """When paginating forwards, the cursor to continue."""
+  """
+  When paginating forwards, the cursor to continue.
+  """
   endCursor: String
 }
 
@@ -1849,80 +2127,255 @@ type Project {
 
 type Query {
   node(
-    """The ID of the object."""
+    """
+    The ID of the object.
+    """
     id: GlobalID!
   ): Node!
   nodes(
-    """The IDs of the objects."""
+    """
+    The IDs of the objects.
+    """
     ids: [GlobalID!]!
   ): [Node!]!
-  workflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRun!]!
-  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Workflow!]!
-  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunStep!]!
-  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunEntityInput!]!
-  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowVersion!]!
-  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
+  workflowRuns(
+    where: WorkflowRunWhereClause = null
+    orderBy: [WorkflowRunOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [WorkflowRun!]!
+  workflows(
+    where: WorkflowWhereClause = null
+    orderBy: [WorkflowOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [Workflow!]!
+  workflowRunSteps(
+    where: WorkflowRunStepWhereClause = null
+    orderBy: [WorkflowRunStepOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [WorkflowRunStep!]!
+  workflowRunEntityInputs(
+    where: WorkflowRunEntityInputWhereClause = null
+    orderBy: [WorkflowRunEntityInputOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [WorkflowRunEntityInput!]!
+  workflowVersions(
+    where: WorkflowVersionWhereClause = null
+    orderBy: [WorkflowVersionOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [WorkflowVersion!]!
+  workflowRunsAggregate(
+    where: WorkflowRunWhereClause = null
+  ): WorkflowRunAggregate!
   workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
-  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
-  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
-  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
+  workflowRunStepsAggregate(
+    where: WorkflowRunStepWhereClause = null
+  ): WorkflowRunStepAggregate!
+  workflowRunEntityInputsAggregate(
+    where: WorkflowRunEntityInputWhereClause = null
+  ): WorkflowRunEntityInputAggregate!
+  workflowVersionsAggregate(
+    where: WorkflowVersionWhereClause = null
+  ): WorkflowVersionAggregate!
+  files(where: FileWhereClause = null): [File!]!
+  samples(
+    where: SampleWhereClause = null
+    orderBy: [SampleOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [Sample!]!
+  sequencingReads(
+    where: SequencingReadWhereClause = null
+    orderBy: [SequencingReadOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [SequencingRead!]!
+  genomicRanges(
+    where: GenomicRangeWhereClause = null
+    orderBy: [GenomicRangeOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [GenomicRange!]!
+  referenceGenomes(
+    where: ReferenceGenomeWhereClause = null
+    orderBy: [ReferenceGenomeOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [ReferenceGenome!]!
+  accessions(
+    where: AccessionWhereClause = null
+    orderBy: [AccessionOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [Accession!]!
+  hostOrganisms(
+    where: HostOrganismWhereClause = null
+    orderBy: [HostOrganismOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [HostOrganism!]!
+  metadatas(
+    where: MetadatumWhereClause = null
+    orderBy: [MetadatumOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [Metadatum!]!
+  consensusGenomes(
+    where: ConsensusGenomeWhereClause = null
+    orderBy: [ConsensusGenomeOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [ConsensusGenome!]!
+  metricsConsensusGenomes(
+    where: MetricConsensusGenomeWhereClause = null
+    orderBy: [MetricConsensusGenomeOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [MetricConsensusGenome!]!
+  taxa(
+    where: TaxonWhereClause = null
+    orderBy: [TaxonOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [Taxon!]!
+  upstreamDatabases(
+    where: UpstreamDatabaseWhereClause = null
+    orderBy: [UpstreamDatabaseOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [UpstreamDatabase!]!
+  indexFiles(
+    where: IndexFileWhereClause = null
+    orderBy: [IndexFileOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [IndexFile!]!
+  bulkDownloads(
+    where: BulkDownloadWhereClause = null
+    orderBy: [BulkDownloadOrderByClause!] = []
+    limitOffset: LimitOffsetClause = null
+  ): [BulkDownload!]!
+  samplesAggregate(where: SampleWhereClause = null): SampleAggregate!
+  sequencingReadsAggregate(
+    where: SequencingReadWhereClause = null
+  ): SequencingReadAggregate!
+  genomicRangesAggregate(
+    where: GenomicRangeWhereClause = null
+  ): GenomicRangeAggregate!
+  referenceGenomesAggregate(
+    where: ReferenceGenomeWhereClause = null
+  ): ReferenceGenomeAggregate!
+  accessionsAggregate(where: AccessionWhereClause = null): AccessionAggregate!
+  hostOrganismsAggregate(
+    where: HostOrganismWhereClause = null
+  ): HostOrganismAggregate!
+  metadatasAggregate(where: MetadatumWhereClause = null): MetadatumAggregate!
+  consensusGenomesAggregate(
+    where: ConsensusGenomeWhereClause = null
+  ): ConsensusGenomeAggregate!
+  metricsConsensusGenomesAggregate(
+    where: MetricConsensusGenomeWhereClause = null
+  ): MetricConsensusGenomeAggregate!
+  taxaAggregate(where: TaxonWhereClause = null): TaxonAggregate!
+  upstreamDatabasesAggregate(
+    where: UpstreamDatabaseWhereClause = null
+  ): UpstreamDatabaseAggregate!
+  indexFilesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate!
+  bulkDownloadsAggregate(
+    where: BulkDownloadWhereClause = null
+  ): BulkDownloadAggregate!
   appConfig(id: ID!): AppConfig
   pathogenList(version: String): PathogenList!
   project(id: Int!): Project!
   sample(sampleId: Int!): Sample!
   sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
-  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
-  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
-  files(where: FileWhereClause = null): [File!]!
-  samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Sample!]!
-  sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [SequencingRead!]!
-  genomicRanges(where: GenomicRangeWhereClause = null, orderBy: [GenomicRangeOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [GenomicRange!]!
-  referenceGenomes(where: ReferenceGenomeWhereClause = null, orderBy: [ReferenceGenomeOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [ReferenceGenome!]!
-  accessions(where: AccessionWhereClause = null, orderBy: [AccessionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Accession!]!
-  hostOrganisms(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [HostOrganism!]!
-  metadatas(where: MetadatumWhereClause = null, orderBy: [MetadatumOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Metadatum!]!
-  consensusGenomes(where: ConsensusGenomeWhereClause = null, orderBy: [ConsensusGenomeOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [ConsensusGenome!]!
-  metricsConsensusGenomes(where: MetricConsensusGenomeWhereClause = null, orderBy: [MetricConsensusGenomeOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [MetricConsensusGenome!]!
-  taxa(where: TaxonWhereClause = null, orderBy: [TaxonOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Taxon!]!
-  upstreamDatabases(where: UpstreamDatabaseWhereClause = null, orderBy: [UpstreamDatabaseOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [UpstreamDatabase!]!
-  indexFiles(where: IndexFileWhereClause = null, orderBy: [IndexFileOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [IndexFile!]!
-  bulkDownloads(where: BulkDownloadWhereClause = null, orderBy: [BulkDownloadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [BulkDownload!]!
-  samplesAggregate(where: SampleWhereClause = null): SampleAggregate!
-  sequencingReadsAggregate(where: SequencingReadWhereClause = null): SequencingReadAggregate!
-  genomicRangesAggregate(where: GenomicRangeWhereClause = null): GenomicRangeAggregate!
-  referenceGenomesAggregate(where: ReferenceGenomeWhereClause = null): ReferenceGenomeAggregate!
-  accessionsAggregate(where: AccessionWhereClause = null): AccessionAggregate!
-  hostOrganismsAggregate(where: HostOrganismWhereClause = null): HostOrganismAggregate!
-  metadatasAggregate(where: MetadatumWhereClause = null): MetadatumAggregate!
-  consensusGenomesAggregate(where: ConsensusGenomeWhereClause = null): ConsensusGenomeAggregate!
-  metricsConsensusGenomesAggregate(where: MetricConsensusGenomeWhereClause = null): MetricConsensusGenomeAggregate!
-  taxaAggregate(where: TaxonWhereClause = null): TaxonAggregate!
-  upstreamDatabasesAggregate(where: UpstreamDatabaseWhereClause = null): UpstreamDatabaseAggregate!
-  indexFilesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate!
-  bulkDownloadsAggregate(where: BulkDownloadWhereClause = null): BulkDownloadAggregate!
+  samplesList(
+    annotations: [Annotation!]
+    basic: Boolean
+    domain: String
+    hostIds: [Int!]
+    limit: Int
+    listAllIds: Boolean
+    location: String
+    locationV2: [String!]
+    offset: Int
+    orderBy: String
+    orderDir: String
+    projectId: Int
+    requestedSampleIds: [Int!]
+    sampleIds: [Int!]
+    searchString: String
+    taxIds: [Int!]
+    taxLevels: [String!]
+    thresholdFilterInfo: String
+    time: [String!]
+    tissue: [String!]
+    visibility: [String!]
+    workflow: String
+  ): SampleList!
+  user(
+    archetypes: String!
+    email: String!
+    institution: String!
+    name: String!
+    role: Int!
+    segments: String!
+  ): User!
   AmrDeprecatedResults(sampleId: String): AmrDeprecatedResults
   AmrWorkflowResults(workflowRunId: String): AmrWorkflowResults
   Background(snapshotLinkId: String): Background
-  fedBulkDownloads(input: queryInput_fedBulkDownloads_input_Input): [query_fedBulkDownloads_items]
-  BulkDownloadCGOverview(input: queryInput_BulkDownloadCGOverview_input_Input): ConsensusGenomeOverviewRows
-  fedConsensusGenomes(input: queryInput_fedConsensusGenomes_input_Input): [query_fedConsensusGenomes_items]
-  ConsensusGenomeWorkflowResults(workflowRunId: String): ConsensusGenomeWorkflowResults
-  CoverageVizSummary(snapshotLinkId: String, sampleId: String): [query_CoverageVizSummary_items]
-  MetadataFields(snapshotLinkId: String, input: queryInput_MetadataFields_input_Input): [query_MetadataFields_items]
-  SampleMetadata(snapshotLinkId: String, sampleId: String, input: queryInput_SampleMetadata_input_Input): SampleMetadata
-  SampleForReport(snapshotLinkId: String, railsSampleId: String): SampleForReport
-  MngsWorkflowResults(snapshotLinkId: String, sampleId: String, workflowVersionId: String, _backgroundId: String): MngsWorkflowResults
-  Pathogens(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Pathogens_items]
+  fedBulkDownloads(
+    input: queryInput_fedBulkDownloads_input_Input
+  ): [query_fedBulkDownloads_items]
+  BulkDownloadCGOverview(
+    input: queryInput_BulkDownloadCGOverview_input_Input
+  ): ConsensusGenomeOverviewRows
+  fedConsensusGenomes(
+    input: queryInput_fedConsensusGenomes_input_Input
+  ): [query_fedConsensusGenomes_items]
+  ConsensusGenomeWorkflowResults(
+    workflowRunId: String
+  ): ConsensusGenomeWorkflowResults
+  CoverageVizSummary(
+    snapshotLinkId: String
+    sampleId: String
+  ): [query_CoverageVizSummary_items]
+  MetadataFields(
+    snapshotLinkId: String
+    input: queryInput_MetadataFields_input_Input
+  ): [query_MetadataFields_items]
+  SampleMetadata(
+    snapshotLinkId: String
+    sampleId: String
+    input: queryInput_SampleMetadata_input_Input
+  ): SampleMetadata
+  SampleForReport(
+    snapshotLinkId: String
+    railsSampleId: String
+  ): SampleForReport
+  MngsWorkflowResults(
+    snapshotLinkId: String
+    sampleId: String
+    workflowVersionId: String
+    _backgroundId: String
+  ): MngsWorkflowResults
+  Pathogens(
+    snapshotLinkId: String
+    sampleId: String
+    workflowVersionId: String
+  ): [query_Pathogens_items]
   PersistedBackground(projectId: String): PersistedBackground
   PipelineData(sampleId: String, workflowVersionId: String): PipelineData
   fedSamples(input: queryInput_fedSamples_input_Input): [query_fedSamples_items]
-  fedSequencingReads(input: queryInput_fedSequencingReads_input_Input): [query_fedSequencingReads_items]
-  Taxons(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Taxons_items]
+  fedSequencingReads(
+    input: queryInput_fedSequencingReads_input_Input
+  ): [query_fedSequencingReads_items]
+  Taxons(
+    snapshotLinkId: String
+    sampleId: String
+    workflowVersionId: String
+  ): [query_Taxons_items]
   TaxonDist(backgroundId: String, taxonId: String): TaxonDist
-  UserBlastAnnotations(sampleId: String, workflowVersionId: String): [query_UserBlastAnnotations_items]
-  ValidateUserCanDeleteObjects(input: queryInput_ValidateUserCanDeleteObjects_input_Input): ValidateUserCanDeleteObjects
-  fedWorkflowRuns(input: queryInput_fedWorkflowRuns_input_Input): [query_fedWorkflowRuns_items]
-  fedWorkflowRunsAggregate(input: queryInput_fedWorkflowRunsAggregate_input_Input): fedWorkflowRunsAggregate
+  UserBlastAnnotations(
+    sampleId: String
+    workflowVersionId: String
+  ): [query_UserBlastAnnotations_items]
+  ValidateUserCanDeleteObjects(
+    input: queryInput_ValidateUserCanDeleteObjects_input_Input
+  ): ValidateUserCanDeleteObjects
+  fedWorkflowRuns(
+    input: queryInput_fedWorkflowRuns_input_Input
+  ): [query_fedWorkflowRuns_items]
+  fedWorkflowRunsAggregate(
+    input: queryInput_fedWorkflowRunsAggregate_input_Input
+  ): fedWorkflowRunsAggregate
   ZipLink(workflowRunId: String): ZipLink
   GraphQLFederationVersion: GraphQLFederationVersion
 }
@@ -2553,7 +3006,9 @@ type query_SampleMetadata_metadata_items {
   base_type: String
 }
 
-union query_SampleMetadata_metadata_items_location_validated_value = query_SampleMetadata_metadata_items_location_validated_value_oneOf_0 | query_SampleMetadata_metadata_items_location_validated_value_oneOf_1
+union query_SampleMetadata_metadata_items_location_validated_value =
+    query_SampleMetadata_metadata_items_location_validated_value_oneOf_0
+  | query_SampleMetadata_metadata_items_location_validated_value_oneOf_1
 
 type query_SampleMetadata_metadata_items_location_validated_value_oneOf_0 {
   name: String
@@ -3160,7 +3615,9 @@ input queryInput_ValidateUserCanDeleteObjects_input_Input {
 }
 
 type ReferenceGenome implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   fileId: ID
@@ -3170,19 +3627,29 @@ type ReferenceGenome implements EntityInterface & Node {
     where: ConsensusGenomeWhereClause = null
     orderBy: [ConsensusGenomeOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): ConsensusGenomeConnection!
-  consensusGenomesAggregate(where: ConsensusGenomeWhereClause = null): ConsensusGenomeAggregate
+  consensusGenomesAggregate(
+    where: ConsensusGenomeWhereClause = null
+  ): ConsensusGenomeAggregate
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
@@ -3202,7 +3669,10 @@ type ReferenceGenomeAggregateFunctions {
   min: ReferenceGenomeMinMaxColumns
   max: ReferenceGenomeMinMaxColumns
   groupBy: ReferenceGenomeGroupByOptions
-  count(distinct: Boolean = false, columns: ReferenceGenomeCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: ReferenceGenomeCountColumns = null
+  ): Int
 }
 
 enum ReferenceGenomeCountColumns {
@@ -3284,9 +3754,76 @@ input RunWorkflowVersionInput {
 }
 
 type Sample implements EntityInterface & Node {
+  """
+  The Globally Unique ID of this object
+  """
+  _id: GlobalID!
+  id: ID!
+  railsSampleId: Int
+  name: String!
+  hostOrganism(
+    where: HostOrganismWhereClause = null
+    orderBy: [HostOrganismOrderByClause!] = []
+  ): HostOrganism
+  sequencingReads(
+    where: SequencingReadWhereClause = null
+    orderBy: [SequencingReadOrderByClause!] = []
+
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
+    before: String = null
+
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
+    after: String = null
+
+    """
+    Returns the first n items from the list.
+    """
+    first: Int = null
+
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
+    last: Int = null
+  ): SequencingReadConnection!
+  sequencingReadsAggregate(
+    where: SequencingReadWhereClause = null
+  ): SequencingReadAggregate
+  metadatas(
+    where: MetadatumWhereClause = null
+    orderBy: [MetadatumOrderByClause!] = []
+
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
+    before: String = null
+
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
+    after: String = null
+
+    """
+    Returns the first n items from the list.
+    """
+    first: Int = null
+
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
+    last: Int = null
+  ): MetadatumConnection!
+  metadatasAggregate(where: MetadatumWhereClause = null): MetadatumAggregate
+  producingRunId: ID
+  ownerUserId: Int!
+  collectionId: Int!
+  createdAt: ISO8601DateTime
+  updatedAt: ISO8601DateTime
   alignmentConfigName: String
   basespaceAccessToken: String
-  createdAt: DateTime!
   dagVars: String
   defaultBackgroundId: Int
   defaultPipelineRunId: Int
@@ -3295,10 +3832,8 @@ type Sample implements EntityInterface & Node {
   editable: Boolean
   hostGenome: HostGenome
   hostGenomeId: Int
-  id: ID!
   initialWorkflow: String!
   maxInputFragments: Int
-  name: String!
   pipelineBranch: String
   pipelineCommit: String
   pipelineExecutionStrategy: String
@@ -3314,7 +3849,6 @@ type Sample implements EntityInterface & Node {
   sampleNotes: String
   status: String
   subsample: Int
-  updatedAt: DateTime
   uploadError: String
   uploadedFromBasespace: Int
   useTaxonWhitelist: Boolean!
@@ -3322,48 +3856,6 @@ type Sample implements EntityInterface & Node {
   userId: Int
   webCommit: String
   workflowRuns: [WorkflowRun!]
-
-  """The Globally Unique ID of this object"""
-  _id: GlobalID!
-  railsSampleId: Int
-  hostOrganism(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = []): HostOrganism
-  sequencingReads(
-    where: SequencingReadWhereClause = null
-    orderBy: [SequencingReadOrderByClause!] = []
-
-    """Returns the items in the list that come before the specified cursor."""
-    before: String = null
-
-    """Returns the items in the list that come after the specified cursor."""
-    after: String = null
-
-    """Returns the first n items from the list."""
-    first: Int = null
-
-    """Returns the items in the list that come after the specified cursor."""
-    last: Int = null
-  ): SequencingReadConnection!
-  sequencingReadsAggregate(where: SequencingReadWhereClause = null): SequencingReadAggregate
-  metadatas(
-    where: MetadatumWhereClause = null
-    orderBy: [MetadatumOrderByClause!] = []
-
-    """Returns the items in the list that come before the specified cursor."""
-    before: String = null
-
-    """Returns the items in the list that come after the specified cursor."""
-    after: String = null
-
-    """Returns the first n items from the list."""
-    first: Int = null
-
-    """Returns the items in the list that come after the specified cursor."""
-    last: Int = null
-  ): MetadatumConnection!
-  metadatasAggregate(where: MetadatumWhereClause = null): MetadatumAggregate
-  producingRunId: ID
-  ownerUserId: Int!
-  collectionId: Int!
 }
 
 type SampleAggregate {
@@ -3381,12 +3873,18 @@ type SampleAggregateFunctions {
   count(distinct: Boolean = false, columns: SampleCountColumns = null): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type SampleConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [SampleEdge!]!
 }
 
@@ -3421,12 +3919,18 @@ type SampleDetails {
   workflowRunsCountByWorkflow: String
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type SampleEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: Sample!
 }
 
@@ -3592,10 +4096,15 @@ input SequencingProtocolEnumComparators {
 }
 
 type SequencingRead implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
-  sample(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = []): Sample
+  sample(
+    where: SampleWhereClause = null
+    orderBy: [SampleOrderByClause!] = []
+  ): Sample
   protocol: SequencingProtocol
   r1FileId: ID
   r1File(where: FileWhereClause = null): File
@@ -3604,25 +4113,41 @@ type SequencingRead implements EntityInterface & Node {
   technology: SequencingTechnology!
   clearlabsExport: Boolean!
   medakaModel: String
-  taxon(where: TaxonWhereClause = null, orderBy: [TaxonOrderByClause!] = []): Taxon
-  primerFile(where: GenomicRangeWhereClause = null, orderBy: [GenomicRangeOrderByClause!] = []): GenomicRange
+  taxon(
+    where: TaxonWhereClause = null
+    orderBy: [TaxonOrderByClause!] = []
+  ): Taxon
+  primerFile(
+    where: GenomicRangeWhereClause = null
+    orderBy: [GenomicRangeOrderByClause!] = []
+  ): GenomicRange
   consensusGenomes(
     where: ConsensusGenomeWhereClause = null
     orderBy: [ConsensusGenomeOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): ConsensusGenomeConnection!
-  consensusGenomesAggregate(where: ConsensusGenomeWhereClause = null): ConsensusGenomeAggregate
+  consensusGenomesAggregate(
+    where: ConsensusGenomeWhereClause = null
+  ): ConsensusGenomeAggregate
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
@@ -3642,15 +4167,24 @@ type SequencingReadAggregateFunctions {
   min: SequencingReadMinMaxColumns
   max: SequencingReadMinMaxColumns
   groupBy: SequencingReadGroupByOptions
-  count(distinct: Boolean = false, columns: SequencingReadCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: SequencingReadCountColumns = null
+  ): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type SequencingReadConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [SequencingReadEdge!]!
 }
 
@@ -3685,12 +4219,18 @@ input SequencingReadCreateInput {
   collectionId: Int!
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type SequencingReadEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: SequencingRead!
 }
 
@@ -3812,7 +4352,9 @@ input StrComparators {
 }
 
 type Taxon implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   wikipediaId: String
@@ -3820,43 +4362,66 @@ type Taxon implements EntityInterface & Node {
   commonName: String
   name: String!
   isPhage: Boolean!
-  upstreamDatabase(where: UpstreamDatabaseWhereClause = null, orderBy: [UpstreamDatabaseOrderByClause!] = []): UpstreamDatabase
+  upstreamDatabase(
+    where: UpstreamDatabaseWhereClause = null
+    orderBy: [UpstreamDatabaseOrderByClause!] = []
+  ): UpstreamDatabase
   upstreamDatabaseIdentifier: String!
   level: TaxonLevel!
   consensusGenomes(
     where: ConsensusGenomeWhereClause = null
     orderBy: [ConsensusGenomeOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): ConsensusGenomeConnection!
-  consensusGenomesAggregate(where: ConsensusGenomeWhereClause = null): ConsensusGenomeAggregate
+  consensusGenomesAggregate(
+    where: ConsensusGenomeWhereClause = null
+  ): ConsensusGenomeAggregate
   sequencingReads(
     where: SequencingReadWhereClause = null
     orderBy: [SequencingReadOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): SequencingReadConnection!
-  sequencingReadsAggregate(where: SequencingReadWhereClause = null): SequencingReadAggregate
+  sequencingReadsAggregate(
+    where: SequencingReadWhereClause = null
+  ): SequencingReadAggregate
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
@@ -3879,12 +4444,18 @@ type TaxonAggregateFunctions {
   count(distinct: Boolean = false, columns: TaxonCountColumns = null): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type TaxonConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [TaxonEdge!]!
 }
 
@@ -3944,12 +4515,18 @@ type TaxonDist {
   NT: query_TaxonDist_NT
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type TaxonEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: Taxon!
 }
 
@@ -4111,7 +4688,9 @@ type UpdateSampleNotes {
 }
 
 type UpstreamDatabase implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   name: String!
@@ -4119,16 +4698,24 @@ type UpstreamDatabase implements EntityInterface & Node {
     where: TaxonWhereClause = null
     orderBy: [TaxonOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): TaxonConnection!
   taxaAggregate(where: TaxonWhereClause = null): TaxonAggregate
@@ -4136,16 +4723,24 @@ type UpstreamDatabase implements EntityInterface & Node {
     where: IndexFileWhereClause = null
     orderBy: [IndexFileOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): IndexFileConnection!
   indexesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate
@@ -4153,16 +4748,24 @@ type UpstreamDatabase implements EntityInterface & Node {
     where: AccessionWhereClause = null
     orderBy: [AccessionOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): AccessionConnection!
   accessionsAggregate(where: AccessionWhereClause = null): AccessionAggregate
@@ -4185,7 +4788,10 @@ type UpstreamDatabaseAggregateFunctions {
   min: UpstreamDatabaseMinMaxColumns
   max: UpstreamDatabaseMinMaxColumns
   groupBy: UpstreamDatabaseGroupByOptions
-  count(distinct: Boolean = false, columns: UpstreamDatabaseCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: UpstreamDatabaseCountColumns = null
+  ): Int
 }
 
 enum UpstreamDatabaseCountColumns {
@@ -4293,7 +4899,9 @@ type ValidateUserCanDeleteObjects {
 }
 
 type Workflow implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   name: String
@@ -4303,19 +4911,29 @@ type Workflow implements EntityInterface & Node {
     where: WorkflowVersionWhereClause = null
     orderBy: [WorkflowVersionOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): WorkflowVersionConnection!
-  versionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate
+  versionsAggregate(
+    where: WorkflowVersionWhereClause = null
+  ): WorkflowVersionAggregate
   ownerUserId: Int!
   collectionId: Int!
   createdAt: DateTime!
@@ -4394,7 +5012,9 @@ input WorkflowOrderByClause {
 }
 
 type WorkflowRun implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   railsWorkflowRunId: Int
@@ -4405,41 +5025,64 @@ type WorkflowRun implements EntityInterface & Node {
   workflowRunnerInputsJson: String
   status: String!
   errorMessage: String
-  workflowVersion(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = []): WorkflowVersion
+  workflowVersion(
+    where: WorkflowVersionWhereClause = null
+    orderBy: [WorkflowVersionOrderByClause!] = []
+  ): WorkflowVersion
   steps(
     where: WorkflowRunStepWhereClause = null
     orderBy: [WorkflowRunStepOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): WorkflowRunStepConnection!
-  stepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate
+  stepsAggregate(
+    where: WorkflowRunStepWhereClause = null
+  ): WorkflowRunStepAggregate
   entityInputs(
     where: WorkflowRunEntityInputWhereClause = null
     orderBy: [WorkflowRunEntityInputOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): WorkflowRunEntityInputConnection!
-  entityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate
+  entityInputsAggregate(
+    where: WorkflowRunEntityInputWhereClause = null
+  ): WorkflowRunEntityInputAggregate
   rawInputsJson: String
   ownerUserId: Int!
   collectionId: Int!
@@ -4474,12 +5117,18 @@ type WorkflowRunAggregateFunctions {
   count(distinct: Boolean = false, columns: WorkflowRunCountColumns = null): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type WorkflowRunConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [WorkflowRunEdge!]!
 }
 
@@ -4504,23 +5153,34 @@ enum WorkflowRunCountColumns {
   updatedAt
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type WorkflowRunEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: WorkflowRun!
 }
 
 type WorkflowRunEntityInput implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   inputEntityId: ID
   fieldName: String
   entityType: String
-  workflowRun(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = []): WorkflowRun
+  workflowRun(
+    where: WorkflowRunWhereClause = null
+    orderBy: [WorkflowRunOrderByClause!] = []
+  ): WorkflowRun
   ownerUserId: Int!
   collectionId: Int!
   createdAt: DateTime!
@@ -4539,15 +5199,24 @@ type WorkflowRunEntityInputAggregateFunctions {
   min: WorkflowRunEntityInputMinMaxColumns
   max: WorkflowRunEntityInputMinMaxColumns
   groupBy: WorkflowRunEntityInputGroupByOptions
-  count(distinct: Boolean = false, columns: WorkflowRunEntityInputCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: WorkflowRunEntityInputCountColumns = null
+  ): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type WorkflowRunEntityInputConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [WorkflowRunEntityInputEdge!]!
 }
 
@@ -4571,12 +5240,18 @@ input WorkflowRunEntityInputCreateInput {
   collectionId: Int!
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type WorkflowRunEntityInputEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: WorkflowRunEntityInput!
 }
 
@@ -4718,10 +5393,15 @@ input WorkflowRunStatusEnumComparators {
 }
 
 type WorkflowRunStep implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
-  workflowRun(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = []): WorkflowRun
+  workflowRun(
+    where: WorkflowRunWhereClause = null
+    orderBy: [WorkflowRunOrderByClause!] = []
+  ): WorkflowRun
   startedAt: DateTime
   endedAt: DateTime
   status: WorkflowRunStepStatus
@@ -4743,15 +5423,24 @@ type WorkflowRunStepAggregateFunctions {
   min: WorkflowRunStepMinMaxColumns
   max: WorkflowRunStepMinMaxColumns
   groupBy: WorkflowRunStepGroupByOptions
-  count(distinct: Boolean = false, columns: WorkflowRunStepCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: WorkflowRunStepCountColumns = null
+  ): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type WorkflowRunStepConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [WorkflowRunStepEdge!]!
 }
 
@@ -4774,12 +5463,18 @@ input WorkflowRunStepCreateInput {
   collectionId: Int!
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type WorkflowRunStepEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: WorkflowRunStep!
 }
 
@@ -4902,29 +5597,42 @@ input WorkflowUpdateInput {
 }
 
 type WorkflowVersion implements EntityInterface & Node {
-  """The Globally Unique ID of this object"""
+  """
+  The Globally Unique ID of this object
+  """
   _id: GlobalID!
   id: ID!
   graphJson: String
   workflowUri: String
   version: String
   manifest: String
-  workflow(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = []): Workflow
+  workflow(
+    where: WorkflowWhereClause = null
+    orderBy: [WorkflowOrderByClause!] = []
+  ): Workflow
   deprecated: Boolean
   runs(
     where: WorkflowRunWhereClause = null
     orderBy: [WorkflowRunOrderByClause!] = []
 
-    """Returns the items in the list that come before the specified cursor."""
+    """
+    Returns the items in the list that come before the specified cursor.
+    """
     before: String = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     after: String = null
 
-    """Returns the first n items from the list."""
+    """
+    Returns the first n items from the list.
+    """
     first: Int = null
 
-    """Returns the items in the list that come after the specified cursor."""
+    """
+    Returns the items in the list that come after the specified cursor.
+    """
     last: Int = null
   ): WorkflowRunConnection!
   runsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate
@@ -4946,15 +5654,24 @@ type WorkflowVersionAggregateFunctions {
   min: WorkflowVersionMinMaxColumns
   max: WorkflowVersionMinMaxColumns
   groupBy: WorkflowVersionGroupByOptions
-  count(distinct: Boolean = false, columns: WorkflowVersionCountColumns = null): Int
+  count(
+    distinct: Boolean = false
+    columns: WorkflowVersionCountColumns = null
+  ): Int
 }
 
-"""A connection to a list of items."""
+"""
+A connection to a list of items.
+"""
 type WorkflowVersionConnection {
-  """Pagination data for this connection"""
+  """
+  Pagination data for this connection
+  """
   pageInfo: PageInfo!
 
-  """Contains the nodes in this connection"""
+  """
+  Contains the nodes in this connection
+  """
   edges: [WorkflowVersionEdge!]!
 }
 
@@ -4983,12 +5700,18 @@ input WorkflowVersionCreateInput {
   collectionId: Int!
 }
 
-"""An edge in a connection."""
+"""
+An edge in a connection.
+"""
 type WorkflowVersionEdge {
-  """A cursor for use in pagination"""
+  """
+  A cursor for use in pagination
+  """
   cursor: String!
 
-  """The item at the end of the edge"""
+  """
+  The item at the end of the edge
+  """
   node: WorkflowVersion!
 }
 
@@ -5075,4 +5798,3 @@ type ZipLink {
   url: String
   error: String
 }
-

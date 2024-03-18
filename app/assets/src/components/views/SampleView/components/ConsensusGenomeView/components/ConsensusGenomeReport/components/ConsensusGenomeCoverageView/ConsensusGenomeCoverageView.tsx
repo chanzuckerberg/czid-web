@@ -23,7 +23,7 @@ export const ConsensusGenomeCoverageViewFragment = graphql`
       accessionId
     }
     taxon {
-      commonName
+      name
       id
     }
     metrics {
@@ -64,7 +64,7 @@ export const ConsensusGenomeCoverageView = ({
   const accessionId = data[0]?.accession?.accessionId;
   const taxon = data[0]?.taxon;
 
-  const { commonName: taxonName, id: taxonId } = taxon || {};
+  const { name: taxonName, id: taxonId } = taxon || {};
   const {
     coverageBreadth: coverageBreadthRaw,
     coverageDepth: coverageDepthRaw,

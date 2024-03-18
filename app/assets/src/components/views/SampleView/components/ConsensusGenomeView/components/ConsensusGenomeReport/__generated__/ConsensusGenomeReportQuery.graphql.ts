@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<12fd5fe542950c81b5eb26abfcca8fac>>
+ * @generated SignedSource<<b006c41d30f47d01b93e07b52f313e65>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -119,7 +119,7 @@ return {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "commonName",
+                "name": "name",
                 "storageKey": null
               },
               {
@@ -265,12 +265,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "5ba5c08386e5b2129be4e2c30aa87624",
+    "cacheID": "61252aa1cc6300798208251d3e273ec8",
     "id": null,
     "metadata": {},
     "name": "ConsensusGenomeReportQuery",
     "operationKind": "query",
-    "text": "query ConsensusGenomeReportQuery(\n  $workflowRunId: String\n) {\n  fedConsensusGenomes(input: {where: {producingRunId: {_eq: $workflowRunId}}}) {\n    ...ConsensusGenomeMetricsTableFragment\n    ...ConsensusGenomeCoverageViewFragment\n    ...ConsensusGenomeHistogramFragment\n  }\n}\n\nfragment ConsensusGenomeCoverageViewFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n  }\n  taxon {\n    commonName\n    id\n  }\n  metrics {\n    coverageBreadth\n    coverageDepth\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeHistogramFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n    accessionName\n  }\n  taxon {\n    commonName\n  }\n  metrics {\n    coverageViz\n    coverageBinSize\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeMetricsTableFragment on query_fedConsensusGenomes_items {\n  taxon {\n    commonName\n  }\n  metrics {\n    mappedReads\n    nActg\n    nAmbiguous\n    nMissing\n    refSnps\n    percentIdentity\n    gcPercent\n    percentGenomeCalled\n  }\n}\n"
+    "text": "query ConsensusGenomeReportQuery(\n  $workflowRunId: String\n) {\n  fedConsensusGenomes(input: {where: {producingRunId: {_eq: $workflowRunId}}}) {\n    ...ConsensusGenomeMetricsTableFragment\n    ...ConsensusGenomeCoverageViewFragment\n    ...ConsensusGenomeHistogramFragment\n  }\n}\n\nfragment ConsensusGenomeCoverageViewFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n  }\n  taxon {\n    name\n    id\n  }\n  metrics {\n    coverageBreadth\n    coverageDepth\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeHistogramFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n    accessionName\n  }\n  taxon {\n    name\n  }\n  metrics {\n    coverageViz\n    coverageBinSize\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeMetricsTableFragment on query_fedConsensusGenomes_items {\n  taxon {\n    name\n  }\n  metrics {\n    mappedReads\n    nActg\n    nAmbiguous\n    nMissing\n    refSnps\n    percentIdentity\n    gcPercent\n    percentGenomeCalled\n  }\n}\n"
   }
 };
 })();

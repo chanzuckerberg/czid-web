@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<aee13ea2427d6e42a12747419d3eba46>>
+ * @generated SignedSource<<d89a944efc2517eb9f348ac64a8b6bd6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -22,7 +22,7 @@ export type ConsensusGenomeMetricsTableFragment$data = ReadonlyArray<{
     readonly refSnps: number | null | undefined;
   } | null | undefined;
   readonly taxon: {
-    readonly commonName: string | null | undefined;
+    readonly name: string;
   } | null | undefined;
   readonly " $fragmentType": "ConsensusGenomeMetricsTableFragment";
 }>;
@@ -51,7 +51,7 @@ const node: ReaderFragment = {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "commonName",
+          "name": "name",
           "storageKey": null
         }
       ],
@@ -129,6 +129,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "2e48ea98ae4732eab410b94dfe415d4e";
+(node as any).hash = "2078c2114c9beb4cbcc6b6beb2b534a0";
 
 export default node;
