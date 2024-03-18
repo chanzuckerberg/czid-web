@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { fetchQuery, graphql, useRelayEnvironment } from "react-relay";
 import { useTrackEvent } from "~/api/analytics";
 import { DownloadButton } from "~/components/ui/controls/buttons";
@@ -34,12 +34,14 @@ export const DownloadAllButton = ({
 }: DownloadAllButtonProps) => {
   const trackEvent = useTrackEvent();
   const environment = useRelayEnvironment();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!readyToDownload) {
     return null;
   }
 
   const downloadZipFile = () => {
+    setIsDownloading(true);
     fetchQuery<DownloadAllButtonQueryType>(
       environment,
       DownloadAllButtonQuery,
@@ -58,6 +60,9 @@ export const DownloadAllButton = ({
           openUrl(data.ZipLink.url);
         }
       },
+      complete: () => {
+        setIsDownloading(false);
+      },
     });
     trackEvent(`SampleViewHeader_${workflowType}-download-all-button_clicked`, {
       sampleId: sample.id,
@@ -69,6 +74,8 @@ export const DownloadAllButton = ({
       className={className}
       text="Download All"
       onClick={downloadZipFile}
+      disabled={isDownloading}
+      startIcon={isDownloading ? "loading" : "download"}
     />
   );
 };
