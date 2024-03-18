@@ -9,7 +9,7 @@ import { BenchmarkSampleReportInfo } from "./components/BenchmarkSampleReportInf
 
 interface BenchmarkViewProps {
   sample: Sample;
-  workflowRun: WorkflowRun;
+  workflowRun?: WorkflowRun;
 }
 
 export interface BenchmarkWorkflowRunResults {
@@ -41,7 +41,7 @@ export const BenchmarkView = ({ sample, workflowRun }: BenchmarkViewProps) => {
     };
 
     fetchResults();
-  }, [workflowRun.id, workflowRun?.status]);
+  }, [workflowRun?.id, workflowRun?.status]);
 
   return (
     <SampleReportContent
