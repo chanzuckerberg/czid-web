@@ -25,8 +25,6 @@ export const BenchmarkView = ({ sample, workflowRun }: BenchmarkViewProps) => {
   const [additionalInfo, setAdditionalInfo] =
     useState<IdMap<BenchmarkWorkflowRunAdditionalInfoEntry> | null>(null);
 
-  // eslint-disable-next-line no-console
-  console.log("BenchmarkView", { sample, workflowRun });
   useEffect(() => {
     if (workflowRun?.status !== SUCCEEDED_STATE) {
       return;

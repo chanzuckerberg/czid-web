@@ -1174,15 +1174,11 @@ const SampleViewComponent = ({
     if (sample && sample?.workflow_runs && sample?.workflow_runs?.length > 0) {
       // if the workflow_runs and a workflowRunId is set, return that specific workflow run
       if (workflowRunId) {
-        // eslint-disable-next-line no-console
-        console.log("workflowRunId", workflowRunId);
         return find({ id: workflowRunId }, sample.workflow_runs);
       }
       // if the workflowRun is set and is the same as the currentTab workflow run return it
       const workflowType = getWorkflowTypeFromLabel(currentTab);
       if (workflowRun && workflowRun.workflow === workflowType) {
-        // eslint-disable-next-line no-console
-        console.log({ workflowRun });
         return workflowRun;
       }
       // if there is a pipeline version, use that to choose which workflow run to return
@@ -1195,11 +1191,6 @@ const SampleViewComponent = ({
           }
         });
       } else {
-        // eslint-disable-next-line no-console
-        console.log(
-          "else",
-          sample?.workflow_runs?.filter(run => run?.workflow === workflowType),
-        );
         // otherwise return the first workflow run of the currentTab workflow type
         return head(
           sample?.workflow_runs?.filter(run => run?.workflow === workflowType),
