@@ -38,6 +38,8 @@ export const ReportPanel = ({
   snapshotShareId,
   view,
 }: ReportPanelProps) => {
+  // eslint-disable-next-line no-console
+  console.log("ReportPanel", { currentRun });
   return (
     <>
       {(currentTab === WORKFLOW_TABS.SHORT_READ_MNGS ||
