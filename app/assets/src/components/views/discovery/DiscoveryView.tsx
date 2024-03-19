@@ -1216,36 +1216,41 @@ export class DiscoveryView extends React.Component<
       userDataCounts: null,
     });
 
-    const [{ sampleStats }, { visualizations }] = await Promise.all([
-      getDiscoveryStats({ domain, projectId }),
-      getDiscoveryVisualizations({ domain }),
-    ]);
+    getDiscoveryStats({ domain, projectId }).then(({ sampleStats }) => {
+      const countByWorkflow = sampleStats?.countByWorkflow;
+      workflow = this.getWorkflowToDisplay(workflow, countByWorkflow);
+      const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
 
-    const countByWorkflow = sampleStats?.countByWorkflow;
-    workflow = this.getWorkflowToDisplay(workflow, countByWorkflow);
-    const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
-
-    this.setState(
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-      {
-        workflow,
-        workflowEntity: WORKFLOWS[workflow].entity,
-        userDataCounts: {
-          sampleCountByWorkflow: sampleStats.countByWorkflow,
-          sampleCount: sampleStats.count,
-          projectCount: sampleStats.projectCount,
-          visualizationCount: visualizations.length || 0,
-        },
-        ...(!isWorkflowRunTab && {
-          selectableSampleIds:
-            this.configForWorkflow[workflow].getSelectableIds(),
+      this.setState(
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
+        prevState => ({
+          workflow,
+          workflowEntity: WORKFLOWS[workflow].entity,
+          userDataCounts: {
+            ...prevState.userDataCounts,
+            sampleCountByWorkflow: sampleStats.countByWorkflow,
+            sampleCount: sampleStats.count,
+            projectCount: sampleStats.projectCount,
+          },
+          ...(!isWorkflowRunTab && {
+            selectableSampleIds:
+              this.configForWorkflow[workflow].getSelectableIds(),
+          }),
+          ...this.getOrderStateFieldsFor(currentTab, workflow),
         }),
-        ...this.getOrderStateFieldsFor(currentTab, workflow),
-      },
-      () => {
-        this.updateBrowsingHistory("replace");
-      },
-    );
+        () => {
+          this.updateBrowsingHistory("replace");
+        },
+      );
+    });
+    getDiscoveryVisualizations({ domain }).then(({ visualizations }) => {
+      this.setState(prevState => ({
+        userDataCounts: {
+          ...prevState.userDataCounts,
+          visualizationCount: visualizations.length ?? 0,
+        },
+      }));
+    });
   };
 
   computeTabs = () => {

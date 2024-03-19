@@ -107,7 +107,7 @@ export interface DiscoveryViewState {
     sampleCountByWorkflow: DiscoveryViewState["filteredSampleCountsByWorkflow"];
     sampleCount: number;
     projectCount: number;
-    visualizationCount: number;
+    visualizationCount?: number;
   };
   workflow: WorkflowType;
   workflowEntity: string;
