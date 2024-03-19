@@ -253,7 +253,7 @@ export const getStateFromUrlandLocalStorage = (
     selectedOptionsFromLocal,
     selectedOptionsFromUrl,
     tempSelectedOptions,
-    workflowRunIdFromUrl,
+    workflowRunIdFromUrl: workflowRunIdFromUrl.toString(),
     currentTabFromUrl,
   };
 };
