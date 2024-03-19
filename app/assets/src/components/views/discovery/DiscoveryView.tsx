@@ -542,6 +542,7 @@ export class DiscoveryView extends React.Component<
     };
   };
 
+  // TODO: Delete this unnecessary method.
   getConditions = (workflow?: WorkflowType): Conditions => {
     const { projectId, search, orderBy, orderDirection } = this.state;
     const { snapshotShareId } = this.props;
@@ -2345,6 +2346,7 @@ export class DiscoveryView extends React.Component<
       mapTilerKey,
       snapshotShareId,
       workflowRunsProjectAggregates,
+      fetchWorkflowRunsProjectAggregates,
       allowedFeatures,
       cgWorkflowIds,
     } = this.props;
@@ -2400,9 +2402,14 @@ export class DiscoveryView extends React.Component<
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <ProjectsView
-                workflowRunsProjectAggregates={workflowRunsProjectAggregates}
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
+                fetchWorkflowRunsProjectAggregates={(projectIds: number[]) => {
+                  fetchWorkflowRunsProjectAggregates(
+                    projectIds,
+                    this.getConditionsWithSessionStorage(TAB_PROJECTS),
+                  );
+                }}
                 filteredProjectCount={filteredProjectCount}
                 hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
                 mapLevel={mapLevel}
@@ -2425,6 +2432,7 @@ export class DiscoveryView extends React.Component<
                 sortDirection={orderDirection}
                 sortable={sortable}
                 totalNumberOfProjects={userDataCounts?.projectCount}
+                workflowRunsProjectAggregates={workflowRunsProjectAggregates}
               />
             </div>
             {projects &&
@@ -2771,8 +2779,12 @@ interface DiscoveryViewWithFCProps extends DiscoveryViewProps {
   // NextGen props:
   cgWorkflowIds?: string[];
   cgRows: Array<CgRow | undefined>;
+  workflowRunsProjectAggregates?: ProjectCountsType;
   fetchCgWorkflowRuns: (conditions: Conditions) => void;
   fetchCgPage: (offset: number) => Promise<Array<CgRow | undefined>>;
   fetchNextGenWorkflowRuns: (conditions: Conditions) => void;
-  workflowRunsProjectAggregates?: ProjectCountsType;
+  fetchWorkflowRunsProjectAggregates: (
+    projectIds: number[],
+    conditions: Conditions,
+  ) => void;
 }

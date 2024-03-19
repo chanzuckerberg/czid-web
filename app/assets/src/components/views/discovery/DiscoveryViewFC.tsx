@@ -49,8 +49,8 @@ import { DiscoveryView } from "./DiscoveryView";
 import { STATUS_TYPE } from "./TableRenderers";
 
 export type ProjectCountsType = {
-  [key: number]: {
-    [key: string]: number;
+  [projectId: number]: {
+    [workflow: string]: number;
   };
 };
 
@@ -644,6 +644,7 @@ function getSequencingReadsOrderBys(
 }
 
 async function queryWorkflowRunsAggregate(
+  projectIds: number[],
   { projectId, search, filters }: Conditions,
   props: DiscoveryViewProps,
   workflowRunIds: string[],
@@ -654,6 +655,7 @@ async function queryWorkflowRunsAggregate(
     input: {
       where: {
         id: { _in: workflowRunIds },
+        collectionId: { _in: projectIds },
         workflowVersion: { workflow: { name: { _in: workflows } } },
       },
       todoRemove: {
@@ -804,20 +806,29 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     conditions: Conditions,
   ): Promise<void> => {
     // TODO: fetch more workflows from NextGen
+    fetchCgFilteredWorkflowRuns(conditions);
+  };
+
+  const fetchWorkflowRunsProjectAggregates = async (
+    projectIds: number[],
+    conditions: Conditions,
+  ) => {
+    // workflowRuns should always be fired before <InfiniteTable> asks for data.
+    const workflowRuns = await workflowRunsPromise.current;
     // The conditions object contains workflow but we aren't using it
     // so we can (probably?) use the same conditions to fetch multiple workflows.
-    fetchCgFilteredWorkflowRuns(conditions).then(
-      async (workflowRunIds: string[]) => {
-        const workflowRunsAggregate = await queryWorkflowRunsAggregate(
-          conditions,
-          props,
-          workflowRunIds,
-          [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
-          environment,
-        );
-        setWorkflowRunsProjectAggregates(workflowRunsAggregate);
-      },
+    const newAggregatesPage = await queryWorkflowRunsAggregate(
+      projectIds,
+      conditions,
+      props,
+      workflowRuns.map(run => run.id),
+      [WorkflowType.CONSENSUS_GENOME], // this should be all workflows represented in NextGen
+      environment,
     );
+    setWorkflowRunsProjectAggregates(prevAggregates => ({
+      ...prevAggregates,
+      ...newAggregatesPage,
+    }));
   };
 
   const fetchCgPage = async (
@@ -884,10 +895,11 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       /* NextGen props: */
       cgWorkflowIds={cgWorkflowRunIds}
       cgRows={cgFullRows}
+      workflowRunsProjectAggregates={workflowRunsProjectAggregates}
+      fetchNextGenWorkflowRuns={fetchNextGenWorkflowRuns}
       fetchCgWorkflowRuns={fetchCgFilteredWorkflowRuns}
       fetchCgPage={fetchCgPage}
-      fetchNextGenWorkflowRuns={fetchNextGenWorkflowRuns}
-      workflowRunsProjectAggregates={workflowRunsProjectAggregates}
+      fetchWorkflowRunsProjectAggregates={fetchWorkflowRunsProjectAggregates}
     />
   );
 };

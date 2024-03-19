@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<34d6821b55d89326bb94e2af6293ccb7>>
+ * @generated SignedSource<<5d7a46bced3939f24ee7d37254dd232f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,11 +14,15 @@ export type queryInput_fedWorkflowRunsAggregate_input_Input = {
   where?: queryInput_fedWorkflowRunsAggregate_input_where_Input | null | undefined;
 };
 export type queryInput_fedWorkflowRunsAggregate_input_where_Input = {
+  collectionId?: queryInput_fedWorkflowRunsAggregate_input_where_collectionId_Input | null | undefined;
   id?: queryInput_fedWorkflowRunsAggregate_input_where_id_Input | null | undefined;
   workflowVersion?: queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_Input | null | undefined;
 };
 export type queryInput_fedWorkflowRunsAggregate_input_where_id_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
+};
+export type queryInput_fedWorkflowRunsAggregate_input_where_collectionId_Input = {
+  _in?: ReadonlyArray<number | null | undefined> | null | undefined;
 };
 export type queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_Input = {
   workflow?: queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_Input | null | undefined;

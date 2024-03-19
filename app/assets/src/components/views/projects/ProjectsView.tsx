@@ -21,12 +21,12 @@ import {
 import cs from "./projects_view.scss";
 
 interface ProjectsViewProps {
-  workflowRunsProjectAggregates?: ProjectCountsType;
   currentDisplay: string;
   currentTab: string;
   filteredProjectCount?: number;
   hasAtLeastOneFilterApplied?: boolean;
   mapLevel?: string;
+  fetchWorkflowRunsProjectAggregates: (projectIds: number[]) => void;
   mapLocationData?: Record<string, unknown>;
   mapPreviewedLocationId?: number;
   mapTilerKey?: string;
@@ -44,6 +44,7 @@ interface ProjectsViewProps {
   sortBy?: string;
   sortDirection?: SortDirectionType;
   totalNumberOfProjects?: number;
+  workflowRunsProjectAggregates?: ProjectCountsType;
 }
 
 class ProjectsView extends React.Component<ProjectsViewProps> {
@@ -223,9 +224,12 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
   };
 
   handleLoadRowsAndFormat = async (args: $TSFixMe) => {
-    const { onLoadRows } = this.props;
-    const projects = await onLoadRows(args);
-    // @ts-expect-error Property 'map' does not exist on type 'unknown'.
+    const projects = (await this.props.onLoadRows(args)) as any[];
+
+    this.props.fetchWorkflowRunsProjectAggregates(
+      projects.map(project => Number(project.id)),
+    );
+
     return projects.map((project: $TSFixMe) =>
       merge(
         {
