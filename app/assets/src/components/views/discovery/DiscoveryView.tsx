@@ -1224,11 +1224,10 @@ export class DiscoveryView extends React.Component<
 
       this.setState(
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-        prevState => ({
+        {
           workflow,
           workflowEntity: WORKFLOWS[workflow].entity,
           userDataCounts: {
-            ...prevState.userDataCounts,
             sampleCountByWorkflow: sampleStats.countByWorkflow,
             sampleCount: sampleStats.count,
             projectCount: sampleStats.projectCount,
@@ -1238,19 +1237,16 @@ export class DiscoveryView extends React.Component<
               this.configForWorkflow[workflow].getSelectableIds(),
           }),
           ...this.getOrderStateFieldsFor(currentTab, workflow),
-        }),
+        },
         () => {
           this.updateBrowsingHistory("replace");
         },
       );
     });
     getDiscoveryVisualizations({ domain }).then(({ visualizations }) => {
-      this.setState(prevState => ({
-        userDataCounts: {
-          ...prevState.userDataCounts,
-          visualizationCount: visualizations.length ?? 0,
-        },
-      }));
+      this.setState({
+        visualizationCount: visualizations.length ?? 0,
+      });
     });
   };
 
@@ -1954,9 +1950,8 @@ export class DiscoveryView extends React.Component<
       userDataCounts,
       projectId,
       search,
+      visualizationCount,
     } = this.state;
-
-    if (!userDataCounts) return null;
 
     if (emptyStateModalOpen) {
       return (
@@ -1985,7 +1980,7 @@ export class DiscoveryView extends React.Component<
         }
         break;
       case TAB_SAMPLES:
-        if (userDataCounts.sampleCount === 0) {
+        if (userDataCounts?.sampleCount === 0) {
           return (
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
@@ -2008,7 +2003,7 @@ export class DiscoveryView extends React.Component<
         }
         break;
       case TAB_VISUALIZATIONS:
-        if (userDataCounts.visualizationCount === 0) {
+        if (visualizationCount === 0) {
           return (
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
