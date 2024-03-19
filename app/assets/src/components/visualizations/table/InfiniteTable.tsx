@@ -194,6 +194,7 @@ class InfiniteTable extends React.Component<
     const { rowCount } = this.props;
     this.rows = [];
     this.loadedRowsMap = [];
+    this.cancelableLoadRowsPromise?.cancel();
     this.setState(
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       { rowCount },
