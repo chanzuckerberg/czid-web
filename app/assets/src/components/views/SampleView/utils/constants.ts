@@ -23,7 +23,7 @@ export const URL_FIELDS = {
   tempSelectedOptions: "object",
   view: "string",
   currentTab: "string",
-  workflowRunId: "number",
+  workflowRunId: "string",
 };
 
 export type URL_FIELDS = {
