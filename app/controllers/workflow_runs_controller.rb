@@ -14,7 +14,7 @@ class WorkflowRunsController < ApplicationController
   def index
     permitted_params = index_params
 
-    filters = permitted_params.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility, :time, :workflow, :taxon)
+    filters = permitted_params.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility, :time, :workflow, :taxon, :sampleIds, :workflowRunIds)
     domain = permitted_params[:domain]
     workflow_runs = fetch_workflow_runs(domain: domain, filters: filters)
 
@@ -435,12 +435,12 @@ class WorkflowRunsController < ApplicationController
   end
 
   def index_params
-    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :projectId, :visibility, :workflow, host: [], time: [], locationV2: [], tissue: [], taxon: [])
+    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :projectId, :visibility, :workflow, host: [], time: [], locationV2: [], tissue: [], taxon: [], sampleIds: [], workflowRunIds: [])
   end
 
   def fetch_workflow_runs(domain:, filters: {})
-    sample_filters = filters.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility)
-    workflow_run_filters = filters.slice(:workflow, :time, :taxon)
+    sample_filters = filters.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility, :sampleIds)
+    workflow_run_filters = filters.slice(:workflow, :time, :taxon, :workflowRunIds)
 
     samples = fetch_samples(domain: domain, filters: sample_filters)
     samples_workflow_runs = current_power.samples_workflow_runs(samples).non_deprecated.non_deleted
@@ -508,7 +508,9 @@ class WorkflowRunsController < ApplicationController
       time = filters[:time]
       workflow = filters[:workflow]
       taxon_id = filters[:taxon]
+      workflow_run_ids = filters[:workflowRunIds]
 
+      workflow_runs = workflow_runs.where(id: workflow_run_ids) if workflow_run_ids.present?
       workflow_runs = workflow_runs.by_time(start_date: Date.parse(time[0]), end_date: Date.parse(time[1])) if time.present?
       workflow_runs = workflow_runs.by_workflow(workflow) if workflow.present?
       # At the moment, filtering workflows by taxon is only supported for consensus genome
