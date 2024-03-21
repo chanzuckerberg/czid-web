@@ -11,7 +11,6 @@ import {
   isNull,
   isUndefined,
   keyBy,
-  map,
   mapValues,
   merge,
   pick,
@@ -22,7 +21,6 @@ import {
   xor,
   xorBy,
 } from "lodash/fp";
-import moment from "moment";
 import { nanoid } from "nanoid";
 import React, { ReactNode, Suspense } from "react";
 import { SortDirectionType } from "react-virtualized";
@@ -40,7 +38,6 @@ import {
   TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
-import { ThresholdForAPI } from "~/components/utils/ThresholdMap";
 import { isNotNullish } from "~/components/utils/typeUtils";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
@@ -135,6 +132,8 @@ import {
   getOrderByKeyFor,
   getOrderDirKeyFor,
   getSessionOrderFieldsKeys,
+  prepareFilters,
+  prepareNextGenFilters,
 } from "./utils";
 
 const SAMPLES_UPLOAD_URL = "/samples/upload";
@@ -544,8 +543,8 @@ export class DiscoveryView extends React.Component<
 
   // TODO: Delete this unnecessary method.
   getConditions = (workflow?: WorkflowType): Conditions => {
-    const { projectId, search, orderBy, orderDirection } = this.state;
-    const { snapshotShareId } = this.props;
+    const { filters, projectId, search, orderBy, orderDirection } = this.state;
+    const { allowedFeatures, snapshotShareId } = this.props;
 
     return {
       projectId,
@@ -555,10 +554,11 @@ export class DiscoveryView extends React.Component<
       orderBy,
       orderDir: orderDirection,
       filters: {
-        ...this.preparedFilters(),
+        ...prepareFilters(filters, allowedFeatures),
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         workflow,
       },
+      nextGenFilters: prepareNextGenFilters(filters),
     };
   };
 
@@ -739,83 +739,6 @@ export class DiscoveryView extends React.Component<
     // we can tell if a user is new to the platform if they have just completed the profile form
     const queryParams = new URLSearchParams(window.location.search);
     return queryParams.get("profile_form_submitted");
-  };
-
-  preparedFilters = () => {
-    const { allowedFeatures } = this.props;
-    const { filters } = this.state;
-    const preparedFilters = {} as FilterList;
-    const filtersToFormat = [
-      "timeSelected",
-      "taxonSelected",
-      "taxonThresholdSelected",
-    ];
-
-    // We remove the "Selected" suffix from non-formatted filter keys
-    Object.keys(filters).forEach(key => {
-      if (!filtersToFormat.includes(key)) {
-        preparedFilters[key.replace("Selected", "")] = filters[key];
-      }
-    });
-
-    // Time is formatted: we translate values into date ranges
-    if (filters.timeSelected) {
-      const startDate = {
-        "1_week": [7, "days"],
-        "1_month": [1, "months"],
-        "3_month": [3, "months"],
-        "6_month": [6, "months"],
-        "1_year": [1, "years"],
-      };
-
-      preparedFilters.time = [
-        moment()
-          .subtract(...startDate[filters.timeSelected])
-          .format("YYYYMMDD"),
-        moment().add(1, "days").format("YYYYMMDD"),
-      ];
-    }
-
-    // Taxon is formatted: this filter needs to store complete option, so need to convert to values only
-    if (filters.taxonSelected && filters.taxonSelected.length) {
-      let mapKey = "value";
-
-      if (allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)) {
-        mapKey = "id";
-        preparedFilters.taxaLevels = map("level", filters.taxonSelected);
-      }
-
-      preparedFilters.taxon = map(mapKey, filters.taxonSelected);
-    }
-
-    // Taxon Threshold is formatted: for compatibility with the API query
-    if (Array.isArray(filters.taxonThresholdsSelected)) {
-      preparedFilters.taxonThresholds = filters.taxonThresholdsSelected.reduce(
-        (result, threshold) => {
-          const parsedMetric = threshold["metric"].split(":");
-
-          // basic validation that the metric contains a valid count type and metric
-          if (
-            parsedMetric.length === 2 &&
-            ["nt", "nr"].includes(parsedMetric[0])
-          ) {
-            const [countType, metric] = parsedMetric;
-            const { operator, value } = threshold;
-            result.push({
-              metric,
-              count_type: countType.toUpperCase(),
-              operator,
-              value,
-            });
-          }
-
-          return result;
-        },
-        [] as Array<ThresholdForAPI>,
-      );
-    }
-
-    return preparedFilters;
   };
 
   resetData = ({ callback }: { callback?(): void } = {}) => {
@@ -1043,8 +966,8 @@ export class DiscoveryView extends React.Component<
   };
 
   refreshFilteredStats = async (refreshStatsCallback = null) => {
-    const { domain, snapshotShareId } = this.props;
-    const { projectId, search } = this.state;
+    const { allowedFeatures, domain, snapshotShareId } = this.props;
+    const { filters, projectId, search } = this.state;
 
     this.setState({
       loadingStats: true,
@@ -1054,7 +977,7 @@ export class DiscoveryView extends React.Component<
       domain,
       projectId,
       snapshotShareId,
-      filters: this.preparedFilters(),
+      filters: prepareFilters(filters, allowedFeatures),
       search,
     });
 
@@ -1144,8 +1067,8 @@ export class DiscoveryView extends React.Component<
   };
 
   refreshFilteredDimensions = async () => {
-    const { domain, snapshotShareId } = this.props;
-    const { projectId, search } = this.state;
+    const { allowedFeatures, domain, snapshotShareId } = this.props;
+    const { filters, projectId, search } = this.state;
 
     this.setState({
       loadingDimensions: true,
@@ -1158,7 +1081,7 @@ export class DiscoveryView extends React.Component<
       domain,
       projectId,
       snapshotShareId,
-      filters: this.preparedFilters(),
+      filters: prepareFilters(filters, allowedFeatures),
       search,
     });
 
@@ -1170,8 +1093,8 @@ export class DiscoveryView extends React.Component<
   };
 
   refreshFilteredLocations = async () => {
-    const { domain } = this.props;
-    const { mapLevel, projectId, search } = this.state;
+    const { allowedFeatures, domain } = this.props;
+    const { filters, mapLevel, projectId, search } = this.state;
 
     this.setState({
       loadingLocations: true,
@@ -1180,7 +1103,7 @@ export class DiscoveryView extends React.Component<
     const mapLocationData = await getDiscoveryLocations({
       domain,
       projectId,
-      filters: this.preparedFilters(),
+      filters: prepareFilters(filters, allowedFeatures),
       search,
     });
 
@@ -2319,6 +2242,7 @@ export class DiscoveryView extends React.Component<
       currentDisplay,
       currentTab,
       filteredProjectCount,
+      filters,
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
@@ -2389,7 +2313,7 @@ export class DiscoveryView extends React.Component<
 
     const hasAtLeastOneFilterApplied = some(
       filter => !isEmpty(filter),
-      Object.values(this.preparedFilters()),
+      Object.values(prepareFilters(filters, allowedFeatures)),
     );
     return (
       <>
@@ -2453,7 +2377,7 @@ export class DiscoveryView extends React.Component<
                     currentDisplay={currentDisplay}
                     currentTab={currentTab}
                     domain={domain}
-                    filters={this.preparedFilters()}
+                    filters={prepareFilters(filters, allowedFeatures)}
                     getRows={this.configForWorkflow[workflow].getRows}
                     hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
                     mapLevel={mapLevel}

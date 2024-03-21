@@ -236,12 +236,19 @@ async function fetchProjectIds(
 
 async function queryWorkflowRuns(
   workflow: WorkflowType,
-  { projectId, search, orderBy, orderDir, filters }: Partial<Conditions>,
+  {
+    projectId,
+    search,
+    orderBy,
+    orderDir,
+    filters,
+    nextGenFilters,
+  }: Partial<Conditions>,
   props: DiscoveryViewProps,
   environment: RelayModernEnvironment,
   projectIds?: number[],
 ): Promise<WorkflowRunRow[]> {
-  // INPUTS:
+  // ENTITIES INPUT:
   let collectionIdInput: queryInput_fedWorkflowRuns_input_where_collectionId_Input | null =
     null;
   if (projectId != null) {
@@ -261,7 +268,7 @@ async function queryWorkflowRuns(
         sample: {
           collectionLocation: filters.locationV2?.length
             ? { _in: filters.locationV2 }
-            : null,
+            : undefined,
           hostOrganism: filters.host?.length
             ? {
                 name: {
@@ -269,8 +276,10 @@ async function queryWorkflowRuns(
                   _in: filters.host.map(hostId => hostId.toString()),
                 },
               }
-            : null,
-          sampleType: filters.tissue?.length ? { _in: filters.tissue } : null,
+            : undefined,
+          sampleType: filters.tissue?.length
+            ? { _in: filters.tissue }
+            : undefined,
         },
       },
       todoRemove: {
@@ -288,11 +297,19 @@ async function queryWorkflowRuns(
       },
     };
   }
+
+  // WORKFLOWS INPUT:
   const workflowsInput: queryInput_fedWorkflowRuns_input_Input = {
     where: {
       workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
       deprecatedById: { _is_null: true },
       collectionId: collectionIdInput,
+      startedAt:
+        nextGenFilters?.startedAtIso !== undefined
+          ? {
+              _gte: nextGenFilters.startedAtIso,
+            }
+          : undefined,
       entityInputs: {
         entityType: {
           _eq: "sequencing_read",
@@ -320,17 +337,89 @@ async function queryWorkflowRuns(
     },
   };
 
-  // QUERIES:
+  // ENTITIES QUERY(IES):
   let entitiesPromise:
     | Promise<DiscoveryViewFCSequencingReadIdsQuery$data | undefined>
     | undefined;
   if (entitiesInput !== undefined) {
-    entitiesPromise = fetchQuery<DiscoveryViewFCSequencingReadIdsQueryType>(
-      environment,
-      DiscoveryViewFCSequencingReadIdsQuery,
-      { input: entitiesInput },
-    ).toPromise();
+    if (nextGenFilters?.taxonNames.length) {
+      entitiesPromise = Promise.all([
+        fetchQuery<DiscoveryViewFCSequencingReadIdsQueryType>(
+          environment,
+          DiscoveryViewFCSequencingReadIdsQuery,
+          {
+            input: {
+              ...entitiesInput,
+              where: {
+                ...entitiesInput.where,
+                taxon: {
+                  name: {
+                    _in: nextGenFilters.taxonNames,
+                  },
+                },
+              },
+            },
+          },
+        ).toPromise(),
+        fetchQuery<DiscoveryViewFCSequencingReadIdsQueryType>(
+          environment,
+          DiscoveryViewFCSequencingReadIdsQuery,
+          {
+            input: {
+              ...entitiesInput,
+              where: {
+                ...entitiesInput.where,
+                consensusGenomes: {
+                  taxon: {
+                    name: {
+                      _in: nextGenFilters.taxonNames,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ).toPromise(),
+      ]).then(
+        ([
+          response1,
+          response2,
+        ]): DiscoveryViewFCSequencingReadIdsQuery$data => {
+          if (
+            response1?.fedSequencingReads == null ||
+            response2?.fedSequencingReads == null
+          ) {
+            throw new Error(
+              `Taxon filter request(s) failed: ${JSON.stringify(
+                response1,
+              )} ${JSON.stringify(response2)}`,
+            );
+          }
+          const allIds = new Set([
+            ...response1.fedSequencingReads
+              .filter(isNotNullish)
+              .map(sequencingRead => sequencingRead.id),
+            ...response2.fedSequencingReads
+              .filter(isNotNullish)
+              .map(sequencingRead => sequencingRead.id),
+          ]);
+          return {
+            fedSequencingReads: [...allIds].map(id => ({
+              id,
+            })),
+          };
+        },
+      );
+    } else {
+      entitiesPromise = fetchQuery<DiscoveryViewFCSequencingReadIdsQueryType>(
+        environment,
+        DiscoveryViewFCSequencingReadIdsQuery,
+        { input: entitiesInput },
+      ).toPromise();
+    }
   }
+
+  // WORKFLOWS QUERY:
   const workflowsPromise = fetchQuery<DiscoveryViewFCWorkflowsQueryType>(
     environment,
     DiscoveryViewFCWorkflowsQuery,
@@ -357,7 +446,7 @@ async function queryWorkflowRuns(
     );
   }
 
-  // RESPONSE TRANSFORM:
+  // RESPONSE TRANSFORMS:
   const sequencingReadIds =
     entitiesData !== undefined
       ? new Set(
@@ -406,8 +495,10 @@ async function queryWorkflowRuns(
     });
   // TODO: Make BE do this.
   if (orderBy === "creation_source") {
-    result.sort((run1, run2) =>
-      (run1.creation_source ?? "").localeCompare(run2.creation_source ?? ""),
+    result.sort(
+      (run1, run2) =>
+        (run1.creation_source ?? "").localeCompare(run2.creation_source ?? "") *
+        (orderDir === "ASC" ? 1 : -1),
     );
   }
 
@@ -464,7 +555,7 @@ async function querySequencingReadObjects(
                 limit: DEFAULT_PAGE_SIZE,
                 offset,
               }
-            : null,
+            : undefined,
         where: {
           id: {
             _in: sequencingReadIds,
@@ -713,14 +804,16 @@ const parseAggregateCounts = (
 };
 
 /**
- *  _____  _                                __      ___
- * |  __ \(_)                               \ \    / (_)
- * | |  | |_ ___  ___ _____   _____ _ __ _   \ \  / / _  _____      __
- * | |  | | / __|/ __/ _ \ \ / / _ \ '__| | | \ \/ / | |/ _ \ \ /\ / /
- * | |__| | \__ \ (_| (_) \ V /  __/ |  | |_| |\  /  | |  __/\ V  V /
- * |_____/|_|___/\___\___/ \_/ \___|_|   \__, | \/   |_|\___| \_/\_/
- *                                        __/ |
- *                                       |___/
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *  _____  _                                __      ___                *
+ * |  __ \(_)                               \ \    / (_)               *
+ * | |  | |_ ___  ___ _____   _____ _ __ _   \ \  / / _  _____      __ *
+ * | |  | | / __|/ __/ _ \ \ / / _ \ '__| | | \ \/ / | |/ _ \ \ /\ / / *
+ * | |__| | \__ \ (_| (_) \ V /  __/ |  | |_| |\  /  | |  __/\ V  V /  *
+ * |_____/|_|___/\___\___/ \_/ \___|_|   \__, | \/   |_|\___| \_/\_/   *
+ *                                        __/ |                        *
+ *                                       |___/                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  * Functional wrapper (for Relay and other hooks) that performs all GQL fetching for
  * <DiscoveryView>, which contains most state.

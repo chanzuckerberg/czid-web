@@ -141,4 +141,11 @@ export interface Conditions {
   orderDir?: SortDirectionType;
   filters: FilterList & { workflow: WorkflowType };
   sampleIds?: string[];
+  nextGenFilters: NextGenFilters;
+}
+
+/** Filter parameters that aren't compatible between NextGen and Rails. */
+export interface NextGenFilters {
+  startedAtIso?: string;
+  taxonNames: string[];
 }
