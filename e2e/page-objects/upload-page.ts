@@ -670,8 +670,10 @@ export class UploadPage extends PageObject {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const newKey = sampleNames[i];
-        inputs[newKey] = inputs[key];
-        delete inputs[key];
+        if (newKey !== key) {
+          inputs[newKey] = inputs[key];
+          delete inputs[key];
+        }
       }
     }
 

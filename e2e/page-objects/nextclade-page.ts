@@ -15,7 +15,7 @@ export class NextcladePage extends PageObject {
 
   // #region Get
   public async getSampleNames() {
-    await this.page.locator(SAMPLE_NAMES).first();
+    await this.page.locator(SAMPLE_NAMES).first().waitFor();
     return this.page.locator(SAMPLE_NAMES).allTextContents();
   }
 

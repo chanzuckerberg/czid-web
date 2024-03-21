@@ -25,7 +25,27 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
-  - name: "Functional: P-0: NextClade Tree"
+  - name: "WGS: Functional: P-0: Delete samples"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/delete-samples.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Functional: P-0"
+      retries: 2
+    shard: concurrency
+  - name: "WGS: Functional: P-0: NextClade Tree"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/nextclade.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Functional: P-0"
+      retries: 2
+    shard: concurrency
+  - name: "SC2: Functional: P-0: NextClade Tree"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/sc2/nextclade-tree.spec.ts']

@@ -16,6 +16,7 @@ const DOWNLOAD_FILE_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downlo
 const DOWNLOAD_DATE_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}']/ancestor::div[contains(@class, '__Table__row tableRow-')]//div[@data-testid='date-created']`;
 const DOWNLOAD_NAME_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}']/ancestor::div[contains(@class, '__Table__row tableRow-')]//div[@data-testid='download-name']`;
 const DOWNLOAD_COUNT_BY_DOWNLOADID = (downloadId: string) => `//div[@id='${downloadId}']/ancestor::div[contains(@class, '__Table__row tableRow-')]//div[@aria-colindex='3']/div`;
+const DOWNLOAD_STATUS_BY_DOWNLOADID = (downloadId: string) => `//div[contains(@class, 'downloadStatus')]/parent::div/following-sibling::div/span[@id='${downloadId}']`;
 const DOWNLOAD_STATUS_BY_INDEX = (rowIndex: string) => `(//*[contains(@class, 'downloadStatus')])[${rowIndex}]`;
 const BULK_DOWNLOAD_METRICS = {
   "mngs": "short-read-mngs",
@@ -143,6 +144,10 @@ export class DownloadsPage extends PageObject {
       }
     }
     return complete;
+  }
+
+  public async isDownloadVisible(downloadId: number) {
+    await this.page.locator(DOWNLOAD_STATUS_BY_DOWNLOADID(downloadId.toString())).isVisible();
   }
 
 

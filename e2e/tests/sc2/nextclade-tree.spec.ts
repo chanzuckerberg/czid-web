@@ -1,7 +1,6 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
-import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { UploadPage } from "@e2e/page-objects/upload-page";
+import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
@@ -28,7 +27,17 @@ test.describe("NextClade Tree: Functional: P-0", () => {
   });
 
   test("SNo 23: Create a Nextclade Tree", async ({ page }) => {
-    await runPipelineIfNeeded(page, sc2_project.name, "Human", "Unknown");
+    await runPipelineIfNeeded(
+      page,
+      sc2_project,
+      WGS_SAMPLE_FILES,
+      SARS_CoV2_SAMPLE_NAMES,
+      "Human",
+      "Unknown",
+      WORKFLOWS.SC2,
+      RUN_PIPELINE,
+      WAIT_FOR_PIPELINE,
+    );
 
     // #region 1. Log in to Project
     await projectPage.navigateToMyData();
@@ -68,7 +77,17 @@ test.describe("NextClade Tree: Functional: P-0", () => {
   });
 
   test("SNo 25: Create a Nextclade Tree with a mixture of samples with and without reference assension", async ({ page }) => {
-    await runPipelineIfNeeded(page, sc2_project.name, "Human", "Unknown");
+    await runPipelineIfNeeded(
+      page,
+      sc2_project,
+      WGS_SAMPLE_FILES,
+      SARS_CoV2_SAMPLE_NAMES,
+      "Human",
+      "Unknown",
+      WORKFLOWS.SC2,
+      RUN_PIPELINE,
+      WAIT_FOR_PIPELINE,
+    );
 
     // #region 1. Log in to Project
     await projectPage.navigateToMyData();
@@ -124,29 +143,3 @@ test.describe("NextClade Tree: Functional: P-0", () => {
     expect(nextcladeSampleNames).toEqual(sampleNamesSentToNextclade);
   });
 });
-
-async function runPipelineIfNeeded(page: any, projectName: string, hostOrganism: string, taxon: string) {
-  const samplesPage = new SamplesPage(page);
-
-  let samples = [];
-  let ranPipeline = false;
-  const noHostSample = await samplesPage.getSamples(sc2_project.name, SARS_CoV2_SAMPLE_NAMES[0]);
-  if ((noHostSample.length <= 0) || RUN_PIPELINE) {
-    const uploadPage = new UploadPage(page);
-    const sampleNames = [];
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, SARS_CoV2_SAMPLE_NAMES);
-    for (const sampleName of Object.keys(inputs)) {
-      sampleNames.push(sampleName);
-      inputs[sampleName].hostOrganism = hostOrganism;
-    }
-    await uploadPage.e2eCSVSampleUpload(WGS_SAMPLE_FILES, sc2_project, WORKFLOWS.SC2, inputs, true, taxon);
-    samples = await samplesPage.getSamples(sc2_project.name, sampleNames);
-    ranPipeline = true;
-  }
-
-  if (ranPipeline && WAIT_FOR_PIPELINE) {
-    test.setTimeout(60 * 1000 * 20); // Inclease the test runtime to let the piepline run
-    const sampleIds = samples.map(sample => sample.id);
-    await samplesPage.waitForAllSamplesComplete(sampleIds);
-  }
-}

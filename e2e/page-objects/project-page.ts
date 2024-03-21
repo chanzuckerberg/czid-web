@@ -3,13 +3,21 @@ import { DownloadsPage } from "./downloads-page";
 import { HeatmapPage } from "./heatmap-page";
 import { NextcladePage } from "./nextclade-page";
 import { PageObject } from "./page-object";
+import { SamplesPage } from "./samples-page";
 
+const ARIA_ROWINDEX = "aria-rowindex";
 const UPLOAD_HEADER_LINK = "[data-testid='menu-item-upload']";
+const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genomes']";
+const SAMPLES_TAB = "button[data-testid='samples']";
+const SAMPLES_COUNT_TD_1 = "//div[@aria-rowindex='1']//div[@data-testid='sample-counts' and contains(text(), 'Sample')]";
 const HEATMAP_BUTTON = "[class*='actions'] [role='listbox'] [class*='action']:not([data-testid])";
 const TAXON_HEATMAP = "[href*='/heatmap']";
 const SAMPLE_CHECKBOX_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleName}']/ancestor::div[@aria-rowindex]//div[contains(@class, 'checkbox')]`;
 const SAMPLE_BY_SAMPLE_NAME = (sampleName: string) => `//div[text()='${sampleName}']/ancestor::div[@aria-rowindex]`;
 const DELETE_BUTTON_TESTID = "bulk-delete-trigger";
+const DISMISS_BUTTON = "//*[translate(text(), 'D','d') = 'dismiss']";
+const USER_DROPDOWN = "[class*='userDropdown']";
+const USER_DROPDOWN_DOWNLOADS_LINK = "//a[text()='Downloads']";
 const DOWNLOADS_LINK = "[class*='message'] [href='/bulk_downloads']";
 const NEXTCLADE_TREE_BUTTON = "[class*='action'] > div:not([data-testid])";
 const NEXTCLADE_OPTIONS = "[class*='treeTypeContainer'] [class*='name']";
@@ -203,6 +211,10 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickConsensusGenomeTab() {
+    await this.page.locator(CONSENSUS_GENOME_TAB).click();
+  }
+
   public async clickDownloadsLink() {
     await this.page.locator(DOWNLOADS_LINK).click();
     return new DownloadsPage(this.page);
@@ -298,6 +310,7 @@ export class ProjectPage extends PageObject {
 
   public async clickSample(sampleName: string) {
     await this.page.locator(SAMPLE_BY_SAMPLE_NAME(sampleName)).first().click();
+    return new SamplesPage(this.page);
   }
 
   public async clickSampleCheckbox(sampleName: string) {
@@ -364,16 +377,32 @@ export class ProjectPage extends PageObject {
     await this.page.locator(DELETE_CONFIRMATION_BUTTON).waitFor({state: "visible"});
     await this.page.locator(DELETE_CONFIRMATION_BUTTON).click();
   }
+
+  public async clickDismissButton() {
+    await this.page.locator(DISMISS_BUTTON).click();
+  }
   // #endregion Click
 
   // #region Get
+  public async getSamplesCount() {
+    await this.page.locator(SAMPLES_TAB).waitFor();
+    await this.pause(1);
+    const tabText = await this.page.locator(SAMPLES_TAB).textContent();
+    return parseInt(tabText.replace("Samples", ""));
+  }
+
+  public async getConsensusGenomesCount() {
+    const tabText = await this.page.locator(CONSENSUS_GENOME_TAB).textContent();
+    return parseInt(tabText.replace("Consensus Genomes", ""));
+  }
+
   public async getCompletedRowIndexes() {
-    await this.scrollDownToElement(COMPLETED_ROWS, ROWS, "aria-rowindex");
+    await this.scrollDownToElement(COMPLETED_ROWS, ROWS, ARIA_ROWINDEX);
 
     const rows = await this.page.locator(COMPLETED_ROWS).all();
     const indexes = [];
     for (const row of rows) {
-      const rowIndex = await row.getAttribute("aria-rowindex");
+      const rowIndex = await row.getAttribute(ARIA_ROWINDEX);
       indexes.push(+rowIndex);
     }
 
@@ -409,6 +438,15 @@ export class ProjectPage extends PageObject {
     return this.page.locator(NOTIFICATION_MESSAGE).allTextContents();
   }
 
+  public async getProjectsTable(timeout = 120000) {
+    await this.page.locator(SAMPLES_COUNT_TD_1).first().waitFor({timeout: timeout}).catch(() => null);
+    return this.getTable(
+      "[class*='dataContainer'] [class*='Table__headerColumn'] [class*='label']",
+      "[class*='dataContainer'] [aria-label='row']",
+      "//div[@role='gridcell']",
+    );
+  }
+
   public async getSamplesTable() {
     return this.getTable(
       "[class*='dataContainer'] [class*='Table__headerColumn'] [class*='label']",
@@ -429,9 +467,28 @@ export class ProjectPage extends PageObject {
     }
     return samplesTableOrderByName;
   }
+
+  public async getProjectsTableOrderedByName(timeout = 120000) {
+    const projectsTable = await this.getProjectsTable(timeout);
+    const projectsTableOrderByName = {};
+    if (projectsTable.length > 0) {
+      for (const row of projectsTable) {
+        if (row["Project"]) {
+          projectsTableOrderByName[row["Project"][0]] = row;
+        }
+      }
+    }
+    return projectsTableOrderByName;
+  }
   // #endregion Get
 
   // #region Macro
+  public async gotToDownloads() {
+    await this.page.locator(USER_DROPDOWN).click();
+    await this.page.locator(USER_DROPDOWN_DOWNLOADS_LINK).click();
+    return new DownloadsPage(this.page);
+  }
+
   public async waitForSamplesComplete(projectId: number, workflow: string, sampleNames: Array<string>, waitTime = 30 * 1000) {
     for (const sampleName of sampleNames) {
       await this.waitForSampleComplete(projectId, workflow, sampleName, waitTime);
@@ -463,13 +520,23 @@ export class ProjectPage extends PageObject {
 
   public async selectCompletedSamples(numberToSelect: number) {
     const selectedSampleNames = new Array<string>();
-    const completedRowIndexes = await this.getCompletedRowIndexes();
-    for (let i = 0; i < numberToSelect; i++) {
-      const rowIndex = completedRowIndexes[i];
+    const selectedRowIndexes = new Array<number>();
+    await this.scrollDownToElement(COMPLETED_ROWS, ROWS, ARIA_ROWINDEX);
 
-      const sampleName = await this.getSampleNameFromRow(rowIndex);
-      await this.clickSampleCheckbox(sampleName);
-      selectedSampleNames.push(sampleName);
+    for (let i = 0; i < numberToSelect; i++) {
+      const completedRowIndexes = await this.getCompletedRowIndexes();
+      if (numberToSelect <= completedRowIndexes.length) {
+
+        const rowIndex = completedRowIndexes[i];
+
+        if (!selectedRowIndexes.includes(rowIndex)) {
+          const sampleName = await this.getSampleNameFromRow(rowIndex);
+          await this.clickSampleCheckbox(sampleName);
+
+          selectedRowIndexes.push(rowIndex);
+          selectedSampleNames.push(sampleName);
+        }
+      }
     }
     return selectedSampleNames;
   }

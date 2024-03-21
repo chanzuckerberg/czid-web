@@ -48,7 +48,11 @@ const REPORT_TABLE_ROWS = "[class*='reportTable'] [role='row']";
 const PIPELINES_TAB = "[data-testid='pipelines']";
 const VIEW_PIPELINE_VISUALIZATION_LINK = "[class*='vizLink'] a";
 const REPORT_IN_PROGRESS = "[class*='reportStatus'][class*='inProgress']";
+const MEATBALLS_MENU = "[data-testid='overflow-btn']";
+const DELETE_CG_RUN_BUTTON = "//span[text()='Delete CG Run']";
+const DELETE_CONFIRMATION_BUTTON = "//button[text()='Delete']";
 const DOWNLOAD_ALL_BUTTON = "//button[text()='Download All']";
+const DISMISS_BUTTON = "//*[translate(text(), 'D','d') = 'dismiss']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genome']";
 const SHARE_BUTTON = "//button[text()='Share']";
 const LEARN_MORE_ABOUT_CONSENSUS_GENOMES_LINK = "//a[contains(text(), 'Learn more about consensus genomes')]";
@@ -386,6 +390,25 @@ export class SamplesPage extends PageObject {
 
     public async clickConsensusGenomeTab() {
       await this.page.locator(CONSENSUS_GENOME_TAB).click();
+    }
+
+    public async clickDismissButton() {
+      await this.page.locator(DISMISS_BUTTON).waitFor({timeout: 30000}).catch(() => null);
+      if (this.page.locator(DISMISS_BUTTON).isVisible()) {
+        await this.page.locator(DISMISS_BUTTON).click();
+      }
+    }
+
+    public async clickDeleteButtonConfirmation() {
+      await this.page.locator(DELETE_CONFIRMATION_BUTTON).click();
+    }
+
+    public async clickDeleteCGRunButton() {
+      await this.page.locator(DELETE_CG_RUN_BUTTON).click();
+    }
+
+    public async clickMeatballsMenu() {
+      await this.page.locator(MEATBALLS_MENU).click();
     }
 
     public async clickDownloadAllButton() {

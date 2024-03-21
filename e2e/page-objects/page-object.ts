@@ -59,11 +59,15 @@ export abstract class PageObject {
   // #endregion Click
 
   public async close() {
-    this.page.close();
+    await this.page.close();
   }
 
   public async url() {
     return this.page.url();
+  }
+
+  public async reload() {
+    await this.page.reload();
   }
 
   public async pause(seconds: number) {
