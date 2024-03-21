@@ -10,7 +10,7 @@ export const getBulkDownloadTableColumns = ({
 }): ColumnProps[] => {
   return [
     {
-      dataKey: "download_name",
+      dataKey: "downloadDisplayName",
       label: "Download",
       width: 500,
       flexGrow: 1,
@@ -19,21 +19,22 @@ export const getBulkDownloadTableColumns = ({
         BulkDownloadTableRenderers.renderDownload(cellData, isAdmin),
     },
     {
-      dataKey: "created_at",
+      dataKey: "startedAt",
       label: "Date",
       width: 200,
       cellRenderer: TableRenderers.renderDateWithElapsed,
     },
     {
-      dataKey: "analysis_count",
+      dataKey: "analysisCount",
       label: "Count",
       width: 180,
       cellRenderer: BulkDownloadTableRenderers.renderCount,
     },
     {
-      dataKey: "file_size",
+      dataKey: "fileSize",
       label: "File Size",
       width: 200,
+      cellRenderer: BulkDownloadTableRenderers.renderFileSize,
       className: cs.lightCell,
     },
     {

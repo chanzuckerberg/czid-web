@@ -28,14 +28,7 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="downloads"
         text={
-          <a
-            className={cs.option}
-            href={
-              !adminUser
-                ? "/bulk_downloads"
-                : `/bulk_downloads?searchBy=${userName}&n=10`
-            }
-          >
+          <a className={cs.option} href="/bulk_downloads">
             Downloads
           </a>
         }

@@ -6,37 +6,42 @@ import {
 } from "~/components/views/SampleUploadFlow/constants";
 import { ThresholdFilterData } from "../dropdown";
 import { WorkflowRun } from "../sample";
-import { BooleanNums, DateString, NameId, NumberId } from "./generic";
+import { BooleanNums, DateString, NameId } from "./generic";
 export interface AccessionData {
   best_accessions: AccessionsSummary[];
   num_accessions: number;
 }
 
-export enum BulkDownloadStatusType {
-  ERROR = "error",
-  RUNNING = "running",
-  SUCCESS = "success",
-  WAITING = "waiting",
+export enum BulkDownloadStatus {
+  // In Progress
+  RUNNING = "RUNNING",
+  CREATED = "CREATED",
+  STARTED = "STARTED",
+  PENDING = "PENDING",
+  // Succeeded
+  SUCCEEDED = "SUCCEEDED",
+  // Failed
+  SUCCEEDED_WITH_ISSUE = "SUCCEEDED_WITH_ISSUE",
+  FAILED = "FAILED",
+  TIMED_OUT = "TIMED_OUT",
+  ABORTED = "ABORTED",
 }
-
-export interface BulkDownloadDetails extends NumberId {
-  num_samples: number;
-  params: { [key: string]: DownloadTypeParam };
-  presigned_output_url: string;
-  download_name: string;
-  file_size: string;
-  status: BulkDownloadStatusType;
-  download_type: string;
-  pipeline_runs: { id: number; sample_name: string }[];
-  workflow_runs: Array<$TSFixMe>;
-  description: string;
-  error_message: string;
-  execution_type: string;
-  log_url: string;
-  id: number;
+export interface BulkDownloadDetails {
+  totalSamples: number;
+  url: string;
+  fileSize: string;
+  status: BulkDownloadStatus;
+  downloadType: string;
+  downloadFormat: string;
+  errorMessage: string;
+  logUrl: string;
+  id: string;
   onDownloadClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onStatusClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onDetailsClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   tooltipText: string | null;
+  params: {
+    [x: string]: { value: string; displayName?: string };
+  };
 }
 
 export type BulkDownloadType = {
@@ -76,25 +81,6 @@ export interface ConsensusGenomeData {
   taxName?: string;
   usedAccessions?: string[];
   previousRuns?: WorkflowRun[];
-}
-
-export interface DownloadType {
-  display_name: string;
-  admin_only: boolean;
-  description: string;
-  category: string;
-  fields: {
-    type: string;
-    display_name: string;
-  }[];
-  uploader_only: boolean;
-  required_allowed_feature: string;
-  file_type_display: string;
-}
-
-export interface DownloadTypeParam {
-  displayName: string;
-  value: unknown;
 }
 
 export interface ERCCComparisonShape {

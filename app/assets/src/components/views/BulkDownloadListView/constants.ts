@@ -4,6 +4,8 @@ import {
   CG_QUALITY_CONTROL_LINK,
 } from "~/components/utils/documentationLinks";
 import { WorkflowConfigType, WorkflowType } from "~/components/utils/workflows";
+import { BulkDownloadDetails, BulkDownloadStatus } from "~/interface/shared";
+import { BULK_DOWNLOAD_TYPE_INFO } from "./downloadTypeInfo";
 
 // Stores information about conditional fields for bulk downloads.
 export const CONDITIONAL_FIELDS = [
@@ -53,6 +55,80 @@ export const BULK_DOWNLOAD_TYPES = {
   HOST_GENE_COUNTS: "host_gene_counts",
 };
 
+export const InProgressStatus = [
+  BulkDownloadStatus.RUNNING,
+  BulkDownloadStatus.CREATED,
+  BulkDownloadStatus.PENDING,
+  BulkDownloadStatus.STARTED,
+];
+
+export const FailedStatus = [
+  BulkDownloadStatus.SUCCEEDED_WITH_ISSUE,
+  BulkDownloadStatus.FAILED,
+  BulkDownloadStatus.TIMED_OUT,
+  BulkDownloadStatus.ABORTED,
+];
+
+export const getStatusType = (bulkDownload: BulkDownloadDetails) => {
+  if (
+    (bulkDownload.status === BulkDownloadStatus.SUCCEEDED &&
+      bulkDownload.errorMessage) ||
+    BulkDownloadStatus.SUCCEEDED_WITH_ISSUE === bulkDownload.status
+  ) {
+    // It is possible for a bulk download to "complete with issues".
+    // For example, a few of the source files could not be found, but the rest were compressed successfully.
+    // In this case, the bulk download task will have status = success and also have an error message.
+    return "warning";
+  }
+  if (InProgressStatus.includes(bulkDownload.status)) {
+    return "default";
+  }
+  if (FailedStatus.includes(bulkDownload.status)) {
+    return "error";
+  }
+  if (BulkDownloadStatus.SUCCEEDED === bulkDownload.status) {
+    return "success";
+  }
+  return "default";
+};
+
+export const getStatusDisplay = (
+  status: BulkDownloadStatus,
+  errorMessage?: string,
+) => {
+  if (
+    (status === BulkDownloadStatus.SUCCEEDED && errorMessage) ||
+    BulkDownloadStatus.SUCCEEDED_WITH_ISSUE === status
+  ) {
+    // It is possible for a bulk download to "complete with issues".
+    // For example, a few of the source files could not be found, but the rest were compressed successfully.
+    // In this case, the bulk download task will have status = success and also have an error message.
+    return "complete with issue";
+  }
+  if (InProgressStatus.includes(status)) {
+    return "in progess";
+  }
+  if (FailedStatus.includes(status)) {
+    return "failed";
+  }
+  if (BulkDownloadStatus.SUCCEEDED === status) {
+    return "complete";
+  }
+  console.error("No Display Status Found");
+  return "";
+};
+
+export const getTooltipText = (bulkDownload: BulkDownloadDetails) => {
+  if (
+    bulkDownload.status === BulkDownloadStatus.SUCCEEDED &&
+    bulkDownload.errorMessage
+  ) {
+    return bulkDownload.errorMessage;
+  }
+
+  return null;
+};
+
 export const BULK_DOWNLOAD_DOCUMENTATION_LINKS = {
   [BULK_DOWNLOAD_TYPES.CONSENSUS_GENOME_INTERMEDIATE_OUTPUT_FILES]:
     CG_QUALITY_CONTROL_LINK,
@@ -71,4 +147,14 @@ export const WORKFLOW_OBJECT_LABELS: WorkflowConfigType<string | null> = {
 
 export const HOST_GENOME_NAMES = {
   HUMAN: "Human",
+};
+
+// The number of times we automatically update the bulk downloads on the page before prompting the user.
+export const AUTO_UPDATE_MAX_COUNT = 3;
+
+// Slightly larger than PROGRESS_UPDATE_DELAY on the back-end.
+export const AUTO_UPDATE_DELAY = 20000;
+
+export const getDownloadDisplayName = (downloadType: string) => {
+  return BULK_DOWNLOAD_TYPE_INFO[downloadType]?.displayName;
 };

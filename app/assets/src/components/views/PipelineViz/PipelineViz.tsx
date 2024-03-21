@@ -52,7 +52,7 @@ interface PipelineVizState {
   stagesOpened: $TSFixMe[];
   interStageArrows: string[];
   sidebarVisible: boolean;
-  sidebarParams: object;
+  sidebarParams: $TSFixMe;
   hovered: boolean;
   graphData: PipelineVizProps["graphData"];
 }

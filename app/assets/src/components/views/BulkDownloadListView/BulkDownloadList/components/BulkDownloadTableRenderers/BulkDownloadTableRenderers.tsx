@@ -2,10 +2,18 @@ import { Icon } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import React from "react";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
+import { formatFileSize } from "~/components/utils/format";
+import { openUrl } from "~/components/utils/links";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import {
+  BULK_DOWNLOAD_TYPES,
+  getDownloadDisplayName,
+  getStatusDisplay,
+  InProgressStatus,
+} from "~/components/views/BulkDownloadListView/constants";
+import { BulkDownloadStatus } from "~/interface/shared";
 import LoadingBar from "~ui/controls/LoadingBar";
 import StatusLabel from "~ui/labels/StatusLabel";
-import { BULK_DOWNLOAD_TYPES } from "../../../constants";
 import cs from "./bulk_download_table_renderers.scss";
 
 export class BulkDownloadTableRenderers extends React.Component {
@@ -25,11 +33,11 @@ export class BulkDownloadTableRenderers extends React.Component {
         <div className={cs.downloadRightPane}>
           <div className={cs.downloadNameContainer}>
             <div className={cs.downloadName} data-testid="download-name">
-              {rowData.download_name}
+              {getDownloadDisplayName(rowData.downloadType)}
             </div>
             <StatusLabel
               className={cs.downloadStatus}
-              status={rowData.statusDisplay}
+              status={getStatusDisplay(rowData.status)}
               type={rowData.statusType}
               tooltipText={rowData.tooltipText}
             />
@@ -37,7 +45,7 @@ export class BulkDownloadTableRenderers extends React.Component {
           <div className={cs.metadata}>
             <span
               className={cs.detailsLink}
-              onClick={rowData.onStatusClick}
+              onClick={rowData.onDetailsClick}
               data-testid={"download-details-link"}
               id={rowData?.id}
             >
@@ -45,7 +53,10 @@ export class BulkDownloadTableRenderers extends React.Component {
             </span>
             {admin && (
               <React.Fragment>
-                |<span className={cs.userName}>{rowData.user_name}</span>
+                |
+                <span className={cs.userName}>
+                  User Id: {rowData.ownerUserId}
+                </span>
               </React.Fragment>
             )}
           </div>
@@ -55,17 +66,13 @@ export class BulkDownloadTableRenderers extends React.Component {
   };
 
   static renderCount = ({ rowData }) => {
-    const bulkDownloadType = get("download_type", rowData);
-
-    const count =
-      bulkDownloadType === BULK_DOWNLOAD_TYPES.SAMPLE_METADATA
-        ? get("num_samples", rowData)
-        : get("analysis_count", rowData);
+    const bulkDownloadType = get("downloadType", rowData);
+    const count = get("entityInputs", rowData)?.length;
 
     let analysisTypeString = count === 1 ? "Sample" : "Samples";
     if (bulkDownloadType !== BULK_DOWNLOAD_TYPES.SAMPLE_METADATA) {
       const workflowLabelField = count === 1 ? "label" : "pluralizedLabel";
-      const workflowObj = WORKFLOWS[get("analysis_type", rowData)];
+      const workflowObj = WORKFLOWS[get("entityInputFileType", rowData)];
 
       analysisTypeString = get(workflowLabelField, workflowObj);
     }
@@ -74,16 +81,15 @@ export class BulkDownloadTableRenderers extends React.Component {
   };
 
   static renderStatus = ({ rowData }) => {
-    const { status, progress } = rowData;
-
-    if (status === "success") {
+    const { status, url } = rowData;
+    if (status === BulkDownloadStatus.SUCCEEDED && url) {
       return (
         <div className={cs.statusCell}>
           <div className={cs.links}>
             <div
               id={rowData?.id}
               className={cs.link}
-              onClick={rowData.onDownloadFileClick}
+              onClick={() => openUrl(url)}
             >
               Download File
             </div>
@@ -91,29 +97,38 @@ export class BulkDownloadTableRenderers extends React.Component {
         </div>
       );
     }
-
-    if (status === "error") {
+    if (InProgressStatus.includes(status)) {
       return (
-        <div className={cs.statusCell}>
-          <div className={cs.links}>
-            <a
-              id={rowData?.id}
-              className={cs.link}
-              href={CONTACT_US_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Contact us
-            </a>
-          </div>
+        <div className={cs.statusCell} id={rowData?.id}>
+          <LoadingBar showHint tiny />
         </div>
       );
     }
 
     return (
-      <div className={cs.statusCell} id={rowData?.id}>
-        <LoadingBar percentage={progress} showHint tiny />
+      <div className={cs.statusCell}>
+        <div className={cs.links}>
+          <a
+            id={rowData?.id}
+            className={cs.link}
+            href={CONTACT_US_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Contact us
+          </a>
+        </div>
       </div>
+    );
+  };
+
+  static renderFileSize = ({ rowData }) => {
+    const { fileSize } = rowData;
+    if (typeof fileSize !== "number" || isNaN(fileSize)) {
+      return null;
+    }
+    return (
+      <>{formatFileSize(fileSize, ["Bytes", "KB", "MB", "GB", "TB"], 2)}</>
     );
   };
 }

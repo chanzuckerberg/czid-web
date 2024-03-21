@@ -5,7 +5,10 @@
 import { LoadingIndicator } from "@czi-sds/components";
 import React, { Suspense } from "react";
 import Sidebar from "~/components/ui/containers/Sidebar";
-import { BDDProps, BulkDownloadDetailsMode } from "./BulkDownloadDetailsMode";
+import {
+  BulkDownloadDetailsMode,
+  BulkDownloadDetailsProps,
+} from "./BulkDownloadDetailsMode";
 import cs from "./details_sidebar.scss";
 import GeneDetailsMode, { GDMProps } from "./GeneDetailsMode";
 import PipelineStepDetailsMode, { PSDProps } from "./PipelineStepDetailsMode";
@@ -24,7 +27,7 @@ interface DetailsSidebarProps extends SidebarBase {
     | "geneDetails"
     | "bulkDownloadDetails";
   params:
-    | BDDProps
+    | BulkDownloadDetailsProps
     | GDMProps
     | PSDProps
     | SampleDetailsModeProps
@@ -62,7 +65,9 @@ const DetailsSidebar = ({
       case "geneDetails":
         return <GeneDetailsMode {...(params as GDMProps)} />;
       case "bulkDownloadDetails":
-        return <BulkDownloadDetailsMode {...(params as BDDProps)} />;
+        return (
+          <BulkDownloadDetailsMode {...(params as BulkDownloadDetailsProps)} />
+        );
       default:
         return null;
     }

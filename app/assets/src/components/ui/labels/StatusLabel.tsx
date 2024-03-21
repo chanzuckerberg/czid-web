@@ -10,37 +10,29 @@ interface StatusLabelProps {
   tooltipText?: string;
   inline?: boolean;
 }
+const StatusLabel = ({
+  status,
+  type = "default",
+  className,
+  tooltipText,
+  inline,
+}: StatusLabelProps) => {
+  const label = (
+    <div
+      className={cx(className, cs.statusLabel, inline && cs.inline, cs[type])}
+      data-testid={status}
+    >
+      {status}
+    </div>
+  );
 
-class StatusLabel extends React.Component<StatusLabelProps> {
-  static defaultProps: StatusLabelProps;
-  render() {
-    const { status, type, className, tooltipText, inline } = this.props;
-    const label = (
-      <div
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
-        className={cx(className, cs.statusLabel, inline && cs.inline, cs[type])}
-        data-testid={status}
-      >
-        {status}
-      </div>
+  if (tooltipText) {
+    return (
+      <BasicPopup trigger={label} content={tooltipText} position="top center" />
     );
-
-    if (tooltipText) {
-      return (
-        <BasicPopup
-          trigger={label}
-          content={tooltipText}
-          position="top center"
-        />
-      );
-    }
-
-    return label;
   }
-}
 
-StatusLabel.defaultProps = {
-  type: "default",
+  return label;
 };
 
 export default StatusLabel;

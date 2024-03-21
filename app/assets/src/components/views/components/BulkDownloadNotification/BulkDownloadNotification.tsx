@@ -11,23 +11,13 @@ interface BulkDownloadNotificationProps {
 class BulkDownloadNotification extends React.Component<BulkDownloadNotificationProps> {
   render() {
     const { onClose } = this.props;
-    const { admin, userName } = this.context || {};
 
     const label = (
       <div className={cs.label}>
         <div className={cs.message}>
           We&apos;ve received your download request and are busy preparing your
           data. To check the status of your download, visit the{" "}
-          <a
-            href={
-              !admin
-                ? "/bulk_downloads"
-                : `/bulk_downloads?searchBy=${userName}&n=10`
-            }
-          >
-            Downloads page
-          </a>
-          .
+          <a href="/bulk_downloads">Downloads page</a>.
         </div>
       </div>
     );

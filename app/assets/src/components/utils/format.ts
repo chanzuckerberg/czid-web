@@ -6,13 +6,17 @@ export const limitToRange = (number: number, min: number, max: number) =>
 
 // Converts file sizes to readable format.
 // Example: 1234 to 1.2 kb
-export const formatFileSize = (bytes: number) =>
-  formatWithUnits(bytes, 1024, ["B", "kB", "MB", "GB", "TB", "PB"]);
+export const formatFileSize = (
+  bytes: number,
+  unitIndex = ["B", "kB", "MB", "GB", "TB", "PB"],
+  decimals?: number,
+) => formatWithUnits(bytes, 1024, unitIndex, decimals);
 
 export const formatWithUnits = (
   number: number,
   unitFactor: number,
   units: string[],
+  decimals = 1,
 ) => {
   let unitIndex = 0;
 
@@ -21,5 +25,7 @@ export const formatWithUnits = (
     unitIndex++;
   }
 
-  return `${unitIndex > 0 ? number.toFixed(1) : number} ${units[unitIndex]}`;
+  return `${unitIndex > 0 ? number.toFixed(decimals) : number} ${
+    units[unitIndex]
+  }`;
 };

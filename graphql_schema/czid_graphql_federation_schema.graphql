@@ -2023,14 +2023,17 @@ type query_fedBulkDownloads_items {
   id: String
   status: String
   startedAt: String
-  rawInputsJson: query_fedBulkDownloads_items_rawInputsJson
+  downloadType: String
+  fileFormat: String
   ownerUserId: String
-  file: query_fedBulkDownloads_items_file
-  sampleNames: [JSON]
+  fileSize: Int
+  url: String
   analysisCount: Int
+  errorMessage: String
   entityInputFileType: String
   entityInputs: [query_fedBulkDownloads_items_entityInputs_items]
-  toDelete: query_fedBulkDownloads_items_toDelete
+  params: query_fedBulkDownloads_items_params
+  logUrl: String
 }
 
 type query_fedBulkDownloads_items_entityInputs_items {
@@ -2038,27 +2041,14 @@ type query_fedBulkDownloads_items_entityInputs_items {
   name: String
 }
 
-type query_fedBulkDownloads_items_file {
-  size: Int
-  downloadLink: query_fedBulkDownloads_items_file_downloadLink
-}
-
-type query_fedBulkDownloads_items_file_downloadLink {
-  url: String
-}
-
-type query_fedBulkDownloads_items_rawInputsJson {
-  description: String
-  downloadType: String
-  downloadDisplayName: String
+type query_fedBulkDownloads_items_params {
+  downloadFormat: String
+  metric: String
+  background: String
+  filterBy: String
+  taxaWithReads: String
+  includeMetadata: String
   fileFormat: String
-}
-
-type query_fedBulkDownloads_items_toDelete {
-  user_name: String
-  log_url: String
-  totalSamples: Int
-  progress: JSON
 }
 
 type query_fedConsensusGenomes_items {
@@ -2707,6 +2697,7 @@ input queryInput_fedConsensusGenomes_input_todoRemove_Input {
   tissue: [String]
   orderBy: String
   orderDir: String
+  sampleIds: [String]
 }
 
 input queryInput_fedConsensusGenomes_input_where_Input {

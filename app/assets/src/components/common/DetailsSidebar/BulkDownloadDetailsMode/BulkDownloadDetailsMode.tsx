@@ -1,62 +1,86 @@
 import React, { useContext, useEffect, useState } from "react";
-import { getBulkDownload } from "~/api/bulk_downloads";
+import { useFragment } from "react-relay";
+import { graphql } from "relay-runtime";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
-import {
-  BulkDownloadDetails,
-  BulkDownloadStatusType,
-  DownloadType,
-} from "~/interface/shared";
+import { BulkDownloadListQuery$data } from "~/components/views/BulkDownloadListView/BulkDownloadList/__generated__/BulkDownloadListQuery.graphql";
+import { getDownloadDisplayName } from "~/components/views/BulkDownloadListView/constants";
+import { BulkDownloadStatus } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
+import {
+  BulkDownloadDetailsModeFragment$data,
+  BulkDownloadDetailsModeFragment$key,
+} from "./__generated__/BulkDownloadDetailsModeFragment.graphql";
 import cs from "./bulk_download_details_mode.scss";
 import { AdvancedDownloadTab } from "./components/AdvancedDownloadTab";
+import { AdvancedDownloadTabFragment$key } from "./components/AdvancedDownloadTab/__generated__/AdvancedDownloadTabFragment.graphql";
 import { DetailsTab } from "./components/DetailsTab";
+import { DetailsTabFragment$key } from "./components/DetailsTab/__generated__/DetailsTabFragment.graphql";
 
 type TabNames = "Details" | "Advanced Download";
 const TABS: TabNames[] = ["Details", "Advanced Download"];
 
-export interface BDDProps {
-  bulkDownloadId?: number;
+export interface BulkDownloadDetailsProps {
+  bulkDownloadId?: string;
+  bulkDownloadData: BulkDownloadListQuery$data["fedBulkDownloads"];
 }
 
-export const BulkDownloadDetailsMode = ({ bulkDownloadId }: BDDProps) => {
+export const BulkDownloadDetailsModeFragment = graphql`
+  fragment BulkDownloadDetailsModeFragment on query_fedBulkDownloads_items
+  @relay(plural: true) {
+    id
+    url
+    logUrl
+    status
+    fileSize
+    downloadType
+    errorMessage
+    params {
+      downloadFormat
+    }
+  }
+`;
+
+export const BulkDownloadDetailsMode = ({
+  bulkDownloadData,
+  bulkDownloadId,
+}: BulkDownloadDetailsProps) => {
   const { admin } = useContext(UserContext) ?? {};
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentTab, setCurrentTab] = useState<TabNames>(TABS[0]);
   const [bulkDownloadDetails, setBulkDownloadDetails] =
-    useState<BulkDownloadDetails>();
-  const [downloadType, setDownloadType] = useState<DownloadType>();
+    useState<BulkDownloadDetailsModeFragment$data[0]>();
 
-  const fetchBulkDownload = async (bulkDownloadId: number) => {
-    const {
-      bulk_download: newBulkDownloadDetails,
-      download_type: newDownloadType,
-    } = await getBulkDownload(bulkDownloadId);
-
-    // Guard against possible race conditions.
-    if (newBulkDownloadDetails.id === bulkDownloadId) {
-      setBulkDownloadDetails(newBulkDownloadDetails);
-      setDownloadType(newDownloadType);
-      setIsLoading(false);
-    }
-  };
+  const data = useFragment<BulkDownloadDetailsModeFragment$key>(
+    BulkDownloadDetailsModeFragment,
+    bulkDownloadData as BulkDownloadDetailsModeFragment$key,
+  );
 
   useEffect(() => {
-    setIsLoading(true);
     if (!bulkDownloadId) {
       return;
     }
-    fetchBulkDownload(bulkDownloadId);
-  }, [bulkDownloadId]);
+    setIsLoading(true);
+
+    const newBulkDownloadDetails = data.find(
+      item => item.id === bulkDownloadId,
+    );
+    setBulkDownloadDetails(newBulkDownloadDetails);
+    setIsLoading(false);
+  }, [data, bulkDownloadId]);
 
   const onTabChange = (tab: TabNames) => {
     setCurrentTab(tab);
   };
 
-  const { download_name, error_message, execution_type, log_url, id, status } =
+  const { downloadType, errorMessage, logUrl, id, status } =
     bulkDownloadDetails ?? {};
+
+  if (!downloadType) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -69,22 +93,22 @@ export const BulkDownloadDetailsMode = ({ bulkDownloadId }: BDDProps) => {
   return (
     <div className={cs.content}>
       <div className={cs.title} data-testid={"sidebar-download-name"}>
-        {download_name}
+        {getDownloadDisplayName(downloadType)}
       </div>
       {admin && (
         <div className={cs.adminDetails}>
-          ID: {id}, run in: {execution_type}
-          {log_url && (
+          ID: {id}
+          {logUrl && (
             <span>
               ,{" "}
-              <ExternalLink className={cs.logUrl} href={log_url}>
+              <ExternalLink className={cs.logUrl} href={logUrl}>
                 log url
               </ExternalLink>
             </span>
           )}
         </div>
       )}
-      {status === BulkDownloadStatusType.ERROR && (
+      {status === BulkDownloadStatus.FAILED && (
         <Notification
           type="error"
           displayStyle="flat"
@@ -94,13 +118,13 @@ export const BulkDownloadDetailsMode = ({ bulkDownloadId }: BDDProps) => {
           for help.
         </Notification>
       )}
-      {status === BulkDownloadStatusType.SUCCESS && error_message && (
+      {status === BulkDownloadStatus.SUCCEEDED && errorMessage && (
         <Notification
           type="warning"
           displayStyle="flat"
           className={cs.notification}
         >
-          {error_message}
+          {errorMessage}
         </Notification>
       )}
       <Tabs
@@ -111,12 +135,15 @@ export const BulkDownloadDetailsMode = ({ bulkDownloadId }: BDDProps) => {
       />
       {currentTab === "Details" && (
         <DetailsTab
-          bulkDownload={bulkDownloadDetails}
-          downloadType={downloadType}
+          bulkDownloadData={bulkDownloadData as DetailsTabFragment$key}
+          bulkDownloadId={bulkDownloadId}
         />
       )}
       {currentTab === "Advanced Download" && (
-        <AdvancedDownloadTab bulkDownload={bulkDownloadDetails} />
+        <AdvancedDownloadTab
+          bulkDownloadData={bulkDownloadData as AdvancedDownloadTabFragment$key}
+          bulkDownloadId={bulkDownloadId}
+        />
       )}
     </div>
   );
