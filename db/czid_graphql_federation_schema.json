@@ -3032,13 +3032,9 @@
                 }
               ],
               "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "query_fedWorkflowRunsAggregate_items",
-                  "ofType": null
-                }
+                "kind": "OBJECT",
+                "name": "fedWorkflowRunsAggregate",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -4286,6 +4282,59 @@
               "deprecationReason": null
             },
             {
+              "name": "updateGenomicRange",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "GenomicRangeUpdateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "where",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "GenomicRangeWhereClauseMutations",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "GenomicRange",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "deleteGenomicRange",
               "description": null,
               "args": [
@@ -4848,6 +4897,59 @@
               "deprecationReason": null
             },
             {
+              "name": "updateConsensusGenome",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ConsensusGenomeUpdateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "where",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "ConsensusGenomeWhereClauseMutations",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "ConsensusGenome",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "deleteConsensusGenome",
               "description": null,
               "args": [
@@ -4912,6 +5014,59 @@
                   "kind": "OBJECT",
                   "name": "MetricConsensusGenome",
                   "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updateMetricConsensusGenome",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "MetricConsensusGenomeUpdateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "where",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "MetricConsensusGenomeWhereClauseMutations",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "MetricConsensusGenome",
+                      "ofType": null
+                    }
+                  }
                 }
               },
               "isDeprecated": false,
@@ -5357,6 +5512,59 @@
               "deprecationReason": null
             },
             {
+              "name": "updateBulkDownload",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "BulkDownloadUpdateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "where",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "BulkDownloadWhereClauseMutations",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "BulkDownload",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "deleteBulkDownload",
               "description": null,
               "args": [
@@ -5374,6 +5582,32 @@
                   },
                   "defaultValue": null
                 }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "BulkDownload",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deleteOldBulkDownloads",
+              "description": null,
+              "args": [
+
               ],
               "type": {
                 "kind": "NON_NULL",
@@ -9042,6 +9276,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -10576,6 +10824,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -12033,6 +12295,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -12291,6 +12567,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -12344,6 +12626,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -12466,6 +12758,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -12566,6 +12872,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -12705,6 +13025,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "ENUM",
@@ -13069,6 +13399,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -13302,6 +13638,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -13628,6 +13978,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -13691,6 +14047,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -13876,6 +14242,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -13962,6 +14342,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -14118,6 +14512,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -14212,6 +14616,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -14474,6 +14888,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -14644,6 +15072,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -14877,6 +15319,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "ENUM",
@@ -15263,6 +15715,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -15578,6 +16044,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -15631,6 +16103,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -15816,6 +16298,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -15902,6 +16398,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -16051,6 +16561,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "ENUM",
@@ -16235,6 +16755,16 @@
                 "ofType": null
               },
               "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -16329,6 +16859,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -16435,6 +16975,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -16629,6 +17179,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -16688,6 +17248,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -17013,6 +17583,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -17357,6 +17941,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -17440,6 +18030,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -17653,6 +18253,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -17767,6 +18381,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -17943,6 +18571,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -18074,6 +18712,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -18189,6 +18837,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -18577,6 +19235,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -18898,6 +19570,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -18973,6 +19651,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -19158,6 +19846,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -19244,6 +19946,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -19400,6 +20116,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -19418,6 +20144,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -19532,6 +20268,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -19612,24 +20358,6 @@
                 "ofType": {
                   "kind": "ENUM",
                   "name": "BulkDownloadType",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "downloadDisplayName",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
                   "ofType": null
                 }
               },
@@ -19743,6 +20471,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -19966,12 +20708,6 @@
               "deprecationReason": null
             },
             {
-              "name": "downloadDisplayName",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "file",
               "description": null,
               "isDeprecated": false,
@@ -20012,6 +20748,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -20031,20 +20773,6 @@
                 "ofType": {
                   "kind": "ENUM",
                   "name": "BulkDownloadType",
-                  "ofType": null
-                }
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "downloadDisplayName",
-              "description": null,
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
                   "ofType": null
                 }
               },
@@ -20073,6 +20801,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -20093,20 +20831,6 @@
               "type": {
                 "kind": "ENUM",
                 "name": "BulkDownloadType",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "downloadDisplayName",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -20195,6 +20919,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -20209,20 +20947,6 @@
           "name": "BulkDownloadMinMaxColumns",
           "description": null,
           "fields": [
-            {
-              "name": "downloadDisplayName",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
             {
               "name": "ownerUserId",
               "description": null,
@@ -20267,6 +20991,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -20345,16 +21083,6 @@
               "defaultValue": null
             },
             {
-              "name": "downloadDisplayName",
-              "description": null,
-              "type": {
-                "kind": "ENUM",
-                "name": "orderBy",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
               "name": "id",
               "description": null,
               "type": {
@@ -20413,6 +21141,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -20428,13 +21166,13 @@
           "interfaces": null,
           "enumValues": [
             {
-              "name": "concatenate",
+              "name": "consensus_genome",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "zip",
+              "name": "consensus_genome_intermediate_output_files",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -20561,6 +21299,27 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "BulkDownloadUpdateInput",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "BulkDownloadWhereClause",
           "description": null,
           "fields": null,
@@ -20571,16 +21330,6 @@
               "type": {
                 "kind": "INPUT_OBJECT",
                 "name": "BulkDownloadTypeEnumComparators",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "downloadDisplayName",
-              "description": null,
-              "type": {
-                "kind": "INPUT_OBJECT",
-                "name": "StrComparators",
                 "ofType": null
               },
               "defaultValue": null
@@ -20637,6 +21386,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -21072,6 +21831,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -21411,6 +22184,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -21492,6 +22271,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -21691,6 +22480,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -21749,6 +22552,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -21925,6 +22742,37 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "ConsensusGenomeUpdateInput",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -22039,6 +22887,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -23336,6 +24194,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -23588,6 +24460,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -23621,6 +24499,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -23715,6 +24603,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -23773,6 +24675,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -23899,6 +24815,37 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "GenomicRangeUpdateInput",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -23973,6 +24920,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -24431,6 +25388,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -24865,6 +25836,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -24964,6 +25941,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -25128,6 +26115,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -25228,6 +26229,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -25418,6 +26433,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -25466,6 +26491,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -25603,6 +26638,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -25903,6 +26948,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -26241,6 +27300,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -26332,6 +27397,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -26531,6 +27606,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -26603,6 +27692,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -26769,6 +27872,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -26797,6 +27910,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -26904,6 +28027,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -27395,6 +28528,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -27710,6 +28857,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -27785,6 +28938,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -27970,6 +29133,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -28056,6 +29233,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -28212,6 +29403,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -28230,6 +29431,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -28327,6 +29538,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -28750,6 +29971,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -29086,6 +30321,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -29299,6 +30540,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -29633,6 +30884,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -29887,6 +31152,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -30369,6 +31648,37 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "MetricConsensusGenomeUpdateInput",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -30583,6 +31893,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -31090,6 +32410,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -31348,6 +32682,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -31395,6 +32735,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -31503,6 +32853,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -31575,6 +32939,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -31711,6 +33089,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -31729,6 +33117,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -31816,6 +33214,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -32159,6 +33567,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -32226,6 +33640,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -32411,6 +33835,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -32497,6 +33935,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -32667,6 +34119,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -32685,6 +34147,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -32802,6 +34274,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -33527,6 +35009,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -33884,6 +35380,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -33995,6 +35497,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -34236,6 +35748,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -34308,6 +35834,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -34504,6 +36044,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -34542,6 +36092,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -34689,6 +36249,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -35455,6 +37025,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -35866,6 +37450,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -36089,6 +37679,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -36470,6 +38070,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -36488,7 +38102,7 @@
           "interfaces": null,
           "enumValues": [
             {
-              "name": "level_subspecies",
+              "name": "level_sublevel",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -36791,6 +38405,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -37076,6 +38704,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -37224,6 +38862,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -37481,6 +39129,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -37979,6 +39637,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -38243,6 +39915,12 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -38290,6 +39968,16 @@
                 }
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "defaultValue": "null"
             }
           ],
           "interfaces": null,
@@ -38398,6 +40086,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -38470,6 +40172,20 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "args": [
 
@@ -38606,6 +40322,16 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "ENUM",
+                "name": "orderBy",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -38624,6 +40350,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": "null"
+            },
+            {
+              "name": "deletedAt",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
                 "ofType": null
               },
               "defaultValue": "null"
@@ -38731,6 +40467,16 @@
             },
             {
               "name": "updatedAt",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "DatetimeComparators",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "deletedAt",
               "description": null,
               "type": {
                 "kind": "INPUT_OBJECT",
@@ -39673,14 +41419,28 @@
               "deprecationReason": null
             },
             {
-              "name": "rawInputsJson",
+              "name": "downloadType",
               "description": null,
               "args": [
 
               ],
               "type": {
-                "kind": "OBJECT",
-                "name": "query_fedBulkDownloads_items_rawInputsJson",
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fileFormat",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -39701,33 +41461,29 @@
               "deprecationReason": null
             },
             {
-              "name": "file",
+              "name": "fileSize",
               "description": null,
               "args": [
 
               ],
               "type": {
-                "kind": "OBJECT",
-                "name": "query_fedBulkDownloads_items_file",
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "sampleNames",
+              "name": "url",
               "description": null,
               "args": [
 
               ],
               "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "JSON",
-                  "ofType": null
-                }
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -39741,6 +41497,20 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errorMessage",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -39779,144 +41549,21 @@
               "deprecationReason": null
             },
             {
-              "name": "toDelete",
+              "name": "params",
               "description": null,
               "args": [
 
               ],
               "type": {
                 "kind": "OBJECT",
-                "name": "query_fedBulkDownloads_items_toDelete",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "query_fedBulkDownloads_items_rawInputsJson",
-          "description": null,
-          "fields": [
-            {
-              "name": "description",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
+                "name": "query_fedBulkDownloads_items_params",
                 "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "downloadType",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "downloadDisplayName",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "fileFormat",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "query_fedBulkDownloads_items_file",
-          "description": null,
-          "fields": [
-            {
-              "name": "size",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "downloadLink",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "query_fedBulkDownloads_items_file_downloadLink",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "query_fedBulkDownloads_items_file_downloadLink",
-          "description": null,
-          "fields": [
-            {
-              "name": "url",
+              "name": "logUrl",
               "description": null,
               "args": [
 
@@ -39980,11 +41627,11 @@
         },
         {
           "kind": "OBJECT",
-          "name": "query_fedBulkDownloads_items_toDelete",
+          "name": "query_fedBulkDownloads_items_params",
           "description": null,
           "fields": [
             {
-              "name": "user_name",
+              "name": "downloadFormat",
               "description": null,
               "args": [
 
@@ -39998,7 +41645,7 @@
               "deprecationReason": null
             },
             {
-              "name": "log_url",
+              "name": "metric",
               "description": null,
               "args": [
 
@@ -40012,28 +41659,70 @@
               "deprecationReason": null
             },
             {
-              "name": "totalSamples",
+              "name": "background",
               "description": null,
               "args": [
 
               ],
               "type": {
                 "kind": "SCALAR",
-                "name": "Int",
+                "name": "String",
                 "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "progress",
+              "name": "filterBy",
               "description": null,
               "args": [
 
               ],
               "type": {
                 "kind": "SCALAR",
-                "name": "JSON",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "taxaWithReads",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "includeMetadata",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fileFormat",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -41587,6 +43276,34 @@
                 "kind": "SCALAR",
                 "name": "String",
                 "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "sampleIds",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "workflowRunIds",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
               },
               "defaultValue": null
             }
@@ -44301,7 +46018,7 @@
               ],
               "type": {
                 "kind": "SCALAR",
-                "name": "Int",
+                "name": "String",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -47793,6 +49510,46 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "collectionId",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_collectionId_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "sample",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_sample_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "taxon",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_taxon_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "consensusGenomes",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_consensusGenomes_Input",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -47802,6 +49559,312 @@
         {
           "kind": "INPUT_OBJECT",
           "name": "queryInput_fedSequencingReads_input_where_id_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_in",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_collectionId_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_in",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_sample_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "name",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_sample_name_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "collectionLocation",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_sample_collectionLocation_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "hostOrganism",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_sample_hostOrganism_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "sampleType",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_sample_sampleType_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_sample_name_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_iregex",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_sample_collectionLocation_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_in",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_sample_hostOrganism_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "name",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_sample_hostOrganism_name_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_sample_hostOrganism_name_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_in",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_sample_sampleType_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_in",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_taxon_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "name",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_taxon_name_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_taxon_name_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_in",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_consensusGenomes_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "taxon",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "name",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_name_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_name_Input",
           "description": null,
           "fields": null,
           "inputFields": [
@@ -49668,6 +51731,16 @@
               "defaultValue": null
             },
             {
+              "name": "entityInputs",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedWorkflowRuns_input_where_entityInputs_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "workflowVersion",
               "description": null,
               "type": {
@@ -49787,6 +51860,79 @@
                   "name": "Int",
                   "ofType": null
                 }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedWorkflowRuns_input_where_entityInputs_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "entityType",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedWorkflowRuns_input_where_entityInputs_entityType_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "inputEntityId",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedWorkflowRuns_input_where_entityInputs_inputEntityId_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedWorkflowRuns_input_where_entityInputs_entityType_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_eq",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedWorkflowRuns_input_where_entityInputs_inputEntityId_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_is_null",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "defaultValue": null
             }
@@ -49927,7 +52073,87 @@
         },
         {
           "kind": "OBJECT",
-          "name": "query_fedWorkflowRunsAggregate_items",
+          "name": "fedWorkflowRunsAggregate",
+          "description": null,
+          "fields": [
+            {
+              "name": "aggregate",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "query_fedWorkflowRunsAggregate_aggregate_items",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "query_fedWorkflowRunsAggregate_aggregate_items",
+          "description": null,
+          "fields": [
+            {
+              "name": "groupBy",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "query_fedWorkflowRunsAggregate_aggregate_items_groupBy",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "count",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "query_fedWorkflowRunsAggregate_aggregate_items_groupBy",
           "description": null,
           "fields": [
             {
@@ -49941,61 +52167,87 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "workflowVersion",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion",
+          "description": null,
+          "fields": [
+            {
+              "name": "workflow",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion_workflow",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion_workflow",
+          "description": null,
+          "fields": [
+            {
+              "name": "name",
+              "description": null,
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
                   "name": "String",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "mngsRunsCount",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "cgRunsCount",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "amrRunsCount",
-              "description": null,
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Int",
                   "ofType": null
                 }
               },
@@ -50056,6 +52308,26 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "collectionId",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedWorkflowRunsAggregate_input_where_collectionId_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "workflowVersion",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_Input",
+                "ofType": null
+              },
+              "defaultValue": null
             }
           ],
           "interfaces": null,
@@ -50065,6 +52337,98 @@
         {
           "kind": "INPUT_OBJECT",
           "name": "queryInput_fedWorkflowRunsAggregate_input_where_id_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_in",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedWorkflowRunsAggregate_input_where_collectionId_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "_in",
+              "description": null,
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "workflow",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_Input",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "name",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_name_Input",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_name_Input",
           "description": null,
           "fields": null,
           "inputFields": [

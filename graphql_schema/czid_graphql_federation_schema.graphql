@@ -43,6 +43,7 @@ type Accession implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type AccessionAggregate {
@@ -80,6 +81,7 @@ enum AccessionCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input AccessionCreateInput {
@@ -88,6 +90,7 @@ input AccessionCreateInput {
   upstreamDatabaseId: ID!
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 """An edge in a connection."""
@@ -109,6 +112,7 @@ type AccessionGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type AccessionMinMaxColumns {
@@ -118,6 +122,7 @@ type AccessionMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type AccessionNumericalColumns {
@@ -135,10 +140,12 @@ input AccessionOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input AccessionUpdateInput {
   accessionName: String = null
+  deletedAt: DateTime = null
 }
 
 input AccessionWhereClause {
@@ -152,6 +159,7 @@ input AccessionWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input AccessionWhereClauseMutations {
@@ -227,7 +235,7 @@ input BoolComparators {
   _gte: Int
   _lt: Int
   _lte: Int
-  _is_null: Int
+  _is_null: Boolean
 }
 
 type BulkDownload implements EntityInterface & Node {
@@ -235,7 +243,6 @@ type BulkDownload implements EntityInterface & Node {
   _id: GlobalID!
   id: ID!
   downloadType: BulkDownloadType!
-  downloadDisplayName: String!
   fileId: ID
   file(where: FileWhereClause = null): File
   producingRunId: ID
@@ -243,6 +250,7 @@ type BulkDownload implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type BulkDownloadAggregate {
@@ -262,7 +270,6 @@ type BulkDownloadAggregateFunctions {
 
 enum BulkDownloadCountColumns {
   downloadType
-  downloadDisplayName
   file
   id
   producingRunId
@@ -270,32 +277,33 @@ enum BulkDownloadCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input BulkDownloadCreateInput {
   downloadType: BulkDownloadType!
-  downloadDisplayName: String!
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type BulkDownloadGroupByOptions {
   downloadType: BulkDownloadType
-  downloadDisplayName: String
   id: UUID
   producingRunId: UUID
   ownerUserId: Int
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type BulkDownloadMinMaxColumns {
-  downloadDisplayName: String
   ownerUserId: Int
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type BulkDownloadNumericalColumns {
@@ -305,18 +313,18 @@ type BulkDownloadNumericalColumns {
 
 input BulkDownloadOrderByClause {
   downloadType: orderBy
-  downloadDisplayName: orderBy
   id: orderBy
   producingRunId: orderBy
   ownerUserId: orderBy
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 enum BulkDownloadType {
-  concatenate
-  zip
+  consensus_genome
+  consensus_genome_intermediate_output_files
 }
 
 input BulkDownloadTypeEnumComparators {
@@ -331,15 +339,19 @@ input BulkDownloadTypeEnumComparators {
   _is_null: Boolean
 }
 
+input BulkDownloadUpdateInput {
+  deletedAt: DateTime = null
+}
+
 input BulkDownloadWhereClause {
   downloadType: BulkDownloadTypeEnumComparators
-  downloadDisplayName: StrComparators
   id: UUIDComparators
   producingRunId: UUIDComparators
   ownerUserId: IntComparators
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input BulkDownloadWhereClauseMutations {
@@ -364,6 +376,7 @@ type ConsensusGenome implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type ConsensusGenomeAggregate {
@@ -404,6 +417,7 @@ enum ConsensusGenomeCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input ConsensusGenomeCreateInput {
@@ -413,6 +427,7 @@ input ConsensusGenomeCreateInput {
   accessionId: ID = null
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 """An edge in a connection."""
@@ -435,6 +450,7 @@ type ConsensusGenomeGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type ConsensusGenomeMinMaxColumns {
@@ -442,6 +458,7 @@ type ConsensusGenomeMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type ConsensusGenomeNumericalColumns {
@@ -461,10 +478,15 @@ input ConsensusGenomeOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 type ConsensusGenomeOverviewRows {
   cgOverviewRows: [[String]]!
+}
+
+input ConsensusGenomeUpdateInput {
+  deletedAt: DateTime = null
 }
 
 input ConsensusGenomeWhereClause {
@@ -479,6 +501,7 @@ input ConsensusGenomeWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input ConsensusGenomeWhereClauseMutations {
@@ -702,6 +725,7 @@ type GenomicRange implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type GenomicRangeAggregate {
@@ -728,11 +752,13 @@ enum GenomicRangeCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input GenomicRangeCreateInput {
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type GenomicRangeGroupByOptions {
@@ -742,6 +768,7 @@ type GenomicRangeGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type GenomicRangeMinMaxColumns {
@@ -749,6 +776,7 @@ type GenomicRangeMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type GenomicRangeNumericalColumns {
@@ -763,6 +791,11 @@ input GenomicRangeOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
+}
+
+input GenomicRangeUpdateInput {
+  deletedAt: DateTime = null
 }
 
 input GenomicRangeWhereClause {
@@ -773,6 +806,7 @@ input GenomicRangeWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input GenomicRangeWhereClauseMutations {
@@ -857,6 +891,7 @@ type HostOrganism implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type HostOrganismAggregate {
@@ -907,6 +942,7 @@ enum HostOrganismCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input HostOrganismCreateInput {
@@ -917,6 +953,7 @@ input HostOrganismCreateInput {
   isDeuterostome: Boolean!
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type HostOrganismGroupByOptions {
@@ -931,6 +968,7 @@ type HostOrganismGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type HostOrganismMinMaxColumns {
@@ -941,6 +979,7 @@ type HostOrganismMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type HostOrganismNumericalColumns {
@@ -961,6 +1000,7 @@ input HostOrganismOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input HostOrganismUpdateInput {
@@ -968,6 +1008,7 @@ input HostOrganismUpdateInput {
   version: String = null
   category: HostOrganismCategory = null
   isDeuterostome: Boolean = null
+  deletedAt: DateTime = null
 }
 
 input HostOrganismWhereClause {
@@ -984,6 +1025,7 @@ input HostOrganismWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input HostOrganismWhereClauseMutations {
@@ -1017,6 +1059,7 @@ type IndexFile implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type IndexFileAggregate {
@@ -1055,6 +1098,7 @@ enum IndexFileCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input IndexFileCreateInput {
@@ -1065,6 +1109,7 @@ input IndexFileCreateInput {
   hostOrganismId: ID = null
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 """An edge in a connection."""
@@ -1087,6 +1132,7 @@ type IndexFileGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type IndexFileMinMaxColumns {
@@ -1095,6 +1141,7 @@ type IndexFileMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type IndexFileNumericalColumns {
@@ -1113,11 +1160,13 @@ input IndexFileOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input IndexFileUpdateInput {
   name: IndexTypes = null
   version: String = null
+  deletedAt: DateTime = null
 }
 
 input IndexFileWhereClause {
@@ -1131,6 +1180,7 @@ input IndexFileWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input IndexFileWhereClauseMutations {
@@ -1222,6 +1272,7 @@ type Metadatum implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type MetadatumAggregate {
@@ -1258,6 +1309,7 @@ enum MetadatumCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input MetadatumCreateInput {
@@ -1266,6 +1318,7 @@ input MetadatumCreateInput {
   value: String!
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 """An edge in a connection."""
@@ -1287,6 +1340,7 @@ type MetadatumGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type MetadatumMinMaxColumns {
@@ -1296,6 +1350,7 @@ type MetadatumMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type MetadatumNumericalColumns {
@@ -1313,10 +1368,12 @@ input MetadatumOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input MetadatumUpdateInput {
   value: String = null
+  deletedAt: DateTime = null
 }
 
 input MetadatumWhereClause {
@@ -1329,6 +1386,7 @@ input MetadatumWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input MetadatumWhereClauseMutations {
@@ -1360,6 +1418,7 @@ type MetricConsensusGenome implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type MetricConsensusGenomeAggregate {
@@ -1400,6 +1459,7 @@ enum MetricConsensusGenomeCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input MetricConsensusGenomeCreateInput {
@@ -1421,6 +1481,7 @@ input MetricConsensusGenomeCreateInput {
   coverageViz: [[Float!]!] = null
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type MetricConsensusGenomeGroupByOptions {
@@ -1446,6 +1507,7 @@ type MetricConsensusGenomeGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type MetricConsensusGenomeMinMaxColumns {
@@ -1467,6 +1529,7 @@ type MetricConsensusGenomeMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type MetricConsensusGenomeNumericalColumns {
@@ -1511,6 +1574,11 @@ input MetricConsensusGenomeOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
+}
+
+input MetricConsensusGenomeUpdateInput {
+  deletedAt: DateTime = null
 }
 
 input MetricConsensusGenomeWhereClause {
@@ -1535,6 +1603,7 @@ input MetricConsensusGenomeWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input MetricConsensusGenomeWhereClauseMutations {
@@ -1572,46 +1641,7 @@ type MultipartUploadResponse {
 }
 
 type Mutation {
-  createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
-  uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
-  uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
-  markUploadComplete(fileId: ID!): File!
-  concatenateFiles(ids: [UUID!]!): SignedURL!
-  createSample(input: SampleCreateInput!): Sample!
-  updateSample(input: SampleUpdateInput!, where: SampleWhereClauseMutations!): [Sample!]!
-  deleteSample(where: SampleWhereClauseMutations!): [Sample!]!
-  createSequencingRead(input: SequencingReadCreateInput!): SequencingRead!
-  updateSequencingRead(input: SequencingReadUpdateInput!, where: SequencingReadWhereClauseMutations!): [SequencingRead!]!
-  deleteSequencingRead(where: SequencingReadWhereClauseMutations!): [SequencingRead!]!
-  createGenomicRange(input: GenomicRangeCreateInput!): GenomicRange!
-  deleteGenomicRange(where: GenomicRangeWhereClauseMutations!): [GenomicRange!]!
-  createReferenceGenome(input: ReferenceGenomeCreateInput!): ReferenceGenome!
-  updateReferenceGenome(input: ReferenceGenomeUpdateInput!, where: ReferenceGenomeWhereClauseMutations!): [ReferenceGenome!]!
-  deleteReferenceGenome(where: ReferenceGenomeWhereClauseMutations!): [ReferenceGenome!]!
-  createAccession(input: AccessionCreateInput!): Accession!
-  updateAccession(input: AccessionUpdateInput!, where: AccessionWhereClauseMutations!): [Accession!]!
-  deleteAccession(where: AccessionWhereClauseMutations!): [Accession!]!
-  createHostOrganism(input: HostOrganismCreateInput!): HostOrganism!
-  updateHostOrganism(input: HostOrganismUpdateInput!, where: HostOrganismWhereClauseMutations!): [HostOrganism!]!
-  deleteHostOrganism(where: HostOrganismWhereClauseMutations!): [HostOrganism!]!
-  createMetadatum(input: MetadatumCreateInput!): Metadatum!
-  updateMetadatum(input: MetadatumUpdateInput!, where: MetadatumWhereClauseMutations!): [Metadatum!]!
-  deleteMetadatum(where: MetadatumWhereClauseMutations!): [Metadatum!]!
-  createConsensusGenome(input: ConsensusGenomeCreateInput!): ConsensusGenome!
-  deleteConsensusGenome(where: ConsensusGenomeWhereClauseMutations!): [ConsensusGenome!]!
-  createMetricConsensusGenome(input: MetricConsensusGenomeCreateInput!): MetricConsensusGenome!
-  deleteMetricConsensusGenome(where: MetricConsensusGenomeWhereClauseMutations!): [MetricConsensusGenome!]!
-  createTaxon(input: TaxonCreateInput!): Taxon!
-  updateTaxon(input: TaxonUpdateInput!, where: TaxonWhereClauseMutations!): [Taxon!]!
-  deleteTaxon(where: TaxonWhereClauseMutations!): [Taxon!]!
-  createUpstreamDatabase(input: UpstreamDatabaseCreateInput!): UpstreamDatabase!
-  updateUpstreamDatabase(input: UpstreamDatabaseUpdateInput!, where: UpstreamDatabaseWhereClauseMutations!): [UpstreamDatabase!]!
-  deleteUpstreamDatabase(where: UpstreamDatabaseWhereClauseMutations!): [UpstreamDatabase!]!
-  createIndexFile(input: IndexFileCreateInput!): IndexFile!
-  updateIndexFile(input: IndexFileUpdateInput!, where: IndexFileWhereClauseMutations!): [IndexFile!]!
-  deleteIndexFile(where: IndexFileWhereClauseMutations!): [IndexFile!]!
-  createBulkDownload(input: BulkDownloadCreateInput!): BulkDownload!
-  deleteBulkDownload(where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
+  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
   createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
   updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
   deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
@@ -1627,7 +1657,51 @@ type Mutation {
   deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
   runWorkflowVersion(input: RunWorkflowVersionInput!, executionId: String = null): WorkflowRun!
   runWorkflowRun(workflowRunId: ID!, executionId: String = null): WorkflowRun!
-  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
+  createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
+  uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
+  uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
+  markUploadComplete(fileId: ID!): File!
+  concatenateFiles(ids: [UUID!]!): SignedURL!
+  createSample(input: SampleCreateInput!): Sample!
+  updateSample(input: SampleUpdateInput!, where: SampleWhereClauseMutations!): [Sample!]!
+  deleteSample(where: SampleWhereClauseMutations!): [Sample!]!
+  createSequencingRead(input: SequencingReadCreateInput!): SequencingRead!
+  updateSequencingRead(input: SequencingReadUpdateInput!, where: SequencingReadWhereClauseMutations!): [SequencingRead!]!
+  deleteSequencingRead(where: SequencingReadWhereClauseMutations!): [SequencingRead!]!
+  createGenomicRange(input: GenomicRangeCreateInput!): GenomicRange!
+  updateGenomicRange(input: GenomicRangeUpdateInput!, where: GenomicRangeWhereClauseMutations!): [GenomicRange!]!
+  deleteGenomicRange(where: GenomicRangeWhereClauseMutations!): [GenomicRange!]!
+  createReferenceGenome(input: ReferenceGenomeCreateInput!): ReferenceGenome!
+  updateReferenceGenome(input: ReferenceGenomeUpdateInput!, where: ReferenceGenomeWhereClauseMutations!): [ReferenceGenome!]!
+  deleteReferenceGenome(where: ReferenceGenomeWhereClauseMutations!): [ReferenceGenome!]!
+  createAccession(input: AccessionCreateInput!): Accession!
+  updateAccession(input: AccessionUpdateInput!, where: AccessionWhereClauseMutations!): [Accession!]!
+  deleteAccession(where: AccessionWhereClauseMutations!): [Accession!]!
+  createHostOrganism(input: HostOrganismCreateInput!): HostOrganism!
+  updateHostOrganism(input: HostOrganismUpdateInput!, where: HostOrganismWhereClauseMutations!): [HostOrganism!]!
+  deleteHostOrganism(where: HostOrganismWhereClauseMutations!): [HostOrganism!]!
+  createMetadatum(input: MetadatumCreateInput!): Metadatum!
+  updateMetadatum(input: MetadatumUpdateInput!, where: MetadatumWhereClauseMutations!): [Metadatum!]!
+  deleteMetadatum(where: MetadatumWhereClauseMutations!): [Metadatum!]!
+  createConsensusGenome(input: ConsensusGenomeCreateInput!): ConsensusGenome!
+  updateConsensusGenome(input: ConsensusGenomeUpdateInput!, where: ConsensusGenomeWhereClauseMutations!): [ConsensusGenome!]!
+  deleteConsensusGenome(where: ConsensusGenomeWhereClauseMutations!): [ConsensusGenome!]!
+  createMetricConsensusGenome(input: MetricConsensusGenomeCreateInput!): MetricConsensusGenome!
+  updateMetricConsensusGenome(input: MetricConsensusGenomeUpdateInput!, where: MetricConsensusGenomeWhereClauseMutations!): [MetricConsensusGenome!]!
+  deleteMetricConsensusGenome(where: MetricConsensusGenomeWhereClauseMutations!): [MetricConsensusGenome!]!
+  createTaxon(input: TaxonCreateInput!): Taxon!
+  updateTaxon(input: TaxonUpdateInput!, where: TaxonWhereClauseMutations!): [Taxon!]!
+  deleteTaxon(where: TaxonWhereClauseMutations!): [Taxon!]!
+  createUpstreamDatabase(input: UpstreamDatabaseCreateInput!): UpstreamDatabase!
+  updateUpstreamDatabase(input: UpstreamDatabaseUpdateInput!, where: UpstreamDatabaseWhereClauseMutations!): [UpstreamDatabase!]!
+  deleteUpstreamDatabase(where: UpstreamDatabaseWhereClauseMutations!): [UpstreamDatabase!]!
+  createIndexFile(input: IndexFileCreateInput!): IndexFile!
+  updateIndexFile(input: IndexFileUpdateInput!, where: IndexFileWhereClauseMutations!): [IndexFile!]!
+  deleteIndexFile(where: IndexFileWhereClauseMutations!): [IndexFile!]!
+  createBulkDownload(input: BulkDownloadCreateInput!): BulkDownload!
+  updateBulkDownload(input: BulkDownloadUpdateInput!, where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
+  deleteBulkDownload(where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
+  deleteOldBulkDownloads: [BulkDownload!]!
   CreateBulkDownload(input: mutationInput_CreateBulkDownload_input_Input): JSON
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
   UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleNotes
@@ -1848,6 +1922,13 @@ type Project {
 }
 
 type Query {
+  appConfig(id: ID!): AppConfig
+  pathogenList(version: String): PathogenList!
+  project(id: Int!): Project!
+  sample(sampleId: Int!): Sample!
+  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
+  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
+  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   node(
     """The ID of the object."""
     id: GlobalID!
@@ -1856,6 +1937,16 @@ type Query {
     """The IDs of the objects."""
     ids: [GlobalID!]!
   ): [Node!]!
+  workflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRun!]!
+  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Workflow!]!
+  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunStep!]!
+  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunEntityInput!]!
+  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowVersion!]!
+  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
+  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
+  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
+  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
+  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
   files(where: FileWhereClause = null): [File!]!
   samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Sample!]!
   sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [SequencingRead!]!
@@ -1883,23 +1974,6 @@ type Query {
   upstreamDatabasesAggregate(where: UpstreamDatabaseWhereClause = null): UpstreamDatabaseAggregate!
   indexFilesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate!
   bulkDownloadsAggregate(where: BulkDownloadWhereClause = null): BulkDownloadAggregate!
-  workflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRun!]!
-  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Workflow!]!
-  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunStep!]!
-  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunEntityInput!]!
-  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowVersion!]!
-  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
-  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
-  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
-  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
-  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
-  appConfig(id: ID!): AppConfig
-  pathogenList(version: String): PathogenList!
-  project(id: Int!): Project!
-  sample(sampleId: Int!): Sample!
-  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
-  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
-  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   AmrDeprecatedResults(sampleId: String): AmrDeprecatedResults
   AmrWorkflowResults(workflowRunId: String): AmrWorkflowResults
   Background(snapshotLinkId: String): Background
@@ -2697,7 +2771,8 @@ input queryInput_fedConsensusGenomes_input_todoRemove_Input {
   tissue: [String]
   orderBy: String
   orderDir: String
-  sampleIds: [String]
+  sampleIds: [Int]
+  workflowRunIds: [Int]
 }
 
 input queryInput_fedConsensusGenomes_input_where_Input {
@@ -2960,9 +3035,14 @@ input queryInput_fedSequencingReads_input_where_sample_hostOrganism_name_Input {
 }
 
 input queryInput_fedSequencingReads_input_where_sample_Input {
+  name: queryInput_fedSequencingReads_input_where_sample_name_Input
   collectionLocation: queryInput_fedSequencingReads_input_where_sample_collectionLocation_Input
   hostOrganism: queryInput_fedSequencingReads_input_where_sample_hostOrganism_Input
   sampleType: queryInput_fedSequencingReads_input_where_sample_sampleType_Input
+}
+
+input queryInput_fedSequencingReads_input_where_sample_name_Input {
+  _iregex: String
 }
 
 input queryInput_fedSequencingReads_input_where_sample_sampleType_Input {
@@ -3184,6 +3264,7 @@ type ReferenceGenome implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type ReferenceGenomeAggregate {
@@ -3211,12 +3292,14 @@ enum ReferenceGenomeCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input ReferenceGenomeCreateInput {
   name: String!
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type ReferenceGenomeGroupByOptions {
@@ -3227,6 +3310,7 @@ type ReferenceGenomeGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type ReferenceGenomeMinMaxColumns {
@@ -3235,6 +3319,7 @@ type ReferenceGenomeMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type ReferenceGenomeNumericalColumns {
@@ -3250,10 +3335,12 @@ input ReferenceGenomeOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input ReferenceGenomeUpdateInput {
   name: String = null
+  deletedAt: DateTime = null
 }
 
 input ReferenceGenomeWhereClause {
@@ -3265,6 +3352,7 @@ input ReferenceGenomeWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input ReferenceGenomeWhereClauseMutations {
@@ -3280,11 +3368,48 @@ input RunWorkflowVersionInput {
 }
 
 type Sample implements EntityInterface & Node {
+  alignmentConfigName: String
+  basespaceAccessToken: String
+  createdAt: DateTime!
+  dagVars: String
+  defaultBackgroundId: Int
+  defaultPipelineRunId: Int
+  details: SampleDetails!
+  doNotProcess: Boolean!
+  editable: Boolean
+  hostGenome: HostGenome
+  hostGenomeId: Int
+  id: ID!
+  initialWorkflow: String!
+  maxInputFragments: Int
+  name: String!
+  pipelineBranch: String
+  pipelineCommit: String
+  pipelineExecutionStrategy: String
+  pipelineRuns: [PipelineRun!]
+  privateUntil: ISO8601DateTime
+  project: Project
+  projectId: Int
+  public: Int!
+  s3Bowtie2IndexPath: String
+  s3PreloadResultPath: String
+  s3StarIndexPath: String
+  sampleDeletable: Boolean
+  sampleNotes: String
+  status: String
+  subsample: Int
+  updatedAt: DateTime
+  uploadError: String
+  uploadedFromBasespace: Int
+  useTaxonWhitelist: Boolean!
+  user: User
+  userId: Int
+  webCommit: String
+  workflowRuns: [WorkflowRun!]
+
   """The Globally Unique ID of this object"""
   _id: GlobalID!
-  id: ID!
   railsSampleId: Int
-  name: String!
   hostOrganism(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = []): HostOrganism
   sequencingReads(
     where: SequencingReadWhereClause = null
@@ -3323,42 +3448,7 @@ type Sample implements EntityInterface & Node {
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int!
-  createdAt: ISO8601DateTime
-  updatedAt: ISO8601DateTime
-  alignmentConfigName: String
-  basespaceAccessToken: String
-  dagVars: String
-  defaultBackgroundId: Int
-  defaultPipelineRunId: Int
-  details: SampleDetails!
-  doNotProcess: Boolean!
-  editable: Boolean
-  hostGenome: HostGenome
-  hostGenomeId: Int
-  initialWorkflow: String!
-  maxInputFragments: Int
-  pipelineBranch: String
-  pipelineCommit: String
-  pipelineExecutionStrategy: String
-  pipelineRuns: [PipelineRun!]
-  privateUntil: ISO8601DateTime
-  project: Project
-  projectId: Int
-  public: Int!
-  s3Bowtie2IndexPath: String
-  s3PreloadResultPath: String
-  s3StarIndexPath: String
-  sampleDeletable: Boolean
-  sampleNotes: String
-  status: String
-  subsample: Int
-  uploadError: String
-  uploadedFromBasespace: Int
-  useTaxonWhitelist: Boolean!
-  user: User
-  userId: Int
-  webCommit: String
-  workflowRuns: [WorkflowRun!]
+  deletedAt: DateTime
 }
 
 type SampleAggregate {
@@ -3397,6 +3487,7 @@ enum SampleCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input SampleCreateInput {
@@ -3405,6 +3496,7 @@ input SampleCreateInput {
   hostOrganismId: ID = null
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type SampleDetails {
@@ -3455,6 +3547,7 @@ type SampleGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type SampleList {
@@ -3479,6 +3572,7 @@ type SampleMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type SampleNumericalColumns {
@@ -3497,6 +3591,7 @@ input SampleOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 type SampleReadsStats {
@@ -3534,6 +3629,7 @@ type SampleSummaryStats {
 
 input SampleUpdateInput {
   name: String = null
+  deletedAt: DateTime = null
 }
 
 type SampleUploader {
@@ -3553,6 +3649,7 @@ input SampleWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input SampleWhereClauseMutations {
@@ -3623,6 +3720,7 @@ type SequencingRead implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type SequencingReadAggregate {
@@ -3666,6 +3764,7 @@ enum SequencingReadCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input SequencingReadCreateInput {
@@ -3678,6 +3777,7 @@ input SequencingReadCreateInput {
   primerFileId: ID = null
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 """An edge in a connection."""
@@ -3703,6 +3803,7 @@ type SequencingReadGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type SequencingReadMinMaxColumns {
@@ -3711,6 +3812,7 @@ type SequencingReadMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type SequencingReadNumericalColumns {
@@ -3732,12 +3834,14 @@ input SequencingReadOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input SequencingReadUpdateInput {
   clearlabsExport: Boolean = null
   medakaModel: String = null
   primerFileId: ID = null
+  deletedAt: DateTime = null
 }
 
 input SequencingReadWhereClause {
@@ -3755,6 +3859,7 @@ input SequencingReadWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input SequencingReadWhereClauseMutations {
@@ -3857,6 +3962,7 @@ type Taxon implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type TaxonAggregate {
@@ -3909,6 +4015,7 @@ enum TaxonCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input TaxonCreateInput {
@@ -3931,6 +4038,7 @@ input TaxonCreateInput {
   taxSuperkingdomId: ID = null
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type TaxonDist {
@@ -3972,10 +4080,11 @@ type TaxonGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 enum TaxonLevel {
-  level_subspecies
+  level_sublevel
   level_species
   level_genus
   level_family
@@ -4008,6 +4117,7 @@ type TaxonMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type TaxonNumericalColumns {
@@ -4039,6 +4149,7 @@ input TaxonOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input TaxonUpdateInput {
@@ -4056,6 +4167,7 @@ input TaxonUpdateInput {
   taxPhylumId: ID = null
   taxKingdomId: ID = null
   taxSuperkingdomId: ID = null
+  deletedAt: DateTime = null
 }
 
 input TaxonWhereClause {
@@ -4084,6 +4196,7 @@ input TaxonWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input TaxonWhereClauseMutations {
@@ -4166,6 +4279,7 @@ type UpstreamDatabase implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type UpstreamDatabaseAggregate {
@@ -4194,12 +4308,14 @@ enum UpstreamDatabaseCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input UpstreamDatabaseCreateInput {
   name: String!
   producingRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type UpstreamDatabaseGroupByOptions {
@@ -4210,6 +4326,7 @@ type UpstreamDatabaseGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type UpstreamDatabaseMinMaxColumns {
@@ -4218,6 +4335,7 @@ type UpstreamDatabaseMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type UpstreamDatabaseNumericalColumns {
@@ -4233,10 +4351,12 @@ input UpstreamDatabaseOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input UpstreamDatabaseUpdateInput {
   name: String = null
+  deletedAt: DateTime = null
 }
 
 input UpstreamDatabaseWhereClause {
@@ -4250,6 +4370,7 @@ input UpstreamDatabaseWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input UpstreamDatabaseWhereClauseMutations {
@@ -4315,6 +4436,7 @@ type Workflow implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowAggregate {
@@ -4342,6 +4464,7 @@ enum WorkflowCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input WorkflowCreateInput {
@@ -4349,6 +4472,7 @@ input WorkflowCreateInput {
   defaultVersion: String = null
   minimumSupportedVersion: String = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 type WorkflowGroupByOptions {
@@ -4360,6 +4484,7 @@ type WorkflowGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowMinMaxColumns {
@@ -4370,6 +4495,7 @@ type WorkflowMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowNumericalColumns {
@@ -4386,9 +4512,27 @@ input WorkflowOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 type WorkflowRun implements EntityInterface & Node {
+  cachedResults: String
+  createdAt: DateTime!
+  deprecated: Boolean!
+  errorMessage: String
+  executedAt: ISO8601DateTime
+  inputsJson: String
+  rerunFrom: Int
+  s3OutputPrefix: String
+  sample: Sample
+  sampleId: Int
+  sfnExecutionArn: String
+  status: WorkflowRunStatus
+  timeToFinalized: Int
+  updatedAt: DateTime
+  wdlVersion: String
+  workflow: String!
+
   """The Globally Unique ID of this object"""
   _id: GlobalID!
   id: ID!
@@ -4398,8 +4542,6 @@ type WorkflowRun implements EntityInterface & Node {
   executionId: String
   outputsJson: String
   workflowRunnerInputsJson: String
-  status: String!
-  errorMessage: String
   workflowVersion(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = []): WorkflowVersion
   steps(
     where: WorkflowRunStepWhereClause = null
@@ -4438,20 +4580,7 @@ type WorkflowRun implements EntityInterface & Node {
   rawInputsJson: String
   ownerUserId: Int!
   collectionId: Int!
-  createdAt: ISO8601DateTime!
-  updatedAt: ISO8601DateTime!
-  cachedResults: String
-  deprecated: Boolean!
-  executedAt: ISO8601DateTime
-  inputsJson: String
-  rerunFrom: Int
-  s3OutputPrefix: String
-  sample: Sample
-  sampleId: Int
-  sfnExecutionArn: String
-  timeToFinalized: Int
-  wdlVersion: String
-  workflow: String!
+  deletedAt: DateTime
 }
 
 type WorkflowRunAggregate {
@@ -4497,6 +4626,7 @@ enum WorkflowRunCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 """An edge in a connection."""
@@ -4520,6 +4650,7 @@ type WorkflowRunEntityInput implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowRunEntityInputAggregate {
@@ -4556,6 +4687,7 @@ enum WorkflowRunEntityInputCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input WorkflowRunEntityInputCreateInput {
@@ -4564,6 +4696,7 @@ input WorkflowRunEntityInputCreateInput {
   entityType: String = null
   workflowRunId: ID = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 """An edge in a connection."""
@@ -4585,6 +4718,7 @@ type WorkflowRunEntityInputGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowRunEntityInputMinMaxColumns {
@@ -4594,6 +4728,7 @@ type WorkflowRunEntityInputMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowRunEntityInputNumericalColumns {
@@ -4611,6 +4746,7 @@ input WorkflowRunEntityInputOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input WorkflowRunEntityInputWhereClause {
@@ -4623,6 +4759,7 @@ input WorkflowRunEntityInputWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input WorkflowRunEntityInputWhereClauseMutations {
@@ -4646,6 +4783,7 @@ type WorkflowRunGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowRunMinMaxColumns {
@@ -4661,6 +4799,7 @@ type WorkflowRunMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowRunNumericalColumns {
@@ -4686,6 +4825,7 @@ input WorkflowRunOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 enum WorkflowRunStatus {
@@ -4724,6 +4864,7 @@ type WorkflowRunStep implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowRunStepAggregate {
@@ -4760,6 +4901,7 @@ enum WorkflowRunStepCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input WorkflowRunStepCreateInput {
@@ -4767,6 +4909,7 @@ input WorkflowRunStepCreateInput {
   endedAt: DateTime = null
   status: WorkflowRunStepStatus = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 """An edge in a connection."""
@@ -4788,6 +4931,7 @@ type WorkflowRunStepGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowRunStepMinMaxColumns {
@@ -4797,6 +4941,7 @@ type WorkflowRunStepMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowRunStepNumericalColumns {
@@ -4814,6 +4959,7 @@ input WorkflowRunStepOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 enum WorkflowRunStepStatus {
@@ -4837,6 +4983,7 @@ input WorkflowRunStepStatusEnumComparators {
 input WorkflowRunStepUpdateInput {
   endedAt: DateTime = null
   status: WorkflowRunStepStatus = null
+  deletedAt: DateTime = null
 }
 
 input WorkflowRunStepWhereClause {
@@ -4849,6 +4996,7 @@ input WorkflowRunStepWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input WorkflowRunStepWhereClauseMutations {
@@ -4863,6 +5011,7 @@ input WorkflowRunUpdateInput {
   status: WorkflowRunStatus = null
   errorMessage: String = null
   deprecatedById: ID = null
+  deletedAt: DateTime = null
 }
 
 input WorkflowRunWhereClause {
@@ -4884,6 +5033,7 @@ input WorkflowRunWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input WorkflowRunWhereClauseMutations {
@@ -4894,6 +5044,7 @@ input WorkflowUpdateInput {
   name: String = null
   defaultVersion: String = null
   minimumSupportedVersion: String = null
+  deletedAt: DateTime = null
 }
 
 type WorkflowVersion implements EntityInterface & Node {
@@ -4927,6 +5078,7 @@ type WorkflowVersion implements EntityInterface & Node {
   collectionId: Int!
   createdAt: DateTime!
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowVersionAggregate {
@@ -4966,6 +5118,7 @@ enum WorkflowVersionCountColumns {
   collectionId
   createdAt
   updatedAt
+  deletedAt
 }
 
 input WorkflowVersionCreateInput {
@@ -4976,6 +5129,7 @@ input WorkflowVersionCreateInput {
   workflowId: ID = null
   deprecated: Boolean = null
   collectionId: Int!
+  deletedAt: DateTime = null
 }
 
 """An edge in a connection."""
@@ -4999,6 +5153,7 @@ type WorkflowVersionGroupByOptions {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowVersionMinMaxColumns {
@@ -5010,6 +5165,7 @@ type WorkflowVersionMinMaxColumns {
   collectionId: Int
   createdAt: DateTime
   updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type WorkflowVersionNumericalColumns {
@@ -5029,6 +5185,7 @@ input WorkflowVersionOrderByClause {
   collectionId: orderBy
   createdAt: orderBy
   updatedAt: orderBy
+  deletedAt: orderBy
 }
 
 input WorkflowVersionWhereClause {
@@ -5044,6 +5201,7 @@ input WorkflowVersionWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input WorkflowVersionWhereClauseMutations {
@@ -5060,6 +5218,7 @@ input WorkflowWhereClause {
   collectionId: IntComparators
   createdAt: DatetimeComparators
   updatedAt: DatetimeComparators
+  deletedAt: DatetimeComparators
 }
 
 input WorkflowWhereClauseMutations {
