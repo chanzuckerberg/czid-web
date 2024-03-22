@@ -604,18 +604,17 @@ class SamplesController < ApplicationController
     error = validated_objects[:error]
 
     if error.nil? && !invalid_sample_ids.empty?
-      invalid_sample_ids_rails = []
-
       # Handle case where `invalid_sample_ids` is an array of CG UUIDs from NextGen.
+      invalid_sample_ids_rails = []
       if !BulkDeletionServiceNextgen.nextgen_workflow?(workflow, invalid_sample_ids)
         invalid_sample_ids_rails = invalid_sample_ids
       else
         result = BulkDeletionServiceNextgen.get_invalid_samples(current_user.id, invalid_sample_ids)
         invalid_sample_ids_rails += result[:invalid_sample_ids_rails]
-        invalid_sample_names += result[:invalid_sample_names]
+        invalid_sample_names += result[:invalid_sample_names] # sample names from nextgen
       end
-
       invalid_sample_names += current_power.samples.where(id: invalid_sample_ids_rails).pluck(:name)
+
     end
 
     render json: {

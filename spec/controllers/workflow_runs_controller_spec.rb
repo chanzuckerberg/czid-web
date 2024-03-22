@@ -661,6 +661,15 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
             it "filters out workflow runs with non-nil deleted_at in domain '#{domain}' with mode '#{mode}'" do
               allow(HardDeleteObjects).to receive(:perform)
+              allow(BulkDeletionServiceNextgen).to receive(:call).and_return(
+                {
+                  rails_ids: {
+                    workflow_run_ids: [@deleting_wr.id],
+                    sample_ids: [@deleting_wr.sample.id],
+                  },
+                  nextgen_ids: {},
+                }
+              )
               BulkDeletionService.call(
                 object_ids: [@deleting_wr.id],
                 user: @user,

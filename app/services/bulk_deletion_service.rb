@@ -13,7 +13,13 @@ class BulkDeletionService
       Rails.logger.warn("BulkDeletionService called with object_ids = nil")
       @object_ids = []
     else
-      @object_ids = object_ids.map(&:to_i)
+      # Expect to get either array of integers (read from Rails) or array of UUID strings (read from NextGen).
+      # Only convert to integers if we receive Rails IDs, not UUIDs.
+      @object_ids = if ArrayUtil.all_integers?(object_ids)
+                      object_ids.map(&:to_i)
+                    else
+                      object_ids
+                    end
     end
 
     if workflow.nil?
@@ -62,32 +68,49 @@ class BulkDeletionService
 
     # If mngs, get pipeline runs from sample ids and clean up visualizations.
     # If workflow runs, get workflow run objects from workflow run ids.
-    sample_ids_failed_upload = []
+    nextgen_ids = {}
+    token = TokenCreationService
+            .call(
+              user_id: @user.id,
+              should_include_project_claims: true
+            )["token"]
     if WorkflowRun::MNGS_WORKFLOWS.include?(workflow)
       technology = WorkflowRun::MNGS_WORKFLOW_TO_TECHNOLOGY[workflow]
-      deletable_objects = current_power.deletable_pipeline_runs.where(sample_id: object_ids, technology: technology)
-      sample_ids = object_ids # allows us to delete samples with failed uploads but no pipeline runs
-      sample_ids_failed_upload = sample_ids - deletable_objects.pluck(:sample_id)
+      deletable_rails_objects = current_power.deletable_pipeline_runs.where(sample_id: object_ids, technology: technology)
+      sample_ids = object_ids
       handle_visualizations(sample_ids, delete_timestamp)
+    elsif workflow != WorkflowRun::WORKFLOW[:consensus_genome]
+      deletable_rails_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
+      sample_ids = deletable_rails_objects.pluck(:sample_id)
     else
-      deletable_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
-      sample_ids = deletable_objects.pluck(:sample_id)
+      # NEXTGEN: get Rails objects to delete and NextGen objects to delete
+      rails_ids, nextgen_ids = BulkDeletionServiceNextgen.call(
+        user: user,
+        object_ids: object_ids,
+        workflow: workflow,
+        delete_timestamp: delete_timestamp,
+        token: token
+      ).values_at(:rails_ids, :nextgen_ids)
+      deletable_rails_ids, sample_ids = rails_ids.values_at(:workflow_run_ids, :sample_ids)
+      deletable_rails_objects = current_power.deletable_workflow_runs.where(id: deletable_rails_ids).by_workflow(workflow).non_deprecated
     end
 
-    handle_bulk_downloads(deletable_objects, delete_timestamp)
+    # Soft delete Rails bulk downloads
+    handle_bulk_downloads(deletable_rails_objects, delete_timestamp)
 
     # Skip validations so that we can update old samples that would otherwise fail
     # new validation checks added since they were created
     # rubocop:disable Rails/SkipsModelValidations
-    deletable_objects.update_all(deleted_at: delete_timestamp)
+    deletable_rails_objects.update_all(deleted_at: delete_timestamp)
     # rubocop:enable Rails/SkipsModelValidations
 
-    count_by_workflow = get_workflow_counts(sample_ids)
+    # Update initial workflow on Rails samples or soft delete them
+    count_by_workflow = get_workflow_counts(user, sample_ids, token)
     samples = current_power.destroyable_samples.where(id: sample_ids)
     soft_deleted_sample_ids = update_initial_workflows_or_soft_delete(samples, workflow, delete_timestamp, count_by_workflow)
 
     # log soft deletion for GDPR compliance
-    deleted_objects_info = deletable_objects
+    deleted_objects_info = deletable_rails_objects
                            .joins(:sample, sample: :project)
                            .select(
                              :id,
@@ -96,7 +119,7 @@ class BulkDeletionService
                              "projects.name AS project_name",
                              "projects.id AS project_id"
                            ).as_json
-    object_type = deletable_objects.first.class.name
+    object_type = deletable_rails_objects.first.class.name
 
     deleted_objects_info.each do |object|
       DeletionLog.create!(
@@ -139,14 +162,17 @@ class BulkDeletionService
       )
     end
 
-    # first enqueue sample upload failures
-    unless sample_ids_failed_upload.empty?
-      Resque.enqueue(HardDeleteObjects, [], sample_ids_failed_upload, workflow, user.id)
+    # First enqueue deletion of samples without workflow runs
+    # This happens for short read mNGS uploads and for CG runs in NextGen,
+    # since the workflow run lives in NextGen and the sample is duplicated in Rails
+    sample_ids_without_wrs = sample_ids - deletable_rails_objects.pluck(:sample_id)
+    unless sample_ids_without_wrs.empty?
+      Resque.enqueue(HardDeleteObjects, [], sample_ids_without_wrs, workflow, user.id)
     end
 
     # then enqueue runs in batches, since deleting pipeline runs can take a long time
-    unless deletable_objects.empty?
-      deletable_objects.in_batches(of: HARD_DELETION_BATCH_SIZE) do |batch|
+    unless deletable_rails_objects.empty?
+      deletable_rails_objects.in_batches(of: HARD_DELETION_BATCH_SIZE) do |batch|
         # .transpose turns array [["run1", "sample1"], ["run2", "sample2"]] into [["run1", "run2"], ["sample1", "sample2"]]
         ids = batch.pluck(:id, :sample_id).transpose
         Resque.enqueue(HardDeleteObjects, ids[0], ids[1], workflow, user.id)
@@ -155,23 +181,28 @@ class BulkDeletionService
 
     # Warn if nothing to hard delete. This can happen when a user deletes failed
     # mNGS uploads but there are also failed AMR runs on the samples.
-    if deletable_objects.empty? && sample_ids_failed_upload.empty?
+    if deletable_rails_objects.empty? && sample_ids_without_wrs.empty?
       LogUtil.log_message("No runs or samples to hard delete.",
                           sample_count_by_workflow: count_by_workflow,
                           object_ids: object_ids,
                           workflow_deleted: workflow)
     end
 
+    should_read_from_nextgen = user.allowed_feature?("should_read_from_nextgen") && workflow == WorkflowRun::WORKFLOW[:consensus_genome]
+    # Workflow run ids and sample ids in either system. This is unused by the frontend.
+    deleted_run_ids = should_read_from_nextgen ? nextgen_ids[:workflow_run_ids] : deletable_rails_objects.pluck(:id)
+    deleted_sample_ids = should_read_from_nextgen ? nextgen_ids[:sample_ids] : soft_deleted_sample_ids
+
     return {
-      deleted_run_ids: deletable_objects.pluck(:id),
-      deleted_sample_ids: soft_deleted_sample_ids,
+      deleted_run_ids: deleted_run_ids,
+      deleted_sample_ids: deleted_sample_ids,
     }
   end
 
   # Get counts for all samples using 4 queries
   # Get hash of sample ids that have a workflow of each type in the form
   # count = { [workflow] => set(sample_id1, sample_id2...) }
-  def get_workflow_counts(sample_ids)
+  def get_workflow_counts(user, sample_ids, token)
     counts = {}
     counts["short-read-mngs"] = PipelineRun.where(
       sample_id: sample_ids,
@@ -187,12 +218,21 @@ class BulkDeletionService
       technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore]
     ).pluck(:sample_id).to_set
 
-    counts["consensus-genome"] = WorkflowRun.where(
-      sample_id: sample_ids,
-      deleted_at: nil,
-      deprecated: false,
-      workflow: WorkflowRun::WORKFLOW[:consensus_genome]
-    ).pluck(:sample_id).to_set
+    counts["consensus-genome"] = if user.allowed_feature?("should_read_from_nextgen")
+                                   BulkDeletionServiceNextgen.get_rails_samples_with_nextgen_workflow(
+                                     user,
+                                     sample_ids,
+                                     WorkflowRun::WORKFLOW[:consensus_genome],
+                                     token: token
+                                   )
+                                 else
+                                   WorkflowRun.where(
+                                     sample_id: sample_ids,
+                                     deleted_at: nil,
+                                     deprecated: false,
+                                     workflow: WorkflowRun::WORKFLOW[:consensus_genome]
+                                   ).pluck(:sample_id).to_set
+                                 end
 
     counts["amr"] = WorkflowRun.where(
       sample_id: sample_ids,
@@ -293,7 +333,8 @@ class BulkDeletionService
     end
   end
 
-  # Mark associated bulk downloads for deletion.
+  # Mark associated bulk downloads for deletion in Rails
+  # TODO: return ids here and pass them to the hard delete job
   def handle_bulk_downloads(deletable_objects, delete_timestamp)
     # Unlike `.update`, `.update_attribute` & `.update_all` skip model validations (i.e.
     # column X must satisfy certain conditions), and skips updating `updated_at`. This is needed to make sure we mark

@@ -1017,7 +1017,7 @@ RSpec.describe SamplesController, type: :controller do
           },
         }.to_json, object_class: OpenStruct)
 
-        allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetWorkflowRuns, { variables: { workflow_run_ids: ["Workflow-UUID1", "Workflow-UUID2", "Workflow-UUID3"] } }).and_return(get_workflow_runs)
+        allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetWorkflowRuns, { variables: { run_ids: ["Workflow-UUID1", "Workflow-UUID2", "Workflow-UUID3"] } }).and_return(get_workflow_runs)
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetSamples, { variables: { sample_ids: ["Sample-UUID2", "Sample-UUID3"] } }).and_return(get_samples)
       end
 

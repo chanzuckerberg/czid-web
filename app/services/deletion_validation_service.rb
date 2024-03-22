@@ -103,7 +103,15 @@ class DeletionValidationService
 
     # Handle case where `workflow_run_ids` is an array of CG UUIDs from NextGen
     if BulkDeletionServiceNextgen.nextgen_workflow?(workflow, workflow_run_ids)
-      return BulkDeletionServiceNextgen.get_invalid_workflows(user.id, workflow_run_ids)
+      result = CzidGraphqlFederation.query_with_token(user.id, BulkDeletionServiceNextgen::GetWorkflowRuns, variables: { run_ids: workflow_run_ids })
+      valid_ids = result.data.workflow_runs.select { |run| run.owner_user_id == user.id }.map(&:id)
+      invalid_ids = workflow_run_ids.reject { |id| valid_ids.include?(id) }
+      invalid_sample_ids = result.data.workflow_run_entity_inputs.filter { |input| invalid_ids.include?(input.workflow_run.id) }.map(&:input_entity_id)
+
+      return {
+        valid_ids: valid_ids,
+        invalid_sample_ids: invalid_sample_ids,
+      }
     end
 
     # Otherwise, workflow_run_ids is an array of integers from Rails
