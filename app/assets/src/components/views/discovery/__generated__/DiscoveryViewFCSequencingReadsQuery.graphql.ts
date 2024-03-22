@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<aca3896aac621fdca655cd21899fb9f4>>
+ * @generated SignedSource<<b24ea7f460b8a11ce3f768617bad213f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -39,7 +39,11 @@ export type queryInput_fedSequencingReads_input_where_collectionId_Input = {
 export type queryInput_fedSequencingReads_input_where_sample_Input = {
   collectionLocation?: queryInput_fedSequencingReads_input_where_sample_collectionLocation_Input | null | undefined;
   hostOrganism?: queryInput_fedSequencingReads_input_where_sample_hostOrganism_Input | null | undefined;
+  name?: queryInput_fedSequencingReads_input_where_sample_name_Input | null | undefined;
   sampleType?: queryInput_fedSequencingReads_input_where_sample_sampleType_Input | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_sample_name_Input = {
+  _iregex?: string | null | undefined;
 };
 export type queryInput_fedSequencingReads_input_where_sample_collectionLocation_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;

@@ -1,6 +1,8 @@
+import { escapeRegExp } from "lodash";
 import { toLower } from "lodash/fp";
 import React, { useContext, useRef, useState } from "react";
 import { useRelayEnvironment } from "react-relay";
+import { SortDirectionType } from "react-virtualized";
 import { fetchQuery, graphql } from "relay-runtime";
 import RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironment";
 import { getProjects } from "~/api";
@@ -248,39 +250,55 @@ async function queryWorkflowRuns(
   environment: RelayModernEnvironment,
   projectIds?: number[],
 ): Promise<WorkflowRunRow[]> {
-  // ENTITIES INPUT:
-  let collectionIdInput: queryInput_fedWorkflowRuns_input_where_collectionId_Input | null =
-    null;
+  let collectionIdInput:
+    | queryInput_fedWorkflowRuns_input_where_collectionId_Input
+    | undefined;
   if (projectId != null) {
     collectionIdInput = { _in: [parseInt(projectId)] };
   } else if (projectIds !== undefined) {
     collectionIdInput = { _in: projectIds };
   }
+
+  // ENTITIES INPUT:
   let entitiesInput: queryInput_fedSequencingReads_input_Input | undefined;
-  if (
+  const hasSampleFilter =
+    search?.length ||
     filters?.locationV2?.length ||
     filters?.host?.length ||
-    filters?.tissue?.length
-  ) {
+    filters?.tissue?.length;
+  if (hasSampleFilter || nextGenFilters?.taxonNames.length) {
     entitiesInput = {
       where: {
         collectionId: collectionIdInput,
-        sample: {
-          collectionLocation: filters.locationV2?.length
-            ? { _in: filters.locationV2 }
-            : undefined,
-          hostOrganism: filters.host?.length
-            ? {
-                name: {
-                  // TODO: Send names when NextGen supports hostOrganism.
-                  _in: filters.host.map(hostId => hostId.toString()),
-                },
-              }
-            : undefined,
-          sampleType: filters.tissue?.length
-            ? { _in: filters.tissue }
-            : undefined,
-        },
+        sample: hasSampleFilter
+          ? {
+              name: search?.length
+                ? {
+                    // Match names containing all search terms in any order.
+                    _iregex:
+                      search
+                        .trim()
+                        .split(/\s+/)
+                        .map(word => `(?=.*${escapeRegExp(word)})`)
+                        .join("") + ".*",
+                  }
+                : undefined,
+              collectionLocation: filters?.locationV2?.length
+                ? { _in: filters.locationV2 }
+                : undefined,
+              hostOrganism: filters?.host?.length
+                ? {
+                    name: {
+                      // TODO: Send names when NextGen supports hostOrganism.
+                      _in: filters.host.map(hostId => hostId.toString()),
+                    },
+                  }
+                : undefined,
+              sampleType: filters?.tissue?.length
+                ? { _in: filters.tissue }
+                : undefined,
+            }
+          : undefined,
       },
       todoRemove: {
         domain: props.domain,
@@ -507,23 +525,24 @@ async function queryWorkflowRuns(
 
 function getWorkflowRunsOrderBys(
   orderBy?: string,
-  orderDir?: string,
+  orderDir?: SortDirectionType,
 ): queryInput_fedWorkflowRuns_input_orderByArray_items_Input[] {
-  orderDir = orderDir?.toLowerCase() ?? "desc";
+  const nextGenOrderDir =
+    orderDir === "ASC" ? "asc_nulls_first" : "desc_nulls_last";
   switch (orderBy) {
     case null:
     case undefined:
     case "createdAt":
       return [
         {
-          startedAt: orderDir,
+          startedAt: nextGenOrderDir,
         },
       ];
     case "wdl_version":
       return [
         {
           workflowVersion: {
-            version: orderDir,
+            version: nextGenOrderDir,
           },
         },
       ];
