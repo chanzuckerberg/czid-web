@@ -27,9 +27,15 @@ import {
   getWorkflowRunMetadataFields,
 } from "~/api/metadata";
 import { LoadingPage } from "~/components/common/LoadingPage";
-import { UserContext } from "~/components/common/UserContext";
+import {
+  useAllowedFeatures,
+  UserContext,
+} from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import { HEATMAP_ELASTICSEARCH_FEATURE } from "~/components/utils/features";
+import {
+  HEATMAP_ELASTICSEARCH_FEATURE,
+  SHOULD_READ_FROM_NEXTGEN,
+} from "~/components/utils/features";
 import {
   AMR_PIPELINE,
   isPipelineFeatureAvailable,
@@ -488,9 +494,18 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderNextcladeTrigger = () => {
+    const allowedFeatures = useAllowedFeatures();
+    const shouldReadFromNextGen = allowedFeatures.includes(
+      SHOULD_READ_FROM_NEXTGEN,
+    );
     const sendToNextcladeCount = getSendToNextcladeCount();
 
     const getPopupSubtitle = () => {
+      // This is a temporary work-around to disable Nextclade until we are able to convert it to NextGen
+      if (shouldReadFromNextGen) {
+        return "Sending SARS-CoV-2 samples directly to Nexclade is temporarily unavailable.";
+      }
+
       if (sendToNextcladeCount > MAX_NEXTCLADE_SAMPLES) {
         return `Select at most ${MAX_NEXTCLADE_SAMPLES} SARS-CoV-2 samples`;
       } else if (sendToNextcladeCount === 0) {
@@ -505,9 +520,12 @@ const SamplesView = forwardRef(function SamplesView(
         icon="treeDendogram"
         popupText="Nextclade"
         popupSubtitle={getPopupSubtitle()}
+        // TODO: re-enable Nextclade when it's connected to NextGen
         disabled={
-          sendToNextcladeCount === 0 ||
-          sendToNextcladeCount > MAX_NEXTCLADE_SAMPLES
+          shouldReadFromNextGen
+            ? true
+            : sendToNextcladeCount === 0 ||
+              sendToNextcladeCount > MAX_NEXTCLADE_SAMPLES
         }
         onClick={() => setNextcladeModalOpen(true)}
       />
