@@ -31,6 +31,37 @@ class BulkDeletionServiceNextgen
   GRAPHQL
 
   GetWorkflowRunsBySampleId = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+    query ($sample_ids: [UUID!]!) {
+      workflowRuns (where: {
+        deprecatedById: {
+          _is_null: true
+        }
+        entityInputs: {
+          inputEntityId: {
+            _in: $sample_ids
+          }
+        }
+        deletedAt: {
+          _is_null: true
+        }
+      }) {
+        id
+        entityInputs(where: {
+          entityType: {
+            _eq: "sample"
+          }
+        }) {
+          edges {
+            node {
+              inputEntityId
+            }
+          }
+        }
+      }    
+    }
+  GRAPHQL
+
+  GetWorkflowRunsBySampleIdAndWorkflowType = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
     query ($sample_ids: [UUID!]!, $workflow_name: String) {
       workflowRuns (where: {
         deprecatedById: {
@@ -511,7 +542,7 @@ class BulkDeletionServiceNextgen
     rails_samples_with_workflow = []
     token = TokenCreationService.call(user_id: user.id, should_include_project_claims: true)["token"]
     samples = CzidGraphqlFederation.query_with_token(user.id, GetSamplesByRailsSampleId, variables: { sample_ids: rails_sample_ids }, token: token).data.samples
-    workflow_runs = CzidGraphqlFederation.query_with_token(user.id, GetWorkflowRunsBySampleId, variables: { sample_ids: samples.map(&:id), workflow_name: workflow }, token: token).data.workflow_runs
+    workflow_runs = CzidGraphqlFederation.query_with_token(user.id, GetWorkflowRunsBySampleIdAndWorkflowType, variables: { sample_ids: samples.map(&:id), workflow_name: workflow }, token: token).data.workflow_runs
     samples.each do |sample|
       sample_has_workflow = workflow_runs.any? { |wr| wr.entity_inputs.edges.first.node.input_entity_id == sample.id }
       if sample_has_workflow
