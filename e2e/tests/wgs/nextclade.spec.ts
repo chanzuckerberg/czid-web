@@ -32,11 +32,8 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
       sc2_project,
       WGS_SAMPLE_FILES,
       SARS_CoV2_SAMPLE_NAMES,
-      "Human",
-      "Unknown",
       WORKFLOWS.WGS,
-      RUN_PIPELINE,
-      WAIT_FOR_PIPELINE,
+      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
     );
 
     // #region 1. Log in to Project

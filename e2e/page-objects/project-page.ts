@@ -5,6 +5,26 @@ import { NextcladePage } from "./nextclade-page";
 import { PageObject } from "./page-object";
 import { SamplesPage } from "./samples-page";
 
+const TIMEFRAME_FILTER = "[data-testid='timeframe']";
+const TIMEFRAME_OPTIONS = "//*[text()='Select Timeframe']/parent::*//*[@role='option']";
+const VISIBILITY_FILTER = "[data-testid='visibility']";
+const VISIBILITY_OPTIONS = "//*[text()='Select Visibility']/parent::*//*[@role='option']";
+const SAMPLE_TYPE_FILTER = "[data-testid='sample-type']";
+const SAMPLE_TYPE_OPTIONS = "//*[text()='Select Sample Type']/parent::*//*[@role='option']";
+const SELECT_SAMPLE_TYPE = "//*[text()='Select Sample Type']/parent::*//input";
+const HOST_FILTER = "[data-testid='host']";
+const HOST_OPTIONS = "//*[text()='Select Host']/parent::*//*[@role='option']";
+const SELECT_HOST = "//*[text()='Select Host']/parent::*//input";
+const LOCATION_FILTER = "[data-testid='location']";
+const SELECT_LOCATION = "[data-testid='select-location'] input";
+const LOCATION_OPTIONS = "//*[@data-testid='select-location']/parent::*/following-sibling::*/*[@role='option']";
+const DISABLED_TOOLTIP = "[class*='disabledTooltip']";
+const ANNOTATION_FILTER = "//*[@data-testid='annotation']/ancestor::button";
+const TAXON_FILTER = "[data-testid='taxon-filter']";
+const CHOOSE_TAXON = "//*[text()='Taxon Filter']/following-sibling::button";
+const TOOLTIP_INPUT = "[role='tooltip'] input";
+const TOOLTIP_OPTIONS = "[role='presentation'] [role='listbox'] [role='option']";
+const APPLY_BUTTON = "[data-testid='apply']";
 const ARIA_ROWINDEX = "aria-rowindex";
 const UPLOAD_HEADER_LINK = "[data-testid='menu-item-upload']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genomes']";
@@ -140,7 +160,7 @@ export class ProjectPage extends PageObject {
     return responseJson.backgrounds;
   }
 
-  public async getOrCreateProject(projectName: string) {
+  public async getOrCreateProject(projectName: string, public_access = 1) {
     let project = null;
     const userName = process.env.CZID_USERNAME.split("@")[0];
     const userProjectName = `${userName}_${projectName}`;
@@ -150,7 +170,7 @@ export class ProjectPage extends PageObject {
       const payload = {
         "project":{
           "name": userProjectName,
-          "public_access": 1, // Public
+          "public_access": public_access, // Public
           "description": "created by automation",
         },
       };
@@ -197,9 +217,109 @@ export class ProjectPage extends PageObject {
     const responseJson = await response.json();
     return responseJson.projects;
   }
+
+  public async getLocationsExternalSearch(query: string) {
+    const urlParams = new URLSearchParams();
+    urlParams.append("query", query);
+
+    const params = Array.from(urlParams.entries()).length > 0 ? `?${urlParams.toString()}` : "";
+    const requestUrl = `${process.env.BASEURL}/locations/external_search${params}`;
+    const response = await this.page.context().request.get(requestUrl);
+    return response.json();
+  }
+
+  public async getSearchSuggestions(query: string, categories = null, superkingdom = null, domain = null) {
+    const urlParams = new URLSearchParams();
+    if (categories !== null) {
+      urlParams.append("categories[]", categories);
+    }
+    if (query !== null) {
+      urlParams.append("query", query);
+    }
+    if (domain !== null) {
+      urlParams.append("domain", domain);
+    }
+    if (superkingdom !== null) {
+      urlParams.append("superkingdom", superkingdom);
+    }
+
+    const params = Array.from(urlParams.entries()).length > 0 ? `?${urlParams.toString()}` : "";
+    const requestUrl = `${process.env.BASEURL}/search_suggestions${params}`;
+    const response = await this.page.context().request.get(requestUrl);
+    return response.json();
+  }
   // #endregion Api
 
+  // #region bool
+  public async isAnnotationFilterDisabled() {
+    return this.page.locator(ANNOTATION_FILTER).isDisabled();
+  }
+  // #endregion bool
+
+  // #region hover
+  public async hoverOverAnnotationFilter() {
+    await this.page.locator(ANNOTATION_FILTER).hover({force: true});
+  }
+  // #endregion hover
+
   // #region fill
+  public async fillTimeframeFilter(value: string) {
+    await this.pause(1);
+    await this.page.locator(TIMEFRAME_FILTER).click();
+    await this.page.locator(TIMEFRAME_OPTIONS).getByText(value, {exact: true}).click();
+  }
+
+  public async fillVisibilityFilter(value: string) {
+    await this.pause(1);
+    await this.page.locator(VISIBILITY_FILTER).click();
+    await this.page.locator(VISIBILITY_OPTIONS).getByText(value, {exact: true}).click();
+  }
+
+  public async fillSampleTypeFilter(values: Array<string>) {
+    await this.pause(1);
+    await this.page.locator(SAMPLE_TYPE_FILTER).click();
+    for (const value of values) {
+      await this.page.locator(SELECT_SAMPLE_TYPE).fill(value);
+      await this.page.locator(SAMPLE_TYPE_OPTIONS).getByText(value, {exact: true}).click();
+    }
+    await this.page.locator(SAMPLE_TYPE_FILTER).click();
+  }
+
+  public async fillHostFilter(values: Array<string>) {
+    await this.pause(1);
+    await this.page.locator(HOST_FILTER).waitFor();
+    await this.page.locator(HOST_FILTER).click();
+    for (const value of values) {
+      await this.page.locator(SELECT_HOST).fill(value);
+      await this.page.locator(HOST_OPTIONS).getByText(value, {exact: true}).click();
+    }
+    await this.page.locator(HOST_FILTER).click();
+  }
+
+  public async fillLocationFilter(values: Array<string>) {
+    await this.pause(1);
+    await this.page.locator(LOCATION_FILTER).click();
+    for (const value of values) {
+      await this.page.locator(SELECT_LOCATION).fill(value);
+      await this.page.locator(LOCATION_OPTIONS).getByText(value, {exact: true}).click();
+    }
+    await this.page.locator(LOCATION_FILTER).click();
+  }
+
+  public async fillTaxonFilter(values: Array<string>) {
+    await this.pause(1);
+    await this.page.locator(TAXON_FILTER).click();
+    await this.page.locator(CHOOSE_TAXON).click();
+
+    for (const value of values) {
+      await this.page.locator(TOOLTIP_INPUT).fill(value);
+      await this.page.locator(TOOLTIP_OPTIONS).first().waitFor();
+      await this.page.locator(TOOLTIP_OPTIONS).getByText(value, {exact: true}).click();
+    }
+
+    await this.page.locator(CHOOSE_TAXON).click();
+  }
+
   public async fillSearchMyDataInput(value: string) {
     await this.page.locator(SEARCH_MY_DATA_INPUT).fill(value);
     await this.pressEnter();
@@ -211,6 +331,10 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickApplyButton() {
+    await this.page.locator(APPLY_BUTTON).click();
+  }
+
   public async clickConsensusGenomeTab() {
     await this.page.locator(CONSENSUS_GENOME_TAB).click();
   }
@@ -384,6 +508,24 @@ export class ProjectPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getTimeframeFilterOptions() {
+    await this.page.locator(TIMEFRAME_FILTER).click();
+    const options = this.page.locator(TIMEFRAME_OPTIONS).allTextContents();
+    await this.page.locator(TIMEFRAME_FILTER).click();
+    return options;
+  }
+
+  public async getLocationFilterOptions() {
+    await this.page.locator(LOCATION_FILTER).click();
+    const locationOptions = this.page.locator(LOCATION_OPTIONS).allTextContents();
+    await this.page.locator(LOCATION_FILTER).click();
+    return locationOptions;
+  }
+
+  public async getDisabledTooltip() {
+    return this.page.locator(DISABLED_TOOLTIP).textContent();
+  }
+
   public async getSamplesCount() {
     await this.page.locator(SAMPLES_TAB).waitFor();
     await this.pause(1);
@@ -392,6 +534,7 @@ export class ProjectPage extends PageObject {
   }
 
   public async getConsensusGenomesCount() {
+    await this.page.locator(CONSENSUS_GENOME_TAB, {hasNotText: "-"}).waitFor();
     const tabText = await this.page.locator(CONSENSUS_GENOME_TAB).textContent();
     return parseInt(tabText.replace("Consensus Genomes", ""));
   }

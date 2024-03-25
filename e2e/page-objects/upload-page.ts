@@ -568,7 +568,7 @@ export class UploadPage extends PageObject {
           inputs[sampleName].nucleotideType,
           inputs[sampleName].collectionDate,
           inputs[sampleName].waterControl,
-          inputs[sampleName].collectionLocation,
+          `"${inputs[sampleName].collectionLocation}"`,
           ",,,,,,,,,,,,,,,,,",
         ].join(",");
         csvContent += `${row}\n`;

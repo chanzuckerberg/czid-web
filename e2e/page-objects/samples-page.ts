@@ -187,7 +187,7 @@ export class SamplesPage extends PageObject {
       }
     }
 
-    private async getProjectSamples(projectName = null, sampleName = null) {
+    private async getProjectSamples(projectName = null, sampleName = null, limit = 10000) {
       const urlParams = new URLSearchParams();
       let project = null;
       if (projectName !== null) {
@@ -200,6 +200,7 @@ export class SamplesPage extends PageObject {
       if (sampleName !== null) {
         urlParams.append("search", sampleName);
       }
+      urlParams.append("limit", `${limit}`);
 
       const params = Array.from(urlParams.entries()).length > 0 ? `?${urlParams.toString()}` : "";
       const requestUrl = `${process.env.BASEURL}/samples/index_v2.json${params}`;

@@ -262,10 +262,8 @@ async function runTestSetup(page: any, projectName: string) {
     project,
     WGS_SAMPLE_FILES,
     [`${SARS_CoV2_NO_HOST}_1`],
-    "Human", "Unknown",
     WORKFLOWS.WGS,
-    false,
-    WAIT_FOR_PIPELINE,
+    {hostOrganism: "Human", taxon: "Unknown", runPipeline: false, waitForPipeline: WAIT_FOR_PIPELINE},
   );
   // no host 2
   await runPipelineIfNeeded(
@@ -273,10 +271,8 @@ async function runTestSetup(page: any, projectName: string) {
     project,
     WGS_SAMPLE_FILES,
     [`${SARS_CoV2_NO_HOST}_2`],
-    "Human", "Unknown",
     WORKFLOWS.WGS,
-    false,
-    WAIT_FOR_PIPELINE,
+    {hostOrganism: "Human", taxon: "Unknown", runPipeline: false, waitForPipeline: WAIT_FOR_PIPELINE},
   );
   // sample to delete
   await runPipelineIfNeeded(
@@ -284,10 +280,8 @@ async function runTestSetup(page: any, projectName: string) {
     project,
     WGS_SAMPLE_FILES,
     SARS_CoV2_SAMPLE_NAMES,
-    "Human", "Unknown",
     WORKFLOWS.WGS,
-    RUN_PIPELINE,
-    WAIT_FOR_PIPELINE,
+    {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
   );
    return {projectPage, project};
 };
