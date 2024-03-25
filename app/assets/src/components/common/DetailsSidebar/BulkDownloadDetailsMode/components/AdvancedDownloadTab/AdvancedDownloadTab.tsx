@@ -74,15 +74,29 @@ export const AdvancedDownloadTab = ({
     if (downloadType === "biom_format") {
       return `curl -L "${url}" > "${bulkDownloadFileName}.biom" `;
     }
-    if (
-      downloadType === "consensus_genome" &&
-      params?.downloadFormat &&
-      ["Single File (Concatenated)", "concatenated"].includes(
-        JSON.parse(params.downloadFormat).value,
-      )
-    ) {
-      return `curl -L "${url}" > "${bulkDownloadFileName}.fa" `;
+
+    if (downloadType === "consensus_genome") {
+      // eslint-disable-next-line no-console
+      console.log({ params });
+      if (
+        params?.downloadFormat &&
+        ["Single File (Concatenated)", "concatenated"].includes(
+          params.downloadFormat,
+        )
+      ) {
+        return `curl -L "${url}" > "${bulkDownloadFileName}.fa" `;
+      }
     }
+    // TODO: Remove/re-enable this block after troubleshooting
+    // if (
+    //   downloadType === "consensus_genome" &&
+    //   params?.downloadFormat &&
+    //   ["Single File (Concatenated)", "concatenated"].includes(
+    //     JSON.parse(params.downloadFormat).value,
+    //   )
+    // ) {
+    //   return `curl -L "${url}" > "${bulkDownloadFileName}.fa" `;
+    // }
 
     return `curl -L "${url}" > "${bulkDownloadFileName}.tar.gz"\
         && mkdir "${bulkDownloadFileName}"\

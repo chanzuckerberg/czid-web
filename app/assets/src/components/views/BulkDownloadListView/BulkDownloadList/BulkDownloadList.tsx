@@ -77,7 +77,7 @@ const BulkDownloadListComponent = () => {
   const bulkDownloadsData = data?.fedBulkDownloads;
   const hasInProgressBulkDownloads = useCallback(bulkdownloads => {
     return some(
-      bulkDownload => InProgressStatus.includes(bulkDownload.status),
+      bulkDownload => InProgressStatus.includes(bulkDownload?.status),
       bulkdownloads,
     );
   }, []);
@@ -191,7 +191,7 @@ const BulkDownloadListComponent = () => {
               data={processBulkDownloads(bulkDownloadsData)}
               defaultRowHeight={70}
               sortable
-              defaultSortBy="created_at"
+              defaultSortBy="startedAt"
               defaultSortDirection={SortDirection.DESC}
             />
           )}

@@ -20,7 +20,9 @@ const SEPARATE_FILES_DOWNLOAD_VALUE = "zip";
 const SINGLE_FILE_CONCATENATED_DOWNLOAD_VALUE = "concatenate";
 
 const HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE = "host_gene_counts";
+const CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE = "contigs_non_host";
 const READS_NON_HOST_BULK_DOWNLOAD_TYPE = "reads_non_host";
+const UNMAPPED_READS_BULK_DOWNLOAD_TYPE = "unmapped_reads";
 const BIOM_FORMAT_DOWNLOAD_TYPE = "biom_format";
 
 const CUSTOMER_SUPPORT_BULK_DOWNLOAD_TYPE = "customer_support_request";
@@ -94,6 +96,18 @@ export const BULK_DOWNLOAD_TYPE_INFO = {
     required_allowed_feature: "microbiome",
     fileTypeDisplay: ".biom",
   },
+  [CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE]: {
+    type: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
+    displayName: "Contigs (Non-host)",
+    description: "Contigs with host data subtracted",
+    category: "raw_data",
+    fields: [
+      {
+        displayName: "Taxon",
+        type: "taxa_with_contigs",
+      },
+    ],
+  },
   [READS_NON_HOST_BULK_DOWNLOAD_TYPE]: {
     type: READS_NON_HOST_BULK_DOWNLOAD_TYPE,
     displayName: "Reads (Non-host)",
@@ -110,6 +124,12 @@ export const BULK_DOWNLOAD_TYPE_INFO = {
         options: [".fasta", ".fastq"],
       },
     ],
+  },
+  [UNMAPPED_READS_BULK_DOWNLOAD_TYPE]: {
+    type: UNMAPPED_READS_BULK_DOWNLOAD_TYPE,
+    displayName: "Unmapped Reads",
+    description: "Reads that did not map to any taxa",
+    category: "raw_data",
   },
   // Short Read mNGS & Long Read mNGS Download Types
   [SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE]: {
