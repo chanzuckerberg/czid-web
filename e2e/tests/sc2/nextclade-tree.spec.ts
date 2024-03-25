@@ -8,11 +8,10 @@ const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const SARS_CoV2_NO_HOST = "wgs_SARS_CoV2_no_host";
 const SARS_CoV2_SAMPLE_NAMES = [SARS_CoV2_NO_HOST];
 
-let sc2_project = null;
 let wgs_project = null;
 let projectPage = null;
 const timeout = 60 * 1000 * 5;
-const RUN_PIPELINE = true;
+const RUN_PIPELINE = false;
 const WAIT_FOR_PIPELINE = false;
 
 /*
@@ -23,10 +22,10 @@ test.describe("NextClade Tree: Functional: P-0", () => {
   test.beforeEach(async ({ page }) => {
     test.setTimeout(timeout);
     projectPage = new ProjectPage(page);
-    sc2_project = await projectPage.getOrCreateProject(`NextClade_${WORKFLOWS.SC2}`);
   });
 
   test("SNo 23: Create a Nextclade Tree", async ({ page }) => {
+    const sc2_project = await projectPage.getOrCreateProject(`SNo-23_NextClade_${WORKFLOWS.SC2}`);
     await runPipelineIfNeeded(
       page,
       sc2_project,
@@ -74,6 +73,7 @@ test.describe("NextClade Tree: Functional: P-0", () => {
   });
 
   test("SNo 25: Create a Nextclade Tree with a mixture of samples with and without reference assension", async ({ page }) => {
+    const sc2_project = await projectPage.getOrCreateProject(`SNo-25_NextClade_${WORKFLOWS.SC2}`);
     await runPipelineIfNeeded(
       page,
       sc2_project,

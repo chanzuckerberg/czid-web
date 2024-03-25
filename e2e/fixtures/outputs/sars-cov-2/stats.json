@@ -1,0 +1,27 @@
+{
+  "sample_name": "sars-cov-2_SRR11178050_10p",
+  "depth_avg": 1.4392535865966625,
+  "depth_q.25": 0.0,
+  "depth_q.5": 1.0,
+  "depth_q.75": 2.0,
+  "depth_frac_above_10x": 0.0,
+  "depth_frac_above_25x": 0.0,
+  "depth_frac_above_50x": 0.0,
+  "depth_frac_above_100x": 0.0,
+  "allele_counts": {
+    "N": 29903
+  },
+  "total_reads": 28545,
+  "mapped_reads": 154,
+  "mapped_paired": 0,
+  "paired_inward": 0,
+  "paired_outward": 0,
+  "paired_other_orientation": 0,
+  "ref_snps": 0,
+  "ref_mnps": 0,
+  "ref_indels": 0,
+  "n_actg": 0,
+  "n_missing": 29903,
+  "n_gap": 0,
+  "n_ambiguous": 0
+}

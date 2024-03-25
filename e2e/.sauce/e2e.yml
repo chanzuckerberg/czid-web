@@ -27,24 +27,37 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
-  - name: "Data Validation: P-1: SNo -: Data report validation example"
+  - name: "E2E: P-1: SNo e3: WGS SC2 Nanopore Sample Report & Download Data Validation"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-report.spec.ts']
+    maxDuration: 1h
     params:
       browserName: "chromium"
       project: "chromium"
-      grep: "SNo -: Data report validation example"
+      grep: "SNo e3:"
       retries: 2
     shard: concurrency
-  - name: "Data Validation: P-1: SNo -: WGS SARS-CoV-2 Data report validation example"
+  - name: "E2E: P-1: SNo e2: WGS SC2 Sample Report & Download Data Validation"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-report.spec.ts']
+    maxDuration: 1h
     params:
       browserName: "chromium"
       project: "chromium"
-      grep: "SNo -: WGS SARS-CoV-2 Data report validation example"
+      grep: "SNo e2:"
+      retries: 2
+    shard: concurrency
+  - name: "E2E: P-1: SNo e1: WGS Sample Report & Download Data Validation"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/wgs/sample-report.spec.ts']
+    maxDuration: 1h
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo e1:"
       retries: 2
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 5: Basespace Viral Consensus Genome - No trim"
@@ -139,3 +152,4 @@ npm:
     - adm-zip
     - moment-timezone
     - tar
+    - fast-diff

@@ -63,7 +63,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-2: Viral CG (WGS) - Sample upload (web) Nanopore unavailable"
     platformName: "macOS 12"

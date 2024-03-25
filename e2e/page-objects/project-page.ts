@@ -27,7 +27,6 @@ const TOOLTIP_OPTIONS = "[role='presentation'] [role='listbox'] [role='option']"
 const APPLY_BUTTON = "[data-testid='apply']";
 const ARIA_ROWINDEX = "aria-rowindex";
 const UPLOAD_HEADER_LINK = "[data-testid='menu-item-upload']";
-const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genomes']";
 const SAMPLES_TAB = "button[data-testid='samples']";
 const SAMPLES_COUNT_TD_1 = "//div[@aria-rowindex='1']//div[@data-testid='sample-counts' and contains(text(), 'Sample')]";
 const HEATMAP_BUTTON = "[class*='actions'] [role='listbox'] [class*='action']:not([data-testid])";
@@ -56,6 +55,7 @@ const BACKGROUND_SEARCH_RESULTS = "[class*='optionText']";
 const BACKGROUND_FILTER_LABEL = "//div[contains(@class, 'downloadType')]//div[text()='Background' and contains(@class, 'label')]";
 const SEARCH_MY_DATA_INPUT = "[class*='header'] [class*='category search'] input";
 const HOST_SEARCH_RESULTS = "[category='host'] [class='title']";
+const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genomes']";
 const PROJECT_SEARCH_RESULTS = "[category='Project'] [class='title']";
 
 const INCLUDE_SAMPLE_METADATA = "//span[text()='Include sample metadata in this table']/preceding-sibling::input";

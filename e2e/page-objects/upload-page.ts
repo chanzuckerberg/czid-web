@@ -19,10 +19,10 @@ export const SARS_COV2_REF_FILENAME = "wgs_SARS_CoV2_reference.fa";
 export const SARS_COV2_TRIM_PRIMER_FILENAME = "wgs_SARS_CoV2_primers_regions.bed";
 export const REF_FILENAME = "consensus_TEST_SC2.fa";
 export const TRIM_PRIMER_FILENAME = "Primer_K.bed";
+export const WETLAB_PROTOCOL = "ARTIC v4/ARTIC v4.1";
 const REF_FILE = (refFilename: string) => `./fixtures/reference_sequences/${refFilename}`;
 const TRIM_PRIMER_FILE = (trimPrimerFilename: string) => `./fixtures/trim_primers/${trimPrimerFilename}`;
 const METADATA_FILE_NAME = "metadata_template.csv";
-const WETLAB_PROTOCOL = "ARTIC v4/ARTIC v4.1";
 
 // Upload Samples
 const SELECT_BASESPACE_PROJECT_DROPDOWN = "[class*='basespaceSampleImport'] [class*='dropdownTrigger']";
@@ -52,7 +52,9 @@ const GUPPY_BASECALLER_SETTING_OPTIONS_TESTIDS = {
 const UPLOAD_TAXON_FILTER_TESTID = "upload-taxon-filter";
 const UPLOAD_TAXON_FILTER_INPUT = "[class*='FormControl'] input[type='search']";
 const CLEAR_UPLOADED_FILE_BUTTON_TESTID = "clear-uploaded-file-button";
+const CLEAR_LABS_TOGGLE = "[class*='clearLabs'] [class*='checkbox']";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
+const WETLAB_FILTER = "//*[text()='Wetlab Protocol:']/following-sibling::*/*[@data-testid='filters']";
 const REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID = "reference-sequence-file-upload";
 const TRIM_PRIMERS_FILE_UPLOAD = "//span[text()='Trim Primers']/parent::div/following-sibling::button";
 const PORTAL_DROPDOWN_LOCATOR = "[class*='portalDropdown']";
@@ -120,6 +122,11 @@ export class UploadPage extends PageObject {
   // #region Click
 
   // #region Samples
+  public async setWetLabFilter(filterName: string) {
+    await this.page.locator(WETLAB_FILTER).first().click();
+    await this.page.getByText(filterName).click();
+  }
+
   public async clickSelectBasespaceProjectDropdown() {
     await this.page.locator(SELECT_BASESPACE_PROJECT_DROPDOWN).click();
   }
@@ -191,6 +198,13 @@ export class UploadPage extends PageObject {
 
   public async clickUploadTaxonFilter() {
     await this.page.getByTestId(UPLOAD_TAXON_FILTER_TESTID).click();
+  }
+
+  public async clickClearLabsToggle(option: "Yes" | "No") {
+    const value = await this.page.locator(CLEAR_LABS_TOGGLE).textContent();
+    if (value !== option) {
+      await this.page.locator(CLEAR_LABS_TOGGLE).click();
+    }
   }
 
   public async clickClearUploadedFile() {
@@ -613,13 +627,9 @@ export class UploadPage extends PageObject {
       await this.clickSequencingPlatform(SEQUENCING_PLATFORMS.MNGS);
       await this.pause(1);
 
-      await this.setWetLabFilter(WETLAB_PROTOCOL);
+      await this.setTaxonFilter(WETLAB_PROTOCOL);
     }
     await this.pause(2); // Pause to stabilze test performance
-  }
-
-  public async setWetLabFilter(filterName: string) {
-    await this.setTaxonFilter(filterName); // Same locators as wet lab filter
   }
 
   public async setTaxonFilter(filterName: string) {
@@ -670,7 +680,7 @@ export class UploadPage extends PageObject {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const newKey = sampleNames[i];
-        if (newKey !== key) {
+        if (key !== newKey) {
           inputs[newKey] = inputs[key];
           delete inputs[key];
         }

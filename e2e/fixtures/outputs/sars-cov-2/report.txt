@@ -1,0 +1,41 @@
+Assembly                       sars_cov_2_SRR11178050_10p.consensus
+# contigs (>= 0 bp)            1                                   
+# contigs (>= 1000 bp)         1                                   
+# contigs (>= 5000 bp)         1                                   
+# contigs (>= 10000 bp)        1                                   
+# contigs (>= 25000 bp)        1                                   
+# contigs (>= 50000 bp)        0                                   
+Total length (>= 0 bp)         29903                               
+Total length (>= 1000 bp)      29903                               
+Total length (>= 5000 bp)      29903                               
+Total length (>= 10000 bp)     29903                               
+Total length (>= 25000 bp)     29903                               
+Total length (>= 50000 bp)     0                                   
+# contigs                      1                                   
+Largest contig                 29903                               
+Total length                   29903                               
+Reference length               29903                               
+Reference GC (%)               37.97                               
+N50                            29903                               
+NG50                           29903                               
+N75                            29903                               
+NG75                           29903                               
+L50                            1                                   
+LG50                           1                                   
+L75                            1                                   
+LG75                           1                                   
+# total reads                  28545                               
+# left                         0                                   
+# right                        0                                   
+Mapped (%)                     0.0                                 
+Reference mapped (%)           0.83                                
+Properly paired (%)            0.0                                 
+Reference properly paired (%)  0.0                                 
+Avg. coverage depth            0                                   
+Reference avg. coverage depth  2                                   
+Coverage >= 1x (%)             0.0                                 
+Reference coverage >= 1x (%)   86.62                               
+# unaligned contigs            1 + 0 part                          
+Unaligned length               29903                               
+# N's per 100 kbp              100000.00                           
+NGA50                          -                                   

@@ -65,6 +65,7 @@ const SAMPLE_DETAILS_HOST_VALUE = "[data-testid='host-value']";
 // TODO: Add const
 
 // How good is the coverage?
+const NCBI_REFERENCE_LENGTH = "//div[text()='NCBI Reference']/parent::div/following-sibling::div";
 const REFERENCE_LENGTH = "//div[text()='Reference Length']/parent::div/following-sibling::div";
 const COVERAGE_DEPTH = "//div[text()='Coverage Depth']/parent::div/following-sibling::div";
 const COVERAGE_BREADTH = "//div[text()='Coverage Breadth']/parent::div/following-sibling::div";
@@ -129,6 +130,10 @@ export class SamplesPage extends PageObject {
 
     public async getCoverageDept() {
       return this.page.locator(COVERAGE_DEPTH).textContent();
+    }
+
+    public async getNCBIReferenceLength() {
+      return this.page.locator(NCBI_REFERENCE_LENGTH).textContent();
     }
 
     public async getReferenceLength() {
