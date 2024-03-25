@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   get "identify", to: "identity#identify"
   get "enrich_token", to: "identity#enrich_token"
   get "impersonate", to: "identity#impersonate"
+  get "enrich_token_for_admin", to: "identity#enrich_token_for_admin"
 
   resources :samples do
     member do

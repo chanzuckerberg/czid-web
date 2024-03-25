@@ -1,5 +1,6 @@
 class IdentityController < ApplicationController
   before_action :login_required, only: [:identify]
+  before_action :admin_required, only: [:enrich_token_for_admin]
   skip_before_action :authenticate_user!, only: [:enrich_token, :impersonate]
 
   TOKEN_AUTH_SERVICE = "scripts/token_auth.py".freeze
@@ -84,6 +85,17 @@ class IdentityController < ApplicationController
 
     # Enrich the token with project roles & the same service identity & return it as payload
     enriched_token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true, service_identity: service_identity)
+    render json: {
+      token: enriched_token["token"],
+    }, status: :ok
+  end
+
+  def enrich_token_for_admin
+    permitted_params = params.permit(:user_id)
+    user_id = permitted_params[:user_id]&.to_i
+
+    # Enrich the token with project roles & return it as payload
+    enriched_token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true)
     render json: {
       token: enriched_token["token"],
     }, status: :ok

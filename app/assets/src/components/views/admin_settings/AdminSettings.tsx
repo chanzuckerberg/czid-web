@@ -3,6 +3,7 @@ import { getAppConfigs, setAppConfig } from "~/api/index";
 import cs from "./admin_settings.scss";
 import { CreateAppConfig } from "./components/CreateAppConfig";
 import { FeatureFlagControls } from "./components/FeatureFlagControls";
+import { GenerateEnrichedUserToken } from "./components/GenerateEnrichedUserToken";
 import { UpdateAppConfig } from "./components/UpdateAppConfig";
 import { WorkflowVersions } from "./components/WorkflowVersions";
 
@@ -44,6 +45,7 @@ const AdminSettings = () => {
   return (
     <div className={cs.page}>
       <h1 className={cs.header}>Admin Settings</h1>
+      <GenerateEnrichedUserToken />
       <WorkflowVersions workflowVersions={workflowVersions} />
       <FeatureFlagControls />
       <UpdateAppConfig
