@@ -3,10 +3,6 @@ require "rails_helper"
 RSpec.describe BulkDeletionServiceNextgen, type: :service do
   create_users
 
-  def to_struct(hash)
-    JSON.parse(hash.to_json, object_class: OpenStruct)
-  end
-
   def stub_soft_delete
     allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::UpdateWorkflowRuns, any_args)
     allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::UpdateSamples, any_args)
@@ -16,111 +12,111 @@ RSpec.describe BulkDeletionServiceNextgen, type: :service do
   end
 
   def make_workflow_runs_response(workflow_runs)
-    to_struct({
-                data: {
-                  workflow_runs: workflow_runs.map do |wr|
-                    {
-                      id: wr.id,
-                      owner_user_id: wr.owner_user_id,
-                      rails_workflow_run_id: wr.rails_workflow_run_id,
-                    }
-                  end,
-                  workflow_run_entity_inputs: workflow_runs.map do |wr|
-                    {
-                      workflow_run: {
-                        id: wr.id,
-                      },
-                      input_entity_id: wr.input_entity_id,
-                    }
-                  end,
-                },
-              })
+    HashUtil.to_struct({
+                         data: {
+                           workflow_runs: workflow_runs.map do |wr|
+                             {
+                               id: wr.id,
+                               owner_user_id: wr.owner_user_id,
+                               rails_workflow_run_id: wr.rails_workflow_run_id,
+                             }
+                           end,
+                           workflow_run_entity_inputs: workflow_runs.map do |wr|
+                             {
+                               workflow_run: {
+                                 id: wr.id,
+                               },
+                               input_entity_id: wr.input_entity_id,
+                             }
+                           end,
+                         },
+                       })
   end
 
   def make_workflow_runs_ints_response(workflow_runs)
-    to_struct({
-                data: {
-                  workflow_runs: workflow_runs.map do |wr|
-                    { id: wr.id }
-                  end,
-                },
-              })
+    HashUtil.to_struct({
+                         data: {
+                           workflow_runs: workflow_runs.map do |wr|
+                             { id: wr.id }
+                           end,
+                         },
+                       })
   end
 
   def make_workflow_runs_by_sample_id_response(workflow_runs)
-    to_struct({
-                data: {
-                  workflow_runs: workflow_runs.map do |wr|
-                    {
-                      id: wr.id,
-                      entity_inputs: {
-                        edges: [
-                          node: {
-                            input_entity_id: wr.input_entity_id,
-                          },
-                        ],
-                      },
-                    }
-                  end,
-                },
-              })
+    HashUtil.to_struct({
+                         data: {
+                           workflow_runs: workflow_runs.map do |wr|
+                             {
+                               id: wr.id,
+                               entity_inputs: {
+                                 edges: [
+                                   node: {
+                                     input_entity_id: wr.input_entity_id,
+                                   },
+                                 ],
+                               },
+                             }
+                           end,
+                         },
+                       })
   end
 
   def make_cgs_response(cgs)
-    to_struct({
-                data: {
-                  consensus_genomes: cgs.map do |cg|
-                    {
-                      id: cg.id,
-                      producing_run_id: cg.producing_run_id,
-                      sequencing_read: {
-                        sample: {
-                          id: cg.sample_id,
-                          rails_sample_id: cg.rails_sample_id,
-                        },
-                      },
-                    }
-                  end,
-                },
-              })
+    HashUtil.to_struct({
+                         data: {
+                           consensus_genomes: cgs.map do |cg|
+                             {
+                               id: cg.id,
+                               producing_run_id: cg.producing_run_id,
+                               sequencing_read: {
+                                 sample: {
+                                   id: cg.sample_id,
+                                   rails_sample_id: cg.rails_sample_id,
+                                 },
+                               },
+                             }
+                           end,
+                         },
+                       })
   end
 
   def make_samples_response(samples)
-    to_struct({
-                data: {
-                  samples: samples.map do |sample|
-                    {
-                      id: sample.id,
-                      rails_sample_id: sample.rails_sample_id,
-                      name: sample.name,
-                    }
-                  end,
-                },
-              })
+    HashUtil.to_struct({
+                         data: {
+                           samples: samples.map do |sample|
+                             {
+                               id: sample.id,
+                               rails_sample_id: sample.rails_sample_id,
+                               name: sample.name,
+                             }
+                           end,
+                         },
+                       })
   end
 
   def make_bulk_download_workflow_runs_response(bulk_download_wrs)
-    to_struct({
-                data: {
-                  workflow_runs: bulk_download_wrs.map do |wr|
-                    {
-                      id: wr.id,
-                    }
-                  end,
-                },
-              })
+    HashUtil.to_struct({
+                         data: {
+                           workflow_runs: bulk_download_wrs.map do |wr|
+                             {
+                               id: wr.id,
+                             }
+                           end,
+                         },
+                       })
   end
 
   def make_bulk_download_entities_response(bulk_download_entities)
-    to_struct({
-                data: {
-                  bulk_downloads: bulk_download_entities.map do |entity|
-                    {
-                      id: entity.id,
-                    }
-                  end,
-                },
-              })
+    HashUtil.to_struct({
+                         data: {
+                           bulk_downloads: bulk_download_entities.map do |entity|
+                             {
+                               id: entity.id,
+                             }
+                           end,
+                         },
+                       })
   end
 
   let(:consensus_genome) { WorkflowRun::WORKFLOW[:consensus_genome] }
@@ -140,55 +136,55 @@ RSpec.describe BulkDeletionServiceNextgen, type: :service do
 
   # nextgen stuff
   let(:ng_sample1) do
-    to_struct({
-                id: "Sample_UUID1",
-                name: "sample1",
-                rails_sample_id: sample1.id,
-              })
+    HashUtil.to_struct({
+                         id: "Sample_UUID1",
+                         name: "sample1",
+                         rails_sample_id: sample1.id,
+                       })
   end
   let(:ng_sample2) do
-      to_struct({
-                  id: "Sample_UUID2",
-                  name: "sample2",
-                  rails_sample_id: sample2.id,
-                })
+      HashUtil.to_struct({
+                           id: "Sample_UUID2",
+                           name: "sample2",
+                           rails_sample_id: sample2.id,
+                         })
     end
   let(:ng_sample3) do
-    to_struct({
-                id: "Sample_UUID3",
-                name: "sample3",
-                rails_sample_id: sample3.id,
-              })
+    HashUtil.to_struct({
+                         id: "Sample_UUID3",
+                         name: "sample3",
+                         rails_sample_id: sample3.id,
+                       })
   end
 
   let(:ng_wr1) do
-    to_struct({
-                id: "WR_UUID1",
-                owner_user_id: @joe.id,
-                rails_workflow_run_id: wr1.id,
-                input_entity_id: ng_sample1.id,
-                cg_id: "CG_UUID1",
-              })
+    HashUtil.to_struct({
+                         id: "WR_UUID1",
+                         owner_user_id: @joe.id,
+                         rails_workflow_run_id: wr1.id,
+                         input_entity_id: ng_sample1.id,
+                         cg_id: "CG_UUID1",
+                       })
   end
   let(:ng_wr2) do
-  to_struct({
-              id: "WR_UUID2",
-              owner_user_id: @joe.id,
-              rails_workflow_run_id: wr2.id,
-              input_entity_id: ng_sample2.id,
-            })
+  HashUtil.to_struct({
+                       id: "WR_UUID2",
+                       owner_user_id: @joe.id,
+                       rails_workflow_run_id: wr2.id,
+                       input_entity_id: ng_sample2.id,
+                     })
 end
   let(:ng_wr3) do
-  to_struct({
-              id: "WR_UUID3",
-              owner_user_id: @joe.id,
-              rails_workflow_run_id: wr3.id,
-              input_entity_id: ng_sample3.id,
-              cg_id: "CG_UUID2",
-            })
+  HashUtil.to_struct({
+                       id: "WR_UUID3",
+                       owner_user_id: @joe.id,
+                       rails_workflow_run_id: wr3.id,
+                       input_entity_id: ng_sample3.id,
+                       cg_id: "CG_UUID2",
+                     })
 end
   let(:ng_wr4) do
-    to_struct(
+    HashUtil.to_struct(
       {
         id: "WR_UUID4",
         owner_user_id: @joe.id,
@@ -198,15 +194,15 @@ end
     )
   end
   let(:ng_cg1) do
-    to_struct({
-                id: "CG_UUID1",
-                producing_run_id: ng_wr1.id,
-                sample_id: ng_sample1.id,
-                rails_sample_id: ng_sample1.rails_sample_id,
-              })
+    HashUtil.to_struct({
+                         id: "CG_UUID1",
+                         producing_run_id: ng_wr1.id,
+                         sample_id: ng_sample1.id,
+                         rails_sample_id: ng_sample1.rails_sample_id,
+                       })
   end
   let(:ng_cg2) do
-    to_struct(
+    HashUtil.to_struct(
       {
         id: "CG_UUID2",
         producing_run_id: ng_wr3.id,
@@ -217,15 +213,15 @@ end
   end
 
   let(:ng_bulk_download_wr) do
-    to_struct({
-                id: "WR_UUID6",
-              })
+    HashUtil.to_struct({
+                         id: "WR_UUID6",
+                       })
   end
 
   let(:ng_bulk_download) do
-    to_struct({
-                id: "BD_UUID1",
-              })
+    HashUtil.to_struct({
+                         id: "BD_UUID1",
+                       })
   end
 
   describe "call" do
@@ -265,6 +261,21 @@ end
           # Only the sample ids without remaining workflow runs are returned
           expect(nextgen_ids[:sample_ids]).to contain_exactly(ng_sample1.id, ng_sample2.id)
         end
+
+        it "creates a deletion log for each object" do
+          BulkDeletionServiceNextgen.call(
+            user: @joe,
+            object_ids: [wr1.id, wr2.id, wr3.id],
+            workflow: consensus_genome,
+            delete_timestamp: Time.now.utc,
+            token: token
+          )
+          expect(NextgenDeletionLog.where(object_id: [ng_cg1.id, ng_cg2.id], user_id: @joe.id).count).to eq(2)
+          expect(NextgenDeletionLog.where(object_id: [ng_wr1.id, ng_wr2.id, ng_wr3.id], user_id: @joe.id).count).to eq(3)
+          expect(NextgenDeletionLog.where(object_id: [ng_sample1.id, ng_sample2.id], user_id: @joe.id).count).to eq(2)
+          expect(NextgenDeletionLog.where(object_id: [ng_bulk_download.id], user_id: @joe.id).count).to eq(1)
+          expect(NextgenDeletionLog.where(object_id: [ng_bulk_download_wr.id], user_id: @joe.id).count).to eq(1)
+        end
       end
 
       context "when the workflow run ids are UUIDs" do
@@ -290,6 +301,21 @@ end
           # Only the sample ids without remaining workflow runs are returned
           expect(nextgen_ids[:sample_ids]).to contain_exactly(ng_sample1.id, ng_sample2.id)
         end
+
+        it "creates a deletion log for each object" do
+          BulkDeletionServiceNextgen.call(
+            user: @joe,
+            object_ids: [ng_wr1.id, ng_wr2.id, ng_wr3.id],
+            workflow: consensus_genome,
+            delete_timestamp: Time.now.utc,
+            token: token
+          )
+          expect(NextgenDeletionLog.where(object_id: [ng_cg1.id, ng_cg2.id], user_id: @joe.id).count).to eq(2)
+          expect(NextgenDeletionLog.where(object_id: [ng_wr1.id, ng_wr2.id, ng_wr3.id], user_id: @joe.id).count).to eq(3)
+          expect(NextgenDeletionLog.where(object_id: [ng_sample1.id, ng_sample2.id], user_id: @joe.id).count).to eq(2)
+          expect(NextgenDeletionLog.where(object_id: [ng_bulk_download.id], user_id: @joe.id).count).to eq(1)
+          expect(NextgenDeletionLog.where(object_id: [ng_bulk_download_wr.id], user_id: @joe.id).count).to eq(1)
+        end
       end
     end
 
@@ -309,6 +335,17 @@ end
         expect(rails_ids[:workflow_run_ids]).to contain_exactly(wr1.id, wr2.id, wr3.id)
         expect(rails_ids[:sample_ids]).to contain_exactly(sample1.id, sample2.id, sample3.id)
         expect(nextgen_ids).to be_empty
+      end
+
+      it "does not create any deletion logs" do
+        BulkDeletionServiceNextgen.call(
+          user: @joe,
+          object_ids: [wr1.id, wr2.id, wr3.id],
+          workflow: consensus_genome,
+          delete_timestamp: Time.now.utc,
+          token: token
+        )
+        expect(NextgenDeletionLog.where(user_id: @joe.id).count).to eq(0)
       end
     end
 
@@ -349,6 +386,20 @@ end
         expect(nextgen_ids[:cg_ids]).to contain_exactly(ng_cg1.id)
         expect(nextgen_ids[:bulk_download_workflow_run_ids]).to be_empty
         expect(nextgen_ids[:bulk_download_entity_ids]).to be_empty
+      end
+
+      it "creates a deletion log for each nextgen object" do
+        BulkDeletionServiceNextgen.call(
+          user: @joe,
+          object_ids: [wr1.id, wr2.id, wr3.id],
+          workflow: consensus_genome,
+          delete_timestamp: Time.now.utc,
+          token: token
+        )
+        expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: "ConsensusGenome").pluck(:object_id)).to contain_exactly(ng_cg1.id)
+        expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: WorkflowRun.name).pluck(:object_id)).to contain_exactly(ng_wr1.id)
+        expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: Sample.name).pluck(:object_id)).to contain_exactly(ng_sample1.id)
+        expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: BulkDownload.name).count).to eq(0)
       end
     end
   end

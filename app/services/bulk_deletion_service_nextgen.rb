@@ -187,6 +187,7 @@ class BulkDeletionServiceNextgen
         producingRunId: { _in: $run_ids }
       }) {
         id
+        producingRunId
       }
     }
   GRAPHQL
@@ -251,36 +252,6 @@ class BulkDeletionServiceNextgen
       ) {
         id
         deletedAt
-      }
-    }
-  GRAPHQL
-
-  DeleteCGs = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    mutation($cg_ids: [UUID!]) {
-      deleteConsensusGenome(where: {
-        id: { _in: $cg_ids }
-      }) {
-        id
-      }
-    }
-  GRAPHQL
-
-  DeleteSamples = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    mutation($sample_ids: [UUID!]) {
-      deleteSample(where: {
-        id: { _in: $sample_ids }
-      }) {
-        id
-      }
-    }
-  GRAPHQL
-
-  DeleteWorkflowRuns = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    mutation($run_ids: [UUID!]) {
-      deleteWorkflowRun(where: {
-        id: { _in: $run_ids }
-      }) {
-        id
       }
     }
   GRAPHQL
@@ -385,15 +356,24 @@ class BulkDeletionServiceNextgen
 
     # Figure out which samples don't have any more workflow runs (and should therefore be deleted)
     sample_ids_to_delete = find_samples_to_delete(nextgen_workflows_to_sample_ids, all_workflow_runs_nextgen, nextgen_sample_ids)
-    _samples_to_delete = nextgen_samples.select { |sample| sample_ids_to_delete.include?(sample.id) }
+    samples_to_delete = nextgen_samples.select { |sample| sample_ids_to_delete.include?(sample.id) }
 
     mutation_token = TokenCreationService.call(user_id: user.id, should_include_project_claims: true, service_identity: "rails")["token"]
 
     # Soft delete bulk downloads
-    bulk_download_wr_ids, bulk_download_entity_ids = soft_delete_bulk_downloads(user, cg_ids_to_delete, token, mutation_token).values_at(:bulk_download_workflow_run_ids, :bulk_download_entity_ids)
+    bulk_download_wrs, bulk_download_entities = soft_delete_bulk_downloads(user, cg_ids_to_delete, token, mutation_token).values_at(:bulk_download_workflow_runs, :bulk_download_entities)
 
     # Create CG deletion logs
-    # create_deletion_logs(user, cgs_to_delete, samples_to_delete, nextgen_workflows_to_delete, WorkflowRun::WORKFLOW[:consensus_genome], delete_timestamp)
+    create_deletion_logs(
+      user,
+      cgs_to_delete,
+      samples_to_delete,
+      nextgen_workflows_to_delete,
+      bulk_download_wrs,
+      bulk_download_entities,
+      WorkflowRun::WORKFLOW[:consensus_genome],
+      delete_timestamp
+    )
 
     # Soft delete CGs, samples, and workflow runs in NextGen
     soft_delete_objects(user, delete_timestamp, cg_ids_to_delete, sample_ids_to_delete, nextgen_run_ids_to_delete)
@@ -411,8 +391,8 @@ class BulkDeletionServiceNextgen
         cg_ids: cg_ids_to_delete,
         sample_ids: sample_ids_to_delete, # sample ids to delete in nextgen
         workflow_run_ids: nextgen_run_ids_to_delete,
-        bulk_download_workflow_run_ids: bulk_download_wr_ids,
-        bulk_download_entity_ids: bulk_download_entity_ids,
+        bulk_download_workflow_run_ids: bulk_download_wrs.map(&:id),
+        bulk_download_entity_ids: bulk_download_entities.map(&:id),
       },
     }
   end
@@ -461,15 +441,16 @@ class BulkDeletionServiceNextgen
   end
 
   def soft_delete_bulk_downloads(user, entity_ids, token, mutation_token)
-    bulk_download_workflow_run_ids = CzidGraphqlFederation.query_with_token(user.id, GetBulkDownloadWorkflowRunsForEntities, variables: { entity_ids: entity_ids }, token: token).data.workflow_runs.map(&:id)
-    bulk_download_entity_ids = CzidGraphqlFederation.query_with_token(user.id, GetBulkDownloadsForWorkflowRuns, variables: { run_ids: bulk_download_workflow_run_ids }, token: token).data.bulk_downloads.map(&:id)
+    bulk_download_workflow_runs = CzidGraphqlFederation.query_with_token(user.id, GetBulkDownloadWorkflowRunsForEntities, variables: { entity_ids: entity_ids }, token: token).data.workflow_runs
+    bd_wr_ids = bulk_download_workflow_runs.map(&:id)
+    bulk_download_entities = CzidGraphqlFederation.query_with_token(user.id, GetBulkDownloadsForWorkflowRuns, variables: { run_ids: bd_wr_ids }, token: token).data.bulk_downloads
 
-    CzidGraphqlFederation.query_with_token(user.id, UpdateBulkDownload, variables: { bulk_download_ids: bulk_download_entity_ids, delete_timestamp: @delete_timestamp }, token: mutation_token)
-    CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: bulk_download_workflow_run_ids, delete_timestamp: @delete_timestamp }, token: mutation_token)
+    CzidGraphqlFederation.query_with_token(user.id, UpdateBulkDownload, variables: { bulk_download_ids: bulk_download_entities.map(&:id), delete_timestamp: @delete_timestamp }, token: mutation_token)
+    CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: bd_wr_ids, delete_timestamp: @delete_timestamp }, token: mutation_token)
 
     return {
-      bulk_download_workflow_run_ids: bulk_download_workflow_run_ids,
-      bulk_download_entity_ids: bulk_download_entity_ids,
+      bulk_download_workflow_runs: bulk_download_workflow_runs,
+      bulk_download_entities: bulk_download_entities,
     }
   end
 
@@ -479,6 +460,86 @@ class BulkDeletionServiceNextgen
     CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: workflow_run_ids_to_delete, delete_timestamp: delete_timestamp }, token: token)
     CzidGraphqlFederation.query_with_token(user.id, UpdateConsensusGenomes, variables: { cg_ids: cg_ids_to_delete, delete_timestamp: delete_timestamp }, token: token)
     CzidGraphqlFederation.query_with_token(user.id, UpdateSamples, variables: { sample_ids: sample_ids_to_delete, delete_timestamp: delete_timestamp }, token: token)
+  end
+
+  def create_deletion_logs(
+    user,
+    cgs_to_delete,
+    samples_to_delete,
+    workflow_runs_to_delete,
+    bulk_download_wrs,
+    bulk_download_entities,
+    workflow,
+    delete_timestamp
+  )
+    cgs_to_delete.each do |cg|
+      NextgenDeletionLog.create!(
+        user_id: user.id,
+        user_email: user.email,
+        object_id: cg.id,
+        object_type: "ConsensusGenome",
+        soft_deleted_at: delete_timestamp,
+        rails_object_id: nil,
+        metadata_json: {
+          producing_run_id: cg.producing_run_id,
+          sample_id: cg.sequencing_read.sample.id,
+        }
+      )
+    end
+
+    samples_to_delete.each do |sample|
+      NextgenDeletionLog.create!(
+        user_id: user.id,
+        user_email: user.email,
+        object_id: sample.id,
+        object_type: Sample.name,
+        soft_deleted_at: delete_timestamp,
+        rails_object_id: sample.rails_sample_id,
+        metadata_json: {}
+      )
+    end
+
+    workflow_runs_to_delete.each do |wr|
+      NextgenDeletionLog.create!(
+        user_id: user.id,
+        user_email: user.email,
+        object_id: wr.id,
+        object_type: WorkflowRun.name,
+        soft_deleted_at: delete_timestamp,
+        rails_object_id: wr.rails_workflow_run_id,
+        metadata_json: {
+          workflow: workflow,
+        }
+      )
+    end
+
+    bulk_download_wrs.each do |wr|
+      NextgenDeletionLog.create!(
+        user_id: user.id,
+        user_email: user.email,
+        object_id: wr.id,
+        object_type: WorkflowRun.name,
+        soft_deleted_at: delete_timestamp,
+        rails_object_id: nil,
+        metadata_json: {
+          workflow: "bulk-download",
+        }
+      )
+    end
+
+    bulk_download_entities.each do |bd|
+      NextgenDeletionLog.create!(
+        user_id: user.id,
+        user_email: user.email,
+        object_id: bd.id,
+        object_type: BulkDownload.name,
+        soft_deleted_at: delete_timestamp,
+        rails_object_id: nil,
+        metadata_json: {
+          producing_run_id: bd.producing_run_id,
+        }
+      )
+    end
   end
 
   # ------------------------------------------------------------------------

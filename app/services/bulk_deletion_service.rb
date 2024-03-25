@@ -162,6 +162,10 @@ class BulkDeletionService
       )
     end
 
+    unless nextgen_ids.empty?
+      Resque.enqueue(HardDeleteNextgenObjects, user.id, nextgen_ids[:cg_ids], nextgen_ids[:sample_ids], nextgen_ids[:workflow_run_ids], nextgen_ids[:bulk_download_workflow_run_ids], nextgen_ids[:bulk_download_entity_ids])
+    end
+
     # First enqueue deletion of samples without workflow runs
     # This happens for short read mNGS uploads and for CG runs in NextGen,
     # since the workflow run lives in NextGen and the sample is duplicated in Rails

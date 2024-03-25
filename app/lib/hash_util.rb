@@ -10,4 +10,8 @@ class HashUtil
     h.each { |k, r| flat_hash(r, f + [k], g) }
     g
   end
+
+  def self.to_struct(hash)
+    JSON.parse(hash.to_json, object_class: OpenStruct)
+  end
 end

@@ -578,11 +578,7 @@ RSpec.describe BulkDeletionService, type: :service do
 
     context "NextGen" do
       context "when there are no rails workflow runs to delete" do
-        it "still enqueues a NextGen hard deletion job" do
-          # TODO: wait for next gen hard delete implementation
-        end
-
-        it "still enqueues a Resque job to delete Rails samples" do
+        it "still enqueues a NextGen hard deletion job and a Rails job" do
           allow(BulkDeletionServiceNextgen).to receive(:call).and_return(
             {
               rails_ids: {
@@ -592,12 +588,13 @@ RSpec.describe BulkDeletionService, type: :service do
               nextgen_ids: {
                 workflow_run_ids: ["WR_UUID1"],
                 sample_ids: ["Sample_UUID1"],
-                cg_ids: [],
+                cg_ids: ["CG_UUID1"],
                 bulk_download_workflow_run_ids: [],
                 bulk_download_entity_ids: [],
               },
             }
           )
+          expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [])
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [], [@sample4.id], consensus_genome, @joe.id
           )

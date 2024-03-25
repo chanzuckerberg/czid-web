@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_01_17_054458) do
+ActiveRecord::Schema.define(version: 2024_03_22_175304) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -333,6 +333,19 @@ ActiveRecord::Schema.define(version: 2024_01_17_054458) do
     t.bigint "metadata_field_id", null: false
     t.index ["metadata_field_id"], name: "metadata_fields_projects_metadata_field_id_fk"
     t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
+  end
+
+  create_table "nextgen_deletion_logs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false, comment: "The user id of the user who deleted the object"
+    t.string "user_email", comment: "The email of the user who deleted the object"
+    t.bigint "rails_object_id", comment: "The id of the object that was deleted (Rails ID)"
+    t.string "object_id", null: false, comment: "The id of the object that was deleted (NextGen UUID)"
+    t.string "object_type", null: false, comment: "The type of object deleted, e.g. Sample, Workflow"
+    t.datetime "soft_deleted_at", comment: "When the object was marked as soft deleted"
+    t.datetime "hard_deleted_at", comment: "When the object was successfully hard deleted"
+    t.string "metadata_json", comment: "Generic JSON-string format for recording additional information about the object"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "output_states", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
