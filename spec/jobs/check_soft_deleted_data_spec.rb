@@ -6,8 +6,12 @@ RSpec.describe CheckSoftDeletedData, type: :job do
   let(:consensus_genome) { WorkflowRun::WORKFLOW[:consensus_genome] }
   let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
 
+  before do
+    allow(CzidGraphqlFederation).to receive(:query_with_token).and_return([]).exactly(4).times
+  end
+
   it "logs error and raises exception if unexpected error occurs" do
-    allow(CheckSoftDeletedData).to receive(:check_for_soft_deleted_data).and_raise(StandardError)
+    allow(CheckSoftDeletedData).to receive(:check_for_soft_deleted_data_rails).and_raise(StandardError)
     expect(LogUtil).to receive(:log_error).with("Unexpected error encountered while checking database for soft deleted data", exception: StandardError).exactly(1).times
     expect do
       CheckSoftDeletedData.perform
