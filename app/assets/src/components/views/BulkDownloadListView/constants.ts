@@ -69,7 +69,10 @@ export const FailedStatus = [
   BulkDownloadStatus.ABORTED,
 ];
 
-export const getStatusType = (bulkDownload: BulkDownloadDetails) => {
+export const getStatusType = (bulkDownload?: BulkDownloadDetails) => {
+  if (!bulkDownload) {
+    return "default";
+  }
   if (
     (bulkDownload.status === BulkDownloadStatus.SUCCEEDED &&
       bulkDownload.errorMessage) ||
