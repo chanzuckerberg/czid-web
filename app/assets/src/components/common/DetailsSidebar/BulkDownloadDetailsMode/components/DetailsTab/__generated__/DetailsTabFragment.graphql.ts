@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<220b29828d04ba7d500ba1c8957f8d4c>>
+ * @generated SignedSource<<d684c48d51a9cb583e4112ab8595ba68>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,15 +17,11 @@ export type DetailsTabFragment$data = ReadonlyArray<{
     readonly name: string | null | undefined;
   } | null | undefined> | null | undefined;
   readonly id: string | null | undefined;
-  readonly params: {
-    readonly background: string | null | undefined;
-    readonly downloadFormat: string | null | undefined;
-    readonly fileFormat: string | null | undefined;
-    readonly filterBy: string | null | undefined;
-    readonly includeMetadata: string | null | undefined;
-    readonly metric: string | null | undefined;
-    readonly taxaWithReads: string | null | undefined;
-  } | null | undefined;
+  readonly params: ReadonlyArray<{
+    readonly displayName: string | null | undefined;
+    readonly paramType: string;
+    readonly value: string;
+  } | null | undefined> | null | undefined;
   readonly " $fragmentType": "DetailsTabFragment";
 }>;
 export type DetailsTabFragment$key = ReadonlyArray<{
@@ -60,58 +56,30 @@ return {
     {
       "alias": null,
       "args": null,
-      "concreteType": "query_fedBulkDownloads_items_params",
+      "concreteType": "query_fedBulkDownloads_items_params_items",
       "kind": "LinkedField",
       "name": "params",
-      "plural": false,
+      "plural": true,
       "selections": [
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "downloadFormat",
+          "name": "paramType",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "metric",
+          "name": "value",
           "storageKey": null
         },
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "background",
-          "storageKey": null
-        },
-        {
-          "alias": null,
-          "args": null,
-          "kind": "ScalarField",
-          "name": "filterBy",
-          "storageKey": null
-        },
-        {
-          "alias": null,
-          "args": null,
-          "kind": "ScalarField",
-          "name": "taxaWithReads",
-          "storageKey": null
-        },
-        {
-          "alias": null,
-          "args": null,
-          "kind": "ScalarField",
-          "name": "includeMetadata",
-          "storageKey": null
-        },
-        {
-          "alias": null,
-          "args": null,
-          "kind": "ScalarField",
-          "name": "fileFormat",
+          "name": "displayName",
           "storageKey": null
         }
       ],
@@ -142,6 +110,6 @@ return {
 };
 })();
 
-(node as any).hash = "ff3da33ab7e74f2fc5d28997dce8a63c";
+(node as any).hash = "6e5b87759f2e78db112412b35f7647ee";
 
 export default node;

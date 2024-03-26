@@ -37,7 +37,9 @@ export const BulkDownloadDetailsModeFragment = graphql`
     downloadType
     errorMessage
     params {
-      downloadFormat
+      paramType
+      value
+      displayName
     }
   }
 `;

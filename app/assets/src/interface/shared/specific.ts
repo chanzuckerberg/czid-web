@@ -32,7 +32,6 @@ export interface BulkDownloadDetails {
   fileSize: string;
   status: BulkDownloadStatus;
   downloadType: string;
-  downloadFormat: string;
   errorMessage: string;
   logUrl: string;
   id: string;
@@ -40,7 +39,7 @@ export interface BulkDownloadDetails {
   onDetailsClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   tooltipText: string | null;
   params: {
-    [x: string]: { value: string; displayName?: string };
+    [x: string]: { paramType: string; value: string; displayName?: string };
   };
 }
 

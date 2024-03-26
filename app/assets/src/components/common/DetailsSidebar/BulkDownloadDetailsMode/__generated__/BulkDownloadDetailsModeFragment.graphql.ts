@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4b0d010252fe1454c64952dab7f44a89>>
+ * @generated SignedSource<<49eb949f7999d4efd684c0cd4169a1cf>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -16,9 +16,11 @@ export type BulkDownloadDetailsModeFragment$data = ReadonlyArray<{
   readonly fileSize: number | null | undefined;
   readonly id: string | null | undefined;
   readonly logUrl: string | null | undefined;
-  readonly params: {
-    readonly downloadFormat: string | null | undefined;
-  } | null | undefined;
+  readonly params: ReadonlyArray<{
+    readonly displayName: string | null | undefined;
+    readonly paramType: string;
+    readonly value: string;
+  } | null | undefined> | null | undefined;
   readonly status: string | null | undefined;
   readonly url: string | null | undefined;
   readonly " $fragmentType": "BulkDownloadDetailsModeFragment";
@@ -88,16 +90,30 @@ const node: ReaderFragment = {
     {
       "alias": null,
       "args": null,
-      "concreteType": "query_fedBulkDownloads_items_params",
+      "concreteType": "query_fedBulkDownloads_items_params_items",
       "kind": "LinkedField",
       "name": "params",
-      "plural": false,
+      "plural": true,
       "selections": [
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "downloadFormat",
+          "name": "paramType",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "value",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "displayName",
           "storageKey": null
         }
       ],
@@ -108,6 +124,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "5308eb8ff7c44acf814de5ff077596fe";
+(node as any).hash = "8a8f70ffb1eea7ee5a2a8db87e4f857e";
 
 export default node;

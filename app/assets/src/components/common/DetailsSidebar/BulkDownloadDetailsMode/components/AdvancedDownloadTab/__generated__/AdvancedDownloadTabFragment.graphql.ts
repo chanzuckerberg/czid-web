@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f65ee52d10761e2e0e03682a75528be0>>
+ * @generated SignedSource<<4278f3141195c4246bc2de2fa8b8635c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,9 +14,11 @@ export type AdvancedDownloadTabFragment$data = ReadonlyArray<{
   readonly downloadType: string | null | undefined;
   readonly fileSize: number | null | undefined;
   readonly id: string | null | undefined;
-  readonly params: {
-    readonly downloadFormat: string | null | undefined;
-  } | null | undefined;
+  readonly params: ReadonlyArray<{
+    readonly displayName: string | null | undefined;
+    readonly paramType: string;
+    readonly value: string;
+  } | null | undefined> | null | undefined;
   readonly status: string | null | undefined;
   readonly url: string | null | undefined;
   readonly " $fragmentType": "AdvancedDownloadTabFragment";
@@ -72,16 +74,30 @@ const node: ReaderFragment = {
     {
       "alias": null,
       "args": null,
-      "concreteType": "query_fedBulkDownloads_items_params",
+      "concreteType": "query_fedBulkDownloads_items_params_items",
       "kind": "LinkedField",
       "name": "params",
-      "plural": false,
+      "plural": true,
       "selections": [
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "downloadFormat",
+          "name": "paramType",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "value",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "displayName",
           "storageKey": null
         }
       ],
@@ -92,6 +108,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "63bdb02e721304250c773fa1f680c50f";
+(node as any).hash = "73321950a93853e90e15856cbf6da8fc";
 
 export default node;

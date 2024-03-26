@@ -421,7 +421,7 @@ enum ConsensusGenomeCountColumns {
 }
 
 input ConsensusGenomeCreateInput {
-  taxonId: ID!
+  taxonId: ID = null
   sequencingReadId: ID!
   referenceGenomeId: ID = null
   accessionId: ID = null
@@ -1641,7 +1641,6 @@ type MultipartUploadResponse {
 }
 
 type Mutation {
-  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
   createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
   updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
   deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
@@ -1657,6 +1656,7 @@ type Mutation {
   deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
   runWorkflowVersion(input: RunWorkflowVersionInput!, executionId: String = null): WorkflowRun!
   runWorkflowRun(workflowRunId: ID!, executionId: String = null): WorkflowRun!
+  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
   createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
   uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
   uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
@@ -1922,13 +1922,6 @@ type Project {
 }
 
 type Query {
-  appConfig(id: ID!): AppConfig
-  pathogenList(version: String): PathogenList!
-  project(id: Int!): Project!
-  sample(sampleId: Int!): Sample!
-  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
-  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
-  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   node(
     """The ID of the object."""
     id: GlobalID!
@@ -1947,6 +1940,13 @@ type Query {
   workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
   workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
   workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
+  appConfig(id: ID!): AppConfig
+  pathogenList(version: String): PathogenList!
+  project(id: Int!): Project!
+  sample(sampleId: Int!): Sample!
+  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
+  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
+  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   files(where: FileWhereClause = null): [File!]!
   samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Sample!]!
   sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [SequencingRead!]!
@@ -2106,7 +2106,7 @@ type query_fedBulkDownloads_items {
   errorMessage: String
   entityInputFileType: String
   entityInputs: [query_fedBulkDownloads_items_entityInputs_items]
-  params: query_fedBulkDownloads_items_params
+  params: [query_fedBulkDownloads_items_params_items]
   logUrl: String
 }
 
@@ -2115,14 +2115,10 @@ type query_fedBulkDownloads_items_entityInputs_items {
   name: String
 }
 
-type query_fedBulkDownloads_items_params {
-  downloadFormat: String
-  metric: String
-  background: String
-  filterBy: String
-  taxaWithReads: String
-  includeMetadata: String
-  fileFormat: String
+type query_fedBulkDownloads_items_params_items {
+  paramType: String!
+  displayName: String
+  value: String!
 }
 
 type query_fedConsensusGenomes_items {
@@ -4516,23 +4512,6 @@ input WorkflowOrderByClause {
 }
 
 type WorkflowRun implements EntityInterface & Node {
-  cachedResults: String
-  createdAt: DateTime!
-  deprecated: Boolean!
-  errorMessage: String
-  executedAt: ISO8601DateTime
-  inputsJson: String
-  rerunFrom: Int
-  s3OutputPrefix: String
-  sample: Sample
-  sampleId: Int
-  sfnExecutionArn: String
-  status: WorkflowRunStatus
-  timeToFinalized: Int
-  updatedAt: DateTime
-  wdlVersion: String
-  workflow: String!
-
   """The Globally Unique ID of this object"""
   _id: GlobalID!
   id: ID!
@@ -4542,6 +4521,8 @@ type WorkflowRun implements EntityInterface & Node {
   executionId: String
   outputsJson: String
   workflowRunnerInputsJson: String
+  status: String!
+  errorMessage: String
   workflowVersion(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = []): WorkflowVersion
   steps(
     where: WorkflowRunStepWhereClause = null
@@ -4580,7 +4561,21 @@ type WorkflowRun implements EntityInterface & Node {
   rawInputsJson: String
   ownerUserId: Int!
   collectionId: Int!
+  createdAt: ISO8601DateTime!
+  updatedAt: ISO8601DateTime!
   deletedAt: DateTime
+  cachedResults: String
+  deprecated: Boolean!
+  executedAt: ISO8601DateTime
+  inputsJson: String
+  rerunFrom: Int
+  s3OutputPrefix: String
+  sample: Sample
+  sampleId: Int
+  sfnExecutionArn: String
+  timeToFinalized: Int
+  wdlVersion: String
+  workflow: String!
 }
 
 type WorkflowRunAggregate {

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<17b37fdd61e9110104603baf41ffe249>>
+ * @generated SignedSource<<a6fdcd7bd7a0753c01ef2cac317a577d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -33,56 +33,66 @@ export type BulkDownloadListQuery = {
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = {
+var v0 = [
+  {
+    "kind": "Literal",
+    "name": "input",
+    "value": {
+      "limit": 40,
+      "searchBy": "Suzette McCanny"
+    }
+  }
+],
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v1 = {
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "status",
   "storageKey": null
 },
-v2 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "startedAt",
   "storageKey": null
 },
-v3 = {
+v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "ownerUserId",
   "storageKey": null
 },
-v4 = {
+v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "downloadType",
   "storageKey": null
 },
-v5 = {
+v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "url",
   "storageKey": null
 },
-v6 = {
+v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "fileSize",
   "storageKey": null
 },
-v7 = {
+v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -98,7 +108,7 @@ return {
     "selections": [
       {
         "alias": null,
-        "args": null,
+        "args": (v0/*: any*/),
         "concreteType": "query_fedBulkDownloads_items",
         "kind": "LinkedField",
         "name": "fedBulkDownloads",
@@ -119,7 +129,6 @@ return {
             "kind": "FragmentSpread",
             "name": "AdvancedDownloadTabFragment"
           },
-          (v0/*: any*/),
           (v1/*: any*/),
           (v2/*: any*/),
           (v3/*: any*/),
@@ -127,6 +136,7 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
+          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -135,12 +145,12 @@ return {
             "name": "entityInputs",
             "plural": true,
             "selections": [
-              (v0/*: any*/)
+              (v1/*: any*/)
             ],
             "storageKey": null
           }
         ],
-        "storageKey": null
+        "storageKey": "fedBulkDownloads(input:{\"limit\":40,\"searchBy\":\"Suzette McCanny\"})"
       }
     ],
     "type": "Query",
@@ -154,14 +164,14 @@ return {
     "selections": [
       {
         "alias": null,
-        "args": null,
+        "args": (v0/*: any*/),
         "concreteType": "query_fedBulkDownloads_items",
         "kind": "LinkedField",
         "name": "fedBulkDownloads",
         "plural": true,
         "selections": [
-          (v0/*: any*/),
-          (v5/*: any*/),
+          (v1/*: any*/),
+          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -169,9 +179,9 @@ return {
             "name": "logUrl",
             "storageKey": null
           },
-          (v1/*: any*/),
-          (v6/*: any*/),
-          (v4/*: any*/),
+          (v2/*: any*/),
+          (v7/*: any*/),
+          (v5/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -182,58 +192,30 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "query_fedBulkDownloads_items_params",
+            "concreteType": "query_fedBulkDownloads_items_params_items",
             "kind": "LinkedField",
             "name": "params",
-            "plural": false,
+            "plural": true,
             "selections": [
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "downloadFormat",
+                "name": "paramType",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "metric",
+                "name": "value",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
-                "name": "background",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "filterBy",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "taxaWithReads",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "includeMetadata",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "fileFormat",
+                "name": "displayName",
                 "storageKey": null
               }
             ],
@@ -247,7 +229,7 @@ return {
             "name": "entityInputs",
             "plural": true,
             "selections": [
-              (v0/*: any*/),
+              (v1/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -258,25 +240,25 @@ return {
             ],
             "storageKey": null
           },
-          (v2/*: any*/),
           (v3/*: any*/),
-          (v7/*: any*/)
+          (v4/*: any*/),
+          (v8/*: any*/)
         ],
-        "storageKey": null
+        "storageKey": "fedBulkDownloads(input:{\"limit\":40,\"searchBy\":\"Suzette McCanny\"})"
       }
     ]
   },
   "params": {
-    "cacheID": "220ab2caf29df2b4fd7125d7d7156d67",
+    "cacheID": "8e306edcfd4afa0026e76974d9d117e9",
     "id": null,
     "metadata": {},
     "name": "BulkDownloadListQuery",
     "operationKind": "query",
-    "text": "query BulkDownloadListQuery {\n  fedBulkDownloads {\n    ...BulkDownloadDetailsModeFragment\n    ...DetailsTabFragment\n    ...AdvancedDownloadTabFragment\n    id\n    status\n    startedAt\n    ownerUserId\n    downloadType\n    url\n    fileSize\n    entityInputFileType\n    entityInputs {\n      id\n    }\n  }\n}\n\nfragment AdvancedDownloadTabFragment on query_fedBulkDownloads_items {\n  id\n  url\n  status\n  fileSize\n  downloadType\n  params {\n    downloadFormat\n  }\n}\n\nfragment BulkDownloadDetailsModeFragment on query_fedBulkDownloads_items {\n  id\n  url\n  logUrl\n  status\n  fileSize\n  downloadType\n  errorMessage\n  params {\n    downloadFormat\n  }\n}\n\nfragment DetailsTabFragment on query_fedBulkDownloads_items {\n  id\n  downloadType\n  params {\n    downloadFormat\n    metric\n    background\n    filterBy\n    taxaWithReads\n    includeMetadata\n    fileFormat\n  }\n  entityInputs {\n    id\n    name\n  }\n}\n"
+    "text": "query BulkDownloadListQuery {\n  fedBulkDownloads(input: {searchBy: \"Suzette McCanny\", limit: 40}) {\n    ...BulkDownloadDetailsModeFragment\n    ...DetailsTabFragment\n    ...AdvancedDownloadTabFragment\n    id\n    status\n    startedAt\n    ownerUserId\n    downloadType\n    url\n    fileSize\n    entityInputFileType\n    entityInputs {\n      id\n    }\n  }\n}\n\nfragment AdvancedDownloadTabFragment on query_fedBulkDownloads_items {\n  id\n  url\n  status\n  fileSize\n  downloadType\n  params {\n    paramType\n    value\n    displayName\n  }\n}\n\nfragment BulkDownloadDetailsModeFragment on query_fedBulkDownloads_items {\n  id\n  url\n  logUrl\n  status\n  fileSize\n  downloadType\n  errorMessage\n  params {\n    paramType\n    value\n    displayName\n  }\n}\n\nfragment DetailsTabFragment on query_fedBulkDownloads_items {\n  id\n  downloadType\n  params {\n    paramType\n    value\n    displayName\n  }\n  entityInputs {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "7f8f38c0888e4a5f8ae70dcd09db008d";
+(node as any).hash = "c41f005971f3dc9c585826c17deb13d3";
 
 export default node;

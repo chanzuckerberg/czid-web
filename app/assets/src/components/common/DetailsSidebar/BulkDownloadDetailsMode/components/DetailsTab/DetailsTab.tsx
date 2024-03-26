@@ -19,13 +19,9 @@ export const DetailsTabFragment = graphql`
     id
     downloadType
     params {
-      downloadFormat
-      metric
-      background
-      filterBy
-      taxaWithReads
-      includeMetadata
-      fileFormat
+      paramType
+      value
+      displayName
     }
     entityInputs {
       id
@@ -64,8 +60,9 @@ export const DetailsTab = ({
 
   downloadTypeConfig.fields &&
     downloadTypeConfig.fields.forEach(field => {
-      const paramsField: { displayName?: string; value: string } =
-        bulkDownloadDetails?.params?.[camelCase(field.type)];
+      const paramsField = bulkDownloadDetails?.params?.find(
+        param => param?.paramType === camelCase(field.type),
+      );
       // fieldValue must be a string. In some cases, the field has a displayName, such as for filter values.
       // In other cases, the field just has a value, such as the download format. The stringify is here just
       // in case the value is not a string - for example the list of filters.
