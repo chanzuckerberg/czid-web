@@ -197,20 +197,15 @@ class SampleFileEntityLinkCreationService
     end
 
     # Kick off the workflow run
-    run_workflow_response = CzidGraphqlFederation
-                            .query_with_token(
-                              @user_id,
-                              KickoffWorkflowRun,
-                              variables: {
-                                workflow_run_id: next_gen_workflow_run_id,
-                                execution_id: @workflow_run.sfn_execution_arn,
-                              },
-                              token: @token
-                            )
-
-    if run_workflow_response.errors.any?
-      message = response.errors.messages&.[]("data") || "Failed to kick off workflow run"
-      LogUtil.log_error(message, details: response.errors.details)
-    end
+    CzidGraphqlFederation
+      .query_with_token(
+        @user_id,
+        KickoffWorkflowRun,
+        variables: {
+          workflow_run_id: next_gen_workflow_run_id,
+          execution_id: @workflow_run.sfn_execution_arn,
+        },
+        token: @token
+      )
   end
 end

@@ -33,6 +33,15 @@ module CzidGraphqlFederation
                         TokenCreationService.call(user_id: user_id, should_include_project_claims: true, service_identity: "rails")["token"]
                       end
 
-    Client.query(query, variables: variables, context: context)
+    resp = Client.query(query, variables: variables, context: context)
+    if resp.errors.any?
+      err_msg = resp&.errors&.details&.to_h
+      LogUtil.log_error(
+        "GraphQL federation query failed: #{err_msg}",
+        exception: GraphQL::ExecutionError.new(err_msg),
+        query_name: query.operation_name
+      )
+    end
+    return resp
   end
 end
