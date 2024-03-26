@@ -71,8 +71,9 @@ class BulkDeletionService
     nextgen_ids = {}
     token = TokenCreationService
             .call(
-              user_id: @user.id,
-              should_include_project_claims: true
+              user_id: user.id,
+              should_include_project_claims: true,
+              service_identity: "rails"
             )["token"]
     if WorkflowRun::MNGS_WORKFLOWS.include?(workflow)
       technology = WorkflowRun::MNGS_WORKFLOW_TO_TECHNOLOGY[workflow]

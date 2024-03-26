@@ -31,6 +31,8 @@ x-web-variables: &web-variables
   ? SERVER_DOMAIN
   ? SMTP_PASSWORD
   ? SMTP_USER
+  ? SYSTEM_ADMIN_USER_ID
+  ? SYSTEM_ADMIN_PROJECT_ID
   ? HEATMAP_ES_ADDRESS=http://opensearch:9200
   ? INDEXING_LAMBDA_MODE=local
   ? LOCAL_TAXON_INDEXING_URL=concurrency-lambda:8080

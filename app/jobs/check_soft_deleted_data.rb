@@ -126,10 +126,10 @@ class CheckSoftDeletedData
   end
 
   def self.check_for_soft_deleted_data_nextgen
-    system_user_id = ENV["SYSTEM_USER_ID"]
+    system_user_id = ENV["SYSTEM_ADMIN_USER_ID"]
     token = TokenCreationService.call(user_id: system_user_id, should_include_project_claims: true)["token"]
     time = (Time.now.utc - DELAY).iso8601
-    soft_deleted_cgs = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedCGs, variables: { time: time }, token: token)
+    soft_deleted_cgs = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedCGs, variables: { time: time }, token: token).data.consensus_genomes
     if soft_deleted_cgs.present?
       LogUtil.log_error(
         "Soft deleted NextGen consensus genomes found in database",
@@ -138,7 +138,7 @@ class CheckSoftDeletedData
       )
     end
 
-    soft_deleted_samples = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedSamples, variables: { time: time }, token: token)
+    soft_deleted_samples = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedSamples, variables: { time: time }, token: token).data.samples
     if soft_deleted_samples.present?
       LogUtil.log_error(
         "Soft deleted NextGen samples found in database",
@@ -147,7 +147,7 @@ class CheckSoftDeletedData
       )
     end
 
-    soft_deleted_workflow_runs = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedWorkflowRuns, variables: { time: time }, token: token)
+    soft_deleted_workflow_runs = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedWorkflowRuns, variables: { time: time }, token: token).data.workflow_runs
     if soft_deleted_workflow_runs.present?
       LogUtil.log_error(
         "Soft deleted NextGen workflow runs found in database",
@@ -156,7 +156,7 @@ class CheckSoftDeletedData
       )
     end
 
-    soft_deleted_bulk_downloads = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedBulkDownloads, variables: { time: time }, token: token)
+    soft_deleted_bulk_downloads = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedBulkDownloads, variables: { time: time }, token: token).data.bulk_downloads
     if soft_deleted_bulk_downloads.present?
       LogUtil.log_error(
         "Soft deleted NextGen bulk downloads found in database",
