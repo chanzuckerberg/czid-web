@@ -78,8 +78,6 @@ export const AdvancedDownloadTab = ({
     }
 
     if (downloadType === "consensus_genome") {
-      // eslint-disable-next-line no-console
-      console.log({ params });
       const downloadFormat = params?.find(
         param => param?.paramType === "downloadFormat",
       );

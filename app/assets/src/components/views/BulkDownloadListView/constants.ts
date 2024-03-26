@@ -96,9 +96,12 @@ export const getStatusType = (bulkDownload?: BulkDownloadDetails) => {
 };
 
 export const getStatusDisplay = (
-  status: BulkDownloadStatus,
+  status?: BulkDownloadStatus,
   errorMessage?: string,
 ) => {
+  if (!status) {
+    return "";
+  }
   if (
     (status === BulkDownloadStatus.SUCCEEDED && errorMessage) ||
     BulkDownloadStatus.SUCCEEDED_WITH_ISSUE === status

@@ -140,8 +140,8 @@ const BulkDownloadListComponent = () => {
           },
           statusType: getStatusType(bulkDownloadRaw),
           statusDisplay: getStatusDisplay(
-            bulkDownloadRaw.status,
-            bulkDownloadRaw.errorMessage,
+            bulkDownloadRaw?.status,
+            bulkDownloadRaw?.errorMessage,
           ),
           tooltipText: getTooltipText(bulkDownloadRaw),
         };
