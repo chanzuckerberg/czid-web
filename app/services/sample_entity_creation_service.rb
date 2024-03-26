@@ -16,6 +16,32 @@ class SampleEntityCreationService
     }
   GRAPHQL
 
+  GetSampleQuery = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+    query($sample_id: Int!) {
+      samples(where: {railsSampleId: {_eq: $sample_id}}) {
+        id
+      }
+    }
+  GRAPHQL
+
+  # This query will need to be updated to enable support for associating
+  # multiple sequencing reads with a sample.
+  GetSequencingReadQuery = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+    query($sample_id: Int!) {
+      sequencingReads(where: {sample: {railsSampleId: {_eq: $sample_id}}}) {
+        id
+      }
+    }
+  GRAPHQL
+
+  GetAccessionId = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+    query($accession_id: String!) {
+      accessions(where: {upstreamDatabase: {name: {_eq: "NCBI"}}, accessionId: {_eq: $accession_id}}) {
+        id
+      }
+    }
+  GRAPHQL
+
   CreateSequencingReadMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
     mutation($technology: SequencingTechnology!, $clearlabs_export: Boolean!, $collection_id: Int!, $medaka_model: String, $protocol: SequencingProtocol, $sample_id: ID!) {
       createSequencingRead(
@@ -59,14 +85,6 @@ class SampleEntityCreationService
   }
   GRAPHQL
 
-  GetAccessionId = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-  query($accession_id: String!) {
-    accessions(where: { accessionId: { _eq: $accession_id } } ) {
-      id
-    }
-  }
-  GRAPHQL
-
   CreateWorkflowRun = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
     mutation($collectionId: Int!, $workflowVersionId: ID!, $railsWorkflowRunId: Int!, $rawInputJson: String!, $entityInputs: [EntityInputType!]!) {
       createWorkflowRun(
@@ -92,6 +110,9 @@ class SampleEntityCreationService
     @user_id = user_id
     @sample = sample
     @workflow_run = workflow_run
+    @workflow_run_accession_id = @workflow_run.inputs&.[]("accession_id")
+    @workflow_run_accession_name = @workflow_run.inputs&.[]("accession_name")
+    @technology = NEXT_GEN_SEQUENCING_TECHNOLOGY_MAP[@workflow_run.get_input("technology")]
     @token = TokenCreationService
              .call(
                user_id: @user_id,
@@ -105,7 +126,7 @@ class SampleEntityCreationService
     response = CzidGraphqlFederation
                .query_with_token(
                  @user_id,
-                 CreateSampleMutation,
+                 GetSampleQuery,
                  variables: {
                    sample_name: @sample.name,
                    collection_id: @sample.project_id,
@@ -113,13 +134,28 @@ class SampleEntityCreationService
                  },
                  token: @token
                )
-    nextgen_sample_id = response.data.create_sample.id
+    nextgen_sample_id = response.data.samples.first&.id
+    if nextgen_sample_id.nil?
+      # Create the new Sample
+      response = CzidGraphqlFederation
+                 .query_with_token(
+                   @user_id,
+                   CreateSampleMutation,
+                   variables: {
+                     sample_name: @sample.name,
+                     collection_id: @sample.project_id,
+                     rails_sample_id: @sample.id,
+                   },
+                   token: @token
+                 )
+      nextgen_sample_id = response.data.create_sample.id
+    end
 
-    # Create the new SequencingRead and link it to the Sample
+    # Check if the SequencingRead already exists in the nextGen database
     response = CzidGraphqlFederation
                .query_with_token(
                  @user_id,
-                 CreateSequencingReadMutation,
+                 GetSequencingReadQuery,
                  variables: {
                    technology: NEXT_GEN_SEQUENCING_TECHNOLOGY_MAP[workflow_run_technology],
                    clearlabs_export: @workflow_run.get_input("clearlabs") | false,
@@ -130,7 +166,25 @@ class SampleEntityCreationService
                  },
                  token: @token
                )
-    sequencing_read_id = response.data.create_sequencing_read.id
+    sequencing_read_id = response.data.sequencing_reads.first&.id
+    if sequencing_read_id.nil?
+      # Create the new SequencingRead and link it to the Sample
+      response = CzidGraphqlFederation
+                 .query_with_token(
+                   @user_id,
+                   CreateSequencingReadMutation,
+                   variables: {
+                     technology: @technology,
+                     clearlabs_export: @workflow_run.get_input("clearlabs") | false,
+                     collection_id: @sample.project_id,
+                     medaka_model: @workflow_run.get_input("medaka_model"),
+                     protocol: @workflow_run.get_input("wetlab_protocol"),
+                     sample_id: nextgen_sample_id,
+                   },
+                   token: @token
+                 )
+      sequencing_read_id = response.data.create_sequencing_read.id
+    end
 
     # Get the workflow version id
     wdl_version = VersionRetrievalService.call(@sample.project_id, @workflow_run.workflow)
@@ -216,15 +270,13 @@ class SampleEntityCreationService
                                    token: @token
                                  )
         next_gen_accession_id = get_accession_response.data.accessions.first&.id
-        if next_gen_accession_id
-          create_workflow_run_entity_inputs.push(
-            {
-              name: "accession",
-              entityId: next_gen_accession_id,
-              entityType: "accession",
-            }
-          )
-        end
+        create_workflow_run_entity_inputs.push(
+          {
+            name: "accession",
+            entityId: next_gen_accession_id,
+            entityType: "accession",
+          }
+        )
       end
     end
 
