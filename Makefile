@@ -141,6 +141,11 @@ local-clean: local-stop ## Wipe out the local dev environment (including the db!
 local-pull: local-ecr-login ## Pull down the latest upstream docker images to this computer
 	$(docker_compose) pull --ignore-pull-failures
 
+.PHONY: local-update-gql-schema
+local-update-gql-schema: ## updates gql schema
+	npx get-graphql-schema http://localhost:3000/graphqlfed > graphql_schema/czid_graphql_federation_schema.graphql -h "x-graphql-yoga-csrf=csrf"
+	$(docker_compose) run web bin/rails czid_graphql_federation:update_schema
+
 .PHONY: rspec
 rspec: .env.localdev ## Run rspec
 	$(docker_compose_simple) exec web rspec
