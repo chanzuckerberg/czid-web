@@ -134,7 +134,7 @@ class SampleEntityCreationService
                  },
                  token: @token
                )
-    nextgen_sample_id = response.data.samples.first&.id
+    nextgen_sample_id = response.data&.samples&.first&.id
     if nextgen_sample_id.nil?
       # Create the new Sample
       response = CzidGraphqlFederation
