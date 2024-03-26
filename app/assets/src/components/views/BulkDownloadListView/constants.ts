@@ -124,10 +124,10 @@ export const getStatusDisplay = (
   return "";
 };
 
-export const getTooltipText = (bulkDownload: BulkDownloadDetails) => {
+export const getTooltipText = (bulkDownload?: BulkDownloadDetails) => {
   if (
-    bulkDownload.status === BulkDownloadStatus.SUCCEEDED &&
-    bulkDownload.errorMessage
+    bulkDownload?.status === BulkDownloadStatus.SUCCEEDED &&
+    bulkDownload?.errorMessage
   ) {
     return bulkDownload.errorMessage;
   }
