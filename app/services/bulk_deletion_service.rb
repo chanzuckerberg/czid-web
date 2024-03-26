@@ -224,7 +224,7 @@ class BulkDeletionService
 
     counts["consensus-genome"] = if user.allowed_feature?("should_read_from_nextgen")
                                    BulkDeletionServiceNextgen.get_rails_samples_with_nextgen_workflow(
-                                     user,
+                                     user.id,
                                      sample_ids,
                                      WorkflowRun::WORKFLOW[:consensus_genome],
                                      token: token

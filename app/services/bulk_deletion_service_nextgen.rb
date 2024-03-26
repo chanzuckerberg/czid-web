@@ -271,7 +271,7 @@ class BulkDeletionServiceNextgen
     user = @user
     workflow = @workflow
     object_ids = @object_ids
-    delete_timestamp = @delete_timestamp
+    delete_timestamp = @delete_timestamp.iso8601 # NextGen expects timestamps in ISO8601 format
     token = @token
     # The source of truth of which runs are done under which Samples is a combination of Rails and NextGen.
     # NextGen is the source of truth for all CG runs, even those initially run on Rails and migrated.
@@ -361,7 +361,7 @@ class BulkDeletionServiceNextgen
     mutation_token = TokenCreationService.call(user_id: user.id, should_include_project_claims: true, service_identity: "rails")["token"]
 
     # Soft delete bulk downloads
-    bulk_download_wrs, bulk_download_entities = soft_delete_bulk_downloads(user, cg_ids_to_delete, token, mutation_token).values_at(:bulk_download_workflow_runs, :bulk_download_entities)
+    bulk_download_wrs, bulk_download_entities = soft_delete_bulk_downloads(user, cg_ids_to_delete, token, mutation_token, delete_timestamp).values_at(:bulk_download_workflow_runs, :bulk_download_entities)
 
     # Create CG deletion logs
     create_deletion_logs(
@@ -440,13 +440,13 @@ class BulkDeletionServiceNextgen
     return sample_ids_to_delete
   end
 
-  def soft_delete_bulk_downloads(user, entity_ids, token, mutation_token)
+  def soft_delete_bulk_downloads(user, entity_ids, token, mutation_token, delete_timestamp)
     bulk_download_workflow_runs = CzidGraphqlFederation.query_with_token(user.id, GetBulkDownloadWorkflowRunsForEntities, variables: { entity_ids: entity_ids }, token: token).data.workflow_runs
     bd_wr_ids = bulk_download_workflow_runs.map(&:id)
     bulk_download_entities = CzidGraphqlFederation.query_with_token(user.id, GetBulkDownloadsForWorkflowRuns, variables: { run_ids: bd_wr_ids }, token: token).data.bulk_downloads
 
-    CzidGraphqlFederation.query_with_token(user.id, UpdateBulkDownload, variables: { bulk_download_ids: bulk_download_entities.map(&:id), delete_timestamp: @delete_timestamp }, token: mutation_token)
-    CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: bd_wr_ids, delete_timestamp: @delete_timestamp }, token: mutation_token)
+    CzidGraphqlFederation.query_with_token(user.id, UpdateBulkDownload, variables: { bulk_download_ids: bulk_download_entities.map(&:id), delete_timestamp: delete_timestamp }, token: mutation_token)
+    CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: bd_wr_ids, delete_timestamp: delete_timestamp }, token: mutation_token)
 
     return {
       bulk_download_workflow_runs: bulk_download_workflow_runs,
@@ -584,26 +584,12 @@ class BulkDeletionServiceNextgen
     }
   end
 
-  def self.hard_delete_objects(user, cg_ids_to_delete, sample_ids_to_delete, workflow_run_ids_to_delete)
-    # Delete CG if Sample has other CGs not being deleted
-    if cg_ids_to_delete.count > 0
-      CzidGraphqlFederation.query_with_token(user.id, BulkDeletionServiceNextgen::DeleteCGs, variables: { cg_ids: cg_ids_to_delete })
-    end
-    # Delete entire samples
-    if sample_ids_to_delete.count > 0
-      CzidGraphqlFederation.query_with_token(user.id, BulkDeletionServiceNextgen::DeleteSamples, variables: { sample_ids: sample_ids_to_delete })
-    end
-    # Delete Workflow runs
-    if workflow_run_ids_to_delete.count > 0
-      CzidGraphqlFederation.query_with_token(user.id, BulkDeletionServiceNextgen::DeleteWorkflowRuns, variables: { run_ids: workflow_run_ids_to_delete })
-    end
-  end
+  def self.get_rails_samples_with_nextgen_workflow(user_id, rails_sample_ids, workflow, token = nil)
+    token ||= TokenCreationService.call(user_id: user_id, should_include_project_claims: true)["token"]
 
-  def self.get_rails_samples_with_nextgen_workflow(user, rails_sample_ids, workflow)
     rails_samples_with_workflow = []
-    token = TokenCreationService.call(user_id: user.id, should_include_project_claims: true)["token"]
-    samples = CzidGraphqlFederation.query_with_token(user.id, GetSamplesByRailsSampleId, variables: { sample_ids: rails_sample_ids }, token: token).data.samples
-    workflow_runs = CzidGraphqlFederation.query_with_token(user.id, GetWorkflowRunsBySampleIdAndWorkflowType, variables: { sample_ids: samples.map(&:id), workflow_name: workflow }, token: token).data.workflow_runs
+    samples = CzidGraphqlFederation.query_with_token(user_id, GetSamplesByRailsSampleId, variables: { sample_ids: rails_sample_ids }, token: token).data.samples
+    workflow_runs = CzidGraphqlFederation.query_with_token(user_id, GetWorkflowRunsBySampleIdAndWorkflowType, variables: { sample_ids: samples.map(&:id), workflow_name: workflow }, token: token).data.workflow_runs
     samples.each do |sample|
       sample_has_workflow = workflow_runs.any? { |wr| wr.entity_inputs.edges.first.node.input_entity_id == sample.id }
       if sample_has_workflow

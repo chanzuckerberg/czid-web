@@ -128,7 +128,7 @@ class CheckSoftDeletedData
   def self.check_for_soft_deleted_data_nextgen
     system_user_id = ENV["SYSTEM_USER_ID"]
     token = TokenCreationService.call(user_id: system_user_id, should_include_project_claims: true)["token"]
-    time = Time.now.utc - DELAY
+    time = (Time.now.utc - DELAY).iso8601
     soft_deleted_cgs = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedCGs, variables: { time: time }, token: token)
     if soft_deleted_cgs.present?
       LogUtil.log_error(

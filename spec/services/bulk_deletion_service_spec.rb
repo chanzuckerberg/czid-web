@@ -577,33 +577,128 @@ RSpec.describe BulkDeletionService, type: :service do
     end
 
     context "NextGen" do
-      context "when there are no rails workflow runs to delete" do
-        it "still enqueues a NextGen hard deletion job and a Rails job" do
-          allow(BulkDeletionServiceNextgen).to receive(:call).and_return(
-            {
-              rails_ids: {
-                workflow_run_ids: [],
-                sample_ids: [@sample4.id],
-              },
-              nextgen_ids: {
-                workflow_run_ids: ["WR_UUID1"],
-                sample_ids: ["Sample_UUID1"],
-                cg_ids: ["CG_UUID1"],
-                bulk_download_workflow_run_ids: [],
-                bulk_download_entity_ids: [],
-              },
-            }
-          )
-          expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [])
-          expect(Resque).to receive(:enqueue).with(
-            HardDeleteObjects, [], [@sample4.id], consensus_genome, @joe.id
-          )
-          response = BulkDeletionService.call(
-            object_ids: [@completed_wr.id],
-            user: @joe,
-            workflow: consensus_genome
-          )
-          expect(response[:error]).to be_nil
+      context "when the workflow run ids are UUIDs" do
+        context "when there are no rails workflow runs to delete" do
+          it "still enqueues a NextGen hard deletion job and a Rails job" do
+            allow(BulkDeletionServiceNextgen).to receive(:call).and_return(
+              {
+                rails_ids: {
+                  workflow_run_ids: [],
+                  sample_ids: [@sample4.id],
+                },
+                nextgen_ids: {
+                  workflow_run_ids: ["WR_UUID1"],
+                  sample_ids: ["Sample_UUID1"],
+                  cg_ids: ["CG_UUID1"],
+                  bulk_download_workflow_run_ids: [],
+                  bulk_download_entity_ids: [],
+                },
+              }
+            )
+            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [])
+            expect(Resque).to receive(:enqueue).with(
+              HardDeleteObjects, [], [@sample4.id], consensus_genome, @joe.id
+            )
+            response = BulkDeletionService.call(
+              object_ids: ["WR_UUID1"],
+              user: @joe,
+              workflow: consensus_genome
+            )
+            expect(response[:error]).to be_nil
+          end
+
+          it "completes successfully when should_read_from_nextgen is on" do
+            @joe.add_allowed_feature("should_read_from_nextgen")
+            allow(BulkDeletionServiceNextgen).to receive(:call).and_return(
+              {
+                rails_ids: {
+                  workflow_run_ids: [],
+                  sample_ids: [@sample4.id],
+                },
+                nextgen_ids: {
+                  workflow_run_ids: ["WR_UUID1"],
+                  sample_ids: ["Sample_UUID1"],
+                  cg_ids: ["CG_UUID1"],
+                  bulk_download_workflow_run_ids: [],
+                  bulk_download_entity_ids: [],
+                },
+              }
+            )
+            allow(BulkDeletionServiceNextgen).to receive(:get_rails_samples_with_nextgen_workflow).with(@joe.id, [@sample4.id], consensus_genome, any_args).and_return([])
+            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [])
+            expect(Resque).to receive(:enqueue).with(
+              HardDeleteObjects, [], [@sample4.id], consensus_genome, @joe.id
+            )
+            response = BulkDeletionService.call(
+              object_ids: ["WR_UUID1"],
+              user: @joe,
+              workflow: consensus_genome
+            )
+            expect(response[:error]).to be_nil
+          end
+        end
+
+        context "when there are some Rails workflow runs to delete" do
+          it "enqueues a NextGen hard deletion job and a Rails job" do
+            allow(BulkDeletionServiceNextgen).to receive(:call).and_return(
+              {
+                rails_ids: {
+                  workflow_run_ids: [@completed_wr.id],
+                  sample_ids: [@sample1.id, @sample4.id],
+                },
+                nextgen_ids: {
+                  workflow_run_ids: ["WR_UUID1", "WR_UUID4"],
+                  sample_ids: ["Sample_UUID1", "Sample_UUID4"],
+                  cg_ids: ["CG_UUID1"],
+                  bulk_download_workflow_run_ids: [],
+                  bulk_download_entity_ids: [],
+                },
+              }
+            )
+            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1", "Sample_UUID4"], ["WR_UUID1", "WR_UUID4"], [], [])
+            expect(Resque).to receive(:enqueue).with(
+              HardDeleteObjects, [], [@sample4.id], consensus_genome, @joe.id
+            )
+            expect(Resque).to receive(:enqueue).with(
+              HardDeleteObjects, [@completed_wr.id], [@sample1.id], consensus_genome, @joe.id
+            )
+            response = BulkDeletionService.call(
+              object_ids: ["WR_UUID1", "WR_UUID4"],
+              user: @joe,
+              workflow: consensus_genome
+            )
+            expect(response[:error]).to be_nil
+          end
+
+          it "completes successfully when should_read_from_nextgen is on" do
+            @joe.add_allowed_feature("should_read_from_nextgen")
+            allow(BulkDeletionServiceNextgen).to receive(:call).and_return(
+              {
+                rails_ids: {
+                  workflow_run_ids: [@completed_wr.id],
+                  sample_ids: [@sample1.id],
+                },
+                nextgen_ids: {
+                  workflow_run_ids: ["WR_UUID1"],
+                  sample_ids: ["Sample_UUID1"],
+                  cg_ids: ["CG_UUID1"],
+                  bulk_download_workflow_run_ids: [],
+                  bulk_download_entity_ids: [],
+                },
+              }
+            )
+            allow(BulkDeletionServiceNextgen).to receive(:get_rails_samples_with_nextgen_workflow).with(@joe.id, [@sample1.id], consensus_genome, any_args).and_return([])
+            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [])
+            expect(Resque).to receive(:enqueue).with(
+              HardDeleteObjects, [@completed_wr.id], [@sample1.id], consensus_genome, @joe.id
+            )
+            response = BulkDeletionService.call(
+              object_ids: ["WR_UUID1"],
+              user: @joe,
+              workflow: consensus_genome
+            )
+            expect(response[:error]).to be_nil
+          end
         end
       end
     end

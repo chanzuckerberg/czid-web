@@ -270,11 +270,10 @@ end
             delete_timestamp: Time.now.utc,
             token: token
           )
-          expect(NextgenDeletionLog.where(object_id: [ng_cg1.id, ng_cg2.id], user_id: @joe.id).count).to eq(2)
-          expect(NextgenDeletionLog.where(object_id: [ng_wr1.id, ng_wr2.id, ng_wr3.id], user_id: @joe.id).count).to eq(3)
-          expect(NextgenDeletionLog.where(object_id: [ng_sample1.id, ng_sample2.id], user_id: @joe.id).count).to eq(2)
-          expect(NextgenDeletionLog.where(object_id: [ng_bulk_download.id], user_id: @joe.id).count).to eq(1)
-          expect(NextgenDeletionLog.where(object_id: [ng_bulk_download_wr.id], user_id: @joe.id).count).to eq(1)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: "ConsensusGenome").pluck(:object_id)).to contain_exactly(ng_cg1.id, ng_cg2.id)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: WorkflowRun.name).pluck(:object_id)).to contain_exactly(ng_wr1.id, ng_wr2.id, ng_wr3.id, ng_bulk_download_wr.id)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: Sample.name).pluck(:object_id)).to contain_exactly(ng_sample1.id, ng_sample2.id)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: BulkDownload.name).pluck(:object_id)).to contain_exactly(ng_bulk_download.id)
         end
       end
 
@@ -310,11 +309,10 @@ end
             delete_timestamp: Time.now.utc,
             token: token
           )
-          expect(NextgenDeletionLog.where(object_id: [ng_cg1.id, ng_cg2.id], user_id: @joe.id).count).to eq(2)
-          expect(NextgenDeletionLog.where(object_id: [ng_wr1.id, ng_wr2.id, ng_wr3.id], user_id: @joe.id).count).to eq(3)
-          expect(NextgenDeletionLog.where(object_id: [ng_sample1.id, ng_sample2.id], user_id: @joe.id).count).to eq(2)
-          expect(NextgenDeletionLog.where(object_id: [ng_bulk_download.id], user_id: @joe.id).count).to eq(1)
-          expect(NextgenDeletionLog.where(object_id: [ng_bulk_download_wr.id], user_id: @joe.id).count).to eq(1)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: "ConsensusGenome").pluck(:object_id)).to contain_exactly(ng_cg1.id, ng_cg2.id)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: WorkflowRun.name).pluck(:object_id)).to contain_exactly(ng_wr1.id, ng_wr2.id, ng_wr3.id, ng_bulk_download_wr.id)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: Sample.name).pluck(:object_id)).to contain_exactly(ng_sample1.id, ng_sample2.id)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: BulkDownload.name).pluck(:object_id)).to contain_exactly(ng_bulk_download.id)
         end
       end
     end
