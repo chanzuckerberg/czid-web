@@ -10,10 +10,19 @@ class DeleteOldBulkDownloads
   BATCH_SIZE = 100
   SECONDS_OF_DELAY_BETWEEN_BATCHES = 1
 
+  NextGenDeleteBulkDownloads = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+    mutation {
+      deleteOldBulkDownloads {
+        id
+      }
+    }
+  GRAPHQL
+
   def self.perform
     Rails.logger.info("Starting DeleteOldBulkDownloads job.")
     if AppConfigHelper.get_app_config(AppConfig::AUTO_DELETE_OLD_BULK_DOWNLOADS) == "1"
       destroy_old_downloads
+      destroy_old_downloads_nextgen
     else
       Rails.logger.info("Auto-deletion of BulkDownloads is not currently enabled. See AppConfig.")
     end
@@ -60,6 +69,14 @@ class DeleteOldBulkDownloads
     unless failed_bulk_download_ids.empty?
       Rails.logger.error("Failed to delete BulkDownloads with ids: #{failed_bulk_download_ids.join(', ')}.")
     end
+  end
+
+  def self.destroy_old_downloads_nextgen
+    Rails.logger.info("Starting DeleteOldBulkDownloads job for NextGen bulk downloads.")
+
+    # Delete old bulk downloads
+    system_user_id = ENV["SYSTEM_ADMIN_USER_ID"]
+    CzidGraphqlFederation.query_with_token(system_user_id, NextGenDeleteBulkDownloads)
   end
 
   # Destroy a single bulk_download record with retry logic in case something goes wrong.
