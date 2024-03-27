@@ -241,7 +241,7 @@ class SampleEntityCreationService
                      },
                      token: @token
                    )
-        next_gen_taxon_id = response.data.taxa.first&.id
+        next_gen_taxon_id = response.data&.taxa&.first&.id
         if next_gen_taxon_id
           create_workflow_run_entity_inputs.push(
             {
@@ -296,7 +296,7 @@ class SampleEntityCreationService
                  },
                  token: @token
                )
-    next_gen_workflow_run_id = response.data.create_workflow_run.id
+    next_gen_workflow_run_id = response.data&.create_workflow_run&.id
     next_gen_workflow_run_id
   end
 end
