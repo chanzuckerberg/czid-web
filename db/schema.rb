@@ -835,6 +835,7 @@ ActiveRecord::Schema.define(version: 2024_03_22_175304) do
     t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing."
     t.text "error_message"
     t.datetime "deleted_at", comment: "When the user triggered deletion of the workflow run"
+    t.json "temp_cg_coverage_viz", comment: "Temporary column to store coverage viz data for consensus-genome workflow runs"
     t.bigint "user_id", comment: "The ID of the user who kicked off the workflow run"
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
