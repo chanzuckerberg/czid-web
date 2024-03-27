@@ -371,7 +371,9 @@ async function queryWorkflowRuns(
         time: filters?.time,
         tissue: filters?.tissue,
         visibility: filters?.visibility,
-        workflow: WorkflowType.CONSENSUS_GENOME,
+        orderBy,
+        orderDir,
+        workflow,
       },
     };
   }
