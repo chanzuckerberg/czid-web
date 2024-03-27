@@ -728,8 +728,8 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
         end
 
         it "returns correct csv values with metadata" do
-          consensus_genome_overview_csv_string = BulkDownloadsHelper.generate_cg_overview_data(workflow_runs: @sample.workflow_runs, include_metadata: true)
-          expect(consensus_genome_overview_csv_string)
+          consensus_genome_overview_csv_data = BulkDownloadsHelper.generate_cg_overview_data(workflow_runs: @sample.workflow_runs, include_metadata: true)
+          expect(consensus_genome_overview_csv_data)
             .to eq(
               [
                 cg_metric_headers.concat(cg_metadata_headers, @sample_metadata_headers.map { |h| h.humanize.titleize }),
@@ -738,6 +738,31 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
             )
         end
       end
+    end
+  end
+
+  describe "#generate_cg_sample_metadata" do
+    it "returns metadata for sample in a 2D array" do
+      user = create(:joe)
+      project = create(:project, users: [user])
+      sample = create(:sample,
+                      project: project,
+                      user: user,
+                      metadata_fields: { sample_type: "Serum", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", collection_location_v2: "San Francisco, USA" })
+      age = (MetadataField::MAX_HUMAN_AGE - 1).to_s
+      sample2 = create(:sample,
+                       project: project,
+                       user: user,
+                       host_genome_name: "Human",
+                       metadata_fields: { collection_location_v2: "Indio, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", host_age: age })
+      sample_metadata = BulkDownloadsHelper.generate_cg_sample_metadata([sample.id, sample2.id], user)
+
+      expected_metadata = {}
+      expected_metadata["headers"] = ["Sample Type", "Nucleotide Type", "Collection Date", "Water Control", "Collection Location", "Host Age"]
+      expected_metadata[sample.id] = ["Serum", "DNA", "2021-04", "No", "San Francisco, USA", nil]
+      expected_metadata[sample2.id] = ["CSF", "DNA", "2021-04", "No", "Indio, USA", age]
+
+      expect(sample_metadata).to eq(expected_metadata)
     end
   end
 end

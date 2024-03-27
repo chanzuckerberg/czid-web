@@ -134,6 +134,27 @@ class BulkDownloadsController < ApplicationController
     render json: { cg_overview_rows: cg_overview_arr }, status: :ok
   end
 
+  # POST /bulk_downloads/consensus_genome_sample_metadata.json
+  def consensus_genome_sample_metadata
+    sample_ids = validate_sample_metadata_params(consensus_genome_sample_metadata_params, current_user)
+
+    unless sample_ids.is_a?(Array)
+      render json: { error: MISSING_SAMPLE_IDS_ERROR }, status: :unprocessable_entity
+      return
+    end
+    metadata_arr = BulkDownloadsHelper.generate_cg_sample_metadata(sample_ids, current_user)
+
+    render json: { sample_metadata: metadata_arr }, status: :ok
+  rescue StandardError => e
+    LogUtil.log_error(
+      "BulkDownloadsSampleMetadataError: Failed to get sample metadata #{e}",
+      exception: e,
+      params: consensus_genome_sample_metadata_params
+    )
+
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   # GET /bulk_downloads
   # GET /bulk_downloads.json
   def index
@@ -267,6 +288,10 @@ class BulkDownloadsController < ApplicationController
 
   def bulk_download_create_params
     params.permit(:download_type, :workflow, sample_ids: [], params: {}, workflow_run_ids: [])
+  end
+
+  def consensus_genome_sample_metadata_params
+    params.permit(sample_ids: [])
   end
 
   def get_workflow_run_ids_of_viewable_objects(bulk_download_params)

@@ -13,6 +13,7 @@ module BulkDownloadsHelper
   INVALID_ACCESS_TOKEN = "The access token was invalid for this bulk download.".freeze
   KICKOFF_FAILURE = "Unexpected error kicking off bulk download.".freeze
   KICKOFF_FAILURE_HUMAN_READABLE = "Could not kick off bulk download. Please contact us for help.".freeze
+  APP_CONFIG_MAX_OBJECTS_NOT_SET = "Could not kick off bulk download. Please contact us for help.".freeze
   PRESIGNED_URL_GENERATION_ERROR = "Could not generate a presigned url.".freeze
   SUCCESS_URL_REQUIRED = "Success url required for bulk download.".freeze
   FAILED_SAMPLES_ERROR_TEMPLATE = "%s samples could not be processed. Please contact us for help.".freeze
@@ -23,6 +24,7 @@ module BulkDownloadsHelper
   COLLABORATOR_ONLY_DOWNLOAD_TYPE = "You must be a collaborator on the respective projects of each sample to initiate this download type.".freeze
   BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
   READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE = "Unexpected error. Could not find valid taxon lineage for taxid %s".freeze
+  MISSING_SAMPLE_IDS_ERROR = "Sample IDs must be provided as an array".freeze
   TAXONOMY_LIST = ["superkingdom_name", "kingdom_name", "phylum_name", "class_name", "order_name", "family_name", "genus_name", "species_name"].freeze
   METRIC_MAP = {
     "r": "count",
@@ -119,7 +121,7 @@ module BulkDownloadsHelper
 
     # Max objects should be string containing an integer, but just in case.
     if max_objects_allowed.nil?
-      raise BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE
+      raise BulkDownloadsHelper::APP_CONFIG_MAX_OBJECTS_NOT_SET
     end
 
     if num_objects > Integer(max_objects_allowed) && !current_user.admin?
@@ -176,6 +178,21 @@ module BulkDownloadsHelper
     end
 
     return viewable_objects
+  end
+
+  def validate_sample_metadata_params(params, user)
+    current_power = Power.new(user)
+
+    sample_ids = params[:sample_ids]
+    raise BulkDownloadsHelper::MISSING_SAMPLE_IDS_ERROR unless sample_ids.is_a?(Array)
+
+    sample_ids = sample_ids.uniq
+    validate_num_objects(sample_ids.length, AppConfig::MAX_OBJECTS_BULK_DOWNLOAD)
+
+    viewable_objects = current_power.viewable_samples.where(id: sample_ids)
+    raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR if sample_ids.length != viewable_objects.count
+
+    sample_ids
   end
 
   # Generate the metric values matrix.
@@ -504,10 +521,8 @@ module BulkDownloadsHelper
     headers = BulkDownloadsHelper.cg_overview_headers
 
     if include_metadata
-      samples = Sample.where(id: workflow_runs.pluck(:sample_id).uniq)
-      metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: samples)
-      cg_metadata_headers = ["Wetlab Protocol", "Executed At"]
-      headers.concat(cg_metadata_headers, metadata_headers.map { |h| h.humanize.titleize })
+      cg_metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.cg_overview_metadata_headers_and_info(workflow_runs: workflow_runs)
+      headers.concat(cg_metadata_headers)
     end
 
     overview_arr << headers
@@ -526,6 +541,30 @@ module BulkDownloadsHelper
     end
 
     overview_arr
+  end
+
+  def self.generate_cg_sample_metadata(sample_ids, _user)
+    metadata_hash = {}
+    samples = Sample.where(id: sample_ids)
+    metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: samples)
+
+    metadata_hash["headers"] = metadata_headers.map { |h| h.humanize.titleize }
+
+    samples.each do |sample|
+      metadata = metadata_by_sample_id[sample.id] || {}
+      sample_metadata_row_values = metadata.values_at(*metadata_keys)
+      metadata_hash[sample.id] = sample_metadata_row_values
+    end
+
+    metadata_hash
+  end
+
+  def self.cg_overview_metadata_headers_and_info(workflow_runs:)
+    samples = Sample.where(id: workflow_runs.pluck(:sample_id).uniq)
+    metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: samples)
+    cg_metadata_headers = ["Wetlab Protocol", "Executed At"]
+    cg_metadata_headers.concat(metadata_headers.map { |h| h.humanize.titleize })
+    [cg_metadata_headers, metadata_keys, metadata_by_sample_id]
   end
 
   def self.prepare_workflow_run_metrics_csv_info(workflow_run:)

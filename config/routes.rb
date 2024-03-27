@@ -197,6 +197,7 @@ Rails.application.routes.draw do
 
     collection do
       post :consensus_genome_overview_data
+      post :consensus_genome_sample_metadata
       get :types
       get :metrics
     end

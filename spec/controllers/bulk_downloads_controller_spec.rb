@@ -554,6 +554,90 @@ RSpec.describe BulkDownloadsController, type: :controller do
       end
     end
 
+    describe "POST #consensus_genome_sample_metadata" do
+      let(:max_objects_allowed) { 100 }
+
+      before do
+        AppConfigHelper.set_app_config(AppConfig::MAX_OBJECTS_BULK_DOWNLOAD, max_objects_allowed)
+      end
+
+      context "when number of sample_ids exceeds maximum" do
+        let(:max_objects_allowed) { 1 }
+
+        it "returns a max objects exceeded error in response" do
+          project = create(:project, users: [@joe])
+          sample1 = create(:sample, user: @joe, project: project)
+          sample2 = create(:sample, user: @joe, project: project)
+          params = { sample_ids: [sample1.id, sample2.id] }
+
+          post :consensus_genome_sample_metadata, params: params
+
+          expect(response).to have_http_status(422)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response["error"]).to eq(BulkDownloadsHelper::MAX_OBJECTS_EXCEEDED_ERROR_TEMPLATE % max_objects_allowed)
+        end
+      end
+
+      context "when sample_ids array is not provided" do
+        it "returns a missing sample id error in response" do
+          post :consensus_genome_sample_metadata, params: { sample_ids: nil }
+
+          expect(response).to have_http_status(422)
+          json_response = JSON.parse(response.body)
+          expect(json_response["error"]).to eq(BulkDownloadsHelper::MISSING_SAMPLE_IDS_ERROR)
+        end
+      end
+
+      context "when user does not have access to sample" do
+        it "returns an error" do
+          project = create(:project, users: [@admin])
+          sample = create(:sample, user: @admin, project: project)
+
+          post :consensus_genome_sample_metadata, params: { sample_ids: [sample.id] }
+
+          expect(response).to have_http_status(422)
+          json_response = JSON.parse(response.body)
+          expect(json_response["error"]).to eq(BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR)
+        end
+      end
+
+      it "return the correct data for a consensus genome sample metadata bulk download" do
+        project = create(:project, users: [@joe])
+        sample = create(:sample,
+                        project: project,
+                        user: @joe,
+                        metadata_fields: { sample_type: "Serum", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", collection_location_v2: "San Francisco, USA" })
+
+        post :consensus_genome_sample_metadata, params: { sample_ids: [sample.id] }
+
+        expect(response).to have_http_status(200)
+
+        json_response = JSON.parse(response.body)
+        cg_sample_metadata = json_response["sample_metadata"]
+
+        expected_metadata = {}
+        expected_metadata["headers"] = ["Sample Type", "Nucleotide Type", "Collection Date", "Water Control", "Collection Location"]
+        expected_metadata[sample.id.to_s] = ["Serum", "DNA", "2021-04", "No", "San Francisco, USA"]
+        expect(cg_sample_metadata).to eq(expected_metadata)
+      end
+
+      it "returns does not return multiple keys when the sample_ids array contains duplicate IDs" do
+        project = create(:project, users: [@joe])
+        sample = create(:sample,
+                        project: project,
+                        user: @joe,
+                        metadata_fields: { sample_type: "Serum", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", collection_location_v2: "San Francisco, USA" })
+
+        post :consensus_genome_sample_metadata, params: { sample_ids: [sample.id, sample.id] }
+        expect(response).to have_http_status(200)
+
+        json_response = JSON.parse(response.body)
+        cg_sample_metadata = json_response["sample_metadata"]
+        expect(cg_sample_metadata.keys).to eq(["headers", sample.id.to_s])
+      end
+    end
+
     describe "GET #index" do
       it "should return only bulk downloads viewable to the user" do
         @sample_one = create(:sample, project: @project,
@@ -842,7 +926,6 @@ RSpec.describe BulkDownloadsController, type: :controller do
         }
 
         post :create, params: bulk_download_params
-        puts(response.body)
         expect(response).to have_http_status(:ok)
       end
     end
