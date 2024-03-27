@@ -2,69 +2,69 @@ class SampleFileEntityLinkCreationService
   include Callable
 
   FetchWorkflowRun = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-  query($workflow_run_id: Int!) {
-    workflowRuns(where: {railsWorkflowRunId: {_eq: $workflow_run_id}}) {
-      id
-      entityInputs(where: {entityType: {_eq: "reference_genome"}}) {
-        edges {
-          node {
-            id
-            entityType
+    query($workflow_run_id: Int!) {
+      workflowRuns(where: {railsWorkflowRunId: {_eq: $workflow_run_id}}) {
+        id
+        entityInputs(where: {entityType: {_eq: "reference_genome"}}) {
+          edges {
+            node {
+              inputEntityId
+              entityType
+            }
           }
         }
       }
     }
-  }
   GRAPHQL
 
   GetSequencingReadQuery = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-        query($sample_id: Int!) {
-            sequencingReads(where: {sample: {railsSampleId: {_eq: $sample_id}}}) {
-                id
-            }
-        }
+    query($sample_id: Int!) {
+      sequencingReads(where: {sample: {railsSampleId: {_eq: $sample_id}}}) {
+        id
+      }
+    }
   GRAPHQL
 
   CreateLinkedFileMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-        mutation($entity_id: ID!, $field_name: String!, $file_name: String!, $protocol: FileAccessProtocol!, $file_path: String!, $file_type: String!, $namespace: String!) {
-            createFile(
-                entityFieldName: $field_name
-                entityId: $entity_id
-                file: {
-                    name: $file_name,
-                    protocol: $protocol,
-                    namespace: $namespace,
-                    path: $file_path,
-                    fileFormat: $file_type
-                }
-            ) {
-                id
-            }
+    mutation($entity_id: ID!, $field_name: String!, $file_name: String!, $protocol: FileAccessProtocol!, $file_path: String!, $file_type: String!, $namespace: String!) {
+      createFile(
+        entityFieldName: $field_name
+        entityId: $entity_id
+        file: {
+          name: $file_name,
+          protocol: $protocol,
+          namespace: $namespace,
+          path: $file_path,
+          fileFormat: $file_type
         }
+      ) {
+        id
+      }
+    }
   GRAPHQL
 
   CreateGenomicRangeMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-        mutation($collection_id: Int!) {
-            createGenomicRange(input: {collectionId: $collection_id}) {
-                id
-            }
-        }
+    mutation($collection_id: Int!) {
+      createGenomicRange(input: {collectionId: $collection_id}) {
+        id
+      }
+    }
   GRAPHQL
 
   LinkGenomicRangeMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-      mutation($primer_file_id: ID!, $sequencing_read_id: UUID!) {
-          updateSequencingRead(input: {primerFileId: $primer_file_id}, where: {id: {_eq: $sequencing_read_id}}) {
-              id
-          }
+    mutation($primer_file_id: ID!, $sequencing_read_id: UUID!) {
+      updateSequencingRead(input: {primerFileId: $primer_file_id}, where: {id: {_eq: $sequencing_read_id}}) {
+        id
       }
+    }
   GRAPHQL
 
   KickoffWorkflowRun = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-        mutation($workflow_run_id: ID!, $execution_id: String) {
-          runWorkflowRun(workflowRunId: $workflow_run_id, executionId: $execution_id) {
-            id
-          }
-        }
+    mutation($workflow_run_id: ID!, $execution_id: String) {
+      runWorkflowRun(workflowRunId: $workflow_run_id, executionId: $execution_id) {
+        id
+      }
+    }
   GRAPHQL
 
   NEXT_GEN_FILE_FORMAT_MAP = {
@@ -104,7 +104,7 @@ class SampleFileEntityLinkCreationService
     # Store reference genome to link file to sequencing read
     workflow_run_entity_inputs = response.data.workflow_runs.first.entity_inputs.edges
     is_reference_genome_input = workflow_run_entity_inputs.present? && workflow_run_entity_inputs.first.node.entity_type == "reference_genome"
-    workflow_run_reference_genome_id = is_reference_genome_input ? workflow_run_entity_inputs.first.node.id : nil
+    workflow_run_reference_genome_id = is_reference_genome_input ? workflow_run_entity_inputs.first.node.input_entity_id : nil
 
     # Get the SequencingRead ID so we can link the files to it
     response = CzidGraphqlFederation
@@ -159,7 +159,8 @@ class SampleFileEntityLinkCreationService
     if primer_bed.present?
       response = CzidGraphqlFederation
                  .query_with_token(
-                   @user_id, CreateGenomicRangeMutation,
+                   @user_id,
+                   CreateGenomicRangeMutation,
                    variables: {
                      collection_id: @sample.project_id,
                    },
@@ -200,7 +201,19 @@ class SampleFileEntityLinkCreationService
     # Link reference sequence file to ReferenceGenome
     reference_sequence = @sample.input_files.where(file_type: InputFile::FILE_TYPE_REFERENCE_SEQUENCE).first
     if reference_sequence.present? && workflow_run_reference_genome_id.present?
-      CzidGraphqlFederation.query_with_token(@user_id, CreateLinkedFileMutation, variables: { entity_id: workflow_run_reference_genome_id, field_name: "file", file_name: reference_sequence.name, protocol: "s3", file_path: reference_sequence.file_path, file_type: "fastq", namespace: ENV["SAMPLES_BUCKET_NAME"] })
+      CzidGraphqlFederation.query_with_token(
+        @user_id,
+        CreateLinkedFileMutation,
+        variables: {
+          entity_id: workflow_run_reference_genome_id,
+          field_name: "file",
+          file_name: reference_sequence.name,
+          protocol: "s3",
+          file_path: reference_sequence.file_path,
+          file_type: "fastq",
+          namespace: ENV["SAMPLES_BUCKET_NAME"],
+        }
+      )
     end
 
     # Kick off the workflow run
