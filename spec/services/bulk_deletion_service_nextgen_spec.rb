@@ -62,6 +62,31 @@ RSpec.describe BulkDeletionServiceNextgen, type: :service do
                        })
   end
 
+  def make_deprecated_workflow_runs_response(workflow_runs)
+    HashUtil.to_struct({
+                         data: {
+                           workflow_runs: workflow_runs.map do |wr|
+                             {
+                               id: wr.id,
+                               rails_workflow_run_id: wr.rails_workflow_run_id,
+                               entity_inputs: {
+                                 edges: [
+                                   node: {
+                                     input_entity_id: wr.input_entity_id,
+                                   },
+                                 ],
+                               },
+                               workflow_version: {
+                                 workflow: {
+                                   name: wr.workflow_name,
+                                 },
+                               },
+                             }
+                           end,
+                         },
+                       })
+  end
+
   def make_cgs_response(cgs)
     HashUtil.to_struct({
                          data: {
@@ -129,10 +154,12 @@ RSpec.describe BulkDeletionServiceNextgen, type: :service do
   # WR_UUID1: only CG run on sample UUID1
   # WR_UUID2 failed its run on Sample UUID2
   # WR_UUID3 + 4: both CG runs on sample UUID2. WR_UUID4 is not meant to be deleted
+  # WR_UUID5: deprecated CG run on sample UUID2
   let(:wr1) { create(:workflow_run, sample_id: sample1.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded]) }
   let(:wr2) { create(:workflow_run, sample_id: sample2.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed]) }
   let(:wr3) { create(:workflow_run, sample_id: sample3.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded]) }
   let(:wr4) { create(:workflow_run, sample_id: sample3.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded]) }
+  let(:wr5) { create(:workflow_run, sample_id: sample2.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deprecated: true) }
 
   # nextgen stuff
   let(:ng_sample1) do
@@ -193,6 +220,17 @@ end
       }
     )
   end
+  let(:ng_wr5) do
+    HashUtil.to_struct(
+      {
+        id: "WR_UUID5",
+        owner_user_id: @joe.id,
+        rails_workflow_run_id: wr5.id,
+        input_entity_id: ng_sample2.id,
+        workflow_name: consensus_genome,
+      }
+    )
+  end
   let(:ng_cg1) do
     HashUtil.to_struct({
                          id: "CG_UUID1",
@@ -233,6 +271,7 @@ end
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetSamples, any_args).and_return(make_samples_response([ng_sample1, ng_sample2, ng_sample3]))
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetWorkflowRunsBySampleId, any_args).and_return(make_workflow_runs_by_sample_id_response([ng_wr1, ng_wr2, ng_wr3, ng_wr4]))
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetCGsToDelete, any_args).and_return(make_cgs_response([ng_cg1, ng_cg2]))
+        allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetDeprecatedWorkflowRunsBySampleId, any_args).and_return(make_deprecated_workflow_runs_response([ng_wr5]))
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetBulkDownloadWorkflowRunsForEntities, any_args).and_return(make_bulk_download_workflow_runs_response([ng_bulk_download_wr]))
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetBulkDownloadsForWorkflowRuns, any_args).and_return(make_bulk_download_entities_response([ng_bulk_download]))
         stub_soft_delete
@@ -255,6 +294,7 @@ end
           nextgen_ids = response[:nextgen_ids]
           expect(nextgen_ids[:cg_ids]).to contain_exactly(ng_cg1.id, ng_cg2.id)
           expect(nextgen_ids[:workflow_run_ids]).to contain_exactly(ng_wr1.id, ng_wr2.id, ng_wr3.id)
+          expect(nextgen_ids[:deprecated_workflow_run_ids]).to contain_exactly(ng_wr5.id)
           expect(nextgen_ids[:bulk_download_workflow_run_ids]).to contain_exactly(ng_bulk_download_wr.id)
           expect(nextgen_ids[:bulk_download_entity_ids]).to contain_exactly(ng_bulk_download.id)
 
@@ -271,7 +311,7 @@ end
             token: token
           )
           expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: "ConsensusGenome").pluck(:object_id)).to contain_exactly(ng_cg1.id, ng_cg2.id)
-          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: WorkflowRun.name).pluck(:object_id)).to contain_exactly(ng_wr1.id, ng_wr2.id, ng_wr3.id, ng_bulk_download_wr.id)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: WorkflowRun.name).pluck(:object_id)).to contain_exactly(ng_wr1.id, ng_wr2.id, ng_wr3.id, ng_bulk_download_wr.id, ng_wr5.id)
           expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: Sample.name).pluck(:object_id)).to contain_exactly(ng_sample1.id, ng_sample2.id)
           expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: BulkDownload.name).pluck(:object_id)).to contain_exactly(ng_bulk_download.id)
         end
@@ -294,6 +334,7 @@ end
           nextgen_ids = response[:nextgen_ids]
           expect(nextgen_ids[:cg_ids]).to contain_exactly(ng_cg1.id, ng_cg2.id)
           expect(nextgen_ids[:workflow_run_ids]).to contain_exactly(ng_wr1.id, ng_wr2.id, ng_wr3.id)
+          expect(nextgen_ids[:deprecated_workflow_run_ids]).to contain_exactly(ng_wr5.id)
           expect(nextgen_ids[:bulk_download_workflow_run_ids]).to contain_exactly(ng_bulk_download_wr.id)
           expect(nextgen_ids[:bulk_download_entity_ids]).to contain_exactly(ng_bulk_download.id)
 
@@ -310,7 +351,7 @@ end
             token: token
           )
           expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: "ConsensusGenome").pluck(:object_id)).to contain_exactly(ng_cg1.id, ng_cg2.id)
-          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: WorkflowRun.name).pluck(:object_id)).to contain_exactly(ng_wr1.id, ng_wr2.id, ng_wr3.id, ng_bulk_download_wr.id)
+          expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: WorkflowRun.name).pluck(:object_id)).to contain_exactly(ng_wr1.id, ng_wr2.id, ng_wr3.id, ng_bulk_download_wr.id, ng_wr5.id)
           expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: Sample.name).pluck(:object_id)).to contain_exactly(ng_sample1.id, ng_sample2.id)
           expect(NextgenDeletionLog.where(user_id: @joe.id, object_type: BulkDownload.name).pluck(:object_id)).to contain_exactly(ng_bulk_download.id)
         end
@@ -354,6 +395,7 @@ end
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetSamples, any_args).and_return(make_samples_response([ng_sample1]))
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetWorkflowRunsBySampleId, any_args).and_return(make_workflow_runs_by_sample_id_response([ng_wr1]))
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetCGsToDelete, any_args).and_return(make_cgs_response([ng_cg1]))
+        allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetDeprecatedWorkflowRunsBySampleId, any_args).and_return(make_workflow_runs_response([]))
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetBulkDownloadWorkflowRunsForEntities, any_args).and_return(make_bulk_download_workflow_runs_response([]))
         allow(CzidGraphqlFederation).to receive(:query_with_token).with(@joe.id, BulkDeletionServiceNextgen::GetBulkDownloadsForWorkflowRuns, any_args).and_return(make_bulk_download_entities_response([]))
         stub_soft_delete

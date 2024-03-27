@@ -588,6 +588,7 @@ RSpec.describe BulkDeletionService, type: :service do
                 },
                 nextgen_ids: {
                   workflow_run_ids: ["WR_UUID1"],
+                  deprecated_workflow_run_ids: [],
                   sample_ids: ["Sample_UUID1"],
                   cg_ids: ["CG_UUID1"],
                   bulk_download_workflow_run_ids: [],
@@ -595,7 +596,7 @@ RSpec.describe BulkDeletionService, type: :service do
                 },
               }
             )
-            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [])
+            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [], [])
             expect(Resque).to receive(:enqueue).with(
               HardDeleteObjects, [], [@sample4.id], consensus_genome, @joe.id
             )
@@ -617,6 +618,7 @@ RSpec.describe BulkDeletionService, type: :service do
                 },
                 nextgen_ids: {
                   workflow_run_ids: ["WR_UUID1"],
+                  deprecated_workflow_run_ids: [],
                   sample_ids: ["Sample_UUID1"],
                   cg_ids: ["CG_UUID1"],
                   bulk_download_workflow_run_ids: [],
@@ -625,7 +627,7 @@ RSpec.describe BulkDeletionService, type: :service do
               }
             )
             allow(BulkDeletionServiceNextgen).to receive(:get_rails_samples_with_nextgen_workflow).with(@joe.id, [@sample4.id], consensus_genome, any_args).and_return([])
-            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [])
+            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [], [])
             expect(Resque).to receive(:enqueue).with(
               HardDeleteObjects, [], [@sample4.id], consensus_genome, @joe.id
             )
@@ -648,6 +650,7 @@ RSpec.describe BulkDeletionService, type: :service do
                 },
                 nextgen_ids: {
                   workflow_run_ids: ["WR_UUID1", "WR_UUID4"],
+                  deprecated_workflow_run_ids: [],
                   sample_ids: ["Sample_UUID1", "Sample_UUID4"],
                   cg_ids: ["CG_UUID1"],
                   bulk_download_workflow_run_ids: [],
@@ -655,7 +658,7 @@ RSpec.describe BulkDeletionService, type: :service do
                 },
               }
             )
-            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1", "Sample_UUID4"], ["WR_UUID1", "WR_UUID4"], [], [])
+            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1", "Sample_UUID4"], ["WR_UUID1", "WR_UUID4"], [], [], [])
             expect(Resque).to receive(:enqueue).with(
               HardDeleteObjects, [], [@sample4.id], consensus_genome, @joe.id
             )
@@ -680,6 +683,7 @@ RSpec.describe BulkDeletionService, type: :service do
                 },
                 nextgen_ids: {
                   workflow_run_ids: ["WR_UUID1"],
+                  deprecated_workflow_run_ids: [],
                   sample_ids: ["Sample_UUID1"],
                   cg_ids: ["CG_UUID1"],
                   bulk_download_workflow_run_ids: [],
@@ -688,7 +692,7 @@ RSpec.describe BulkDeletionService, type: :service do
               }
             )
             allow(BulkDeletionServiceNextgen).to receive(:get_rails_samples_with_nextgen_workflow).with(@joe.id, [@sample1.id], consensus_genome, any_args).and_return([])
-            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [])
+            expect(Resque).to receive(:enqueue).with(HardDeleteNextgenObjects, @joe.id, ["CG_UUID1"], ["Sample_UUID1"], ["WR_UUID1"], [], [], [])
             expect(Resque).to receive(:enqueue).with(
               HardDeleteObjects, [@completed_wr.id], [@sample1.id], consensus_genome, @joe.id
             )

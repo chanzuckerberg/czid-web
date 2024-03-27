@@ -164,7 +164,7 @@ class BulkDeletionService
     end
 
     unless nextgen_ids.empty?
-      Resque.enqueue(HardDeleteNextgenObjects, user.id, nextgen_ids[:cg_ids], nextgen_ids[:sample_ids], nextgen_ids[:workflow_run_ids], nextgen_ids[:bulk_download_workflow_run_ids], nextgen_ids[:bulk_download_entity_ids])
+      Resque.enqueue(HardDeleteNextgenObjects, user.id, nextgen_ids[:cg_ids], nextgen_ids[:sample_ids], nextgen_ids[:workflow_run_ids], nextgen_ids[:deprecated_workflow_run_ids], nextgen_ids[:bulk_download_workflow_run_ids], nextgen_ids[:bulk_download_entity_ids])
     end
 
     # First enqueue deletion of samples without workflow runs

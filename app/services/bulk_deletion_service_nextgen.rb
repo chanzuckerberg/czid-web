@@ -192,6 +192,43 @@ class BulkDeletionServiceNextgen
     }
   GRAPHQL
 
+  GetDeprecatedWorkflowRunsBySampleId = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+    query ($sample_ids: [UUID!]!) {
+      workflowRuns (where: {
+        deprecatedById: {
+          _is_null: false
+        }
+        entityInputs: {
+          inputEntityId: {
+            _in: $sample_ids
+          }
+        }
+        deletedAt: {
+          _is_null: true
+        }
+      }) {
+        id
+        railsWorkflowRunId
+        entityInputs(where: {
+          entityType: {
+            _eq: "sample"
+          }
+        }) {
+          edges {
+            node {
+              inputEntityId
+            }
+          }
+        }
+        workflowVersion {
+          workflow {
+            name
+          }
+        }
+      }    
+    }
+  GRAPHQL
+
   UpdateWorkflowRuns = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
     mutation($run_ids: [UUID!], $delete_timestamp: DateTime!) {
       updateWorkflowRun(
@@ -359,6 +396,9 @@ class BulkDeletionServiceNextgen
     sample_ids_to_delete = find_samples_to_delete(nextgen_workflows_to_sample_ids, all_workflow_runs_nextgen, nextgen_sample_ids)
     samples_to_delete = nextgen_samples.select { |sample| sample_ids_to_delete.include?(sample.id) }
 
+    deprecated_wrs_to_delete = CzidGraphqlFederation.query_with_token(user.id, GetDeprecatedWorkflowRunsBySampleId, variables: { sample_ids: sample_ids_to_delete }, token: token).data.workflow_runs
+    deprecated_wr_ids = deprecated_wrs_to_delete.map(&:id)
+
     # Soft delete bulk downloads
     bulk_download_wrs, bulk_download_entities = soft_delete_bulk_downloads(user, cg_ids_to_delete, token, delete_timestamp).values_at(:bulk_download_workflow_runs, :bulk_download_entities)
 
@@ -368,6 +408,7 @@ class BulkDeletionServiceNextgen
       cgs_to_delete,
       samples_to_delete,
       nextgen_workflows_to_delete,
+      deprecated_wrs_to_delete,
       bulk_download_wrs,
       bulk_download_entities,
       WorkflowRun::WORKFLOW[:consensus_genome],
@@ -375,7 +416,7 @@ class BulkDeletionServiceNextgen
     )
 
     # Soft delete CGs, samples, and workflow runs in NextGen
-    soft_delete_objects(user, token, delete_timestamp, cg_ids_to_delete, sample_ids_to_delete, nextgen_run_ids_to_delete)
+    soft_delete_objects(user, token, delete_timestamp, cg_ids_to_delete, sample_ids_to_delete, nextgen_run_ids_to_delete + deprecated_wr_ids)
 
     # Get Rails workflow run ids and sample ids for the Rails deletion service to use
     rails_workflow_run_ids += nextgen_workflows_to_delete.map(&:rails_workflow_run_id).compact
@@ -390,6 +431,7 @@ class BulkDeletionServiceNextgen
         cg_ids: cg_ids_to_delete,
         sample_ids: sample_ids_to_delete, # sample ids to delete in nextgen
         workflow_run_ids: nextgen_run_ids_to_delete,
+        deprecated_workflow_run_ids: deprecated_wr_ids,
         bulk_download_workflow_run_ids: bulk_download_wrs.map(&:id),
         bulk_download_entity_ids: bulk_download_entities.map(&:id),
       },
@@ -465,6 +507,7 @@ class BulkDeletionServiceNextgen
     cgs_to_delete,
     samples_to_delete,
     workflow_runs_to_delete,
+    deprecated_wrs_to_delete,
     bulk_download_wrs,
     bulk_download_entities,
     workflow,
@@ -507,6 +550,21 @@ class BulkDeletionServiceNextgen
         rails_object_id: wr.rails_workflow_run_id,
         metadata_json: {
           workflow: workflow,
+        }
+      )
+    end
+
+    deprecated_wrs_to_delete.each do |wr|
+      NextgenDeletionLog.create!(
+        user_id: user.id,
+        user_email: user.email,
+        object_id: wr.id,
+        object_type: WorkflowRun.name,
+        soft_deleted_at: delete_timestamp,
+        rails_object_id: wr.rails_workflow_run_id,
+        metadata_json: {
+          workflow: wr.workflow_version.workflow.name,
+          sample_id: wr.entity_inputs.edges.first.node.input_entity_id,
         }
       )
     end

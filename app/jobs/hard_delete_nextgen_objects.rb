@@ -104,13 +104,13 @@ class HardDeleteNextgenObjects
   # ------------------------------------------
   # TODO: ideally this should accept a generic list of ids and their object types,
   # and then we map the type to the appropriate mutation.
-  def self.perform(user_id, cg_ids, sample_ids, workflow_run_ids, bulk_download_workflow_run_ids, bulk_download_entity_ids)
+  def self.perform(user_id, cg_ids, sample_ids, workflow_run_ids, deprecated_workflow_run_ids, bulk_download_workflow_run_ids, bulk_download_entity_ids)
     Rails.logger.info("Starting to hard delete NextGen objects")
     # service identity field required for deletions
     deletion_token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true, service_identity: "rails")["token"]
     hard_delete(user_id, cg_ids, "ConsensusGenome", :query_cg_ds, :delete_cgs, deletion_token) if cg_ids.present?
     hard_delete(user_id, sample_ids, "Sample", :query_sample_ids, :delete_samples, deletion_token) if sample_ids.present?
-    hard_delete(user_id, workflow_run_ids, "WorkflowRun", :query_workflow_run_ids, :delete_workflow_runs, deletion_token) if workflow_run_ids.present?
+    hard_delete(user_id, workflow_run_ids + deprecated_workflow_run_ids, "WorkflowRun", :query_workflow_run_ids, :delete_workflow_runs, deletion_token) if workflow_run_ids.present?
     hard_delete(user_id, bulk_download_workflow_run_ids, "WorkflowRun", :query_workflow_run_ids, :delete_workflow_runs, deletion_token) if bulk_download_workflow_run_ids.present?
     hard_delete(user_id, bulk_download_entity_ids, "BulkDownload", :query_bulk_download_ids, :delete_bulk_downloads, deletion_token) if bulk_download_entity_ids.present?
 
@@ -123,6 +123,7 @@ class HardDeleteNextgenObjects
         cg_ids: cg_ids,
         sample_ids: sample_ids,
         workflow_run_ids: workflow_run_ids,
+        deprecated_workflow_run_ids: deprecated_workflow_run_ids,
         bulk_download_workflow_run_ids: bulk_download_workflow_run_ids,
         bulk_download_entity_ids: bulk_download_entity_ids,
       },
