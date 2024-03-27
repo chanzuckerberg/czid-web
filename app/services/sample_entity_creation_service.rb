@@ -148,7 +148,7 @@ class SampleEntityCreationService
                    },
                    token: @token
                  )
-      nextgen_sample_id = response.data.create_sample.id
+      nextgen_sample_id = response.data&.create_sample&.id
     end
 
     # Check if the SequencingRead already exists in the nextGen database
@@ -157,16 +157,11 @@ class SampleEntityCreationService
                  @user_id,
                  GetSequencingReadQuery,
                  variables: {
-                   technology: NEXT_GEN_SEQUENCING_TECHNOLOGY_MAP[workflow_run_technology],
-                   clearlabs_export: @workflow_run.get_input("clearlabs") | false,
-                   collection_id: @sample.project_id,
-                   medaka_model: @workflow_run.get_input("medaka_model"),
-                   protocol: @workflow_run.get_input("wetlab_protocol"),
-                   sample_id: nextgen_sample_id,
+                   sample_id: @sample.id,
                  },
                  token: @token
                )
-    sequencing_read_id = response.data.sequencing_reads.first&.id
+    sequencing_read_id = response.data&.sequencing_reads&.first&.id
     if sequencing_read_id.nil?
       # Create the new SequencingRead and link it to the Sample
       response = CzidGraphqlFederation
@@ -183,7 +178,7 @@ class SampleEntityCreationService
                    },
                    token: @token
                  )
-      sequencing_read_id = response.data.create_sequencing_read.id
+      sequencing_read_id = response.data&.create_sequencing_read&.id
     end
 
     # Get the workflow version id
@@ -198,7 +193,7 @@ class SampleEntityCreationService
                  },
                  token: @token
                )
-    workflow_version_id = response.data.workflow_versions.first.id
+    workflow_version_id = response.data&.workflow_versions&.first&.id
 
     # Assemble entity inputs
     create_workflow_run_entity_inputs = [
