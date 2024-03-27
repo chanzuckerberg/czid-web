@@ -67,6 +67,13 @@ class SampleFileEntityLinkCreationService
         }
   GRAPHQL
 
+  NEXT_GEN_FILE_FORMAT_MAP = {
+    "fastq" => "fastq",
+    "fasta" => "fasta",
+    "primer_bed" => "bed",
+    "json" => "json",
+  }.freeze
+
   def initialize(user_id, sample)
     @user_id = user_id
     @sample = sample
@@ -171,7 +178,7 @@ class SampleFileEntityLinkCreationService
             file_name: primer_bed.name,
             protocol: "s3",
             file_path: primer_bed.file_path,
-            file_type: primer_bed.file_type,
+            file_type: NEXT_GEN_FILE_FORMAT_MAP[primer_bed.file_type],
             namespace: ENV["SAMPLES_BUCKET_NAME"],
           },
           token: @token
