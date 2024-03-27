@@ -18,6 +18,7 @@ const APPCUES_CONTAINER = "[class*='appcues-tooltip-container']";
 const APPCUES_GOT_IT_BUTTON = "[class*='appcues-button-success']";
 const NOTIFICATION_CONTAINER = "[class*='notificationContainer']";
 
+
 export class HeatmapPage extends PageObject {
 
   // #region Api

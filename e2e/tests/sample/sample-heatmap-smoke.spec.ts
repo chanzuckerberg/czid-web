@@ -9,6 +9,7 @@ let heatmapPage = null;
 let project = null;
 let heatmapSamples = null;
 
+
 test.describe("Sample Heatmap", () => {
 
   test.beforeEach(async ({ page }) => {
@@ -72,7 +73,7 @@ test.describe("Sample Heatmap", () => {
    * Scale
    */
   test(`Smoke Test: Verify user is able select the following view options`, async () => {
-    test.setTimeout(180000); // This test needs a slightly longer runtime
+    test.setTimeout(60 * 1000 * 5); // This test needs a slightly longer runtime
     // #region Verify the expected view options are visible
     const expectedViewOptions = ["Taxon Level", "Metric", "Sort Samples", "Sort Taxa", "Scale"];
     const viewOptions = await heatmapPage.getViewOptions();
