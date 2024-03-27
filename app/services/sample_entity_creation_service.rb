@@ -130,7 +130,7 @@ class SampleEntityCreationService
                  variables: {
                    sample_name: @sample.name,
                    collection_id: @sample.project_id,
-                   rails_sample_id: @sample.id,
+                   sample_id: @sample.id,
                  },
                  token: @token
                )
