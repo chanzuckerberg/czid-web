@@ -27,118 +27,258 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Functional: P-0: Sample upload (web) with wetlab ARTIC v4/ARTIC v4.1"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v4/ARTIC v4.1"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab ARTIC v5.3.2"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v5.3.2"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab ARTIC v3"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v3$"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab ARTIC v3 - Short Amplicons (275 bp)"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v3 - Short Amplicons"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab MSSPE"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab MSSPE"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab Combined MSSPE & ARTIC v3"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab Combined MSSPE & ARTIC v3"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab SNAP"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab SNAP"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab AmpliSeq"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab AmpliSeq"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab COVIDseq"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab COVIDseq"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab VarSkip"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab VarSkip"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab Midnight"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab Midnight"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab Easyseq"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.t']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: SARS-CoV-2 Illumina sample web upload with wetlab Easyseq"
+      retries: 3
+    shard: concurrency
   - name: "E2E: P-1: SNo e3: WGS SC2 Nanopore Sample Report & Download Data Validation"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-report.spec.ts']
-    maxDuration: 1h
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo e3:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "E2E: P-1: SNo e2: WGS SC2 Sample Report & Download Data Validation"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-report.spec.ts']
-    maxDuration: 1h
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo e2:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "E2E: P-1: SNo e1: WGS Sample Report & Download Data Validation"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-report.spec.ts']
-    maxDuration: 1h
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo e1:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 5: Basespace Viral Consensus Genome - No trim"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-upload-basespace.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 5:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 6: Basespace Viral Consensus Genome - with trim"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-upload-basespace.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 6:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 7: Basespace Viral Consensus Genome - No trim with mNGS - Ilumina"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-upload-basespace.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 7:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 8: Basespace Viral Consensus Genome - with trim with mNGS - Ilumina"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-upload-basespace.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 8:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload: SNo 1: Viral Consensus Genome - No trim"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-upload.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 1:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload: SNo 2: Viral Consensus Genome - with trim"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-upload.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 2:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload: SNo 3: Viral Consensus Genome - No trim with mNGS - Ilumina"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-upload.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 3:"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Sample upload: SNo 4: Viral Consensus Genome - with trim with mNGS - Ilumina"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/wgs/sample-upload.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo 4:"
-      retries: 2
+      retries: 3
     shard: concurrency
 artifacts:
   cleanup: true

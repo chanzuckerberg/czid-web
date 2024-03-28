@@ -54,7 +54,8 @@ const UPLOAD_TAXON_FILTER_INPUT = "[class*='FormControl'] input[type='search']";
 const CLEAR_UPLOADED_FILE_BUTTON_TESTID = "clear-uploaded-file-button";
 const CLEAR_LABS_TOGGLE = "[class*='clearLabs'] [class*='checkbox']";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
-const WETLAB_FILTER = "//*[text()='Wetlab Protocol:']/following-sibling::*/*[@data-testid='filters']";
+const WETLAB_FILTER = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']";
+const WETLAB_OPTION = (wetlab: string) =>`//*[@data-testid="dropdown-menu"]//*[@role="option" and text()="${wetlab}"]`;
 const REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID = "reference-sequence-file-upload";
 const TRIM_PRIMERS_FILE_UPLOAD = "//span[text()='Trim Primers']/parent::div/following-sibling::button";
 const PORTAL_DROPDOWN_LOCATOR = "[class*='portalDropdown']";
@@ -122,11 +123,6 @@ export class UploadPage extends PageObject {
   // #region Click
 
   // #region Samples
-  public async setWetLabFilter(filterName: string) {
-    await this.page.locator(WETLAB_FILTER).first().click();
-    await this.page.getByText(filterName).click();
-  }
-
   public async clickSelectBasespaceProjectDropdown() {
     await this.page.locator(SELECT_BASESPACE_PROJECT_DROPDOWN).click();
   }
@@ -632,9 +628,14 @@ export class UploadPage extends PageObject {
     await this.pause(2); // Pause to stabilze test performance
   }
 
+  public async setWetLabFilter(filterName: string) {
+    await this.page.locator(WETLAB_FILTER).click();
+    await this.page.locator(WETLAB_OPTION(filterName)).click();
+  }
+
   public async setTaxonFilter(filterName: string) {
     await this.clickTaxonFilter();
-    await this.page.getByText(filterName).click();
+    await this.page.getByText(filterName, {exact: true}).click();
   }
 
   public async setUploadTaxonFilter(filterName: string) {
@@ -650,7 +651,17 @@ export class UploadPage extends PageObject {
   public async setManualInputs(inputs: any)
   {
     const sampleNames = await this.getMetadataSampleNames();
-    for (let i = 0; i < Object.keys(inputs).length; i++) {
+    const keys = Object.keys(inputs);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const newKey = sampleNames[i];
+      if (newKey !== key) {
+        inputs[newKey] = inputs[key];
+        delete inputs[key];
+      }
+    }
+
+    for (let i = 0; i < sampleNames.length; i++) {
       const sampleName = sampleNames[i];
       await this.fillHostOrganism(inputs[sampleName].hostOrganism, i);
       await this.fillSampleTissueType(inputs[sampleName].sampleTissueType, i);
@@ -659,6 +670,7 @@ export class UploadPage extends PageObject {
       await this.fillCollectionDate(inputs[sampleName].collectionDate, i);
       await this.fillCollectionLocation(inputs[sampleName].collectionLocation, i);
     }
+    return inputs;
   }
 
   public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown") {

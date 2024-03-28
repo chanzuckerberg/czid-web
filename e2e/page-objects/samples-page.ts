@@ -38,6 +38,7 @@ import { PageObject } from "./page-object";
 import { PipelineVizPage } from "./pipeline_viz-page";
 import { ProjectPage } from "./project-page";
 const TAXON_HOVER_ACTIONS = (taxonName: string) => `//span[text()='${taxonName}']/parent::div//span[@data-testid='hover-actions']//button`;
+const SAMPLE_MESSAGE = "[data-testid='sample-message']";
 const COVERAGE_VIZ_HISTOGRAM_LOCATOR = "[class*='coverageVizHistogram']";
 const ACTION_BUTTONS_LOCATOR = "[class*='actionIcons'] button";
 const BLAST_SELECTION_MODAL_TESTID = "blast-selection-modal";
@@ -108,6 +109,19 @@ export class SamplesPage extends PageObject {
     // #endregion Navigate
 
     // #region Get
+    public async getSampleStatusMessage(waitForMessage = "Loading") {
+      let statusMessage = await this.page.locator(SAMPLE_MESSAGE).textContent();
+      while (!statusMessage.toLowerCase().includes(waitForMessage)) {
+        statusMessage = await this.page.locator(SAMPLE_MESSAGE).textContent();
+        if (statusMessage.toLowerCase().includes(waitForMessage.toLowerCase())) {
+          break;
+        } else {
+          await this.page.locator(SAMPLE_MESSAGE).getByText("LoadingLoading report data.").waitFor({state: "detached"});
+        }
+      }
+      return this.page.locator(SAMPLE_MESSAGE).textContent();
+    }
+
     public async getShareMessage() {
       return this.page.locator(NONHEADER_TOOLTIP_CONTAINER).textContent();
     }

@@ -28,7 +28,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
     await Promise.all([
       page.goto(`${process.env.BASEURL}`, { waitUntil: "networkidle" }),
     ]);
-    expect(page.getByText(tag)).toBeVisible({ timeout: 1 });
+    expect(page.getByText(tag)).toBeVisible({ timeout: 30 * 1000 }); // Wait upto 30 seconds
     await page.getByTestId("home-top-nav-login").click();
     await login(page, username, password);
     await page.context().storageState({ path: storageState as string });

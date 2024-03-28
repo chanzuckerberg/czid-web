@@ -5,6 +5,7 @@ import { NextcladePage } from "./nextclade-page";
 import { PageObject } from "./page-object";
 import { SamplesPage } from "./samples-page";
 
+const SAMPLE_SEARCH = (sampleId: number, projectId: number) => `[project_id="${projectId}"][sample_id="${sampleId}"]`;
 const TIMEFRAME_FILTER = "[data-testid='timeframe']";
 const TIMEFRAME_OPTIONS = "//*[text()='Select Timeframe']/parent::*//*[@role='option']";
 const VISIBILITY_FILTER = "[data-testid='visibility']";
@@ -160,7 +161,7 @@ export class ProjectPage extends PageObject {
     return responseJson.backgrounds;
   }
 
-  public async getOrCreateProject(projectName: string, public_access = 1) {
+  public async getOrCreateProject(projectName: string, publicAccess = 1) {
     let project = null;
     const userName = process.env.CZID_USERNAME.split("@")[0];
     const userProjectName = `${userName}_${projectName}`;
@@ -170,7 +171,7 @@ export class ProjectPage extends PageObject {
       const payload = {
         "project":{
           "name": userProjectName,
-          "public_access": public_access, // Public
+          "public_access": publicAccess, // Public
           "description": "created by automation",
         },
       };
@@ -318,6 +319,12 @@ export class ProjectPage extends PageObject {
     }
 
     await this.page.locator(CHOOSE_TAXON).click();
+  }
+
+  public async SearchMyDataInputForSample(project: any, sample: any) {
+    await this.page.locator(SEARCH_MY_DATA_INPUT).fill(sample.name);
+    const resultLocator = SAMPLE_SEARCH(sample.id, project.id);
+    await this.page.locator(resultLocator).click();
   }
 
   public async fillSearchMyDataInput(value: string) {
@@ -659,6 +666,10 @@ export class ProjectPage extends PageObject {
         sampleStatus = samplesTable[sampleName]["Sample"][1];
       }
     }
+  }
+
+  public async scrollDownToSample(sampleName: string) {
+    await this.scrollDownToElement(SAMPLE_BY_SAMPLE_NAME(sampleName), ROWS, ARIA_ROWINDEX);
   }
 
   public async selectCompletedSamples(numberToSelect: number) {
