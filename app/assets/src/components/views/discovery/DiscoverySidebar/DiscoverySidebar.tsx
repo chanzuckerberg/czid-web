@@ -17,7 +17,7 @@ interface DiscoverySidebarProps {
   currentTab: string;
   defaultNumberOfMetadataRows?: number;
   loading?: boolean;
-  noDataAvailable?: boolean;
+  noDataAvailable: boolean;
   onFilterClick?: $TSFixMeFunction;
   onProjectDescriptionSave?: (value: string) => void;
   projectDimensions?: DimensionsDetailed;

@@ -149,7 +149,7 @@ const SamplesView = forwardRef(function SamplesView(
     sortable,
     sortBy,
     sortDirection,
-    userDataCounts,
+    totalWorkflowCounts,
     workflow = WorkflowType.SHORT_READ_MNGS,
     workflowEntity,
   }: SamplesViewProps,
@@ -938,13 +938,11 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderFilteredCount = () => {
-    if (isEmpty(userDataCounts)) {
+    if (!totalWorkflowCounts) {
       return;
     }
 
-    const totalNumberOfObjects =
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-      userDataCounts.sampleCountByWorkflow[workflow];
+    const totalNumberOfObjects = totalWorkflowCounts[workflow];
     const workflowConfig = configForWorkflow[workflow];
 
     return (

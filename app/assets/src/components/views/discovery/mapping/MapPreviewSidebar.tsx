@@ -409,6 +409,7 @@ export default class MapPreviewSidebar extends React.Component<MapPreviewSidebar
         currentTab={discoveryCurrentTab}
         loading={loading}
         onFilterClick={onFilterClick}
+        noDataAvailable={false}
         projectDimensions={projectDimensions}
         projectStats={projectStats}
         sampleDimensions={sampleDimensions}

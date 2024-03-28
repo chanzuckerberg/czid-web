@@ -104,13 +104,13 @@ export interface DiscoveryViewState {
   showFilters: boolean;
   showStats: boolean;
   userDataCounts: {
-    sampleCountByWorkflow: DiscoveryViewState["filteredSampleCountsByWorkflow"];
     sampleCount: number;
     projectCount: number;
-  };
+  } | null;
   visualizationCount?: number;
   workflow: WorkflowType;
   workflowEntity: string;
+  workflowCounts?: WorkflowCount;
 }
 
 export interface ConfigForWorkflow {

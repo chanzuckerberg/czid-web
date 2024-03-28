@@ -251,6 +251,7 @@ export class DiscoveryView extends React.Component<
       showFilters: true,
       showStats: true,
       userDataCounts: null,
+      workflowCounts: undefined,
       workflow: WorkflowType.SHORT_READ_MNGS,
       workflowEntity: WORKFLOW_ENTITIES.SAMPLES,
       ...localState,
@@ -1131,13 +1132,13 @@ export class DiscoveryView extends React.Component<
   };
 
   loadUserDataStats = async () => {
-    const { domain } = this.props;
+    const { domain, fetchTotalWorkflowCounts } = this.props;
     const { currentTab, projectId } = this.state;
     let { workflow } = this.state;
 
     this.setState({
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       userDataCounts: null,
+      workflowCounts: undefined,
     });
 
     getDiscoveryStats({ domain, projectId }).then(({ sampleStats }) => {
@@ -1151,7 +1152,6 @@ export class DiscoveryView extends React.Component<
           workflow,
           workflowEntity: WORKFLOWS[workflow].entity,
           userDataCounts: {
-            sampleCountByWorkflow: sampleStats.countByWorkflow,
             sampleCount: sampleStats.count,
             projectCount: sampleStats.projectCount,
           },
@@ -1171,6 +1171,13 @@ export class DiscoveryView extends React.Component<
         visualizationCount: visualizations.length ?? 0,
       });
     });
+    fetchTotalWorkflowCounts(projectId).then(
+      (workflowCounts: WorkflowCount) => {
+        this.setState({
+          workflowCounts,
+        });
+      },
+    );
   };
 
   computeTabs = () => {
@@ -2211,26 +2218,26 @@ export class DiscoveryView extends React.Component<
     // When workflow runs are kicked off from existing samples, we need to update the counts appropriately
     this.setState(
       ({
+        workflowCounts: prevWorkflowCounts,
         filteredSampleCountsByWorkflow: prevFilteredSampleCountsByWorkflow,
-        userDataCounts: prevUserDataCounts,
       }) => {
-        const prevSampleCountByWorkflow =
-          prevUserDataCounts?.sampleCountByWorkflow;
-        const newWorkflowRunsCount =
-          prevFilteredSampleCountsByWorkflow?.[workflow] +
-          numWorkflowRunsCreated;
+        const prevFilteredSampleCountForWorkflow =
+          prevFilteredSampleCountsByWorkflow[workflow];
+        const newFilteredWorkflowRunsCount =
+          prevFilteredSampleCountForWorkflow + numWorkflowRunsCreated;
+        const prevUnfilteredWorkflowCount: number =
+          prevWorkflowCounts?.[workflow] || 0;
+        const newUnfilteredWorkflowCount =
+          prevUnfilteredWorkflowCount + numWorkflowRunsCreated;
 
         return {
-          userDataCounts: {
-            ...prevUserDataCounts,
-            sampleCountByWorkflow: {
-              ...prevSampleCountByWorkflow,
-              [workflow]: newWorkflowRunsCount,
-            },
+          workflowCounts: {
+            ...prevWorkflowCounts,
+            [workflow]: newUnfilteredWorkflowCount,
           },
           filteredSampleCountsByWorkflow: {
             ...prevFilteredSampleCountsByWorkflow,
-            [workflow]: newWorkflowRunsCount,
+            [workflow]: newFilteredWorkflowRunsCount,
           },
         };
       },
@@ -2257,6 +2264,7 @@ export class DiscoveryView extends React.Component<
       userDataCounts,
       workflow,
       workflowEntity,
+      workflowCounts,
     } = this.state;
 
     const {
@@ -2366,8 +2374,7 @@ export class DiscoveryView extends React.Component<
             <div className={cs.dataContainer}>
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
               {/* TODO(bchu): Style <Suspense> fallback. */}
-              {userDataCounts &&
-              !userDataCounts.sampleCountByWorkflow[workflow] ? (
+              {workflowCounts && !workflowCounts[workflow] ? (
                 this.renderNoDataWorkflowBanner()
               ) : (
                 <Suspense fallback={<IconLoading />}>
@@ -2406,21 +2413,21 @@ export class DiscoveryView extends React.Component<
                     sortBy={orderByForCurrentTab}
                     sortDirection={orderDirection}
                     onUpdateSelectedIds={updateSelectedIds}
-                    userDataCounts={userDataCounts}
                     handleNewWorkflowRunsCreated={
                       this.handleNewWorkflowRunsCreated
                     }
                     filtersSidebarOpen={showFilters}
                     sampleStatsSidebarOpen={showStats}
                     hideAllTriggers={hideAllTriggers}
+                    totalWorkflowCounts={workflowCounts}
                     workflow={workflow}
                     workflowEntity={workflowEntity}
                   />
                 </Suspense>
               )}
             </div>
-            {userDataCounts &&
-            userDataCounts.sampleCountByWorkflow[workflow] &&
+            {workflowCounts &&
+            workflowCounts[workflow] &&
             this.configForWorkflow[workflow].getFilteredSampleCount() === 0 &&
             tableHasLoaded
               ? this.renderNoSearchResultsBanner(TAB_SAMPLES)
@@ -2549,11 +2556,11 @@ export class DiscoveryView extends React.Component<
             <DiscoverySidebar
               allowedFeatures={allowedFeatures}
               currentTab={currentTab}
-              noDataAvailable={
+              noDataAvailable={Boolean(
                 domain === DISCOVERY_DOMAIN_MY_DATA &&
-                userDataCounts &&
-                !userDataCounts.projectCount
-              }
+                  userDataCounts &&
+                  !userDataCounts.projectCount,
+              )}
               loading={loading}
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
               onFilterClick={
@@ -2699,6 +2706,9 @@ interface DiscoveryViewWithFCProps extends DiscoveryViewProps {
   cgWorkflowIds?: string[];
   cgRows: Array<CgRow | undefined>;
   workflowRunsProjectAggregates?: ProjectCountsType;
+  fetchTotalWorkflowCounts: (
+    selectedProjectId?: string,
+  ) => Promise<WorkflowCount | undefined>;
   fetchCgWorkflowRuns: (conditions: Conditions) => void;
   fetchCgPage: (offset: number) => Promise<Array<CgRow | undefined>>;
   fetchNextGenWorkflowRuns: (conditions: Conditions) => void;

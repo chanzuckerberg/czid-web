@@ -615,6 +615,10 @@ type fedWorkflowRunsAggregate {
   aggregate: [query_fedWorkflowRunsAggregate_aggregate_items]
 }
 
+type fedWorkflowRunsAggregateTotalCount {
+  aggregate: [query_fedWorkflowRunsAggregateTotalCount_aggregate_items]
+}
+
 type File {
   id: ID!
   entityId: ID!
@@ -1997,6 +2001,7 @@ type Query {
   ValidateUserCanDeleteObjects(input: queryInput_ValidateUserCanDeleteObjects_input_Input): ValidateUserCanDeleteObjects
   fedWorkflowRuns(input: queryInput_fedWorkflowRuns_input_Input): [query_fedWorkflowRuns_items]
   fedWorkflowRunsAggregate(input: queryInput_fedWorkflowRunsAggregate_input_Input): fedWorkflowRunsAggregate
+  fedWorkflowRunsAggregateTotalCount(input: queryInput_fedWorkflowRunsAggregateTotalCount_input_Input): fedWorkflowRunsAggregateTotalCount
   ZipLink(workflowRunId: String): ZipLink
   GraphQLFederationVersion: GraphQLFederationVersion
 }
@@ -2369,6 +2374,23 @@ type query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion {
 }
 
 type query_fedWorkflowRunsAggregate_aggregate_items_groupBy_workflowVersion_workflow {
+  name: String!
+}
+
+type query_fedWorkflowRunsAggregateTotalCount_aggregate_items {
+  count: Int!
+  groupBy: query_fedWorkflowRunsAggregateTotalCount_aggregate_items_groupBy!
+}
+
+type query_fedWorkflowRunsAggregateTotalCount_aggregate_items_groupBy {
+  workflowVersion: query_fedWorkflowRunsAggregateTotalCount_aggregate_items_groupBy_workflowVersion!
+}
+
+type query_fedWorkflowRunsAggregateTotalCount_aggregate_items_groupBy_workflowVersion {
+  workflow: query_fedWorkflowRunsAggregateTotalCount_aggregate_items_groupBy_workflowVersion_workflow!
+}
+
+type query_fedWorkflowRunsAggregateTotalCount_aggregate_items_groupBy_workflowVersion_workflow {
   name: String!
 }
 
@@ -3231,6 +3253,37 @@ input queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_I
 }
 
 input queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_name_Input {
+  _in: [String]
+}
+
+input queryInput_fedWorkflowRunsAggregateTotalCount_input_Input {
+  where: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_Input
+  todoRemove: queryInput_fedWorkflowRunsAggregateTotalCount_input_todoRemove_Input
+}
+
+input queryInput_fedWorkflowRunsAggregateTotalCount_input_todoRemove_Input {
+  domain: String
+  projectId: String
+}
+
+input queryInput_fedWorkflowRunsAggregateTotalCount_input_where_collectionId_Input {
+  _in: [Int]!
+}
+
+input queryInput_fedWorkflowRunsAggregateTotalCount_input_where_Input {
+  collectionId: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_collectionId_Input
+  workflowVersion: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_Input
+}
+
+input queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_Input {
+  workflow: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_workflow_Input
+}
+
+input queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_workflow_Input {
+  name: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_workflow_name_Input
+}
+
+input queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_workflow_name_Input {
   _in: [String]
 }
 

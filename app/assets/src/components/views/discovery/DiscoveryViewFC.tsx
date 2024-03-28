@@ -9,7 +9,7 @@ import { getProjects } from "~/api";
 import { UserContext } from "~/components/common/UserContext";
 import { logError } from "~/components/utils/logUtil";
 import { checkExhaustive, isNotNullish } from "~/components/utils/typeUtils";
-import { WorkflowType } from "~/components/utils/workflows";
+import { WorkflowCount, WorkflowType } from "~/components/utils/workflows";
 import { DEFAULT_PAGE_SIZE } from "~/components/visualizations/table/constants";
 import {
   ActionType,
@@ -34,6 +34,11 @@ import {
   DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType,
   DiscoveryViewFCFedWorkflowRunsAggregateQuery$data,
 } from "./__generated__/DiscoveryViewFCFedWorkflowRunsAggregateQuery.graphql";
+import {
+  DiscoveryViewFCFedWorkflowsTotalCountQuery as DiscoveryViewFCFedWorkflowsTotalCountQueryType,
+  DiscoveryViewFCFedWorkflowsTotalCountQuery$data,
+  queryInput_fedWorkflowRunsAggregateTotalCount_input_where_collectionId_Input,
+} from "./__generated__/DiscoveryViewFCFedWorkflowsTotalCountQuery.graphql";
 import {
   DiscoveryViewFCSequencingReadIdsQuery as DiscoveryViewFCSequencingReadIdsQueryType,
   DiscoveryViewFCSequencingReadIdsQuery$data,
@@ -256,6 +261,25 @@ export const DiscoveryViewFCFedWorkflowRunsAggregateQuery = graphql`
           }
         }
         count
+      }
+    }
+  }
+`;
+
+export const DiscoveryViewFCFedWorkflowsTotalCountQuery = graphql`
+  query DiscoveryViewFCFedWorkflowsTotalCountQuery(
+    $input: queryInput_fedWorkflowRunsAggregateTotalCount_input_Input
+  ) {
+    fedWorkflowRunsAggregateTotalCount(input: $input) {
+      aggregate {
+        count
+        groupBy {
+          workflowVersion {
+            workflow {
+              name
+            }
+          }
+        }
       }
     }
   }
@@ -1095,6 +1119,67 @@ const parseAggregateCounts = (
   return projectCounts;
 };
 
+async function queryWorkflowRunsTotalCount(
+  props: DiscoveryViewProps,
+  workflows: WorkflowType[],
+  environment: RelayModernEnvironment,
+  projectIds?: number[],
+  selectedProjectId?: string,
+): Promise<WorkflowCount | undefined> {
+  // collection id should be either project ids or a single project id
+  let collectionIdInput:
+    | queryInput_fedWorkflowRunsAggregateTotalCount_input_where_collectionId_Input
+    | undefined;
+  if (selectedProjectId != null) {
+    collectionIdInput = { _in: [parseInt(selectedProjectId)] };
+  } else if (projectIds !== undefined) {
+    collectionIdInput = { _in: projectIds };
+  }
+  const input = {
+    input: {
+      where: {
+        collectionId: collectionIdInput,
+        workflowVersion: { workflow: { name: { _in: workflows } } },
+      },
+      todoRemove: {
+        domain: props.domain,
+        projectId: selectedProjectId,
+      },
+    },
+  };
+  const workflowsTotalCount =
+    await fetchQuery<DiscoveryViewFCFedWorkflowsTotalCountQueryType>(
+      environment,
+      DiscoveryViewFCFedWorkflowsTotalCountQuery,
+      input,
+    ).toPromise();
+
+  return parseTotalCounts(workflowsTotalCount);
+}
+
+const parseTotalCounts = (
+  rawWorkflowsTotalCountData?: DiscoveryViewFCFedWorkflowsTotalCountQuery$data,
+): WorkflowCount | undefined => {
+  const totalCounts =
+    rawWorkflowsTotalCountData?.fedWorkflowRunsAggregateTotalCount?.aggregate;
+
+  if (!totalCounts) {
+    throw new Error(
+      `Missing project workflows total count data: ${JSON.stringify(
+        rawWorkflowsTotalCountData,
+      )}`,
+    );
+  }
+
+  const workflowCounts = {};
+  totalCounts.filter(isNotNullish).forEach(({ count, groupBy }) => {
+    const { workflowVersion } = groupBy;
+    const { name } = workflowVersion.workflow;
+    workflowCounts[name] = count;
+  });
+  return workflowCounts;
+};
+
 /**
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  _____  _                                __      ___                *
@@ -1156,21 +1241,17 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
 
   const fetchCgFilteredWorkflowRuns = async (
     conditions: Conditions,
+    projectIds?: number[],
   ): Promise<string[]> => {
     reset();
     cgConditions.current = conditions;
     try {
-      const projectIdsPromise = mustFetchProjectIds(props.domain, conditions)
-        ? fetchProjectIds(props.domain, conditions)
-        : Promise.resolve();
-      workflowRunsPromise.current = projectIdsPromise.then(projectIds =>
-        queryWorkflowRuns(
-          WorkflowType.CONSENSUS_GENOME,
-          conditions,
-          props,
-          environment,
-          projectIds,
-        ),
+      workflowRunsPromise.current = queryWorkflowRuns(
+        WorkflowType.CONSENSUS_GENOME,
+        conditions,
+        props,
+        environment,
+        projectIds,
       );
       const workflowRuns = await workflowRunsPromise.current;
       const workflowRunIds = workflowRuns.map(run => run.id);
@@ -1190,8 +1271,13 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   const fetchNextGenWorkflowRuns = async (
     conditions: Conditions,
   ): Promise<void> => {
+    const projectIdsPromise = mustFetchProjectIds(props.domain, conditions)
+      ? fetchProjectIds(props.domain, conditions)
+      : Promise.resolve();
+    projectIdsPromise.then(projectIds => {
+      fetchCgFilteredWorkflowRuns(conditions, projectIds);
+    });
     // TODO: fetch more workflows from NextGen
-    fetchCgFilteredWorkflowRuns(conditions);
   };
 
   const fetchWorkflowRunsProjectAggregates = async (
@@ -1271,6 +1357,21 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     return newRows;
   };
 
+  const fetchWorkflowCounts = async (
+    selectedProjectId?: string,
+  ): Promise<WorkflowCount | undefined> => {
+    const projectIds = selectedProjectId
+      ? [parseInt(selectedProjectId)]
+      : await fetchProjectIds(props.domain, {});
+    return queryWorkflowRunsTotalCount(
+      props,
+      [WorkflowType.CONSENSUS_GENOME], // all workflows in nextgen
+      environment,
+      projectIds,
+      selectedProjectId,
+    );
+  };
+
   return (
     <DiscoveryView
       {...props}
@@ -1281,6 +1382,7 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       cgWorkflowIds={cgWorkflowRunIds}
       cgRows={cgFullRows}
       workflowRunsProjectAggregates={workflowRunsProjectAggregates}
+      fetchTotalWorkflowCounts={fetchWorkflowCounts}
       fetchNextGenWorkflowRuns={fetchNextGenWorkflowRuns}
       fetchCgWorkflowRuns={fetchCgFilteredWorkflowRuns}
       fetchCgPage={fetchCgPage}

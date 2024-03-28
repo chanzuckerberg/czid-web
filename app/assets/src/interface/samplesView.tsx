@@ -1,6 +1,6 @@
 import { SortDirectionType } from "react-virtualized";
 import { ThresholdForAPI } from "~/components/utils/ThresholdMap";
-import { WorkflowType } from "~/components/utils/workflows";
+import { WorkflowCount, WorkflowType } from "~/components/utils/workflows";
 import { AnnotationValue } from "~/interface/discovery";
 import { LocationObject } from "~/interface/shared";
 import { DateString } from "~/interface/shared/generic";
@@ -56,7 +56,7 @@ export interface SamplesViewProps {
   sortDirection?: SortDirectionType;
   snapshotShareId?: string;
   sortable?: boolean;
-  userDataCounts?: { sampleCountByWorkflow: { [key: string]: number } };
+  totalWorkflowCounts?: WorkflowCount;
   workflow?: WorkflowType;
   workflowEntity?: string;
 }
