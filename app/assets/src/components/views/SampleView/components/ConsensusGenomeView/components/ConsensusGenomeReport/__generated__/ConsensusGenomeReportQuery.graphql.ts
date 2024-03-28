@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b006c41d30f47d01b93e07b52f313e65>>
+ * @generated SignedSource<<13dfcd72dcdb4188f32943cbc158ab36>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -258,6 +258,46 @@ return {
               }
             ],
             "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "query_fedConsensusGenomes_items_referenceGenome",
+            "kind": "LinkedField",
+            "name": "referenceGenome",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "query_fedConsensusGenomes_items_referenceGenome_file",
+                "kind": "LinkedField",
+                "name": "file",
+                "plural": false,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "query_fedConsensusGenomes_items_referenceGenome_file_downloadLink",
+                    "kind": "LinkedField",
+                    "name": "downloadLink",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "url",
+                        "storageKey": null
+                      }
+                    ],
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
           }
         ],
         "storageKey": null
@@ -265,12 +305,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "61252aa1cc6300798208251d3e273ec8",
+    "cacheID": "c5b7a211dff752a173c294047167b9d8",
     "id": null,
     "metadata": {},
     "name": "ConsensusGenomeReportQuery",
     "operationKind": "query",
-    "text": "query ConsensusGenomeReportQuery(\n  $workflowRunId: String\n) {\n  fedConsensusGenomes(input: {where: {producingRunId: {_eq: $workflowRunId}}}) {\n    ...ConsensusGenomeMetricsTableFragment\n    ...ConsensusGenomeCoverageViewFragment\n    ...ConsensusGenomeHistogramFragment\n  }\n}\n\nfragment ConsensusGenomeCoverageViewFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n  }\n  taxon {\n    name\n    id\n  }\n  metrics {\n    coverageBreadth\n    coverageDepth\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeHistogramFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n    accessionName\n  }\n  taxon {\n    name\n  }\n  metrics {\n    coverageViz\n    coverageBinSize\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeMetricsTableFragment on query_fedConsensusGenomes_items {\n  taxon {\n    name\n  }\n  metrics {\n    mappedReads\n    nActg\n    nAmbiguous\n    nMissing\n    refSnps\n    percentIdentity\n    gcPercent\n    percentGenomeCalled\n  }\n}\n"
+    "text": "query ConsensusGenomeReportQuery(\n  $workflowRunId: String\n) {\n  fedConsensusGenomes(input: {where: {producingRunId: {_eq: $workflowRunId}}}) {\n    ...ConsensusGenomeMetricsTableFragment\n    ...ConsensusGenomeCoverageViewFragment\n    ...ConsensusGenomeHistogramFragment\n  }\n}\n\nfragment ConsensusGenomeCoverageViewFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n  }\n  taxon {\n    name\n    id\n  }\n  metrics {\n    coverageBreadth\n    coverageDepth\n    coverageTotalLength\n  }\n  referenceGenome {\n    file {\n      downloadLink {\n        url\n      }\n    }\n  }\n}\n\nfragment ConsensusGenomeHistogramFragment on query_fedConsensusGenomes_items {\n  accession {\n    accessionId\n    accessionName\n  }\n  taxon {\n    name\n  }\n  metrics {\n    coverageViz\n    coverageBinSize\n    coverageTotalLength\n  }\n}\n\nfragment ConsensusGenomeMetricsTableFragment on query_fedConsensusGenomes_items {\n  taxon {\n    name\n  }\n  metrics {\n    mappedReads\n    nActg\n    nAmbiguous\n    nMissing\n    refSnps\n    percentIdentity\n    gcPercent\n    percentGenomeCalled\n  }\n}\n"
   }
 };
 })();

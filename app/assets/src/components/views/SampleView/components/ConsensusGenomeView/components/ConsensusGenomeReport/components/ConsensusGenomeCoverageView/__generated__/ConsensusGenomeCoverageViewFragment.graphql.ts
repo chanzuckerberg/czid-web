@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2e5d692837fb5b6974593852a48acb26>>
+ * @generated SignedSource<<5525794d72aa7824f83adf2174d379c8>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,6 +18,13 @@ export type ConsensusGenomeCoverageViewFragment$data = ReadonlyArray<{
     readonly coverageBreadth: number | null | undefined;
     readonly coverageDepth: number | null | undefined;
     readonly coverageTotalLength: number | null | undefined;
+  } | null | undefined;
+  readonly referenceGenome: {
+    readonly file: {
+      readonly downloadLink: {
+        readonly url: string | null | undefined;
+      } | null | undefined;
+    } | null | undefined;
   } | null | undefined;
   readonly taxon: {
     readonly id: string | null | undefined;
@@ -112,12 +119,52 @@ const node: ReaderFragment = {
         }
       ],
       "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "concreteType": "query_fedConsensusGenomes_items_referenceGenome",
+      "kind": "LinkedField",
+      "name": "referenceGenome",
+      "plural": false,
+      "selections": [
+        {
+          "alias": null,
+          "args": null,
+          "concreteType": "query_fedConsensusGenomes_items_referenceGenome_file",
+          "kind": "LinkedField",
+          "name": "file",
+          "plural": false,
+          "selections": [
+            {
+              "alias": null,
+              "args": null,
+              "concreteType": "query_fedConsensusGenomes_items_referenceGenome_file_downloadLink",
+              "kind": "LinkedField",
+              "name": "downloadLink",
+              "plural": false,
+              "selections": [
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "url",
+                  "storageKey": null
+                }
+              ],
+              "storageKey": null
+            }
+          ],
+          "storageKey": null
+        }
+      ],
+      "storageKey": null
     }
   ],
   "type": "query_fedConsensusGenomes_items",
   "abstractKey": null
 };
 
-(node as any).hash = "f8c802330a62eaa94ef850db7daada0e";
+(node as any).hash = "3ce28c461d4e1e036882bce1a0fe8359";
 
 export default node;

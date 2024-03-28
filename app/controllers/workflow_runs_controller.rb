@@ -410,7 +410,12 @@ class WorkflowRunsController < ApplicationController
       presigned_url = get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_#{@workflow_run.id}_#{filename}")
 
       if presigned_url
-        redirect_to presigned_url
+        render(
+          json: {
+            url: presigned_url,
+          },
+          status: :ok
+        )
       else
         render(
           json: { status: "File not available" },

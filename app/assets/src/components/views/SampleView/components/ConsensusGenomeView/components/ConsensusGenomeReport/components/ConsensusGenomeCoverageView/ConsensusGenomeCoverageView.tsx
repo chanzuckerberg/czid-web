@@ -9,7 +9,6 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { formatPercent } from "~/components/utils/format";
 import { openUrlInNewTab } from "~/components/utils/links";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
-import { getWorkflowRefAccessionFileLink } from "~/components/views/report/utils/download";
 import cs from "~/components/views/SampleView/components/ConsensusGenomeView/consensus_genome_view.scss";
 import { WorkflowRun } from "~/interface/sample";
 import { SampleId } from "~/interface/shared";
@@ -30,6 +29,13 @@ export const ConsensusGenomeCoverageViewFragment = graphql`
       coverageBreadth
       coverageDepth
       coverageTotalLength
+    }
+    referenceGenome {
+      file {
+        downloadLink {
+          url
+        }
+      }
     }
   }
 `;
@@ -98,8 +104,10 @@ export const ConsensusGenomeCoverageView = ({
   );
 
   const downloadCustomRefFile = () => {
-    const fileLocation = getWorkflowRefAccessionFileLink(workflowRun.id);
-    openUrlInNewTab(fileLocation);
+    const fileLocation = data[0]?.referenceGenome?.file?.downloadLink?.url;
+    // eslint-disable-next-line no-console
+    console.log({ fileLocation });
+    fileLocation && openUrlInNewTab(fileLocation);
   };
 
   const customReference = (
