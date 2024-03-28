@@ -39,6 +39,7 @@ class TaxonLineage < ApplicationRecord
     #  called on all updates. This module updates elasticsearch using these
     #  callbacks. If you must circumvent them somehow (eg. using raw SQL or
     #  bulk_import) you must explicitly update elasticsearch appropriately.
+    index_name 'taxon_lineages_alias' # This is the alias name
     include ElasticsearchCallbacksHelper
   end
   include TaxonLineageHelper
