@@ -24,6 +24,25 @@ module ElasticsearchQueryHelper
     zscore: "zscore",
   }.freeze
 
+  # Remove an alias from one index and point it to a new index in one atomic operation
+  # This incurs zero downtime.
+  def self.swap_index_for_alias(old_index_name, new_index_name, alias_name)
+    ES_CLIENT.indices.update_aliases body: {
+      actions: [
+        { add: { index: new_index_name, alias: alias_name } },
+        { remove: { index: old_index_name, alias: alias_name } },
+      ],
+    }
+  end
+
+  def self.drop_index(index_name)
+    ES_CLIENT.indices.delete(index: index_name)
+  end
+
+  def self.get_index_for_alias(alias_name)
+    ES_CLIENT.indices.get_alias(name: alias_name).keys.first
+  end
+
   # Check is the data exists in ES for background_id and pipeline_run_ids if not then invoke taxon-indexing lambda job
   # to calculate and save scores in the ES index
   def self.update_es_for_missing_data(background_id, pipeline_run_ids)
