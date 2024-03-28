@@ -228,7 +228,7 @@ class BulkDeletionService
                                      user.id,
                                      sample_ids,
                                      WorkflowRun::WORKFLOW[:consensus_genome],
-                                     token: token
+                                     token
                                    )
                                  else
                                    WorkflowRun.where(

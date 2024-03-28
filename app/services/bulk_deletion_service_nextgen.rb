@@ -486,8 +486,8 @@ class BulkDeletionServiceNextgen
     bd_wr_ids = bulk_download_workflow_runs.map(&:id)
     bulk_download_entities = CzidGraphqlFederation.query_with_token(user.id, GetBulkDownloadsForWorkflowRuns, variables: { run_ids: bd_wr_ids }, token: token).data.bulk_downloads
 
-    CzidGraphqlFederation.query_with_token(user.id, UpdateBulkDownload, variables: { bulk_download_ids: bulk_download_entities.map(&:id), delete_timestamp: delete_timestamp }, token: token)
-    CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: bd_wr_ids, delete_timestamp: delete_timestamp }, token: token)
+    CzidGraphqlFederation.query_with_token(user.id, UpdateBulkDownload, variables: { bulk_download_ids: bulk_download_entities.map(&:id), delete_timestamp: delete_timestamp }, token: token) if bulk_download_entities.present?
+    CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: bd_wr_ids, delete_timestamp: delete_timestamp }, token: token) if bd_wr_ids.present?
 
     return {
       bulk_download_workflow_runs: bulk_download_workflow_runs,
@@ -497,9 +497,9 @@ class BulkDeletionServiceNextgen
 
   # TODO: in the future this should be more general. We shouldn't need to specify consensus genomes here
   def soft_delete_objects(user, token, delete_timestamp, cg_ids_to_delete, sample_ids_to_delete, workflow_run_ids_to_delete)
-    CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: workflow_run_ids_to_delete, delete_timestamp: delete_timestamp }, token: token)
-    CzidGraphqlFederation.query_with_token(user.id, UpdateConsensusGenomes, variables: { cg_ids: cg_ids_to_delete, delete_timestamp: delete_timestamp }, token: token)
-    CzidGraphqlFederation.query_with_token(user.id, UpdateSamples, variables: { sample_ids: sample_ids_to_delete, delete_timestamp: delete_timestamp }, token: token)
+    CzidGraphqlFederation.query_with_token(user.id, UpdateWorkflowRuns, variables: { run_ids: workflow_run_ids_to_delete, delete_timestamp: delete_timestamp }, token: token) if workflow_run_ids_to_delete.present?
+    CzidGraphqlFederation.query_with_token(user.id, UpdateConsensusGenomes, variables: { cg_ids: cg_ids_to_delete, delete_timestamp: delete_timestamp }, token: token) if cg_ids_to_delete.present?
+    CzidGraphqlFederation.query_with_token(user.id, UpdateSamples, variables: { sample_ids: sample_ids_to_delete, delete_timestamp: delete_timestamp }, token: token) if sample_ids_to_delete.present?
   end
 
   def create_deletion_logs(
