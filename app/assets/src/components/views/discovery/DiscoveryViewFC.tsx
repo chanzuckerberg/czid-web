@@ -8,7 +8,7 @@ import RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironme
 import { getProjects } from "~/api";
 import { UserContext } from "~/components/common/UserContext";
 import { logError } from "~/components/utils/logUtil";
-import { isNotNullish } from "~/components/utils/typeUtils";
+import { checkExhaustive, isNotNullish } from "~/components/utils/typeUtils";
 import { WorkflowType } from "~/components/utils/workflows";
 import { DEFAULT_PAGE_SIZE } from "~/components/visualizations/table/constants";
 import {
@@ -24,6 +24,12 @@ import {
   Metadata,
   WorkflowRunRow,
 } from "../samples/SamplesView/SamplesView";
+import {
+  DiscoveryViewFCConsensusGenomeIdsQuery as DiscoveryViewFCConsensusGenomeIdsQueryType,
+  DiscoveryViewFCConsensusGenomeIdsQuery$data,
+  queryInput_fedConsensusGenomes_input_Input,
+  queryInput_fedConsensusGenomes_input_orderBy_items_Input,
+} from "./__generated__/DiscoveryViewFCConsensusGenomeIdsQuery.graphql";
 import {
   DiscoveryViewFCFedWorkflowRunsAggregateQuery as DiscoveryViewFCFedWorkflowRunsAggregateQueryType,
   DiscoveryViewFCFedWorkflowRunsAggregateQuery$data,
@@ -152,6 +158,16 @@ const DiscoveryViewFCSequencingReadIdsQuery = graphql`
   ) {
     fedSequencingReads(input: $input) {
       id
+    }
+  }
+`;
+
+const DiscoveryViewFCConsensusGenomeIdsQuery = graphql`
+  query DiscoveryViewFCConsensusGenomeIdsQuery(
+    $input: queryInput_fedConsensusGenomes_input_Input
+  ) {
+    fedConsensusGenomes(input: $input) {
+      producingRunId
     }
   }
 `;
@@ -378,6 +394,40 @@ async function queryWorkflowRuns(
     };
   }
 
+  // CONSENSUSGENOMES INPUT:
+  let consensusGenomesInput:
+    | queryInput_fedConsensusGenomes_input_Input
+    | undefined;
+  if (isConsensusGenomesSortKey(orderBy)) {
+    consensusGenomesInput = {
+      where:
+        collectionIdInput !== undefined
+          ? {
+              collectionId: collectionIdInput,
+            }
+          : undefined,
+      orderBy: getConsensusGenomesOrderBys(
+        orderBy as (typeof CONSENSUS_GENOMES_SORT_KEYS)[number],
+        orderDir,
+      ),
+      todoRemove: {
+        domain: props.domain,
+        projectId: projectId?.toString(),
+        search,
+        host: filters?.host,
+        locationV2: filters?.locationV2,
+        taxons: filters?.taxon,
+        taxaLevels: filters?.taxaLevels,
+        time: filters?.time,
+        tissue: filters?.tissue,
+        visibility: filters?.visibility,
+        orderBy,
+        orderDir,
+        workflow,
+      },
+    };
+  }
+
   // WORKFLOWS INPUT:
   const workflowsInput: queryInput_fedWorkflowRuns_input_Input = {
     where: {
@@ -505,6 +555,19 @@ async function queryWorkflowRuns(
     }
   }
 
+  // CONSENESUSGENOMES QUERY (IF NEEDED):
+  let consensusGenomesPromise:
+    | Promise<DiscoveryViewFCConsensusGenomeIdsQuery$data | undefined>
+    | undefined;
+  if (consensusGenomesInput !== undefined) {
+    consensusGenomesPromise =
+      fetchQuery<DiscoveryViewFCConsensusGenomeIdsQueryType>(
+        environment,
+        DiscoveryViewFCConsensusGenomeIdsQuery,
+        { input: consensusGenomesInput },
+      ).toPromise();
+  }
+
   // WORKFLOWS QUERY:
   const workflowsPromise = fetchQuery<DiscoveryViewFCWorkflowsQueryType>(
     environment,
@@ -517,6 +580,10 @@ async function queryWorkflowRuns(
     sequencingReadsPromise !== undefined
       ? await sequencingReadsPromise
       : undefined;
+  const consensusGenomesData =
+    consensusGenomesPromise !== undefined
+      ? await consensusGenomesPromise
+      : undefined;
   const workflowsData = await workflowsPromise;
   if (
     sequencingReadsPromise !== undefined &&
@@ -525,6 +592,16 @@ async function queryWorkflowRuns(
     throw new Error(
       `Missing filtered sequencingReads data: ${JSON.stringify(
         sequencingReadsData,
+      )}`,
+    );
+  }
+  if (
+    consensusGenomesPromise !== undefined &&
+    consensusGenomesData?.fedConsensusGenomes == null
+  ) {
+    throw new Error(
+      `Missing sorted consensusGenomes data: ${JSON.stringify(
+        consensusGenomesData,
       )}`,
     );
   }
@@ -550,28 +627,80 @@ async function queryWorkflowRuns(
     }
     const sequencingReadIdsToWorkflowRuns = new Map<
       string,
-      NonNullable<(typeof workflowsData.fedWorkflowRuns)[number]>
-    >(
-      workflowsData.fedWorkflowRuns.filter(isNotNullish).flatMap(run => {
-        const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
-        if (sequencingReadId != null) {
-          return [[sequencingReadId, run]];
-        } else {
-          return [];
-        }
-      }),
-    );
+      Array<NonNullable<(typeof workflowsData.fedWorkflowRuns)[number]>>
+    >();
+    for (const run of workflowsData.fedWorkflowRuns.filter(isNotNullish)) {
+      const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
+      if (sequencingReadId == null) {
+        continue;
+      }
+      if (!sequencingReadIdsToWorkflowRuns.has(sequencingReadId)) {
+        sequencingReadIdsToWorkflowRuns.set(sequencingReadId, [run]);
+      } else {
+        sequencingReadIdsToWorkflowRuns.get(sequencingReadId)?.push(run);
+      }
+    }
     sortedWorkflowResponses = sequencingReadsData.fedSequencingReads
       .filter(isNotNullish)
       .filter(sequencingRead =>
         sequencingReadIdsToWorkflowRuns.has(sequencingRead.id),
       )
-      .map(
+      .flatMap(
         sequencingRead =>
-          sequencingReadIdsToWorkflowRuns.get(sequencingRead.id) as NonNullable<
-            (typeof workflowsData.fedWorkflowRuns)[number]
+          sequencingReadIdsToWorkflowRuns.get(sequencingRead.id) as Array<
+            NonNullable<(typeof workflowsData.fedWorkflowRuns)[number]>
           >,
       );
+  } else if (isConsensusGenomesSortKey(orderBy)) {
+    if (consensusGenomesData?.fedConsensusGenomes == null) {
+      throw new Error(
+        "Impossible state: Sorting by ConsensusGenome but no ConsensusGenome response.",
+      );
+    }
+    // Includes SequencingRead filters.
+    const sequencingReadIds =
+      sequencingReadsData?.fedSequencingReads != null
+        ? new Set(
+            sequencingReadsData.fedSequencingReads
+              .filter(isNotNullish)
+              .map(sequencingRead => sequencingRead.id),
+          )
+        : undefined;
+    // Includes SequencingRead + WorkflowRun filters.
+    const idToWorkflowRun = new Map<
+      string,
+      NonNullable<(typeof workflowsData.fedWorkflowRuns)[number]>
+    >(
+      workflowsData.fedWorkflowRuns.filter(isNotNullish).flatMap(run => {
+        const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
+        if (sequencingReadId == null) {
+          return [];
+        }
+        if (
+          sequencingReadIds !== undefined &&
+          !sequencingReadIds.has(sequencingReadId)
+        ) {
+          return [];
+        }
+        return [[run.id, run]];
+      }),
+    );
+    const yesConsensusGenomeWorkflowRuns =
+      consensusGenomesData.fedConsensusGenomes
+        .map(consensusGenome => consensusGenome?.producingRunId)
+        .filter(isNotNullish)
+        .filter(runId => idToWorkflowRun.has(runId))
+        .flatMap(runId => idToWorkflowRun.get(runId)!);
+    const yesConsensusGenomeWorkflowRunIds = new Set(
+      yesConsensusGenomeWorkflowRuns.map(run => run.id),
+    );
+    const noConsensusGenomeWorkflowRuns = [...idToWorkflowRun.values()].filter(
+      run => !yesConsensusGenomeWorkflowRunIds.has(run.id),
+    );
+    sortedWorkflowResponses =
+      orderDir === "ASC"
+        ? [...noConsensusGenomeWorkflowRuns, ...yesConsensusGenomeWorkflowRuns]
+        : [...yesConsensusGenomeWorkflowRuns, ...noConsensusGenomeWorkflowRuns];
   } else {
     const sequencingReadIds =
       sequencingReadsData !== undefined
@@ -714,6 +843,42 @@ function getSequencingReadsOrderBys(
           },
         },
       ];
+  }
+}
+
+function getConsensusGenomesOrderBys(
+  orderBy?: (typeof CONSENSUS_GENOMES_SORT_KEYS)[number],
+  orderDir?: string,
+): queryInput_fedConsensusGenomes_input_orderBy_items_Input[] | undefined {
+  const nextGenOrderDir =
+    orderDir === "ASC" ? "asc_nulls_first" : "desc_nulls_last";
+  switch (orderBy) {
+    case null:
+    case undefined:
+      return undefined;
+    case "referenceAccession":
+      return [
+        {
+          accession: {
+            accessionId: nextGenOrderDir,
+          },
+        },
+      ];
+    case "coverageDepth":
+    case "gcPercent":
+    case "refSnps":
+    case "percentIdentity":
+    case "nActg":
+    case "percentGenomeCalled":
+    case "nMissing":
+    case "nAmbiguous":
+      return [{ metrics: { [orderBy]: nextGenOrderDir } }];
+    case "totalReadsCG":
+      return [{ metrics: { totalReads: nextGenOrderDir } }];
+    case "referenceAccessionLength":
+      return [{ metrics: { referenceGenomeLength: nextGenOrderDir } }];
+    default:
+      checkExhaustive(orderBy);
   }
 }
 

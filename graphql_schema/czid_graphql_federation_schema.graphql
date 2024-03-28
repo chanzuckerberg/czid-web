@@ -2166,6 +2166,7 @@ type query_fedConsensusGenomes_items_referenceGenome_file_downloadLink {
 }
 
 type query_fedConsensusGenomes_items_sequencingRead {
+  id: String!
   nucleicAcid: String!
   protocol: String
   medakaModel: String
@@ -2740,20 +2741,20 @@ input queryInput_fedConsensusGenomes_input_Input {
   limit: Int
   offset: Int
   where: queryInput_fedConsensusGenomes_input_where_Input
-  orderBy: queryInput_fedConsensusGenomes_input_orderBy_Input
+  orderBy: [queryInput_fedConsensusGenomes_input_orderBy_items_Input]
   todoRemove: queryInput_fedConsensusGenomes_input_todoRemove_Input
 }
 
-input queryInput_fedConsensusGenomes_input_orderBy_accession_Input {
+input queryInput_fedConsensusGenomes_input_orderBy_items_accession_Input {
   accessionId: String
 }
 
-input queryInput_fedConsensusGenomes_input_orderBy_Input {
-  accession: queryInput_fedConsensusGenomes_input_orderBy_accession_Input
-  metrics: queryInput_fedConsensusGenomes_input_orderBy_metrics_Input
+input queryInput_fedConsensusGenomes_input_orderBy_items_Input {
+  accession: queryInput_fedConsensusGenomes_input_orderBy_items_accession_Input
+  metrics: queryInput_fedConsensusGenomes_input_orderBy_items_metrics_Input
 }
 
-input queryInput_fedConsensusGenomes_input_orderBy_metrics_Input {
+input queryInput_fedConsensusGenomes_input_orderBy_items_metrics_Input {
   coverageDepth: String
   totalReads: String
   gcPercent: String
@@ -2784,7 +2785,12 @@ input queryInput_fedConsensusGenomes_input_todoRemove_Input {
   workflowRunIds: [Int]
 }
 
+input queryInput_fedConsensusGenomes_input_where_collectionId_Input {
+  _in: [Int]
+}
+
 input queryInput_fedConsensusGenomes_input_where_Input {
+  collectionId: queryInput_fedConsensusGenomes_input_where_collectionId_Input
   producingRunId: queryInput_fedConsensusGenomes_input_where_producingRunId_Input
 }
 
