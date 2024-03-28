@@ -108,7 +108,7 @@ class HardDeleteNextgenObjects
     Rails.logger.info("Starting to hard delete NextGen objects")
     # service identity field required for deletions
     deletion_token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true, service_identity: "rails")["token"]
-    hard_delete(user_id, cg_ids, "ConsensusGenome", :query_cg_ds, :delete_cgs, deletion_token) if cg_ids.present?
+    hard_delete(user_id, cg_ids, "ConsensusGenome", :query_cg_ids, :delete_cgs, deletion_token) if cg_ids.present?
     hard_delete(user_id, sample_ids, "Sample", :query_sample_ids, :delete_samples, deletion_token) if sample_ids.present?
     hard_delete(user_id, workflow_run_ids + deprecated_workflow_run_ids, "WorkflowRun", :query_workflow_run_ids, :delete_workflow_runs, deletion_token) if workflow_run_ids.present?
     hard_delete(user_id, bulk_download_workflow_run_ids, "WorkflowRun", :query_workflow_run_ids, :delete_workflow_runs, deletion_token) if bulk_download_workflow_run_ids.present?
@@ -185,7 +185,7 @@ class HardDeleteNextgenObjects
     CzidGraphqlFederation.query_with_token(user_id, DeleteSamples, variables: { ids: ids }, token: token).data.delete_sample.map(&:id)
   end
 
-  def self.delete_bulk_download(user_id, ids, token)
+  def self.delete_bulk_downloads(user_id, ids, token)
     CzidGraphqlFederation.query_with_token(user_id, DeleteBulkDownloads, variables: { ids: ids }, token: token).data.delete_bulk_download.map(&:id)
   end
 end
