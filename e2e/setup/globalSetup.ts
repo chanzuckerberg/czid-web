@@ -1,11 +1,11 @@
-import * as fs from "fs";
-import * as path from "path";
+import { readFileSync } from "fs"; // Move this line before the import of @playwright/test
+import { resolve } from "path"; // Move this line before the import of @playwright/test
 import { chromium, expect, FullConfig } from "@playwright/test";
-import * as dotenv from "dotenv";
+import { config } from "dotenv";
 import { tag } from "../constants/common";
 import { login } from "../utils/login";
 
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
+config({ path: resolve(`.env.${process.env.NODE_ENV}`) });
 
 /**
  * This function is run once at the start of the test
@@ -16,13 +16,15 @@ dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 async function globalSetup(config: FullConfig): Promise<void> {
   const { storageState, baseURL } = config.projects[0].use;
   process.env.BASEURL = baseURL;
+
   if (process.env.NODE_ENV === "ci") {
     process.env.CI = "true";
   }
-  const username = process.env.CZID_USERNAME;
-  const password = process.env.CZID_PASSWORD;
 
-  if (!checkCookies()) {
+  if (!hasRecentlyLoggedIn()) {
+    const username = process.env.CZID_USERNAME;
+    const password = process.env.CZID_PASSWORD;
+
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
     await Promise.all([
@@ -42,11 +44,11 @@ export default globalSetup;
  * This is very helpful during development when we run lots of tests
  * @returns
  */
-function checkCookies(): boolean {
+const hasRecentlyLoggedIn = (): boolean => {
   try {
     const cookieFile = "/tmp/state.json";
     const currentTime = new Date().getTime();
-    const cookieJson = JSON.parse(fs.readFileSync(cookieFile).toString())[
+    const cookieJson = JSON.parse(readFileSync(cookieFile).toString())[
       "cookies"
     ];
     const cookie = cookieJson.find(cookie => cookie.name === "auth0");
@@ -63,4 +65,4 @@ function checkCookies(): boolean {
   } catch (error) {
     return false;
   }
-}
+};

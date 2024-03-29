@@ -61,7 +61,10 @@ class IdentityController < ApplicationController
       expires: expires_at,
     }
 
-    render json: { token_value: token_value, expires_at: expires_at }, status: :ok
+    render json: {
+      token_value: token_value,
+      expires_at: expires_at,
+    }, status: :ok
   end
 
   def enrich_token

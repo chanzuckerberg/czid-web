@@ -1,0 +1,38 @@
+name: Run API Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment'
+        required: true
+        default: 'staging'
+        options:
+        - staging
+        - sandbox
+        - prod
+
+run-name: "Run API tests on ${{ inputs.environment }}"
+
+jobs:
+  run-api-tests:
+    runs-on: ubuntu-latest
+    env:
+      CZID_USERNAME: ${{secrets.CZID_ADMIN_USERNAME}}
+      CZID_PASSWORD: ${{secrets.CZID_ADMIN_PASSWORD}}
+      NODE_ENV: ${{inputs.environment}}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install npm packages
+        working-directory: ./e2e/
+        run: |
+          npm install
+          npm i -g @playwright/test
+
+      - name: Run API tests
+        working-directory: ./e2e/
+        run: npx playwright test --headed -c ./setup/${{inputs.environment}}.config.ts tests/api/*.spec.ts
