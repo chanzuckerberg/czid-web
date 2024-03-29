@@ -6,6 +6,8 @@ on:
       - "**"
     tags-ignore:
       - "**"
+    paths-ignore:
+      - ".github/workflows/**"
 
 env:
   AWS_DEFAULT_OUTPUT: json

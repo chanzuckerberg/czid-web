@@ -1,0 +1,21 @@
+name: Scheduled e2e tests on staging - without feature flags
+# Runs E2E "e2e" tests on staging every weekday at 12am PT (7am UTC).
+# The e2e tests are run on the staging environment, and do not use feature flags.
+# These tests upload samples, wait for the samples to be processed, and then check the results.
+
+on:
+  schedule:
+    # Visit https://crontab.guru for more info on cron schedule expressions.
+    # The default timezone of GitHub Actions is Coordinated Universal Time (UTC).
+    # UTC is 7 hours ahead of PT, so 12am PT is 7am UTC (0700 military time).
+    - cron: '0 7 * * 1-5' # “At 07:00 on every day-of-week from Monday through Friday.”
+
+jobs:
+  run_staging_playwright_e2e_tests:
+    name: Run Playwright E2E tests on staging
+    uses: ./.github/workflows/e2e-automation.yml
+    with:
+      node-environment: "staging"
+      test-category: "e2e"
+      should-run-with-feature-flags: "false"
+    secrets: inherit
