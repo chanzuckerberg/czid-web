@@ -128,75 +128,99 @@ test.beforeAll(
 const railsConsensusGenomesMap = {};
 const nextGenConsensusGenomesMap = {};
 test.beforeAll("fetch data from Rails and NextGen", async () => {
-  const fragment = `
-    producingRunId
-    sequencingRead {
-      sample {
-        name
+  const cgFragment = `
+    edges {
+      node {
+        accession {
+          accessionName
+          accessionId
+        }
+        metrics {
+          coverageDepth
+          gcPercent
+          nActg
+          nMissing
+          nAmbiguous
+          percentGenomeCalled
+          percentIdentity
+          refSnps
+          totalReads
+          referenceGenomeLength
+        }
+        taxon {
+          name
+        }
+        producingRunId
       }
-      medakaModel
-      protocol
-      technology
-    }
-    metrics {
-      coverageDepth
-      refSnps
-      totalReads
-      percentIdentity
-      percentGenomeCalled
-      nMissing
-      nAmbiguous
-      nActg
-    }
-    accession {
-      accessionId
-      accessionName
-    }
-    taxon {
-      name
     }
   `;
 
+  const sequencingReadFragment = `
+    medakaModel
+    protocol
+    sample {
+      name
+      railsSampleId
+    }
+  `;
+
+  const railsIds = `[${Object.keys(railsIdToNextGenIdMap).join(",")}]`;
+  const railsIdsInStrings = `["${Object.keys(railsIdToNextGenIdMap).join(
+    '","',
+  )}"]`;
   const consensusGenomesFromRailsResponse = await makeRequestToRailsGQL(`
     query MyQuery {
-      fedConsensusGenomes(
-        input: {
-          todoRemove: {
-            workflow: "consensus-genome",
-            workflowRunIds: [${Object.keys(railsIdToNextGenIdMap).join(", ")}]
-          }
-        }
+      fedSequencingReads(
+        input: {todoRemove: {workflowRunIds: ${railsIds}}, consensusGenomesInput: {where: {producingRunId: {_in: ${railsIdsInStrings}}}}}
       ) {
-        ${fragment}
+        consensusGenomes {
+          ${cgFragment}
+        }
+        ${sequencingReadFragment}
       }
     }
   `);
 
   // Create a map of the consensus genomes from Rails, where the key is the producingRunId and the value the consensus genome
   const railsConsensusGenomes =
-    consensusGenomesFromRailsResponse.data.fedConsensusGenomes;
+    consensusGenomesFromRailsResponse.data.fedSequencingReads;
   for (const consensusGenome of railsConsensusGenomes) {
-    railsConsensusGenomesMap[consensusGenome.producingRunId] = consensusGenome;
+    for (const edge of consensusGenome.consensusGenomes.edges) {
+      railsConsensusGenomesMap[edge.node.producingRunId] = {
+        ...edge.node,
+        sequencingRead: {
+          medakaModel: consensusGenome.medakaModel,
+          protocol: consensusGenome.protocol,
+          sample: consensusGenome.sample,
+        },
+      };
+    }
   }
 
+  const nextGenIds = `["${Object.keys(nextGenIdToRailsIdMap).join('", "')}"]`;
   const responseFromNextGen = await makeRequestToNextGenGQL(`
-      query MyQuery {
-        consensusGenomes(
-          where: {producingRunId: {_in: ["${Object.keys(
-            nextGenIdToRailsIdMap,
-          ).join('", "')}"]}}
-        ) {
-          ${fragment}
+    query MyQuery {
+      sequencingReads(where: {consensusGenomes: {producingRunId: {_in: ${nextGenIds}}}}) {
+        consensusGenomes(where: {producingRunId: {_in: ${nextGenIds}}}) {
+          ${cgFragment}
         }
+        ${sequencingReadFragment}
       }
-    `);
+    }
+  `);
 
   // Create a map of the consensus genomes from NextGen, where the key is the producingRunId and the value the consensus genome
-  const nextGenConsensusGenomes = responseFromNextGen.data.consensusGenomes;
+  const nextGenConsensusGenomes = responseFromNextGen.data.sequencingReads;
   for (const consensusGenome of nextGenConsensusGenomes) {
-    if (nextGenIdToRailsIdMap[consensusGenome.producingRunId]) {
-      nextGenConsensusGenomesMap[consensusGenome.producingRunId] =
-        consensusGenome;
+    for (const edge of consensusGenome.consensusGenomes.edges) {
+      nextGenConsensusGenomesMap[edge.node.producingRunId] = {
+        ...edge.node,
+        sequencingRead: {
+          medakaModel: consensusGenome.medakaModel,
+          protocol: consensusGenome.protocol,
+          sample: consensusGenome.sample,
+        },
+      };
     }
   }
 });
