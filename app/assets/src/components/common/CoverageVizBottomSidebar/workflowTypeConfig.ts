@@ -11,21 +11,26 @@ const READ_REQUIRED_MESSAGE =
 
 export interface CoverageVizBottomSidebarConfigType {
   getUnavailableMessage: ((version?: string | null) => string) | null;
+  isReadLevelVizAvailable: boolean;
 }
 
 export const CoverageVizBottomSidebarConfig: WorkflowConfigType<CoverageVizBottomSidebarConfigType> =
   {
     [WorkflowType.AMR]: {
       getUnavailableMessage: null,
+      isReadLevelVizAvailable: false,
     },
     [WorkflowType.AMR_DEPRECATED]: {
       getUnavailableMessage: null,
+      isReadLevelVizAvailable: false,
     },
     [WorkflowType.BENCHMARK]: {
       getUnavailableMessage: null,
+      isReadLevelVizAvailable: false,
     },
     [WorkflowType.CONSENSUS_GENOME]: {
       getUnavailableMessage: null,
+      isReadLevelVizAvailable: false,
     },
     [WorkflowType.LONG_READ_MNGS]: {
       getUnavailableMessage: (version: string) =>
@@ -35,8 +40,10 @@ export const CoverageVizBottomSidebarConfig: WorkflowConfigType<CoverageVizBotto
         )
           ? READ_REQUIRED_MESSAGE
           : CONTIG_REQUIRED_MESSAGE,
+      isReadLevelVizAvailable: false,
     },
     [WorkflowType.SHORT_READ_MNGS]: {
       getUnavailableMessage: () => CONTIG_REQUIRED_MESSAGE,
+      isReadLevelVizAvailable: true,
     },
   };

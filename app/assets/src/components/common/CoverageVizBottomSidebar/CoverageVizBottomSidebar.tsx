@@ -408,7 +408,11 @@ export default class CoverageVizBottomSidebar extends React.Component<
           numAccessions - numBestAccessions
         } poor-quality accessions are omitted, as they have
         no contig alignments and few read alignments.
-        To see them, go to the read-level visualization.
+        ${
+          CoverageVizBottomSidebarConfig[workflow].isReadLevelVizAvailable
+            ? " To see them, go to the read-level visualization."
+            : ""
+        }
       `;
 
     return (
