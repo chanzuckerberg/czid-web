@@ -1230,28 +1230,53 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
     );
   };
 
-  const reset = () => {
-    // TODO: dispose() stale queryReferences.
+  const resetCg = () => {
     cgFirstPagePromise.current = undefined;
     cgConditions.current = {};
     setCgWorkflowRunIds(undefined);
     setCgFullRows([]);
-    setWorkflowRunsProjectAggregates(undefined);
+  };
+
+  /**
+   * WARNING: This function cannot be async. All requests and state resets+updates must be done
+   *  immediately/synchronously until the first workflowRun query sent out because the
+   *  InfiniteTable has already been reset() by now.
+   *
+   * @param sortOnlyWorkflow workflow that experienced a sort change (only need to reset/requery
+   *  of data when sorting changes). If this is undefined, we are resetting+requerying everything.
+   */
+  const fetchNextGenWorkflowRuns = (
+    conditions: Conditions,
+    sortOnlyWorkflow?: WorkflowType,
+  ): void => {
+    if (sortOnlyWorkflow === undefined) {
+      setWorkflowRunsProjectAggregates(undefined);
+    }
+    const projectIdsPromise = mustFetchProjectIds(props.domain, conditions)
+      ? fetchProjectIds(props.domain, conditions)
+      : Promise.resolve(undefined);
+    // TODO: Fetch only sortOnlyWorkflow if given.
+    fetchCgFilteredWorkflowRuns(conditions, projectIdsPromise);
   };
 
   const fetchCgFilteredWorkflowRuns = async (
     conditions: Conditions,
-    projectIds?: number[],
+    projectIdsPromise: Promise<number[] | undefined>,
   ): Promise<string[]> => {
-    reset();
+    resetCg();
     cgConditions.current = conditions;
     try {
-      workflowRunsPromise.current = queryWorkflowRuns(
-        WorkflowType.CONSENSUS_GENOME,
-        conditions,
-        props,
-        environment,
-        projectIds,
+      // This Promise needs to be set immediately (cannot await the projects query first), because
+      // InfiniteTable has already been reset() and needs to hit this pending Promise to accurately
+      // show that it's still loading.
+      workflowRunsPromise.current = projectIdsPromise.then(projectIds =>
+        queryWorkflowRuns(
+          WorkflowType.CONSENSUS_GENOME,
+          conditions,
+          props,
+          environment,
+          projectIds,
+        ),
       );
       const workflowRuns = await workflowRunsPromise.current;
       const workflowRunIds = workflowRuns.map(run => run.id);
@@ -1266,18 +1291,6 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       });
       return [];
     }
-  };
-
-  const fetchNextGenWorkflowRuns = async (
-    conditions: Conditions,
-  ): Promise<void> => {
-    const projectIdsPromise = mustFetchProjectIds(props.domain, conditions)
-      ? fetchProjectIds(props.domain, conditions)
-      : Promise.resolve();
-    projectIdsPromise.then(projectIds => {
-      fetchCgFilteredWorkflowRuns(conditions, projectIds);
-    });
-    // TODO: fetch more workflows from NextGen
   };
 
   const fetchWorkflowRunsProjectAggregates = async (
@@ -1384,7 +1397,6 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       workflowRunsProjectAggregates={workflowRunsProjectAggregates}
       fetchTotalWorkflowCounts={fetchWorkflowCounts}
       fetchNextGenWorkflowRuns={fetchNextGenWorkflowRuns}
-      fetchCgWorkflowRuns={fetchCgFilteredWorkflowRuns}
       fetchCgPage={fetchCgPage}
       fetchWorkflowRunsProjectAggregates={fetchWorkflowRunsProjectAggregates}
     />

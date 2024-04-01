@@ -371,7 +371,7 @@ export class DiscoveryView extends React.Component<
         noDataMessage:
           `No samples were processed by the AMR Pipeline. ` +
           "You can upload new samples or rerun mNGS samples through the AMR pipeline.",
-        fetchWorkflowRuns: () => {
+        fetchWorkflowRunsForSortChange: () => {
           // Not migrated to NextGen yet.
         },
         fetchPage: this.amrWorkflowRuns.handleLoadObjectRows,
@@ -392,7 +392,7 @@ export class DiscoveryView extends React.Component<
         noDataMessage:
           `No samples were processed by the Benchmark Pipeline. ` +
           "You can Benchmark samples by selecting them in the mNGS table and clicking the 'Benchmark' icon.",
-        fetchWorkflowRuns: () => {
+        fetchWorkflowRunsForSortChange: () => {
           // Not migrated to NextGen yet.
         },
         fetchPage: this.benchmarkWorkflowRuns.handleLoadObjectRows,
@@ -409,7 +409,11 @@ export class DiscoveryView extends React.Component<
         noDataMessage: this.getNoDataBannerMessage(
           WORKFLOW_TABS.CONSENSUS_GENOME,
         ),
-        fetchWorkflowRuns: this.props.fetchCgWorkflowRuns,
+        fetchWorkflowRunsForSortChange: (conditions: Conditions) =>
+          this.props.fetchNextGenWorkflowRuns(
+            conditions,
+            WorkflowType.CONSENSUS_GENOME,
+          ),
         fetchPage: ({ startIndex }) => this.props.fetchCgPage(startIndex),
         getSelectableIds: () => this.props.cgWorkflowIds,
         getFilteredSampleCount: () => this.props.cgWorkflowIds?.length,
@@ -428,7 +432,7 @@ export class DiscoveryView extends React.Component<
         noDataMessage: this.getNoDataBannerMessage(
           WORKFLOW_TABS.SHORT_READ_MNGS,
         ),
-        fetchWorkflowRuns: () => {
+        fetchWorkflowRunsForSortChange: () => {
           // Not migrated to NextGen yet.
         },
         fetchPage: this.samples.handleLoadObjectRows,
@@ -448,7 +452,7 @@ export class DiscoveryView extends React.Component<
         noDataMessage: this.getNoDataBannerMessage(
           WORKFLOW_TABS.LONG_READ_MNGS,
         ),
-        fetchWorkflowRuns: () => {
+        fetchWorkflowRunsForSortChange: () => {
           // Not migrated to NextGen yet.
         },
         fetchPage: this.longReadMngsSamples.handleLoadObjectRows,
@@ -902,7 +906,9 @@ export class DiscoveryView extends React.Component<
     if (currentTab === TAB_SAMPLES) {
       // TODO: After the Workflows Service call is only responsible for sorting Workflows-related
       // columns, only refetch the full list of IDs if sorting on a Workflows Service column.
-      this.configForWorkflow[workflow].fetchWorkflowRuns(conditions);
+      this.configForWorkflow[workflow].fetchWorkflowRunsForSortChange(
+        conditions,
+      );
     }
     this.configForWorkflow[workflow].objectCollection?.reset({
       conditions,
@@ -2709,9 +2715,11 @@ interface DiscoveryViewWithFCProps extends DiscoveryViewProps {
   fetchTotalWorkflowCounts: (
     selectedProjectId?: string,
   ) => Promise<WorkflowCount | undefined>;
-  fetchCgWorkflowRuns: (conditions: Conditions) => void;
   fetchCgPage: (offset: number) => Promise<Array<CgRow | undefined>>;
-  fetchNextGenWorkflowRuns: (conditions: Conditions) => void;
+  fetchNextGenWorkflowRuns: (
+    conditions: Conditions,
+    sortOnlyWorkflow?: WorkflowType,
+  ) => void;
   fetchWorkflowRunsProjectAggregates: (
     projectIds: number[],
     conditions: Conditions,

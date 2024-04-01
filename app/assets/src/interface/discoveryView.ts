@@ -126,7 +126,7 @@ export interface ConfigForWorkflow {
   getSelectableIds: () => string[] | undefined;
   getFilteredSampleCount: () => number | undefined;
   getRows: () => any[];
-  fetchWorkflowRuns: (conditions: Conditions) => void;
+  fetchWorkflowRunsForSortChange: (conditions: Conditions) => void;
   fetchPage: (range: {
     startIndex: number;
     stopIndex: number;
