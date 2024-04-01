@@ -156,7 +156,7 @@ export const HOST_GENOME_NAMES = {
 };
 
 // The number of times we automatically update the bulk downloads on the page before prompting the user.
-export const AUTO_UPDATE_MAX_COUNT = 3;
+export const AUTO_UPDATE_MAX_COUNT = 15;
 
 // Slightly larger than PROGRESS_UPDATE_DELAY on the back-end.
 export const AUTO_UPDATE_DELAY = 20000;

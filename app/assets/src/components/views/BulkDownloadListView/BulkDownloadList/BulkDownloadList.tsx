@@ -43,6 +43,7 @@ const BulkDownloadListQuery = graphql`
       startedAt
       ownerUserId
       downloadType
+      analysisCount
       url
       fileSize
       entityInputFileType
@@ -75,10 +76,10 @@ const BulkDownloadListComponent = () => {
     refreshedQueryOptions,
   );
   const bulkDownloadsData = data?.fedBulkDownloads;
-  const hasInProgressBulkDownloads = useCallback(bulkdownloads => {
+  const hasInProgressBulkDownloads = useCallback(bulkDownloads => {
     return some(
       bulkDownload => InProgressStatus.includes(bulkDownload?.status),
-      bulkdownloads,
+      bulkDownloads,
     );
   }, []);
   const shouldBeAutoUpdating = hasInProgressBulkDownloads(bulkDownloadsData);
@@ -109,8 +110,10 @@ const BulkDownloadListComponent = () => {
 
   useEffect(() => {
     const autoUpdate = (count: number) => {
-      refresh();
-      setAutoUpdateCount(count + 1);
+      if (shouldBeAutoUpdating) {
+        refresh();
+        setAutoUpdateCount(count + 1);
+      }
     };
     if (shouldBeAutoUpdating && autoUpdateCount <= AUTO_UPDATE_MAX_COUNT) {
       setTimeout(() => autoUpdate(autoUpdateCount), AUTO_UPDATE_DELAY);

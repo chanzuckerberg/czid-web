@@ -67,7 +67,7 @@ export class BulkDownloadTableRenderers extends React.Component {
 
   static renderCount = ({ rowData }) => {
     const bulkDownloadType = get("downloadType", rowData);
-    const count = get("entityInputs", rowData)?.length;
+    const count = get("analysisCount", rowData);
 
     let analysisTypeString = count === 1 ? "Sample" : "Samples";
     if (bulkDownloadType !== BULK_DOWNLOAD_TYPES.SAMPLE_METADATA) {

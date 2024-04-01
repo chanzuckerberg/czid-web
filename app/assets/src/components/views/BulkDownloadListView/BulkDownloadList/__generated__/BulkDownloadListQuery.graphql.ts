@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dacc9c2753676b889a83f8653bad9a13>>
+ * @generated SignedSource<<865684ba04e9a634c38dc144d324443b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,7 @@ import { FragmentRefs } from "relay-runtime";
 export type BulkDownloadListQuery$variables = Record<PropertyKey, never>;
 export type BulkDownloadListQuery$data = {
   readonly fedBulkDownloads: ReadonlyArray<{
+    readonly analysisCount: number | null | undefined;
     readonly downloadType: string | null | undefined;
     readonly entityInputFileType: string | null | undefined;
     readonly entityInputs: ReadonlyArray<{
@@ -72,17 +73,24 @@ v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "url",
+  "name": "analysisCount",
   "storageKey": null
 },
 v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "fileSize",
+  "name": "url",
   "storageKey": null
 },
 v7 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "fileSize",
+  "storageKey": null
+},
+v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -127,6 +135,7 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
+          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -161,7 +170,7 @@ return {
         "plural": true,
         "selections": [
           (v0/*: any*/),
-          (v5/*: any*/),
+          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -170,7 +179,7 @@ return {
             "storageKey": null
           },
           (v1/*: any*/),
-          (v6/*: any*/),
+          (v7/*: any*/),
           (v4/*: any*/),
           {
             "alias": null,
@@ -232,23 +241,24 @@ return {
           },
           (v2/*: any*/),
           (v3/*: any*/),
-          (v7/*: any*/)
+          (v5/*: any*/),
+          (v8/*: any*/)
         ],
         "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "d99d9c682381a13df77c7d8fea3842a7",
+    "cacheID": "452c6753d0936f6c02eb34e46874c424",
     "id": null,
     "metadata": {},
     "name": "BulkDownloadListQuery",
     "operationKind": "query",
-    "text": "query BulkDownloadListQuery {\n  fedBulkDownloads {\n    ...BulkDownloadDetailsModeFragment\n    ...DetailsTabFragment\n    ...AdvancedDownloadTabFragment\n    id\n    status\n    startedAt\n    ownerUserId\n    downloadType\n    url\n    fileSize\n    entityInputFileType\n    entityInputs {\n      id\n    }\n  }\n}\n\nfragment AdvancedDownloadTabFragment on query_fedBulkDownloads_items {\n  id\n  url\n  status\n  fileSize\n  downloadType\n  params {\n    paramType\n    value\n    displayName\n  }\n}\n\nfragment BulkDownloadDetailsModeFragment on query_fedBulkDownloads_items {\n  id\n  url\n  logUrl\n  status\n  fileSize\n  downloadType\n  errorMessage\n  params {\n    paramType\n    value\n    displayName\n  }\n}\n\nfragment DetailsTabFragment on query_fedBulkDownloads_items {\n  id\n  downloadType\n  params {\n    paramType\n    value\n    displayName\n  }\n  entityInputs {\n    id\n    name\n  }\n}\n"
+    "text": "query BulkDownloadListQuery {\n  fedBulkDownloads {\n    ...BulkDownloadDetailsModeFragment\n    ...DetailsTabFragment\n    ...AdvancedDownloadTabFragment\n    id\n    status\n    startedAt\n    ownerUserId\n    downloadType\n    analysisCount\n    url\n    fileSize\n    entityInputFileType\n    entityInputs {\n      id\n    }\n  }\n}\n\nfragment AdvancedDownloadTabFragment on query_fedBulkDownloads_items {\n  id\n  url\n  status\n  fileSize\n  downloadType\n  params {\n    paramType\n    value\n    displayName\n  }\n}\n\nfragment BulkDownloadDetailsModeFragment on query_fedBulkDownloads_items {\n  id\n  url\n  logUrl\n  status\n  fileSize\n  downloadType\n  errorMessage\n  params {\n    paramType\n    value\n    displayName\n  }\n}\n\nfragment DetailsTabFragment on query_fedBulkDownloads_items {\n  id\n  downloadType\n  params {\n    paramType\n    value\n    displayName\n  }\n  entityInputs {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "7f8f38c0888e4a5f8ae70dcd09db008d";
+(node as any).hash = "a26e15399d86967f593452d6effd6ed0";
 
 export default node;
