@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9b3ac5141390b88ef491a8eb27524ae4>>
+ * @generated SignedSource<<d684c48d51a9cb583e4112ab8595ba68>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,8 +19,8 @@ export type DetailsTabFragment$data = ReadonlyArray<{
   readonly id: string | null | undefined;
   readonly params: ReadonlyArray<{
     readonly displayName: string | null | undefined;
-    readonly paramType: string | null | undefined;
-    readonly value: string | null | undefined;
+    readonly paramType: string;
+    readonly value: string;
   } | null | undefined> | null | undefined;
   readonly " $fragmentType": "DetailsTabFragment";
 }>;

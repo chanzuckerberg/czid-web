@@ -349,6 +349,48 @@ async function queryWorkflowRuns(
     collectionIdInput = { _in: projectIds };
   }
 
+  // WORKFLOWS INPUT:
+  const workflowsInput: queryInput_fedWorkflowRuns_input_Input = {
+    where: {
+      workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
+      deprecatedById: { _is_null: true },
+      collectionId: collectionIdInput,
+      startedAt:
+        nextGenFilters?.startedAtIso !== undefined
+          ? {
+              _gte: nextGenFilters.startedAtIso,
+            }
+          : undefined,
+      entityInputs: {
+        entityType: {
+          _eq: "sequencing_read",
+        },
+        inputEntityId: {
+          _is_null: false,
+        },
+      },
+    },
+    orderByArray: getWorkflowRunsOrderBys(
+      orderBy as (typeof WORKFLOWS_SORT_KEYS)[number],
+      orderDir,
+    ), // TODO: Delete old non-Array orderBy
+    todoRemove: {
+      domain: props.domain,
+      projectId: projectId?.toString(),
+      search,
+      host: filters?.host,
+      locationV2: filters?.locationV2,
+      taxon: filters?.taxon,
+      taxonLevels: filters?.taxaLevels,
+      time: filters?.time,
+      tissue: filters?.tissue,
+      visibility: filters?.visibility,
+      orderBy,
+      orderDir,
+      workflow,
+    },
+  };
+
   // SEQUENCINGREADS INPUT:
   let sequencingReadsInput:
     | queryInput_fedSequencingReads_input_Input
@@ -452,47 +494,12 @@ async function queryWorkflowRuns(
     };
   }
 
-  // WORKFLOWS INPUT:
-  const workflowsInput: queryInput_fedWorkflowRuns_input_Input = {
-    where: {
-      workflowVersion: { workflow: { name: { _in: ["consensus-genome"] } } },
-      deprecatedById: { _is_null: true },
-      collectionId: collectionIdInput,
-      startedAt:
-        nextGenFilters?.startedAtIso !== undefined
-          ? {
-              _gte: nextGenFilters.startedAtIso,
-            }
-          : undefined,
-      entityInputs: {
-        entityType: {
-          _eq: "sequencing_read",
-        },
-        inputEntityId: {
-          _is_null: false,
-        },
-      },
-    },
-    orderByArray: getWorkflowRunsOrderBys(
-      orderBy as (typeof WORKFLOWS_SORT_KEYS)[number],
-      orderDir,
-    ), // TODO: Delete old non-Array orderBy
-    todoRemove: {
-      domain: props.domain,
-      projectId: projectId?.toString(),
-      search,
-      host: filters?.host,
-      locationV2: filters?.locationV2,
-      taxon: filters?.taxon,
-      taxonLevels: filters?.taxaLevels,
-      time: filters?.time,
-      tissue: filters?.tissue,
-      visibility: filters?.visibility,
-      orderBy,
-      orderDir,
-      workflow,
-    },
-  };
+  // WORKFLOWS QUERY:
+  const workflowsPromise = fetchQuery<DiscoveryViewFCWorkflowsQueryType>(
+    environment,
+    DiscoveryViewFCWorkflowsQuery,
+    { input: workflowsInput },
+  ).toPromise();
 
   // SEQUENCINGREADS QUERY(IES) (IF NEEDED):
   let sequencingReadsPromise:
@@ -519,25 +526,30 @@ async function queryWorkflowRuns(
             },
           },
         ).toPromise(),
-        fetchQuery<DiscoveryViewFCSequencingReadIdsQueryType>(
-          environment,
-          DiscoveryViewFCSequencingReadIdsQuery,
-          {
-            input: {
-              ...sequencingReadsInput,
-              where: {
-                ...sequencingReadsInput.where,
-                consensusGenomes: {
-                  taxon: {
-                    name: {
-                      _in: nextGenFilters.taxonNames,
+        workflowsPromise.then(workflowRuns =>
+          fetchQuery<DiscoveryViewFCSequencingReadIdsQueryType>(
+            environment,
+            DiscoveryViewFCSequencingReadIdsQuery,
+            {
+              input: {
+                ...sequencingReadsInput,
+                where: {
+                  ...sequencingReadsInput!.where,
+                  consensusGenomes: {
+                    producingRunId: {
+                      _in: workflowRuns!.fedWorkflowRuns!.map(run => run!.id),
+                    },
+                    taxon: {
+                      name: {
+                        _in: nextGenFilters.taxonNames,
+                      },
                     },
                   },
                 },
               },
             },
-          },
-        ).toPromise(),
+          ).toPromise(),
+        ),
       ]).then(
         ([
           response1,
@@ -592,14 +604,8 @@ async function queryWorkflowRuns(
       ).toPromise();
   }
 
-  // WORKFLOWS QUERY:
-  const workflowsPromise = fetchQuery<DiscoveryViewFCWorkflowsQueryType>(
-    environment,
-    DiscoveryViewFCWorkflowsQuery,
-    { input: workflowsInput },
-  ).toPromise();
-
   // AWAIT QUERIES:
+  const workflowsData = await workflowsPromise;
   const sequencingReadsData =
     sequencingReadsPromise !== undefined
       ? await sequencingReadsPromise
@@ -608,7 +614,15 @@ async function queryWorkflowRuns(
     consensusGenomesPromise !== undefined
       ? await consensusGenomesPromise
       : undefined;
-  const workflowsData = await workflowsPromise;
+  if (workflowsData?.fedWorkflowRuns == null) {
+    throw new Error(
+      `Missing data: ${JSON.stringify(workflowsData)} ${JSON.stringify(
+        workflow,
+      )} ${search} ${orderBy} ${orderDir} ${JSON.stringify(
+        filters,
+      )} ${JSON.stringify(props)}}`,
+    );
+  }
   if (
     sequencingReadsPromise !== undefined &&
     sequencingReadsData?.fedSequencingReads == null
@@ -627,15 +641,6 @@ async function queryWorkflowRuns(
       `Missing sorted consensusGenomes data: ${JSON.stringify(
         consensusGenomesData,
       )}`,
-    );
-  }
-  if (workflowsData?.fedWorkflowRuns == null) {
-    throw new Error(
-      `Missing data: ${JSON.stringify(workflowsData)} ${JSON.stringify(
-        workflow,
-      )} ${search} ${orderBy} ${orderDir} ${JSON.stringify(
-        filters,
-      )} ${JSON.stringify(props)}}`,
     );
   }
 

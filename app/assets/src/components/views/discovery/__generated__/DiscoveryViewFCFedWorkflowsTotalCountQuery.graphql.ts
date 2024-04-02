@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<405718f1a5d68394eea44f17e13d030c>>
+ * @generated SignedSource<<dc5426bf20a2b8a84cdcea47358b42d3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,7 @@ export type queryInput_fedWorkflowRunsAggregateTotalCount_input_where_Input = {
   workflowVersion?: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_Input | null | undefined;
 };
 export type queryInput_fedWorkflowRunsAggregateTotalCount_input_where_collectionId_Input = {
-  _in: ReadonlyArray<number | null | undefined>;
+  _in?: ReadonlyArray<number | null | undefined> | null | undefined;
 };
 export type queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_Input = {
   workflow?: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_workflow_Input | null | undefined;

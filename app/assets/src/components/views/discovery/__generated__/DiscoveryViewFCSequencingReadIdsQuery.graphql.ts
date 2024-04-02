@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2df96f029d0633d9e9760369c11ec486>>
+ * @generated SignedSource<<5e8901cf6afa095f6cf3753401a5fffe>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -64,7 +64,11 @@ export type queryInput_fedSequencingReads_input_where_taxon_name_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
 export type queryInput_fedSequencingReads_input_where_consensusGenomes_Input = {
+  producingRunId?: queryInput_fedSequencingReads_input_where_consensusGenomes_producingRunId_Input | null | undefined;
   taxon?: queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_Input | null | undefined;
+};
+export type queryInput_fedSequencingReads_input_where_consensusGenomes_producingRunId_Input = {
+  _in?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
 export type queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_Input = {
   name?: queryInput_fedSequencingReads_input_where_consensusGenomes_taxon_name_Input | null | undefined;
