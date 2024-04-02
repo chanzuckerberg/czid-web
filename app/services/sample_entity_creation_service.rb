@@ -2,105 +2,6 @@ class SampleEntityCreationService
   include Callable
   include ParameterSanitization
 
-  CreateSampleMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    mutation($sample_name: String!, $collection_id: Int!, $rails_sample_id: Int!) {
-      createSample(
-        input: {
-          name: $sample_name,
-          collectionId: $collection_id,
-          railsSampleId: $rails_sample_id,
-        }
-      ) {
-        id
-      }
-    }
-  GRAPHQL
-
-  GetSampleQuery = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    query($sample_id: Int!) {
-      samples(where: {railsSampleId: {_eq: $sample_id}}) {
-        id
-      }
-    }
-  GRAPHQL
-
-  # This query will need to be updated to enable support for associating
-  # multiple sequencing reads with a sample.
-  GetSequencingReadQuery = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    query($sample_id: Int!) {
-      sequencingReads(where: {sample: {railsSampleId: {_eq: $sample_id}}}) {
-        id
-      }
-    }
-  GRAPHQL
-
-  GetAccessionId = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    query($accession_id: String!) {
-      accessions(where: {upstreamDatabase: {name: {_eq: "NCBI"}}, accessionId: {_eq: $accession_id}}) {
-        id
-      }
-    }
-  GRAPHQL
-
-  CreateSequencingReadMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    mutation($technology: SequencingTechnology!, $clearlabs_export: Boolean!, $collection_id: Int!, $medaka_model: String, $protocol: SequencingProtocol, $sample_id: ID!) {
-      createSequencingRead(
-        input: {
-          technology: $technology,
-          clearlabsExport: $clearlabs_export,
-          collectionId: $collection_id,
-          medakaModel: $medaka_model,
-          protocol: $protocol,
-          sampleId: $sample_id,
-        }
-      ) {
-        id
-      }
-    }
-  GRAPHQL
-
-  CreateReferenceGenomeMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-        mutation($name: String!, $collection_id: Int!) {
-            createReferenceGenome(input: {name: $name, collectionId: $collection_id}) {
-                id
-            }
-        }
-  GRAPHQL
-
-  GetWorkflowVersion = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    query($workflow_name: String!, $version: String!) {
-      workflowVersions(
-        where: {workflow: {name: {_eq: $workflow_name}}, version: {_eq: $version}}
-      ) {
-        id
-      }
-    }
-  GRAPHQL
-
-  GetTaxonByUpstreamDatabaseIdentifier = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-  query($upstream_database_identifier: String!) {
-    taxa(where: {upstreamDatabaseIdentifier: {_eq: $upstream_database_identifier}}) {
-      id
-    }
-  }
-  GRAPHQL
-
-  CreateWorkflowRun = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
-    mutation($collectionId: Int!, $workflowVersionId: ID!, $railsWorkflowRunId: Int!, $rawInputJson: String!, $entityInputs: [EntityInputType!]!) {
-      createWorkflowRun(
-        input: {
-          collectionId: $collectionId,
-          workflowVersionId: $workflowVersionId,
-          entityInputs: $entityInputs,
-          rawInputJson: $rawInputJson,
-          railsWorkflowRunId: $railsWorkflowRunId,
-        }
-      ) {
-        id
-      }
-    }
-  GRAPHQL
-
   NEXT_GEN_SEQUENCING_TECHNOLOGY_MAP = {
     "Illumina" => "Illumina",
     "ONT" => "Nanopore",
@@ -126,7 +27,7 @@ class SampleEntityCreationService
     response = CzidGraphqlFederation
                .query_with_token(
                  @user_id,
-                 GetSampleQuery,
+                 GraphqlOperations::GetSampleQuery,
                  variables: {
                    sample_name: @sample.name,
                    collection_id: @sample.project_id,
@@ -140,7 +41,7 @@ class SampleEntityCreationService
       response = CzidGraphqlFederation
                  .query_with_token(
                    @user_id,
-                   CreateSampleMutation,
+                   GraphqlOperations::CreateSampleMutation,
                    variables: {
                      sample_name: @sample.name,
                      collection_id: @sample.project_id,
@@ -155,7 +56,7 @@ class SampleEntityCreationService
     response = CzidGraphqlFederation
                .query_with_token(
                  @user_id,
-                 GetSequencingReadQuery,
+                 GraphqlOperations::GetSequencingReadQuery,
                  variables: {
                    sample_id: @sample.id,
                  },
@@ -167,7 +68,7 @@ class SampleEntityCreationService
       response = CzidGraphqlFederation
                  .query_with_token(
                    @user_id,
-                   CreateSequencingReadMutation,
+                   GraphqlOperations::CreateSequencingReadMutation,
                    variables: {
                      technology: @technology,
                      clearlabs_export: @workflow_run.get_input("clearlabs") | false,
@@ -186,7 +87,7 @@ class SampleEntityCreationService
     response = CzidGraphqlFederation
                .query_with_token(
                  @user_id,
-                 GetWorkflowVersion,
+                 GraphqlOperations::GetWorkflowVersion,
                  variables: {
                    workflow_name: @workflow_run.workflow,
                    version: wdl_version,
@@ -212,7 +113,7 @@ class SampleEntityCreationService
         response = CzidGraphqlFederation
                    .query_with_token(
                      @user_id,
-                     CreateReferenceGenomeMutation,
+                     GraphqlOperations::CreateReferenceGenomeMutation,
                      variables: {
                        name: reference_sequence.name,
                        collection_id: @sample.project_id,
@@ -235,7 +136,7 @@ class SampleEntityCreationService
         response = CzidGraphqlFederation
                    .query_with_token(
                      @user_id,
-                     GetTaxonByUpstreamDatabaseIdentifier,
+                     GraphqlOperations::GetTaxonByUpstreamDatabaseIdentifier,
                      variables: {
                        upstream_database_identifier: @workflow_run.get_input("taxon_id").to_s,
                      },
@@ -258,7 +159,7 @@ class SampleEntityCreationService
         get_accession_response = CzidGraphqlFederation
                                  .query_with_token(
                                    @user_id,
-                                   GetAccessionId,
+                                   GraphqlOperations::GetAccessionId,
                                    variables: {
                                      accession_id: workflow_run_accession_id,
                                    },
@@ -286,7 +187,7 @@ class SampleEntityCreationService
     response = CzidGraphqlFederation
                .query_with_token(
                  @user_id,
-                 CreateWorkflowRun,
+                 GraphqlOperations::CreateWorkflowRun,
                  variables: {
                    collectionId: @sample.project_id,
                    workflowVersionId: workflow_version_id,
@@ -299,46 +200,48 @@ class SampleEntityCreationService
     next_gen_workflow_run_id = response.data&.create_workflow_run&.id
     next_gen_workflow_run_id
   end
-end
 
-def workflow_run_accession_id
-  if workflow_run_is_sars_cov_2?
-    @workflow_run.inputs&.[]("accession_id")
-  elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload] && workflow_run_technology_illumina?
-    @workflow_run.inputs&.[]("reference_accession")
-  elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report] && workflow_run_technology_illumina?
-    sanitize_accession_id(@workflow_run.inputs&.[]("accession_id"))
+  private
+
+  def workflow_run_accession_id
+    if workflow_run_is_sars_cov_2?
+      @workflow_run.inputs&.[]("accession_id")
+    elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload] && workflow_run_technology_illumina?
+      @workflow_run.inputs&.[]("reference_accession")
+    elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report] && workflow_run_technology_illumina?
+      sanitize_accession_id(@workflow_run.inputs&.[]("accession_id"))
+    end
+    nil
   end
-  nil
-end
 
-def workflow_run_technology
-  @workflow_run.get_input("technology")
-end
-
-def workflow_run_technology_illumina?
-  workflow_run_technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina]
-end
-
-def creation_source
-  ref_fasta_input = @workflow_run.sample.input_files.reference_sequence
-
-  if workflow_run_technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
-    # CG kickoff is not available through mNGS nanopore report
-    return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
-  elsif ref_fasta_input.presence || @workflow_run.inputs&.[]("reference_accession")
-    return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload]
-  elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
-    return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
-  else
-    return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report]
+  def workflow_run_technology
+    @workflow_run.get_input("technology")
   end
-end
 
-def workflow_run_ncbi_version
-  @workflow_run.inputs&.[]("alignment_config_name") || AlignmentConfig.default_name
-end
+  def workflow_run_technology_illumina?
+    workflow_run_technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina]
+  end
 
-def workflow_run_is_sars_cov_2?
-  @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
+  def creation_source
+    ref_fasta_input = @workflow_run.sample.input_files.reference_sequence
+
+    if workflow_run_technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+      # CG kickoff is not available through mNGS nanopore report
+      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
+    elsif ref_fasta_input.presence || @workflow_run.inputs&.[]("reference_accession")
+      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload]
+    elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
+      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
+    else
+      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report]
+    end
+  end
+
+  def workflow_run_ncbi_version
+    @workflow_run.inputs&.[]("alignment_config_name") || AlignmentConfig.default_name
+  end
+
+  def workflow_run_is_sars_cov_2?
+    @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
+  end
 end
