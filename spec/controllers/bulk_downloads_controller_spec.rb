@@ -640,7 +640,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
     describe "GET #index" do
       it "should return only bulk downloads viewable to the user" do
-        @sample_one = create(:sample, project: @project,
+        @sample_one = create(:sample, name: "Joe's sample", project: @project,
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
         @project_admin = create(:project, users: [@admin])
         @sample_two = create(:sample, project: @project_admin,
@@ -659,8 +659,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(bulk_downloads[0]["user_id"]).to eq(@joe.id)
         expect(bulk_downloads[0]["download_type"]).to eq("unmapped_reads")
         expect(bulk_downloads[0]["num_samples"]).to eq(1)
-        # Should not return pipeline runs.
-        expect(bulk_downloads[0]["pipeline_runs"]).to eq(nil)
+        expect(bulk_downloads[0]["pipeline_runs"][0]["sample_name"]).to eq(@sample_one.name)
         # Should not return admin-only fields.
         expect(bulk_downloads[0]["user_name"]).to eq(nil)
         expect(bulk_downloads[0]["execution_type"]).to eq(nil)

@@ -181,7 +181,9 @@ class BulkDownloadsController < ApplicationController
 
         render json: scope
           .includes(:pipeline_runs, :workflow_runs, :user)
-          .map { |bulk_download| format_bulk_download(bulk_download, admin: current_user.admin?) }
+          .map { |bulk_download|
+          format_bulk_download(bulk_download, detailed: true, admin: current_user.admin?).merge(download_type_details: BulkDownloadTypesHelper.bulk_download_type(bulk_download.download_type))
+        }
       end
     end
   end
