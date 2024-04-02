@@ -13,6 +13,7 @@ const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const LMNGS_SAMPLE_FILES = [SAMPLE_FILE_CT];
 const uploadWorkflows = [WORKFLOWS.MNGS, WORKFLOWS.LMNGS, WORKFLOWS.AMR, WORKFLOWS.WGS, WORKFLOWS.SC2];
 
+
 test.describe("Upload Smoke Tests", () => {
 
   test.beforeEach(async ({ page }) => {

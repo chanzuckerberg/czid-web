@@ -1,4 +1,5 @@
 import { PageObject } from "./page-object";
+const LIMIT = 10000;
 
 export class Graphqlfed extends PageObject {
 
@@ -22,7 +23,7 @@ export class Graphqlfed extends PageObject {
               }
             }
           }`,
-          "variables": {"taxonName": taxon.title, "limit": 1000},
+          "variables": {"taxonName": taxon.title, "limit": LIMIT},
         },
       },
     );
@@ -58,7 +59,7 @@ export class Graphqlfed extends PageObject {
               }
             }
           }`,
-          "variables": {"collectionLocation": collectionLocation, "limit": 1000} },
+          "variables": {"collectionLocation": collectionLocation, "limit": LIMIT} },
       },
     );
     const responseJson = await response.json();
@@ -95,7 +96,7 @@ export class Graphqlfed extends PageObject {
               }
             }
           }`,
-          "variables": {"hostOrganism": hostOrganism, "limit": 1000} },
+          "variables": {"hostOrganism": hostOrganism, "limit": LIMIT} },
       },
     );
     const responseJson = await response.json();
@@ -130,7 +131,7 @@ export class Graphqlfed extends PageObject {
               }
             }
           }`,
-          "variables": {"sampleType": sampleTissueType, "limit": 1000},
+          "variables": {"sampleType": sampleTissueType, "limit": LIMIT},
         },
       },
     );

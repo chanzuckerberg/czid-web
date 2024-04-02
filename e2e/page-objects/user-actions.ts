@@ -1,3 +1,4 @@
+import { SEQUENCING_PLATFORMS } from "@e2e/constants/common";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { UploadPage } from "@e2e/page-objects/upload-page";
 import { test } from "@playwright/test";
@@ -9,6 +10,7 @@ type runOptions = {
   collectionLocation?: string;
   runPipeline?: boolean;
   waitForPipeline?: boolean;
+  sequencingPlatform?: string;
 };
 
 export async function runPipelineIfNeeded(page: any, project: any, sampleFiles: Array<string>, sampleNames: Array<string>, workflow: string, runOptions?: runOptions) {
@@ -33,7 +35,11 @@ export async function runPipelineIfNeeded(page: any, project: any, sampleFiles: 
           inputs[sampleName].sampleTissueType = runOptions.sampleTissueType;
         }
       }
-      inputs = await uploadPage.e2eCSVSampleUpload(sampleFiles, project, workflow, inputs, true, runOptions.taxon ? runOptions.taxon : "Unknown");
+      inputs = await uploadPage.e2eCSVSampleUpload(
+        sampleFiles, project, workflow, inputs, true,
+        runOptions.taxon ? runOptions.taxon : "Unknown",
+        runOptions.sequencingPlatform ? runOptions.sequencingPlatform : SEQUENCING_PLATFORMS.MNGS,
+      );
       sampleNames = Object.keys(inputs);
 
       samples = await samplesPage.getSamples(project.name, sampleNames);

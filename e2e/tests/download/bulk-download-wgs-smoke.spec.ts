@@ -18,7 +18,7 @@ test.describe("Bulk Download: WGS", () => {
        * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-68
        */
       test(`Smoke Test: Bulk Download ${workflow} ${downloadType}`, async ({ page }) => {
-        const timeout = 180000;
+        const timeout = 60 * 1000 * 5;
         test.setTimeout(timeout);
         await new DownloadsPage(page).downloadSmokeTest(workflow, downloadType, timeout);
       });

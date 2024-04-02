@@ -56,11 +56,15 @@ const CLEAR_LABS_TOGGLE = "[class*='clearLabs'] [class*='checkbox']";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
 const WETLAB_FILTER = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']";
 const WETLAB_OPTION = (wetlab: string) =>`//*[@data-testid="dropdown-menu"]//*[@role="option" and text()="${wetlab}"]`;
+const WETLAB_DESCRIPTION = "//*[text()='Wetlab Protocol:']/following-sibling::*[contains(@class, 'description')]";
+const MEDAKA_MODEL_FILTER = "//*[text()='Medaka Model:']/parent::*//*[@data-testid='filters']";
+const MEDAKA_MODEL_OPTION = (medakaModel: string) => `//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText') and text()='${medakaModel}']`;
+const MEDAKA_MODEL_DESCRIPTION = "//*[text()='Medaka Model:']/following-sibling::*[contains(@class, 'description')]";
 const REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID = "reference-sequence-file-upload";
 const TRIM_PRIMERS_FILE_UPLOAD = "//span[text()='Trim Primers']/parent::div/following-sibling::button";
 const PORTAL_DROPDOWN_LOCATOR = "[class*='portalDropdown']";
 
-// Metadata locators
+// #region Metadata locators
 const METADATA_SAMPLE_NAMES = "[data-testid='sample-name']";
 const METADATA_FILENAMES_LOCATORS = "[class*='fileName']";
 const METADATA_HOST_ORGANISM_TESTID = "host-organism";
@@ -70,8 +74,9 @@ const METADATA_NUCLEOTIDE_TYPE_TESTID = "nucleotide_type";
 const METADATA_COLLECTION_DATE_TESTID = "collection_date";
 const METADATA_COLLECTION_LOCATION_TESTID = "collection_location_v2";
 const METADATA_APPLY_TO_ALL_LOCATOR = "[class*='applyToAll']";
+// #endregion Metadata locators
 
-// Review locators
+// #region Review locators
 const REVIEW_SAMPLE_NAMES = "[class*='visible'] [data-testid='sample-name']";
 const REVIEW_FILENAMES_LOCATORS = "[data-testid='input-files'] [class*='file-']";
 const REVIEW_HOST_ORGANISM_LOCATOR = "//span[text()='Sample Info']/parent::div/following-sibling::div//td[@data-testid='host-organism']";
@@ -86,14 +91,16 @@ const ANALYSIS_REVIEW_TESTID = "upload-input-review";
 const PROJECT_INFO_REVIEW_LOCATOR = "//span[text()='Project Info']/parent::div/following-sibling::div[1]";
 const TERMS_AGREEMENT_LOCATOR = "[class*='termsAgreement'] [class*='checkbox']";
 const START_UPLOAD_BUTTON_LOCATOR = "//button[text()='Start Upload']";
+// #endregion Review locators
 
-// Uploads completed
+// #region Uploads completed
 const UPLOAD_COMPLETE = "Uploads completed!";
 const SENT_TO_PIPELINE = (sampleName: string) => `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/following-sibling::div[contains(@class, 'sampleStatus')]/div[text()='Sent to pipeline']`;
 const UPLOAD_WINDOW_TITLE = "[class*='titleWithIcon-']";
 const GO_TO_PROJECT_BUTTON = "//button[text()='Go to Project']";
 const SAMPLE_UPLOAD_STATUS_BAR = (sampleName: string) => `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/ancestor::div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]`;
 const LOADING_BARS = "//div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]";
+// #endregion Uploads completed
 
 
 export class UploadPage extends PageObject {
@@ -197,7 +204,7 @@ export class UploadPage extends PageObject {
   }
 
   public async clickClearLabsToggle(option: "Yes" | "No") {
-    const value = await this.page.locator(CLEAR_LABS_TOGGLE).textContent();
+    const value = await this.getClearLabsValue();
     if (value !== option) {
       await this.page.locator(CLEAR_LABS_TOGGLE).click();
     }
@@ -256,6 +263,26 @@ export class UploadPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getWetLabFilterValue() {
+    await this.page.locator(WETLAB_FILTER).locator("[data-testid='filter-value']").textContent();
+  }
+
+  public async getMedakaModelFilterValue() {
+    await this.page.locator(MEDAKA_MODEL_FILTER).locator("[data-testid='filter-value']").textContent();
+  }
+
+  public async getClearLabsValue() {
+    return this.page.locator(CLEAR_LABS_TOGGLE).textContent();
+  }
+
+  public async getMedakaModelDescription() {
+    return this.page.locator(MEDAKA_MODEL_DESCRIPTION).textContent();
+  }
+
+  public async getWetlabDescription() {
+    return this.page.locator(WETLAB_DESCRIPTION).textContent();
+  }
+
   public async getBasespaceUploadWindowTitle() {
     return this.page.locator(BASESPACE_UPLOAD_WINDOW_TITLE).textContent();
   }
@@ -591,16 +618,20 @@ export class UploadPage extends PageObject {
     }
   }
 
-  public async setWorkFlow(analysisType: string, includeTrimPrimer = true, taxonName = "Unknown") {
+  public async setWorkFlow(analysisType: string, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null) {
     if (analysisType === WORKFLOWS.MNGS) {
+
       // Illumina: Short read mNGS
       await this.clickCheckboxForWorkflow(analysisType);
-      await this.clickSequencingPlatform(SEQUENCING_PLATFORMS.MNGS);
+
+      sequencingPlatform = sequencingPlatform != null ? sequencingPlatform : SEQUENCING_PLATFORMS.MNGS;
+      await this.clickSequencingPlatform(sequencingPlatform);
     }
     if (analysisType === WORKFLOWS.LMNGS) {
       // Nanopore: ONT (long read mNGS)
       await this.clickCheckboxForWorkflow(WORKFLOWS.MNGS);
-      await this.clickSequencingPlatform(WORKFLOWS.LMNGS);
+      sequencingPlatform = sequencingPlatform != null ? sequencingPlatform : WORKFLOWS.LMNGS;
+      await this.clickSequencingPlatform(sequencingPlatform);
 
       await this.clickGuppyBasecallerSettingDropDown();
       await this.clickGuppyBasecallerSettingOption("fast");
@@ -620,10 +651,12 @@ export class UploadPage extends PageObject {
     if (analysisType === WORKFLOWS.SC2) {
       await this.clickCheckboxForWorkflow(analysisType);
       await this.pause(1);
-      await this.clickSequencingPlatform(SEQUENCING_PLATFORMS.MNGS);
+
+      sequencingPlatform = sequencingPlatform != null ? sequencingPlatform : SEQUENCING_PLATFORMS.MNGS;
+      await this.clickSequencingPlatform(sequencingPlatform);
       await this.pause(1);
 
-      await this.setTaxonFilter(WETLAB_PROTOCOL);
+      await this.setWetLabFilter(WETLAB_PROTOCOL);
     }
     await this.pause(2); // Pause to stabilze test performance
   }
@@ -631,6 +664,11 @@ export class UploadPage extends PageObject {
   public async setWetLabFilter(filterName: string) {
     await this.page.locator(WETLAB_FILTER).click();
     await this.page.locator(WETLAB_OPTION(filterName)).click();
+  }
+
+  public async setMedakaModelFilter(medakaModel: string) {
+    await this.page.locator(MEDAKA_MODEL_FILTER).click();
+    await this.page.locator(MEDAKA_MODEL_OPTION(medakaModel)).click();
   }
 
   public async setTaxonFilter(filterName: string) {
@@ -673,12 +711,12 @@ export class UploadPage extends PageObject {
     return inputs;
   }
 
-  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown") {
+  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null) {
     await this.goto();
     await this.dismissCookieBanner();
 
     await this.selectProject(project.name);
-    await this.setWorkFlow(workflow, includeTrimPrimer, taxonName);
+    await this.setWorkFlow(workflow, includeTrimPrimer, taxonName, sequencingPlatform);
     await this.uploadSampleFiles(sampleFiles);
 
     // Continue

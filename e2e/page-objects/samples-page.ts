@@ -37,6 +37,7 @@ import { ArticlesPage } from "./articles-page";
 import { PageObject } from "./page-object";
 import { PipelineVizPage } from "./pipeline_viz-page";
 import { ProjectPage } from "./project-page";
+const BACK_TO_PROJECT = (projectName: string) => `//a[text()='${projectName}']`;
 const TAXON_HOVER_ACTIONS = (taxonName: string) => `//span[text()='${taxonName}']/parent::div//span[@data-testid='hover-actions']//button`;
 const SAMPLE_MESSAGE = "[data-testid='sample-message']";
 const COVERAGE_VIZ_HISTOGRAM_LOCATOR = "[class*='coverageVizHistogram']";
@@ -57,6 +58,12 @@ const DISMISS_BUTTON = "//*[translate(text(), 'D','d') = 'dismiss']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genome']";
 const SHARE_BUTTON = "//button[text()='Share']";
 const LEARN_MORE_ABOUT_CONSENSUS_GENOMES_LINK = "//a[contains(text(), 'Learn more about consensus genomes')]";
+const GENERATE_CONSENSUS_GENOME_DROPDOWN = "[data-testid='create-consensus-genome-modal'] [data-testid='filters']";
+const GENERATE_CONSENSUS_GENOME_OPTION = "//*[@data-testid='create-consensus-genome-modal']/parent::*/following-sibling::*//*[contains(@class, 'optionText')]";
+const GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS = "//*[@data-testid='create-consensus-genome-modal']/parent::*/following-sibling::*//*[not(contains(@class, 'disabledOption'))]/*[contains(@class, 'optionText')]";
+const CREATE_A_NEW_CONSENSUS_GENOME_BUTTON = "//button[text()='Create a New Consensus Genome']";
+const CREATE_CONSENSUS_GENOME_BUTTON = "//button[text()='Create Consensus Genome']";
+const VIEW_CONSENSUS_GENOME_Link = "[class*='consensusGenomeLink']";
 
 // Sample Details
 const SAMPLE_DETAILS_BUTTON = "[data-testid='sample-details']";
@@ -109,6 +116,13 @@ export class SamplesPage extends PageObject {
     // #endregion Navigate
 
     // #region Get
+    public async getReferenceAccessionOptions() {
+      await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+      const referenceAccession = this.page.locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS).allTextContents();
+      await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+      return referenceAccession;
+    }
+
     public async getSampleStatusMessage(waitForMessage = "Loading") {
       let statusMessage = await this.page.locator(SAMPLE_MESSAGE).textContent();
       while (!statusMessage.toLowerCase().includes(waitForMessage)) {
@@ -382,6 +396,18 @@ export class SamplesPage extends PageObject {
     // #endregion Get
 
     // #region Click
+    public async clickBackToProject(projectName: string) {
+      await this.page.locator(BACK_TO_PROJECT(projectName)).click();
+    }
+
+    public async clickViewConsensusGenomeLink() {
+      await this.page.locator(VIEW_CONSENSUS_GENOME_Link).click();
+    }
+
+    public async clickCreateConsensusGenomeButton() {
+      await this.page.locator(CREATE_CONSENSUS_GENOME_BUTTON).click();
+    }
+
     public async clickLearnMoreAboutConsensusGenomesLink() {
       const [newPage] = await Promise.all([
         this.page.context().waitForEvent("page"),
@@ -561,6 +587,20 @@ export class SamplesPage extends PageObject {
 
      await hoverElement.hover();
      await hoverElement.click();
+    }
+
+    public async clickConsensusGenomeIcon(taxonName: string) {
+      const taxonElement = await this.getTaxonElementByName(taxonName);
+     await taxonElement.hover();
+
+     const hoverElement = this.page.locator(TAXON_HOVER_ACTIONS(taxonName)).nth(3);
+
+     await hoverElement.hover();
+     await hoverElement.click();
+    }
+
+    public async clickCreateANewConsensusGenome() {
+      await this.page.locator(CREATE_A_NEW_CONSENSUS_GENOME_BUTTON).click();
     }
 
     public async clickBlastButton() {
@@ -752,9 +792,20 @@ export class SamplesPage extends PageObject {
       await this.clickSearchBar();
       await this.clickSearchResult(searchResultText);
     }
+
+    public async selectReferenceAccession(option: string) {
+      await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+      await this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION).getByText(option).click();
+      await this.pause(1);
+    }
     // #endregion Macro
 
     // #region Validation
+    public async isCreateANewConsensusGenomeButtonVisible() {
+      await this.page.locator(CREATE_A_NEW_CONSENSUS_GENOME_BUTTON).waitFor({state: "visible", timeout: 10 * 1000}).catch(() => null);
+      return this.page.locator(CREATE_A_NEW_CONSENSUS_GENOME_BUTTON).isVisible();
+    }
+
     public async validateContigFastaDownload(sample: any, taxon: any) {
       const downloadPromise = this.page.waitForEvent("download");
       await this.clickContigFastaButton();

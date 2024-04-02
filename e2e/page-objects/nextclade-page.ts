@@ -16,7 +16,16 @@ export class NextcladePage extends PageObject {
   // #region Get
   public async getSampleNames() {
     await this.page.locator(SAMPLE_NAMES).first().waitFor();
-    return this.page.locator(SAMPLE_NAMES).allTextContents();
+    const sequenceName = await this.page.locator(SAMPLE_NAMES).allTextContents();
+    const sampleNames = [];
+    for (const sequence of sequenceName) {
+      let sampleName = sequence;
+      if (sequence.includes("/")) {
+        sampleName = sequence.split("/")[0];
+      }
+      sampleNames.push(sampleName);
+    }
+    return sampleNames;
   }
 
   // #endregion Get

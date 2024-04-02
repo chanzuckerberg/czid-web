@@ -54,7 +54,7 @@ const BACKGROUND_FILTER_DROPDOWN = "//div[contains(@class, 'downloadType')]//div
 const BACKGROUND_SEARCH_INPUT = "[class*='portalDropdown'] [data-testid='filter-search-bar'] input";
 const BACKGROUND_SEARCH_RESULTS = "[class*='optionText']";
 const BACKGROUND_FILTER_LABEL = "//div[contains(@class, 'downloadType')]//div[text()='Background' and contains(@class, 'label')]";
-const SEARCH_MY_DATA_INPUT = "[class*='header'] [class*='category search'] input";
+const SEARCH_MY_DATA_INPUT = "[class*='header'] [class*='category'][class*='search'] input";
 const HOST_SEARCH_RESULTS = "[category='host'] [class='title']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genomes']";
 const PROJECT_SEARCH_RESULTS = "[category='Project'] [class='title']";
@@ -321,7 +321,7 @@ export class ProjectPage extends PageObject {
     await this.page.locator(CHOOSE_TAXON).click();
   }
 
-  public async SearchMyDataInputForSample(project: any, sample: any) {
+  public async searchMyDataInputForSample(project: any, sample: any) {
     await this.page.locator(SEARCH_MY_DATA_INPUT).fill(sample.name);
     const resultLocator = SAMPLE_SEARCH(sample.id, project.id);
     await this.page.locator(resultLocator).click();
@@ -338,6 +338,12 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickDownloadButtonForImmediateDownload() {
+    const downloadPromise = this.page.waitForEvent("download");
+    await this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click();
+    return downloadPromise;
+  }
+
   public async clickApplyButton() {
     await this.page.locator(APPLY_BUTTON).click();
   }

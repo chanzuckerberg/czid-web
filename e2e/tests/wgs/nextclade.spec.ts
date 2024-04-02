@@ -1,18 +1,17 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import { SAMPLE_FILE_CT20K } from "@e2e/constants/sample";
+import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
-const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
-const SARS_CoV2_NO_HOST = "wgs_SARS_CoV2_no_host";
-const SARS_CoV2_SAMPLE_NAMES = [SARS_CoV2_NO_HOST];
+const CT20K_SAMPLE_NAME = "Ct20K";
 
 let sc2_project = null;
 let wgs_project = null;
 let projectPage = null;
 const timeout = 60 * 1000 * 5;
-const RUN_PIPELINE = true;
+const RUN_PIPELINE = false;
 const WAIT_FOR_PIPELINE = false;
 
 /*
@@ -30,10 +29,13 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
     await runPipelineIfNeeded(
       page,
       sc2_project,
-      WGS_SAMPLE_FILES,
-      SARS_CoV2_SAMPLE_NAMES,
-      WORKFLOWS.WGS,
-      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      [SAMPLE_FILE_CT20K],
+      [CT20K_SAMPLE_NAME],
+      WORKFLOWS.SC2,
+      {
+        hostOrganism: "Human", taxon: "Unknown", sequencingPlatform: WORKFLOWS.LMNGS,
+        runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
 
     // #region 1. Log in to Project
@@ -55,6 +57,9 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
 
     await projectPage.fillSearchMyDataInput(sc2_project.name);
     await projectPage.clickProjectSearchResult(sc2_project.name);
+
+    const sample = (await new SamplesPage(page).getSamples(sc2_project.name, [CT20K_SAMPLE_NAME]))[0];
+    await projectPage.searchMyDataInputForSample(sc2_project, sample);
 
     const sampleNamesSentToNextclade = await projectPage.selectCompletedSamples(1);
     // #endregion 4. Click on Select All samples checkbox

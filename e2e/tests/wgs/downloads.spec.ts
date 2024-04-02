@@ -359,8 +359,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 9. Click on Download File link and save the file (.tar.gz)
   });
 
-  // https://czi-sci.slack.com/archives/C05NKGCD2E8/p1708024084043239?thread_ts=1707760675.695619&cid=C05NKGCD2E8
-  test.skip("SNo 15: Consensus Genome Overview (.csv)", async ({ page }) => {
+  test("SNo 15: Consensus Genome Overview (.csv)", async ({ page }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -386,82 +385,39 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 5. Select Consensus Genome Overview radio button
 
     // #region 6. Click Start Generating Download button
-    const downloadId = await projectPage.clickStartGeneratingDownloadButton();
+    const download = await projectPage.clickDownloadButtonForImmediateDownload();
     // #endregion 6. Click Start Generating Download button
 
-    // #region 7. Go to Downloads section (User menu)
-    const downloadsPage = await projectPage.clickDownloadsLink();
-    // #endregion 7. Go to Downloads section (User menu)
-
-    // #region 8. Observe Download list latest record details
-    // - Download file status as COMPLETE
-    await downloadsPage.waitForDownloadComplete(downloadId, timeout);
-    // #endregion 8. Observe Download list latest record details
-
-    // #region 9. Click on Download File link and save the file (.tar.gz)
+    // #region 7. Verify that the download completes immediately
     // - DOWNLOAD FILE link works (file downloaded)
-    const download = await downloadsPage.clickDownloadFile(downloadId);
     const downloadPath = await download.path();
 
-    // - "CONSENSUS_GENOME_OVERVIEW" name displayed
-    const downloadName = await downloadsPage.getDownloadName(downloadId);
-    expect(downloadName).toEqual(CONSENSUS_GENOME_OVERVIEW);
-
-    // - Download Date / Count is correct
-    const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format(DATE_FORMAT);
-    expect(downloadDate).toEqual(today);
-
-    const downloadCount = await downloadsPage.getDownloadCount(downloadId);
-    expect(downloadCount).toEqual(oneOrMoreSamples.toString());
-
-    // - Download details displayed correctly
-    await downloadsPage.clickDownloadDetails(downloadId);
-    await downloadsPage.clickSamplesInDownloadDropdown();
-    let samplesInDownload = await downloadsPage.getSamplesInDownloadNames();
-    samplesInDownload = samplesInDownload.sort();
-    expect(samplesInDownload).toEqual(selectedSamples);
-
-    // - (.tar.gz)  file contains Sample(s) selected"
+    // - "consensus_genome_overview.csv" file contains Sample(s) selected
     const downloadFileName = download.suggestedFilename();
-    expect(downloadFileName).toMatch(/\.tar\.gz$/);
+    expect(downloadFileName).toEqual("consensus_genome_overview.csv");
 
-    const downloadDirectory = path.dirname(downloadPath);
-    const extractPath = path.join(downloadDirectory, `SNo15_${Date.now()}`);
-    await fs.mkdir(extractPath, {recursive: true});
-    await tar.x({
-      file: downloadPath,
-      cwd: extractPath,
-    });
-    const extractedContents = await fs.readdir(extractPath);
+    const fileContent = await fs.readFile(downloadPath, {encoding: "utf-8"});
+    let lines = fileContent.split(/\r?\n/);
+    const fistHeader = lines.shift().split(",")[0];
 
-    for (const contents of extractedContents) {
-      const extractedFile = path.join(extractPath, contents);
-      const fileContent = await fs.readFile(extractedFile, {encoding: "utf-8"});
+    expect(fistHeader).toEqual("Sample Name");
 
-      let lines = fileContent.split(/\r?\n/);
-
-      const fistHeader = lines.shift().split(",")[0];
-      expect(fistHeader).toEqual("Sample Name");
-
-      const lastLine = lines[lines.length-1];
-      if (lastLine.trim() === "") {
-        lines.pop(); // Remove the last empty line
-      }
-
-      const samplesInDownload = [];
-      lines = lines.sort();
-      for (const i in lines) {
-        const sampleName = lines[i].split(",")[0];
-        samplesInDownload.push(sampleName);
-      }
-      expect(samplesInDownload).toEqual(selectedSamples);
+    const lastLine = lines[lines.length-1];
+    if (lastLine.trim() === "") {
+      lines.pop(); // Remove the last empty line
     }
-    // #endregion 9. Click on Download File link and save the file (.tar.gz)
+
+    const samplesInDownload = [];
+    lines = lines.sort();
+    for (const i in lines) {
+      const sampleName = lines[i].split(",")[0];
+      samplesInDownload.push(sampleName);
+    }
+    expect(samplesInDownload).toEqual(selectedSamples);
+    // #endregion 7. Verify that the download completes immediately
   });
 
-  // https://czi-sci.slack.com/archives/C05NKGCD2E8/p1708024084043239?thread_ts=1707760675.695619&cid=C05NKGCD2E8
-  test.skip("SNo 16: Consensus Genome Overview (.csv) - Include sample metadata in this table", async ({ page }) => {
+  test("SNo 16: Consensus Genome Overview (.csv) - Include sample metadata in this table", async ({ page }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -491,80 +447,36 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 6. Check on Include sample metadata in this table checkbox
 
     // #region 7. Click Start Generating Download button
-    const downloadId = await projectPage.clickStartGeneratingDownloadButton();
+    const download = await projectPage.clickDownloadButtonForImmediateDownload();
     // #endregion 7. Click Start Generating Download button
 
-    // #region 8. Go to Downloads section (User menu)
-    const downloadsPage = await projectPage.clickDownloadsLink();
-    // #endregion 8. Go to Downloads section (User menu)
-
-    // #region 9. Observe Download list latest record details
-    // - Download file status as COMPLETE
-    await downloadsPage.waitForDownloadComplete(downloadId, timeout);
-
-    // - "CONSENSUS_GENOME_OVERVIEW" name displayed
-    const downloadName = await downloadsPage.getDownloadName(downloadId);
-    expect(downloadName).toEqual(CONSENSUS_GENOME_OVERVIEW);
-
-    // - Download Date / Count is correct
-    const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format(DATE_FORMAT);
-    expect(downloadDate).toEqual(today);
-
-    const downloadCount = await downloadsPage.getDownloadCount(downloadId);
-    expect(downloadCount).toEqual(oneOrMoreSamples.toString());
-
-    // - Download details displayed correctly
-    await downloadsPage.clickDownloadDetails(downloadId);
-    await downloadsPage.clickSamplesInDownloadDropdown();
-    let samplesInDownload = await downloadsPage.getSamplesInDownloadNames();
-    samplesInDownload = samplesInDownload.sort();
-    expect(samplesInDownload).toEqual(selectedSamples);
-
-    await downloadsPage.clickCloseIcon();
-    // #endregion 9. Observe Download list latest record details
-
-    // #region 10. Click on Download File link and save the file (.tar.gz)
+    // #region 8. Verify that the download completes immediately
     // - DOWNLOAD FILE link works (file downloaded)
-    const download = await downloadsPage.clickDownloadFile(downloadId);
     const downloadPath = await download.path();
 
-    // - (.tar.gz)  file contains Sample(s) selected
+    // - "consensus_genome_overview.csv" file contains Sample(s) selected
     const downloadFileName = download.suggestedFilename();
-    expect(downloadFileName).toMatch(/\.tar\.gz$/);
+    expect(downloadFileName).toEqual("consensus_genome_overview.csv");
 
-    const downloadDirectory = path.dirname(downloadPath);
-    const extractPath = path.join(downloadDirectory, `SNo16_${Date.now()}`);
-    await fs.mkdir(extractPath, {recursive: true});
-    await tar.x({
-      file: downloadPath,
-      cwd: extractPath,
-    });
-    const extractedContents = await fs.readdir(extractPath);
+    const fileContent = await fs.readFile(downloadPath, {encoding: "utf-8"});
+    let lines = fileContent.split(/\r?\n/);
+    const fistHeader = lines.shift().split(",")[0];
 
-    for (const contents of extractedContents) {
-      const extractedFile = path.join(extractPath, contents);
-      const fileContent = await fs.readFile(extractedFile, {encoding: "utf-8"});
+    expect(fistHeader).toEqual("Sample Name");
 
-      let lines = fileContent.split(/\r?\n/);
-
-      const fistHeader = lines.shift().split(",")[0];
-      expect(fistHeader).toEqual("Sample Name");
-
-      const lastLine = lines[lines.length-1];
-      if (lastLine.trim() === "") {
-        lines.pop(); // Remove the last empty line
-      }
-
-      const samplesInDownload = [];
-      lines = lines.sort();
-      for (const i in lines) {
-        const sampleName = lines[i].split(",")[0];
-        samplesInDownload.push(sampleName);
-      }
-      expect(samplesInDownload).toEqual(selectedSamples);
+    const lastLine = lines[lines.length-1];
+    if (lastLine.trim() === "") {
+      lines.pop(); // Remove the last empty line
     }
-    // #endregion 10. Click on Download File link and save the file (.tar.gz)
+
+    const samplesInDownload = [];
+    lines = lines.sort();
+    for (const i in lines) {
+      const sampleName = lines[i].split(",")[0];
+      samplesInDownload.push(sampleName);
+    }
+    expect(samplesInDownload).toEqual(selectedSamples);
+    // #endregion 8. Verify that the download completes immediately
   });
 
   test("SNo 17: Intermediate Output Files", async ({ page }) => {

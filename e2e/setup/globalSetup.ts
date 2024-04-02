@@ -27,9 +27,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
 
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
-    await Promise.all([
-      page.goto(`${process.env.BASEURL}`, { waitUntil: "networkidle" }),
-    ]);
+    await page.goto(process.env.BASEURL);
     expect(page.getByText(tag)).toBeVisible({ timeout: 30 * 1000 }); // Wait upto 30 seconds
     await page.getByTestId("home-top-nav-login").click();
     await login(page, username, password);

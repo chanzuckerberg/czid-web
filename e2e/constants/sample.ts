@@ -276,8 +276,9 @@ export const SAMPLE_FILE_R1 = "RR004_water_2_S23A_R1_001.fastq";
 export const SAMPLE_FILE_R2 = "RR004_water_2_S23A_R2_001.fastq";
 export const SAMPLE_FILE_NO_HOST_1 = "wgs_SARS_CoV2_no_host_R1.fastq.gz";
 export const SAMPLE_FILE_NO_HOST_2 = "wgs_SARS_CoV2_no_host_R2.fastq.gz";
-export const SAMPLE_1_PAIRED_R1 = "Sample_1_Paired_R1.fastq.gz";
-export const SAMPLE_1_PAIRED_R2 = "Sample_1_Paired_R2.fastq.gz";
+export const SAMPLE_FILE_1_PAIRED_R1 = "Sample_1_Paired_R1.fastq.gz";
+export const SAMPLE_FILE_1_PAIRED_R2 = "Sample_1_Paired_R2.fastq.gz";
+export const SAMPLE_FILE_CT20K = "Ct20K.fastq.gz";
 
 export const SAMPLE_NAMES: Record<string, string[]> = {
   STAGING: ["RNAEnr_10e4_viralcopies_RVOPv2_iSeq"],
