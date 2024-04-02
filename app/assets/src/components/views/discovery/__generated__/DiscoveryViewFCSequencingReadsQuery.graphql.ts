@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<39a54f6ee0c89fb2d87e7c3760e2f48c>>
+ * @generated SignedSource<<bd2e1a17b85b54edfa12d4226f034109>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -138,6 +138,7 @@ export type queryInput_fedSequencingReads_input_todoRemove_Input = {
   orderBy?: string | null | undefined;
   orderDir?: string | null | undefined;
   projectId?: string | null | undefined;
+  sampleIds?: ReadonlyArray<number | null | undefined> | null | undefined;
   search?: string | null | undefined;
   taxaLevels?: ReadonlyArray<string | null | undefined> | null | undefined;
   taxons?: ReadonlyArray<number | null | undefined> | null | undefined;
@@ -145,6 +146,7 @@ export type queryInput_fedSequencingReads_input_todoRemove_Input = {
   tissue?: ReadonlyArray<string | null | undefined> | null | undefined;
   visibility?: string | null | undefined;
   workflow?: string | null | undefined;
+  workflowRunIds?: ReadonlyArray<number | null | undefined> | null | undefined;
 };
 export type DiscoveryViewFCSequencingReadsQuery$variables = {
   input?: queryInput_fedSequencingReads_input_Input | null | undefined;
@@ -172,6 +174,7 @@ export type DiscoveryViewFCSequencingReadsQuery$data = {
           } | null | undefined;
           readonly producingRunId: string | null | undefined;
           readonly taxon: {
+            readonly level: string | null | undefined;
             readonly name: string;
           } | null | undefined;
         };
@@ -478,7 +481,16 @@ v3 = [
                     "kind": "LinkedField",
                     "name": "taxon",
                     "plural": false,
-                    "selections": (v2/*: any*/),
+                    "selections": [
+                      (v1/*: any*/),
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "level",
+                        "storageKey": null
+                      }
+                    ],
                     "storageKey": null
                   },
                   {
@@ -618,16 +630,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "0854606456916a206e74794250eff57d",
+    "cacheID": "afceb68889a6e1ed297cd25aecf99c3c",
     "id": null,
     "metadata": {},
     "name": "DiscoveryViewFCSequencingReadsQuery",
     "operationKind": "query",
-    "text": "query DiscoveryViewFCSequencingReadsQuery(\n  $input: queryInput_fedSequencingReads_input_Input\n) {\n  fedSequencingReads(input: $input) {\n    id\n    nucleicAcid\n    protocol\n    medakaModel\n    technology\n    taxon {\n      name\n    }\n    sample {\n      railsSampleId\n      name\n      notes\n      collectionLocation\n      sampleType\n      waterControl\n      uploadError\n      hostOrganism {\n        name\n      }\n      collection {\n        name\n        public\n      }\n      ownerUserId\n      ownerUserName\n      metadatas {\n        edges {\n          node {\n            fieldName\n            value\n          }\n        }\n      }\n    }\n    consensusGenomes {\n      edges {\n        node {\n          producingRunId\n          taxon {\n            name\n          }\n          accession {\n            accessionId\n            accessionName\n          }\n          metrics {\n            coverageDepth\n            totalReads\n            gcPercent\n            refSnps\n            percentIdentity\n            nActg\n            percentGenomeCalled\n            nMissing\n            nAmbiguous\n            referenceGenomeLength\n          }\n        }\n      }\n    }\n  }\n}\n"
+    "text": "query DiscoveryViewFCSequencingReadsQuery(\n  $input: queryInput_fedSequencingReads_input_Input\n) {\n  fedSequencingReads(input: $input) {\n    id\n    nucleicAcid\n    protocol\n    medakaModel\n    technology\n    taxon {\n      name\n    }\n    sample {\n      railsSampleId\n      name\n      notes\n      collectionLocation\n      sampleType\n      waterControl\n      uploadError\n      hostOrganism {\n        name\n      }\n      collection {\n        name\n        public\n      }\n      ownerUserId\n      ownerUserName\n      metadatas {\n        edges {\n          node {\n            fieldName\n            value\n          }\n        }\n      }\n    }\n    consensusGenomes {\n      edges {\n        node {\n          producingRunId\n          taxon {\n            name\n            level\n          }\n          accession {\n            accessionId\n            accessionName\n          }\n          metrics {\n            coverageDepth\n            totalReads\n            gcPercent\n            refSnps\n            percentIdentity\n            nActg\n            percentGenomeCalled\n            nMissing\n            nAmbiguous\n            referenceGenomeLength\n          }\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5d74d6f6ca976feb23f8398bfe79d269";
+(node as any).hash = "6a2c670cf3bfda69bc74a979eadc5b7b";
 
 export default node;

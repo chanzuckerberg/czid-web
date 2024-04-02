@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5d7a46bced3939f24ee7d37254dd232f>>
+ * @generated SignedSource<<673f3cc2d4e02a361b2944111fc821c4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type queryInput_fedWorkflowRunsAggregate_input_Input = {
 };
 export type queryInput_fedWorkflowRunsAggregate_input_where_Input = {
   collectionId?: queryInput_fedWorkflowRunsAggregate_input_where_collectionId_Input | null | undefined;
+  deprecatedById?: queryInput_fedWorkflowRunsAggregate_input_where_deprecatedById_Input | null | undefined;
   id?: queryInput_fedWorkflowRunsAggregate_input_where_id_Input | null | undefined;
   workflowVersion?: queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_Input | null | undefined;
 };
@@ -32,6 +33,9 @@ export type queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_work
 };
 export type queryInput_fedWorkflowRunsAggregate_input_where_workflowVersion_workflow_name_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
+};
+export type queryInput_fedWorkflowRunsAggregate_input_where_deprecatedById_Input = {
+  _is_null?: boolean | null | undefined;
 };
 export type queryInput_fedWorkflowRunsAggregate_input_todoRemove_Input = {
   annotations?: ReadonlyArray<queryInput_fedWorkflowRunsAggregate_input_todoRemove_annotations_items_Input | null | undefined> | null | undefined;

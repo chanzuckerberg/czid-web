@@ -222,6 +222,7 @@ const DiscoveryViewFCSequencingReadsQuery = graphql`
             producingRunId
             taxon {
               name
+              level
             }
             accession {
               accessionId
@@ -1036,7 +1037,9 @@ async function querySequencingReadObjects(
             accessionName: node.accession?.accessionName ?? undefined,
             referenceAccessionId: node.accession?.accessionId ?? undefined,
             taxonName:
-              sequencingRead.taxon?.name ?? node.taxon?.name ?? undefined,
+              sequencingRead.taxon?.name ??
+              `${node.taxon?.name} (${node.taxon?.level})` ??
+              undefined,
           },
           coverageDepth: metrics?.coverageDepth ?? undefined,
           totalReadsCG: metrics?.totalReads ?? undefined,

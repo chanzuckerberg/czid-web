@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5e8901cf6afa095f6cf3753401a5fffe>>
+ * @generated SignedSource<<13b0ed31d013a062de6ed492b1bbb3fb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -138,6 +138,7 @@ export type queryInput_fedSequencingReads_input_todoRemove_Input = {
   orderBy?: string | null | undefined;
   orderDir?: string | null | undefined;
   projectId?: string | null | undefined;
+  sampleIds?: ReadonlyArray<number | null | undefined> | null | undefined;
   search?: string | null | undefined;
   taxaLevels?: ReadonlyArray<string | null | undefined> | null | undefined;
   taxons?: ReadonlyArray<number | null | undefined> | null | undefined;
@@ -145,6 +146,7 @@ export type queryInput_fedSequencingReads_input_todoRemove_Input = {
   tissue?: ReadonlyArray<string | null | undefined> | null | undefined;
   visibility?: string | null | undefined;
   workflow?: string | null | undefined;
+  workflowRunIds?: ReadonlyArray<number | null | undefined> | null | undefined;
 };
 export type DiscoveryViewFCSequencingReadIdsQuery$variables = {
   input?: queryInput_fedSequencingReads_input_Input | null | undefined;

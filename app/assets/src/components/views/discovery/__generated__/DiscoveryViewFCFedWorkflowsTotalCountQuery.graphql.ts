@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dc5426bf20a2b8a84cdcea47358b42d3>>
+ * @generated SignedSource<<481d7c6ff987b8a56132306ebe344b51>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type queryInput_fedWorkflowRunsAggregateTotalCount_input_Input = {
 };
 export type queryInput_fedWorkflowRunsAggregateTotalCount_input_where_Input = {
   collectionId?: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_collectionId_Input | null | undefined;
+  deprecatedById?: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_deprecatedById_Input | null | undefined;
   workflowVersion?: queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_Input | null | undefined;
 };
 export type queryInput_fedWorkflowRunsAggregateTotalCount_input_where_collectionId_Input = {
@@ -28,6 +29,9 @@ export type queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVe
 };
 export type queryInput_fedWorkflowRunsAggregateTotalCount_input_where_workflowVersion_workflow_name_Input = {
   _in?: ReadonlyArray<string | null | undefined> | null | undefined;
+};
+export type queryInput_fedWorkflowRunsAggregateTotalCount_input_where_deprecatedById_Input = {
+  _is_null?: boolean | null | undefined;
 };
 export type queryInput_fedWorkflowRunsAggregateTotalCount_input_todoRemove_Input = {
   domain?: string | null | undefined;
