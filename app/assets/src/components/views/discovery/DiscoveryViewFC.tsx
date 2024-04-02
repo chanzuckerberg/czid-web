@@ -1064,6 +1064,7 @@ async function queryWorkflowRunsAggregate(
         id: { _in: workflowRunIds },
         collectionId: { _in: projectIds },
         workflowVersion: { workflow: { name: { _in: workflows } } },
+        deprecatedById: { _is_null: true },
       },
       todoRemove: {
         domain: props.domain,
@@ -1140,6 +1141,7 @@ async function queryWorkflowRunsTotalCount(
       where: {
         collectionId: collectionIdInput,
         workflowVersion: { workflow: { name: { _in: workflows } } },
+        deprecatedById: { _is_null: true },
       },
       todoRemove: {
         domain: props.domain,
