@@ -40,7 +40,7 @@ type Accession implements EntityInterface & Node {
   consensusGenomesAggregate(where: ConsensusGenomeWhereClause = null): ConsensusGenomeAggregate
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -89,7 +89,7 @@ input AccessionCreateInput {
   accessionName: String!
   upstreamDatabaseId: ID!
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -247,7 +247,7 @@ type BulkDownload implements EntityInterface & Node {
   file(where: FileWhereClause = null): File
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -283,7 +283,7 @@ enum BulkDownloadCountColumns {
 input BulkDownloadCreateInput {
   downloadType: BulkDownloadType!
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -373,7 +373,7 @@ type ConsensusGenome implements EntityInterface & Node {
   intermediateOutputs(where: FileWhereClause = null): File
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -426,7 +426,7 @@ input ConsensusGenomeCreateInput {
   referenceGenomeId: ID = null
   accessionId: ID = null
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -726,7 +726,7 @@ type GenomicRange implements EntityInterface & Node {
   sequencingReadsAggregate(where: SequencingReadWhereClause = null): SequencingReadAggregate
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -761,7 +761,7 @@ enum GenomicRangeCountColumns {
 
 input GenomicRangeCreateInput {
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -892,7 +892,7 @@ type HostOrganism implements EntityInterface & Node {
   samplesAggregate(where: SampleWhereClause = null): SampleAggregate
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -956,7 +956,7 @@ input HostOrganismCreateInput {
   category: HostOrganismCategory!
   isDeuterostome: Boolean!
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -1060,7 +1060,7 @@ type IndexFile implements EntityInterface & Node {
   hostOrganism(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = []): HostOrganism
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -1112,7 +1112,7 @@ input IndexFileCreateInput {
   upstreamDatabaseId: ID = null
   hostOrganismId: ID = null
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -1273,7 +1273,7 @@ type Metadatum implements EntityInterface & Node {
   value: String!
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -1321,7 +1321,7 @@ input MetadatumCreateInput {
   fieldName: String!
   value: String!
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -1419,7 +1419,7 @@ type MetricConsensusGenome implements EntityInterface & Node {
   coverageViz: [[Float!]!]
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -1484,7 +1484,7 @@ input MetricConsensusGenomeCreateInput {
   coverageTotalLength: Int = null
   coverageViz: [[Float!]!] = null
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -2326,6 +2326,7 @@ type query_fedSequencingReads_items_sample_metadatas_edges_items_node {
 
 type query_fedSequencingReads_items_taxon {
   name: String!
+  level: String
 }
 
 type query_fedWorkflowRuns_items {
@@ -3347,7 +3348,7 @@ type ReferenceGenome implements EntityInterface & Node {
   consensusGenomesAggregate(where: ConsensusGenomeWhereClause = null): ConsensusGenomeAggregate
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -3384,7 +3385,7 @@ enum ReferenceGenomeCountColumns {
 input ReferenceGenomeCreateInput {
   name: String!
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -3533,7 +3534,7 @@ type Sample implements EntityInterface & Node {
   metadatasAggregate(where: MetadatumWhereClause = null): MetadatumAggregate
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   deletedAt: DateTime
 }
 
@@ -3581,7 +3582,7 @@ input SampleCreateInput {
   name: String!
   hostOrganismId: ID = null
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -3803,7 +3804,7 @@ type SequencingRead implements EntityInterface & Node {
   consensusGenomesAggregate(where: ConsensusGenomeWhereClause = null): ConsensusGenomeAggregate
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -3862,7 +3863,7 @@ input SequencingReadCreateInput {
   taxonId: ID = null
   primerFileId: ID = null
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -4045,7 +4046,7 @@ type Taxon implements EntityInterface & Node {
   sequencingReadsAggregate(where: SequencingReadWhereClause = null): SequencingReadAggregate
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -4123,7 +4124,7 @@ input TaxonCreateInput {
   taxKingdomId: ID = null
   taxSuperkingdomId: ID = null
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -4362,7 +4363,7 @@ type UpstreamDatabase implements EntityInterface & Node {
   accessionsAggregate(where: AccessionWhereClause = null): AccessionAggregate
   producingRunId: ID
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -4400,7 +4401,7 @@ enum UpstreamDatabaseCountColumns {
 input UpstreamDatabaseCreateInput {
   name: String!
   producingRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
