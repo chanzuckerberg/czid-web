@@ -18,7 +18,7 @@ export interface WorkflowRun {
     card_version: string;
     creation_source: CreationSource;
     ref_fasta: string;
-    taxon_id: number;
+    taxon_id: string;
     taxon_name: string;
     technology: string;
     wetlab_protocol: string;

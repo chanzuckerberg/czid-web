@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<865684ba04e9a634c38dc144d324443b>>
+ * @generated SignedSource<<51f29686e32d5efd93ac5d41ed35982d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -21,7 +21,7 @@ export type BulkDownloadListQuery$data = {
     } | null | undefined> | null | undefined;
     readonly fileSize: number | null | undefined;
     readonly id: string | null | undefined;
-    readonly ownerUserId: string | null | undefined;
+    readonly ownerUserId: number | null | undefined;
     readonly startedAt: string | null | undefined;
     readonly status: string | null | undefined;
     readonly url: string | null | undefined;
