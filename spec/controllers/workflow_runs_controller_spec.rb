@@ -1169,6 +1169,23 @@ RSpec.describe WorkflowRunsController, type: :controller do
         end
       end
     end
+
+    describe "GET #cg_report_downloads" do
+      context "when the consensus genome run does not have a reference fasta" do
+        before do
+          @project = create(:project, users: [@joe])
+          @sample = create(:sample, project: @project)
+          @workflow_run = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+        end
+
+        it "returns a nil presigned url and an ok status" do
+          get :cg_report_downloads, params: { id: @workflow_run.id, downloadType: "ref_fasta" }
+
+          expect(response).to have_http_status(:ok)
+          expect(JSON.parse(response.body)["presignedUrl"]).to be_nil
+        end
+      end
+    end
   end
 
   context "Admin" do

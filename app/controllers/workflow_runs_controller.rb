@@ -397,32 +397,27 @@ class WorkflowRunsController < ApplicationController
 
     case download_type
     when "ref_fasta"
-      s3_path = @workflow_run.sample.input_files.reference_sequence[0].s3_path
+      s3_path = @workflow_run.sample.input_files.reference_sequence[0]&.[](:s3_path)
       filename = @workflow_run.inputs&.[]("ref_fasta")
     else
       render(
         json: { status: "File not found" },
         status: :not_found
-      )
+      ) and return
+
     end
 
+    presigned_url = nil
     if s3_path.present? && filename.present?
       presigned_url = get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_#{@workflow_run.id}_#{filename}")
-
-      if presigned_url
-        render(
-          json: {
-            url: presigned_url,
-          },
-          status: :ok
-        )
-      else
-        render(
-          json: { status: "File not available" },
-          status: :not_found
-        )
-      end
     end
+
+    render(
+      json: {
+        url: presigned_url,
+      },
+      status: :ok
+    )
   end
 
   private
