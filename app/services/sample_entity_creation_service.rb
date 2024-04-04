@@ -11,7 +11,6 @@ class SampleEntityCreationService
     @user_id = user_id
     @sample = sample
     @workflow_run = workflow_run
-    @workflow_run_accession_id = @workflow_run.inputs&.[]("accession_id")
     @workflow_run_accession_name = @workflow_run.inputs&.[]("accession_name")
     @technology = NEXT_GEN_SEQUENCING_TECHNOLOGY_MAP[@workflow_run.get_input("technology")]
     @token = TokenCreationService
@@ -23,7 +22,7 @@ class SampleEntityCreationService
   end
 
   def call
-    # Create the new Sample
+    # Check if the Sample already exists in the nextGen database
     response = CzidGraphqlFederation
                .query_with_token(
                  @user_id,
@@ -204,14 +203,11 @@ class SampleEntityCreationService
   private
 
   def workflow_run_accession_id
-    if workflow_run_is_sars_cov_2?
-      @workflow_run.inputs&.[]("accession_id")
-    elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload] && workflow_run_technology_illumina?
-      @workflow_run.inputs&.[]("reference_accession")
-    elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report] && workflow_run_technology_illumina?
-      sanitize_accession_id(@workflow_run.inputs&.[]("accession_id"))
+    if creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload]
+      return sanitize_accession_id(@workflow_run.inputs&.[]("reference_accession"))
+    else
+      return sanitize_accession_id(@workflow_run.inputs&.[]("accession_id"))
     end
-    nil
   end
 
   def workflow_run_technology
@@ -223,14 +219,9 @@ class SampleEntityCreationService
   end
 
   def creation_source
-    ref_fasta_input = @workflow_run.sample.input_files.reference_sequence
-
-    if workflow_run_technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
-      # CG kickoff is not available through mNGS nanopore report
-      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
-    elsif ref_fasta_input.presence || @workflow_run.inputs&.[]("reference_accession")
+    if @workflow_run.inputs&.[]("ref_fasta")
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload]
-    elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
+    elsif workflow_run_is_sars_cov_2?
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
     else
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report]
