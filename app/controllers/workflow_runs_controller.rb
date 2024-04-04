@@ -397,7 +397,7 @@ class WorkflowRunsController < ApplicationController
 
     case download_type
     when "ref_fasta"
-      s3_path = @workflow_run.sample.input_files.reference_sequence[0]&.[](:s3_path)
+      s3_path = @workflow_run.sample.input_files.reference_sequence[0]&.s3_path
       filename = @workflow_run.inputs&.[]("ref_fasta")
     else
       render(
