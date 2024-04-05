@@ -114,7 +114,7 @@ const BulkDeleteModalComponent = ({
 
   // Data from query:
   const validIds = data.validIds.filter(
-    (validId): validId is number => validId != null,
+    (validId): validId is string => validId != null,
   );
   const invalidSampleNames = data.invalidSampleNames.filter(
     (invalidSampleName): invalidSampleName is string =>
