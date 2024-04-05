@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bd2e1a17b85b54edfa12d4226f034109>>
+ * @generated SignedSource<<6f9fd9158cd93d71604355292ef0cfdc>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -211,6 +211,7 @@ export type DiscoveryViewFCSequencingReadsQuery$data = {
       readonly waterControl: boolean | null | undefined;
     } | null | undefined;
     readonly taxon: {
+      readonly level: string | null | undefined;
       readonly name: string;
     } | null | undefined;
     readonly technology: string;
@@ -237,7 +238,14 @@ v1 = {
   "storageKey": null
 },
 v2 = [
-  (v1/*: any*/)
+  (v1/*: any*/),
+  {
+    "alias": null,
+    "args": null,
+    "kind": "ScalarField",
+    "name": "level",
+    "storageKey": null
+  }
 ],
 v3 = [
   {
@@ -357,7 +365,9 @@ v3 = [
             "kind": "LinkedField",
             "name": "hostOrganism",
             "plural": false,
-            "selections": (v2/*: any*/),
+            "selections": [
+              (v1/*: any*/)
+            ],
             "storageKey": null
           },
           {
@@ -481,16 +491,7 @@ v3 = [
                     "kind": "LinkedField",
                     "name": "taxon",
                     "plural": false,
-                    "selections": [
-                      (v1/*: any*/),
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "level",
-                        "storageKey": null
-                      }
-                    ],
+                    "selections": (v2/*: any*/),
                     "storageKey": null
                   },
                   {
@@ -630,16 +631,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "afceb68889a6e1ed297cd25aecf99c3c",
+    "cacheID": "0e29d7a5b9a5d9e1f3a0131fb89073ae",
     "id": null,
     "metadata": {},
     "name": "DiscoveryViewFCSequencingReadsQuery",
     "operationKind": "query",
-    "text": "query DiscoveryViewFCSequencingReadsQuery(\n  $input: queryInput_fedSequencingReads_input_Input\n) {\n  fedSequencingReads(input: $input) {\n    id\n    nucleicAcid\n    protocol\n    medakaModel\n    technology\n    taxon {\n      name\n    }\n    sample {\n      railsSampleId\n      name\n      notes\n      collectionLocation\n      sampleType\n      waterControl\n      uploadError\n      hostOrganism {\n        name\n      }\n      collection {\n        name\n        public\n      }\n      ownerUserId\n      ownerUserName\n      metadatas {\n        edges {\n          node {\n            fieldName\n            value\n          }\n        }\n      }\n    }\n    consensusGenomes {\n      edges {\n        node {\n          producingRunId\n          taxon {\n            name\n            level\n          }\n          accession {\n            accessionId\n            accessionName\n          }\n          metrics {\n            coverageDepth\n            totalReads\n            gcPercent\n            refSnps\n            percentIdentity\n            nActg\n            percentGenomeCalled\n            nMissing\n            nAmbiguous\n            referenceGenomeLength\n          }\n        }\n      }\n    }\n  }\n}\n"
+    "text": "query DiscoveryViewFCSequencingReadsQuery(\n  $input: queryInput_fedSequencingReads_input_Input\n) {\n  fedSequencingReads(input: $input) {\n    id\n    nucleicAcid\n    protocol\n    medakaModel\n    technology\n    taxon {\n      name\n      level\n    }\n    sample {\n      railsSampleId\n      name\n      notes\n      collectionLocation\n      sampleType\n      waterControl\n      uploadError\n      hostOrganism {\n        name\n      }\n      collection {\n        name\n        public\n      }\n      ownerUserId\n      ownerUserName\n      metadatas {\n        edges {\n          node {\n            fieldName\n            value\n          }\n        }\n      }\n    }\n    consensusGenomes {\n      edges {\n        node {\n          producingRunId\n          taxon {\n            name\n            level\n          }\n          accession {\n            accessionId\n            accessionName\n          }\n          metrics {\n            coverageDepth\n            totalReads\n            gcPercent\n            refSnps\n            percentIdentity\n            nActg\n            percentGenomeCalled\n            nMissing\n            nAmbiguous\n            referenceGenomeLength\n          }\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6a2c670cf3bfda69bc74a979eadc5b7b";
+(node as any).hash = "6bebd8377bb1272e8d246ef8ef4b8111";
 
 export default node;
