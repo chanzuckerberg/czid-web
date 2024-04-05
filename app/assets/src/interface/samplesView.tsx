@@ -107,6 +107,7 @@ export interface Entry {
   qcPercent: number;
   referenceAccession: object;
   sample: {
+    id: string;
     name: string;
     project: string;
     userId: number;

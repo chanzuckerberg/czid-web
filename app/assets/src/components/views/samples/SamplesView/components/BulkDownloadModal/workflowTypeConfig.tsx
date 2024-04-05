@@ -10,6 +10,8 @@ import { RunValidationType } from "./types";
 import {
   fetchRailsValidationInfo,
   fetchValidationInfo,
+  getRailsSampleIdsFromSamples,
+  getRailsSampleIdsFromWorkflowRuns,
   parseIsUserOwnerOfAllObjects,
   parseRailsIsUserOwnerOfAllObjects,
   parseRailsValidationInfo,
@@ -40,6 +42,10 @@ type BulkDownloadModalConfigType = {
     workflow,
     workflowEntity,
   }: FetchValidationInfoFunctionInputType) => Promise<any>;
+  getRailsSampleIds: (
+    selectedObjects: Entry[],
+    validIds: Set<string>,
+  ) => string[];
   isUserOwnerParser: (
     // The NextGen parser uses validationInfo and currentUserId
     validationInfo: {
@@ -80,6 +86,7 @@ export const BulkDownloadModalConfig: WorkflowConfigType<BulkDownloadModalConfig
   {
     [WorkflowType.AMR]: {
       fetchAreAllObjectsUploadedByCurrentUser: workflowRunsCreatedByCurrentUser,
+      getRailsSampleIds: getRailsSampleIdsFromWorkflowRuns,
       ...fetchAndParseValidationFromRails,
     },
     [WorkflowType.CONSENSUS_GENOME]: {
@@ -87,21 +94,26 @@ export const BulkDownloadModalConfig: WorkflowConfigType<BulkDownloadModalConfig
       fetchValidationInfoFunction: fetchValidationInfo,
       isUserOwnerParser: parseIsUserOwnerOfAllObjects,
       validationParser: parseValidationInfo,
+      getRailsSampleIds: getRailsSampleIdsFromWorkflowRuns,
     },
     [WorkflowType.SHORT_READ_MNGS]: {
       fetchAreAllObjectsUploadedByCurrentUser: samplesUploadedByCurrentUser,
+      getRailsSampleIds: getRailsSampleIdsFromSamples,
       ...fetchAndParseValidationFromRails,
     },
     [WorkflowType.LONG_READ_MNGS]: {
       fetchAreAllObjectsUploadedByCurrentUser: samplesUploadedByCurrentUser,
+      getRailsSampleIds: getRailsSampleIdsFromSamples,
       ...fetchAndParseValidationFromRails,
     },
     [WorkflowType.AMR_DEPRECATED]: {
       fetchAreAllObjectsUploadedByCurrentUser: () => Promise.resolve(null),
+      getRailsSampleIds: () => [],
       ...fetchAndParseValidationFromRails,
     },
     [WorkflowType.BENCHMARK]: {
       fetchAreAllObjectsUploadedByCurrentUser: workflowRunsCreatedByCurrentUser,
+      getRailsSampleIds: () => [],
       ...fetchAndParseValidationFromRails,
     },
   };

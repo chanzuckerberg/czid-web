@@ -136,7 +136,7 @@ class BulkDownloadsController < ApplicationController
 
   # POST /bulk_downloads/consensus_genome_sample_metadata.json
   def consensus_genome_sample_metadata
-    sample_ids = validate_sample_metadata_params(consensus_genome_sample_metadata_params, current_user)
+    sample_ids, = validate_sample_metadata_params(sample_metadata_params, current_user)
 
     unless sample_ids.is_a?(Array)
       render json: { error: MISSING_SAMPLE_IDS_ERROR }, status: :unprocessable_entity
@@ -149,7 +149,28 @@ class BulkDownloadsController < ApplicationController
     LogUtil.log_error(
       "BulkDownloadsSampleMetadataError: Failed to get sample metadata #{e}",
       exception: e,
-      params: consensus_genome_sample_metadata_params
+      params: sample_metadata_params
+    )
+
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
+  # POST /bulk_downloads/sample_metadata.json
+  def sample_metadata
+    sample_ids, samples = validate_sample_metadata_params(sample_metadata_params, current_user)
+
+    unless sample_ids.is_a?(Array)
+      render json: { error: MISSING_SAMPLE_IDS_ERROR }, status: :unprocessable_entity
+      return
+    end
+    metadata_arr = BulkDownloadsHelper.generate_metadata_arr(samples)
+
+    render json: { sample_metadata: metadata_arr }, status: :ok
+  rescue StandardError => e
+    LogUtil.log_error(
+      "BulkDownloadsSampleMetadataError: Failed to get sample metadata #{e}",
+      exception: e,
+      params: sample_metadata_params
     )
 
     render json: { error: e.message }, status: :unprocessable_entity
@@ -292,7 +313,7 @@ class BulkDownloadsController < ApplicationController
     params.permit(:download_type, :workflow, sample_ids: [], params: {}, workflow_run_ids: [])
   end
 
-  def consensus_genome_sample_metadata_params
+  def sample_metadata_params
     params.permit(sample_ids: [])
   end
 

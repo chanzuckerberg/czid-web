@@ -51,3 +51,12 @@ export type RunValidationType = {
   status: WorkflowRunStatusType;
   ownerUserId: number;
 };
+
+export type SampleMetadataResponseType = {
+  sample_metadata?: readonly (
+    | readonly (string | null | undefined)[]
+    | null
+    | undefined
+  )[];
+  error?: string;
+};

@@ -192,7 +192,7 @@ module BulkDownloadsHelper
     viewable_objects = current_power.viewable_samples.where(id: sample_ids)
     raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR if sample_ids.length != viewable_objects.count
 
-    sample_ids
+    [sample_ids, viewable_objects]
   end
 
   # Generate the metric values matrix.
@@ -480,6 +480,17 @@ module BulkDownloadsHelper
         csv << [sample.name] + metadata.values_at(*metadata_keys)
       end
     end
+  end
+
+  def self.generate_metadata_arr(samples)
+    metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: samples)
+    csv = []
+    csv << ["sample_name"] + metadata_headers
+    samples.each do |sample|
+      metadata = metadata_by_sample_id[sample.id] || {}
+      csv << [sample.name] + metadata.values_at(*metadata_keys)
+    end
+    csv
   end
 
   def self.cg_overview_headers

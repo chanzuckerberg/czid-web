@@ -1,3 +1,4 @@
+import { SampleMetadataResponseType } from "~/components/views/samples/SamplesView/components/BulkDownloadModal/types";
 import { BulkDownloadType } from "~/interface/shared";
 import { WorkflowType, WORKFLOW_ENTITIES } from "~utils/workflows";
 import { get, postWithCSRF } from "./core";
@@ -37,3 +38,8 @@ export const getBulkDownload = (bulkDownloadId: number) =>
 
 export const getPresignedOutputUrl = (bulkDownloadId: number) =>
   get(`/bulk_downloads/${bulkDownloadId}/presigned_output_url`);
+
+export const createSampleMetadataBulkDownload = (
+  sampleIds: string[],
+): Promise<SampleMetadataResponseType> =>
+  postWithCSRF(`/bulk_downloads/sample_metadata`, { sample_ids: sampleIds });

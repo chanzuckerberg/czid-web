@@ -6,6 +6,7 @@ import { getMassNormalizedBackgroundAvailability } from "~/api";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import {
   createBulkDownload,
+  createSampleMetadataBulkDownload,
   getBulkDownloadMetrics,
   getBulkDownloadTypes,
 } from "~/api/bulk_downloads";
@@ -205,7 +206,7 @@ export const BulkDownloadModal = ({
   };
 
   const environment = useRelayEnvironment();
-  const downloadCSVFile = ({
+  const downloadCgOverview = ({
     workflowRunIds,
     workflow,
     includeMetadata,
@@ -243,6 +244,27 @@ export const BulkDownloadModal = ({
       },
     });
   };
+
+  async function downloadSampleMetadata(sampleIds: string[]) {
+    const sampleMetadataResponse = await createSampleMetadataBulkDownload(
+      sampleIds,
+    );
+    const metadata = sampleMetadataResponse.sample_metadata;
+    if (metadata) {
+      try {
+        downloadFileFromCSV(metadata, "sample_metadata");
+      } catch (e) {
+        console.error(e);
+        onCreateDownloadError(e || DEFAULT_CREATION_ERROR);
+      }
+      onClose();
+    } else {
+      console.error(sampleMetadataResponse.error);
+      onCreateDownloadError(
+        sampleMetadataResponse.error || DEFAULT_CREATION_ERROR,
+      );
+    }
+  }
 
   // *** Async requests ***
   async function fetchSampleOptionsAndValidateSelectedSamples({
@@ -401,13 +423,18 @@ export const BulkDownloadModal = ({
         authenticityToken: getCsrfToken(),
       });
     } else if (selectedDownload.downloadType === "consensus_genome_overview") {
-      downloadCSVFile({
+      downloadCgOverview({
         workflowRunIds: selectedDownload.validObjectIds,
         includeMetadata: selectedDownload?.fields?.include_metadata?.value,
         downloadType: selectedDownload.downloadType,
         workflow: workflow,
         authenticityToken: getCsrfToken(),
       });
+    } else if (selectedDownload.downloadType === "sample_metadata") {
+      const railsSampleIds = BulkDownloadModalConfig[
+        workflow
+      ].getRailsSampleIds(selectedObjects, validObjectIds);
+      downloadSampleMetadata(railsSampleIds);
     } else {
       try {
         await createBulkDownload(selectedDownload);

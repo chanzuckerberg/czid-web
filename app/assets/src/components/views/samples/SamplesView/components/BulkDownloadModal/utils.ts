@@ -146,6 +146,22 @@ export async function fetchValidationInfo({
   ).toPromise();
 }
 
+export const getRailsSampleIdsFromWorkflowRuns = (
+  selectedObjects: Entry[],
+  validObjectIds: Set<string>,
+): string[] => {
+  return selectedObjects
+    .filter(obj => validObjectIds.has(obj?.id))
+    .map(obj => obj?.sample?.id);
+};
+
+export const getRailsSampleIdsFromSamples = (
+  _selectedObjects: Entry[],
+  validObjectIds: Set<string>,
+): string[] => {
+  return Array.from(validObjectIds || []);
+};
+
 export const parseRailsValidationInfo = (validationInfo: {
   validIds: number[];
   invalidSampleNames: string[];
