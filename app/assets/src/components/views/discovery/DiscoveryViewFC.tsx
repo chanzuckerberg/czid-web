@@ -1290,14 +1290,14 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
   const fetchCgFilteredWorkflowRuns = async (
     conditions: Conditions,
     projectIdsPromise: Promise<number[] | undefined>,
-  ): Promise<string[]> => {
+  ): Promise<void> => {
     resetCg();
     cgConditions.current = conditions;
     try {
       // This Promise needs to be set immediately (cannot await the projects query first), because
       // InfiniteTable has already been reset() and needs to hit this pending Promise to accurately
       // show that it's still loading.
-      workflowRunsPromise.current = projectIdsPromise.then(projectIds =>
+      const newWorkflowRunsPromise = projectIdsPromise.then(projectIds =>
         queryWorkflowRuns(
           WorkflowType.CONSENSUS_GENOME,
           conditions,
@@ -1306,18 +1306,19 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
           projectIds,
         ),
       );
-      const workflowRuns = await workflowRunsPromise.current;
-      const workflowRunIds = workflowRuns.map(run => run.id);
-      setCgWorkflowRunIds(workflowRunIds);
+      workflowRunsPromise.current = newWorkflowRunsPromise;
+      const workflowRuns = await newWorkflowRunsPromise;
+      if (workflowRunsPromise.current !== newWorkflowRunsPromise) {
+        // A newer query has been made.
+        return;
+      }
+      setCgWorkflowRunIds(workflowRuns.map(run => run.id));
       fetchCgPage(/* offset */ 0);
-      // TODO: Query stats, etc.
-      return workflowRunIds;
     } catch (error) {
       logError({
         message: "[DiscoveryViewError] fetchCgFilteredWorkflowRuns() failed",
         details: { error },
       });
-      return [];
     }
   };
 
