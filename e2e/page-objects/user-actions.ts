@@ -18,9 +18,9 @@ export async function runPipelineIfNeeded(page: any, project: any, sampleFiles: 
 
     let samples = [];
     let ranPipeline = false;
-    const noHostSample = await samplesPage.getSamples(project.name, sampleNames[0]);
+    samples = await samplesPage.getSamples(project.name, sampleNames);
     runOptions = runOptions || {};
-    if ((noHostSample.length <= 0) || runOptions.runPipeline) {
+    if ((samples.length <= 0) || runOptions.runPipeline) {
       const uploadPage = new UploadPage(page);
 
       let inputs = await uploadPage.getRandomizedSampleInputs(sampleFiles, sampleNames);

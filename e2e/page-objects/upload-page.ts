@@ -55,14 +55,18 @@ const CLEAR_UPLOADED_FILE_BUTTON_TESTID = "clear-uploaded-file-button";
 const CLEAR_LABS_TOGGLE = "[class*='clearLabs'] [class*='checkbox']";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
 const WETLAB_FILTER = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']";
+const WETLAB_FILTER_VALUE = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']//*[@data-testid='filter-value']";
 const WETLAB_OPTION = (wetlab: string) =>`//*[@data-testid="dropdown-menu"]//*[@role="option" and text()="${wetlab}"]`;
+const WETLAB_OPTIONS = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='dropdown-menu']//*[@role='option']";
 const WETLAB_DESCRIPTION = "//*[text()='Wetlab Protocol:']/following-sibling::*[contains(@class, 'description')]";
 const MEDAKA_MODEL_FILTER = "//*[text()='Medaka Model:']/parent::*//*[@data-testid='filters']";
 const MEDAKA_MODEL_OPTION = (medakaModel: string) => `//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText') and text()='${medakaModel}']`;
+const MEDAKA_MODEL_OPTIONS = "//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText')]";
 const MEDAKA_MODEL_DESCRIPTION = "//*[text()='Medaka Model:']/following-sibling::*[contains(@class, 'description')]";
 const REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID = "reference-sequence-file-upload";
 const TRIM_PRIMERS_FILE_UPLOAD = "//span[text()='Trim Primers']/parent::div/following-sibling::button";
 const PORTAL_DROPDOWN_LOCATOR = "[class*='portalDropdown']";
+const NANOPORE_TECHNOLOGY_DESCRIPTION = "[data-testid='sequencing-technology-ONT'] [class*='technologyDescription']";
 
 // #region Metadata locators
 const METADATA_SAMPLE_NAMES = "[data-testid='sample-name']";
@@ -263,12 +267,24 @@ export class UploadPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getNanoporeTechnologyDescription() {
+    return this.page.locator(NANOPORE_TECHNOLOGY_DESCRIPTION).textContent();
+  }
+
   public async getWetLabFilterValue() {
-    await this.page.locator(WETLAB_FILTER).locator("[data-testid='filter-value']").textContent();
+    return this.page.locator(WETLAB_FILTER_VALUE).textContent();
+  }
+
+  public async getWetlabOptions() {
+    return this.page.locator(WETLAB_OPTIONS).allTextContents();
+  }
+
+  public async getMedakaModelFilterOptions() {
+    return this.page.locator(MEDAKA_MODEL_OPTIONS).allTextContents();
   }
 
   public async getMedakaModelFilterValue() {
-    await this.page.locator(MEDAKA_MODEL_FILTER).locator("[data-testid='filter-value']").textContent();
+    return this.page.locator(MEDAKA_MODEL_FILTER).locator("[data-testid='filter-value']").textContent();
   }
 
   public async getClearLabsValue() {

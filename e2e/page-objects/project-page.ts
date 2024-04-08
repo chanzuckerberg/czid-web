@@ -39,8 +39,9 @@ const DISMISS_BUTTON = "//*[translate(text(), 'D','d') = 'dismiss']";
 const USER_DROPDOWN = "[class*='userDropdown']";
 const USER_DROPDOWN_DOWNLOADS_LINK = "//a[text()='Downloads']";
 const DOWNLOADS_LINK = "[class*='message'] [href='/bulk_downloads']";
-const NEXTCLADE_TREE_BUTTON = "[class*='action'] > div:not([data-testid])";
+const NEXTCLADE_TREE_BUTTON = "[class*='action'] > div:not([data-testid]) button";
 const NEXTCLADE_OPTIONS = "[class*='treeTypeContainer'] [class*='name']";
+const UPLOAD_A_TREE_INPUT = "[class*='treeTypeContainer'] input[accept='.json']";
 const VIEW_QC_IN_NEXTCLADE = "//button[text()='View QC in Nextclade']";
 const NEXTCLADE_CONFIRM_BUTTON = "//button[text()='Confirm']";
 const DOWNLOAD_BUTTON_TESTID = "download-icon";
@@ -252,6 +253,10 @@ export class ProjectPage extends PageObject {
   // #endregion Api
 
   // #region bool
+  public async isNextcladeTreeButtonDisabled() {
+    return this.page.locator(NEXTCLADE_TREE_BUTTON).isDisabled();
+  }
+
   public async isAnnotationFilterDisabled() {
     return this.page.locator(ANNOTATION_FILTER).isDisabled();
   }
@@ -467,6 +472,10 @@ export class ProjectPage extends PageObject {
     await this.page.locator(NEXTCLADE_OPTIONS).getByText("Nextclade Default Tree").click();
   }
 
+  public async clickUploadATree() {
+    await this.page.locator(NEXTCLADE_OPTIONS).getByText("Upload a Tree").click();
+  }
+
   public async clickViewQCInNextcladeButton() {
     await this.page.locator(VIEW_QC_IN_NEXTCLADE).click();
   }
@@ -637,6 +646,10 @@ export class ProjectPage extends PageObject {
     return projectsTableOrderByName;
   }
   // #endregion Get
+
+  public async setUploadTreeInput(filePath: string) {
+    await this.page.setInputFiles(UPLOAD_A_TREE_INPUT, filePath);
+  }
 
   // #region Macro
   public async gotToDownloads() {

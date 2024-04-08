@@ -23,10 +23,23 @@ const WETLAB_PROTOCOL = "Wetlab Protocol";
 const MEDAKA_MODEL = "Medaka Model";
 const PLUS_COLUMNS = ["Sequencing Platform", WETLAB_PROTOCOL, MEDAKA_MODEL];
 
-const WET_LABS = ["ARTIC v4/ARTIC v4.1", "ARTIC v5.3.2", "ARTIC v3",
+const ARTIC_V4_1 = "ARTIC v4/ARTIC v4.1";
+const ARTIC_V5_3_2 = "ARTIC v5.3.2";
+const ILLUMINA_WET_LABS = [ARTIC_V4_1, ARTIC_V5_3_2, "ARTIC v3",
 "ARTIC v3 - Short Amplicons (275 bp)", "MSSPE", "Combined MSSPE & ARTIC v3",
 "SNAP", "AmpliSeq", "COVIDseq",
 "VarSkip", "Midnight", "Easyseq"];
+const NANOPORE_WET_LABS = ["ARTIC v3", "Midnight", ARTIC_V4_1, "VarSkip", ARTIC_V5_3_2];
+const MEDAKA_MODELS = [
+  "r941_prom_high_g330", "r103_prom_snp_g3210", "r941_prom_high_g303",
+  "r941_prom_snp_g303", "r941_prom_snp_g360", "r941_prom_variant_g322",
+  "r941_prom_variant_g360", "r941_min_high_g303", "r941_prom_high_g360",
+  "r941_prom_fast_g303", "r941_prom_high_g344", "r941_min_high_g340_rle",
+  "r103_prom_high_g360", "r941_min_high_g344", "r941_min_high_g351",
+  "r103_prom_variant_g3210", "r941_prom_high_g4011", "r941_prom_snp_g322",
+  "r941_prom_variant_g303", "r941_min_fast_g303", "r941_min_high_g330",
+  "r941_min_high_g360",
+];
 
 let TEST_TIMEOUT = 60 * 1000 * 5;
 
@@ -38,7 +51,7 @@ test.describe("Sample upload (web): Functional: P-0", () => {
 
   // AUTOMATION COMMENT:
   // We need to run this Illumina TC with different Wetlab Protocol:
-  for (const wetLab of WET_LABS) {
+  for (const wetLab of ILLUMINA_WET_LABS) {
 
     /*
     Sample upload (web) - SC2  Illumina
@@ -177,9 +190,9 @@ test.describe("Sample upload (web): Functional: P-0", () => {
         expectedWetlab = "Combined MSSPE ARTIC";
       } else if (wetLab === "ARTIC v3 - Short Amplicons (275 bp)") {
         expectedWetlab = "ARTIC Short Amplicons";
-      } else if (wetLab === "ARTIC v4/ARTIC v4.1") {
+      } else if (wetLab === ARTIC_V4_1) {
         expectedWetlab = "ARTIC v4";
-      } else if (wetLab === "ARTIC v5.3.2") {
+      } else if (wetLab === ARTIC_V5_3_2) {
         expectedWetlab = "ARTIC v5";
       }
       for (const sampleName of sampleNames) {
@@ -381,8 +394,13 @@ test.describe("Sample upload (web): Functional: P-0", () => {
 
     // #region 6. Select Wetlab Protocol "Midnight" option
     // - Wetlab Protocol defaulted to ""ARTIC v3""
-    const wetlabProtocolDefault = await uploadPage.getWetLabFilterValue();
-    expect(wetlabProtocolDefault).toEqual("ARTIC v3");
+    const nanoporeTechnologyDescriptio = await uploadPage.getNanoporeTechnologyDescription();
+    expect(nanoporeTechnologyDescriptio).toEqual(
+      "We are using the ARTIC network’s nCoV-2019 novel coronavirus bioinformatics protocol for nanopore sequencing, which can be found here.");
+
+    // We want to verify that Medaka Model choices appear, as well as wetlab protocol
+    const wetlabOptions = await uploadPage.getWetlabOptions();
+    expect(wetlabOptions.sort()).toEqual(NANOPORE_WET_LABS.sort());
 
     const wetLab = "Midnight";
     await uploadPage.setWetLabFilter(wetLab);
@@ -392,6 +410,10 @@ test.describe("Sample upload (web): Functional: P-0", () => {
     // - Medaka Model defaulted to ""r941_min_high_g360""
     const medakaModelDefault = await uploadPage.getMedakaModelFilterValue();
     expect(medakaModelDefault).toEqual("r941_min_high_g360");
+
+    // We want to verify that Medaka Model choices appear, as well as wetlab protocol
+    const medakaModelFilterOptions = await uploadPage.getMedakaModelFilterOptions();
+    expect(medakaModelFilterOptions.sort()).toEqual(MEDAKA_MODELS.sort());
 
     const medakaModel = "r941_prom_high_g330";
     await uploadPage.setMedakaModelFilter(medakaModel);

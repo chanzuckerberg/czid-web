@@ -69,6 +69,9 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v4/ARTIC v4.1"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab ARTIC v5.3.2"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/sc2/sample-upload.spec.ts']
@@ -77,6 +80,9 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v5.3.2"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab ARTIC v3"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/sc2/sample-upload.spec.ts']
@@ -85,6 +91,9 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v3$"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab ARTIC v3 - Short Amplicons"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/sc2/sample-upload.spec.ts']
@@ -93,6 +102,9 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v3 - Short Amplicons"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab MSSPE"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/sc2/sample-upload.spec.ts']
@@ -101,6 +113,9 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab MSSPE"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab Combined MSSPE & ARTIC v3"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/sc2/sample-upload.spec.ts']
@@ -109,6 +124,9 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab Combined MSSPE & ARTIC v3"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Sample upload (web) with wetlab SNAP"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/sc2/sample-upload.spec.ts']
