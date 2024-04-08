@@ -286,77 +286,37 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 5. Select Sample Metadata radio button
 
     // #region 6. Click Start Generating Download button
-    const downloadId = await projectPage.clickStartGeneratingDownloadButton();
+    const download = await projectPage.clickDownloadButtonForImmediateDownload();
     // #endregion 6. Click Start Generating Download button
 
-    // #region 7. Go to Downloads section (User menu)
-    const downloadsPage = await projectPage.clickDownloadsLink();
-    // #endregion 7. Go to Downloads section (User menu)
-
-    // #region 8. Observe Download list latest record details
-    // - Download file status as COMPLETE
-    await downloadsPage.waitForDownloadComplete(downloadId, timeout);
-    // #endregion 8. Observe Download list latest record details
-
-    // #region 9. Click on Download File link and save the file (.tar.gz)
+    // #region 7. Verify that the download completes immediately
     // - DOWNLOAD FILE link works (file downloaded)
-    const download = await downloadsPage.clickDownloadFile(downloadId);
     const downloadPath = await download.path();
 
-    // - ""Sample Metadata"" name displayed
-    const downloadName = await downloadsPage.getDownloadName(downloadId);
-    expect(downloadName).toEqual("Sample Metadata");
-
-    // - Download Date / Count is correct
-    const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format(DATE_FORMAT);
-    expect(downloadDate).toEqual(today);
-    const downloadCount = await downloadsPage.getDownloadCount(downloadId);
-    expect(downloadCount).toEqual(oneOrMoreSamples.toString());
-
-    // - Download details displayed correctly
-    await downloadsPage.clickDownloadDetails(downloadId);
-    await downloadsPage.clickSamplesInDownloadDropdown();
-    let samplesInDownload = await downloadsPage.getSamplesInDownloadNames();
-    samplesInDownload = samplesInDownload.sort();
-    expect(samplesInDownload).toEqual(selectedSamples);
-
-    // - (.tar.gz)  file contains Sample(s) selected
+    // - sample_metadata.csv file contains Sample(s) selected
     const downloadFileName = download.suggestedFilename();
-    expect(downloadFileName).toMatch(/\.tar\.gz$/);
+    expect(downloadFileName).toEqual("sample_metadata.csv");
 
-    const downloadDirectory = path.dirname(downloadPath);
-    const extractPath = path.join(downloadDirectory, `SNo14_${Date.now()}`);
-    await fs.mkdir(extractPath, {recursive: true});
-    await tar.x({
-      file: downloadPath,
-      cwd: extractPath,
-    });
-    const extractedContents = await fs.readdir(extractPath);
+    const fileContent = await fs.readFile(downloadPath, {encoding: "utf-8"});
 
-    for (const contents of extractedContents) {
-      const extractedFile = path.join(extractPath, contents);
-      const fileContent = await fs.readFile(extractedFile, {encoding: "utf-8"});
+    let lines = fileContent.split(/\r?\n/);
 
-      let lines = fileContent.split(/\r?\n/);
+    const fistHeader = lines.shift().split(",")[0];
+    expect(fistHeader).toEqual("sample_name");
 
-      const fistHeader = lines.shift().split(",")[0];
-      expect(fistHeader).toEqual("sample_name");
-
-      const lastLine = lines[lines.length-1];
-      if (lastLine.trim() === "") {
-        lines.pop(); // Remove the last empty line
-      }
-
-      const samplesInDownload = [];
-      lines = lines.sort();
-      for (const i in lines) {
-        const sampleName = lines[i].split(",")[0];
-        samplesInDownload.push(sampleName);
-      }
-      expect(samplesInDownload).toEqual(selectedSamples);
+    const lastLine = lines[lines.length-1];
+    if (lastLine.trim() === "") {
+      lines.pop(); // Remove the last empty line
     }
-    // #endregion 9. Click on Download File link and save the file (.tar.gz)
+
+    const samplesInDownload = [];
+    lines = lines.sort();
+    for (const i in lines) {
+      const sampleName = lines[i].split(",")[0];
+      samplesInDownload.push(sampleName);
+    }
+    expect(samplesInDownload).toEqual(selectedSamples);
+    // #endregion 7. Verify that the download completes immediately
   });
 
   test("SNo 15: Consensus Genome Overview (.csv)", async ({ page }) => {
