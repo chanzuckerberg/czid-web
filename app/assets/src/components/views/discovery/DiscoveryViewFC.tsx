@@ -345,7 +345,13 @@ async function queryWorkflowRuns(
   let collectionIdInput:
     | queryInput_fedWorkflowRuns_input_where_collectionId_Input
     | undefined;
-  if (projectId != null) {
+  if (projectId != null && projectIds !== undefined) {
+    collectionIdInput = {
+      _in: projectIds.includes(parseInt(projectId))
+        ? [parseInt(projectId)]
+        : [],
+    };
+  } else if (projectId != null) {
     collectionIdInput = { _in: [parseInt(projectId)] };
   } else if (projectIds !== undefined) {
     collectionIdInput = { _in: projectIds };
@@ -378,7 +384,7 @@ async function queryWorkflowRuns(
     ), // TODO: Delete old non-Array orderBy
     todoRemove: {
       domain: props.domain,
-      projectId: projectId?.toString(),
+      projectId,
       search,
       host: filters?.host,
       locationV2: filters?.locationV2,
@@ -446,7 +452,7 @@ async function queryWorkflowRuns(
         : undefined,
       todoRemove: {
         domain: props.domain,
-        projectId: projectId?.toString(),
+        projectId,
         search,
         host: filters?.host,
         locationV2: filters?.locationV2,
@@ -480,7 +486,7 @@ async function queryWorkflowRuns(
       ),
       todoRemove: {
         domain: props.domain,
-        projectId: projectId?.toString(),
+        projectId,
         search,
         host: filters?.host,
         locationV2: filters?.locationV2,
