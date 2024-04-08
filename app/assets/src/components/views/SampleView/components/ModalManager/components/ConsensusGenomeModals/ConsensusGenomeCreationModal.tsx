@@ -10,7 +10,7 @@ import { VIRAL_CONSENSUS_GENOME_DOC_LINK } from "~/components/utils/documentatio
 import { logError } from "~/components/utils/logUtil";
 import { WorkflowType } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
-import Sample, { WorkflowRun } from "~/interface/sample";
+import Sample from "~/interface/sample";
 import { ConsensusGenomeParams, ModalsVisible } from "~/interface/sampleView";
 import { ConsensusGenomeData } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -63,10 +63,7 @@ interface ConsensusGenomeCreationModalProps {
   open?: boolean;
   onClose: () => void;
   sample: Sample;
-  handleConsensusGenomeKickoff: (
-    workflowRuns: WorkflowRun[],
-    sample: Sample,
-  ) => Promise<void>;
+  handleConsensusGenomeKickoff: (sample: Sample) => Promise<void>;
   modalsVisible: ModalsVisible;
 }
 
@@ -108,8 +105,8 @@ export const ConsensusGenomeCreationModal = ({
             authenticityToken: getCsrfToken(),
           },
         },
-        onCompleted(workflowRuns: { KickoffWGSWorkflow: WorkflowRun[] }) {
-          handleConsensusGenomeKickoff(workflowRuns.KickoffWGSWorkflow, sample);
+        onCompleted() {
+          handleConsensusGenomeKickoff(sample);
         },
         onError(error) {
           console.error(error);

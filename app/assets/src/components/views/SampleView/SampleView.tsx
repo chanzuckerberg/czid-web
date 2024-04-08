@@ -19,9 +19,9 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useLazyLoadQuery } from "react-relay";
+import { useLazyLoadQuery, useRelayEnvironment } from "react-relay";
 import { toast } from "react-toastify";
-import { graphql } from "relay-runtime";
+import { fetchQuery, graphql } from "relay-runtime";
 import {
   getBackgrounds,
   getCoverageVizSummary,
@@ -58,6 +58,7 @@ import {
   COVERAGE_VIZ_FEATURE,
   isPipelineFeatureAvailable,
 } from "~/components/utils/pipeline_versions";
+import { isNotNullish } from "~/components/utils/typeUtils";
 import {
   getWorkflowTypeFromLabel,
   isMngsWorkflow,
@@ -217,6 +218,7 @@ const SampleViewComponent = ({
   const trackEvent = useRef<TrackEventType | null>(null);
   trackEvent.current = useTrackEvent();
   const { allowedFeatures } = useContext(UserContext) || {};
+  const environment = useRelayEnvironment();
 
   const {
     pipelineVersionFromUrl,
@@ -1041,22 +1043,34 @@ const SampleViewComponent = ({
     }
   };
 
-  const handleConsensusGenomeKickoff = async (
-    workflowRuns: WorkflowRun[],
-    sample: Sample,
-  ) => {
-    setSample({
-      ...sample,
-      workflow_runs: workflowRuns,
-    });
+  const handleConsensusGenomeKickoff = async (sample: Sample) => {
     // Close both modals in case they came via the previous runs modal + error modal
     handleModalAction([
       ["close", "consensusGenomeCreation"],
       ["close", "consensusGenomePrevious"],
       ["close", "consensusGenomeError"],
     ]);
-    showNotification(NOTIFICATION_TYPES.consensusGenomeCreated, {
-      handleTabChange: () => setCurrentTab(WORKFLOW_TABS.CONSENSUS_GENOME),
+    fetchQuery<SampleViewSampleQuery>(environment, SampleQuery, {
+      railsSampleId: sampleId?.toString(),
+      snapshotLinkId: snapshotShareId,
+    }).subscribe({
+      next: response => {
+        const updatedSample = response.SampleForReport as unknown as Sample;
+        if (!updatedSample || !updatedSample.workflow_runs) {
+          console.error("Error fetching updated sample", response);
+          return;
+        }
+        setSample({
+          ...sample,
+          workflow_runs: updatedSample.workflow_runs.filter(isNotNullish),
+        });
+        showNotification(NOTIFICATION_TYPES.consensusGenomeCreated, {
+          handleTabChange: () => setCurrentTab(WORKFLOW_TABS.CONSENSUS_GENOME),
+        });
+      },
+      error: error => {
+        console.error("Error fetching updated sample", error);
+      },
     });
   };
 

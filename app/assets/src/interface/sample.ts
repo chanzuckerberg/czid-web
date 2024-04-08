@@ -70,7 +70,7 @@ export default interface Sample {
   created_at: DateString;
   updated_at: DateString;
   default_background_id: number;
-  default_pipeline_run_id: number;
+  default_pipeline_run_id: string;
   editable: boolean;
   initial_workflow: WorkflowType;
   upload_error: string;

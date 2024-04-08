@@ -30,10 +30,7 @@ interface ModalManagerProps {
   }) => void;
   modalsVisible: ModalsVisible;
   sample: Sample;
-  handleConsensusGenomeKickoff: (
-    workflowRuns: WorkflowRun[],
-    sample: Sample,
-  ) => Promise<void>;
+  handleConsensusGenomeKickoff: (sample: Sample) => Promise<void>;
 }
 
 export const ModalManager = ({
