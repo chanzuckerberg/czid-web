@@ -345,7 +345,6 @@ describe WorkflowRun, type: :model do
 
     it "retrieves output metrics and updates the record column" do
       expect_any_instance_of(ConsensusGenomeWorkflowRun).to receive(:results).with(cacheable_only: true).and_return(@mock_result)
-      expect(ConsensusGenomeCoverageService).to receive(:call).with(workflow_run: workflow_run, cacheable_only: false).and_return({ coverage_depth: 900, coverage_breadth: 0.9 })
 
       expect(subject).to eq(true)
       expect(workflow_run.cached_results).to eq(@mock_result.to_json)

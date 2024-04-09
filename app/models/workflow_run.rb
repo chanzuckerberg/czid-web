@@ -480,15 +480,6 @@ class WorkflowRun < ApplicationRecord
     begin
       results = workflow_by_class.results(cacheable_only: true)
       update(cached_results: results.to_json)
-      # TODO: Remove this once data migration to NextGen is complete.
-      # The temp_cg_coverage_viz field is used to store the coverage viz data for ConsensusGenomeWorkflowRuns.
-      # It is not used by any part of the application and is only used for data migration purposes.
-      if workflow_by_class.class == ConsensusGenomeWorkflowRun
-        metrics = ConsensusGenomeCoverageService.call(workflow_run: self, cacheable_only: false)
-        update!(temp_cg_coverage_viz: metrics) if metrics.present?
-      end
-    rescue ConsensusGenomeCoverageService::NoDepthDataError
-      update!(temp_cg_coverage_viz: {})
     rescue ArgumentError
       raise NotImplementedError("Check that results support cacheable_only")
     rescue StandardError => exception
