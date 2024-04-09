@@ -1645,6 +1645,22 @@ type MultipartUploadResponse {
 }
 
 type Mutation {
+  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
+  createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
+  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  createWorkflow(input: WorkflowCreateInput!): Workflow!
+  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
+  deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
+  createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
+  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
+  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
+  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
+  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
+  createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
+  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
+  runWorkflowVersion(input: RunWorkflowVersionInput!, executionId: String = null): WorkflowRun!
+  runWorkflowRun(workflowRunId: ID!, executionId: String = null): WorkflowRun!
   createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
   uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
   uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
@@ -1690,22 +1706,6 @@ type Mutation {
   updateBulkDownload(input: BulkDownloadUpdateInput!, where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
   deleteBulkDownload(where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
   deleteOldBulkDownloads: [BulkDownload!]!
-  createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
-  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
-  deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
-  createWorkflow(input: WorkflowCreateInput!): Workflow!
-  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
-  deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
-  createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
-  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
-  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
-  createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
-  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
-  runWorkflowVersion(input: RunWorkflowVersionInput!, executionId: String = null): WorkflowRun!
-  runWorkflowRun(workflowRunId: ID!, executionId: String = null): WorkflowRun!
-  createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
   CreateBulkDownload(input: mutationInput_CreateBulkDownload_input_Input): JSON
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
   UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleNotes
@@ -1926,6 +1926,13 @@ type Project {
 }
 
 type Query {
+  appConfig(id: ID!): AppConfig
+  pathogenList(version: String): PathogenList!
+  project(id: Int!): Project!
+  sample(sampleId: Int!): Sample!
+  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
+  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
+  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   node(
     """The ID of the object."""
     id: GlobalID!
@@ -1934,6 +1941,16 @@ type Query {
     """The IDs of the objects."""
     ids: [GlobalID!]!
   ): [Node!]!
+  workflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRun!]!
+  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Workflow!]!
+  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunStep!]!
+  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunEntityInput!]!
+  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowVersion!]!
+  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
+  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
+  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
+  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
+  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
   files(where: FileWhereClause = null): [File!]!
   samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Sample!]!
   sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [SequencingRead!]!
@@ -1961,23 +1978,6 @@ type Query {
   upstreamDatabasesAggregate(where: UpstreamDatabaseWhereClause = null): UpstreamDatabaseAggregate!
   indexFilesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate!
   bulkDownloadsAggregate(where: BulkDownloadWhereClause = null): BulkDownloadAggregate!
-  workflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRun!]!
-  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Workflow!]!
-  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunStep!]!
-  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunEntityInput!]!
-  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowVersion!]!
-  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
-  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
-  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
-  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
-  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
-  appConfig(id: ID!): AppConfig
-  pathogenList(version: String): PathogenList!
-  project(id: Int!): Project!
-  sample(sampleId: Int!): Sample!
-  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
-  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
-  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   AmrDeprecatedResults(sampleId: String): AmrDeprecatedResults
   AmrWorkflowResults(workflowRunId: String): AmrWorkflowResults
   Background(snapshotLinkId: String): Background
@@ -3447,7 +3447,7 @@ input ReferenceGenomeWhereClauseMutations {
 }
 
 input RunWorkflowVersionInput {
-  collectionId: Int!
+  collectionId: Int = null
   workflowVersionId: ID!
   entityInputs: [EntityInputType!]
   rawInputJson: String
@@ -3455,11 +3455,48 @@ input RunWorkflowVersionInput {
 }
 
 type Sample implements EntityInterface & Node {
+  alignmentConfigName: String
+  basespaceAccessToken: String
+  createdAt: DateTime!
+  dagVars: String
+  defaultBackgroundId: Int
+  defaultPipelineRunId: Int
+  details: SampleDetails!
+  doNotProcess: Boolean!
+  editable: Boolean
+  hostGenome: HostGenome
+  hostGenomeId: Int
+  id: ID!
+  initialWorkflow: String!
+  maxInputFragments: Int
+  name: String!
+  pipelineBranch: String
+  pipelineCommit: String
+  pipelineExecutionStrategy: String
+  pipelineRuns: [PipelineRun!]
+  privateUntil: ISO8601DateTime
+  project: Project
+  projectId: Int
+  public: Int!
+  s3Bowtie2IndexPath: String
+  s3PreloadResultPath: String
+  s3StarIndexPath: String
+  sampleDeletable: Boolean
+  sampleNotes: String
+  status: String
+  subsample: Int
+  updatedAt: DateTime
+  uploadError: String
+  uploadedFromBasespace: Int
+  useTaxonWhitelist: Boolean!
+  user: User
+  userId: Int
+  webCommit: String
+  workflowRuns: [WorkflowRun!]
+
   """The Globally Unique ID of this object"""
   _id: GlobalID!
-  id: ID!
   railsSampleId: Int
-  name: String!
   hostOrganism(where: HostOrganismWhereClause = null, orderBy: [HostOrganismOrderByClause!] = []): HostOrganism
   sequencingReads(
     where: SequencingReadWhereClause = null
@@ -3498,43 +3535,7 @@ type Sample implements EntityInterface & Node {
   producingRunId: ID
   ownerUserId: Int!
   collectionId: Int
-  createdAt: ISO8601DateTime
-  updatedAt: ISO8601DateTime
   deletedAt: DateTime
-  alignmentConfigName: String
-  basespaceAccessToken: String
-  dagVars: String
-  defaultBackgroundId: Int
-  defaultPipelineRunId: Int
-  details: SampleDetails!
-  doNotProcess: Boolean!
-  editable: Boolean
-  hostGenome: HostGenome
-  hostGenomeId: Int
-  initialWorkflow: String!
-  maxInputFragments: Int
-  pipelineBranch: String
-  pipelineCommit: String
-  pipelineExecutionStrategy: String
-  pipelineRuns: [PipelineRun!]
-  privateUntil: ISO8601DateTime
-  project: Project
-  projectId: Int
-  public: Int!
-  s3Bowtie2IndexPath: String
-  s3PreloadResultPath: String
-  s3StarIndexPath: String
-  sampleDeletable: Boolean
-  sampleNotes: String
-  status: String
-  subsample: Int
-  uploadError: String
-  uploadedFromBasespace: Int
-  useTaxonWhitelist: Boolean!
-  user: User
-  userId: Int
-  webCommit: String
-  workflowRuns: [WorkflowRun!]
 }
 
 type SampleAggregate {
@@ -4519,7 +4520,7 @@ type Workflow implements EntityInterface & Node {
   ): WorkflowVersionConnection!
   versionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -4557,7 +4558,7 @@ input WorkflowCreateInput {
   name: String = null
   defaultVersion: String = null
   minimumSupportedVersion: String = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -4602,6 +4603,23 @@ input WorkflowOrderByClause {
 }
 
 type WorkflowRun implements EntityInterface & Node {
+  cachedResults: String
+  createdAt: DateTime!
+  deprecated: Boolean!
+  errorMessage: String
+  executedAt: ISO8601DateTime
+  inputsJson: String
+  rerunFrom: Int
+  s3OutputPrefix: String
+  sample: Sample
+  sampleId: Int
+  sfnExecutionArn: String
+  status: WorkflowRunStatus
+  timeToFinalized: Int
+  updatedAt: DateTime
+  wdlVersion: String
+  workflow: String!
+
   """The Globally Unique ID of this object"""
   _id: GlobalID!
   id: ID!
@@ -4611,8 +4629,6 @@ type WorkflowRun implements EntityInterface & Node {
   executionId: String
   outputsJson: String
   workflowRunnerInputsJson: String
-  status: String!
-  errorMessage: String
   workflowVersion(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = []): WorkflowVersion
   steps(
     where: WorkflowRunStepWhereClause = null
@@ -4650,22 +4666,8 @@ type WorkflowRun implements EntityInterface & Node {
   entityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate
   rawInputsJson: String
   ownerUserId: Int!
-  collectionId: Int!
-  createdAt: ISO8601DateTime!
-  updatedAt: ISO8601DateTime!
+  collectionId: Int
   deletedAt: DateTime
-  cachedResults: String
-  deprecated: Boolean!
-  executedAt: ISO8601DateTime
-  inputsJson: String
-  rerunFrom: Int
-  s3OutputPrefix: String
-  sample: Sample
-  sampleId: Int
-  sfnExecutionArn: String
-  timeToFinalized: Int
-  wdlVersion: String
-  workflow: String!
 }
 
 type WorkflowRunAggregate {
@@ -4732,7 +4734,7 @@ type WorkflowRunEntityInput implements EntityInterface & Node {
   entityType: String
   workflowRun(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = []): WorkflowRun
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -4780,7 +4782,7 @@ input WorkflowRunEntityInputCreateInput {
   fieldName: String = null
   entityType: String = null
   workflowRunId: ID = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -4946,7 +4948,7 @@ type WorkflowRunStep implements EntityInterface & Node {
   endedAt: DateTime
   status: WorkflowRunStepStatus
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -4993,7 +4995,7 @@ input WorkflowRunStepCreateInput {
   workflowRunId: ID = null
   endedAt: DateTime = null
   status: WorkflowRunStepStatus = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
@@ -5160,7 +5162,7 @@ type WorkflowVersion implements EntityInterface & Node {
   ): WorkflowRunConnection!
   runsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate
   ownerUserId: Int!
-  collectionId: Int!
+  collectionId: Int
   createdAt: DateTime!
   updatedAt: DateTime
   deletedAt: DateTime
@@ -5213,7 +5215,7 @@ input WorkflowVersionCreateInput {
   manifest: String = null
   workflowId: ID = null
   deprecated: Boolean = null
-  collectionId: Int!
+  collectionId: Int = null
   deletedAt: DateTime = null
 }
 
