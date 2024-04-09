@@ -3,6 +3,7 @@ import { PageObject } from "./page-object";
 
 import { ProjectPage } from "./project-page";
 
+const SAMPLE_METADATA = "Sample Metadata";
 const SAMPLES_IN_DOWNLOAD_DROPDOWN = "//div[text()='Samples in this Download']";
 const SAMPLES_IN_DOWNLOAD_NAMES = "[class*='samplesList'] [class*='sampleName']";
 const CLOSE_ICON = "[class*='closeIcon']";
@@ -226,10 +227,10 @@ export class DownloadsPage extends PageObject {
       await projectPage.clickIncludeSampleMetadata();
     }
 
-    if (downloadType.includes("Consensus Genome Overview") ){
+    if (downloadType.includes("Consensus Genome Overview") || (downloadType === SAMPLE_METADATA) ){
       // Verify that the download completes immediately
       expectedFileExtention = "csv";
-      const fileName = "consensus_genome_overview";
+      const fileName = downloadType === SAMPLE_METADATA ? "sample_metadata" : "consensus_genome_overview";
       const download = await projectPage.clickDownloadButtonForImmediateDownload();
       expect(`${fileName}.${expectedFileExtention}`).toMatch(download.suggestedFilename());
       return;
