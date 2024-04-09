@@ -54,7 +54,7 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     const consensusGenomesCountBefore = await projectPage.getConsensusGenomesCount();
     // #endregion 4. Select WGS samples - ""no_host_1"", ""no_host_2"", ""wgs_SARS_CoV2_no_host""
 
-    // #region 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Sample Metadata, Intermediate Output Files
+    // #region 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Intermediate Output Files
     await projectPage.clickDownloadButton();
     await projectPage.clickDownloadType("Consensus Genome");
     await projectPage.clickFilterDropdown();
@@ -63,14 +63,9 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     await projectPage.clickDismissButton();
 
     await projectPage.clickDownloadButton();
-    await projectPage.clickDownloadType("Sample Metadata");
-    const sampleMetadataDownloadId = await projectPage.clickStartGeneratingDownloadButton();
-    await projectPage.clickDismissButton();
-
-    await projectPage.clickDownloadButton();
     await projectPage.clickDownloadType("Intermediate Output Files");
     const intermediateOutputFilesDownloadId = await projectPage.clickStartGeneratingDownloadButton();
-    // #endregion 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Sample Metadata, Intermediate Output Files
+    // #endregion 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Intermediate Output Files
 
     // #region 6. Go to Download main user menu
     let downloadsPage = await projectPage.gotToDownloads();
@@ -79,7 +74,6 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 7. Verify created Bulk Downloads complete
     // Bulk Download files created with samples selected
     await downloadsPage.waitForDownloadComplete(consensusGenomeDownloadId);
-    await downloadsPage.waitForDownloadComplete(sampleMetadataDownloadId);
     await downloadsPage.waitForDownloadComplete(intermediateOutputFilesDownloadId);
     // #endregion 7. Verify created Bulk Downloads complete
 
@@ -104,7 +98,6 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 12. Verify Bulk Download files created in step 5 are removed
     // Bulk download file records removed when a sample is deleted
     expect(await downloadsPage.isDownloadVisible(consensusGenomeDownloadId)).toBeFalsy();
-    expect(await downloadsPage.isDownloadVisible(sampleMetadataDownloadId)).toBeFalsy();
     expect(await downloadsPage.isDownloadVisible(intermediateOutputFilesDownloadId)).toBeFalsy();
     // #endregion 12. Verify Bulk Download files created in step 5 are removed
 
@@ -166,7 +159,7 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     const consensusGenomesCountBefore = await projectPage.getConsensusGenomesCount();
     // #endregion 4. Select WGS samples - ""no_host_1"", ""no_host_2"", ""wgs_SARS_CoV2_no_host""
 
-    // #region 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Sample Metadata, Intermediate Output Files
+    // #region 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Intermediate Output Files
     await projectPage.clickDownloadButton();
     await projectPage.clickDownloadType("Consensus Genome");
     await projectPage.clickFilterDropdown();
@@ -175,14 +168,9 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     await projectPage.clickDismissButton();
 
     await projectPage.clickDownloadButton();
-    await projectPage.clickDownloadType("Sample Metadata");
-    const sampleMetadataDownloadId = await projectPage.clickStartGeneratingDownloadButton();
-    await projectPage.clickDismissButton();
-
-    await projectPage.clickDownloadButton();
     await projectPage.clickDownloadType("Intermediate Output Files");
     const intermediateOutputFilesDownloadId = await projectPage.clickStartGeneratingDownloadButton();
-    // #endregion 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Sample Metadata, Intermediate Output Files
+    // #endregion 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Intermediate Output Files
 
     // #region 6. Go to Download main user menu
     let downloadsPage = await projectPage.gotToDownloads();
@@ -191,7 +179,6 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 7. Verify created Bulk Downloads complete
     // Bulk Download files created with samples selected
     await downloadsPage.waitForDownloadComplete(consensusGenomeDownloadId);
-    await downloadsPage.waitForDownloadComplete(sampleMetadataDownloadId);
     await downloadsPage.waitForDownloadComplete(intermediateOutputFilesDownloadId);
     // #endregion 7. Verify created Bulk Downloads complete
 
@@ -220,7 +207,6 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 13. Verify Bulk Download files created in step 5 are removed
     // Bulk download file records removed when a sample is deleted
     expect(await downloadsPage.isDownloadVisible(consensusGenomeDownloadId)).toBeFalsy();
-    expect(await downloadsPage.isDownloadVisible(sampleMetadataDownloadId)).toBeFalsy();
     expect(await downloadsPage.isDownloadVisible(intermediateOutputFilesDownloadId)).toBeFalsy();
     // #endregion 13. Verify Bulk Download files created in step 5 are removed
 
