@@ -1354,8 +1354,8 @@ export class DiscoveryView extends React.Component<
       }
       case "project": {
         this.handleProjectSelected({
-          project: this.projects.get(value) ?? {
-            id: value,
+          project: this.projects.get(value.toString()) ?? {
+            id: value.toString(),
             editable: false,
             name: "",
           },
