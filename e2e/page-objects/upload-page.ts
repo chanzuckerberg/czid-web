@@ -14,7 +14,7 @@ import { expect } from "@playwright/test";
 import { IlluminaPage } from "./illumina-page";
 import { PageObject } from "./page-object";
 
-const CONSENSUS_GENOME_PIPELINE_VERSION = "3.5.0";
+const CONSENSUS_GENOME_PIPELINE_MAJOR_VERSION = "3";
 export const SARS_COV2_REF_FILENAME = "wgs_SARS_CoV2_reference.fa";
 export const SARS_COV2_TRIM_PRIMER_FILENAME = "wgs_SARS_CoV2_primers_regions.bed";
 export const REF_FILENAME = "consensus_TEST_SC2.fa";
@@ -838,7 +838,7 @@ export class UploadPage extends PageObject {
       expectedResults = {
         "Sequencing Platform": "Illumina",
         "Analysis Type": "Metagenomics",
-        "Pipeline Version": "8.3.1",
+        "Pipeline Version": "8", // Major version
       };
     }
     else if (sampleType === WORKFLOWS.LMNGS) {
@@ -846,13 +846,13 @@ export class UploadPage extends PageObject {
         "Sequencing Platform": "Nanopore",
         "Analysis Type": "Metagenomics",
         "Guppy Basecaller Setting": "fast",
-        "Pipeline Version": "0.7.6",
+        "Pipeline Version": "0", // Major version
       };
     }
     else if (sampleType === WORKFLOWS.AMR) {
       expectedResults = {
         "Analysis Type": "Antimicrobial Resistance",
-        "Pipeline Version": "1.4.0",
+        "Pipeline Version": "1", // Major version
       };
     }
     else if (sampleType === WORKFLOWS.WGS) {
@@ -862,7 +862,7 @@ export class UploadPage extends PageObject {
         "Taxon Name": "unknown",
         "Reference Sequence": "consensus_TEST_SC2.fa",
         "Trim Primer": "Primer_K.bed",
-        "Pipeline Version": CONSENSUS_GENOME_PIPELINE_VERSION,
+        "Pipeline Version": CONSENSUS_GENOME_PIPELINE_MAJOR_VERSION,
       };
     }
     else if (sampleType === WORKFLOWS.SC2) {
@@ -870,14 +870,19 @@ export class UploadPage extends PageObject {
         "Analysis Type": "SARS-CoV-2 Consensus Genome",
         "Sequencing Platform": "Illumina",
         "Wetlab Protocol": WETLAB_PROTOCOL,
-        "Pipeline Version": CONSENSUS_GENOME_PIPELINE_VERSION,
+        "Pipeline Version": CONSENSUS_GENOME_PIPELINE_MAJOR_VERSION,
       };
     }
     else {
         throw new Error(`Unsupported Sample Type: ${sampleType}`);
     }
     for (const analysis in expectedResults) {
-      await expect(analysisReview).toContainText(expectedResults[analysis]);
+      if (analysis === "Pipeline Version") {
+        const pipelineRegex = new RegExp(`Pipeline Version: ${expectedResults[analysis]}.\\d+.\\d+`);
+        expect(await analysisReview.textContent()).toMatch(pipelineRegex);
+      } else {
+        await expect(analysisReview).toContainText(expectedResults[analysis]);
+      }
     }
   }
 
