@@ -189,11 +189,7 @@ export const BulkDownloadModal = ({
         authenticityToken,
       },
       onCompleted: data => {
-        if (
-          data.CreateBulkDownload != null &&
-          data.CreateBulkDownload.data != null &&
-          data.CreateBulkDownload.errors.length === 0
-        ) {
+        if (data?.CreateBulkDownload?.data?.runWorkflowVersion?.id) {
           onGenerate();
         } else {
           console.error(data.CreateBulkDownload.errors);
