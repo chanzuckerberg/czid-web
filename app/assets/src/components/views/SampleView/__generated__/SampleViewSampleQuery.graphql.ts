@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<104ef39c8ab043624b50bb264c5f521c>>
+ * @generated SignedSource<<223c20100c170ebf7790f504443a2053>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,14 +15,14 @@ export type SampleViewSampleQuery$variables = {
 };
 export type SampleViewSampleQuery$data = {
   readonly SampleForReport: {
-    readonly created_at: string | null | undefined;
+    readonly created_at: string;
     readonly default_background_id: number | null | undefined;
     readonly default_pipeline_run_id: string | null | undefined;
-    readonly editable: boolean | null | undefined;
+    readonly editable: boolean;
     readonly host_genome_id: number | null | undefined;
-    readonly id: string | null | undefined;
-    readonly initial_workflow: string | null | undefined;
-    readonly name: string | null | undefined;
+    readonly id: string;
+    readonly initial_workflow: string;
+    readonly name: string;
     readonly pipeline_runs: ReadonlyArray<{
       readonly adjusted_remaining_reads: number | null | undefined;
       readonly alignment_config_name: string | null | undefined;
@@ -37,17 +37,17 @@ export type SampleViewSampleQuery$data = {
     readonly project: {
       readonly id: string | null | undefined;
       readonly name: string | null | undefined;
-    } | null | undefined;
-    readonly project_id: number | null | undefined;
+    };
+    readonly project_id: number;
     readonly railsSampleId: string | null | undefined;
-    readonly status: string | null | undefined;
-    readonly updated_at: string | null | undefined;
+    readonly status: string;
+    readonly updated_at: string;
     readonly upload_error: string | null | undefined;
-    readonly user_id: number | null | undefined;
+    readonly user_id: number;
     readonly workflow_runs: ReadonlyArray<{
       readonly deprecated: boolean | null | undefined;
-      readonly executed_at: string | null | undefined;
-      readonly id: string | null | undefined;
+      readonly executed_at: string;
+      readonly id: string;
       readonly input_error: string | null | undefined;
       readonly inputs: {
         readonly accession_id: string | null | undefined;
@@ -57,8 +57,8 @@ export type SampleViewSampleQuery$data = {
         readonly taxon_id: string | null | undefined;
         readonly taxon_name: string | null | undefined;
         readonly technology: string | null | undefined;
-      } | null | undefined;
-      readonly run_finalized: boolean | null | undefined;
+      };
+      readonly run_finalized: boolean;
       readonly status: string | null | undefined;
       readonly wdl_version: string | null | undefined;
       readonly workflow: string | null | undefined;

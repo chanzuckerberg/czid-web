@@ -1951,6 +1951,13 @@ type Query {
   workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
   workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
   workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
+  appConfig(id: ID!): AppConfig
+  pathogenList(version: String): PathogenList!
+  project(id: Int!): Project!
+  sample(sampleId: Int!): Sample!
+  sampleReadsStats(sampleIds: [String!]!): SampleReadsStatsList!
+  samplesList(annotations: [Annotation!], basic: Boolean, domain: String, hostIds: [Int!], limit: Int, listAllIds: Boolean, location: String, locationV2: [String!], offset: Int, orderBy: String, orderDir: String, projectId: Int, requestedSampleIds: [Int!], sampleIds: [Int!], searchString: String, taxIds: [Int!], taxLevels: [String!], thresholdFilterInfo: String, time: [String!], tissue: [String!], visibility: [String!], workflow: String): SampleList!
+  user(archetypes: String!, email: String!, institution: String!, name: String!, role: Int!, segments: String!): User!
   files(where: FileWhereClause = null): [File!]!
   samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Sample!]!
   sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [SequencingRead!]!
@@ -2105,7 +2112,7 @@ type query_fedBulkDownloads_items {
   downloadType: String
   fileFormat: String
   ownerUserId: Int
-  fileSize: Int
+  fileSize: JSON
   url: String
   analysisCount: Int
   errorMessage: String
@@ -2525,15 +2532,16 @@ type query_SampleForReport_project {
 }
 
 type query_SampleForReport_workflow_runs_items {
-  id: String
+  id: String!
   status: String
   workflow: String
   wdl_version: String
-  executed_at: String
+  executed_at: String!
   deprecated: Boolean
   input_error: String
-  inputs: query_SampleForReport_workflow_runs_items_inputs
-  run_finalized: Boolean
+  inputs: query_SampleForReport_workflow_runs_items_inputs!
+  run_finalized: Boolean!
+  rails_workflow_run_id: String
 }
 
 type query_SampleForReport_workflow_runs_items_inputs {
@@ -3605,21 +3613,21 @@ type SampleEdge {
 }
 
 type SampleForReport {
-  id: String
+  id: String!
   railsSampleId: String
-  name: String
-  created_at: String
-  updated_at: String
-  project_id: Int
-  status: String
+  name: String!
+  created_at: String!
+  updated_at: String!
+  project_id: Int!
+  status: String!
   host_genome_id: Int
-  user_id: Int
+  user_id: Int!
   upload_error: String
-  initial_workflow: String
-  project: query_SampleForReport_project
+  initial_workflow: String!
+  project: query_SampleForReport_project!
   default_background_id: Int
   default_pipeline_run_id: String
-  editable: Boolean
+  editable: Boolean!
   pipeline_runs: [query_SampleForReport_pipeline_runs_items]
   workflow_runs: [query_SampleForReport_workflow_runs_items]
 }

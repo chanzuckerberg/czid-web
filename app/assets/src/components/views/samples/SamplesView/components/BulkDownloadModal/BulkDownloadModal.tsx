@@ -191,11 +191,13 @@ export const BulkDownloadModal = ({
       onCompleted: data => {
         if (
           data.CreateBulkDownload != null &&
-          data.CreateBulkDownload.error == null
+          data.CreateBulkDownload.data != null &&
+          data.CreateBulkDownload.errors.length === 0
         ) {
           onGenerate();
         } else {
-          onCreateDownloadError(data.CreateBulkDownload.error);
+          console.error(data.CreateBulkDownload.errors);
+          onCreateDownloadError(DEFAULT_CREATION_ERROR);
         }
       },
       onError: error => {

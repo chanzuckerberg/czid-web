@@ -76,7 +76,10 @@ export class BulkDownloadTableRenderers extends React.Component {
 
       analysisTypeString = get(workflowLabelField, workflowObj);
     }
-
+    if (!analysisTypeString) {
+      console.error("No analysis type string found for bulk download type");
+      return null;
+    }
     return <div>{`${count} ${analysisTypeString}`}</div>;
   };
 

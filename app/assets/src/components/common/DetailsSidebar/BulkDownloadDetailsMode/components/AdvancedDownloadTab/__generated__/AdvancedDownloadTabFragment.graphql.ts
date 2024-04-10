@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c5de8fc2054c00b8d98b379ebcdf8d1e>>
+ * @generated SignedSource<<fe61eceb4e59a58c97bb3cd3412701cf>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,7 @@ import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type AdvancedDownloadTabFragment$data = ReadonlyArray<{
   readonly downloadType: string | null | undefined;
-  readonly fileSize: number | null | undefined;
+  readonly fileSize: any | null | undefined;
   readonly id: string | null | undefined;
   readonly params: ReadonlyArray<{
     readonly displayName: string | null | undefined;

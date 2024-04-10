@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<51f29686e32d5efd93ac5d41ed35982d>>
+ * @generated SignedSource<<33f7cf211e9b46a1056f5d3affce4763>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,7 +19,7 @@ export type BulkDownloadListQuery$data = {
     readonly entityInputs: ReadonlyArray<{
       readonly id: string | null | undefined;
     } | null | undefined> | null | undefined;
-    readonly fileSize: number | null | undefined;
+    readonly fileSize: any | null | undefined;
     readonly id: string | null | undefined;
     readonly ownerUserId: number | null | undefined;
     readonly startedAt: string | null | undefined;
