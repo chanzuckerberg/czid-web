@@ -302,4 +302,73 @@ test.describe("Validate consensus genomes between Rails & Nextgen are equivelant
       },
     );
   });
+
+  // This test queries the consensus genomes from Rails and NextGen and compares the metrics
+  // The above test is more comprehensive, but this one is more focused on metrics (includes coverage viz metrics)
+  test("consensus genomes metrics should be the same", async () => {
+    const fragment = `
+      metrics {
+        coverageBinSize
+        coverageBreadth
+        coverageDepth
+        coverageTotalLength
+        coverageViz
+        gcPercent
+        mappedReads
+        nActg
+        nAmbiguous
+        nMissing
+        percentIdentity
+        percentGenomeCalled
+        referenceGenomeLength
+        refSnps
+        totalReads
+      }
+    `;
+
+    for (const [railsWorkflowRunId, nextGenWorkflowRunId] of Object.entries(
+      railsIdToNextGenIdMap,
+    )) {
+      const testStepName = `Rails ID: ${railsWorkflowRunId}, NextGen ID: ${nextGenWorkflowRunId}`;
+
+      await test.step(
+        testStepName,
+        async () => {
+          const responseFromRails = await makeRequestToRailsGQL(`
+        query MyQuery {
+          fedConsensusGenomes(input: {where: {producingRunId: {_eq: "${railsWorkflowRunId}"}}}) {
+            ${fragment}
+          }
+        }
+      `);
+
+          const responseFromNextGen = await makeRequestToNextGenGQL(`
+        query MyQuery {
+          consensusGenomes(where: {producingRunId: {_eq: "${nextGenWorkflowRunId}"}}) {
+            id
+            ${fragment}
+          }
+        }
+      `);
+
+          expect(responseFromRails.data.fedConsensusGenomes).toHaveLength(
+            responseFromNextGen.data.consensusGenomes.length,
+          );
+
+          if (responseFromRails.data.fedConsensusGenomes.length > 0) {
+            const railsCg = responseFromRails.data.fedConsensusGenomes[0];
+            const nextGenCg = responseFromNextGen.data.consensusGenomes[0];
+
+            expect
+              .soft(
+                railsCg.metrics,
+                `metrics should be equal for ${testStepName}`,
+              )
+              .toEqual(nextGenCg.metrics);
+          }
+        },
+        { box: true },
+      );
+    }
+  });
 });
