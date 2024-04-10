@@ -8,18 +8,19 @@ type runOptions = {
   sampleTissueType?: string;
   taxon?: string;
   collectionLocation?: string;
+  includeTrimPrimer?: boolean;
   runPipeline?: boolean;
   waitForPipeline?: boolean;
   sequencingPlatform?: string;
 };
 
 export async function runPipelineIfNeeded(page: any, project: any, sampleFiles: Array<string>, sampleNames: Array<string>, workflow: string, runOptions?: runOptions) {
+    runOptions = runOptions || {};
     const samplesPage = new SamplesPage(page);
 
     let samples = [];
     let ranPipeline = false;
     samples = await samplesPage.getSamples(project.name, sampleNames);
-    runOptions = runOptions || {};
     if ((samples.length <= 0) || runOptions.runPipeline) {
       const uploadPage = new UploadPage(page);
 
@@ -35,8 +36,9 @@ export async function runPipelineIfNeeded(page: any, project: any, sampleFiles: 
           inputs[sampleName].sampleTissueType = runOptions.sampleTissueType;
         }
       }
+      const includeTrimPrimer = runOptions.includeTrimPrimer === undefined ? true : runOptions.includeTrimPrimer;
       inputs = await uploadPage.e2eCSVSampleUpload(
-        sampleFiles, project, workflow, inputs, true,
+        sampleFiles, project, workflow, inputs, includeTrimPrimer,
         runOptions.taxon ? runOptions.taxon : "Unknown",
         runOptions.sequencingPlatform ? runOptions.sequencingPlatform : SEQUENCING_PLATFORMS.MNGS,
       );

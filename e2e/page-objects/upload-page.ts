@@ -738,6 +738,8 @@ export class UploadPage extends PageObject {
     // Continue
     await this.clickContinue();
 
+    // Update the sample inputs using to the dynamically generated sample names
+    // ex sample_name_{number}
     const sampleNames = await this.getMetadataSampleNames();
     if (inputs === null) {
       inputs = await this.getRandomizedSampleInputs(sampleFiles, sampleNames);
@@ -746,7 +748,9 @@ export class UploadPage extends PageObject {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const newKey = sampleNames[i];
-        if (key !== newKey) {
+        if (!newKey) {
+          delete inputs[key];
+        } else if (key !== newKey) {
           inputs[newKey] = inputs[key];
           delete inputs[key];
         }

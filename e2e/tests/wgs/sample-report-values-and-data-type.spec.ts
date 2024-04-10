@@ -1,19 +1,15 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { UploadPage } from "@e2e/page-objects/upload-page";
+import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
-let project = null;
-let projectPage = null;
-
 // #region Expected data
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
-const NO_HOST_1 = "no_host_1";
-const NO_HOST_2 = "no_host_2";
-const WGS_SAMPLE_NAMES = [NO_HOST_1, NO_HOST_2];
-const PIPELINE_VERSION = "Consensus Genome Pipeline v3.4.18";
+const NO_HOST = "wgs_SARS_CoV2_no_host";
+const WGS_SAMPLE_NAMES = [NO_HOST];
+const PIPELINE_VERSION = "Consensus Genome Pipeline v3.5.0";
 const GC_CONTENT_LABEL = "GC Content";
 const INFORMATIVE_NUCLEOTIDES_LABEL = "Informative Nucleotides";
 const GENOME_CALLED_LABEL = "% Genome Called";
@@ -22,39 +18,22 @@ const AMBIGUOUS_BASES_LABEL = "Ambiguous Bases";
 const REFERENCE_ACCESSION_LENGTH_LABEL = "Reference Accession Length";
 const COVERAGE_DEPTH_LABEL = "Coverage Depth";
 const expectedData = {
-  "no_host_1": {
+  "wgs_SARS_CoV2_no_host": {
     "ConsensusGenomeData": [{
       Taxon: "",
-      "Mapped Reads": "545789",
+      "Mapped Reads": "108023",
       "GC Content": "37.9%",
       SNPs: "0",
       "%id": "100%",
-      "Informative Nucleotides": "29778",
-      "% Genome Called": "100%",
-      "Missing Bases": "13",
-      "Ambiguous Bases": "2",
-    }],
-    "PipelineVersion": PIPELINE_VERSION,
-    "ReferenceLength": "29793",
-    "CoverageDept": "2108.3x",
-    "CoverageBreadth": "100.0%",
-  },
-  "no_host_2": {
-    "ConsensusGenomeData": [{
-      Taxon: "",
-      "Mapped Reads": "547079",
-      "GC Content": "37.9%",
-      SNPs: "0",
-      "%id": "100%",
-      "Informative Nucleotides": "29779",
-      "% Genome Called": "100%",
-      "Missing Bases": "13",
+      "Informative Nucleotides": "29639",
+      "% Genome Called": "99.5%",
+      "Missing Bases": "127",
       "Ambiguous Bases": "1",
     }],
     "PipelineVersion": PIPELINE_VERSION,
-    "ReferenceLength": "29793",
-    "CoverageDept": "2121.9x",
-    "CoverageBreadth": "100.0%",
+    "ReferenceLength": "29790",
+    "CoverageDept": "420.4x",
+    "CoverageBreadth": "99.9%",
   },
 };
 const CHIKUNGUNYA_VIRUS_SPECIES = "Chikungunya virus (species)";
@@ -67,7 +46,16 @@ const CHIKUNGUNYA_VIRUS_SPECIES = "Chikungunya virus (species)";
 test.describe("Data Validation: P-0", () => {
 
   test("SNo 28: Data report validation (Human) JAN", async ({ page }) => {
-    await runPipelineIfNeeded(page, "Test_SNo_28", "Human", "Unknown");
+    const projectPage = new ProjectPage(page);
+    const project = await projectPage.getOrCreateProject("Test_SNo_28");
+    await runPipelineIfNeeded(
+      page,
+      project,
+      WGS_SAMPLE_FILES,
+      WGS_SAMPLE_NAMES,
+      WORKFLOWS.WGS,
+      {hostOrganism: "Human", taxon: "Unknown"},
+    );
 
     // #region 1. Login to CZ ID staging
     await projectPage.navigateToMyData();
@@ -148,7 +136,16 @@ test.describe("Data Validation: P-0", () => {
   });
 
   test("SNo 31: Sample report values displayed in project sample view list", async ({ page }) => {
-    await runPipelineIfNeeded(page, "Test_SNo_31", "Human", "Unknown");
+    const projectPage = new ProjectPage(page);
+    const project = await projectPage.getOrCreateProject("Test_SNo_31");
+    await runPipelineIfNeeded(
+      page,
+      project,
+      WGS_SAMPLE_FILES,
+      WGS_SAMPLE_NAMES,
+      WORKFLOWS.WGS,
+      {hostOrganism: "Human", taxon: "Unknown"},
+    );
 
     // #region 1. Login to CZ ID staging
     await projectPage.navigateToMyData();
@@ -184,27 +181,16 @@ test.describe("Data Validation: P-0", () => {
       samplesTableOrderByName[row["Sample"][0]] = row;
     }
     const expectedColumnData = {
-      "no_host_1": {
+      "wgs_SARS_CoV2_no_host": {
         "GC Content": "37.9%",
         "SNPs": "0",
         "%id": "100%",
-        "Informative Nucleotides": "29,778",
-        "% Genome Called": "100%",
-        "Missing Bases": "13",
-        "Ambiguous Bases": "2",
-        "Reference Accession Length": "29,790",
-        "Coverage Depth": "2108.27",
-      },
-      "no_host_2": {
-        "GC Content": "37.9%",
-        "SNPs": "0",
-        "%id": "100%",
-        "Informative Nucleotides": "29,779",
-        "% Genome Called": "100%",
-        "Missing Bases": "13",
+        "Informative Nucleotides": "29,639",
+        "% Genome Called": "99.5%",
+        "Missing Bases": "127",
         "Ambiguous Bases": "1",
         "Reference Accession Length": "29,790",
-        "Coverage Depth": "2121.95",
+        "Coverage Depth": "420.40",
       },
     };
     // 5. Observe "no_host_1" WGS sample record and verify values and data types
@@ -228,7 +214,16 @@ test.describe("Data Validation: P-0", () => {
   });
 
   test("SNo 34: Data report validation (ERCC Only) JAN", async ({ page }) => {
-    await runPipelineIfNeeded(page, "Test_SNo_34", "ERCC Only", "Unknown");
+    const projectPage = new ProjectPage(page);
+    const project = await projectPage.getOrCreateProject("Test_SNo_34");
+    await runPipelineIfNeeded(
+      page,
+      project,
+      WGS_SAMPLE_FILES,
+      WGS_SAMPLE_NAMES,
+      WORKFLOWS.WGS,
+      {hostOrganism: "ERCC Only", taxon: "Unknown"},
+    );
 
     // #region 1. Login to CZ ID staging
     await projectPage.navigateToMyData();
@@ -309,7 +304,16 @@ test.describe("Data Validation: P-0", () => {
   });
 
   test("SNo 35: Data report validation (Human) - Chikungunya virus (species) JAN", async ({ page }) => {
-    await runPipelineIfNeeded(page, "Test_SNo_35", "Human", "Chikungunya virus");
+    const projectPage = new ProjectPage(page);
+    const project = await projectPage.getOrCreateProject("Test_SNo_35");
+    await runPipelineIfNeeded(
+      page,
+      project,
+      WGS_SAMPLE_FILES,
+      WGS_SAMPLE_NAMES,
+      WORKFLOWS.WGS,
+      {hostOrganism: "Human", taxon: "Chikungunya virus"},
+    );
 
     // #region 1. Login to CZ ID staging
     await projectPage.navigateToMyData();
@@ -323,8 +327,9 @@ test.describe("Data Validation: P-0", () => {
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 3. Select "Consensus Genomes" tab
 
-    expectedData["no_host_1"]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
-    expectedData["no_host_2"]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
+    for (const sampleName of WGS_SAMPLE_NAMES) {
+      expectedData[sampleName]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
+    }
     const expectedDataChikungunyaVirus = expectedData;
     const samplesPage = new SamplesPage(page);
     for (const sampleName of Object.keys(expectedDataChikungunyaVirus)) {
@@ -392,7 +397,16 @@ test.describe("Data Validation: P-0", () => {
   });
 
   test("SNo 36: Data report validation (ERCC Only) - Chikungunya virus (species) JAN", async ({ page }) => {
-    await runPipelineIfNeeded(page, "Test_SNo_36", "ERCC Only", "Chikungunya virus");
+    const projectPage = new ProjectPage(page);
+    const project = await projectPage.getOrCreateProject("Test_SNo_36");
+    await runPipelineIfNeeded(
+      page,
+      project,
+      WGS_SAMPLE_FILES,
+      WGS_SAMPLE_NAMES,
+      WORKFLOWS.WGS,
+      {hostOrganism: "ERCC Only", taxon: "Chikungunya virus"},
+    );
 
     // #region 1. Login to CZ ID staging
     await projectPage.navigateToMyData();
@@ -406,8 +420,9 @@ test.describe("Data Validation: P-0", () => {
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 3. Select "Consensus Genomes" tab
 
-    expectedData["no_host_1"]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
-    expectedData["no_host_2"]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
+    for (const sampleName of WGS_SAMPLE_NAMES) {
+      expectedData[sampleName]["ConsensusGenomeData"][0]["Taxon"] = CHIKUNGUNYA_VIRUS_SPECIES;
+    }
     const expectedDataERCCOnlyChikungunyaVirus = expectedData;
     const samplesPage = new SamplesPage(page);
     for (const sampleName of Object.keys(expectedDataERCCOnlyChikungunyaVirus)) {
@@ -474,30 +489,3 @@ test.describe("Data Validation: P-0", () => {
     }
   });
 });
-
-async function runPipelineIfNeeded(page: any, projectName: string, hostOrganism: string, taxon: string) {
-  projectPage = new ProjectPage(page);
-  project = await projectPage.getOrCreateProject(projectName);
-  const samplesPage = new SamplesPage(page);
-
-  let samples = [];
-  let ranPipeline = false;
-  const noHostSample1 = await samplesPage.getSamples(project.name, WGS_SAMPLE_NAMES[0]);
-  const noHostSample2 = await samplesPage.getSamples(project.name, WGS_SAMPLE_NAMES[1]);
-  if (noHostSample1.length <= 0 && noHostSample2.length <= 0) {
-    test.setTimeout(60 * 1000 * 20); // Inclease the test runtime to let the piepline run
-
-    const uploadPage = new UploadPage(page);
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, WGS_SAMPLE_NAMES);
-    for (const sampleName of WGS_SAMPLE_NAMES) {
-      inputs[sampleName].hostOrganism = hostOrganism;
-    }
-    await uploadPage.e2eCSVSampleUpload(WGS_SAMPLE_FILES, project, WORKFLOWS.WGS, inputs, true, taxon);
-    samples = await samplesPage.getSamples(project.name, WGS_SAMPLE_NAMES[1]);
-    ranPipeline = true;
-  }
-
-  if (ranPipeline) {
-    await samplesPage.waitForReportComplete(samples[0].id); // Wait for the last report to finish
-  }
-}

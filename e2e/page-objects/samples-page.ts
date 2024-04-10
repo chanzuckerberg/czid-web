@@ -207,7 +207,10 @@ export class SamplesPage extends PageObject {
     private async getSamplesInArray(projectName: string, sampleNames: Array<string>) {
       const samples = [];
       for (const sampleName of sampleNames) {
-        samples.push((await this.getProjectSamples(projectName, sampleName))[0]);
+        const matchingSample = await this.getProjectSamples(projectName, sampleName);
+        if (matchingSample.length > 0) {
+          samples.push(matchingSample[0]);
+        }
       }
       return samples;
     }
