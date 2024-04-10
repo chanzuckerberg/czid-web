@@ -2,12 +2,12 @@ import { APIRequestContext, expect, test } from "@playwright/test";
 import { sampleSize } from "lodash/fp";
 import { GRAPHQL_FED_ENDPOINT } from "./shared";
 /**
- * This test suite is designed to compare the consensus genomes from Rails and NextGen
+ * This test suite is designed to compare sequencing reads & nested objects from Rails and NextGen
  * It does so by:
  * 1. Getting a list of consensus genome producing workflow run ids from NextGen
  * 2. Getting the corresponding workflow run ids from Rails
- * 3. Making a request to both Rails and NextGen to get the consensus genomes
- * 4. Comparing the responses and asserting the metrics & accessions are the same.
+ * 3. Making a request to both Rails and NextGen to get the sequencing reads
+ * 4. Comparing the responses and asserting the metrics, taxons, accessions, and sample are the same.
  */
 
 const NUMBER_OF_WORKFLOW_RUNS_TO_TEST = 100;
@@ -125,8 +125,8 @@ test.beforeAll(
   },
 );
 
-const railsConsensusGenomesMap = {};
-const nextGenConsensusGenomesMap = {};
+const railsSequencingReadsMap = {};
+const nextGenSequencingReadsMap = {};
 test.beforeAll("fetch data from Rails and NextGen", async () => {
   const cgFragment = `
     edges {
@@ -164,14 +164,16 @@ test.beforeAll("fetch data from Rails and NextGen", async () => {
     }
   `;
 
-  const railsIds = `[${Object.keys(railsIdToNextGenIdMap).join(",")}]`;
-  const railsIdsInStrings = `["${Object.keys(railsIdToNextGenIdMap).join(
-    '","',
-  )}"]`;
-  const consensusGenomesFromRailsResponse = await makeRequestToRailsGQL(`
+  const railsWorkflowRunIds = `[${Object.keys(railsIdToNextGenIdMap).join(
+    ",",
+  )}]`;
+  const railsWorkflowRunIdsInStrings = `["${Object.keys(
+    railsIdToNextGenIdMap,
+  ).join('","')}"]`;
+  const sequencingReadsFromRailsResponse = await makeRequestToRailsGQL(`
     query MyQuery {
       fedSequencingReads(
-        input: {todoRemove: {workflowRunIds: ${railsIds}}, consensusGenomesInput: {where: {producingRunId: {_in: ${railsIdsInStrings}}}}}
+        input: {todoRemove: {workflowRunIds: ${railsWorkflowRunIds}}, consensusGenomesInput: {where: {producingRunId: {_in: ${railsWorkflowRunIdsInStrings}}}}}
       ) {
         consensusGenomes {
           ${cgFragment}
@@ -181,17 +183,17 @@ test.beforeAll("fetch data from Rails and NextGen", async () => {
     }
   `);
 
-  // Create a map of the consensus genomes from Rails, where the key is the producingRunId and the value the consensus genome
-  const railsConsensusGenomes =
-    consensusGenomesFromRailsResponse.data.fedSequencingReads;
-  for (const consensusGenome of railsConsensusGenomes) {
-    for (const edge of consensusGenome.consensusGenomes.edges) {
-      railsConsensusGenomesMap[edge.node.producingRunId] = {
+  // Create a map of the consensus genomes from Rails, where the key is the producingRunId and the value is a flat object with the consensus genome and the sequencing read
+  const railsSequencingReads =
+    sequencingReadsFromRailsResponse.data.fedSequencingReads;
+  for (const sequencingRead of railsSequencingReads) {
+    for (const edge of sequencingRead.consensusGenomes.edges) {
+      railsSequencingReadsMap[edge.node.producingRunId] = {
         ...edge.node,
         sequencingRead: {
-          medakaModel: consensusGenome.medakaModel,
-          protocol: consensusGenome.protocol,
-          sample: consensusGenome.sample,
+          medakaModel: sequencingRead.medakaModel,
+          protocol: sequencingRead.protocol,
+          sample: sequencingRead.sample,
         },
       };
     }
@@ -210,15 +212,15 @@ test.beforeAll("fetch data from Rails and NextGen", async () => {
   `);
 
   // Create a map of the consensus genomes from NextGen, where the key is the producingRunId and the value the consensus genome
-  const nextGenConsensusGenomes = responseFromNextGen.data.sequencingReads;
-  for (const consensusGenome of nextGenConsensusGenomes) {
-    for (const edge of consensusGenome.consensusGenomes.edges) {
-      nextGenConsensusGenomesMap[edge.node.producingRunId] = {
+  const nextGenSequencingReads = responseFromNextGen.data.sequencingReads;
+  for (const sequencingRead of nextGenSequencingReads) {
+    for (const edge of sequencingRead.consensusGenomes.edges) {
+      nextGenSequencingReadsMap[edge.node.producingRunId] = {
         ...edge.node,
         sequencingRead: {
-          medakaModel: consensusGenome.medakaModel,
-          protocol: consensusGenome.protocol,
-          sample: consensusGenome.sample,
+          medakaModel: sequencingRead.medakaModel,
+          protocol: sequencingRead.protocol,
+          sample: sequencingRead.sample,
         },
       };
     }
@@ -229,48 +231,73 @@ test.describe("Validate consensus genomes between Rails & Nextgen are equivelant
   test(`metrics, accession, sequencingRead, and sample should be the same`, async () => {
     // Iterate through the consensus genomes ids, look them up in the maps, and assert that they are the same
     Object.entries(nextGenIdToRailsIdMap).forEach(
-      ([nextGenWorkflowRunId, railsWorkflowRunId]) => {
+      async ([nextGenWorkflowRunId, railsWorkflowRunId]) => {
         if (
-          railsWorkflowRunId in railsConsensusGenomesMap &&
-          nextGenWorkflowRunId in nextGenConsensusGenomesMap
+          railsWorkflowRunId in railsSequencingReadsMap &&
+          nextGenWorkflowRunId in nextGenSequencingReadsMap
         ) {
-          const railsCg = railsConsensusGenomesMap[railsWorkflowRunId];
-          const nextGenCg = nextGenConsensusGenomesMap[nextGenWorkflowRunId];
+          const railsCg = railsSequencingReadsMap[railsWorkflowRunId];
+          const nextGenCg = nextGenSequencingReadsMap[nextGenWorkflowRunId];
 
-          test.step(`Rails ID: ${railsWorkflowRunId}, NextGen ID: ${nextGenWorkflowRunId}`, () => {
-            if (railsCg.metrics.coverageDepth === null) {
-              // The s3 file for the Rails coverage viz metrics has expired, so don't compare this metric
-              delete railsCg.metrics.coverageDepth;
-              delete nextGenCg.metrics.coverageDepth;
-            }
-            // Compare the data of the two consensus genomes
-            expect(railsCg.metrics).toEqual(nextGenCg.metrics);
-            expect(railsCg.accession).toEqual(nextGenCg.accession);
-            expect(railsCg.sequencingRead).toEqual(nextGenCg.sequencingRead);
+          const testStepName = `Rails ID: ${railsWorkflowRunId}, NextGen ID: ${nextGenWorkflowRunId}`;
+          await test.step(
+            testStepName,
+            () => {
+              if (railsCg.metrics.coverageDepth === null) {
+                // The s3 file for the Rails coverage viz metrics has expired, so don't compare this metric
+                delete railsCg.metrics.coverageDepth;
+                delete nextGenCg.metrics.coverageDepth;
+              }
+              // Compare the data of the two consensus genomes
+              expect
+                .soft(
+                  railsCg.metrics,
+                  `metrics sould be equal for ${testStepName}`,
+                )
+                .toEqual(nextGenCg.metrics);
+              expect
+                .soft(
+                  railsCg.accession,
+                  `accession should be equal for ${testStepName}`,
+                )
+                .toEqual(nextGenCg.accession);
+              expect
+                .soft(
+                  railsCg.sequencingRead,
+                  `sequencingRead should be equal for ${testStepName}`,
+                )
+                .toEqual(nextGenCg.sequencingRead);
 
-            const knownMismatchesFromRailsToNextGen = {
-              // Rails taxon name : NextGen taxon name
-              "Betacoronavirus 1 (species)": "Betacoronavirus 1",
-              "Betacoronavirus (genus)": "Betacoronavirus",
-              "Bat Hp-betacoronavirus Zhejiang2013 (species)":
-                "Bat Hp-betacoronavirus Zhejiang2013",
-              "Chikungunya virus (species)": "Chikungunya virus",
-              "Human respirovirus 3 (species)": "Human respirovirus 3",
-              "Torque teno virus (species)": "Torque teno virus",
-              "Alphapapillomavirus (genus)": "Alphapapillomavirus",
-              "Severe acute respiratory syndrome-related coronavirus (species)":
-                "Severe acute respiratory syndrome-related coronavirus",
-            };
+              const knownMismatchesFromRailsToNextGen = {
+                // Rails taxon name : NextGen taxon name
+                "Betacoronavirus 1 (species)": "Betacoronavirus 1",
+                "Betacoronavirus (genus)": "Betacoronavirus",
+                "Bat Hp-betacoronavirus Zhejiang2013 (species)":
+                  "Bat Hp-betacoronavirus Zhejiang2013",
+                "Chikungunya virus (species)": "Chikungunya virus",
+                "Human respirovirus 3 (species)": "Human respirovirus 3",
+                "Torque teno virus (species)": "Torque teno virus",
+                "Alphapapillomavirus (genus)": "Alphapapillomavirus",
+                "Severe acute respiratory syndrome-related coronavirus (species)":
+                  "Severe acute respiratory syndrome-related coronavirus",
+              };
 
-            const isAKnownMismatch =
-              knownMismatchesFromRailsToNextGen[railsCg?.taxon?.name] ===
-                nextGenCg?.taxon?.name &&
-              nextGenCg?.taxon?.name !== null &&
-              railsCg?.taxon?.name !== null;
-            if (!isAKnownMismatch) {
-              expect(railsCg.taxon).toEqual(nextGenCg.taxon);
-            }
-          });
+              const isAKnownMismatch =
+                knownMismatchesFromRailsToNextGen[railsCg?.taxon?.name] ===
+                  nextGenCg?.taxon?.name &&
+                nextGenCg?.taxon?.name !== null &&
+                railsCg?.taxon?.name !== null;
+              if (!isAKnownMismatch) {
+                expect
+                  .soft(
+                    railsCg.taxon,
+                    `taxon should be equal for ${testStepName}`,
+                  )
+                  .toEqual(nextGenCg.taxon);
+              }
+            },
+            { box: true },
+          );
         }
       },
     );
