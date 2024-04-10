@@ -16,7 +16,7 @@ const IN_PROGRESS = "IN PROGRESS";
 const IN_PROGRESS_MESSAGE = "IN PROGRESSYour Consensus Genome is being generated!Learn about Consensus Genomes";
 const EXPECTED_REFERENCE_ACCESSION = [
   "MN908947.3 - Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome",
-  "Severe acute respiratory syndrome coronavirus 2",
+  "Severe acute respiratory syndrome coronavirus 2 (sublevel)",
 ];
 const REFERENCE_ACCESSION = "Reference Accession";
 const WETLAB_PROTOCOL = "Wetlab Protocol";
