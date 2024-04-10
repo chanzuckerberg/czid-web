@@ -141,6 +141,7 @@ const BulkDownloadListComponent = () => {
           onDetailsClick: () => {
             handleDetailsClick(bulkDownloadRaw);
           },
+          startedAt: new Date(bulkDownloadRaw?.startedAt).toISOString(),
           statusType: getStatusType(bulkDownloadRaw),
           statusDisplay: getStatusDisplay(
             bulkDownloadRaw?.status,
