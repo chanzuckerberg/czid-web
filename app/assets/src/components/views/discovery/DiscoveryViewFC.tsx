@@ -1073,7 +1073,9 @@ function formatTaxonName(taxon: {
   name: string;
   level: string | null | undefined;
 }): string {
-  return taxon.level != null ? `${taxon.name} (${taxon.level})` : taxon.name;
+  return taxon.level != null
+    ? `${taxon.name} (${taxon.level.split("level_").slice(-1)})`
+    : taxon.name;
 }
 
 async function queryWorkflowRunsAggregate(
