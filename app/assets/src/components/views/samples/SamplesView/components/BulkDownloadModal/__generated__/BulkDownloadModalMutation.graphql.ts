@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<62066c9796c36d99d061bbfc2b110929>>
+ * @generated SignedSource<<4a08a308462633c4855aaabec8957063>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,9 @@ export type BulkDownloadModalMutation$variables = {
   workflowRunIdsStrings?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
 export type BulkDownloadModalMutation$data = {
-  readonly CreateBulkDownload: any | null | undefined;
+  readonly CreateBulkDownload: {
+    readonly id: string;
+  } | null | undefined;
 };
 export type BulkDownloadModalMutation = {
   response: BulkDownloadModalMutation$data;
@@ -86,8 +88,19 @@ v5 = [
         "name": "input"
       }
     ],
-    "kind": "ScalarField",
+    "concreteType": "fedCreateBulkDownload",
+    "kind": "LinkedField",
     "name": "CreateBulkDownload",
+    "plural": false,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "id",
+        "storageKey": null
+      }
+    ],
     "storageKey": null
   }
 ];
@@ -121,16 +134,16 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "72f8d6335a1f2ffc9e15a6a486403364",
+    "cacheID": "a16f3467f2094d7015ce5a561eb768cf",
     "id": null,
     "metadata": {},
     "name": "BulkDownloadModalMutation",
     "operationKind": "mutation",
-    "text": "mutation BulkDownloadModalMutation(\n  $workflowRunIdsStrings: [String]\n  $downloadFormat: String\n  $downloadType: String!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  CreateBulkDownload(input: {workflowRunIdsStrings: $workflowRunIdsStrings, downloadFormat: $downloadFormat, downloadType: $downloadType, workflow: $workflow, authenticityToken: $authenticityToken})\n}\n"
+    "text": "mutation BulkDownloadModalMutation(\n  $workflowRunIdsStrings: [String]\n  $downloadFormat: String\n  $downloadType: String!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  CreateBulkDownload(input: {workflowRunIdsStrings: $workflowRunIdsStrings, downloadFormat: $downloadFormat, downloadType: $downloadType, workflow: $workflow, authenticityToken: $authenticityToken}) {\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c2837295a1f33395edffa5f6836cc09d";
+(node as any).hash = "0cc41c0a1a985f0a93e67b0c5148d4ce";
 
 export default node;

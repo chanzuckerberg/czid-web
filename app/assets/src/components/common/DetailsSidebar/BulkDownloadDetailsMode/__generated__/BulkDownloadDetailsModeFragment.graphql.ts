@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b0716c3df68518b72970a4c87a27bfbf>>
+ * @generated SignedSource<<94f17a4fb848ad5332c5daeb4a5b1e03>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,7 +13,7 @@ import { FragmentRefs } from "relay-runtime";
 export type BulkDownloadDetailsModeFragment$data = ReadonlyArray<{
   readonly downloadType: string | null | undefined;
   readonly errorMessage: string | null | undefined;
-  readonly fileSize: any | null | undefined;
+  readonly fileSize: number | null | undefined;
   readonly id: string | null | undefined;
   readonly logUrl: string | null | undefined;
   readonly params: ReadonlyArray<{

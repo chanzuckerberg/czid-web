@@ -99,7 +99,9 @@ const BulkDownloadModalMutation = graphql`
         workflow: $workflow
         authenticityToken: $authenticityToken
       }
-    )
+    ) {
+      id
+    }
   }
 `;
 
@@ -189,10 +191,9 @@ export const BulkDownloadModal = ({
         authenticityToken,
       },
       onCompleted: data => {
-        if (data?.CreateBulkDownload?.data?.runWorkflowVersion?.id) {
+        if (data.CreateBulkDownload?.id != null) {
           onGenerate();
         } else {
-          console.error(data.CreateBulkDownload.errors);
           onCreateDownloadError(DEFAULT_CREATION_ERROR);
         }
       },
