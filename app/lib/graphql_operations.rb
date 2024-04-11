@@ -73,6 +73,8 @@ class GraphqlOperations
   query($upstream_database_identifier: String!) {
     taxa(where: {upstreamDatabaseIdentifier: {_eq: $upstream_database_identifier}}) {
       id
+      name
+      level
     }
   }
   GRAPHQL

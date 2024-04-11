@@ -105,6 +105,13 @@ class SampleEntityCreationService
         entityType: "sequencing_read", },
     ]
 
+    # Assemble raw inputs
+    create_workflow_run_raw_inputs_hash = {
+      sars_cov_2: workflow_run_is_sars_cov_2?,
+      ncbi_index_version: workflow_run_ncbi_version,
+      creation_source: creation_source,
+    }
+
     unless workflow_run_is_sars_cov_2?
       # Add reference genome (if present) to workflow run entity inputs
       reference_sequence = @sample.input_files.where(file_type: InputFile::FILE_TYPE_REFERENCE_SEQUENCE).first
@@ -150,6 +157,9 @@ class SampleEntityCreationService
               entityType: "taxon",
             }
           )
+
+          create_workflow_run_raw_inputs_hash[:taxon_name] = response.data&.taxa&.first&.name
+          create_workflow_run_raw_inputs_hash[:taxon_level] = response.data&.taxa&.first&.level
         end
       end
 
@@ -172,15 +182,11 @@ class SampleEntityCreationService
             entityType: "accession",
           }
         )
+
+        create_workflow_run_raw_inputs_hash[:accession_id] = workflow_run_accession_id
+        create_workflow_run_raw_inputs_hash[:accession_name] = @workflow_run_accession_name
       end
     end
-
-    # Assemble raw inputs
-    create_workflow_run_raw_inputs_hash = {
-      sars_cov_2: workflow_run_is_sars_cov_2?,
-      ncbi_index_version: workflow_run_ncbi_version,
-      creation_source: creation_source,
-    }
 
     # Create the new workflow run
     response = CzidGraphqlFederation
