@@ -14,7 +14,7 @@ type runOptions = {
   sequencingPlatform?: string;
 };
 
-export async function runPipelineIfNeeded(page: any, project: any, sampleFiles: Array<string>, sampleNames: Array<string>, workflow: string, runOptions?: runOptions) {
+export async function setupSamples(page: any, project: any, sampleFiles: Array<string>, sampleNames: Array<string>, workflow: string, runOptions?: runOptions) {
     runOptions = runOptions || {};
     const samplesPage = new SamplesPage(page);
 

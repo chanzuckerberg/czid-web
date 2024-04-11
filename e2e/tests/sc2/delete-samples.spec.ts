@@ -1,6 +1,6 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_1_PAIRED_R1, SAMPLE_FILE_1_PAIRED_R2 } from "@e2e/constants/sample";
-import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
@@ -26,7 +26,7 @@ test.describe("SC2 Delete samples: Functional: P-0", () => {
     test.setTimeout(TEST_TIMEOUT);
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("SNo_SC2-47");
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       CT20K_SAMPLE_FILES,
@@ -35,7 +35,7 @@ test.describe("SC2 Delete samples: Functional: P-0", () => {
       {hostOrganism: "Human", taxon: "Unknown", runPipeline: true, waitForPipeline: WAIT_FOR_PIPELINE},
     );
     // Run again so we have an extra sample for deleting later
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       CT20K_SAMPLE_FILES,
@@ -157,7 +157,7 @@ test.describe("SC2 Delete samples: Functional: P-0", () => {
     test.setTimeout(TEST_TIMEOUT);
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("SNo_SC2-48");
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       CT20K_SAMPLE_FILES,
@@ -166,7 +166,7 @@ test.describe("SC2 Delete samples: Functional: P-0", () => {
       {hostOrganism: "Human", taxon: "Unknown", runPipeline: true, waitForPipeline: WAIT_FOR_PIPELINE},
     );
     // Run again so we have an extra sample for deleting later
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       CT20K_SAMPLE_FILES,

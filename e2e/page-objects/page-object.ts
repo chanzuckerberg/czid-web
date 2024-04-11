@@ -53,6 +53,19 @@ export abstract class PageObject {
   // #endregion Get
 
   // #region Click
+  public async clickOutsidePage(linkLocator: string) {
+    const [newPage] = await Promise.all([
+      this.page.context().waitForEvent("page"),
+      await this.page.locator(linkLocator).click(),
+    ]);
+    await newPage.waitForLoadState();
+    class OutsidePage extends PageObject {}
+    const outsidePage = new OutsidePage(newPage);
+
+    await this.pause(3);
+    return outsidePage;
+  }
+
   public async clickElement(locatorString: string) {
     (await this.getLocator(locatorString)).click();
   }

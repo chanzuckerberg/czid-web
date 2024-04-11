@@ -1,3 +1,4 @@
+import { DOWNLOAD_ICON } from "@e2e/constants/common";
 import { expect } from "@playwright/test";
 import { DownloadsPage } from "./downloads-page";
 import { HeatmapPage } from "./heatmap-page";
@@ -5,6 +6,9 @@ import { NextcladePage } from "./nextclade-page";
 import { PageObject } from "./page-object";
 import { SamplesPage } from "./samples-page";
 
+const CLOSE_ICON = "[class*='closeIcon']";
+const SELECT_ALL_SAMPLES = "//*[@type='checkbox'][@value='all']/parent::*";
+const SELECTED_SAMPLES_COUNTER = "[class*='counterContainer']";
 const SAMPLE_SEARCH = (sampleId: number, projectId: number) => `[project_id="${projectId}"][sample_id="${sampleId}"]`;
 const TIMEFRAME_FILTER = "[data-testid='timeframe']";
 const TIMEFRAME_OPTIONS = "//*[text()='Select Timeframe']/parent::*//*[@role='option']";
@@ -41,11 +45,13 @@ const USER_DROPDOWN_DOWNLOADS_LINK = "//a[text()='Downloads']";
 const DOWNLOADS_LINK = "[class*='message'] [href='/bulk_downloads']";
 const NEXTCLADE_TREE_BUTTON = "[class*='action'] > div:not([data-testid]) button";
 const NEXTCLADE_OPTIONS = "[class*='treeTypeContainer'] [class*='name']";
+const NEXTCLADE_TAGLINE = "[class*='modal'] [class*='nextcladeHeader'] [class*='tagline']";
 const UPLOAD_A_TREE_INPUT = "[class*='treeTypeContainer'] input[accept='.json']";
 const VIEW_QC_IN_NEXTCLADE = "//button[text()='View QC in Nextclade']";
 const NEXTCLADE_CONFIRM_BUTTON = "//button[text()='Confirm']";
 const DOWNLOAD_BUTTON_TESTID = "download-icon";
 const DOWNLOAD_TYPES_LOCATOR = "[class*='downloadTypeContainer'] [class*='name']";
+const DOWNLOAD_TYPES_TAGLINE = "[class*='modal'] [class*='header'] [class*='tagline']";
 export const START_GENERATING_DOWNLOAD_BUTTON = "//button[text()='Start Generating Download']";
 const TAXON_FILTER_DROPDOWN = "[class*='taxaWithHitsDropdown'] [data-testid='filters']";
 const TAXON_DROPDOWN_OPTIONS = "[class*='portalDropdown'] [class*='item'] [class*='option']";
@@ -56,6 +62,7 @@ const BACKGROUND_SEARCH_INPUT = "[class*='portalDropdown'] [data-testid='filter-
 const BACKGROUND_SEARCH_RESULTS = "[class*='optionText']";
 const BACKGROUND_FILTER_LABEL = "//div[contains(@class, 'downloadType')]//div[text()='Background' and contains(@class, 'label')]";
 const SEARCH_MY_DATA_INPUT = "[class*='header'] [class*='category'][class*='search'] input";
+const SEARCH_RESULTS = "[class='results'] [class='title']";
 const HOST_SEARCH_RESULTS = "[category='host'] [class='title']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genomes']";
 const PROJECT_SEARCH_RESULTS = "[category='Project'] [class='title']";
@@ -116,6 +123,8 @@ const COMPLETED_ROWS = "//div[contains(@class, 'sampleStatus') and @data-testid=
 const ROWS = "//div[contains(@class, 'sampleStatus')]//ancestor::div[@aria-rowindex]";
 const SAMPLE_NAME_BY_INDEX = (index: number) => `//div[contains(@class, "sampleStatus")]//ancestor::div[@aria-rowindex="${index}"]//div[contains(@class, "sampleName-")]`;
 const DELETE_CONFIRMATION_BUTTON = "//button[text()='Delete']";
+const DELETE_CANCEL_BUTTON = "//*[@data-testid='bulk-delete-modal']//button[text()='Cancel']";
+const DELETE_MODAL_TITLE = "[data-testid='bulk-delete-modal'] [class*='MuiDialog-container'] [class*='MuiDialogTitle']";
 const ERROR_MESSAGE = "[class*='errorMessage']";
 const ALERT_MESSAGE = "[role='alert'][class*='toast-body']";
 const NOTIFICATION_MESSAGE = "[class*='notificationContainer']";
@@ -257,6 +266,14 @@ export class ProjectPage extends PageObject {
     return this.page.locator(NEXTCLADE_TREE_BUTTON).isDisabled();
   }
 
+  public async isDownloadButtonDisabled() {
+    return this.page.getByTestId(DOWNLOAD_ICON).isDisabled();
+  }
+
+  public async isDeleteButtonDisabled() {
+    return this.page.getByTestId(DELETE_BUTTON_TESTID).isDisabled();
+  }
+
   public async isAnnotationFilterDisabled() {
     return this.page.locator(ANNOTATION_FILTER).isDisabled();
   }
@@ -332,9 +349,13 @@ export class ProjectPage extends PageObject {
     await this.page.locator(resultLocator).click();
   }
 
-  public async fillSearchMyDataInput(value: string) {
+  public async fillSearchMyDataInput(value: string, options?: {clickResult: boolean}) {
     await this.page.locator(SEARCH_MY_DATA_INPUT).fill(value);
     await this.pressEnter();
+
+    if (options && options.clickResult === true) {
+      await this.page.locator(SEARCH_RESULTS).getByText(value, {exact: true}).first().click();
+    }
   }
 
   public async fillBackgroundSearchInput(value: string) {
@@ -343,6 +364,14 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickCloseIcon() {
+    await this.page.locator(CLOSE_ICON).click();
+  }
+
+  public async clickSelectAllSamples() {
+    await this.page.locator(SELECT_ALL_SAMPLES).click();
+  }
+
   public async clickDownloadButtonForImmediateDownload() {
     const downloadPromise = this.page.waitForEvent("download");
     await this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click();
@@ -519,6 +548,11 @@ export class ProjectPage extends PageObject {
     await this.page.getByTestId(DELETE_BUTTON_TESTID).click();
   }
 
+  public async clickDeleteCancelButton() {
+    await this.page.locator(DELETE_CANCEL_BUTTON).waitFor({state: "visible"});
+    await this.page.locator(DELETE_CANCEL_BUTTON).click();
+  }
+
   public async clickDeleteConfirmationButton() {
     await this.page.locator(DELETE_CONFIRMATION_BUTTON).waitFor({state: "visible"});
     await this.page.locator(DELETE_CONFIRMATION_BUTTON).click();
@@ -530,6 +564,40 @@ export class ProjectPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getDeleteSelectedSamplesCount() {
+    const deleteTitle = await this.page.locator(DELETE_MODAL_TITLE).textContent();
+    const selected = deleteTitle
+      .replace("Are you sure you want to delete", "")
+      .replace("Consensus Genome run", "")
+      .replace("Consensus Genome runs", "")
+      .trim();
+    return parseInt(selected);
+  }
+
+  public async getDownloadTypeSelectedSamplesCount() {
+    const nextcladeTaglineText = await this.page.locator(DOWNLOAD_TYPES_TAGLINE).textContent();
+    const selected = nextcladeTaglineText
+      .replace("consensus genomes selected", "")
+      .replace("consensus genome selected", "")
+      .trim();
+    return parseInt(selected);
+  }
+
+  public async getNextcladeSelectedSamplesCount() {
+    const nextcladeTaglineText = await this.page.locator(NEXTCLADE_TAGLINE).textContent();
+    const selected = nextcladeTaglineText
+      .replace("Consensus Genomes selected", "")
+      .replace("Consensus Genome selected", "")
+      .trim();
+    return parseInt(selected);
+  }
+
+  public async getSelectedSamplesCount() {
+    const counterText = await this.page.locator(SELECTED_SAMPLES_COUNTER).textContent();
+    const selected = counterText.replace("Selected", "");
+    return parseInt(selected);
+  }
+
   public async getTimeframeFilterOptions() {
     await this.page.locator(TIMEFRAME_FILTER).click();
     const options = this.page.locator(TIMEFRAME_OPTIONS).allTextContents();

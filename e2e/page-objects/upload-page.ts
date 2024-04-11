@@ -25,6 +25,12 @@ const TRIM_PRIMER_FILE = (trimPrimerFilename: string) => `./fixtures/trim_primer
 const METADATA_FILE_NAME = "metadata_template.csv";
 
 // Upload Samples
+const PIPELINE_VERSION = "[class*='technologyContent'] [class*='version']";
+const ILLUMINA_LEARN_MORE_LINK = "//*[text()='Learn More' and @href]";
+const GITHUB_HERE_LINK = "[href*='github.com/chanzuckerberg']";
+const CLEAR_HERE_LINK = "[href*='clearlabs']";
+const ARTIC_NETWORK_LINK = "[href*='artic.network']";
+const NANOPORE_LEARN_MORE_LINK = "//*[contains(@href, 'chanzuckerberg.zendesk') and text()='Learn More']";
 const SELECT_BASESPACE_PROJECT_DROPDOWN = "[class*='basespaceSampleImport'] [class*='dropdownTrigger']";
 const SELECT_BASESPACE_PROJECT_OPTIONS = "[class*='basespaceSampleImport'] [role*='option']";
 const BASESPACE_UPLOAD_WINDOW_TITLE = "[class*='titleWithIcon']";
@@ -37,6 +43,7 @@ const CONTINUE_BUTTON = "//button[text()='Continue']";
 const ROW_FILENAMES = "[aria-label='row'] [class*='fileName'] ";
 const FILE_ERROR_INFO_ICON = "[class*='fileName'] svg";
 const COLUMN_TOOLTIP = "[data-testid='column-tooltip']";
+const COLUMN_TOOLTIP_LINK = "[data-testid='column-tooltip'] a";
 const FILE_INPUT_SELECTOR = "[data-testid='drop-sample-files'] input";
 const SAMPLE_NAME_LOCATOR = "[class*='sampleUploadTable'] [role='gridcell'][title]";
 const COOKIE_BANNER_LOCATOR = "[id='onetrust-accept-btn-handler']:visible";
@@ -53,6 +60,7 @@ const UPLOAD_TAXON_FILTER_TESTID = "upload-taxon-filter";
 const UPLOAD_TAXON_FILTER_INPUT = "[class*='FormControl'] input[type='search']";
 const CLEAR_UPLOADED_FILE_BUTTON_TESTID = "clear-uploaded-file-button";
 const CLEAR_LABS_TOGGLE = "[class*='clearLabs'] [class*='checkbox']";
+const CLEAR_LABS_INFO_ICON = "[class*='clearLabs'] [class*='subheader'] svg";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
 const WETLAB_FILTER = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']";
 const WETLAB_FILTER_VALUE = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']//*[@data-testid='filter-value']";
@@ -60,6 +68,7 @@ const WETLAB_OPTION = (wetlab: string) =>`//*[@data-testid="dropdown-menu"]//*[@
 const WETLAB_OPTIONS = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='dropdown-menu']//*[@role='option']";
 const WETLAB_DESCRIPTION = "//*[text()='Wetlab Protocol:']/following-sibling::*[contains(@class, 'description')]";
 const MEDAKA_MODEL_FILTER = "//*[text()='Medaka Model:']/parent::*//*[@data-testid='filters']";
+const MEDAKA_MODEL_INFO_ICON = "//*[text()='Medaka Model:']/span";
 const MEDAKA_MODEL_OPTION = (medakaModel: string) => `//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText') and text()='${medakaModel}']`;
 const MEDAKA_MODEL_OPTIONS = "//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText')]";
 const MEDAKA_MODEL_DESCRIPTION = "//*[text()='Medaka Model:']/following-sibling::*[contains(@class, 'description')]";
@@ -134,6 +143,30 @@ export class UploadPage extends PageObject {
   // #region Click
 
   // #region Samples
+  public async clickMedakaModelHereLink() {
+    return this.clickOutsidePage(COLUMN_TOOLTIP_LINK);
+  }
+
+  public async clickClearHereLink() {
+    return this.clickOutsidePage(CLEAR_HERE_LINK);
+  }
+
+  public async clickNanoporeLearnMoreLink() {
+    return this.clickOutsidePage(NANOPORE_LEARN_MORE_LINK);
+  }
+
+  public async clickArticNetworkLink() {
+    return this.clickOutsidePage(ARTIC_NETWORK_LINK);
+  }
+
+  public async clickIlluminaLearnMoreLink() {
+    return this.clickOutsidePage(ILLUMINA_LEARN_MORE_LINK);
+  }
+
+  public async clickGithubHereLink() {
+    return this.clickOutsidePage(GITHUB_HERE_LINK);
+  }
+
   public async clickSelectBasespaceProjectDropdown() {
     await this.page.locator(SELECT_BASESPACE_PROJECT_DROPDOWN).click();
   }
@@ -228,6 +261,14 @@ export class UploadPage extends PageObject {
   // #endregion Samples
 
   // #region Metadata
+  public async hoverOverMedakaModelInfoIcon(index = 0) {
+    await this.page.locator(MEDAKA_MODEL_INFO_ICON).nth(index).hover();
+  }
+
+  public async hoverOverClearLabsInfoIcon(index = 0) {
+    await this.page.locator(CLEAR_LABS_INFO_ICON).nth(index).hover();
+  }
+
   public async hoverOverFileErrorIcon(index = 0) {
     await this.page.locator(FILE_ERROR_INFO_ICON).nth(index).hover();
   }
@@ -267,6 +308,10 @@ export class UploadPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getPipelineVersion() {
+    return this.page.locator(PIPELINE_VERSION).textContent();
+  }
+
   public async getNanoporeTechnologyDescription() {
     return this.page.locator(NANOPORE_TECHNOLOGY_DESCRIPTION).textContent();
   }

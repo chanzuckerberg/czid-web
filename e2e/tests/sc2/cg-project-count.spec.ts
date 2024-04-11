@@ -1,7 +1,7 @@
 import { SEQUENCING_PLATFORMS, WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
@@ -34,7 +34,7 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
 
     // #region 2. At Project tab, select ""floo sp100"" project
     const project = await projectPage.getOrCreateProject("SNo_SC2-42");
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       SAMPLE_FILES,

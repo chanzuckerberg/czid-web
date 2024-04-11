@@ -1,7 +1,7 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
@@ -48,7 +48,7 @@ test.describe("Data Validation: P-0", () => {
   test("SNo 28: Data report validation (Human) JAN", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_28");
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
@@ -138,7 +138,7 @@ test.describe("Data Validation: P-0", () => {
   test("SNo 31: Sample report values displayed in project sample view list", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_31");
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
@@ -216,7 +216,7 @@ test.describe("Data Validation: P-0", () => {
   test("SNo 34: Data report validation (ERCC Only) JAN", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_34");
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
@@ -306,7 +306,7 @@ test.describe("Data Validation: P-0", () => {
   test("SNo 35: Data report validation (Human) - Chikungunya virus (species) JAN", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_35");
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
@@ -399,7 +399,7 @@ test.describe("Data Validation: P-0", () => {
   test("SNo 36: Data report validation (ERCC Only) - Chikungunya virus (species) JAN", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_36");
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,

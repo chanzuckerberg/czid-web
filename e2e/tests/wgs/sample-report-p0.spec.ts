@@ -3,7 +3,7 @@ import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
 import { ProjectPage } from "@e2e/page-objects/project-page";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 
 // #region Expected data
@@ -20,7 +20,7 @@ test.describe("Data Validation: P-0", () => {
   test("SNo 29: Customer Reference file download and format", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await new ProjectPage(page).getOrCreateProject("Test_SNo_29");
-    const samples = await runPipelineIfNeeded(
+    const samples = await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,

@@ -2,7 +2,7 @@ import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { TRIM_PRIMER_FILENAME } from "@e2e/page-objects/upload-page";
-import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import AdmZip = require("adm-zip");
 import { ProjectPage } from "../../page-objects/project-page";
@@ -28,7 +28,7 @@ test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_30");
     // #region 1. Upload the same sample with/without Trim Primers file
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
@@ -36,7 +36,7 @@ test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
       WORKFLOWS.WGS,
       {includeTrimPrimer: true},
     );
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,

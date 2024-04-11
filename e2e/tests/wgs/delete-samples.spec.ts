@@ -1,6 +1,6 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1 } from "@e2e/constants/sample";
-import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
@@ -27,8 +27,8 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 1. Login to CZ ID staging
     const {project, projectPage} = await runTestSetup(page, `SNo-WGS-47`);
     await projectPage.navigateToMyData();
-    await projectPage.fillSearchMyDataInput(project.name);;
-    const projectsTableBefore = await projectPage.getProjectsTableOrderedByName();;
+    await projectPage.fillSearchMyDataInput(project.name);
+    const projectsTableBefore = await projectPage.getProjectsTableOrderedByName();
     expect(projectsTableBefore[project.name]["Counts"]).toBeDefined();
     expect(projectsTableBefore[project.name]["Counts"].toString()).toMatch(/[0-9]+ Sample(s)?/);
 
@@ -40,7 +40,7 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 2. Open [floo WGS1] Project
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
 
-    const projectSamplesBefore = await projectPage.getSamplesCount();;
+    const projectSamplesBefore = await projectPage.getSamplesCount();
     // #endregion 2. Open [floo WGS1] Project
 
     // #region 3. Navigate to Consensus Genome tab
@@ -109,14 +109,14 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     expect(consensusGenomesCountAfter).toEqual(consensusGenomesCountBefore - 1);
 
     // - Samples general tab count decreases by [X]
-    const projectSamplesAfter = await projectPage.getSamplesCount();;
+    const projectSamplesAfter = await projectPage.getSamplesCount();
     expect(projectSamplesAfter).toEqual(projectSamplesBefore - 1);
     // #endregion 13. Verify Samples & Consensus Genomes tabs sample counts
 
     // #region 14. Verify Discovery View Project sample count
     await projectPage.navigateToMyData();
-    await projectPage.fillSearchMyDataInput(project.name);;
-    const projectsTableAfter = await projectPage.getProjectsTableOrderedByName();;
+    await projectPage.fillSearchMyDataInput(project.name);
+    const projectsTableAfter = await projectPage.getProjectsTableOrderedByName();
 
     // - Discovery view project sample count total and CG count decreases by [X]
     let projectsTableSampleCountAfter = projectsTableAfter[project.name]["Counts"][0];
@@ -131,9 +131,9 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 1. Login to CZ ID staging
     const {project, projectPage} = await runTestSetup(page, `SNo-WGS-48`);
     await projectPage.navigateToMyData();
-    await projectPage.fillSearchMyDataInput(project.name);;
+    await projectPage.fillSearchMyDataInput(project.name);
 
-    const projectsTableBefore = await projectPage.getProjectsTableOrderedByName();;
+    const projectsTableBefore = await projectPage.getProjectsTableOrderedByName();
     expect(projectsTableBefore[project.name]["Counts"]).toBeDefined();
     expect(projectsTableBefore[project.name]["Counts"].toString()).toMatch(/[0-9]+ Sample(s)?/);
 
@@ -145,7 +145,7 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 2. Open [floo WGS1] Project
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
 
-    const projectSamplesBefore = await projectPage.getSamplesCount();;
+    const projectSamplesBefore = await projectPage.getSamplesCount();
     // #endregion 2. Open [floo WGS1] Project
 
     // #region 3. Navigate to Consensus Genome tab
@@ -218,14 +218,14 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     expect(consensusGenomesCountAfter).toEqual(consensusGenomesCountBefore - 1);
 
     // - Samples general tab count decreases by [X]
-    const projectSamplesAfter = await projectPage.getSamplesCount();;
+    const projectSamplesAfter = await projectPage.getSamplesCount();
     expect(projectSamplesAfter).toEqual(projectSamplesBefore - 1);
     // #endregion 14. Verify Samples & Consensus Genomes tabs sample counts
 
     // #region 15. Verify Discovery View Project sample count
     await projectPage.navigateToMyData();
-    await projectPage.fillSearchMyDataInput(project.name);;
-    const projectsTableAfter = await projectPage.getProjectsTableOrderedByName();;
+    await projectPage.fillSearchMyDataInput(project.name);
+    const projectsTableAfter = await projectPage.getProjectsTableOrderedByName();
 
     // - Discovery view project sample count total and CG count decreases by [X]
     let projectsTableSampleCountAfter = projectsTableAfter[project.name]["Counts"][0];
@@ -243,7 +243,7 @@ async function runTestSetup(page: any, projectName: string) {
   const project = await projectPage.getOrCreateProject(projectName);
 
   // no host 1
-  await runPipelineIfNeeded(
+  await setupSamples(
     page,
     project,
     WGS_SAMPLE_FILES,
@@ -252,7 +252,7 @@ async function runTestSetup(page: any, projectName: string) {
     {hostOrganism: "Human", taxon: "Unknown", runPipeline: false, waitForPipeline: WAIT_FOR_PIPELINE},
   );
   // no host 2
-  await runPipelineIfNeeded(
+  await setupSamples(
     page,
     project,
     WGS_SAMPLE_FILES,
@@ -261,7 +261,7 @@ async function runTestSetup(page: any, projectName: string) {
     {hostOrganism: "Human", taxon: "Unknown", runPipeline: false, waitForPipeline: WAIT_FOR_PIPELINE},
   );
   // sample to delete
-  await runPipelineIfNeeded(
+  await setupSamples(
     page,
     project,
     WGS_SAMPLE_FILES,

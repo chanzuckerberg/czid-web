@@ -1,6 +1,6 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2, SAMPLE_FILE_1_PAIRED_R1, SAMPLE_FILE_1_PAIRED_R2 } from "@e2e/constants/sample";
-import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
@@ -32,7 +32,7 @@ test.describe("NextClade Tree: Functional: P-0", () => {
 
   test("SNo 23: Create a Nextclade Tree", async ({ page }) => {
     const sc2_project = await projectPage.getOrCreateProject(`SNo-23_NextClade_${WORKFLOWS.SC2}`);
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       sc2_project,
       WGS_SAMPLE_FILES,
@@ -80,7 +80,7 @@ test.describe("NextClade Tree: Functional: P-0", () => {
 
   test("SNo 25: Create a Nextclade Tree with a mixture of samples with and without reference assension", async ({ page }) => {
     const sc2_project = await projectPage.getOrCreateProject(`SNo-25_NextClade_${WORKFLOWS.SC2}`);
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       sc2_project,
       WGS_SAMPLE_FILES,
@@ -149,7 +149,7 @@ test.describe("NextClade Tree: Functional: P-0", () => {
    */
   test("SNo SC2-45: Nextclade using Default tree", async ({ page }) => {
     const sc2_project = await projectPage.getOrCreateProject(`SC2-45_NextClade_CT20K_${WORKFLOWS.SC2}`);
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       sc2_project,
       CT20K_SAMPLE_FILES,
@@ -211,7 +211,7 @@ test.describe("NextClade Tree: Functional: P-0", () => {
    */
   test("SNo SC2-46: Nextclade uploading a reference .json tree file", async ({ page }) => {
     const sc2_project = await projectPage.getOrCreateProject(`SC2-46_NextClade_CT20K_${WORKFLOWS.SC2}`);
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       sc2_project,
       CT20K_SAMPLE_FILES,

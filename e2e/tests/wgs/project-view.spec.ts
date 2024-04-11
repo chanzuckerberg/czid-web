@@ -5,7 +5,7 @@ import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { UploadPage } from "@e2e/page-objects/upload-page";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
-import { runPipelineIfNeeded } from "../../page-objects/user-actions";
+import { setupSamples } from "../../page-objects/user-actions";
 
 const WGS_SARS_COV2_NO_HOST_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const SARS_CoV2_NO_HOST = "wgs_SARS_CoV2_no_host";
@@ -34,7 +34,7 @@ test.describe("Project View: Functional: P-1", () => {
 
     const taxons = (await projectPage.getSearchSuggestions("coronavirus", "taxon", "Viruses", "my_data")).Taxon.results;
     const coronavirus = taxons[Math.floor(Math.random() * taxons.length)];
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SARS_COV2_NO_HOST_FILES,
@@ -107,7 +107,7 @@ test.describe("Project View: Functional: P-1", () => {
 
     const locations = await projectPage.getLocationsExternalSearch(randomLetter);
     const location = locations[Math.floor(Math.random() * locations.length)];
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SARS_COV2_NO_HOST_FILES,
@@ -201,14 +201,14 @@ test.describe("Project View: Functional: P-1", () => {
     const projectPage = new ProjectPage(page);
     const privateProject = await projectPage.getOrCreateProject(`private_SNo_WGS-42_${WORKFLOWS.WGS}`, 0);
     const publicProject = await projectPage.getOrCreateProject(`public_SNo_WGS-42_${WORKFLOWS.WGS}`, 1);
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       privateProject,
       WGS_SARS_COV2_NO_HOST_FILES,
       SARS_CoV2_SAMPLE_NAMES,
       WORKFLOWS.WGS,
     );
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       publicProject,
       WGS_SARS_COV2_NO_HOST_FILES,
@@ -255,7 +255,7 @@ test.describe("Project View: Functional: P-1", () => {
     const project = await projectPage.getOrCreateProject(`SNo_WGS-43_${WORKFLOWS.WGS}`);
 
     const hostOrganism = await new UploadPage(page).getRandomHostOrganism();
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SARS_COV2_NO_HOST_FILES,
@@ -297,7 +297,7 @@ test.describe("Project View: Functional: P-1", () => {
     const project = await projectPage.getOrCreateProject(`SNo_WGS-44_${WORKFLOWS.WGS}`);
 
     const sampleType = await new UploadPage(page).getRandomSampleTissueType();
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       project,
       WGS_SARS_COV2_NO_HOST_FILES,

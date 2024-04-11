@@ -1,7 +1,7 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { SAMPLE_FILE_CT20K } from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { runPipelineIfNeeded } from "@e2e/page-objects/user-actions";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
@@ -26,7 +26,7 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
   });
 
   test("SNo WGS - 46: Nextclade enabled when selecting WGS / SC2 samples", async ({ page }) => {
-    await runPipelineIfNeeded(
+    await setupSamples(
       page,
       sc2_project,
       [SAMPLE_FILE_CT20K],

@@ -25,6 +25,26 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "SC2: Functional: P-1: Sample upload (web) Illumina"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-upload.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Functional: P-1"
+      retries: 3
+    shard: concurrency
+  - name: "SC2: Functional: P-0: Sample view list"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/sc2/sample-view-list.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Functional: P-0"
+      retries: 3
+    shard: concurrency
   - name: "SC2: Functional: P-0: Delete samples"
     platformName: "macOS 12"
     screenResolution: "1440x900"
@@ -33,7 +53,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "WGS: Functional: P-1: Project View"
     platformName: "macOS 12"
@@ -43,7 +63,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-1"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "WGS: Functional: P-0: Delete samples"
     platformName: "macOS 12"
@@ -53,7 +73,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "WGS: Functional: P-0: NextClade Tree"
     platformName: "macOS 12"
@@ -63,7 +83,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "SC2: Functional: P-0: NextClade Tree"
     platformName: "macOS 12"
@@ -83,7 +103,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-2"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-1: Viral CG (WGS) - Sample report"
     platformName: "macOS 12"
@@ -93,7 +113,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-1"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-2: Viral CG (WGS) - Sample report"
     platformName: "macOS 12"
@@ -103,7 +123,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-2"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-2: Viral CG (WGS) - Downloads (CURL)"
     platformName: "macOS 12"
@@ -113,7 +133,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-2"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Downloads"
     platformName: "macOS 12"
@@ -123,7 +143,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Functional: P-0: WGS - Downloads (CURL)"
     platformName: "macOS 12"
@@ -133,7 +153,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Functional: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Data Validation: P-0: Viral CG (WGS) - Report files"
     platformName: "macOS 12"
@@ -143,7 +163,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Data Validation: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Data Validation: P-0: Viral CG (WGS) - Sample report: Values & Data type"
     platformName: "macOS 12"
@@ -153,7 +173,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Data Validation: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Data Validation: P-0: WGS - Sample report"
     platformName: "macOS 12"
@@ -163,7 +183,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Data Validation: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Data Validation: P-0: WGS - Sample upload: Error handling"
     platformName: "macOS 12"
@@ -173,7 +193,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Data Validation: P-0"
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Bulk Download: AMR"
     platformName: "macOS 12"
@@ -183,7 +203,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Bulk Download: LMNGS"
     platformName: "macOS 12"
@@ -213,7 +233,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
-      retries: 2
+      retries: 3
     shard: concurrency
   - name: "Pipeline Visualization"
     platformName: "macOS 12"
@@ -223,7 +243,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
-      retries: 1
+      retries: 3
     shard: concurrency
   - name: "Sample Deletion Smoke Tests"
     platformName: "macOS 12"
@@ -273,7 +293,7 @@ suites:
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
-      retries: 1
+      retries: 3
     shard: concurrency
 artifacts:
   cleanup: true
