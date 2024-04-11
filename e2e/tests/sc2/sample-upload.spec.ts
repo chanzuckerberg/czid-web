@@ -19,9 +19,10 @@ const EXPECTED_REFERENCE_ACCESSION = [
   "Severe acute respiratory syndrome coronavirus 2 (sublevel)",
 ];
 const REFERENCE_ACCESSION = "Reference Accession";
+const SEQUENCING_PLATFORM = "Sequencing Platform";
 const WETLAB_PROTOCOL = "Wetlab Protocol";
 const MEDAKA_MODEL = "Medaka Model";
-const PLUS_COLUMNS = ["Sequencing Platform", WETLAB_PROTOCOL, MEDAKA_MODEL];
+const PLUS_COLUMNS = [SEQUENCING_PLATFORM, WETLAB_PROTOCOL, MEDAKA_MODEL];
 
 const ARTIC_V4_1 = "ARTIC v4/ARTIC v4.1";
 const ARTIC_V5_3_2 = "ARTIC v5.3.2";
@@ -350,7 +351,7 @@ test.describe("Sample upload (web): Functional: P-0", () => {
 
     for (const sampleName of sampleNames) {
       // - Sequencing Platform metadata reads: Nanopore
-      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual("Nanopore");
+      expect(samplesTable[sampleName][SEQUENCING_PLATFORM]).toEqual("Nanopore");
       // - Wetlab Protocol reads: ARTIC
       expect(samplesTable[sampleName][WETLAB_PROTOCOL]).toEqual("ARTIC");
       // - Medaka Model reads: r941_min_high_g360
@@ -517,7 +518,7 @@ test.describe("Sample upload (web): Functional: P-0", () => {
 
     for (const sampleName of sampleNames) {
       // - Sequencing Platform metadata reads: Nanopore
-      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual("Nanopore");
+      expect(samplesTable[sampleName][SEQUENCING_PLATFORM]).toEqual("Nanopore");
       // - Wetlab Protocol reads: Midnight
       expect(samplesTable[sampleName][WETLAB_PROTOCOL]).toEqual(wetLab);
       // - Medaka Model reads: r941_prom_high_g330
