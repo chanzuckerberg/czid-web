@@ -174,7 +174,7 @@ class HardDeleteNextgenObjects
   end
 
   def self.query_bulk_download_ids(user_id, ids, token)
-    CzidGraphqlFederation.query_with_token(user_id, GetSoftDeletedBulkDownloads, variables: { ids: ids }, token: token).data.bulkDownloads.map(&:id)
+    CzidGraphqlFederation.query_with_token(user_id, GetSoftDeletedBulkDownloads, variables: { ids: ids }, token: token).data.bulk_downloads.map(&:id)
   end
 
   def self.delete_workflow_runs(user_id, ids, token)
