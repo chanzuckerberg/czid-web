@@ -112,7 +112,7 @@ export const getStatusDisplay = (
     return "complete with issue";
   }
   if (InProgressStatus.includes(status)) {
-    return "in progess";
+    return "in progress";
   }
   if (FailedStatus.includes(status)) {
     return "failed";
