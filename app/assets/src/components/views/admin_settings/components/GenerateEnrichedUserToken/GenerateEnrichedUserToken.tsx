@@ -1,18 +1,27 @@
-import { Button, Callout, InputText } from "@czi-sds/components";
+import { Button, Callout, InputCheckbox, InputText } from "@czi-sds/components";
 import React, { useState } from "react";
 import { get } from "~/api/core";
 import cs from "../../admin_settings.scss";
 
-const fetchEnrichedUserTokenForAdmin = async (userId: string) =>
-  get(`/enrich_token_for_admin?user_id=${userId}`);
+const fetchEnrichedUserTokenForAdmin = async (
+  userId: string,
+  includeHeaders: boolean,
+) =>
+  get("/enrich_token_for_admin", {
+    params: { include_headers: includeHeaders, user_id: userId },
+  });
 
 export const GenerateEnrichedUserToken = () => {
   const [userId, setUserId] = useState<string>("");
   const [calloutIntent, setCalloutIntent] = useState<"success" | undefined>();
+  const [includeHeaders, setIncludeHeaders] = useState<boolean>(true);
 
   const handleButtonClick = async (userId: string) => {
     if (userId !== "") {
-      const { token } = await fetchEnrichedUserTokenForAdmin(userId);
+      const { token } = await fetchEnrichedUserTokenForAdmin(
+        userId,
+        includeHeaders,
+      );
       if (token) {
         navigator.clipboard.writeText(token);
         setCalloutIntent("success");
@@ -30,6 +39,13 @@ export const GenerateEnrichedUserToken = () => {
         value={userId ?? ""}
         onChange={e => setUserId(e.target.value)}
       />
+      <div>
+        <InputCheckbox
+          label="Include headers for GraphiQL"
+          stage={includeHeaders ? "checked" : "unchecked"}
+          onChange={() => setIncludeHeaders(!includeHeaders)}
+        />
+      </div>
       <Button
         onClick={() => handleButtonClick(userId)}
         sdsStyle="square"

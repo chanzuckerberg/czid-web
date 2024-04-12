@@ -94,13 +94,18 @@ class IdentityController < ApplicationController
   end
 
   def enrich_token_for_admin
-    permitted_params = params.permit(:user_id)
+    permitted_params = params.permit(:user_id, :include_headers)
     user_id = permitted_params[:user_id]&.to_i
+    include_headers = permitted_params[:include_headers] == "true"
 
     # Enrich the token with project roles & return it as payload
-    enriched_token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true)
+    # Valid for 20 minutes
+    enriched_token = TokenCreationService.call(user_id: user_id, should_include_project_claims: true, expires_after: 1200)["token"]
+    if include_headers
+      enriched_token = "{\"x-should-read-from-nextgen\": true, \"Authorization\": \"Bearer #{enriched_token}\"}"
+    end
     render json: {
-      token: enriched_token["token"],
+      token: enriched_token,
     }, status: :ok
   end
 
