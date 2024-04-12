@@ -189,7 +189,6 @@ const DiscoveryViewFCSequencingReadsQuery = graphql`
       technology
       taxon {
         name
-        level
       }
       sample {
         railsSampleId
@@ -223,7 +222,6 @@ const DiscoveryViewFCSequencingReadsQuery = graphql`
             producingRunId
             taxon {
               name
-              level
             }
             accession {
               accessionId
@@ -1022,7 +1020,7 @@ async function querySequencingReadObjects(
         referenceAccession:
           sequencingRead.taxon != null
             ? {
-                taxonName: formatTaxonName(sequencingRead.taxon),
+                taxonName: sequencingRead.taxon.name,
               }
             : undefined,
       };
@@ -1049,8 +1047,7 @@ async function querySequencingReadObjects(
           referenceAccession: {
             accessionName: node.accession?.accessionName ?? undefined,
             referenceAccessionId: node.accession?.accessionId ?? undefined,
-            taxonName:
-              node.taxon != null ? formatTaxonName(node.taxon) : undefined,
+            taxonName: node.taxon?.name ?? undefined,
           },
           coverageDepth: metrics?.coverageDepth ?? undefined,
           totalReadsCG: metrics?.totalReads ?? undefined,
@@ -1067,15 +1064,6 @@ async function querySequencingReadObjects(
 
       return rows;
     });
-}
-
-function formatTaxonName(taxon: {
-  name: string;
-  level: string | null | undefined;
-}): string {
-  return taxon.level != null
-    ? `${taxon.name} (${taxon.level.split("level_").slice(-1)})`
-    : taxon.name;
 }
 
 async function queryWorkflowRunsAggregate(

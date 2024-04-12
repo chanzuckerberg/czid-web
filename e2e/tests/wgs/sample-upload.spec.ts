@@ -1,5 +1,8 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { UploadPage, REF_FILENAME } from "@e2e/page-objects/upload-page";
 import { test, expect } from "@playwright/test";
@@ -17,7 +20,6 @@ const TEST_TIMEOUT = 60 * 1000 * 60;
  * Local file
  */
 test.describe("WGS - Sample upload | Functional: P-0", () => {
-
   test("SNo 1: Viral Consensus Genome - No trim", async ({ page }) => {
     test.setTimeout(TEST_TIMEOUT); // Increase default timeout for reports to complete
     // #region 1. Login to CZ ID staging
@@ -51,7 +53,10 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 6. Select sample Input Files and click on Continue (see Data section)
 
     // #region 7. Enter required Metadata and click on Continue
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
     // #endregion 7. Enter required Metadata and click on Continue
@@ -67,16 +72,21 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Go to Project button enabled / displayed
     */
     for (const sampleName of sampleNames) {
-      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleName);
+      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(
+        sampleName,
+      );
       expect(hostSentToPipeline).toBeTruthy();
 
-      const hostUploadProgress = await uploadPage.getSampleUploadProgress(sampleName);
+      const hostUploadProgress = await uploadPage.getSampleUploadProgress(
+        sampleName,
+      );
       expect(hostUploadProgress).toEqual(100);
     }
     const uploadWindowTitle = await uploadPage.getUploadWindowTitle();
     expect(uploadWindowTitle).toEqual(UPLOAD_COMPLETE_LITERAL);
 
-    const goToProjectButtonEnabled = await uploadPage.isGoToProjectButtonEnabled();
+    const goToProjectButtonEnabled =
+      await uploadPage.isGoToProjectButtonEnabled();
     expect(goToProjectButtonEnabled).toBeTruthy();
     // #endregion 8. Check on Terms and Privacy policies checkbox and click Start Upload
 
@@ -97,7 +107,7 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     for (const sampleName of sampleNames) {
       const row = samplesTable[sampleName];
       expect(row["Sample"][1]).toEqual(COMPLETE_LITERAL);
-      expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual([ "—", "—" ]);
+      expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual(["—", "—"]);
     }
     // #endregion 10. Verify Samples Status and Reference Accession value once finished processing
   });
@@ -139,7 +149,10 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 7. Select sample Input Files and click on Continue (see Data section)
 
     // #region 8. Enter required Metadata and click on Continue
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
     // #endregion 8. Enter required Metadata and click on Continue
@@ -156,16 +169,21 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Go to Project button enabled / displayed
     */
     for (const sampleName of sampleNames) {
-      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleName);
+      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(
+        sampleName,
+      );
       expect(hostSentToPipeline).toBeTruthy();
 
-      const hostUploadProgress = await uploadPage.getSampleUploadProgress(sampleName);
+      const hostUploadProgress = await uploadPage.getSampleUploadProgress(
+        sampleName,
+      );
       expect(hostUploadProgress).toEqual(100);
     }
     const uploadWindowTitle = await uploadPage.getUploadWindowTitle();
     expect(uploadWindowTitle).toEqual(UPLOAD_COMPLETE_LITERAL);
 
-    const goToProjectButtonEnabled = await uploadPage.isGoToProjectButtonEnabled();
+    const goToProjectButtonEnabled =
+      await uploadPage.isGoToProjectButtonEnabled();
     expect(goToProjectButtonEnabled).toBeTruthy();
     // #endregion 9. Check on Terms and Privacy policies checkbox and click Start Upload
 
@@ -177,7 +195,7 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     /*
     At Project Sample view list:
     - Sample uploads COMPLETE status (in green)
-    - Reference Accession reads: (dash) + Betacoronavirus 1 (species)
+    - Reference Accession reads: (dash) + Betacoronavirus 1
     */
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
@@ -186,12 +204,17 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     for (const sampleName of sampleNames) {
       const row = samplesTable[sampleName];
       expect(row["Sample"][1]).toEqual(COMPLETE_LITERAL);
-      expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual([ "—", "Betacoronavirus 1 (species)" ]);
+      expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual([
+        "—",
+        "Betacoronavirus 1",
+      ]);
     }
     // #endregion 11. Verify Samples Status and Reference Accession value once finished processing
   });
 
-  test("SNo 3: Viral Consensus Genome - No trim + mNGS - Ilumina", async ({ page }) => {
+  test("SNo 3: Viral Consensus Genome - No trim + mNGS - Ilumina", async ({
+    page,
+  }) => {
     test.setTimeout(TEST_TIMEOUT); // Increase default timeout for reports to complete
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
@@ -232,7 +255,10 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 8. Select sample Input Files and click on Continue (see Data section)
 
     // #region 9. Enter required Metadata and click on Continue
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
     // #endregion 9. Enter required Metadata and click on Continue
@@ -249,16 +275,21 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Go to Project button enabled / displayed
     */
     for (const sampleName of sampleNames) {
-      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleName);
+      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(
+        sampleName,
+      );
       expect(hostSentToPipeline).toBeTruthy();
 
-      const hostUploadProgress = await uploadPage.getSampleUploadProgress(sampleName);
+      const hostUploadProgress = await uploadPage.getSampleUploadProgress(
+        sampleName,
+      );
       expect(hostUploadProgress).toEqual(100);
     }
     const uploadWindowTitle = await uploadPage.getUploadWindowTitle();
     expect(uploadWindowTitle).toEqual(UPLOAD_COMPLETE_LITERAL);
 
-    const goToProjectButtonEnabled = await uploadPage.isGoToProjectButtonEnabled();
+    const goToProjectButtonEnabled =
+      await uploadPage.isGoToProjectButtonEnabled();
     expect(goToProjectButtonEnabled).toBeTruthy();
     // #endregion 10. Check on Terms and Privacy policies checkbox and click Start Upload
 
@@ -284,7 +315,9 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 12. Verify Samples Status and Reference Accession value once finished processing
   });
 
-  test("SNo 4: Viral Consensus Genome - with trim + mNGS - Ilumina", async ({ page }) => {
+  test("SNo 4: Viral Consensus Genome - with trim + mNGS - Ilumina", async ({
+    page,
+  }) => {
     test.setTimeout(TEST_TIMEOUT); // Increase default timeout for reports to complete
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
@@ -329,7 +362,10 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 9. Select sample Input Files and click on Continue (see Data section)
 
     // #region 10. Enter required Metadata and click on Continue
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
     // #endregion 10. Enter required Metadata and click on Continue
@@ -346,16 +382,21 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     - Go to Project button enabled / displayed
     */
     for (const sampleName of sampleNames) {
-      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(sampleName);
+      const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(
+        sampleName,
+      );
       expect(hostSentToPipeline).toBeTruthy();
 
-      const hostUploadProgress = await uploadPage.getSampleUploadProgress(sampleName);
+      const hostUploadProgress = await uploadPage.getSampleUploadProgress(
+        sampleName,
+      );
       expect(hostUploadProgress).toEqual(100);
     }
     const uploadWindowTitle = await uploadPage.getUploadWindowTitle();
     expect(uploadWindowTitle).toEqual(UPLOAD_COMPLETE_LITERAL);
 
-    const goToProjectButtonEnabled = await uploadPage.isGoToProjectButtonEnabled();
+    const goToProjectButtonEnabled =
+      await uploadPage.isGoToProjectButtonEnabled();
     expect(goToProjectButtonEnabled).toBeTruthy();
     // #endregion 11. Check on Terms and Privacy policies checkbox and click Start Upload
 
@@ -368,7 +409,7 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     /*
     At Project Sample view list:
     - Sample uploads COMPLETE status (in green)
-    - Reference Accession reads: (dash) + Betacoronavirus (genus)
+    - Reference Accession reads: (dash) + Betacoronavirus
     */
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
@@ -377,7 +418,10 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     for (const sampleName of sampleNames) {
       const row = samplesTable[sampleName];
       expect(row["Sample"][1]).toEqual(COMPLETE_LITERAL);
-      expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual([ "—", "Betacoronavirus (genus)" ]);
+      expect(row[REFERENCE_ACCESSION_LITERAL]).toEqual([
+        "—",
+        "Betacoronavirus",
+      ]);
     }
     // #endregion 13. Verify Samples Status and Reference Accession value once finished processing
   });

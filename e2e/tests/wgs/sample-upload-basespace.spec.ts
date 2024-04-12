@@ -1,7 +1,14 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { UploadPage, REF_FILENAME, TRIM_PRIMER_FILENAME } from "@e2e/page-objects/upload-page";
+import {
+  UploadPage,
+  REF_FILENAME,
+  TRIM_PRIMER_FILENAME,
+} from "@e2e/page-objects/upload-page";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 
@@ -10,7 +17,8 @@ const TEST_TIMEOUT = 60 * 1000 * 40;
 
 const REFERENCE_ACCESSION = "Reference Accession";
 const BASESPACE_PROJECT_NAME = "Mark Test Project";
-const UPLOAD_STARTED = "We have started uploading your sample files from Basespace. After the upload is complete, your samples will automatically start processing.";
+const UPLOAD_STARTED =
+  "We have started uploading your sample files from Basespace. After the upload is complete, your samples will automatically start processing.";
 const EXPECTED_STATUS = "COMPLETE - ISSUE";
 
 /*
@@ -21,7 +29,9 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
   test.setTimeout(TEST_TIMEOUT); // Inclease default timeout for uploads to complete
 
   // https://czi-sci.slack.com/archives/C05NKGCD2E8/p1707934454896459?thread_ts=1706730894.886719&cid=C05NKGCD2E8
-  test("SNo 5: Basespace Viral Consensus Genome - No trim", async ({ page }) => {
+  test("SNo 5: Basespace Viral Consensus Genome - No trim", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -60,7 +70,10 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
 
     // #region 8. Enter required Metadata and click on Continue
     const sampleNames = await uploadPage.getMetadataSampleNames();
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     await uploadPage.setManualInputs(inputs);
 
     await uploadPage.clickContinue();
@@ -75,8 +88,11 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // Uploading screen displays with:
     // - (x) samples successfully created
     expect(await uploadPage.getBasespaceUploadWindowTitle()).toEqual(
-      `${sampleNames.length} samples successfully created`);
-    expect(await uploadPage.getBasespaceUploadWindowDescription()).toEqual(UPLOAD_STARTED);
+      `${sampleNames.length} samples successfully created`,
+    );
+    expect(await uploadPage.getBasespaceUploadWindowDescription()).toEqual(
+      UPLOAD_STARTED,
+    );
 
     // - Go to Project button enabled / displayed
     expect(await uploadPage.isGoToProjectButtonEnabled()).toBeTruthy();
@@ -89,21 +105,28 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // #region 11. Verify Samples Status and Reference Accession value once finished processing
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
-    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, TEST_TIMEOUT);
+    await projectPage.waitForSamplesComplete(
+      project.id,
+      WORKFLOWS.WGS,
+      sampleNames,
+      TEST_TIMEOUT,
+    );
 
     // At Project Sample view list:
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
-    // - Reference Accession reads: (dash) + Betacoronavirus 1 (species)
+    // - Reference Accession reads: (dash) + Betacoronavirus 1
     const samplesTable = await projectPage.getSamplesTableOrderedByName();
     for (const sampleName of sampleNames) {
       expect(samplesTable[sampleName]["Sample"][1]).toEqual(EXPECTED_STATUS);
-      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual([ "—", "—" ]);
+      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual(["—", "—"]);
     }
     // #endregion 11. Verify Samples Status and Reference Accession value once finished processing
   });
 
   // https://czi-sci.slack.com/archives/C05NKGCD2E8/p1707934454896459?thread_ts=1706730894.886719&cid=C05NKGCD2E8
-  test("SNo 6: Basespace Viral Consensus Genome - with trim", async ({ page }) => {
+  test("SNo 6: Basespace Viral Consensus Genome - with trim", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -146,7 +169,10 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
 
     // #region 9. Enter required Metadata and click on Continue
     const sampleNames = await uploadPage.getMetadataSampleNames();
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     await uploadPage.setManualInputs(inputs);
 
     await uploadPage.clickContinue();
@@ -161,8 +187,11 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // Uploading screen displays with:
     // - (x) samples successfully created
     expect(await uploadPage.getBasespaceUploadWindowTitle()).toEqual(
-      `${sampleNames.length} samples successfully created`);
-    expect(await uploadPage.getBasespaceUploadWindowDescription()).toEqual(UPLOAD_STARTED);
+      `${sampleNames.length} samples successfully created`,
+    );
+    expect(await uploadPage.getBasespaceUploadWindowDescription()).toEqual(
+      UPLOAD_STARTED,
+    );
 
     // - Go to Project button enabled / displayed
     expect(await uploadPage.isGoToProjectButtonEnabled()).toBeTruthy();
@@ -175,7 +204,12 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // #region 12. Verify Samples Status and Reference Accession value once finished processing
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
-    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, TEST_TIMEOUT);
+    await projectPage.waitForSamplesComplete(
+      project.id,
+      WORKFLOWS.WGS,
+      sampleNames,
+      TEST_TIMEOUT,
+    );
 
     // At Project Sample view list:
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
@@ -184,13 +218,15 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
       // - Sample uploads COMPLETE status (in green)
       expect(samplesTable[sampleName]["Sample"][1]).toEqual(EXPECTED_STATUS);
       // - Reference Accession reads: (dashes)
-      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual([ "—", "—" ]);
+      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual(["—", "—"]);
     }
     // #endregion 12. Verify Samples Status and Reference Accession value once finished processing
   });
 
   // https://czi-sci.slack.com/archives/C05NKGCD2E8/p1707934454896459?thread_ts=1706730894.886719&cid=C05NKGCD2E8
-  test("SNo 7: Basespace Viral Consensus Genome - No trim + mNGS - Ilumina", async ({ page }) => {
+  test("SNo 7: Basespace Viral Consensus Genome - No trim + mNGS - Ilumina", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -237,7 +273,10 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
 
     // #region 10. Enter required Metadata and click on Continue
     const sampleNames = await uploadPage.getMetadataSampleNames();
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     await uploadPage.setManualInputs(inputs);
 
     await uploadPage.clickContinue();
@@ -252,8 +291,11 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // Uploading screen displays with:
     // - (x) samples successfully created
     expect(await uploadPage.getBasespaceUploadWindowTitle()).toEqual(
-      `${sampleNames.length} samples successfully created`);
-    expect(await uploadPage.getBasespaceUploadWindowDescription()).toEqual(UPLOAD_STARTED);
+      `${sampleNames.length} samples successfully created`,
+    );
+    expect(await uploadPage.getBasespaceUploadWindowDescription()).toEqual(
+      UPLOAD_STARTED,
+    );
 
     // - Go to Project button enabled / displayed
     expect(await uploadPage.isGoToProjectButtonEnabled()).toBeTruthy();
@@ -266,7 +308,12 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // #region 13. Verify Samples Status and Reference Accession value once finished processing
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
-    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, TEST_TIMEOUT);
+    await projectPage.waitForSamplesComplete(
+      project.id,
+      WORKFLOWS.WGS,
+      sampleNames,
+      TEST_TIMEOUT,
+    );
 
     // At Project Sample view list:
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
@@ -274,14 +321,16 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     for (const sampleName of sampleNames) {
       // - Sample uploads COMPLETE status (in green)
       expect(samplesTable[sampleName]["Sample"][1]).toEqual(EXPECTED_STATUS);
-      // - Reference Accession reads: (dash) + Betacoronavirus (genus)
-      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual([ "—", "—" ]);
+      // - Reference Accession reads: (dash) + Betacoronavirus
+      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual(["—", "—"]);
     }
     // #endregion 13. Verify Samples Status and Reference Accession value once finished processing
   });
 
   // https://czi-sci.slack.com/archives/C05NKGCD2E8/p1707934454896459?thread_ts=1706730894.886719&cid=C05NKGCD2E8
-  test("SNo 8: Basespace Viral Consensus Genome - with trim + mNGS - Ilumina", async ({ page }) => {
+  test("SNo 8: Basespace Viral Consensus Genome - with trim + mNGS - Ilumina", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -332,7 +381,10 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
 
     // #region 11. Enter required Metadata and click on Continue
     const sampleNames = await uploadPage.getMetadataSampleNames();
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     await uploadPage.setManualInputs(inputs);
 
     await uploadPage.clickContinue();
@@ -347,8 +399,11 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // Uploading screen displays with:
     // - (x) samples successfully created
     expect(await uploadPage.getBasespaceUploadWindowTitle()).toEqual(
-      `${sampleNames.length} samples successfully created`);
-    expect(await uploadPage.getBasespaceUploadWindowDescription()).toEqual(UPLOAD_STARTED);
+      `${sampleNames.length} samples successfully created`,
+    );
+    expect(await uploadPage.getBasespaceUploadWindowDescription()).toEqual(
+      UPLOAD_STARTED,
+    );
 
     // - Go to Project button enabled / displayed
     expect(await uploadPage.isGoToProjectButtonEnabled()).toBeTruthy();
@@ -361,7 +416,12 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     // #region 14. Verify Samples Status and Reference Accession value once finished processing
     const samplesPage = new SamplesPage(page);
     await samplesPage.waitForAllReportsComplete(project.name, sampleNames);
-    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, TEST_TIMEOUT);
+    await projectPage.waitForSamplesComplete(
+      project.id,
+      WORKFLOWS.WGS,
+      sampleNames,
+      TEST_TIMEOUT,
+    );
 
     // At Project Sample view list:
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
@@ -369,10 +429,9 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
     for (const sampleName of sampleNames) {
       // - Sample uploads COMPLETE status (in green)
       expect(samplesTable[sampleName]["Sample"][1]).toEqual(EXPECTED_STATUS);
-    // - Reference Accession reads: (dashes)"
-      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual([ "—", "—" ]);
+      // - Reference Accession reads: (dashes)"
+      expect(samplesTable[sampleName][REFERENCE_ACCESSION]).toEqual(["—", "—"]);
     }
     // #endregion 14. Verify Samples Status and Reference Accession value once finished processing
   });
-
 });

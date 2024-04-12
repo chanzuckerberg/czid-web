@@ -753,7 +753,7 @@ module SamplesHelper
       end
 
       if sample_attributes.key?(:taxon_name)
-        taxon_name = sample_attributes.delete(:taxon_name)
+        sample_attributes.delete(:taxon_name)
       end
 
       if sample_attributes.key?(:ref_fasta)
@@ -806,7 +806,7 @@ module SamplesHelper
           h[:accession_id] = accession_id
           h[:accession_name] = accession_name
           h[:taxon_id] = taxon_id
-          h[:taxon_name] = taxon_name
+          h[:taxon_name] = taxon_id ? TaxonLineage.find_by(taxid: taxon_id).name : nil
           h[:technology] = technology
         end
 

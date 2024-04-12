@@ -478,6 +478,7 @@ class WorkflowRunsController < ApplicationController
         formatted_wr[:inputs] = {}.tap do |wr_info|
           if wr.workflow == WorkflowRun::WORKFLOW[:consensus_genome]
             wr_inputs = ["accession_id", "accession_name", "medaka_model", "taxon_name", "technology", "wetlab_protocol", "ref_fasta", "primer_bed", "creation_source"].index_with { |i| wr.get_input(i) }
+            wr_inputs["taxon_name"] = TaxonLineage.find_by(taxid: wr.get_input("taxon_id"))&.name
             wr_info.merge!(wr_inputs)
             wr_info[:technology] = ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[wr_inputs["technology"]]&.capitalize
           end
