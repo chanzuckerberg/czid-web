@@ -200,6 +200,7 @@ suites:
     screenResolution: "1440x900"
     testMatch: ['tests/download/bulk-download-amr-smoke.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
@@ -210,6 +211,7 @@ suites:
     screenResolution: "1440x900"
     testMatch: ['tests/download/bulk-download-lmngs-smoke.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
@@ -220,6 +222,7 @@ suites:
     screenResolution: "1440x900"
     testMatch: ['tests/download/bulk-download-mngs-smoke.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
@@ -230,6 +233,7 @@ suites:
     screenResolution: "1440x900"
     testMatch: ['tests/download/bulk-download-wgs-smoke.spec.ts']
     params:
+      maxDuration: 3h
       browserName: "chromium"
       project: "chromium"
       grep: "Smoke Test: "
