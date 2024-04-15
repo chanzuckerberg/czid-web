@@ -1,0 +1,58 @@
+name: 'Run Automated Tests on Staging @12am PDT'
+# Runs automated tests on staging every weekday at 12am PDT (7am UTC) or 11pm PST during the winter.
+# Tests get executed in sequential order: smoke tests, smoke tests with feature flags, e2e tests, e2e tests with feature flags.
+# The reason the tests get executed sequentially is to prevent test failures due to resource constraints (limited SauceLabs Virtual Devices).
+
+on:
+  schedule:
+    # Visit https://crontab.guru for more info on cron schedule expressions.
+    # The default timezone of GitHub Actions is Coordinated Universal Time (UTC).
+    # UTC is 7 hours ahead of PT, so 12am PDT is 7am UTC (0700 military time).
+    - cron: '0 7 * * 1-5' # “At 07:00 UTC on every day-of-week from Monday through Friday.”
+
+jobs:
+  # Run Smoke tests on staging
+  run_staging_playwright_smoke_tests:
+    name: Run Playwright Smoke tests on staging
+    uses: ./.github/workflows/e2e-automation.yml
+    with:
+      node-environment: "staging"
+      test-category: "smoke"
+      should-run-with-feature-flags: "false"
+    secrets: inherit
+
+  # Run Smoke tests on staging with feature flags
+  run_staging_playwright_smoke_tests_with_feature_flags:
+    if: ${{ always() }}
+    needs: run_staging_playwright_smoke_tests
+    name: Run Playwright E2E tests on staging
+    uses: ./.github/workflows/e2e-automation.yml
+    with:
+      node-environment: "staging"
+      test-category: "smoke"
+      should-run-with-feature-flags: "true"
+    secrets: inherit
+
+  # Run E2E tests on staging
+  run_staging_playwright_e2e_tests:
+    if: ${{ always() }}
+    needs: run_staging_playwright_smoke_tests_with_feature_flags
+    name: Run Playwright E2E tests on staging
+    uses: ./.github/workflows/e2e-automation.yml
+    with:
+      node-environment: "staging"
+      test-category: "e2e"
+      should-run-with-feature-flags: "false"
+    secrets: inherit
+
+  # Run E2E tests on staging with feature flags
+  run_staging_playwright_e2e_tests_with_feature_flags:
+    if: ${{ always() }}
+    needs: run_staging_playwright_e2e_tests
+    name: Run Playwright E2E tests on staging
+    uses: ./.github/workflows/e2e-automation.yml
+    with:
+      node-environment: "staging"
+      test-category: "e2e"
+      should-run-with-feature-flags: "true"
+    secrets: inherit
