@@ -131,8 +131,7 @@ export class DownloadsPage extends PageObject {
     while ((Date.now() - startTime) < timeout) {
       complete = await this.page.locator(DOWNLOAD_COMPLETE_BY_DOWNLOADID(downloadId.toString())).isVisible();
       if (!complete) {
-        await this.navigateToDownloads();
-        await this.pause(1);
+        await this.pause(7); // typically takes 3-5 secs to load
         await this.page.locator("[class*='downloadCell']").first().waitFor();
       } else {
         break;
