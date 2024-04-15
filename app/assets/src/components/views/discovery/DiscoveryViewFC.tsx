@@ -22,6 +22,7 @@ import {
   CgEntityRow,
   CgRow,
   Metadata,
+  ReferenceAccession,
   WorkflowRunRow,
 } from "../samples/SamplesView/SamplesView";
 import {
@@ -764,11 +765,11 @@ async function queryWorkflowRuns(
   // TRANSFORM RESPONSES:
   const result = sortedWorkflowResponses.map((run): WorkflowRunRow => {
     const sequencingReadId = run.entityInputs.edges[0]?.node.inputEntityId;
-    let parsedRawInput = {};
+    let parsedInputJson;
     try {
-      parsedRawInput = JSON.parse(run.rawInputsJson ?? "");
+      parsedInputJson = JSON.parse(run.rawInputsJson ?? "");
     } catch (e) {
-      // Fallback to {}.
+      // Fallback to undefined.
     }
     return {
       id: run.id,
@@ -782,8 +783,9 @@ async function queryWorkflowRuns(
         run.workflowVersion?.version != null
           ? formatSemanticVersion(run.workflowVersion.version)
           : undefined,
-      creation_source: parsedRawInput["creation_source"] ?? undefined,
+      creation_source: parsedInputJson?.creation_source ?? undefined,
       inputSequencingReadId: sequencingReadId as string,
+      inputJson: parsedInputJson,
     };
   });
   // TODO: Make BE do this.
@@ -1064,6 +1066,26 @@ async function querySequencingReadObjects(
 
       return rows;
     });
+}
+
+function getReferenceAccession(
+  workflowRow: WorkflowRunRow,
+  entityRow: CgEntityRow,
+): ReferenceAccession | undefined {
+  const workflowInputJson = workflowRow.inputJson;
+  if (
+    workflowInputJson?.accession_name !== undefined ||
+    workflowInputJson?.accession_id !== undefined ||
+    workflowInputJson?.taxon_name !== undefined
+  ) {
+    return {
+      accessionName: workflowInputJson.accession_name,
+      referenceAccessionId: workflowInputJson.accession_id,
+      taxonName: workflowInputJson.taxon_name,
+    };
+  } else {
+    return entityRow.referenceAccession;
+  }
 }
 
 async function queryWorkflowRunsAggregate(
@@ -1381,6 +1403,12 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
           ? {
               ...run,
               ...matchingSequencingRead,
+              // Overrides the referenceAccession of CgRow. Reference Accession data can come from
+              // either Workflows or Entities, so we determine where in getReferenceAccession().
+              referenceAccession: getReferenceAccession(
+                run,
+                matchingSequencingRead,
+              ),
             }
           : undefined,
       );

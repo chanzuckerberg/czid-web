@@ -1230,11 +1230,13 @@ export interface WorkflowRunRow {
   // render the sample's user.
   id: string;
   inputSequencingReadId: string;
+  inputJson?: { [key: string]: any };
   status?: string;
   createdAt?: string;
   workflow: string;
   wdl_version?: string;
   creation_source?: string;
+  referenceAccession?: ReferenceAccession;
 }
 
 /**
@@ -1248,7 +1250,6 @@ export interface CgEntityRow {
   sample: {
     id: string;
     railsSampleId?: number;
-    // processRawWorkflowRun():
     name: string;
     project?: string;
     publicAccess?: boolean;
@@ -1258,16 +1259,10 @@ export interface CgEntityRow {
   };
   host?: string;
   notes?: string;
-  // processConsensusGenomeWorkflowRun():
   medakaModel?: string;
   technology: string;
   wetlabProtocol?: string;
-  referenceAccession?: {
-    accessionName?: string;
-    referenceAccessionId?: string;
-    taxonName?: string;
-  };
-  // get("cached_results", cgWorkflowRun):
+  referenceAccession?: ReferenceAccession;
   coverageDepth?: number;
   totalReadsCG?: number;
   gcPercent?: number;
@@ -1278,11 +1273,25 @@ export interface CgEntityRow {
   nMissing?: number;
   nAmbiguous?: number;
   referenceAccessionLength?: number;
-  // getSampleField(["metadata"]):
   collection_location_v2: string;
   nucleotide_type: string;
   sample_type: string;
   water_control?: string;
 }
+
+/**
+ * Data needed to render the Reference Accession column.
+ *
+ * This is on both WorkflowRunRow and CgEntityRow b/c for CG runs kicked off from mNGS that have
+ * not completed, none of this data is available in Entities Service (SequencingRead's taxon is
+ * null and will stay null. No ConsensusGenome has been created yet) so it's pulled from the
+ * WorkflowRun's rawInputJson.
+ */
+export interface ReferenceAccession {
+  accessionName?: string;
+  referenceAccessionId?: string;
+  taxonName?: string;
+}
+
 /** Encapsulates custom metadata fields. */
 export type Metadata = { [key: string]: NonNullable<any> };
