@@ -806,7 +806,7 @@ module SamplesHelper
           h[:accession_id] = accession_id
           h[:accession_name] = accession_name
           h[:taxon_id] = taxon_id
-          h[:taxon_name] = taxon_id ? TaxonLineage.find_by(taxid: taxon_id).name : nil
+          h[:taxon_name] = taxon_id ? TaxonLineage.where(taxid: taxon_id).last&.name : nil
           h[:technology] = technology
         end
 
