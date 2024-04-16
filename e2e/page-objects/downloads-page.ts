@@ -234,7 +234,7 @@ export class DownloadsPage extends PageObject {
       const fileName = downloadType === SAMPLE_METADATA ? "sample_metadata" : "consensus_genome_overview";
       const download = await projectPage.clickDownloadButtonForImmediateDownload();
       // This download type has the same filename and extension for rails and nextgen
-      expect(`${fileName}.csv`).toMatch(download.suggestedFilename());
+      expect(download.suggestedFilename()).toMatch(`${fileName}.csv`);
       return;
     }
     const downloadId = await projectPage.clickStartGeneratingDownloadButton();

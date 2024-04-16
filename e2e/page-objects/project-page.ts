@@ -762,6 +762,8 @@ export class ProjectPage extends PageObject {
   public async selectCompletedSamples(numberToSelect: number) {
     const selectedSampleNames = new Array<string>();
     const selectedRowIndexes = new Array<number>();
+
+    await this.page.locator(ROWS).first().waitFor();
     await this.scrollDownToElement(COMPLETED_ROWS, ROWS, ARIA_ROWINDEX);
 
     for (let i = 0; i < numberToSelect; i++) {
