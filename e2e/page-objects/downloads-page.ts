@@ -175,7 +175,7 @@ export class DownloadsPage extends PageObject {
     await projectPage.clickDownloadButton();
     await projectPage.clickDownloadType(downloadType);
 
-    let expectedFileExtention = "tar.gz";
+    let expectedFileNames = [`${downloadType}.tar.gz`];
     let background = null;
     let bulkDownloadMetric = null;
     if (workflow === "mngs" && downloadType === "Sample Taxon Reports") {
@@ -194,7 +194,7 @@ export class DownloadsPage extends PageObject {
       }
     }
     else if (downloadType === "Combined Microbiome File") {
-      expectedFileExtention = "biom";
+      expectedFileNames = [`${downloadType}.biom`];
       const downloadMetrics = await this.getMicrobiomeDownloadMetrics();
       bulkDownloadMetric = downloadMetrics[Math.floor(Math.random() * downloadMetrics.length)];
 
@@ -209,6 +209,7 @@ export class DownloadsPage extends PageObject {
       const fileFormat = fileFormats[Math.floor(Math.random() * fileFormats.length)];
       await projectPage.clickFileFormatDropdown();
       await projectPage.clickFileFormatOption(fileFormat);
+      expectedFileNames = [`${downloadType}.${fileFormat}`];
     }
     else if (downloadType === "Contigs (Non-host)") {
       await projectPage.clickTaxonFilterDropdown();
@@ -218,7 +219,9 @@ export class DownloadsPage extends PageObject {
       await projectPage.clickFilterDropdown();
       const option = ["Separate Files", "Single File (Concatenated)"][Math.floor(Math.random() * 2)];
       if (option === "Single File (Concatenated)") {
-        expectedFileExtention = "fa";
+        expectedFileNames = [`${downloadType}.fa`, "concatenated.txt"];
+      } else {
+        expectedFileNames = [`${downloadType}.tar.gz`, "result.zip"];
       }
       await projectPage.clickFilterOption(option);
     }
@@ -228,10 +231,10 @@ export class DownloadsPage extends PageObject {
 
     if (downloadType.includes("Consensus Genome Overview") || (downloadType === SAMPLE_METADATA) ){
       // Verify that the download completes immediately
-      expectedFileExtention = "csv";
       const fileName = downloadType === SAMPLE_METADATA ? "sample_metadata" : "consensus_genome_overview";
       const download = await projectPage.clickDownloadButtonForImmediateDownload();
-      expect(`${fileName}.${expectedFileExtention}`).toMatch(download.suggestedFilename());
+      // This download type has the same filename and extension for rails and nextgen
+      expect(`${fileName}.csv`).toMatch(download.suggestedFilename());
       return;
     }
     const downloadId = await projectPage.clickStartGeneratingDownloadButton();
@@ -269,7 +272,7 @@ export class DownloadsPage extends PageObject {
     await this.waitForDownloadComplete(downloadId, timeout);
     const download = await this.clickDownloadFile(downloadId);
 
-    expect(`${downloadType}.${expectedFileExtention}`).toMatch(download.suggestedFilename());
+    expect(expectedFileNames).toContain(download.suggestedFilename());
     // #endregion Verify the expected file was downloaded
   };
 }
