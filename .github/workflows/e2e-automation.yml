@@ -62,6 +62,7 @@ jobs:
       NODE_ENV: ${{inputs.node-environment}}
       BASESPACE_USERNAME: ${{secrets.BASESPACE_USERNAME}}
       BASESPACE_PASSWORD: ${{secrets.BASESPACE_PASSWORD}}
+      NEXTGEN_FEATURE_FLAGS_ENABLED: ${{inputs.should-run-with-feature-flags}}
 
     steps:
       - name: Checkout
