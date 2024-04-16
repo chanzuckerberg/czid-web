@@ -289,6 +289,8 @@ export class ProjectPage extends PageObject {
   public async fillTimeframeFilter(value: string) {
     await this.pause(1);
     await this.page.locator(TIMEFRAME_FILTER).click();
+
+    await this.pause(1);
     await this.page.locator(TIMEFRAME_OPTIONS).getByText(value, {exact: true}).click();
   }
 
@@ -680,7 +682,8 @@ export class ProjectPage extends PageObject {
     );
   }
 
-  public async getSamplesTable() {
+  public async getSamplesTable(timeout = 10000) {
+    await this.page.locator(ROWS).first().waitFor({timeout: timeout}).catch(() => null);
     return this.getTable(
       "[class*='dataContainer'] [class*='Table__headerColumn'] [class*='label']",
       "[class*='dataContainer'] [aria-label='row']",
