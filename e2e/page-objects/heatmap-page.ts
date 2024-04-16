@@ -1,30 +1,35 @@
 import { expect } from "@playwright/test";
 import { PageObject } from "./page-object";
 
-const HEATMAP_SAMPLE_NAMES = "[class*='columnLabels'] [class*='columnLabel'] text";
+const HEATMAP_SAMPLE_NAMES =
+  "[class*='columnLabels'] [class*='columnLabel'] text";
 const SAVE_BUTTON = "//button[text()='Save']";
 const TINY_CONFIRMATION = "[class*='tiny basic']";
 const VIEW_OPTIONS = "[class*='listbox'] [class*='option']";
-const AVAILABLE_VIEW_OPTIONS = "[class*='listbox'] [class*='option'][aria-disabled='false']";
-const VIEW_OPTION_LABELS = "[class*='lowerFilterSection'] [class*='viewOption'] div[class*='label']";
-const VIEW_OPTION_SELECTION = (viewFilter: string) => `//div[text()='${viewFilter}']//ancestor::div[contains(@class, 'viewOptions')]/button/div`;
+const AVAILABLE_VIEW_OPTIONS =
+  "[class*='listbox'] [class*='option'][aria-disabled='false']";
+const VIEW_OPTION_LABELS =
+  "[class*='lowerFilterSection'] [class*='viewOption'] div[class*='label']";
+const VIEW_OPTION_SELECTION = (viewFilter: string) =>
+  `//div[text()='${viewFilter}']//ancestor::div[contains(@class, 'viewOptions')]/button/div`;
 const HEATMAP = "svg[class*='heatmap']";
 const ZOOM_BUTTONS = "[class*='plusMinusControl'] button";
 const TAXON_NAMES = "[data-testid='row-label']";
 const CELLS = "rect[class*='cell']";
-const HOVER_HIGHLIGHTED_METIC = "//div[contains(@class, 'value')]/b/ancestor::div[contains(@class, 'dataRow')]/div";
+const HOVER_HIGHLIGHTED_METIC =
+  "//div[contains(@class, 'value')]/b/ancestor::div[contains(@class, 'dataRow')]/div";
 const TOGGLE_SAMPLE_NAMES = "button[class*='toggleNames']";
 const APPCUES_CONTAINER = "[class*='appcues-tooltip-container']";
 const APPCUES_GOT_IT_BUTTON = "[class*='appcues-button-success']";
 const NOTIFICATION_CONTAINER = "[class*='notificationContainer']";
 
-
 export class HeatmapPage extends PageObject {
-
   // #region Api
   public async getHeatmapMetrics() {
     await this.page.locator(VIEW_OPTION_LABELS).getByText("Metric").click();
-    const viewOptions = await this.page.locator(AVAILABLE_VIEW_OPTIONS).allTextContents();
+    const viewOptions = await this.page
+      .locator(AVAILABLE_VIEW_OPTIONS)
+      .allTextContents();
     await this.page.locator(VIEW_OPTION_LABELS).getByText("Metric").click();
     return viewOptions;
   }
@@ -82,17 +87,19 @@ export class HeatmapPage extends PageObject {
   public async getHighlightedMetic(index: number) {
     await this.hoverOverCell(index);
     await this.page.locator(HOVER_HIGHLIGHTED_METIC).first().waitFor();
-    const metric = await this.page.locator(HOVER_HIGHLIGHTED_METIC).allTextContents();
+    const metric = await this.page
+      .locator(HOVER_HIGHLIGHTED_METIC)
+      .allTextContents();
     return {
-      "label": metric[0],
-      "value": metric[1],
+      label: metric[0],
+      value: metric[1],
     };
   }
 
   public async getHeatmapWidthHeight() {
     return {
-      "width": await this.page.locator(HEATMAP).getAttribute("width"),
-      "height": await this.page.locator(HEATMAP).getAttribute("height"),
+      width: await this.page.locator(HEATMAP).getAttribute("width"),
+      height: await this.page.locator(HEATMAP).getAttribute("height"),
     };
   }
 
@@ -118,8 +125,13 @@ export class HeatmapPage extends PageObject {
 
   // #region Macro
   public async dismissAppcuesContainerIfPresent() {
-    await this.page.locator(APPCUES_CONTAINER).waitFor({timeout: 5000}).catch(() => null);
-    const appcuesContainer = await this.page.locator(APPCUES_CONTAINER).isVisible();
+    await this.page
+      .locator(APPCUES_CONTAINER)
+      .waitFor({ timeout: 5000 })
+      .catch(() => null);
+    const appcuesContainer = await this.page
+      .locator(APPCUES_CONTAINER)
+      .isVisible();
     if (appcuesContainer) {
       const iframe = this.page.frameLocator(APPCUES_CONTAINER);
       await iframe.locator(APPCUES_GOT_IT_BUTTON).click();
@@ -156,9 +168,9 @@ export class HeatmapPage extends PageObject {
   // #region Validation
   public async validateHeatmapSampleNames(sampleNames: Array<string>) {
     const expectedTruncatedNames = sampleNames.map(name => {
-      const truncate_length = 12;
-      if (name.length <= truncate_length) return name;
-      return `${name.substring(0,9)}...${name.slice(-7)}`;
+      const truncate_length = 20;
+      if (name.length < truncate_length) return name;
+      return `${name.substring(0, 9)}...${name.slice(-7)}`;
     });
 
     const heatmapSampleNames = await this.getHeatmapSampleNames();
@@ -169,7 +181,10 @@ export class HeatmapPage extends PageObject {
   }
 
   public async validateNotificationContainerIsNotPresent() {
-    await this.page.locator(NOTIFICATION_CONTAINER).waitFor({timeout: 2}).catch(() => null);
+    await this.page
+      .locator(NOTIFICATION_CONTAINER)
+      .waitFor({ timeout: 2 })
+      .catch(() => null);
     if (await this.isNotificationContainerPresent()) {
       const notification = await this.getNotificationContainerText();
       expect(notification).toBeUndefined();
