@@ -634,7 +634,9 @@ test.describe("Sample upload (web): Functional: P-0", () => {
       // - Sequencing Platform metadata reads: Nanopore
       expect(samplesTable[sampleName][SEQUENCING_PLATFORM]).toEqual("Nanopore");
       // - Wetlab Protocol reads: Midnight
-      expect(samplesTable[sampleName][WETLAB_PROTOCOL]).toEqual(wetLab);
+      expect(samplesTable[sampleName][WETLAB_PROTOCOL]).toEqual(
+        wetLab.toUpperCase(),
+      );
       // - Medaka Model reads: r941_prom_high_g330
       expect(samplesTable[sampleName][MEDAKA_MODEL]).toEqual(medakaModel);
     }

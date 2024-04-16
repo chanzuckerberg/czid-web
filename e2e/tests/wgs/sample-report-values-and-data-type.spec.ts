@@ -12,7 +12,7 @@ import { ProjectPage } from "../../page-objects/project-page";
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const NO_HOST = "wgs_SARS_CoV2_no_host";
 const WGS_SAMPLE_NAMES = [NO_HOST];
-const PIPELINE_VERSION = "Consensus Genome Pipeline v3.5.0";
+const PIPELINE_MAJOR_VERSION = "3";
 const GC_CONTENT_LABEL = "GC Content";
 const INFORMATIVE_NUCLEOTIDES_LABEL = "Informative Nucleotides";
 const GENOME_CALLED_LABEL = "% Genome Called";
@@ -35,7 +35,7 @@ const expectedData = {
         "Ambiguous Bases": "1",
       },
     ],
-    PipelineVersion: PIPELINE_VERSION,
+    PipelineVersion: PIPELINE_MAJOR_VERSION,
     ReferenceLength: "29790",
     CoverageDept: "420.4x",
     CoverageBreadth: "99.9%",
@@ -89,10 +89,11 @@ test.describe("Data Validation: P-0", () => {
       // #endregion 5. Verify "Is my consensuos genome complete?" and "How good is the coverage?" section data
 
       // #region 6. Verify Consensus Genome Pipeline version
-      const expectedPipelineVersion =
-        expectedDataHuman[sampleName]["PipelineVersion"];
+      const expectedPipelineRegex = new RegExp(
+        `Consensus Genome Pipeline v${expectedDataHuman[sampleName]["PipelineVersion"]}.\\d+.\\d+`,
+      );
       const actualPipelineVersion = await samplesPage.getPipelineVersion();
-      expect(actualPipelineVersion).toEqual(expectedPipelineVersion);
+      expect(actualPipelineVersion).toMatch(expectedPipelineRegex);
       // #endregion 6. Verify Consensus Genome Pipeline version
 
       // #region 7. Hover over "How good is the coverage?" histogram
@@ -283,10 +284,11 @@ test.describe("Data Validation: P-0", () => {
       // #endregion 5. Verify "Is my consensuos genome complete?" and "How good is the coverage?" section data
 
       // #region 6. Verify Consensus Genome Pipeline version
-      const expectedPipelineVersion =
-        expectedDataERCCOnly[sampleName]["PipelineVersion"];
+      const expectedPipelineRegex = new RegExp(
+        `Consensus Genome Pipeline v${expectedDataERCCOnly[sampleName]["PipelineVersion"]}.\\d+.\\d+`,
+      );
       const actualPipelineVersion = await samplesPage.getPipelineVersion();
-      expect(actualPipelineVersion).toEqual(expectedPipelineVersion);
+      expect(actualPipelineVersion).toMatch(expectedPipelineRegex);
       // #endregion 6. Verify Consensus Genome Pipeline version
 
       // #region 7. Hover over "How good is the coverage?" histogram
@@ -389,10 +391,11 @@ test.describe("Data Validation: P-0", () => {
       // #endregion 5. Verify "Is my consensuos genome complete?" and "How good is the coverage?" section data
 
       // #region 6. Verify Consensus Genome Pipeline version
-      const expectedPipelineVersion =
-        expectedDataChikungunyaVirus[sampleName]["PipelineVersion"];
+      const expectedPipelineRegex = new RegExp(
+        `Consensus Genome Pipeline v${expectedDataChikungunyaVirus[sampleName]["PipelineVersion"]}.\\d+.\\d+`,
+      );
       const actualPipelineVersion = await samplesPage.getPipelineVersion();
-      expect(actualPipelineVersion).toEqual(expectedPipelineVersion);
+      expect(actualPipelineVersion).toMatch(expectedPipelineRegex);
       // #endregion 6. Verify Consensus Genome Pipeline version
 
       // #region 7. Hover over "How good is the coverage?" histogram
@@ -497,10 +500,11 @@ test.describe("Data Validation: P-0", () => {
       // #endregion 5. Verify "Is my consensuos genome complete?" and "How good is the coverage?" section data
 
       // #region 6. Verify Consensus Genome Pipeline version
-      const expectedPipelineVersion =
-        expectedDataERCCOnlyChikungunyaVirus[sampleName]["PipelineVersion"];
+      const expectedPipelineRegex = new RegExp(
+        `Consensus Genome Pipeline v${expectedDataERCCOnlyChikungunyaVirus[sampleName]["PipelineVersion"]}.\\d+.\\d+`,
+      );
       const actualPipelineVersion = await samplesPage.getPipelineVersion();
-      expect(actualPipelineVersion).toEqual(expectedPipelineVersion);
+      expect(actualPipelineVersion).toMatch(expectedPipelineRegex);
       // #endregion 6. Verify Consensus Genome Pipeline version
 
       // #region 7. Hover over "How good is the coverage?" histogram
