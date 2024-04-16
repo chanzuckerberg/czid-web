@@ -1,5 +1,8 @@
 import { SEQUENCING_PLATFORMS, WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
@@ -12,20 +15,19 @@ const SAMPLE_NAMES = [SAMPLE_NAME];
 const RUN_PIPELINE = true;
 const WAIT_FOR_PIPELINE = false;
 
-
-const TEST_TIMEOUT = 60 * 1000 * 5;
-
+const TEST_TIMEOUT = 60 * 1000 * 20; // Inclease the test runtime to let the workflow run
 
 /*
  * CG - Project Count
  * Run from mNGS
  */
 test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
-
   /*
    * SNo SC2-42: Project count when CG running from mNGS
    */
-  test(`SNo SC2-42: Project count when CG running from mNGS`, async ({ page }) => {
+  test(`SNo SC2-42: Project count when CG running from mNGS`, async ({
+    page,
+  }) => {
     test.setTimeout(TEST_TIMEOUT);
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
@@ -40,13 +42,19 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
       SAMPLE_FILES,
       SAMPLE_NAMES,
       WORKFLOWS.MNGS,
-      {hostOrganism: "Human", taxon: "Betacoronavirus 1", sequencingPlatform: SEQUENCING_PLATFORMS.MNGS,
-      runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        hostOrganism: "Human",
+        taxon: "Betacoronavirus 1",
+        sequencingPlatform: SEQUENCING_PLATFORMS.MNGS,
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
 
     await projectPage.navigateToSamples(project.id, WORKFLOWS.MNGS);
 
-    const originalConsensusGenomeTabCount = await projectPage.getConsensusGenomesCount();
+    const originalConsensusGenomeTabCount =
+      await projectPage.getConsensusGenomesCount();
     const originalGeneralSamplesTabCount = await projectPage.getSamplesCount();
     // #endregion 2. At Project tab, select ""floo sp100"" project
 
@@ -65,9 +73,11 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
 
     // #region 5. Hover over ""Betacoronavirus 1"" species row and click on Consensus Genome icon
     await samplePage.clickExpandAll();
-    const knownPathongen = "Severe acute respiratory syndrome-related coronavirus";
+    const knownPathongen =
+      "Severe acute respiratory syndrome-related coronavirus";
     await samplePage.clickConsensusGenomeIcon(knownPathongen);
-    const isCreateANewConsensusGenomeButtonVisible = await samplePage.isCreateANewConsensusGenomeButtonVisible();
+    const isCreateANewConsensusGenomeButtonVisible =
+      await samplePage.isCreateANewConsensusGenomeButtonVisible();
     if (isCreateANewConsensusGenomeButtonVisible) {
       await samplePage.clickCreateANewConsensusGenome();
     }
@@ -75,7 +85,10 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
 
     // #region 6. Select ""Human coronavirus OC43, complete genome - 99.6%id, Complete Sequence, 31.5x coverage"" Reference Accession option from dropdown list
     const referenceAccessions = await samplePage.getReferenceAccessionOptions();
-    const referenceAccession = referenceAccessions[Math.floor(Math.random() * referenceAccessions.length)];
+    const referenceAccession =
+      referenceAccessions[
+        Math.floor(Math.random() * referenceAccessions.length)
+      ];
     await samplePage.selectReferenceAccession(referenceAccession);
     // #endregion 6. Select ""Human coronavirus OC43, complete genome - 99.6%id, Complete Sequence, 31.5x coverage"" Reference Accession option from dropdown list
 
@@ -87,7 +100,8 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
     await samplePage.clickViewConsensusGenomeLink();
 
     // - CG Pipeline was successfully kicked off and loads a sample report.
-    const isMyConsensusGenomeComplete = await samplePage.getIsMyConsensusGenomeCompleteTable();
+    const isMyConsensusGenomeComplete =
+      await samplePage.getIsMyConsensusGenomeCompleteTable();
     expect(isMyConsensusGenomeComplete).not.toEqual([]);
     // #endregion 8. Click on ""VIEW CONSENSUS GENOME"" link in blue toast message
 
@@ -97,7 +111,8 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
     // #endregion 9. Click back on ""floo sp100"" project link at CG in progress page
 
     // #region 10. Observe Consensus Genome tab count
-    const consensusGenomeTabCount = await projectPage.getConsensusGenomesCount();
+    const consensusGenomeTabCount =
+      await projectPage.getConsensusGenomesCount();
     // #endregion 10. Observe Consensus Genome tab count
 
     // #region 11. Observe Samples general tab count
@@ -105,9 +120,10 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
     // #endregion 11. Observe Samples general tab count
 
     // #region - Consensus Genomes tab count increases by 1
-    expect(consensusGenomeTabCount).toEqual(originalConsensusGenomeTabCount + 1);
+    expect(consensusGenomeTabCount).toEqual(
+      originalConsensusGenomeTabCount + 1,
+    );
     expect(generalSamplesTabCount).toEqual(originalGeneralSamplesTabCount + 1);
     // #endregion - Consensus Genomes tab count increases by 1
-
   });
 });
