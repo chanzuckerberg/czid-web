@@ -13,7 +13,7 @@ on:
 jobs:
   # Run Smoke tests on staging
   run_staging_playwright_smoke_tests:
-    name: Run Playwright Smoke tests on staging
+    name: Run Smoke tests on staging
     uses: ./.github/workflows/e2e-automation.yml
     with:
       node-environment: "staging"
@@ -25,7 +25,7 @@ jobs:
   run_staging_playwright_smoke_tests_with_feature_flags:
     if: ${{ always() }}
     needs: run_staging_playwright_smoke_tests
-    name: Run Playwright E2E tests on staging
+    name: Run Smoke tests on staging with feature flags
     uses: ./.github/workflows/e2e-automation.yml
     with:
       node-environment: "staging"
@@ -37,7 +37,7 @@ jobs:
   run_staging_playwright_e2e_tests:
     if: ${{ always() }}
     needs: run_staging_playwright_smoke_tests_with_feature_flags
-    name: Run Playwright E2E tests on staging
+    name: Run E2E tests on staging
     uses: ./.github/workflows/e2e-automation.yml
     with:
       node-environment: "staging"
@@ -49,7 +49,7 @@ jobs:
   run_staging_playwright_e2e_tests_with_feature_flags:
     if: ${{ always() }}
     needs: run_staging_playwright_e2e_tests
-    name: Run Playwright E2E tests on staging
+    name: Run E2E tests on staging with feature flags
     uses: ./.github/workflows/e2e-automation.yml
     with:
       node-environment: "staging"
