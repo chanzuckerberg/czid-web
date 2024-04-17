@@ -147,7 +147,7 @@ const DiscoveryViewRouter = ({
         <Route exact path="/admin">
           <AdminPage />
         </Route>
-        <Route path="/admin/admin_settings">
+        <Route path="/admin/settings">
           <AdminSettings />
         </Route>
         <Route

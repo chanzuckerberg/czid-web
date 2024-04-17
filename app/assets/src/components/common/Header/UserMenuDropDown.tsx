@@ -40,7 +40,7 @@ const UserMenuDropDown = ({
         <BareDropdown.Item
           key="admin_settings"
           text={
-            <a className={cs.option} href="admin/admin_settings">
+            <a className={cs.option} href="/admin/settings">
               Admin Settings
             </a>
           }

@@ -1,7 +1,7 @@
 class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required, except: [:landing, :sign_up, :maintenance, :page_not_found]
-  before_action :admin_required, only: [:all_data, :admin, :admin_projects, :admin_samples, :admin_settings, :set_workflow_version, :set_app_config, :app_configs]
+  before_action :admin_required, only: [:all_data, :set_workflow_version, :set_app_config, :app_configs]
   before_action :check_profile_form_completion, except: [:landing, :sign_up, :maintenance, :page_not_found, :user_profile_form]
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance, :page_not_found]
   skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
@@ -162,18 +162,6 @@ class HomeController < ApplicationController
                end
     response = AwsClient[:s3].get_object(bucket: S3_WORKFLOWS_BUCKET, key: "#{workflow}-v#{version}/#{filename}")
     return response[:content_length] > 0
-  end
-
-  def admin_settings
-  end
-
-  def admin
-  end
-
-  def admin_projects
-  end
-
-  def admin_samples
   end
 
   def user_profile_form

@@ -9,10 +9,18 @@ export const AdminPage = () => {
       <h2>Available pages</h2>
       <ul>
         <li>
-          <Link to="/admin/admin_settings">/admin/admin_settings</Link>
+          <Link to="/admin/settings">/admin/settings</Link>
+        </li>
+        <li>
+          {/* This is not a react-router link because it's still rendered by rails */}
+          <a href="/projects">/projects</a>
         </li>
         <li>
           <Link to="/admin/projects/123">{`/admin/projects/{projectId}`}</Link>
+        </li>
+        <li>
+          {/* This is not a react-router link because it's still rendered by rails */}
+          <a href="/samples/28139/pipeline_runs">{`/samples/{sampleId}/pipeline_runs`}</a>
         </li>
         <li>
           <Link to="/admin/samples/123">{`/admin/samples/{sampleId}`}</Link>

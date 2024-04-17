@@ -115,16 +115,21 @@ Rails.application.routes.draw do
   get 'public', to: 'home#public'
   get 'select', to: 'home#index'
   get 'taxon_descriptions', to: 'home#taxon_descriptions'
-  get 'admin/admin_settings', to: 'home#admin_settings'
-  get 'admin/projects/:projectId', to: 'home#admin_projects'
-  get 'admin/samples/:sampleId', to: 'home#admin_samples'
-  get 'admin', to: 'home#admin'
   get 'app_configs', to: 'home#app_configs'
   get 'user_profile_form', to: 'home#user_profile_form'
   put 'workflow_version', to: 'home#set_workflow_version'
   put 'set_app_config', to: 'home#set_app_config'
   post 'feedback', to: 'home#feedback'
   post 'sign_up', to: 'home#sign_up'
+
+  # AdminController:
+  resources :admin, only: [:index] do
+    collection do
+      get :settings
+      get 'projects/:projectId', to: 'admin#projects'
+      get 'samples/:sampleId', to: 'admin#samples'
+    end
+  end
 
   # SupportController:
   get 'faqs', to: 'support#faqs'
