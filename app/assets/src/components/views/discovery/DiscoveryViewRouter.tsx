@@ -26,6 +26,9 @@ import FAQPage from "~/components/views/support/FAQPage";
 import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoticeForUserResearch";
 import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";
 import TermsOfUsePreview from "~/components/views/support/TermsOfUsePreview";
+import { AdminPage } from "../admin/AdminPage";
+import { AdminProject } from "../admin/AdminProject";
+import { AdminSample } from "../admin/AdminSample";
 import AdminSettings from "../admin_settings/AdminSettings";
 import { DiscoveryViewFC } from "./DiscoveryViewFC";
 
@@ -141,9 +144,24 @@ const DiscoveryViewRouter = ({
         <Route exact path="/faqs">
           <FAQPage />
         </Route>
-        <Route exact path="/admin_settings">
+        <Route exact path="/admin">
+          <AdminPage />
+        </Route>
+        <Route path="/admin/admin_settings">
           <AdminSettings />
         </Route>
+        <Route
+          path="/admin/samples/:sampleId"
+          render={({ match }) => (
+            <AdminSample sampleId={match.params.sampleId} />
+          )}
+        />
+        <Route
+          path="/admin/projects/:projectId"
+          render={({ match }) => (
+            <AdminProject projectId={match.params.projectId} />
+          )}
+        />
         {userSignedIn ? (
           <Route
             render={({ match }) => (
