@@ -943,6 +943,7 @@ export class ProjectPage extends PageObject {
         }
       }
     }
+    await this.pause(1);
     return selectedSampleNames;
   }
 

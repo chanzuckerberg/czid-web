@@ -118,8 +118,10 @@ export class SamplesPage extends PageObject {
     // #region Get
     public async getReferenceAccessionOptions() {
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+      await this.pause(2);
       const referenceAccession = this.page.locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS).allTextContents();
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+      await this.pause(1);
       return referenceAccession;
     }
 
@@ -664,11 +666,14 @@ export class SamplesPage extends PageObject {
     public async waitForReportComplete(sampleId: number) {
       await this.navigate(sampleId);
       await this.pause(10);
+      await this.waitForNotInProgress();
+    }
 
+    public async waitForNotInProgress() {
       const inProgress = this.page.locator(REPORT_IN_PROGRESS);
       while(await inProgress.isVisible()) {
-        await this.navigate(sampleId);
-        await this.pause(10);
+        await this.reload();
+        await this.pause(20);
       }
     }
 
@@ -798,6 +803,7 @@ export class SamplesPage extends PageObject {
 
     public async selectReferenceAccession(option: string) {
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+      await this.pause(2);
       await this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION).getByText(option).click();
       await this.pause(1);
     }

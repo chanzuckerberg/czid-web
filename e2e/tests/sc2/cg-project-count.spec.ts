@@ -15,7 +15,7 @@ const SAMPLE_NAMES = [SAMPLE_NAME];
 const RUN_PIPELINE = true;
 const WAIT_FOR_PIPELINE = false;
 
-const TEST_TIMEOUT = 60 * 1000 * 20; // Inclease the test runtime to let the workflow run
+const TEST_TIMEOUT = 60 * 1000 * 60; // Inclease the test runtime to let the workflow run
 
 /*
  * CG - Project Count
@@ -98,6 +98,7 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
 
     // #region 8. Click on ""VIEW CONSENSUS GENOME"" link in blue toast message
     await samplePage.clickViewConsensusGenomeLink();
+    await samplePage.waitForNotInProgress();
 
     // - CG Pipeline was successfully kicked off and loads a sample report.
     const isMyConsensusGenomeComplete =
@@ -111,6 +112,7 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
     // #endregion 9. Click back on ""floo sp100"" project link at CG in progress page
 
     // #region 10. Observe Consensus Genome tab count
+    await projectPage.reload();
     const consensusGenomeTabCount =
       await projectPage.getConsensusGenomesCount();
     // #endregion 10. Observe Consensus Genome tab count
