@@ -84,7 +84,7 @@ export const AdvancedDownloadTab = ({
       if (
         downloadFormat &&
         downloadFormat.value &&
-        ["Single File (Concatenated)", "concatenated"].includes(
+        ["Single File (Concatenated)", "concatenate"].includes(
           downloadFormat.value,
         )
       ) {
