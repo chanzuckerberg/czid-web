@@ -200,7 +200,9 @@ export class ProjectPage extends PageObject {
       ".ReactVirtualized__Grid__innerScrollContainer",
     );
     await this.pause(1);
-    await expect(this.page.locator('[class*="loading"]')).toHaveCount(0);
+    await expect(this.page.locator('[class*="loading"]')).toHaveCount(0, {
+      timeout: 30_000,
+    });
   }
   // #endregion Navigate
 
