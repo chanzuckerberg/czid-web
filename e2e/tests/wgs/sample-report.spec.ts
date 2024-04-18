@@ -76,6 +76,7 @@ test.describe("Data Validation: P-1", () => {
     // - Taxonomy=Unkonwn
     await uploadPage.setUploadTaxonFilter("Unknown");
 
+    await uploadPage.pause(4); // Stablize test
     await uploadPage.clickContinue();
 
     // - Host=Human
@@ -87,6 +88,7 @@ test.describe("Data Validation: P-1", () => {
 
     await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
+    expect(await uploadPage.getErrors()).toEqual([]);
 
     await uploadPage.clickTermsAgreementCheckbox();
     await uploadPage.clickStartUploadButton();
@@ -229,6 +231,8 @@ test.describe("Data Validation: P-1", () => {
     await uploadPage.setWetLabFilter(WETLAB_PROTOCOL);
 
     await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES);
+
+    await uploadPage.pause(4); // Stablize test
     await uploadPage.clickContinue();
 
     // - Host=Human
@@ -240,6 +244,7 @@ test.describe("Data Validation: P-1", () => {
 
     await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
+    expect(await uploadPage.getErrors()).toEqual([]);
 
     await uploadPage.clickTermsAgreementCheckbox();
     await uploadPage.clickStartUploadButton();
@@ -371,7 +376,6 @@ test.describe("Data Validation: P-1", () => {
     await uploadPage.clickCheckboxForWorkflow(WORKFLOWS.SC2);
 
     await uploadPage.uploadSampleFiles([`${SC2_NANOPORE_SAMPLE}.fastq.gz`]);
-    let sampleNames = await uploadPage.getSampleNames();
 
     // - Sequencing Platform=Nanopore
     await uploadPage.clickSequencingPlatform(WORKFLOWS.LMNGS);
@@ -379,9 +383,12 @@ test.describe("Data Validation: P-1", () => {
     // - Used Clear Labs=No
     await uploadPage.clickClearLabsToggle("No");
     await uploadPage.setWetLabFilter(WETLAB_PROTOCOL);
+
+    await uploadPage.pause(4); // Stablize test
     await uploadPage.clickContinue();
 
     // - Host=Human
+    let sampleNames = await uploadPage.getMetadataSampleNames();
     const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
     for (const sampleName of sampleNames) {
       inputs[sampleName].hostOrganism = "Human";
@@ -389,6 +396,7 @@ test.describe("Data Validation: P-1", () => {
 
     await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
+    expect(await uploadPage.getErrors()).toEqual([]);
 
     await uploadPage.clickTermsAgreementCheckbox();
     await uploadPage.clickStartUploadButton();

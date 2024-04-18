@@ -802,8 +802,10 @@ export class SamplesPage extends PageObject {
     }
 
     public async selectReferenceAccession(option: string) {
+      await this.pause(1);
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
-      await this.pause(2);
+
+      await this.pause(1);
       await this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION).getByText(option).click();
       await this.pause(1);
     }

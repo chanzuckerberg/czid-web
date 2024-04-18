@@ -14,6 +14,7 @@ import { expect } from "@playwright/test";
 import { IlluminaPage } from "./illumina-page";
 import { PageObject } from "./page-object";
 
+const ERRORS = "[class*='errors']";
 const CONSENSUS_GENOME_PIPELINE_MAJOR_VERSION = "3";
 export const SARS_COV2_REF_FILENAME = "wgs_SARS_CoV2_reference.fa";
 export const SARS_COV2_TRIM_PRIMER_FILENAME = "wgs_SARS_CoV2_primers_regions.bed";
@@ -401,6 +402,11 @@ export class UploadPage extends PageObject {
       "message": error.trim(),
       "files": table,
     };
+  }
+
+  public async getErrors(timeout = 1000) {
+    await this.page.locator(ERRORS).first().waitFor({ timeout: timeout }) .catch(() => null);
+    return this.page.locator(ERRORS).allTextContents();
   }
 
   public async getCheckboxForWorkflow(workflow: string) {
@@ -809,6 +815,7 @@ export class UploadPage extends PageObject {
 
     // Continue to Review to verify the CSV Sample Info
     await this.clickContinue();
+    expect(await this.getErrors()).toEqual([]); // Catch metadata upload errors
 
     // Continue to Upload
     await this.clickTermsAgreementCheckbox();

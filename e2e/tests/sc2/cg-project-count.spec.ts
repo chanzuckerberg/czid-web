@@ -15,7 +15,7 @@ const SAMPLE_NAMES = [SAMPLE_NAME];
 const RUN_PIPELINE = true;
 const WAIT_FOR_PIPELINE = false;
 
-const TEST_TIMEOUT = 60 * 1000 * 60; // Inclease the test runtime to let the workflow run
+const TEST_TIMEOUT = 60 * 1000 * 40; // Inclease the test runtime to let the workflow run
 
 /*
  * CG - Project Count
