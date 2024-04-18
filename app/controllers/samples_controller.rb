@@ -1859,8 +1859,10 @@ class SamplesController < ApplicationController
     # assume that all samples are in the same project and from the same user
     project = samples.first.project
     uploader = samples.first.user
+    # These logs get scanned by the cloudwatch-alerting lambda in the idseq monorepo and sent to slack.
     msg = "LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name}." \
-    " See: #{project.status_url}"
+    " See: #{project.status_url}" \
+    " cc: @xochitl @czid-devs"
     Rails.logger.info(msg)
   rescue StandardError => e
     # catch all errors because we don't want to ever block uploads
