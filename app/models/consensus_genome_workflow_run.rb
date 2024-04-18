@@ -16,6 +16,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   OUTPUT_STATS = "consensus_genome.compute_stats_out_output_stats".freeze
   OUTPUT_ZIP = "consensus_genome.zip_outputs_out_output_zip".freeze
 
+  SARS_COV_2_TAXON_ID = "2697049".freeze
   SARS_COV_2_ACCESSION_ID = "MN908947.3".freeze
 
   WETLAB_PROTOCOL = {

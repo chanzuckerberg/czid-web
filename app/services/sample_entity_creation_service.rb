@@ -51,7 +51,26 @@ class SampleEntityCreationService
       nextgen_sample_id = response.data&.create_sample&.id
     end
 
-    # Check if the SequencingRead already exists in the nextGen database
+    # Fetch the next gen taxon entity (if present)
+    workflow_run_taxon_id = if creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
+                              ConsensusGenomeWorkflowRun::SARS_COV_2_TAXON_ID
+                            else
+                              @workflow_run.get_input("taxon_id")
+                            end
+    if workflow_run_taxon_id
+      taxon_response = CzidGraphqlFederation
+                       .query_with_token(
+                         @user_id,
+                         GraphqlOperations::GetTaxonByUpstreamDatabaseIdentifier,
+                         variables: {
+                           upstream_database_identifier: @workflow_run.get_input("taxon_id").to_s,
+                         },
+                         token: @token
+                       )
+      next_gen_taxon_id = taxon_response.data&.taxa&.first&.id
+    end
+
+    # Check if the SequencingRead already exists in the nextGen database, i.e. creation_source == mngs_report
     response = CzidGraphqlFederation
                .query_with_token(
                  @user_id,
@@ -62,22 +81,42 @@ class SampleEntityCreationService
                  token: @token
                )
     sequencing_read_id = response.data&.sequencing_reads&.first&.id
+    # If the SequencingRead does not exist (i.e. creation_source == viral_cg_upload or sars_cov_2_upload),
+    # create a new SequencingRead and link it to the Sample
     if sequencing_read_id.nil?
-      # Create the new SequencingRead and link it to the Sample
-      response = CzidGraphqlFederation
-                 .query_with_token(
-                   @user_id,
-                   GraphqlOperations::CreateSequencingReadMutation,
-                   variables: {
-                     technology: @technology,
-                     clearlabs_export: @workflow_run.get_input("clearlabs") | false,
-                     collection_id: @sample.project_id,
-                     medaka_model: @workflow_run.get_input("medaka_model"),
-                     protocol: @workflow_run.get_input("wetlab_protocol"),
-                     sample_id: nextgen_sample_id,
-                   },
-                   token: @token
-                 )
+      # Link the SequencingRead to the Taxon if applicable
+      response = if next_gen_taxon_id
+                   CzidGraphqlFederation
+                     .query_with_token(
+                       @user_id,
+                       GraphqlOperations::CreateSequencingReadLinkedToTaxonMutation,
+                       variables: {
+                         technology: @technology,
+                         clearlabs_export: @workflow_run.get_input("clearlabs") | false,
+                         collection_id: @sample.project_id,
+                         medaka_model: @workflow_run.get_input("medaka_model"),
+                         protocol: @workflow_run.get_input("wetlab_protocol"),
+                         sample_id: nextgen_sample_id,
+                         taxon_id: next_gen_taxon_id,
+                       },
+                       token: @token
+                     )
+                 else
+                   CzidGraphqlFederation
+                     .query_with_token(
+                       @user_id,
+                       GraphqlOperations::CreateSequencingReadMutation,
+                       variables: {
+                         technology: @technology,
+                         clearlabs_export: @workflow_run.get_input("clearlabs") | false,
+                         collection_id: @sample.project_id,
+                         medaka_model: @workflow_run.get_input("medaka_model"),
+                         protocol: @workflow_run.get_input("wetlab_protocol"),
+                         sample_id: nextgen_sample_id,
+                       },
+                       token: @token
+                     )
+                 end
       sequencing_read_id = response.data&.create_sequencing_read&.id
     end
 
@@ -136,34 +175,27 @@ class SampleEntityCreationService
         )
       end
 
-      # Add next gen taxon entity (if present) to workflow run entity inputs
-      workflow_run_taxon_id = @workflow_run.get_input("taxon_id")
-      if workflow_run_taxon_id
-        response = CzidGraphqlFederation
-                   .query_with_token(
-                     @user_id,
-                     GraphqlOperations::GetTaxonByUpstreamDatabaseIdentifier,
-                     variables: {
-                       upstream_database_identifier: @workflow_run.get_input("taxon_id").to_s,
-                     },
-                     token: @token
-                   )
-        next_gen_taxon_id = response.data&.taxa&.first&.id
-        if next_gen_taxon_id
-          create_workflow_run_entity_inputs.push(
-            {
-              name: "taxon",
-              entityId: next_gen_taxon_id,
-              entityType: "taxon",
-            }
-          )
+      # Add next gen taxon entity (if present) to workflow run entity inputs.
+      # This is an optional input for running the workflowRun if the creation source is sars_cov_2_upload
+      # since it will be inferred during pipeline processing, but we still want to store it in the raw inputs
+      # for the frontend to display.
+      if next_gen_taxon_id
+        create_workflow_run_entity_inputs.push(
+          {
+            name: "taxon",
+            entityId: next_gen_taxon_id,
+            entityType: "taxon",
+          }
+        )
 
-          create_workflow_run_raw_inputs_hash[:taxon_name] = response.data&.taxa&.first&.name
-          create_workflow_run_raw_inputs_hash[:taxon_level] = response.data&.taxa&.first&.level
-        end
+        create_workflow_run_raw_inputs_hash[:taxon_name] = taxon_response.data&.taxa&.first&.name
+        create_workflow_run_raw_inputs_hash[:taxon_level] = taxon_response.data&.taxa&.first&.level
       end
 
-      # Add next gen accession entity (if present) to workflow run entity inputs
+      # Add next gen accession entity (if present) to workflow run entity inputs.
+      # This is an optional input for running the workflowRun if the creation source is sars_cov_2_upload
+      # since it will be inferred during pipeline processing, but we still want to store it in the raw inputs
+      # for the frontend to display.
       if workflow_run_accession_id
         get_accession_response = CzidGraphqlFederation
                                  .query_with_token(

@@ -51,6 +51,24 @@ class GraphqlOperations
     }
   GRAPHQL
 
+  CreateSequencingReadLinkedToTaxonMutation = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+  mutation($technology: SequencingTechnology!, $clearlabs_export: Boolean!, $collection_id: Int!, $medaka_model: String, $protocol: SequencingProtocol, $sample_id: ID!, $taxon_id: ID!) {
+    createSequencingRead(
+      input: {
+        technology: $technology,
+        clearlabsExport: $clearlabs_export,
+        collectionId: $collection_id,
+        medakaModel: $medaka_model,
+        protocol: $protocol,
+        sampleId: $sample_id,
+        taxonId: $taxon_id,
+      }
+    ) {
+      id
+    }
+  }
+  GRAPHQL
+
   GetWorkflowVersion = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
     query($workflow_name: String!, $version: String!) {
       workflowVersions(
