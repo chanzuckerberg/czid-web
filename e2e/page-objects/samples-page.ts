@@ -432,7 +432,7 @@ export class SamplesPage extends PageObject {
     }
 
     public async clickShareButton() {
-      await this.pause(1);
+      await this.pause(4);
       await this.page.locator(SHARE_BUTTON).click();
 
       await this.pause(1);

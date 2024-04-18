@@ -6,6 +6,7 @@ import { NextcladePage } from "./nextclade-page";
 import { PageObject } from "./page-object";
 import { SamplesPage } from "./samples-page";
 
+const POPUPTEXT = "[class*='popupText']";
 const CLOSE_ICON = "[class*='closeIcon']";
 const SELECT_ALL_SAMPLES = "//*[@type='checkbox'][@value='all']/parent::*";
 const SELECTED_SAMPLES_COUNTER = "[class*='counterContainer']";
@@ -54,7 +55,7 @@ const USER_DROPDOWN = "[class*='userDropdown']";
 const USER_DROPDOWN_DOWNLOADS_LINK = "//a[text()='Downloads']";
 const DOWNLOADS_LINK = "[class*='message'] [href='/bulk_downloads']";
 const NEXTCLADE_TREE_BUTTON =
-  "[class*='action'] > div:not([data-testid]) button";
+  "[class*='action'] > div:not([data-testid]) button svg";
 const NEXTCLADE_OPTIONS = "[class*='treeTypeContainer'] [class*='name']";
 const NEXTCLADE_TAGLINE =
   "[class*='modal'] [class*='nextcladeHeader'] [class*='tagline']";
@@ -600,6 +601,8 @@ export class ProjectPage extends PageObject {
   }
 
   public async clickNextcladeTreeButton() {
+    const nextcladeTreeTooltip = await this.getNextcladeTreeTooltip();
+    expect(nextcladeTreeTooltip).not.toMatch("Nexclade is temporarily unavailable");
     await this.page.locator(NEXTCLADE_TREE_BUTTON).click();
     await this.pause(1);
   }
@@ -682,6 +685,18 @@ export class ProjectPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getNextcladeTreeTooltip() {
+    await this.page.locator(NEXTCLADE_TREE_BUTTON).focus();
+    await this.page.locator(NEXTCLADE_TREE_BUTTON).hover({force: true});
+    const popupTextElement = await this.page.locator(POPUPTEXT).waitFor({timeout: 1000}).catch(() => null);
+
+    let popupText = "";
+    if (popupTextElement !== null) {
+      popupText = await this.page.locator(POPUPTEXT).textContent();
+    }
+    return popupText;
+  }
+
   public async getDeleteSelectedSamplesCount() {
     const deleteTitle = await this.page
       .locator(DELETE_MODAL_TITLE)
