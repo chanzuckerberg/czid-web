@@ -36,6 +36,12 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
 
     // #region 2. At Project tab, select ""floo sp100"" project
     const project = await projectPage.getOrCreateProject("SNo_SC2-42");
+    await projectPage.navigateToSamples(project.id, WORKFLOWS.MNGS);
+
+    const originalConsensusGenomeTabCount =
+      await projectPage.getConsensusGenomesCount();
+    const originalGeneralSamplesTabCount = await projectPage.getSamplesCount();
+
     await setupSamples(
       page,
       project,
@@ -50,12 +56,9 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
         waitForPipeline: WAIT_FOR_PIPELINE,
       },
     );
-
     await projectPage.navigateToSamples(project.id, WORKFLOWS.MNGS);
-
-    const originalConsensusGenomeTabCount =
-      await projectPage.getConsensusGenomesCount();
-    const originalGeneralSamplesTabCount = await projectPage.getSamplesCount();
+    await projectPage.pause(10); // Allow time for the Samples column count to update
+    await projectPage.reload();
     // #endregion 2. At Project tab, select ""floo sp100"" project
 
     // #region 3. Click on ""CoVOC43_95UHR_Thermo_cDNA_Synthesis_Unenriched_Rep1"" sample
@@ -112,7 +115,9 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
     // #endregion 9. Click back on ""floo sp100"" project link at CG in progress page
 
     // #region 10. Observe Consensus Genome tab count
+    await projectPage.pause(10); // Allow time for the Consensus Genome tab count to update
     await projectPage.reload();
+
     const consensusGenomeTabCount =
       await projectPage.getConsensusGenomesCount();
     // #endregion 10. Observe Consensus Genome tab count
