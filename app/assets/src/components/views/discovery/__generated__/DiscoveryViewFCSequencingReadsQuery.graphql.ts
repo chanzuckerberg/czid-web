@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6f9fd9158cd93d71604355292ef0cfdc>>
+ * @generated SignedSource<<cbaf9798fd490eeb031d450f54031e16>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -174,7 +174,6 @@ export type DiscoveryViewFCSequencingReadsQuery$data = {
           } | null | undefined;
           readonly producingRunId: string | null | undefined;
           readonly taxon: {
-            readonly level: string | null | undefined;
             readonly name: string;
           } | null | undefined;
         };
@@ -211,7 +210,6 @@ export type DiscoveryViewFCSequencingReadsQuery$data = {
       readonly waterControl: boolean | null | undefined;
     } | null | undefined;
     readonly taxon: {
-      readonly level: string | null | undefined;
       readonly name: string;
     } | null | undefined;
     readonly technology: string;
@@ -238,14 +236,7 @@ v1 = {
   "storageKey": null
 },
 v2 = [
-  (v1/*: any*/),
-  {
-    "alias": null,
-    "args": null,
-    "kind": "ScalarField",
-    "name": "level",
-    "storageKey": null
-  }
+  (v1/*: any*/)
 ],
 v3 = [
   {
@@ -365,9 +356,7 @@ v3 = [
             "kind": "LinkedField",
             "name": "hostOrganism",
             "plural": false,
-            "selections": [
-              (v1/*: any*/)
-            ],
+            "selections": (v2/*: any*/),
             "storageKey": null
           },
           {
@@ -631,16 +620,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "0e29d7a5b9a5d9e1f3a0131fb89073ae",
+    "cacheID": "0854606456916a206e74794250eff57d",
     "id": null,
     "metadata": {},
     "name": "DiscoveryViewFCSequencingReadsQuery",
     "operationKind": "query",
-    "text": "query DiscoveryViewFCSequencingReadsQuery(\n  $input: queryInput_fedSequencingReads_input_Input\n) {\n  fedSequencingReads(input: $input) {\n    id\n    nucleicAcid\n    protocol\n    medakaModel\n    technology\n    taxon {\n      name\n      level\n    }\n    sample {\n      railsSampleId\n      name\n      notes\n      collectionLocation\n      sampleType\n      waterControl\n      uploadError\n      hostOrganism {\n        name\n      }\n      collection {\n        name\n        public\n      }\n      ownerUserId\n      ownerUserName\n      metadatas {\n        edges {\n          node {\n            fieldName\n            value\n          }\n        }\n      }\n    }\n    consensusGenomes {\n      edges {\n        node {\n          producingRunId\n          taxon {\n            name\n            level\n          }\n          accession {\n            accessionId\n            accessionName\n          }\n          metrics {\n            coverageDepth\n            totalReads\n            gcPercent\n            refSnps\n            percentIdentity\n            nActg\n            percentGenomeCalled\n            nMissing\n            nAmbiguous\n            referenceGenomeLength\n          }\n        }\n      }\n    }\n  }\n}\n"
+    "text": "query DiscoveryViewFCSequencingReadsQuery(\n  $input: queryInput_fedSequencingReads_input_Input\n) {\n  fedSequencingReads(input: $input) {\n    id\n    nucleicAcid\n    protocol\n    medakaModel\n    technology\n    taxon {\n      name\n    }\n    sample {\n      railsSampleId\n      name\n      notes\n      collectionLocation\n      sampleType\n      waterControl\n      uploadError\n      hostOrganism {\n        name\n      }\n      collection {\n        name\n        public\n      }\n      ownerUserId\n      ownerUserName\n      metadatas {\n        edges {\n          node {\n            fieldName\n            value\n          }\n        }\n      }\n    }\n    consensusGenomes {\n      edges {\n        node {\n          producingRunId\n          taxon {\n            name\n          }\n          accession {\n            accessionId\n            accessionName\n          }\n          metrics {\n            coverageDepth\n            totalReads\n            gcPercent\n            refSnps\n            percentIdentity\n            nActg\n            percentGenomeCalled\n            nMissing\n            nAmbiguous\n            referenceGenomeLength\n          }\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6bebd8377bb1272e8d246ef8ef4b8111";
+(node as any).hash = "5d74d6f6ca976feb23f8398bfe79d269";
 
 export default node;

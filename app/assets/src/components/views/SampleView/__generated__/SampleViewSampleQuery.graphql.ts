@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<223c20100c170ebf7790f504443a2053>>
+ * @generated SignedSource<<6ba0d838fb5cf30b5684cfc48e79436f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -48,7 +48,10 @@ export type SampleViewSampleQuery$data = {
       readonly deprecated: boolean | null | undefined;
       readonly executed_at: string;
       readonly id: string;
-      readonly input_error: string | null | undefined;
+      readonly input_error: {
+        readonly label: string | null | undefined;
+        readonly message: string | null | undefined;
+      } | null | undefined;
       readonly inputs: {
         readonly accession_id: string | null | undefined;
         readonly accession_name: string | null | undefined;
@@ -308,8 +311,26 @@ v7 = [
           {
             "alias": null,
             "args": null,
-            "kind": "ScalarField",
+            "concreteType": "query_SampleForReport_workflow_runs_items_input_error",
+            "kind": "LinkedField",
             "name": "input_error",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "label",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "message",
+                "storageKey": null
+              }
+            ],
             "storageKey": null
           },
           {
@@ -407,16 +428,16 @@ return {
     "selections": (v7/*: any*/)
   },
   "params": {
-    "cacheID": "906d013ed1e41b8ba4d1b6442a242fb1",
+    "cacheID": "2173de0c0ab91cb17da9642e02188983",
     "id": null,
     "metadata": {},
     "name": "SampleViewSampleQuery",
     "operationKind": "query",
-    "text": "query SampleViewSampleQuery(\n  $railsSampleId: String\n  $snapshotLinkId: String\n) {\n  SampleForReport(railsSampleId: $railsSampleId, snapshotLinkId: $snapshotLinkId) {\n    id\n    created_at\n    default_background_id\n    default_pipeline_run_id\n    editable\n    host_genome_id\n    initial_workflow\n    name\n    pipeline_runs {\n      adjusted_remaining_reads\n      alignment_config_name\n      assembled\n      created_at\n      id\n      pipeline_version\n      run_finalized\n      total_ercc_reads\n      wdl_version\n    }\n    project {\n      id\n      name\n    }\n    project_id\n    railsSampleId\n    status\n    updated_at\n    upload_error\n    user_id\n    workflow_runs {\n      deprecated\n      executed_at\n      id\n      input_error\n      inputs {\n        accession_id\n        accession_name\n        creation_source\n        ref_fasta\n        taxon_id\n        taxon_name\n        technology\n      }\n      run_finalized\n      status\n      wdl_version\n      workflow\n    }\n  }\n}\n"
+    "text": "query SampleViewSampleQuery(\n  $railsSampleId: String\n  $snapshotLinkId: String\n) {\n  SampleForReport(railsSampleId: $railsSampleId, snapshotLinkId: $snapshotLinkId) {\n    id\n    created_at\n    default_background_id\n    default_pipeline_run_id\n    editable\n    host_genome_id\n    initial_workflow\n    name\n    pipeline_runs {\n      adjusted_remaining_reads\n      alignment_config_name\n      assembled\n      created_at\n      id\n      pipeline_version\n      run_finalized\n      total_ercc_reads\n      wdl_version\n    }\n    project {\n      id\n      name\n    }\n    project_id\n    railsSampleId\n    status\n    updated_at\n    upload_error\n    user_id\n    workflow_runs {\n      deprecated\n      executed_at\n      id\n      input_error {\n        label\n        message\n      }\n      inputs {\n        accession_id\n        accession_name\n        creation_source\n        ref_fasta\n        taxon_id\n        taxon_name\n        technology\n      }\n      run_finalized\n      status\n      wdl_version\n      workflow\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "296e5f8b2bb8b1ffebdaefb367bca0bd";
+(node as any).hash = "ccf67b9998dc286eecbede5c072f993d";
 
 export default node;

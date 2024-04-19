@@ -192,7 +192,10 @@ const SampleQuery = graphql`
         deprecated
         executed_at
         id
-        input_error
+        input_error {
+          label
+          message
+        }
         inputs {
           accession_id
           accession_name
