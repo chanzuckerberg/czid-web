@@ -269,7 +269,12 @@ export class DownloadsPage extends PageObject {
     await this.waitForDownloadComplete(downloadId, timeout);
     const download = await this.clickDownloadFile(downloadId);
 
-    expect(`${downloadType}.${expectedFileExtention}`).toMatch(download.suggestedFilename());
+    let expectedFileName = `${downloadType}.${expectedFileExtention}`;
+    if ((downloadType === "Intermediate Output Files") && await this.isFeatureFlagUser()) {
+      expectedFileName = "result.zip"; // TODO: Remove when consistent between FF on and off
+    }
+
+    expect(download.suggestedFilename()).toMatch(expectedFileName);
     // #endregion Verify the expected file was downloaded
   };
 }

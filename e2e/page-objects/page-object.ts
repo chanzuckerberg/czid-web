@@ -122,4 +122,9 @@ export abstract class PageObject {
   public async scrollDownToElement(locator: string, rowsLocator: string, indexAttribute: string) {
     await this.scrollToElement(locator, "down", rowsLocator, indexAttribute);
   }
+
+  public async isFeatureFlagUser() {
+    const userName = process.env.CZID_USERNAME;
+    return userName.startsWith("czid-e2e-ff");
+  }
 }
