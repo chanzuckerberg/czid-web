@@ -1053,7 +1053,7 @@ describe BulkDownload, type: :model do
 
           # The bulk download succeeds and the failed sample is stored in the error message.
           expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
-          expect(bulk_download.error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 1)
+          expect(bulk_download.error_message).to eq(BulkDownloadsHelper::COMBINED_SAMPLE_TAXON_RESULTS_ERROR_TEMPLATE % 1)
         end
       end
 
@@ -1106,7 +1106,7 @@ describe BulkDownload, type: :model do
 
           # The bulk download succeeds and the failed sample is stored in the error message.
           expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
-          expect(bulk_download.error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 1)
+          expect(bulk_download.error_message).to eq(BulkDownloadsHelper::COMBINED_SAMPLE_TAXON_RESULTS_ERROR_TEMPLATE % 1)
         end
       end
     end

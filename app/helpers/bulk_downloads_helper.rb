@@ -17,6 +17,7 @@ module BulkDownloadsHelper
   PRESIGNED_URL_GENERATION_ERROR = "Could not generate a presigned url.".freeze
   SUCCESS_URL_REQUIRED = "Success url required for bulk download.".freeze
   FAILED_SAMPLES_ERROR_TEMPLATE = "%s samples could not be processed. Please contact us for help.".freeze
+  COMBINED_SAMPLE_TAXON_RESULTS_ERROR_TEMPLATE = "%s samples were missing or had no data for the selected metric. Please contact us for help.".freeze
   UNKNOWN_EXECUTION_TYPE = "Could not find execution type for bulk download".freeze
   UNKNOWN_DOWNLOAD_TYPE = "Could not find download type for bulk download".freeze
   ADMIN_ONLY_DOWNLOAD_TYPE = "You must be an admin to initiate this download type.".freeze
@@ -441,7 +442,7 @@ module BulkDownloadsHelper
     metric_values, taxids_to_name = BulkDownloadsHelper.generate_metric_values(taxon_counts_by_pr, samples, metric)
                                                        .values_at(:metric_values, :taxids_to_name)
 
-    # Filter out any samples which could not be fetched or had no valid columns.
+    # Filter out any samples which could not be fetched or had no valid data for the metric.
     successful_samples, failed_samples = samples.to_a.partition { |sample| metric_values[sample.id].present? }
 
     # Generate the CSV.

@@ -776,11 +776,11 @@ class BulkDownload < ApplicationRecord
 
         unless result[:failed_sample_ids].empty?
           LogUtil.log_error(
-            "BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{result[:failed_sample_ids]}",
+            "BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process or had no data for the metric: #{result[:failed_sample_ids]}",
             bulk_download_id: id,
             failed_sample_ids: result[:failed_sample_ids]
           )
-          update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % result[:failed_sample_ids].length)
+          update(error_message: BulkDownloadsHelper::COMBINED_SAMPLE_TAXON_RESULTS_ERROR_TEMPLATE % result[:failed_sample_ids].length)
         end
       elsif download_type == SAMPLE_METADATA_BULK_DOWNLOAD_TYPE
         Rails.logger.info("Generating sample metadata for #{pipeline_runs.length} samples...")
