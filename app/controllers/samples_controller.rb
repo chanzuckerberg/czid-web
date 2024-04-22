@@ -1552,8 +1552,9 @@ class SamplesController < ApplicationController
     inputs_json = collection_params[:inputs_json].to_json
     workflow_run = @sample.create_and_dispatch_workflow_run(workflow, current_user.id, inputs_json: inputs_json)
     if current_user.allowed_feature?("create_next_gen_entities")
-      SampleEntityCreationService.call(current_user.id, workflow_run.sample, workflow_run)
-      SampleFileEntityLinkCreationService.call(current_user.id, workflow_run.sample)
+      # Create the entities/workflowRun under the sample owner
+      SampleEntityCreationService.call(@sample.user_id, workflow_run.sample, workflow_run)
+      SampleFileEntityLinkCreationService.call(@sample.user_id, workflow_run.sample)
     end
     render json: @sample.workflow_runs_info
   end
