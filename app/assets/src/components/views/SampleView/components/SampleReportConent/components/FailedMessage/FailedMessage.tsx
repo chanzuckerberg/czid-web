@@ -17,7 +17,8 @@ export const FailedMessage = ({
   analyticsEventName,
 }: FailedMessageProps) => {
   const { link, linkText, subtitle, message, status, type } = sampleErrorInfo({
-    sample,
+    sampleId: sample.id,
+    sampleUploadError: sample.upload_error,
     error: workflowRun?.input_error || {},
   });
   return (

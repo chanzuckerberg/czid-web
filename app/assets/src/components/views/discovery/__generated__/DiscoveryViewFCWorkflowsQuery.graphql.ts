@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d19e4cbc61a5a55b70d0c7adb90c52f1>>
+ * @generated SignedSource<<cc4a5767fb3fbfb09855193c63311ca3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -107,6 +107,7 @@ export type DiscoveryViewFCWorkflowsQuery$data = {
         };
       } | null | undefined>;
     };
+    readonly errorLabel: string | null | undefined;
     readonly id: string;
     readonly rawInputsJson: string | null | undefined;
     readonly startedAt: string | null | undefined;
@@ -166,6 +167,13 @@ v1 = [
         "args": null,
         "kind": "ScalarField",
         "name": "status",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "errorLabel",
         "storageKey": null
       },
       {
@@ -280,16 +288,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "2f55a75dce5cb8b405a0202d128884de",
+    "cacheID": "1af3a794c6789bc8f2bb24e2fc23dd8f",
     "id": null,
     "metadata": {},
     "name": "DiscoveryViewFCWorkflowsQuery",
     "operationKind": "query",
-    "text": "query DiscoveryViewFCWorkflowsQuery(\n  $input: queryInput_fedWorkflowRuns_input_Input\n) {\n  fedWorkflowRuns(input: $input) {\n    id\n    startedAt\n    status\n    rawInputsJson\n    workflowVersion {\n      version\n      workflow {\n        name\n      }\n    }\n    entityInputs {\n      edges {\n        node {\n          inputEntityId\n          entityType\n        }\n      }\n    }\n  }\n}\n"
+    "text": "query DiscoveryViewFCWorkflowsQuery(\n  $input: queryInput_fedWorkflowRuns_input_Input\n) {\n  fedWorkflowRuns(input: $input) {\n    id\n    startedAt\n    status\n    errorLabel\n    rawInputsJson\n    workflowVersion {\n      version\n      workflow {\n        name\n      }\n    }\n    entityInputs {\n      edges {\n        node {\n          inputEntityId\n          entityType\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d1536dce178d7cdd478978ee3f7af05c";
+(node as any).hash = "68e726f1671f65b2caeeba94e0b34abf";
 
 export default node;

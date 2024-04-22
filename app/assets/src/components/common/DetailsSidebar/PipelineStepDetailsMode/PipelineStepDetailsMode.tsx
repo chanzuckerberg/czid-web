@@ -47,7 +47,8 @@ const PipelineStepDetailsMode = ({
       case "userErrored":
       case "pipelineErrored": {
         const { message, linkText, link } = sampleErrorInfo({
-          sample,
+          sampleId: sample.id,
+          sampleUploadError: sample.upload_error,
           pipelineRun,
         });
         statusTitle = "Sample failed at this step.";

@@ -1,7 +1,7 @@
 import { isEmpty, last } from "lodash/fp";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
-import Sample, { SampleStatus } from "~/interface/sample";
-import { PipelineRun } from "../../interface/shared/specific";
+import { SampleStatus } from "~/interface/sample";
+import { PipelineRun, SampleId } from "../../interface/shared/specific";
 
 // Get the basename from a file path
 export const baseName = (str: string) => {
@@ -80,13 +80,15 @@ export const UPLOAD_URL = "/samples/upload";
 const CONTACT_US = "Contact us for help.";
 
 export const sampleErrorInfo = ({
-  sample,
+  sampleId,
+  sampleUploadError,
   pipelineRun = {},
   error = {},
 }: {
-  sample: Sample;
+  sampleId?: SampleId;
+  sampleUploadError?: string;
   pipelineRun?: PipelineRun | Record<string, never>;
-  error?: { label?: string; message: string } | Record<string, never>;
+  error?: { label?: string; message?: string } | Record<string, never>;
 }) => {
   let status: SampleStatus,
     message,
@@ -96,7 +98,7 @@ export const sampleErrorInfo = ({
     link,
     pipelineVersionUrlParam;
   switch (
-    sample.upload_error ||
+    sampleUploadError ||
     (pipelineRun && pipelineRun.known_user_error) ||
     error.label
   ) {
@@ -126,9 +128,10 @@ export const sampleErrorInfo = ({
         pipelineRun && pipelineRun.pipeline_version
           ? `?pipeline_version=${pipelineRun.pipeline_version}`
           : "";
-      link = isEmpty(pipelineRun)
-        ? CONTACT_US_LINK
-        : `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
+      link =
+        isEmpty(pipelineRun) || sampleId === undefined
+          ? CONTACT_US_LINK
+          : `/samples/${sampleId}/results_folder${pipelineVersionUrlParam}`;
       break;
     case "BrokenReadPairError":
       status = SampleStatus.COMPLETE_ISSUE;
@@ -194,7 +197,10 @@ export const sampleErrorInfo = ({
         pipelineRun && pipelineRun.pipeline_version
           ? `?pipeline_version=${pipelineRun.pipeline_version}`
           : "";
-      link = `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
+      link =
+        sampleId === undefined
+          ? CONTACT_US_LINK
+          : `/samples/${sampleId}/results_folder${pipelineVersionUrlParam}`;
       break;
     case "BROKEN_PAIRS":
       status = SampleStatus.COMPLETE_ISSUE;

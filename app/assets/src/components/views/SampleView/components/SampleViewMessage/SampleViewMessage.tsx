@@ -89,7 +89,8 @@ export const SampleViewMessage = ({
         pipelineRun.error_message = errorMessage;
       }
       ({ status, message, subtitle, linkText, type, link } = sampleErrorInfo({
-        sample,
+        sampleId: sample.id,
+        sampleUploadError: sample.upload_error,
         pipelineRun,
       }));
     }

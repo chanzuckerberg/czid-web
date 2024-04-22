@@ -1,5 +1,4 @@
 import { escapeRegExp } from "lodash";
-import { toLower } from "lodash/fp";
 import React, { useContext, useRef, useState } from "react";
 import { useRelayEnvironment } from "react-relay";
 import { SortDirectionType } from "react-virtualized";
@@ -8,6 +7,7 @@ import RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironme
 import { getProjects } from "~/api";
 import { UserContext } from "~/components/common/UserContext";
 import { logError } from "~/components/utils/logUtil";
+import { sampleErrorInfo } from "~/components/utils/sample";
 import { checkExhaustive, isNotNullish } from "~/components/utils/typeUtils";
 import { WorkflowCount, WorkflowType } from "~/components/utils/workflows";
 import { DEFAULT_PAGE_SIZE } from "~/components/visualizations/table/constants";
@@ -139,6 +139,7 @@ const DiscoveryViewFCWorkflowsQuery = graphql`
       id
       startedAt
       status
+      errorLabel
       rawInputsJson
       workflowVersion {
         version
@@ -771,13 +772,18 @@ async function queryWorkflowRuns(
     } catch (e) {
       // Fallback to undefined.
     }
+    let status: string | undefined;
+    if (run.status === "FAILED" && run.errorLabel != null) {
+      status = sampleErrorInfo({
+        error: { label: run.errorLabel },
+      }).status;
+    } else if (run.status != null) {
+      status = NEXT_GEN_TO_LEGACY_STATUS[run.status] ?? run.status;
+    }
     return {
       id: run.id,
       createdAt: run.startedAt ?? undefined,
-      status:
-        run.status != null
-          ? NEXT_GEN_TO_LEGACY_STATUS[run.status] ?? toLower(run.status)
-          : undefined,
+      status: status?.toLowerCase(),
       workflow: "consensus-genome", // TODO: Get this from the correct field in NextGen
       wdl_version:
         run.workflowVersion?.version != null
