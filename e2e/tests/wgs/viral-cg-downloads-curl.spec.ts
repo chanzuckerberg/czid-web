@@ -101,6 +101,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
     // #endregion 12. Open a CMD/Terminal session and execute command in clipboard (remember storing folder path)
 
     // #region 13. Open storing folder, open the fasta files (notepad suggested) and observe data displayed
+    const isFFUser = await downloadsPage.isFeatureFlagUser();
     try {
       await new Promise((resolve, reject) => {
         exec(clipboardText, { cwd: tempDir }, (error, stdout) => {
@@ -129,18 +130,30 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
         const extractedDir = path.join(tempDir, contents);
         const contentInExtractedDir = await fs.readdir(extractedDir);
 
-        for (const extractedContent of contentInExtractedDir) {
+        for (const extractedContent of contentInExtractedDir.sort()) {
           const pathToExtractedContent = path.join(extractedDir, extractedContent);
-          let contents = await fs.readdir(pathToExtractedContent);
-          contents = contents.sort();
 
           // - (.tar.gz) file contains Sample(s) selected
           for (const i in sampleNames) {
-            // ({Sample_Name}_{ID}_consensus.fa) files format:
-            const expectedSampleFile = `${sampleNames[i]}_${samples[i].id}_consensus.fa`;
-            expect(contents[i]).toEqual(expectedSampleFile);
+            let extractedFilePath = "";
+            if (!isFFUser) {
+              const extrectedFiles = (await fs.readdir(pathToExtractedContent)).sort();
 
-            const extractedFilePath = path.join(pathToExtractedContent, contents[i]);
+              // ({Sample_Name}_{ID}_consensus.fa) files format:
+              const expectedSampleFile = `${sampleNames[i]}_${samples[i].id}_consensus.fa`;
+              expect(extrectedFiles[i]).toEqual(expectedSampleFile);
+
+              // {pathTo}/{projectFolder}/{Sample_Name}_{ID}_consensus.fa
+              extractedFilePath = path.join(pathToExtractedContent, extrectedFiles[i]);
+            } else {
+              // ({Sample_Name}_{UID}.fa) files format:
+              const uid_regex = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+              expect(extractedContent).toMatch(new RegExp(`^${sampleNames[i]}_${uid_regex}.fa`));
+
+              // {pathTo}/{Sample_Name}_{UID}.fa
+              extractedFilePath = pathToExtractedContent;
+            }
+
             const fileContent = await fs.readFile(extractedFilePath, {encoding: "utf-8"});
             const lines = fileContent.split(/\r?\n/);
 
