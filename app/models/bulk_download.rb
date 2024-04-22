@@ -52,7 +52,7 @@ class BulkDownload < ApplicationRecord
 
   def params_checks
     if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE && get_param_value("workflow") == WorkflowRun::WORKFLOW[:short_read_mngs]
-      errors.add(:params, "background value must be an integer") unless get_param_value("background").is_a? Integer
+      errors.add(:params, "background value must be an integer") unless get_param_value("background").nil? || get_param_value("background").is_a?(Integer)
     end
 
     if download_type == BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE

@@ -39,6 +39,10 @@ export const OPTIONAL_FIELDS = [
     field: "filter_by",
     downloadType: "biom_format",
   },
+  {
+    field: "background",
+    downloadType: "sample_taxon_report",
+  },
 ];
 
 export const DEFAULT_BACKGROUND_MODEL = 26;
