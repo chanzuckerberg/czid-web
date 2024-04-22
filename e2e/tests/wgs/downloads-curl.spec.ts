@@ -98,7 +98,8 @@ test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
       "stats.json",
       "variants.vcf.gz",
     ];
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "SNo_20"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "SNo_23"));
+    const isFFUser = await downloadsPage.isFeatureFlagUser();
     try {
       await new Promise((resolve, reject) => {
         exec(clipboardText, { cwd: tempDir }, (error, stdout) => {
@@ -129,15 +130,21 @@ test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
         for (const extractedContent of contentInExtractedDir) {
           const pathToExtractedDir = path.join(extractedDir, extractedContent);
 
-          let directoriesInExtractedDir = await fs.readdir(pathToExtractedDir);
-          directoriesInExtractedDir = directoriesInExtractedDir.sort();
+          // {pathTo}/{downloadType}/{Sample_Name}/*
+          let contentsInExtractedDir = (await fs.readdir(pathToExtractedDir)).sort();
 
-          for (const extractedDir of directoriesInExtractedDir) {
-            const pathToNestedExtractedDir = path.join(pathToExtractedDir, extractedDir);
-            const filesInNestedDir = await fs.readdir(pathToNestedExtractedDir);
-            for (const expectedFile of expectedExtractedContents) {
-              expect(filesInNestedDir).toContain(expectedFile);
+          if (!isFFUser) {
+            for (const content of contentsInExtractedDir) {
+              const pathToNestedConent = path.join(pathToExtractedDir, content);
+              const filesInNestedDir = await fs.readdir(pathToNestedConent);
+
+              // {pathTo}/{downloadType}/{projectFolder}/{Sample_Name}/*
+              contentsInExtractedDir = filesInNestedDir;
             }
+          }
+
+          for (const expectedFile of expectedExtractedContents) {
+            expect(contentsInExtractedDir).toContain(expectedFile);
           }
         }
       }
