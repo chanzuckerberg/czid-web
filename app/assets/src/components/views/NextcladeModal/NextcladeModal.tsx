@@ -23,10 +23,10 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import { WorkflowType } from "~utils/workflows";
+import { NextcladeConfirmationModal } from "./components/NextcladeConfirmationModal";
+import { NextcladeModalFooter } from "./components/NextcladeModalFooter";
+import { NextcladeReferenceTreeOptions } from "./components/NextcladeReferenceTreeOptions";
 import cs from "./nextclade_modal.scss";
-import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
-import NextcladeModalFooter from "./NextcladeModalFooter";
-import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
 
 interface NextcladeModalProps {
   onClose: $TSFixMeFunction;
@@ -385,7 +385,7 @@ class NextcladeModalCC extends React.Component<
 // Using a function component wrapper provides a semi-hacky way to
 // access useContext from multiple providers without the class component to function component
 // conversion.
-const NextcladeModal = (props: NextcladeModalProps) => {
+export const NextcladeModal = (props: NextcladeModalProps) => {
   const { admin, userId } = useContext(UserContext);
   const trackEvent = useTrackEvent();
 
@@ -399,5 +399,3 @@ const NextcladeModal = (props: NextcladeModalProps) => {
     />
   );
 };
-
-export default NextcladeModal;

@@ -13,7 +13,7 @@ interface NextcladeConfirmationModalProps {
   loading?: boolean;
 }
 
-const NextcladeConfirmationModal = ({
+export const NextcladeConfirmationModal = ({
   onCancel,
   onConfirm,
   open,

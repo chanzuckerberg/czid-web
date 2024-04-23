@@ -1,9 +1,9 @@
 import React from "react";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
+import cs from "./nextclade_modal_footer.scss";
 
 interface NextcladeModalFooterProps {
   description?: string;
@@ -18,7 +18,7 @@ interface NextcladeModalFooterProps {
   validationError?: string;
 }
 
-const NextcladeModalFooter = ({
+export const NextcladeModalFooter = ({
   hasValidIds,
   invalidSampleNames,
   loading,

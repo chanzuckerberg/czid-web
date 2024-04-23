@@ -18,7 +18,7 @@ interface NextcladeReferenceTreeOptionsProps {
   selectedType?: string;
 }
 
-class NextcladeReferenceTreeOptions extends React.Component<NextcladeReferenceTreeOptionsProps> {
+export class NextcladeReferenceTreeOptions extends React.Component<NextcladeReferenceTreeOptionsProps> {
   onDrop = acceptedFile => {
     this.props.onChange(head(acceptedFile));
   };

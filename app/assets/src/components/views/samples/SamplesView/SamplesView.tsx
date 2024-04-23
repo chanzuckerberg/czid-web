@@ -48,7 +48,7 @@ import { showBulkDownloadNotification } from "~/components/views/components/Bulk
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
-import NextcladeModal from "~/components/views/nextclade/NextcladeModal";
+import { NextcladeModal } from "~/components/views/NextcladeModal";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import { BulkDownloadModal } from "~/components/views/samples/SamplesView/components/BulkDownloadModal";
