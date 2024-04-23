@@ -443,6 +443,8 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
+
+    const isFFUser = await projectPage.isFeatureFlagUser();
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
@@ -503,17 +505,6 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - (.tar.gz)  file contains Intermediate output files from Sample(s) selected
     const downloadFileName = download.suggestedFilename();
-    expect(downloadFileName).toMatch(/\.tar\.gz$/);
-
-    const downloadDirectory = path.dirname(downloadPath);
-    const extractPath = path.join(downloadDirectory, `SNo17_${Date.now()}`);
-    await fs.mkdir(extractPath, {recursive: true});
-    await tar.x({
-      file: downloadPath,
-      cwd: extractPath,
-    });
-    const extractedContents = await fs.readdir(extractPath);
-
     const expectedExtractedContents = [
       "aligned_reads.bam",
       "consensus.fa",
@@ -529,26 +520,79 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
       "stats.json",
       "variants.vcf.gz",
     ];
-    for (const contents of extractedContents) {
-      const extractedDir = path.join(extractPath, contents);
 
-      let directories = await fs.readdir(extractedDir);
-      directories = directories.sort();
+    if (!isFFUser) {
+      expect(downloadFileName).toMatch(/\.tar\.gz$/);
 
-      for (const i in directories) {
-        const samplesPage = new SamplesPage(page);
-        const samples = await samplesPage.getSamples(project.name, selectedSamples[i]);
+      const downloadDirectory = path.dirname(downloadPath);
+      const extractPath = path.join(downloadDirectory, `SNo17_${Date.now()}`);
+      await fs.mkdir(extractPath, {recursive: true});
+      await tar.x({
+        file: downloadPath,
+        cwd: extractPath,
+      });
+      const extractedContents = await fs.readdir(extractPath);
 
-        // {Sample_Name}_{ID}_ files format:
-        expect(directories).toContain(`${selectedSamples[i]}_${samples[0].id}_`);
+      for (const contents of extractedContents) {
+        const extractedDir = path.join(extractPath, contents);
 
-        const extractedDirPath = path.join(extractedDir, directories[i]);
-        let extractedFiles = await fs.readdir(extractedDirPath);
-        extractedFiles = extractedFiles.sort();
-        for (const expectedFile of expectedExtractedContents) {
-          expect(extractedFiles).toContain(expectedFile);
+        let directories = await fs.readdir(extractedDir);
+        directories = directories.sort();
+
+        for (const i in directories) {
+          const samplesPage = new SamplesPage(page);
+          const samples = await samplesPage.getSamples(project.name, selectedSamples[i]);
+
+          // {Sample_Name}_{ID}_ files format:
+          expect(directories).toContain(`${selectedSamples[i]}_${samples[0].id}_`);
+
+          const extractedDirPath = path.join(extractedDir, directories[i]);
+          let extractedFiles = await fs.readdir(extractedDirPath);
+          extractedFiles = extractedFiles.sort();
+          for (const expectedFile of expectedExtractedContents) {
+            expect(extractedFiles).toContain(expectedFile);
+          }
         }
       }
+    } else {
+      expect(downloadFileName).toEqual("result.zip");
+
+      const zip = new AdmZip(downloadPath);
+      const zipContents = zip.getEntries();
+
+      const entries = [];
+      const directories = [];
+      for (const content of zipContents) {
+        if (content.isDirectory) {
+          const directoryName = content.entryName.split("/")[0];
+          if (!directories.includes(directoryName)) {
+            directories.push(directoryName);
+          }
+        } else {
+          entries.push(content.entryName);
+        }
+      }
+      directories.sort();
+
+      // Each sample is zipped in it's own directory
+      expect(selectedSamples.length).toEqual(directories.length);
+
+      const expectedEntries = [];
+      const uidRegex = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+      for (const i in selectedSamples) {
+
+        // {Sample_Name}_{UID} directory format
+        expect(directories[i]).toMatch(new RegExp(`${selectedSamples[i]}_${uidRegex}`));
+
+        for (const expectedContent of expectedExtractedContents) {
+          expectedEntries.push(`${directories[i]}/${expectedContent}`);
+        }
+      }
+
+      // Verify the expected file are in the AdmZip entries
+      expectedEntries.forEach(expectedFile => {
+        expect(entries).toContain(expectedFile);
+      });
     }
   });
 
