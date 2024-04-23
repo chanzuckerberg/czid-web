@@ -3,6 +3,7 @@ import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { IconAlertType } from "~/interface/icon";
 import { SampleStatus } from "~/interface/sample";
 import { PipelineRun, SampleId } from "../../interface/shared/specific";
+import { STATUS_TYPE } from "../views/discovery/TableRenderers";
 
 // Get the basename from a file path
 export const baseName = (str: string) => {
@@ -80,6 +81,7 @@ function subtextError(message: string) {
 export const UPLOAD_URL = "/samples/upload";
 const CONTACT_US = "Contact us for help.";
 
+/* eslint-disable sonarjs/no-duplicate-string */
 export const sampleErrorInfo = ({
   sampleId,
   sampleUploadError,
@@ -92,6 +94,7 @@ export const sampleErrorInfo = ({
   error?: { label?: string; message?: string } | Record<string, never>;
 }) => {
   let status: SampleStatus;
+  let pillStatus: keyof typeof STATUS_TYPE; // For discovery view table rows.
   let message: string | undefined;
   let subtitle: string | undefined;
   let linkText: string | undefined;
@@ -109,6 +112,7 @@ export const sampleErrorInfo = ({
     case "InvalidFileFormatError":
     case "InvalidInputFileError":
       status = SampleStatus.INCOMPLETE_ISSUE;
+      pillStatus = "failed";
       message = pipelineRun.error_message || error.message;
       subtitle = message !== undefined ? subtextError(message) : undefined;
       linkText = subtitle
@@ -119,6 +123,7 @@ export const sampleErrorInfo = ({
       break;
     case "InsufficientReadsError":
       status = SampleStatus.COMPLETE_ISSUE;
+      pillStatus = "complete - issue";
       message = pipelineRun.error_message || error.message;
       subtitle = message !== undefined ? subtextError(message) : undefined;
       linkText = isEmpty(pipelineRun)
@@ -136,6 +141,7 @@ export const sampleErrorInfo = ({
       break;
     case "BrokenReadPairError":
       status = SampleStatus.COMPLETE_ISSUE;
+      pillStatus = "complete - issue";
       message = pipelineRun.error_message || error.message;
       linkText = "Please fix the read pairing, then reupload.";
       type = "warning";
@@ -145,6 +151,7 @@ export const sampleErrorInfo = ({
     // sent from the server.
     case "BASESPACE_UPLOAD_FAILED":
       status = SampleStatus.SAMPLE_FAILED;
+      pillStatus = "failed";
       message =
         "Oh no! There was an issue uploading your sample file from Basespace.";
       linkText = CONTACT_US;
@@ -153,6 +160,7 @@ export const sampleErrorInfo = ({
       break;
     case "S3_UPLOAD_FAILED":
       status = SampleStatus.SAMPLE_FAILED;
+      pillStatus = "failed";
       message = "Oh no! There was an issue uploading your sample file from S3.";
       linkText = CONTACT_US;
       type = "error";
@@ -160,6 +168,7 @@ export const sampleErrorInfo = ({
       break;
     case "LOCAL_UPLOAD_FAILED":
       status = SampleStatus.SAMPLE_FAILED;
+      pillStatus = "failed";
       message = "Oh no! It took too long to upload your sample file.";
       linkText = CONTACT_US;
       type = "error";
@@ -167,6 +176,7 @@ export const sampleErrorInfo = ({
       break;
     case "LOCAL_UPLOAD_STALLED":
       status = SampleStatus.INCOMPLETE_ISSUE;
+      pillStatus = "failed";
       message =
         "It looks like it is taking a long time to upload your sample file.";
       linkText = CONTACT_US;
@@ -175,12 +185,14 @@ export const sampleErrorInfo = ({
       break;
     case "DO_NOT_PROCESS":
       status = SampleStatus.PROCESSING_SKIPPED;
+      pillStatus = "skipped";
       message =
         "Sample processing has been skipped due to user selection during upload.";
       type = "info";
       break;
     case "FAULTY_INPUT":
       status = SampleStatus.COMPLETE_ISSUE;
+      pillStatus = "complete - issue";
       message = `Sorry, something was wrong with your input file. ${
         pipelineRun ? pipelineRun.error_message : ""
       }.`;
@@ -190,6 +202,7 @@ export const sampleErrorInfo = ({
       break;
     case "INSUFFICIENT_READS":
       status = SampleStatus.COMPLETE_ISSUE;
+      pillStatus = "complete - issue";
       message =
         "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
       linkText = "Check where your reads were filtered out.";
@@ -205,6 +218,7 @@ export const sampleErrorInfo = ({
       break;
     case "BROKEN_PAIRS":
       status = SampleStatus.COMPLETE_ISSUE;
+      pillStatus = "complete - issue";
       message =
         "Sorry, something was wrong with your input files. " +
         "Either the paired reads were not named using the same identifiers in both files, " +
@@ -215,6 +229,7 @@ export const sampleErrorInfo = ({
       break;
     default:
       status = SampleStatus.SAMPLE_FAILED;
+      pillStatus = "failed";
       message = "Oh no! There was an issue processing your sample.";
       linkText = "Contact us for help re-running your sample.";
       type = "error";
@@ -224,6 +239,7 @@ export const sampleErrorInfo = ({
 
   return {
     status,
+    pillStatus,
     message,
     subtitle,
     type,

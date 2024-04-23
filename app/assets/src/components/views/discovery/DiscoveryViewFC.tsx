@@ -776,7 +776,7 @@ async function queryWorkflowRuns(
     if (run.status === "FAILED" && run.errorLabel != null) {
       status = sampleErrorInfo({
         error: { label: run.errorLabel },
-      }).status;
+      }).pillStatus;
     } else if (run.status != null) {
       status = NEXT_GEN_TO_LEGACY_STATUS[run.status] ?? run.status;
     }
