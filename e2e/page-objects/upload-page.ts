@@ -26,6 +26,7 @@ const TRIM_PRIMER_FILE = (trimPrimerFilename: string) => `./fixtures/trim_primer
 const METADATA_FILE_NAME = "metadata_template.csv";
 
 // Upload Samples
+const SELECTED_SAMPLES = "//*[contains(@class, 'sampleUploadTable')]//*[@data-testid='check-box']/ancestor::*[@role='gridcell']/following-sibling::*[1]";
 const PIPELINE_VERSION = "[class*='technologyContent'] [class*='version']";
 const ILLUMINA_LEARN_MORE_LINK = "//*[text()='Learn More' and @href]";
 const GITHUB_HERE_LINK = "[href*='github.com/chanzuckerberg']";
@@ -144,6 +145,12 @@ export class UploadPage extends PageObject {
   // #region Click
 
   // #region Samples
+  public async clickSamples(sampleNames: Array<string>) {
+    for (const sampleName of sampleNames) {
+      await this.page.locator(SELECTED_SAMPLES).getByText(sampleName, {exact: true}).click();
+    }
+  }
+
   public async clickMedakaModelHereLink() {
     return this.clickOutsidePage(COLUMN_TOOLTIP_LINK);
   }
@@ -197,7 +204,9 @@ export class UploadPage extends PageObject {
   public async clickConnectToProject() {
     await this.pause(4);
     await this.page.locator(BASESPACE_CONNECT_TO_PROJECT).click();
+  }
 
+  public async clickAuthorizeIllumina() {
     const illuminaPage = await this.clickAuthorize();
     await illuminaPage.clickCloseWindowButton();
   }
@@ -309,6 +318,11 @@ export class UploadPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getSelectedSamples() {
+    await this.page.locator(SELECTED_SAMPLES).first().waitFor();
+    return this.page.locator(SELECTED_SAMPLES).allTextContents();
+  }
+
   public async getPipelineVersion() {
     return this.page.locator(PIPELINE_VERSION).textContent();
   }

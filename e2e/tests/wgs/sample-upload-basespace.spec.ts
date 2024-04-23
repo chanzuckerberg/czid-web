@@ -66,6 +66,9 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
 
     await uploadPage.selectBasespaceProject(BASESPACE_PROJECT_NAME);
     await uploadPage.clickConnectToProject();
+    const selectedSamples = await uploadPage.getSelectedSamples();
+    await uploadPage.clickSamples(selectedSamples.slice(1));
+    await uploadPage.clickAuthorizeIllumina();
     // #endregion 7. Click on Authorize
 
     // #region 8. Enter required Metadata and click on Continue
@@ -165,6 +168,9 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
 
     await uploadPage.selectBasespaceProject(BASESPACE_PROJECT_NAME);
     await uploadPage.clickConnectToProject();
+    const selectedSamples = await uploadPage.getSelectedSamples();
+    await uploadPage.clickSamples(selectedSamples.slice(1));
+    await uploadPage.clickAuthorizeIllumina();
     // #endregion 8. Click on Authorize
 
     // #region 9. Enter required Metadata and click on Continue
@@ -269,6 +275,9 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
 
     await uploadPage.selectBasespaceProject(BASESPACE_PROJECT_NAME);
     await uploadPage.clickConnectToProject();
+    const selectedSamples = await uploadPage.getSelectedSamples();
+    await uploadPage.clickSamples(selectedSamples.slice(1));
+    await uploadPage.clickAuthorizeIllumina();
     // #endregion 9. Click on Authorize
 
     // #region 10. Enter required Metadata and click on Continue
@@ -377,6 +386,9 @@ test.describe("WGS - Sample upload (web) Basespace project | Functional: P-0", (
 
     await uploadPage.selectBasespaceProject(BASESPACE_PROJECT_NAME);
     await uploadPage.clickConnectToProject();
+    const selectedSamples = await uploadPage.getSelectedSamples();
+    await uploadPage.clickSamples(selectedSamples.slice(1));
+    await uploadPage.clickAuthorizeIllumina();
     // #endregion 10. Click on Authorize
 
     // #region 11. Enter required Metadata and click on Continue
