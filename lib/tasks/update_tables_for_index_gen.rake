@@ -31,9 +31,7 @@ task update_tables_for_index_gen: :environment do |_, _args|
 
   # es index params:
   alias_name = "taxon_lineages_alias"
-  old_index_name = ElasticsearchQueryHelper.get_index_for_alias(alias_name)
   new_index_name = "taxon_lineages_#{index_name}"
-  puts("Elastic Search old index name: #{old_index_name}; new index name: #{new_index_name}")
 
   should_insert_alignment_config = prompt("MySQL: Do you want to insert an alignment config? (y/n): ") == "y"
   if should_insert_alignment_config
@@ -53,13 +51,12 @@ task update_tables_for_index_gen: :environment do |_, _args|
   re_index_es = prompt("Elasticsearch: Do you want to create a new taxon lineages index? (y/n): ") == "y"
   if re_index_es
     begin
-      puts("Creating a new index for taxon_lineages_new in Elasticsearch.")
+      puts("Creating a new index for taxon_lineages_new in Elasticsearch named #{new_index_name}.")
       # Updating elasticsearch took ~18 hours locally
       class TaxonLineageNew < TaxonLineage
         include Elasticsearch::Model
         self.table_name = 'taxon_lineages_new' # references recently populated table in MySQL
       end
-      new_index_name = new_index_name
       TaxonLineageNew.__elasticsearch__.create_index! index: new_index_name, force: true # force: true will delete the index if it already exists
       TaxonLineageNew.__elasticsearch__.import index: new_index_name
     rescue StandardError => e
@@ -72,7 +69,7 @@ task update_tables_for_index_gen: :environment do |_, _args|
   # swap ES alias to new index
   swap_es_alias = prompt("Elastic Search: Do you want to swap the taxon lineages alias to the new index? (y/n): ") == "y"
   if swap_es_alias
-    swap_es_alias(alias_name, old_index_name, new_index_name)
+    swap_es_alias(alias_name, new_index_name)
   else
     puts("Skipping swapping taxon lineages ES alias.")
   end
@@ -92,9 +89,9 @@ task update_tables_for_index_gen: :environment do |_, _args|
     puts("Skipping dropping old taxon lineages table.")
   end
 
-  revert_es_index = prompt("Elastic Search: Do you want to revert the taxon lineages ES index to the old index? (y/n): ") == "y"
+  revert_es_index = prompt("Elastic Search: Do you want to revert the taxon lineages ES index to an old index? (y/n): ") == "y"
   if revert_es_index
-    revert_es_index(alias_name, old_index_name, new_index_name)
+    revert_es_index(alias_name)
   else
     puts("Skipping reverting taxon lineages ES index.")
   end
@@ -191,8 +188,10 @@ rescue StandardError => e
   puts("Failed to load new taxon lineages table: #{e.message}")
 end
 
-def swap_es_alias(alias_name, old_index_name, new_index_name)
+def swap_es_alias(alias_name, new_index_name)
   puts("Swapping taxon lineages ES alias to new index.")
+  old_index_name = ElasticsearchQueryHelper.get_index_for_alias(alias_name)
+
   puts "swapping old_index_name: #{old_index_name} for new index: #{new_index_name}"
   ElasticsearchQueryHelper.swap_index_for_alias(old_index_name, new_index_name, alias_name)
 rescue StandardError => e
@@ -219,9 +218,11 @@ rescue StandardError => e
   puts("Failed to drop old taxon lineages table: #{e.message}")
 end
 
-def revert_es_index(alias_name, old_index_name, new_index_name)
+def revert_es_index(alias_name)
   puts("Reverting taxon lineages ES index to the old index.")
-  ElasticsearchQueryHelper.swap_index_for_alias(new_index_name, old_index_name, alias_name)
+  current_index_name = ElasticsearchQueryHelper.get_index_for_alias(alias_name)
+  revert_index = prompt("Enter the index name to revert back to: ")
+  ElasticsearchQueryHelper.swap_index_for_alias(current_index_name, revert_index, alias_name)
 rescue StandardError => e
   puts("Failed to revert taxon lineages ES index to the old index: #{e.message}")
 end
