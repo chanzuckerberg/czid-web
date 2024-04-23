@@ -76,7 +76,6 @@ test.describe("Data Validation: P-1", () => {
     // - Taxonomy=Unkonwn
     await uploadPage.setUploadTaxonFilter("Unknown");
 
-    await uploadPage.pause(4); // Stablize test
     await uploadPage.clickContinue();
 
     // - Host=Human
@@ -232,7 +231,6 @@ test.describe("Data Validation: P-1", () => {
 
     await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES);
 
-    await uploadPage.pause(4); // Stablize test
     await uploadPage.clickContinue();
 
     // - Host=Human
@@ -384,7 +382,6 @@ test.describe("Data Validation: P-1", () => {
     await uploadPage.clickClearLabsToggle("No");
     await uploadPage.setWetLabFilter(WETLAB_PROTOCOL);
 
-    await uploadPage.pause(4); // Stablize test
     await uploadPage.clickContinue();
 
     // - Host=Human

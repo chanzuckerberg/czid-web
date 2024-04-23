@@ -628,9 +628,10 @@ export class UploadPage extends PageObject {
     await trimPrimerFileChooser.setFiles(path.resolve(TRIM_PRIMER_FILE(fileName)));
   };
 
-  public async selectFiles(selector: string, filePath: string, files: string[], waitForConfirmation = true) {
+  public async selectFiles(selector: string, filePath: string, files: string[], waitForConfirmation = true, timeout = 90_000) {
     for (let i = 0; i < files.length; i++) {
-      const fullPath = await path.join(filePath, files[i]);
+      const fullPath = path.join(filePath, files[i]);
+      await this.pause(2); // Brief pause to stabilize tests
       await this.page.setInputFiles(selector, fullPath);
 
       if (waitForConfirmation) {
@@ -640,7 +641,7 @@ export class UploadPage extends PageObject {
         } else {
           confirmationText = `${i + 1} File${i === 0? "": "s"} Selected For Upload`;
         }
-        await this.page.locator(`text=${confirmationText}`).waitFor();
+        await this.page.locator(`text=${confirmationText}`).waitFor({timeout: timeout});
       }
     };
   }
