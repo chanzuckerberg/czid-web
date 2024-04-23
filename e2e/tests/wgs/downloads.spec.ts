@@ -17,6 +17,7 @@ const WGS_SAMPLE_NAMES = [NO_HOST_1, NO_HOST_2];
 const CONSENSUS_GENOME = "Consensus Genome";
 const DATE_FORMAT = "YYYY-MM-DD";
 const CONSENSUS_GENOME_OVERVIEW = "Consensus Genome Overview";
+const UID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
 let project = null;
 let projectPage = null;
@@ -35,6 +36,8 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
+
+    const isFFUser = await projectPage.isFeatureFlagUser();
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
@@ -46,6 +49,9 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
     let selectedSamples = await projectPage.selectCompletedSamples(oneOrMoreSamples);
     selectedSamples = selectedSamples.sort();
+
+    let samples = await new SamplesPage(page).getSamples(project.name, selectedSamples);
+    samples = samples.sort((a, b) => a.id - b.id);
     // #endregion 3. Select 1 or more samples in Sample list view
 
     // #region 4. Click in Download button (cloud icon)
@@ -100,42 +106,80 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - (.tar.gz) file contains Sample(s) selected
     const downloadFileName = download.suggestedFilename();
-    expect(downloadFileName).toMatch(/\.tar\.gz$/);
     // #endregion 10. Click on Download File link and save the file (.tar.gz)
 
     // #region 11. Extract and open the fasta files (notepad suggested) and observe data displayed"
-    const downloadDirectory = path.dirname(downloadPath);
-    const extractPath = path.join(downloadDirectory, `SNo12_${Date.now()}`);
-    await fs.mkdir(extractPath, {recursive: true});
+    if (!isFFUser) {
+      expect(downloadFileName).toMatch(/\.tar\.gz$/);
+      const downloadDirectory = path.dirname(downloadPath);
+      const extractPath = path.join(downloadDirectory, `SNo12_${Date.now()}`);
+      await fs.mkdir(extractPath, {recursive: true});
 
-    await tar.x({
-      file: downloadPath,
-      cwd: extractPath,
-    });
-    const extractedContents = await fs.readdir(extractPath);
-    for (const contents of extractedContents) {
+      await tar.x({
+        file: downloadPath,
+        cwd: extractPath,
+      });
+      const extractedContents = await fs.readdir(extractPath);
+      for (const contents of extractedContents) {
 
-      const extractedDir = path.join(extractPath, contents);
+        const extractedDir = path.join(extractPath, contents);
 
-      let files = await fs.readdir(extractedDir);
-      files = files.sort();
+        let files = await fs.readdir(extractedDir);
+        files = files.sort();
 
-      selectedSamples = selectedSamples.sort();
+        selectedSamples = selectedSamples.sort();
 
-      for (const i in files) {
-        const samplesPage = new SamplesPage(page);
-        const samples = await samplesPage.getSamples(project.name, selectedSamples[i]);
+        for (const i in files) {
+          const samplesPage = new SamplesPage(page);
+          const samples = await samplesPage.getSamples(project.name, selectedSamples[i]);
 
-        // ({Sample_Name}_{ID}_consensus.fa) files format:
-        expect(files[i]).toEqual(`${selectedSamples[i]}_${samples[0].id}_consensus.fa`);
+          // ({Sample_Name}_{ID}_consensus.fa) files format:
+          expect(files[i]).toEqual(`${selectedSamples[i]}_${samples[0].id}_consensus.fa`);
 
-        const extractedFilePath = path.join(extractedDir, files[i]);
-        const fileContent = await fs.readFile(extractedFilePath, {encoding: "utf-8"});
-        const lines = fileContent.split(/\r?\n/);
+          const extractedFilePath = path.join(extractedDir, files[i]);
+          const fileContent = await fs.readFile(extractedFilePath, {encoding: "utf-8"});
+          const lines = fileContent.split(/\r?\n/);
+
+          // - First row displays ""> - {Sample name} in text format
+          const fistLine = lines.shift();
+          expect(fistLine).toMatch(`>${samples[0].name}`);
+
+          const lastLine = lines[lines.length-1];
+          if (lastLine.trim() === "") {
+            lines.pop(); // Remove the last empty line
+          }
+          // There should be at least 1 line, minus the first ">{ID}_{Description}" line and last empty line
+          expect(lines.length).toBeGreaterThanOrEqual(1);
+
+          // - Sequences displayed in ACGTN chain character format
+          for (const line of lines) {
+            expect(line).toMatch(/^[ACGTNRYKMSWBDHV]+$/); // https://en.wikipedia.org/wiki/FASTA_format
+          }
+        }
+      }
+    } else {
+      expect(downloadFileName).toEqual("result.zip");
+
+      const zip = new AdmZip(downloadPath);
+      const zipContents = zip.getEntries();
+
+      let zippedFileNames = [];
+      for (const content of zipContents) {
+        zippedFileNames.push(content.entryName);
+
+      }
+      zippedFileNames = zippedFileNames.sort();
+
+      for (const i in selectedSamples) {
+        // ({Sample_Name}_{UID}_consensus.fa) files format:
+        expect(zippedFileNames[i]).toMatch(new RegExp(`${selectedSamples[i]}_${UID_REGEX}.fa`));
+
+        const entry = zip.getEntry(zippedFileNames[i]);
+        const lines = entry.getData().toString().split(/\r?\n/);
 
         // - First row displays ""> - {Sample name} in text format
         const fistLine = lines.shift();
-        expect(fistLine).toMatch(`>${samples[0].name}`);
+        expect(fistLine).toMatch(`>${samples[i].name}`);
 
         const lastLine = lines[lines.length-1];
         if (lastLine.trim() === "") {
@@ -578,11 +622,10 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
       expect(selectedSamples.length).toEqual(directories.length);
 
       const expectedEntries = [];
-      const uidRegex = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
       for (const i in selectedSamples) {
 
         // {Sample_Name}_{UID} directory format
-        expect(directories[i]).toMatch(new RegExp(`${selectedSamples[i]}_${uidRegex}`));
+        expect(directories[i]).toMatch(new RegExp(`${selectedSamples[i]}_${UID_REGEX}`));
 
         for (const expectedContent of expectedExtractedContents) {
           expectedEntries.push(`${directories[i]}/${expectedContent}`);
