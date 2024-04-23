@@ -1,5 +1,6 @@
 import { isEmpty, last } from "lodash/fp";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
+import { IconAlertType } from "~/interface/icon";
 import { SampleStatus } from "~/interface/sample";
 import { PipelineRun, SampleId } from "../../interface/shared/specific";
 
@@ -90,13 +91,13 @@ export const sampleErrorInfo = ({
   pipelineRun?: PipelineRun | Record<string, never>;
   error?: { label?: string; message?: string } | Record<string, never>;
 }) => {
-  let status: SampleStatus,
-    message,
-    subtitle,
-    linkText,
-    type,
-    link,
-    pipelineVersionUrlParam;
+  let status: SampleStatus;
+  let message: string | undefined;
+  let subtitle: string | undefined;
+  let linkText: string | undefined;
+  let type: IconAlertType;
+  let link: string | undefined;
+  let pipelineVersionUrlParam: string;
   switch (
     sampleUploadError ||
     (pipelineRun && pipelineRun.known_user_error) ||
@@ -109,7 +110,7 @@ export const sampleErrorInfo = ({
     case "InvalidInputFileError":
       status = SampleStatus.INCOMPLETE_ISSUE;
       message = pipelineRun.error_message || error.message;
-      subtitle = subtextError(message);
+      subtitle = message !== undefined ? subtextError(message) : undefined;
       linkText = subtitle
         ? ""
         : "Please check your file format and reupload your file.";
@@ -119,7 +120,7 @@ export const sampleErrorInfo = ({
     case "InsufficientReadsError":
       status = SampleStatus.COMPLETE_ISSUE;
       message = pipelineRun.error_message || error.message;
-      subtitle = subtextError(message);
+      subtitle = message !== undefined ? subtextError(message) : undefined;
       linkText = isEmpty(pipelineRun)
         ? CONTACT_US
         : "Check where your reads were filtered out.";
@@ -222,11 +223,11 @@ export const sampleErrorInfo = ({
   }
 
   return {
-    status: status,
-    message: message,
-    subtitle: subtitle,
-    type: type,
-    linkText: linkText,
-    link: link,
+    status,
+    message,
+    subtitle,
+    type,
+    linkText,
+    link,
   };
 };

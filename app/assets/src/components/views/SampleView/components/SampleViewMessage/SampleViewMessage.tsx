@@ -32,11 +32,11 @@ export const SampleViewMessage = ({
 }: SampleViewMessageProps) => {
   const { pipelineRunStatus, jobStatus } = reportMetadata;
   let status: SampleStatus,
-    message: string,
-    subtitle: string,
-    linkText: string,
+    message: string | undefined,
+    subtitle: string | undefined,
+    linkText: string | undefined,
     type: IconAlertType,
-    link: string,
+    link: string | undefined,
     icon: JSX.Element;
   // Error messages were previously sent from the server in the reportMetadata,
   // but after the switch to SFN are now sent as part of the sample's information.
@@ -105,22 +105,14 @@ export const SampleViewMessage = ({
 
   return (
     <SampleMessage
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
-      icon={icon}
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
+      icon={icon!}
       link={link}
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       linkText={linkText}
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       message={message}
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
       subtitle={subtitle}
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
-      status={status}
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
-      type={type}
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2454
-      analyticsEventData={{ status }}
+      status={status!}
+      type={type!}
+      analyticsEventData={{ status: status! }}
     />
   );
 };
