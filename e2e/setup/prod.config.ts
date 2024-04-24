@@ -18,18 +18,9 @@ const config: PlaywrightTestConfig = {
       },
     },
   ],
-  reporter: [
-    [
-      "html",
-      {
-        open: "never",
-        outputFolder: "__assets__/html-report/",
-        attachmentsBaseURL: "./",
-      },
-    ],
-  ],
+  reporter: [["json", { outputFile: "report.json" }]],
   testDir: "../",
-  timeout: 90000,
+  timeout: parseInt(process.env.TIMEOUT) || 100000,
   use: {
     channel: "chromium",
     baseURL: "https://czid.org",

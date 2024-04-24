@@ -22,6 +22,7 @@ jobs:
       CZID_USERNAME: ${{secrets.CZID_ADMIN_USERNAME}}
       CZID_PASSWORD: ${{secrets.CZID_ADMIN_PASSWORD}}
       NODE_ENV: ${{inputs.environment}}
+      TIMEOUT: 10000000 # Override default timeout
 
     steps:
       - name: Checkout code

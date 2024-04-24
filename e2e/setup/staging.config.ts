@@ -27,9 +27,15 @@ const config: PlaywrightTestConfig = {
         attachmentsBaseURL: "./",
       },
     ],
+    [
+      "json",
+      {
+        outputFile: "__assets__/json-report/report.json",
+      },
+    ],
   ],
   testDir: "../",
-  timeout: 90000,
+  timeout: parseInt(process.env.TIMEOUT) || 90000,
   use: {
     channel: "chromium",
     baseURL: "https://staging.czid.org",
