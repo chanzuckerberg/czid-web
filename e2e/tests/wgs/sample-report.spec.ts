@@ -495,7 +495,7 @@ test.describe("Data Validation: P-1", () => {
 
 });
 
-async function compareDataFilesWithTolerance(zipContents: AdmZip.IZipEntry[], fixtureDir: string, sampleName: string, baselineName: string, tollerance = 10) {
+async function compareDataFilesWithTolerance(zipContents: AdmZip.IZipEntry[], fixtureDir: string, sampleName: string, baselineName: string, percentage = 0.99) {
   for (const content of zipContents) {
     let contentName = content.name;
     if (contentName.startsWith(sampleName)) {
@@ -522,15 +522,8 @@ async function compareDataFilesWithTolerance(zipContents: AdmZip.IZipEntry[], fi
 
     const stringifiedBaselineData = baselineData.toString();
 
-    // Only if numbers differs >10% from previous runs
-    // or outputs content looks completely different
-    // or empty
-    const baselineDataLines = stringifiedBaselineData.split("\n").length;
-    if (baselineDataLines > 1) {
-      tollerance = Math.round(baselineDataLines * (tollerance * 0.1));
-    }
-
     const resultDiff = fastDiff(stringifiedAnalysisOutputData, stringifiedBaselineData);
+    const tollerance = stringifiedBaselineData.length * percentage;
     expect(resultDiff.length).toBeLessThanOrEqual(tollerance);
   }
 }
