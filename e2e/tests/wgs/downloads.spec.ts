@@ -781,6 +781,6 @@ async function runPipelineIfNeeded(
   }
 
   if (ranPipeline) {
-    await samplesPage.waitForReportComplete(samples[0].id); // Wait for the last report to finish
+    await samplesPage.waitForReportComplete(samples[0]?.id); // Wait for the last report to finish
   }
 }
