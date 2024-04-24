@@ -88,7 +88,6 @@ RSpec.describe WorkflowRunsController, type: :controller do
     # access control tests
     include_examples "private action", :show
     include_examples "private action", :results
-    include_examples "private action", :rerun, admin_only: true
   end
 
   # Actions that are common to all users

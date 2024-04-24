@@ -179,4 +179,37 @@ class GraphqlOperations
       }
     }
   GRAPHQL
+
+  ############### Operations for WorkflowRunRerunService ###############
+  GetWorkflowRunForRerun = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+    query($workflow_run_id: UUID!) {
+      workflowRuns(where: {id: {_eq: $workflow_run_id}}) {
+        id
+        ownerUserId
+        collectionId
+        rawInputsJson
+        railsWorkflowRunId
+        workflowVersion {
+          id
+        }
+        entityInputs {
+          edges {
+            node {
+              entityType
+              inputEntityId
+              fieldName
+            }
+          }
+        }
+      }
+    }
+  GRAPHQL
+
+  DeprecateWorkflowRun = CzidGraphqlFederation::Client.parse <<-'GRAPHQL'
+    mutation($old_workflow_run_id: UUID!, $new_workflow_run_id: ID!) {
+      updateWorkflowRun(input: {deprecatedById: $new_workflow_run_id}, where: {id: {_eq: $old_workflow_run_id}}) {
+        id
+      }
+    }
+  GRAPHQL
 end

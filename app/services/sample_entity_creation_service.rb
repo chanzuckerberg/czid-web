@@ -134,6 +134,8 @@ class SampleEntityCreationService
                )
     workflow_version_id = response.data&.workflow_versions&.first&.id
 
+    # IMPORTANT: If you update the required inputs for a workflow run here, make sure to add them to WorkflowRunRerunService too
+    # until we write reusable logic that encapsulates assembling workflow run inputs.
     # Assemble entity inputs
     create_workflow_run_entity_inputs = [
       { name: "sample",

@@ -3,7 +3,7 @@ class WorkflowRunsController < ApplicationController
   include ParameterSanitization
   include PipelineOutputsHelper
 
-  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :amr_report_downloads, :amr_gene_level_downloads, :cg_report_downloads, :benchmark_report_downloads]
+  before_action :set_workflow_run, only: [:show, :results, :zip_link, :amr_report_downloads, :amr_gene_level_downloads, :cg_report_downloads, :benchmark_report_downloads]
   before_action :admin_required, only: [:rerun]
 
   MAX_PAGE_SIZE = 100
@@ -74,10 +74,17 @@ class WorkflowRunsController < ApplicationController
   end
 
   def rerun
-    @workflow_run.rerun
+    wr_id = params[:id]
+    if StringUtil.integer?(wr_id)
+      set_workflow_run
+      @workflow_run.rerun
+    else
+      # Workflow run is UUID, call Nextgen service
+      WorkflowRunRerunService.call(current_user.id, wr_id)
+    end
     render json: { status: "success" }, status: :ok
   rescue StandardError => e
-    LogUtil.log_error("Rerun trigger failed", exception: e, workflow_id: @workflow_run.id)
+    LogUtil.log_error("Rerun trigger failed", exception: e, workflow_id: wr_id)
     render json: {
       status: "error",
       message: e.message,

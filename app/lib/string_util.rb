@@ -44,4 +44,8 @@ module StringUtil
   def self.extract_version_string(client_input_string)
     return client_input_string.split("").take_while { |char| char != "-" }.join
   end
+
+  def self.integer?(str)
+    str.to_i.to_s == str.to_s
+  end
 end
