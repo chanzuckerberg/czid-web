@@ -405,7 +405,8 @@ test.describe("Validate consensus genomes between Rails & Nextgen are equivelant
             `Rails CG did not get migrated to Nextgen for ${testStepName}`,
           )
           .toBe(false);
-        if (responseFromRails.data.fedConsensusGenomes.length > 0) {
+
+        if (railsCg && nextGenCg) {
           expect
             .soft(
               railsCg.metrics,
