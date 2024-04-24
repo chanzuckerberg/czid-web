@@ -22,6 +22,10 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
   test.beforeEach(async ({ page }) => {
     test.setTimeout(timeout);
     projectPage = new ProjectPage(page);
+    const isFFUser = await projectPage.isFeatureFlagUser();
+    if (isFFUser) {
+      test.skip(); // TODO: Nexclade is temporarily unavailable for Feature Flags users. Skip these tests
+    }
     sc2_project = await projectPage.getOrCreateProject(`NextClade_${WORKFLOWS.SC2}`);
   });
 

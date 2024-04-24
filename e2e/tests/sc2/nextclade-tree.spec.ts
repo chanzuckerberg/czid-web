@@ -28,6 +28,10 @@ test.describe("NextClade Tree: Functional: P-0", () => {
   test.beforeEach(async ({ page }) => {
     test.setTimeout(timeout);
     projectPage = new ProjectPage(page);
+    const isFFUser = await projectPage.isFeatureFlagUser();
+    if (isFFUser) {
+      test.skip(); // TODO: Nexclade is temporarily unavailable for Feature Flags users. Skip these tests
+    }
   });
 
   test("SNo 23: Create a Nextclade Tree", async ({ page }) => {
