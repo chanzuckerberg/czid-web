@@ -991,6 +991,7 @@ const SamplesView = forwardRef(function SamplesView(
       workflow,
       metadataFields,
       basicIcon: !!snapshotShareId,
+      showSampleOwnerName: allowedFeatures.includes(SHOULD_READ_FROM_NEXTGEN),
     });
 
     // Note: If the specified sortBy column (ie. a custom metadata field) is not available on this view,
@@ -1255,7 +1256,7 @@ export interface CgEntityRow {
     publicAccess?: boolean;
     uploadError?: string;
     userId?: number;
-    userNameWhoInitiatedWorkflowRun?: string;
+    user?: string;
   };
   host?: string;
   notes?: string;

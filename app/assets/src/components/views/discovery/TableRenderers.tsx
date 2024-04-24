@@ -130,7 +130,17 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderSampleInfo = ({ rowData, full = true, basicIcon = false }) => {
+  static renderSampleInfo = ({
+    rowData,
+    full = true,
+    basicIcon = false,
+    showSampleOwnerName,
+  }: {
+    rowData: any;
+    full: boolean;
+    basicIcon: boolean;
+    showSampleOwnerName: boolean;
+  }) => {
     const sample = get("sample", rowData);
     const sampleName = get("name", sample);
     let status;
@@ -176,7 +186,9 @@ class TableRenderers extends React.Component {
           {sample ? (
             <div className={cs.sampleDetails}>
               <span className={cs.user}>
-                {sample?.userNameWhoInitiatedWorkflowRun || sample.user}
+                {showSampleOwnerName
+                  ? sample.user
+                  : sample.userNameWhoInitiatedWorkflowRun ?? sample.user}
               </span>
               |<span className={cs.project}>{sample.project}</span>
             </div>

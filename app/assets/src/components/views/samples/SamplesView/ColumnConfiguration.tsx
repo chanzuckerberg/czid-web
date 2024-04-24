@@ -22,11 +22,13 @@ export const computeColumnsByWorkflow = ({
   workflow,
   metadataFields = [],
   basicIcon = false,
+  showSampleOwnerName,
 }: {
   workflow?: string;
   metadataFields?: MetadataType[];
   basicIcon?: boolean;
-} = {}) => {
+  showSampleOwnerName: boolean;
+}) => {
   // At the moment, columns for long read mNGS are the same as for short read mNGS.
   // To change that in the future, just add another function to compute columns.
   if (
@@ -37,9 +39,13 @@ export const computeColumnsByWorkflow = ({
   } else if (workflow === WorkflowType.CONSENSUS_GENOME) {
     return computeConsensusGenomeColumns({ basicIcon, metadataFields });
   } else if (workflow === WorkflowType.AMR) {
-    return computeAmrColumns({ basicIcon, metadataFields });
+    return computeAmrColumns({
+      basicIcon,
+      metadataFields,
+      showSampleOwnerName,
+    });
   } else if (workflow === WorkflowType.BENCHMARK) {
-    return computeBenchmarkColumns({ basicIcon });
+    return computeBenchmarkColumns({ basicIcon, showSampleOwnerName });
   }
 };
 
@@ -198,6 +204,7 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
           rowData,
           full: true,
           basicIcon,
+          showSampleOwnerName: true,
         }),
       headerClassName: cs.sampleHeader,
     },
@@ -371,7 +378,11 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
   return columns;
 };
 
-const computeAmrColumns = ({ basicIcon, metadataFields }) => {
+const computeAmrColumns = ({
+  basicIcon,
+  metadataFields,
+  showSampleOwnerName,
+}) => {
   const fixedColumns = [
     {
       dataKey: "sample",
@@ -382,6 +393,7 @@ const computeAmrColumns = ({ basicIcon, metadataFields }) => {
           rowData,
           full: true,
           basicIcon,
+          showSampleOwnerName,
         }),
       headerClassName: cs.sampleHeader,
     },
@@ -482,7 +494,7 @@ const computeAmrColumns = ({ basicIcon, metadataFields }) => {
   return columns;
 };
 
-const computeBenchmarkColumns = ({ basicIcon }) => {
+const computeBenchmarkColumns = ({ basicIcon, showSampleOwnerName }) => {
   const fixedColumns = [
     {
       dataKey: "sample",
@@ -493,6 +505,7 @@ const computeBenchmarkColumns = ({ basicIcon }) => {
           rowData,
           full: true,
           basicIcon,
+          showSampleOwnerName,
         }),
       headerClassName: cs.sampleHeader,
     },

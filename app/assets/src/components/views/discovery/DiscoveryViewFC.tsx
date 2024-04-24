@@ -1004,9 +1004,9 @@ async function querySequencingReadObjects(
           publicAccess: sample.collection?.public ?? undefined,
           uploadError: sample.uploadError ?? undefined,
           userId: sample.ownerUserId ?? undefined,
-          // TODO: Make a separate query to Rails to get usernames from WorkflowRun ownerUserIds,
-          // which are currently not being read.
-          userNameWhoInitiatedWorkflowRun: sample.ownerUserName ?? undefined,
+          // Not populating userNameWhoInitiatedWorkflowRun because we don't have a good way to
+          // fetch user names by IDs. The owner's name is accessible from the Rails sample though.
+          user: sample.ownerUserName ?? undefined,
         },
         host: sample.hostOrganism?.name,
         notes: sample.notes ?? undefined,
