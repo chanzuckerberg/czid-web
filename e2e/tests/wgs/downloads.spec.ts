@@ -6,24 +6,22 @@ import {
   SAMPLE_FILE_NO_HOST_2,
 } from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { UploadPage } from "@e2e/page-objects/upload-page";
 import { test, expect } from "@playwright/test";
 import AdmZip = require("adm-zip");
 import moment = require("moment-timezone");
 import * as tar from "tar";
 import { ProjectPage } from "../../page-objects/project-page";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
-const NO_HOST_1 = "no_host_1";
-const NO_HOST_2 = "no_host_2";
+const NO_HOST_1 = "wgs_SARS_CoV2_no_host";
+const NO_HOST_2 = "wgs_SARS_CoV2_no_host";
 const WGS_SAMPLE_NAMES = [NO_HOST_1, NO_HOST_2];
 const CONSENSUS_GENOME = "Consensus Genome";
 const DATE_FORMAT = "YYYY-MM-DD";
 const CONSENSUS_GENOME_OVERVIEW = "Consensus Genome Overview";
 const UID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
-let project = null;
-let projectPage = null;
 const timeout = 60 * 1000 * 5;
 
 /*
@@ -673,10 +671,21 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
   });
 
   test("SNo 24: Download All - Sample report link", async ({ page }) => {
-    await runPipelineIfNeeded(page, "Test_SNo_24", "Human", "Unknown");
+    const projectPage = new ProjectPage(page);
+    const project = await projectPage.getOrCreateProject("SNo_SC2-42");
+    const samples = await setupSamples(
+      page,
+      project,
+      WGS_SAMPLE_FILES,
+      WGS_SAMPLE_NAMES,
+      WORKFLOWS.WGS,
+      {
+        hostOrganism: "Human",
+        taxon: "Unknown",
+      },
+    );
 
     // #region 1. Login to CZ ID staging
-    const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
     // #endregion 1. Login to CZ ID staging
 
@@ -689,7 +698,8 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 3. Select "Consensus Genomes" tab
 
     // #region 4. Open ""no_host_1"" WGS sample report
-    await projectPage.clickSample(NO_HOST_1);
+    const sampleName = await projectPage.selectCompletedSamples(1);
+    await projectPage.clickSample(sampleName[0]);
     const samplesPage = new SamplesPage(page);
     await samplesPage.clickConsensusGenomeTab();
     // #endregion 4. Open ""no_host_1"" WGS sample report
@@ -716,6 +726,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // - (.zip) file contains Analysis output files
     let expectedContents = [
       "no_host_1.fq.gz",
+      "no_host_2.fq.gz",
       "Primer_K.bed",
       "consensus_TEST_SC2.fa",
       "consensus.fa",
@@ -729,58 +740,10 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
       "stats.json",
       "samtools_depth.txt",
       "variants.vcf.gz",
-      "no_host_1.muscle.out.fasta",
+      `${sampleName}.muscle.out.fasta`,
     ];
     expectedContents = expectedContents.sort();
     expect(zippedFileNames).toEqual(expectedContents);
     // #endregion 7. Verify files included in the Zip package
   });
 });
-
-async function runPipelineIfNeeded(
-  page: any,
-  projectName: string,
-  hostOrganism: string,
-  taxon: string,
-) {
-  projectPage = new ProjectPage(page);
-  project = await projectPage.getOrCreateProject(projectName);
-  const samplesPage = new SamplesPage(page);
-
-  let samples = [];
-  let ranPipeline = false;
-  const noHostSample1 = await samplesPage.getSamples(
-    project.name,
-    WGS_SAMPLE_NAMES[0],
-  );
-  const noHostSample2 = await samplesPage.getSamples(
-    project.name,
-    WGS_SAMPLE_NAMES[1],
-  );
-  if (noHostSample1.length <= 0 && noHostSample2.length <= 0) {
-    test.setTimeout(60 * 1000 * 20); // Inclease the test runtime to let the piepline run
-
-    const uploadPage = new UploadPage(page);
-    const inputs = await uploadPage.getRandomizedSampleInputs(
-      WGS_SAMPLE_FILES,
-      WGS_SAMPLE_NAMES,
-    );
-    for (const sampleName of WGS_SAMPLE_NAMES) {
-      inputs[sampleName].hostOrganism = hostOrganism;
-    }
-    await uploadPage.e2eCSVSampleUpload(
-      WGS_SAMPLE_FILES,
-      project,
-      WORKFLOWS.WGS,
-      inputs,
-      true,
-      taxon,
-    );
-    samples = await samplesPage.getSamples(project.name, WGS_SAMPLE_NAMES[1]);
-    ranPipeline = true;
-  }
-
-  if (ranPipeline) {
-    await samplesPage.waitForReportComplete(samples[0]?.id); // Wait for the last report to finish
-  }
-}
