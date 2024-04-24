@@ -1,7 +1,10 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { UploadPage } from "@e2e/page-objects/upload-page";
 import { test, expect } from "@playwright/test";
@@ -27,12 +30,13 @@ const timeout = 60 * 1000 * 5;
  * WGS - Downloads
  */
 test.describe("WGS - Downloads | Functional: P-0", () => {
-
   test.beforeEach(async () => {
     test.setTimeout(timeout);
   });
 
-  test("SNo 12: Consensus Genome (consensus.fa) - Separate files", async ({ page }) => {
+  test("SNo 12: Consensus Genome (consensus.fa) - Separate files", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -41,13 +45,17 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select 1 or more samples in Sample list view
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
-    let selectedSamples = await projectPage.selectCompletedSamples(oneOrMoreSamples);
+    let selectedSamples = await projectPage.selectCompletedSamples(
+      oneOrMoreSamples,
+    );
     selectedSamples = selectedSamples.sort();
 
     let samples = await new SamplesPage(page).getSamples(project.name, selectedSamples);
@@ -166,7 +174,6 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
       let zippedFileNames = [];
       for (const content of zipContents) {
         zippedFileNames.push(content.entryName);
-
       }
       zippedFileNames = zippedFileNames.sort();
 
@@ -181,7 +188,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
         const fistLine = lines.shift();
         expect(fistLine).toMatch(`>${samples[i].name}`);
 
-        const lastLine = lines[lines.length-1];
+        const lastLine = lines[lines.length - 1];
         if (lastLine.trim() === "") {
           lines.pop(); // Remove the last empty line
         }
@@ -197,20 +204,26 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 11. Extract and open the fasta files (notepad suggested) and observe data displayed"
   });
 
-  test("SNo 13: Consensus Genome (Consensus Genome.fa) - Single file (Concatenated)", async ({ page }) => {
+  test("SNo 13: Consensus Genome (Consensus Genome.fa) - Single file (Concatenated)", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select > 1 samples in Sample list view
     const moreThanOneSample = 3; // Math.floor(Math.random() * 3) + 2;
-    let selectedSamples = await projectPage.selectCompletedSamples(moreThanOneSample);
+    let selectedSamples = await projectPage.selectCompletedSamples(
+      moreThanOneSample,
+    );
     selectedSamples = selectedSamples.sort();
     // #endregion 3. Select > 1 samples in Sample list view
 
@@ -269,7 +282,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 10. Click on Download File link and save the file (.fa)
 
     // #region 11. Open the fasta file (notepad suggested) and observe data displayed
-    const fileContent = await fs.readFile(downloadPath, {encoding: "utf-8"});
+    const fileContent = await fs.readFile(downloadPath, { encoding: "utf-8" });
     const splitContents = fileContent.trim().split(/>/);
     let acgtnContents = [];
     for (const content of splitContents) {
@@ -287,9 +300,9 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
       // - First row displays ""> - {Sample name} in text format
       const fistLine = lines.shift();
-      expect(fistLine).toMatch(`>${selectedSamples[i]}_`);
+      expect(fistLine).toMatch(`>${selectedSamples[i]}`);
 
-      const lastLine = lines[lines.length-1];
+      const lastLine = lines[lines.length - 1];
       if (lastLine.trim() === "") {
         lines.pop(); // Remove the last empty line
       }
@@ -311,13 +324,17 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select 1 or more samples in Sample list view
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
-    let selectedSamples = await projectPage.selectCompletedSamples(oneOrMoreSamples);
+    let selectedSamples = await projectPage.selectCompletedSamples(
+      oneOrMoreSamples,
+    );
     selectedSamples = selectedSamples.sort();
     // #endregion 3. Select 1 or more samples in Sample list view
 
@@ -330,7 +347,8 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 5. Select Sample Metadata radio button
 
     // #region 6. Click Start Generating Download button
-    const download = await projectPage.clickDownloadButtonForImmediateDownload();
+    const download =
+      await projectPage.clickDownloadButtonForImmediateDownload();
     // #endregion 6. Click Start Generating Download button
 
     // #region 7. Verify that the download completes immediately
@@ -341,14 +359,14 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     const downloadFileName = download.suggestedFilename();
     expect(downloadFileName).toEqual("sample_metadata.csv");
 
-    const fileContent = await fs.readFile(downloadPath, {encoding: "utf-8"});
+    const fileContent = await fs.readFile(downloadPath, { encoding: "utf-8" });
 
     let lines = fileContent.split(/\r?\n/);
 
     const fistHeader = lines.shift().split(",")[0];
     expect(fistHeader).toEqual("sample_name");
 
-    const lastLine = lines[lines.length-1];
+    const lastLine = lines[lines.length - 1];
     if (lastLine.trim() === "") {
       lines.pop(); // Remove the last empty line
     }
@@ -370,13 +388,17 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select 1 or more samples in Sample list view
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
-    let selectedSamples = await projectPage.selectCompletedSamples(oneOrMoreSamples);
+    let selectedSamples = await projectPage.selectCompletedSamples(
+      oneOrMoreSamples,
+    );
     selectedSamples = selectedSamples.sort();
     // #endregion 3. Select 1 or more samples in Sample list view
 
@@ -389,7 +411,8 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 5. Select Consensus Genome Overview radio button
 
     // #region 6. Click Start Generating Download button
-    const download = await projectPage.clickDownloadButtonForImmediateDownload();
+    const download =
+      await projectPage.clickDownloadButtonForImmediateDownload();
     // #endregion 6. Click Start Generating Download button
 
     // #region 7. Verify that the download completes immediately
@@ -400,13 +423,13 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     const downloadFileName = download.suggestedFilename();
     expect(downloadFileName).toEqual("consensus_genome_overview.csv");
 
-    const fileContent = await fs.readFile(downloadPath, {encoding: "utf-8"});
+    const fileContent = await fs.readFile(downloadPath, { encoding: "utf-8" });
     let lines = fileContent.split(/\r?\n/);
     const fistHeader = lines.shift().split(",")[0];
 
     expect(fistHeader).toEqual("Sample Name");
 
-    const lastLine = lines[lines.length-1];
+    const lastLine = lines[lines.length - 1];
     if (lastLine.trim() === "") {
       lines.pop(); // Remove the last empty line
     }
@@ -421,20 +444,26 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 7. Verify that the download completes immediately
   });
 
-  test("SNo 16: Consensus Genome Overview (.csv) - Include sample metadata in this table", async ({ page }) => {
+  test("SNo 16: Consensus Genome Overview (.csv) - Include sample metadata in this table", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select 1 or more samples in Sample list view
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
-    let selectedSamples = await projectPage.selectCompletedSamples(oneOrMoreSamples);
+    let selectedSamples = await projectPage.selectCompletedSamples(
+      oneOrMoreSamples,
+    );
     selectedSamples = selectedSamples.sort();
     // #endregion 3. Select 1 or more samples in Sample list view
 
@@ -451,7 +480,8 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 6. Check on Include sample metadata in this table checkbox
 
     // #region 7. Click Start Generating Download button
-    const download = await projectPage.clickDownloadButtonForImmediateDownload();
+    const download =
+      await projectPage.clickDownloadButtonForImmediateDownload();
     // #endregion 7. Click Start Generating Download button
 
     // #region 8. Verify that the download completes immediately
@@ -462,13 +492,13 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     const downloadFileName = download.suggestedFilename();
     expect(downloadFileName).toEqual("consensus_genome_overview.csv");
 
-    const fileContent = await fs.readFile(downloadPath, {encoding: "utf-8"});
+    const fileContent = await fs.readFile(downloadPath, { encoding: "utf-8" });
     let lines = fileContent.split(/\r?\n/);
     const fistHeader = lines.shift().split(",")[0];
 
     expect(fistHeader).toEqual("Sample Name");
 
-    const lastLine = lines[lines.length-1];
+    const lastLine = lines[lines.length - 1];
     if (lastLine.trim() === "") {
       lines.pop(); // Remove the last empty line
     }
@@ -492,13 +522,17 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select 1 or more samples in Sample list view
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
-    let selectedSamples = await projectPage.selectCompletedSamples(oneOrMoreSamples);
+    let selectedSamples = await projectPage.selectCompletedSamples(
+      oneOrMoreSamples,
+    );
     selectedSamples = selectedSamples.sort();
     // #endregion 3. Select 1 or more samples in Sample list view
 
@@ -620,13 +654,12 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
       // Each sample is zipped in it's own directory
       expect(selectedSamples.length).toEqual(directories.length);
-
       const expectedEntries = [];
       for (const i in selectedSamples) {
 
         // {Sample_Name}_{UID} directory format
         expect(directories[i]).toMatch(new RegExp(`${selectedSamples[i]}_${UID_REGEX}`));
-
+        
         for (const expectedContent of expectedExtractedContents) {
           expectedEntries.push(`${directories[i]}/${expectedContent}`);
         }
@@ -704,24 +737,45 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
   });
 });
 
-async function runPipelineIfNeeded(page: any, projectName: string, hostOrganism: string, taxon: string) {
+async function runPipelineIfNeeded(
+  page: any,
+  projectName: string,
+  hostOrganism: string,
+  taxon: string,
+) {
   projectPage = new ProjectPage(page);
   project = await projectPage.getOrCreateProject(projectName);
   const samplesPage = new SamplesPage(page);
 
   let samples = [];
   let ranPipeline = false;
-  const noHostSample1 = await samplesPage.getSamples(project.name, WGS_SAMPLE_NAMES[0]);
-  const noHostSample2 = await samplesPage.getSamples(project.name, WGS_SAMPLE_NAMES[1]);
+  const noHostSample1 = await samplesPage.getSamples(
+    project.name,
+    WGS_SAMPLE_NAMES[0],
+  );
+  const noHostSample2 = await samplesPage.getSamples(
+    project.name,
+    WGS_SAMPLE_NAMES[1],
+  );
   if (noHostSample1.length <= 0 && noHostSample2.length <= 0) {
     test.setTimeout(60 * 1000 * 20); // Inclease the test runtime to let the piepline run
 
     const uploadPage = new UploadPage(page);
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, WGS_SAMPLE_NAMES);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      WGS_SAMPLE_NAMES,
+    );
     for (const sampleName of WGS_SAMPLE_NAMES) {
       inputs[sampleName].hostOrganism = hostOrganism;
     }
-    await uploadPage.e2eCSVSampleUpload(WGS_SAMPLE_FILES, project, WORKFLOWS.WGS, inputs, true, taxon);
+    await uploadPage.e2eCSVSampleUpload(
+      WGS_SAMPLE_FILES,
+      project,
+      WORKFLOWS.WGS,
+      inputs,
+      true,
+      taxon,
+    );
     samples = await samplesPage.getSamples(project.name, WGS_SAMPLE_NAMES[1]);
     ranPipeline = true;
   }

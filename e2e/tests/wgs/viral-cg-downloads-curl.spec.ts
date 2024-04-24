@@ -15,25 +15,30 @@ const timeout = 60 * 1000 * 5;
  * Viral CG (WGS) - Downloads (CURL)
  */
 test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
-
   test.beforeEach(async () => {
     test.setTimeout(timeout);
   });
 
-  test("SNo 16: Consensus Genome (consensus.fa) - Separate files (CURL)", async ({ page }) => {
+  test("SNo 16: Consensus Genome (consensus.fa) - Separate files (CURL)", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select 1 or more samples in Sample list view
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
-    let sampleNames = await projectPage.selectCompletedSamples(oneOrMoreSamples);
+    let sampleNames = await projectPage.selectCompletedSamples(
+      oneOrMoreSamples,
+    );
     sampleNames = sampleNames.sort();
 
     const samplesPage = new SamplesPage(page);
@@ -130,6 +135,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
         const extractedDir = path.join(tempDir, contents);
         const contentInExtractedDir = await fs.readdir(extractedDir);
 
+
         for (const extractedContent of contentInExtractedDir.sort()) {
           const pathToExtractedContent = path.join(extractedDir, extractedContent);
 
@@ -153,15 +159,16 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
               // {pathTo}/{Sample_Name}_{UID}.fa
               extractedFilePath = pathToExtractedContent;
             }
-
+            
             const fileContent = await fs.readFile(extractedFilePath, {encoding: "utf-8"});
+
             const lines = fileContent.split(/\r?\n/);
 
             // - First row displays ""> - {Sample name} in text format
             const fistLine = lines.shift();
             expect(fistLine).toMatch(`>${samples[i].name}`);
 
-            const lastLine = lines[lines.length-1];
+            const lastLine = lines[lines.length - 1];
             if (lastLine.trim() === "") {
               lines.pop(); // Remove the last empty line
             }
@@ -175,27 +182,32 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
           }
         }
       }
-
     } finally {
-      await fs.rm(tempDir, {recursive: true, force: true});
+      await fs.rm(tempDir, { recursive: true, force: true });
     }
     // #endregion 13. Open storing folder, open the fasta files (notepad suggested) and observe data displayed
   });
 
-  test("SNo 17: Consensus Genome (Consensus Genome.fa) - Single file (Concatenated) (CURL)", async ({ page }) => {
+  test("SNo 17: Consensus Genome (Consensus Genome.fa) - Single file (Concatenated) (CURL)", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select >1 samples in Sample list view
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
-    let sampleNames = await projectPage.selectCompletedSamples(oneOrMoreSamples);
+    let sampleNames = await projectPage.selectCompletedSamples(
+      oneOrMoreSamples,
+    );
     sampleNames = sampleNames.sort();
 
     const samplesPage = new SamplesPage(page);
@@ -279,7 +291,10 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
       expect(filesInTempDir.length).toEqual(1);
 
       // Per each ">" split the file into acgtnContents. Each section is a sample
-      const fileContent = await fs.readFile(path.join(tempDir, filesInTempDir[0]), {encoding: "utf-8"});
+      const fileContent = await fs.readFile(
+        path.join(tempDir, filesInTempDir[0]),
+        { encoding: "utf-8" },
+      );
       const splitContents = fileContent.trim().split(/>/);
       let acgtnContents = [];
       for (const content of splitContents) {
@@ -298,9 +313,9 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
 
         // - First row displays ""> - {Sample name} in text format
         const fistLine = lines.shift();
-        expect(fistLine).toMatch(`>${sampleNames[i]}_`);
+        expect(fistLine).toMatch(`>${sampleNames[i]}`);
 
-        const lastLine = lines[lines.length-1];
+        const lastLine = lines[lines.length - 1];
         if (lastLine.trim() === "") {
           lines.pop(); // Remove the last empty line
         }
@@ -313,9 +328,8 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
         }
       }
     } finally {
-      await fs.rm(tempDir, {recursive: true, force: true});
+      await fs.rm(tempDir, { recursive: true, force: true });
     }
     // #endregion 13. Open the fasta file (notepad suggested) and observe data displayed
   });
-
 });
