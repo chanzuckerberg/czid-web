@@ -12,7 +12,7 @@ import RadioButton from "~ui/controls/RadioButton";
 import cs from "./nextclade_modal_tree_options.scss";
 
 interface NextcladeReferenceTreeOptionsProps {
-  referenceTree?: string;
+  referenceTree?: string | null;
   onChange: $TSFixMeFunction;
   onSelect: $TSFixMeFunction;
   selectedType?: string;

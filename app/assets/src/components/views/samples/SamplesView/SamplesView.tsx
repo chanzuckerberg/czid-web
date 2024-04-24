@@ -1206,10 +1206,9 @@ const SamplesView = forwardRef(function SamplesView(
       )}
       {nextcladeModalOpen && (
         <NextcladeModal
-          open
+          isOpen
           onClose={() => setNextcladeModalOpen(false)}
           selectedIds={selectedIds}
-          workflowEntity={workflowEntity}
         />
       )}
     </div>

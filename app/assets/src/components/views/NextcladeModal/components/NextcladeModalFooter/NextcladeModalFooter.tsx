@@ -15,7 +15,7 @@ interface NextcladeModalFooterProps {
   onClick?: $TSFixMeFunction;
   samplesNotSentToNextclade?: string[];
   type?: "warning" | "error" | "success" | "info";
-  validationError?: string;
+  validationError?: string | null;
 }
 
 export const NextcladeModalFooter = ({

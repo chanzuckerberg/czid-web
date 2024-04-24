@@ -1,28 +1,23 @@
 import { Icon } from "@czi-sds/components";
-import cx from "classnames";
+import { cx } from "@emotion/css";
 import { difference } from "lodash/fp";
-import React, { useContext } from "react";
-import { PopupProps } from "semantic-ui-react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
 import { validateWorkflowRunIds } from "~/api/access_control";
-import {
-  ANALYTICS_EVENT_NAMES,
-  TrackEventType,
-  useTrackEvent,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
+import Modal from "~/components/ui/containers/Modal";
 import List from "~/components/ui/List";
 import {
   NEXTCLADE_APP_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
 } from "~/components/utils/documentationLinks";
-import { SARS_COV_2 } from "~/components/views/samples/SamplesView/constants";
+import { openUrlInNewTab } from "~/components/utils/links";
+import { WorkflowType } from "~/components/utils/workflows";
 import { CreationSource } from "~/interface/sample";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import Modal from "~ui/containers/Modal";
-import { openUrlInNewTab } from "~utils/links";
-import { WorkflowType } from "~utils/workflows";
+import { SARS_COV_2 } from "../samples/SamplesView/constants";
 import { NextcladeConfirmationModal } from "./components/NextcladeConfirmationModal";
 import { NextcladeModalFooter } from "./components/NextcladeModalFooter";
 import { NextcladeReferenceTreeOptions } from "./components/NextcladeReferenceTreeOptions";
@@ -30,67 +25,52 @@ import cs from "./nextclade_modal.scss";
 
 interface NextcladeModalProps {
   onClose: $TSFixMeFunction;
-  open?: boolean;
+  isOpen?: boolean;
   selectedIds?: Set<$TSFixMe>;
-  workflowEntity?: string;
 }
 
-interface NextcladeModalWithContextProps extends NextcladeModalProps {
-  admin: boolean;
-  userId: number;
-  trackEvent: TrackEventType;
+enum SelectedTreeType {
+  GLOBAL = "global",
+  UPLOAD = "upload",
 }
 
-interface NextcladeModalState {
-  confirmationModalOpen: boolean;
-  errorModalOpen: boolean;
-  invalidSampleNames: $TSFixMe[];
-  loading: boolean;
-  loadingResults: boolean;
-  samplesNotSentToNextclade: $TSFixMe[];
-  projectIds: $TSFixMe[];
-  referenceTree: $TSFixMe;
-  selectedTreeType: string;
-  validationError: $TSFixMe;
-  validWorkflowRunIds: Set<$TSFixMe>;
-  validWorkflowInfo: $TSFixMe[];
-  referenceTreeContents?: $TSFixMe;
-}
+export const NextcladeModal = ({
+  onClose,
+  isOpen,
+  selectedIds,
+}: NextcladeModalProps) => {
+  const { admin: isAdmin, userId } = useContext(UserContext);
+  const trackEvent = useTrackEvent();
 
-class NextcladeModalCC extends React.Component<
-  NextcladeModalWithContextProps,
-  NextcladeModalState
-> {
-  constructor(props) {
-    super(props);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [samplesNotSentToNextclade, setSamplesNotSentToNextclade] = useState<
+    string[]
+  >([]);
+  const [projectIds, setProjectIds] = useState<string[]>([]);
+  const [referenceTree, setReferenceTree] = useState<File | null>(null);
+  const [selectedTreeType, setSelectedTreeType] = useState<SelectedTreeType>(
+    SelectedTreeType.GLOBAL,
+  );
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validWorkflowRunIds, setValidWorkflowRunIds] = useState(
+    new Set<string>(),
+  );
+  const [validWorkflowInfo, setValidWorkflowInfo] = useState<$TSFixMe[]>([]);
+  const [referenceTreeContents, setReferenceTreeContents] = useState<
+    string | null
+  >(null);
 
-    this.state = {
-      confirmationModalOpen: false,
-      errorModalOpen: false,
-      invalidSampleNames: [],
-      loading: true,
-      loadingResults: false,
-      samplesNotSentToNextclade: [],
-      projectIds: [],
-      referenceTree: null,
-      selectedTreeType: "global",
-      validationError: null,
-      validWorkflowRunIds: new Set(),
-      validWorkflowInfo: [],
-    };
-  }
-
-  componentDidMount() {
-    this.fetchValidationInfo();
-  }
-
-  fetchValidationInfo = async () => {
-    const { selectedIds } = this.props;
-
+  const fetchValidationInfo = useCallback(async () => {
+    if (!selectedIds) {
+      return null;
+    }
     const { validIds, invalidSampleNames, error } =
       await validateWorkflowRunIds({
         basic: false,
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
         workflowRunIds: Array.from(selectedIds),
         workflow: WorkflowType.CONSENSUS_GENOME,
       });
@@ -109,25 +89,21 @@ class NextcladeModalCC extends React.Component<
       )
       .map(cg => cg.name);
 
-    this.setState(
-      {
-        invalidSampleNames,
-        loading: false,
-        samplesNotSentToNextclade,
-        validationError: error,
-        validWorkflowRunIds: new Set(validIds),
-        validWorkflowInfo: workflowRunInfo,
-        projectIds: projectIds,
-      },
-      this.checkAdminSelections,
-    );
-  };
+    setInvalidSampleNames(invalidSampleNames);
+    setIsLoading(false);
+    setSamplesNotSentToNextclade(samplesNotSentToNextclade);
+    setValidationError(error);
+    setValidWorkflowRunIds(new Set(validIds));
+    setValidWorkflowInfo(workflowRunInfo);
+    setProjectIds(projectIds);
+  }, [selectedIds]);
 
-  checkAdminSelections = () => {
-    const { admin, userId } = this.context || {};
-    const { validWorkflowInfo } = this.state;
+  useEffect(() => {
+    fetchValidationInfo();
+  }, [fetchValidationInfo]);
 
-    if (admin) {
+  const checkAdminSelections = useCallback(() => {
+    if (isAdmin) {
       const selectedOwnerIds = validWorkflowInfo.map(
         workflow => workflow.userId,
       );
@@ -137,11 +113,13 @@ class NextcladeModalCC extends React.Component<
         );
       }
     }
-  };
+  }, [isAdmin, userId, validWorkflowInfo]);
 
-  openExportLink = async () => {
-    const { validWorkflowRunIds, referenceTreeContents, selectedTreeType } =
-      this.state;
+  useEffect(() => {
+    checkAdminSelections();
+  }, [checkAdminSelections, validWorkflowInfo]);
+
+  const openExportLink = async () => {
     const link = await createConsensusGenomeCladeExport({
       workflowRunIds: Array.from(validWorkflowRunIds),
       referenceTree:
@@ -150,252 +128,203 @@ class NextcladeModalCC extends React.Component<
     openUrlInNewTab(link.external_url);
   };
 
-  handleFileUpload = async file => {
+  const handleFileUpload = async (file: File) => {
     // Stringify, then parse to remove excess whitespace
     const fileContents = JSON.stringify(JSON.parse(await file.text()));
-    this.setState({
-      referenceTree: file,
-      referenceTreeContents: fileContents,
-    });
+    setReferenceTree(file);
+    setReferenceTreeContents(fileContents);
   };
 
-  handleSelectTreeType = selectedTreeType => {
-    this.setState({
-      selectedTreeType,
-    });
+  const handleSelectTreeType = (treeType: SelectedTreeType) => {
+    setSelectedTreeType(treeType);
   };
 
-  renderTooltip = ({
-    content,
-    link,
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-    iconStyle = null,
-    offset = [0, 0],
-    position = "top center",
-  }: {
-    content: string;
-    link?: string;
-    iconStyle?: string;
-    offset?: [number, number];
-    position?: PopupProps["position"];
-  }) => {
-    return (
-      <ColumnHeaderTooltip
-        trigger={
-          <span>
-            <Icon
-              sdsIcon="infoCircle"
-              sdsSize="s"
-              sdsType="interactive"
-              className={cx(cs.infoIcon, !!iconStyle && iconStyle)}
-            />
-          </span>
-        }
-        content={content}
-        link={link}
-        offset={offset}
-        position={position}
-      />
-    );
+  const handleOpenConfirmationModal = () => {
+    setIsConfirmationModalOpen(true);
   };
 
-  handleConfirmationModalOpen = () => {
-    this.setState({ confirmationModalOpen: true });
+  const handleCloseConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
   };
 
-  handleConfirmationModalClose = () => {
-    this.setState({ confirmationModalOpen: false });
-  };
-
-  handleConfirmationModalConfirm = async () => {
-    const { onClose, trackEvent } = this.props;
-    const { projectIds, validWorkflowRunIds, selectedTreeType } = this.state;
-
+  const handleConfirmationModalConfirm = async () => {
     try {
-      this.setState({ loadingResults: true }, () => {
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED,
-          {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            workflowRunIds: Array.from(validWorkflowRunIds),
-            selectedTreeType,
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-            projectIds,
-          },
-        );
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED_ALLISON_TESTING,
-          {
-            workflowRunIds: JSON.stringify(Array.from(validWorkflowRunIds)),
-            selectedTreeType,
-            projectIds: JSON.stringify(projectIds),
-          },
-        );
-      });
+      setIsLoadingResults(true);
 
-      await this.openExportLink();
-      this.setState({ confirmationModalOpen: false }, () => {
-        onClose();
-      });
-    } catch (error) {
-      this.setState(
+      // TODO: (ehoops) Checking with Kami to determine which of these has the correct types
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED,
         {
-          confirmationModalOpen: false,
-          errorModalOpen: true,
-          loadingResults: false,
-        },
-        () => {
-          console.error(error);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
+          workflowRunIds: Array.from(validWorkflowRunIds),
+          selectedTreeType,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
+          projectIds,
         },
       );
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED_ALLISON_TESTING,
+        {
+          workflowRunIds: JSON.stringify(Array.from(validWorkflowRunIds)),
+          selectedTreeType,
+          projectIds: JSON.stringify(projectIds),
+        },
+      );
+
+      await openExportLink();
+      setIsConfirmationModalOpen(false);
+      onClose();
+    } catch (error) {
+      setIsConfirmationModalOpen(false);
+      setIsErrorModalOpen(true);
+      setIsLoadingResults(false);
+      console.error(error);
     }
   };
 
-  handleErrorModalRetry = async () => {
-    const { onClose } = this.props;
-
+  const handleErrorModalRetry = async () => {
     try {
-      await this.openExportLink();
-      this.setState({ errorModalOpen: false }, () => {
-        onClose();
-      });
+      await openExportLink();
+      setIsErrorModalOpen(false);
+      onClose();
     } catch (error) {
       console.error(error);
     }
   };
 
-  handleErrorModalClose = () => {
-    this.setState({ errorModalOpen: false });
+  const handleCloseErrorModal = () => {
+    setIsErrorModalOpen(false);
   };
 
-  render() {
-    const { open, onClose, selectedIds } = this.props;
-    const {
-      confirmationModalOpen,
-      errorModalOpen,
-      invalidSampleNames,
-      loading,
-      loadingResults,
-      samplesNotSentToNextclade,
-      referenceTree,
-      validationError,
-      validWorkflowRunIds,
-      selectedTreeType,
-    } = this.state;
+  const sentToNextcladeCount = selectedIds
+    ? selectedIds.size - samplesNotSentToNextclade.length
+    : 0;
 
-    const sentToNextcladeCount =
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-      selectedIds.size - samplesNotSentToNextclade.length;
-
-    return (
-      <Modal narrow open={open} tall onClose={onClose}>
-        <div className={cs.modal}>
-          <div className={cs.nextcladeHeader}>
-            <div className={cs.title}>
-              View Consensus Genomes in Nextclade
-              {this.renderTooltip({
-                content:
-                  "Nextclade is a third-party tool and has its own policies.",
-                link: NEXTCLADE_APP_LINK,
-              })}
-            </div>
-            <div className={cs.tagline}>
-              {sentToNextcladeCount} Consensus Genome
-              {sentToNextcladeCount !== 1 ? "s" : ""} selected
-            </div>
-          </div>
-          <div className={cs.nextcladeDescription}>
-            <div className={cs.title}> Nextclade helps you: </div>
-            <List
-              listItems={[
-                `Assess sequence quality`,
-                `See where your consensus genomes differ from the reference sequence`,
-                `Identify which clade or lineage your consensus genomes belong to`,
-                <>
-                  View consensus genome placement in the context of a Nextstrain{" "}
-                  <br />
-                  phylogenetic tree
-                  {this.renderTooltip({
-                    content:
-                      "Exercise caution when interpreting this tree. Nextclade’s algorithms are meant for quick assessments and not a replacement for full analysis with the Nextstrain pipeline.",
-                    iconStyle: cs.lower,
-                    position: "top right",
-                    offset: [11, 0],
-                  })}
-                </>,
-              ]}
+  return (
+    <Modal narrow open={isOpen} tall onClose={onClose}>
+      <div className={cs.modal}>
+        <div className={cs.nextcladeHeader}>
+          <div className={cs.title}>
+            View Consensus Genomes in Nextclade
+            <ColumnHeaderTooltip
+              trigger={
+                <span>
+                  <Icon
+                    sdsIcon="infoCircle"
+                    sdsSize="s"
+                    sdsType="interactive"
+                    className={cs.infoIcon}
+                  />
+                </span>
+              }
+              content={
+                "Nextclade is a third-party tool and has its own policies."
+              }
+              link={NEXTCLADE_APP_LINK}
+              offset={[0, 0]}
+              position={"top center"}
             />
           </div>
-          <div className={cs.referenceTree}>
-            <div className={cs.title}>
-              Reference Tree
-              {this.renderTooltip({
-                content:
-                  "Nextclade will graft your sequences onto the reference tree to provide more context.",
-                link: NEXTCLADE_REFERENCE_TREE_LINK,
-                iconStyle: cs.lower,
-              })}
-            </div>
-            <div className={cs.options}>
-              <NextcladeReferenceTreeOptions
-                referenceTree={referenceTree && referenceTree.name}
-                onChange={this.handleFileUpload}
-                onSelect={this.handleSelectTreeType}
-                selectedType={selectedTreeType}
-              />
-            </div>
+          <div className={cs.tagline}>
+            {sentToNextcladeCount} Consensus Genome
+            {sentToNextcladeCount !== 1 ? "s" : ""} selected
           </div>
-          <div className={cs.footer}>
-            <NextcladeModalFooter
-              onClick={this.handleConfirmationModalOpen}
-              invalidSampleNames={invalidSampleNames}
-              loading={loading}
-              samplesNotSentToNextclade={samplesNotSentToNextclade}
-              validationError={validationError}
-              hasValidIds={validWorkflowRunIds && validWorkflowRunIds.size > 0}
+        </div>
+        <div className={cs.nextcladeDescription}>
+          <div className={cs.title}> Nextclade helps you: </div>
+          <List
+            listItems={[
+              `Assess sequence quality`,
+              `See where your consensus genomes differ from the reference sequence`,
+              `Identify which clade or lineage your consensus genomes belong to`,
+              <>
+                View consensus genome placement in the context of a Nextstrain{" "}
+                <br />
+                phylogenetic tree
+                <ColumnHeaderTooltip
+                  trigger={
+                    <span>
+                      <Icon
+                        sdsIcon="infoCircle"
+                        sdsSize="s"
+                        sdsType="interactive"
+                        className={cx(cs.infoIcon, cs.lower)}
+                      />
+                    </span>
+                  }
+                  content={
+                    "Exercise caution when interpreting this tree. Nextclade’s algorithms are meant for quick assessments and not a replacement for full analysis with the Nextstrain pipeline."
+                  }
+                  offset={[11, 0]}
+                  position={"top right"}
+                />
+              </>,
+            ]}
+          />
+        </div>
+        <div className={cs.referenceTree}>
+          <div className={cs.title}>
+            Reference Tree
+            <ColumnHeaderTooltip
+              trigger={
+                <span>
+                  <Icon
+                    sdsIcon="infoCircle"
+                    sdsSize="s"
+                    sdsType="interactive"
+                    className={cx(cs.infoIcon, cs.lower)}
+                  />
+                </span>
+              }
+              content={
+                "Nextclade will graft your sequences onto the reference tree to provide more context."
+              }
+              link={NEXTCLADE_REFERENCE_TREE_LINK}
+              offset={[0, 0]}
+              position={"top center"}
+            />
+          </div>
+          <div className={cs.options}>
+            <NextcladeReferenceTreeOptions
+              referenceTree={referenceTree && referenceTree.name}
+              onChange={handleFileUpload}
+              onSelect={handleSelectTreeType}
+              selectedType={selectedTreeType}
             />
           </div>
         </div>
-        {confirmationModalOpen && (
-          <NextcladeConfirmationModal
-            open
-            onCancel={this.handleConfirmationModalClose}
-            onConfirm={this.handleConfirmationModalConfirm}
-            loading={loadingResults}
+        <div className={cs.footer}>
+          <NextcladeModalFooter
+            onClick={handleOpenConfirmationModal}
+            invalidSampleNames={invalidSampleNames}
+            loading={isLoading}
+            samplesNotSentToNextclade={samplesNotSentToNextclade}
+            validationError={validationError}
+            hasValidIds={validWorkflowRunIds && validWorkflowRunIds.size > 0}
           />
-        )}
-        {errorModalOpen && (
-          <ErrorModal
-            labelText="Failed to send"
-            open
-            onCancel={this.handleErrorModalClose}
-            onConfirm={this.handleErrorModalRetry}
-            title={
-              "Sorry! There was an error sending your consensus genomes to Nextclade."
-            }
-          />
-        )}
-      </Modal>
-    );
-  }
-}
-
-// Using a function component wrapper provides a semi-hacky way to
-// access useContext from multiple providers without the class component to function component
-// conversion.
-export const NextcladeModal = (props: NextcladeModalProps) => {
-  const { admin, userId } = useContext(UserContext);
-  const trackEvent = useTrackEvent();
-
-  return (
-    <NextcladeModalCC
-      {...props}
-      admin={admin}
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      userId={userId}
-      trackEvent={trackEvent}
-    />
+        </div>
+      </div>
+      {isConfirmationModalOpen && (
+        <NextcladeConfirmationModal
+          open
+          onCancel={handleCloseConfirmationModal}
+          onConfirm={handleConfirmationModalConfirm}
+          loading={isLoadingResults}
+        />
+      )}
+      {isErrorModalOpen && (
+        <ErrorModal
+          labelText="Failed to send"
+          open
+          onCancel={handleCloseErrorModal}
+          onConfirm={handleErrorModalRetry}
+          title={
+            "Sorry! There was an error sending your consensus genomes to Nextclade."
+          }
+        />
+      )}
+    </Modal>
   );
 };
