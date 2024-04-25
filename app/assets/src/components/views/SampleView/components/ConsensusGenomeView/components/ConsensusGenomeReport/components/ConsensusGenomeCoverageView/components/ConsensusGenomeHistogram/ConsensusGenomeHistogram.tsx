@@ -207,7 +207,7 @@ export const ConsensusGenomeHistogram = ({
   }, [renderHistogram]);
 
   return (
-    <>
+    <div onMouseLeave={handleHistogramBarExit}>
       <div className={cs.coverageVizHistogram} ref={coverageVizContainerRef} />
       {histogramTooltipLocation && histogramTooltipData && (
         <div
@@ -217,6 +217,6 @@ export const ConsensusGenomeHistogram = ({
           <TooltipVizTable data={histogramTooltipData} />
         </div>
       )}
-    </>
+    </div>
   );
 };

@@ -352,14 +352,11 @@ export default class Histogram {
       this.sortedBarCenters,
       svgX,
     );
-
-    let closestX = null;
+    let closestX: number | null = null;
 
     if (closestBarCenters.length === 1) {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       closestX = closestBarCenters[0];
     } else {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       closestX =
         Math.abs(closestBarCenters[0] - svgX) <
         Math.abs(closestBarCenters[1] - svgX)
@@ -369,12 +366,9 @@ export default class Histogram {
 
     // Only return if we are at most hoverBuffer away from the closest bar.
     const buffer = this.barWidth / 2 + this.options.hoverBuffer;
-
     const dataIndices =
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
       Math.abs(closestX - svgX) < buffer
-        ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
-          this.barCentersToIndices[closestX]
+        ? this.barCentersToIndices[closestX]
         : null;
 
     const lastDataIndices = this.lastHoveredBarX
