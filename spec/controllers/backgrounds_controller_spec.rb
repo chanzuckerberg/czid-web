@@ -22,7 +22,7 @@ RSpec.describe BackgroundsController, type: :controller do
     end
 
     describe "GET #index" do
-      it "should not see backgrounds page" do
+      it "should not see backgrounds that don't belong to them" do
         create(:background, name: "Background Joe", user: @joe, pipeline_run_ids: [
                  @sample_joe.first_pipeline_run.id,
                  @sample_joe_two.first_pipeline_run.id,
@@ -37,7 +37,12 @@ RSpec.describe BackgroundsController, type: :controller do
                  @sample_admin.first_pipeline_run.id,
                ])
         get :index, format: :json
-        expect(response).to have_http_status :redirect
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).to include_json(backgrounds: [{
+                                                name: "Background Joe",
+                                              }])
       end
 
       context "categorizedBackgrounds parameter is specified" do
@@ -61,6 +66,19 @@ RSpec.describe BackgroundsController, type: :controller do
                    @sample_admin.first_pipeline_run.id,
                    @sample_admin_two.first_pipeline_run.id,
                  ])
+        end
+
+        it "categoriezes backgrounds into owned_backgrounds and other_backgrounds successfully" do
+          get :index, format: :json, params: { categorizeBackgrounds: true }
+
+          expect(response).to have_http_status :ok
+          json_response = JSON.parse(response.body)
+          other_background_ids = json_response["other_backgrounds"].map { |bg| bg["id"] }
+          owned_background_ids = json_response["owned_backgrounds"].map { |bg| bg["id"] }
+
+          expect(json_response.keys).to contain_exactly("other_backgrounds", "owned_backgrounds")
+          expect(other_background_ids).to contain_exactly(@public_admin_bg.id)
+          expect(owned_background_ids).to contain_exactly(@joe_background.id)
         end
       end
     end

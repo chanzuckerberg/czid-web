@@ -1,14 +1,11 @@
 class BackgroundsController < ApplicationController
   before_action :login_required
-  before_action :admin_required, except: [:create, :show_taxon_dist]
+  before_action :admin_required, except: [:create, :show_taxon_dist, :index]
   before_action :set_background, only: [:show, :destroy, :show_taxon_dist]
 
   # GET /backgrounds
   # GET /backgrounds.json
   def index
-    # Most of this logic is here to account for ensuring non-admin users see the correct subset of backgrounds
-    # This route is being made admin-only, so this is just here in case we bring this back as a user-facing page.
-    # (it is a current feature request)
     permitted_params = index_params
     json_response = {}.tap do |h|
       if permitted_params[:categorizeBackgrounds]
