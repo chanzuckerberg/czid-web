@@ -23,7 +23,39 @@ export const AdminPage = () => {
           <a href="/samples/28139/pipeline_runs">{`/samples/{sampleId}/pipeline_runs`}</a>
         </li>
         <li>
+          <a href="/samples/520461/pipeline_logs">{`/samples/{sampleId}/pipeline_logs`}</a>
+        </li>
+        <li>
+          <a href="/samples/32261/raw_results_folder">{`/samples/{sampleId}/raw_results_folder`}</a>
+        </li>
+        <li>
           <Link to="/admin/samples/123">{`/admin/samples/{sampleId}`}</Link>
+        </li>
+        <li>
+          {/* This is not a react-router link because it's still rendered by rails */}
+          <a href="/backgrounds">{`/backgrounds`}</a>
+        </li>
+        <li>
+          {/* This is not a react-router link because it's still rendered by rails */}
+          <a href="/host_genomes">{`/host_genomes`}</a>
+        </li>
+      </ul>
+      <h2>Playground</h2>
+      <ul>
+        <li>
+          <a href="/playground/controls">/playground/controls</a>
+        </li>
+        <li>
+          <a href="/playground/controls">/playground/components</a>
+        </li>
+        <li>
+          <a href="/playground/icons">/playground/icons</a>
+        </li>
+        <li>
+          <a href="/playground/controls">/playground/typography</a>
+        </li>
+        <li>
+          <a href="/playground/controls">/playground/viz</a>
         </li>
       </ul>
     </div>
