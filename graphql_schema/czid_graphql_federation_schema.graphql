@@ -1627,12 +1627,6 @@ type MngsRunInfo {
   withAssembly: Int
 }
 
-type MngsWorkflowResults {
-  metric_mngs: query_MngsWorkflowResults_metric_mngs
-  taxon_hit_results: query_MngsWorkflowResults_taxon_hit_results
-  fed_lineage: [query_MngsWorkflowResults_fed_lineage_items]
-}
-
 type MultipartUploadCredentials {
   protocol: String!
   namespace: String!
@@ -1715,7 +1709,6 @@ type Mutation {
   UpdateSampleNotes(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleNotes
   UpdateSampleName(sampleId: String, input: mutationInput_UpdateSampleNotes_input_Input): UpdateSampleName
   KickoffWGSWorkflow(sampleId: String, input: mutationInput_KickoffWGSWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
-  KickoffAMRWorkflow(sampleId: String, input: mutationInput_KickoffAMRWorkflow_input_Input): [mutation_KickoffWGSWorkflow_items]
   UpdateMetadata(sampleId: String, input: mutationInput_UpdateMetadata_input_Input): UpdateMetadataReponse
 }
 
@@ -1772,16 +1765,6 @@ input mutationInput_DeleteSamples_input_Input {
   idsStrings: [String]
   workflow: String
   authenticityToken: String
-}
-
-input mutationInput_KickoffAMRWorkflow_input_Input {
-  inputs_json: mutationInput_KickoffAMRWorkflow_input_inputs_json_Input
-  workflow: String
-  authenticityToken: String
-}
-
-input mutationInput_KickoffAMRWorkflow_input_inputs_json_Input {
-  start_from_mngs: Boolean
 }
 
 input mutationInput_KickoffWGSWorkflow_input_Input {
@@ -1861,16 +1844,6 @@ type PathogenList {
   pathogens: [Pathogen!]
   updatedAt: ISO8601DateTime
   version: String
-}
-
-type PersistedBackground {
-  background_id: Int
-}
-
-type PipelineData {
-  stages: [query_PipelineData_stages_items]
-  edges: [query_PipelineData_edges_items]
-  status: String
 }
 
 type PipelineRun {
@@ -1982,6 +1955,8 @@ type Query {
   workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
   workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
   workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
+  adminSamples(input: queryInput_adminSamples_input_Input): [query_adminSamples_items]
+  adminWorkflowRuns(input: queryInput_adminWorkflowRuns_input_Input): [query_adminWorkflowRuns_items]
   AmrDeprecatedResults(sampleId: String): AmrDeprecatedResults
   AmrWorkflowResults(workflowRunId: String): AmrWorkflowResults
   Background(snapshotLinkId: String): Background
@@ -1989,25 +1964,155 @@ type Query {
   BulkDownloadCGOverview(input: queryInput_BulkDownloadCGOverview_input_Input): ConsensusGenomeOverviewRows
   fedConsensusGenomes(input: queryInput_fedConsensusGenomes_input_Input): [query_fedConsensusGenomes_items]
   ConsensusGenomeWorkflowResults(workflowRunId: String): ConsensusGenomeWorkflowResults
-  CoverageVizSummary(snapshotLinkId: String, sampleId: String): [query_CoverageVizSummary_items]
   MetadataFields(snapshotLinkId: String, input: queryInput_MetadataFields_input_Input): [query_MetadataFields_items]
   SampleMetadata(snapshotLinkId: String, sampleId: String, input: queryInput_SampleMetadata_input_Input): SampleMetadata
   SampleForReport(snapshotLinkId: String, railsSampleId: String): SampleForReport
-  MngsWorkflowResults(snapshotLinkId: String, sampleId: String, workflowVersionId: String, _backgroundId: String): MngsWorkflowResults
-  Pathogens(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Pathogens_items]
-  PersistedBackground(projectId: String): PersistedBackground
-  PipelineData(sampleId: String, workflowVersionId: String): PipelineData
-  fedSamples(input: queryInput_fedSamples_input_Input): [query_fedSamples_items]
   fedSequencingReads(input: queryInput_fedSequencingReads_input_Input): [query_fedSequencingReads_items]
-  Taxons(snapshotLinkId: String, sampleId: String, workflowVersionId: String): [query_Taxons_items]
-  TaxonDist(backgroundId: String, taxonId: String): TaxonDist
-  UserBlastAnnotations(sampleId: String, workflowVersionId: String): [query_UserBlastAnnotations_items]
   ValidateUserCanDeleteObjects(input: queryInput_ValidateUserCanDeleteObjects_input_Input): ValidateUserCanDeleteObjects
   fedWorkflowRuns(input: queryInput_fedWorkflowRuns_input_Input): [query_fedWorkflowRuns_items]
   fedWorkflowRunsAggregate(input: queryInput_fedWorkflowRunsAggregate_input_Input): fedWorkflowRunsAggregate
   fedWorkflowRunsAggregateTotalCount(input: queryInput_fedWorkflowRunsAggregateTotalCount_input_Input): fedWorkflowRunsAggregateTotalCount
   ZipLink(workflowRunId: String): ZipLink
   GraphQLFederationVersion: GraphQLFederationVersion
+}
+
+type query_adminSamples_items {
+  id: String!
+  ownerUserId: Int!
+  collectionId: Int
+  createdAt: String!
+  railsSampleId: Int
+  sequencingReads: query_adminSamples_items_sequencingReads!
+}
+
+type query_adminSamples_items_sequencingReads {
+  edges: [query_adminSamples_items_sequencingReads_edges_items]!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items {
+  node: query_adminSamples_items_sequencingReads_edges_items_node!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node {
+  id: String!
+  createdAt: String!
+  protocol: String
+  technology: String!
+  medakaModel: String
+  clearlabsExport: Boolean!
+  r1File: query_adminSamples_items_sequencingReads_edges_items_node_r1File
+  r2File: query_adminSamples_items_sequencingReads_edges_items_node_r2File
+  taxon: query_adminSamples_items_sequencingReads_edges_items_node_taxon
+  primerFile: query_adminSamples_items_sequencingReads_edges_items_node_primerFile
+  consensusGenomes: query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes {
+  edges: [query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items]!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items {
+  node: query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node {
+  id: String!
+  accession: query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_accession
+  createdAt: String!
+  producingRunId: String
+  referenceGenome: query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_referenceGenome
+  taxon: query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_taxon
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_accession {
+  accessionId: String!
+  accessionName: String!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_referenceGenome {
+  file: query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_referenceGenome_file
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_referenceGenome_file {
+  path: String!
+  protocol: String!
+  namespace: String!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_consensusGenomes_edges_items_node_taxon {
+  id: String!
+  name: String!
+  upstreamDatabaseIdentifier: String!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_primerFile {
+  file: query_adminSamples_items_sequencingReads_edges_items_node_primerFile_file
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_primerFile_file {
+  path: String!
+  namespace: String!
+  protocol: String
+  id: String!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_r1File {
+  id: String!
+  protocol: String!
+  path: String!
+  namespace: String!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_r2File {
+  id: String!
+  protocol: String!
+  path: String!
+  namespace: String!
+}
+
+type query_adminSamples_items_sequencingReads_edges_items_node_taxon {
+  id: String
+  name: String
+  upstreamDatabaseIdentifier: String
+}
+
+type query_adminWorkflowRuns_items {
+  id: String!
+  createdAt: String!
+  collectionId: Int
+  startedAt: String
+  errorMessage: String
+  rawInputsJson: String
+  railsWorkflowRunId: Int
+  ownerUserId: Int!
+  status: String
+  executionId: String
+  endedAt: String
+  workflowVersion: query_adminWorkflowRuns_items_workflowVersion
+  entityInputs: query_adminWorkflowRuns_items_entityInputs!
+}
+
+type query_adminWorkflowRuns_items_entityInputs {
+  edges: [query_adminWorkflowRuns_items_entityInputs_edges_items]
+}
+
+type query_adminWorkflowRuns_items_entityInputs_edges_items {
+  node: query_adminWorkflowRuns_items_entityInputs_edges_items_node
+}
+
+type query_adminWorkflowRuns_items_entityInputs_edges_items_node {
+  entityType: String
+  fieldName: String
+  inputEntityId: String
+}
+
+type query_adminWorkflowRuns_items_workflowVersion {
+  workflow: query_adminWorkflowRuns_items_workflowVersion_workflow
+  version: String
+}
+
+type query_adminWorkflowRuns_items_workflowVersion_workflow {
+  name: String
 }
 
 type query_AmrWorkflowResults_amr_hit_items {
@@ -2089,17 +2194,6 @@ type query_ConsensusGenomeWorkflowResults_reference_genome {
 type query_ConsensusGenomeWorkflowResults_reference_genome_taxon {
   id: String
   name: String
-}
-
-type query_CoverageVizSummary_items {
-  id: Int
-  pipeline_id: Int
-  name: String
-  num_contigs: Int
-  num_reads: Int
-  score: Int
-  coverage_breadth: JSON
-  coverage_depth: JSON
 }
 
 type query_fedBulkDownloads_items {
@@ -2229,11 +2323,6 @@ type query_fedConsensusGenomes_items_taxon {
   name: String!
   id: String
   commonName: String
-}
-
-type query_fedSamples_items {
-  id: String!
-  railsSampleId: Int
 }
 
 type query_fedSequencingReads_items {
@@ -2417,99 +2506,6 @@ type query_MetadataFields_items {
 
 type query_MetadataFields_items_examples {
   all: [String]
-}
-
-type query_MngsWorkflowResults_fed_lineage_items {
-  tax_id: String
-  name: String
-  rank: String
-}
-
-type query_MngsWorkflowResults_metric_mngs {
-  assembled: Int
-  adjusted_remaining_reads: Int
-  total_ercc_reads: Int
-  num_reads: Int
-  num_reads_after_subsampling: Int
-  fed_has_byteranges: Boolean
-}
-
-type query_MngsWorkflowResults_taxon_hit_results {
-  taxon_hits: [query_MngsWorkflowResults_taxon_hit_results_taxon_hits_items]
-}
-
-type query_MngsWorkflowResults_taxon_hit_results_taxon_hits_items {
-  count_type: String
-  count: Int
-  base_count: Int
-  rpm: Float
-  bpm: Float
-  alignment_length: Float
-  percent_identity: Int
-  e_value: Float
-  tax_id: Int
-  fed_bg_mean: Float
-  fed_bg_stdev: Float
-  fed_bg_mean_mass_normalized: Float
-  fed_bg_stdev_mass_normalized: Float
-  fed_z_score: Float
-  fed_max_z_score: Float
-  fed_agg_score: Float
-}
-
-type query_Pathogens_items {
-  tax_id: JSON
-}
-
-type query_PipelineData_edges_items {
-  to: query_PipelineData_edges_items_to
-  from: query_PipelineData_edges_items_from
-  files: [query_PipelineData_edges_items_files_items]
-  isIntraStage: Boolean
-}
-
-type query_PipelineData_edges_items_files_items {
-  displayName: String
-  url: JSON
-}
-
-type query_PipelineData_edges_items_from {
-  stageIndex: Int
-  stepIndex: Int
-}
-
-type query_PipelineData_edges_items_to {
-  stageIndex: Int
-  stepIndex: Int
-}
-
-type query_PipelineData_stages_items {
-  name: String
-  steps: [query_PipelineData_stages_items_steps_items]
-  jobStatus: String
-}
-
-type query_PipelineData_stages_items_steps_items {
-  name: String
-  description: String
-  inputVariables: [query_PipelineData_stages_items_steps_items_inputVariables_items]
-  outputFiles: [query_PipelineData_stages_items_steps_items_outputFiles_items]
-  inputEdges: [Int]
-  outputEdges: [Int]
-  status: String
-  startTime: JSON
-  endTime: JSON
-  resources: [JSON]
-}
-
-type query_PipelineData_stages_items_steps_items_inputVariables_items {
-  name: String
-  type: String
-}
-
-type query_PipelineData_stages_items_steps_items_outputFiles_items {
-  displayName: String
-  url: JSON
 }
 
 type query_SampleForReport_pipeline_runs_items {
@@ -2722,40 +2718,32 @@ input query_SampleMetadata_metadata_items_location_validated_value_oneOf_1_Input
   refetch_adjusted_location: Boolean
 }
 
-type query_TaxonDist_merged_NT_NR {
-  tax_level: Int
-  mean: Float
-  stdev: Float
-  rpm_list: [Float]
+input queryInput_adminSamples_input_Input {
+  where: queryInput_adminSamples_input_where_Input
 }
 
-type query_TaxonDist_NR {
-  tax_level: Int
-  mean: Float
-  stdev: Float
-  rpm_list: [Float]
+input queryInput_adminSamples_input_where_Input {
+  railsSampleId: queryInput_adminSamples_input_where_railsSampleId_Input
 }
 
-type query_TaxonDist_NT {
-  tax_level: Int
-  mean: Float
-  stdev: Float
-  rpm_list: [Float]
+input queryInput_adminSamples_input_where_railsSampleId_Input {
+  _eq: Float
 }
 
-type query_Taxons_items {
-  tax_id: JSON
-  tax_id_genus: JSON
-  common_name: JSON
-  name: JSON
-  is_phage: JSON
-  level: JSON
-  fed_category: JSON
+input queryInput_adminWorkflowRuns_input_Input {
+  where: queryInput_adminWorkflowRuns_input_where_Input
 }
 
-type query_UserBlastAnnotations_items {
-  tax_id: JSON
-  annotation: JSON
+input queryInput_adminWorkflowRuns_input_where_entityInputs_Input {
+  inputEntityId: queryInput_adminWorkflowRuns_input_where_entityInputs_inputEntityId_Input
+}
+
+input queryInput_adminWorkflowRuns_input_where_entityInputs_inputEntityId_Input {
+  _eq: String
+}
+
+input queryInput_adminWorkflowRuns_input_where_Input {
+  entityInputs: queryInput_adminWorkflowRuns_input_where_entityInputs_Input
 }
 
 input queryInput_BulkDownloadCGOverview_input_Input {
@@ -2832,118 +2820,6 @@ input queryInput_fedConsensusGenomes_input_where_Input {
 input queryInput_fedConsensusGenomes_input_where_producingRunId_Input {
   _in: [String]
   _eq: String
-}
-
-input queryInput_fedSamples_input_Input {
-  where: queryInput_fedSamples_input_where_Input
-  orderBy: queryInput_fedSamples_input_orderBy_Input
-  sequencingReadsInput: queryInput_fedSamples_input_sequencingReadsInput_Input
-  todoRemove: queryInput_fedSamples_input_todoRemove_Input
-}
-
-input queryInput_fedSamples_input_orderBy_Input {
-  key: String
-  dir: String
-}
-
-input queryInput_fedSamples_input_sequencingReadsInput_Input {
-  where: queryInput_fedSamples_input_sequencingReadsInput_where_Input
-}
-
-input queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_Input {
-  taxon: queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_taxon_Input
-}
-
-input queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_taxon_Input {
-  name: queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_taxon_name_Input
-}
-
-input queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_taxon_name_Input {
-  _in: [String]
-}
-
-input queryInput_fedSamples_input_sequencingReadsInput_where_Input {
-  taxon: queryInput_fedSamples_input_sequencingReadsInput_where_taxon_Input
-  consensusGenomes: queryInput_fedSamples_input_sequencingReadsInput_where_consensusGenomes_Input
-}
-
-input queryInput_fedSamples_input_sequencingReadsInput_where_taxon_Input {
-  name: queryInput_fedSamples_input_sequencingReadsInput_where_taxon_name_Input
-}
-
-input queryInput_fedSamples_input_sequencingReadsInput_where_taxon_name_Input {
-  _in: [String]
-}
-
-input queryInput_fedSamples_input_todoRemove_Input {
-  domain: String
-  visibility: String
-  time: [String]
-  taxaLevels: [String]
-  taxons: [Int]
-  offset: Int
-  limit: Int
-  workflow: String
-  projectId: String
-  listAllIds: Boolean
-}
-
-input queryInput_fedSamples_input_where_collectionLocation_Input {
-  _in: [String]
-}
-
-input queryInput_fedSamples_input_where_hostOrganism_Input {
-  name: queryInput_fedSamples_input_where_hostOrganism_name_Input
-}
-
-input queryInput_fedSamples_input_where_hostOrganism_name_Input {
-  _in: [String]
-}
-
-input queryInput_fedSamples_input_where_id_Input {
-  _in: [String]
-}
-
-input queryInput_fedSamples_input_where_Input {
-  id: queryInput_fedSamples_input_where_id_Input
-  name: queryInput_fedSamples_input_where_name_Input
-  collectionLocation: queryInput_fedSamples_input_where_collectionLocation_Input
-  sampleType: queryInput_fedSamples_input_where_sampleType_Input
-  hostOrganism: queryInput_fedSamples_input_where_hostOrganism_Input
-  sequencingReads: queryInput_fedSamples_input_where_sequencingReads_Input
-}
-
-input queryInput_fedSamples_input_where_name_Input {
-  _like: String
-}
-
-input queryInput_fedSamples_input_where_sampleType_Input {
-  _in: [String]
-}
-
-input queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_Input {
-  taxon: queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_taxon_Input
-}
-
-input queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_taxon_Input {
-  name: queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_taxon_name_Input
-}
-
-input queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_taxon_name_Input {
-  _in: [String]
-}
-
-input queryInput_fedSamples_input_where_sequencingReads_Input {
-  taxon: queryInput_fedSamples_input_where_sequencingReads_taxon_Input
-  consensusGenomes: queryInput_fedSamples_input_where_sequencingReads_consensusGenomes_Input
-}
-
-input queryInput_fedSamples_input_where_sequencingReads_taxon_Input {
-  name: queryInput_fedSamples_input_where_sequencingReads_taxon_name_Input
-}
-
-input queryInput_fedSamples_input_where_sequencingReads_taxon_name_Input {
-  _in: [String]
 }
 
 input queryInput_fedSequencingReads_input_consensusGenomesInput_Input {
@@ -4148,12 +4024,6 @@ input TaxonCreateInput {
   deletedAt: DateTime = null
 }
 
-type TaxonDist {
-  merged_NT_NR: query_TaxonDist_merged_NT_NR
-  NR: query_TaxonDist_NR
-  NT: query_TaxonDist_NT
-}
-
 """An edge in a connection."""
 type TaxonEdge {
   """A cursor for use in pagination"""
@@ -4510,7 +4380,8 @@ input UUIDComparators {
 }
 
 type ValidateUserCanDeleteObjects {
-  validIds: [String]!
+  validIds: [Float]!
+  validIdsStrings: [String]!
   invalidSampleNames: [String]!
   error: String
 }

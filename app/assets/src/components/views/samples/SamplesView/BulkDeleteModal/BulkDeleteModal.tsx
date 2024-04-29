@@ -13,6 +13,7 @@ import { ErrorButton } from "~/components/ui/controls/buttons";
 import { logError } from "~/components/utils/logUtil";
 import { pluralize } from "~/components/utils/stringUtil";
 import { showToast } from "~/components/utils/toast";
+import { isNotNullish } from "~/components/utils/typeUtils";
 import {
   getWorkflowTypeFromLabel,
   WorkflowLabelType,
@@ -41,7 +42,7 @@ const BulkDeleteModalQuery = graphql`
         authenticityToken: $authenticityToken
       }
     ) {
-      validIds
+      validIdsStrings
       invalidSampleNames
       error
     }
@@ -113,9 +114,7 @@ const BulkDeleteModalComponent = ({
   }
 
   // Data from query:
-  const validIds = data.validIds.filter(
-    (validId): validId is string => validId != null,
-  );
+  const validIds = data.validIdsStrings.filter(isNotNullish);
   const invalidSampleNames = data.invalidSampleNames.filter(
     (invalidSampleName): invalidSampleName is string =>
       invalidSampleName != null,
@@ -125,7 +124,7 @@ const BulkDeleteModalComponent = ({
   const deleteSamples = async () => {
     commit({
       variables: {
-        idsStrings: validIds.map(id => id.toString()),
+        idsStrings: validIds,
         workflow: getWorkflowTypeFromLabel(workflowLabel),
         authenticityToken: getCsrfToken(),
       },
@@ -171,7 +170,7 @@ const BulkDeleteModalComponent = ({
       />
     ));
     if (error !== undefined) {
-      console.error(error);
+      logError({ message: `Delete failed: ${error}` });
     }
   };
 
