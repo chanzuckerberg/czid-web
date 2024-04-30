@@ -10,6 +10,7 @@ RSpec.describe BulkDeletionService, type: :service do
   let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
   let(:nanopore) { PipelineRun::TECHNOLOGY_INPUT[:nanopore] }
 
+  # unused but leaving in if we re-enable nextgen later
   def stub_nextgen_call(wr_ids_to_return, sample_ids_to_return)
     allow(BulkDeletionServiceNextgen).to receive(:call).and_return(
       {
@@ -577,6 +578,10 @@ RSpec.describe BulkDeletionService, type: :service do
     end
 
     context "NextGen" do
+      before do
+        AppConfigHelper.set_app_config(AppConfig::NEXTGEN_SERVICES_ENABLED, "1")
+      end
+
       context "when the workflow run ids are UUIDs" do
         context "when there are no rails workflow runs to delete" do
           it "still enqueues a NextGen hard deletion job and a Rails job" do
@@ -708,7 +713,6 @@ RSpec.describe BulkDeletionService, type: :service do
     end
 
     it "returns deletable workflow run ids and sample ids for workflow runs" do
-      stub_nextgen_call([@completed_wr.id, @failed_wr.id], [@sample1.id, @sample2.id])
       response = BulkDeletionService.call(
         object_ids: [@completed_wr.id, @failed_wr.id],
         user: @joe,
@@ -720,7 +724,6 @@ RSpec.describe BulkDeletionService, type: :service do
     end
 
     it "sets the deleted_at field to current time" do
-      stub_nextgen_call([@completed_wr.id, @failed_wr.id], [@sample1.id, @sample2.id])
       response = BulkDeletionService.call(
         object_ids: [@completed_wr.id, @failed_wr.id],
         user: @joe,
@@ -741,7 +744,6 @@ RSpec.describe BulkDeletionService, type: :service do
         sample_name: @sample1.name,
         workflow: consensus_genome,
       }.to_json
-      stub_nextgen_call([@completed_wr.id], [@sample1.id])
 
       BulkDeletionService.call(
         object_ids: [@completed_wr.id],
@@ -762,7 +764,6 @@ RSpec.describe BulkDeletionService, type: :service do
         end
 
         it "maintains an initial workflow of CG" do
-          stub_nextgen_call([@completed_wr.id], [@sample1.id])
           response = BulkDeletionService.call(
             object_ids: [@completed_wr.id],
             user: @joe,
@@ -776,7 +777,6 @@ RSpec.describe BulkDeletionService, type: :service do
         end
 
         it "sends all sample ids to the async hard-delete job" do
-          stub_nextgen_call([@completed_wr.id], [@sample1.id])
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@completed_wr.id], [@completed_wr.sample.id], consensus_genome, @joe.id
           )
@@ -794,7 +794,6 @@ RSpec.describe BulkDeletionService, type: :service do
         end
 
         it "sets the initial workflow to AMR" do
-          stub_nextgen_call([@completed_wr.id], [@sample1.id])
           response = BulkDeletionService.call(
             object_ids: [@completed_wr.id],
             user: @joe,
@@ -808,7 +807,6 @@ RSpec.describe BulkDeletionService, type: :service do
         end
 
         it "sends all sample ids to async hard-delete job" do
-          stub_nextgen_call([@completed_wr.id], [@sample1.id])
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@completed_wr.id], [@completed_wr.sample.id], consensus_genome, @joe.id
           )
@@ -822,7 +820,6 @@ RSpec.describe BulkDeletionService, type: :service do
 
       context "when the sample has no more runs" do
         it "sets the deleted_at column on the sample to the current timestamp" do
-          stub_nextgen_call([@completed_wr.id], [@sample1.id])
           response = BulkDeletionService.call(
             object_ids: [@completed_wr.id],
             user: @joe,
@@ -836,7 +833,6 @@ RSpec.describe BulkDeletionService, type: :service do
         end
 
         it "sends all sample ids to the async hard-delete job" do
-          stub_nextgen_call([@completed_wr.id], [@sample1.id])
           expect(Resque).to receive(:enqueue).with(
             HardDeleteObjects, [@completed_wr.id], [@sample1.id], consensus_genome, @joe.id
           )
@@ -854,7 +850,6 @@ RSpec.describe BulkDeletionService, type: :service do
             sample_id: @sample1.id,
             sample_name: @sample1.name,
           }.to_json
-          stub_nextgen_call([@completed_wr.id], [@sample1.id])
 
           BulkDeletionService.call(
             object_ids: [@completed_wr.id],

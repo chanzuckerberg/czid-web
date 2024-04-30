@@ -80,11 +80,9 @@ class BulkDeletionService
       deletable_rails_objects = current_power.deletable_pipeline_runs.where(sample_id: object_ids, technology: technology)
       sample_ids = object_ids
       handle_visualizations(sample_ids, delete_timestamp)
-    elsif workflow != WorkflowRun::WORKFLOW[:consensus_genome]
-      deletable_rails_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
-      sample_ids = deletable_rails_objects.pluck(:sample_id)
-    else
+    elsif workflow == WorkflowRun::WORKFLOW[:consensus_genome] && AppConfigHelper.get_app_config(AppConfig::NEXTGEN_SERVICES_ENABLED) == "1"
       # NEXTGEN: get Rails objects to delete and NextGen objects to delete
+      # Only go into this service if Nextgen services are available
       rails_ids, nextgen_ids = BulkDeletionServiceNextgen.call(
         user: user,
         object_ids: object_ids,
@@ -94,6 +92,10 @@ class BulkDeletionService
       ).values_at(:rails_ids, :nextgen_ids)
       deletable_rails_ids, sample_ids = rails_ids.values_at(:workflow_run_ids, :sample_ids)
       deletable_rails_objects = current_power.deletable_workflow_runs.where(id: deletable_rails_ids).by_workflow(workflow).non_deprecated
+    else
+      # Flow for Rails-only CG and AMR
+      deletable_rails_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
+      sample_ids = deletable_rails_objects.pluck(:sample_id)
     end
 
     # Soft delete Rails bulk downloads
@@ -163,6 +165,7 @@ class BulkDeletionService
       )
     end
 
+    # This job won't be enqueued unless create_next_gen_entities flag is on
     unless nextgen_ids.empty?
       Resque.enqueue(HardDeleteNextgenObjects, user.id, nextgen_ids[:cg_ids], nextgen_ids[:sample_ids], nextgen_ids[:workflow_run_ids], nextgen_ids[:deprecated_workflow_run_ids], nextgen_ids[:bulk_download_workflow_run_ids], nextgen_ids[:bulk_download_entity_ids])
     end

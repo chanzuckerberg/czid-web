@@ -102,6 +102,7 @@ class DeletionValidationService
     current_power = Power.new(user)
 
     # Handle case where `workflow_run_ids` is an array of CG UUIDs from NextGen
+    # This will only happen if the should_read_from_nextgen flag is on.
     if BulkDeletionServiceNextgen.nextgen_workflow?(workflow, workflow_run_ids)
       result = CzidGraphqlFederation.query_with_token(user.id, BulkDeletionServiceNextgen::GetWorkflowRuns, variables: { run_ids: workflow_run_ids })
       valid_ids = result.data.workflow_runs.select { |run| run.owner_user_id == user.id }.map(&:id)

@@ -72,6 +72,10 @@ class DeleteOldBulkDownloads
   end
 
   def self.destroy_old_downloads_nextgen
+    unless AppConfigHelper.get_app_config(AppConfig::NEXTGEN_SERVICES_ENABLED) == "1"
+      return
+    end
+
     Rails.logger.info("Starting DeleteOldBulkDownloads job for NextGen bulk downloads.")
 
     # Delete old bulk downloads

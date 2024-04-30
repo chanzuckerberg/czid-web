@@ -127,6 +127,11 @@ class CheckSoftDeletedData
 
   def self.check_for_soft_deleted_data_nextgen
     system_user_id = ENV["SYSTEM_ADMIN_USER_ID"]
+    # Don't check for soft deleted data if our nextgen services aren't available
+    unless AppConfigHelper.get_app_config(AppConfig::NEXTGEN_SERVICES_ENABLED) == "1"
+      return
+    end
+
     token = TokenCreationService.call(user_id: system_user_id, should_include_project_claims: true)["token"]
     time = (Time.now.utc - DELAY).iso8601
     soft_deleted_cgs = CzidGraphqlFederation.query_with_token(system_user_id, GetSoftDeletedCGs, variables: { time: time }, token: token).data.consensus_genomes
