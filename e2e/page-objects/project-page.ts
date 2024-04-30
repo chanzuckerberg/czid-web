@@ -461,10 +461,13 @@ export class ProjectPage extends PageObject {
     await this.page.locator(SELECT_ALL_SAMPLES).click();
   }
 
-  public async clickDownloadButtonForImmediateDownload() {
-    const downloadPromise = this.page.waitForEvent("download");
-    await this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click();
-    return downloadPromise;
+  public async clickDownloadButtonForImmediateDownload(timeout = 90_000) {
+    const [download] = await Promise.all([
+      this.page.waitForEvent("download", {timeout: timeout}),
+      this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click(),
+    ]).catch(() => [undefined]);
+    expect(download).toBeDefined();
+    return download;
   }
 
   public async clickApplyButton() {
