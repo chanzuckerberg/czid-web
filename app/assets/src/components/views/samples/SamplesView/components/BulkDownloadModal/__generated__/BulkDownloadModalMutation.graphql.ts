@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4a08a308462633c4855aaabec8957063>>
+ * @generated SignedSource<<5c860682e4c3790e7aa5b648f692a1d1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,7 @@ export type BulkDownloadModalMutation$variables = {
   workflowRunIdsStrings?: ReadonlyArray<string | null | undefined> | null | undefined;
 };
 export type BulkDownloadModalMutation$data = {
-  readonly CreateBulkDownload: {
+  readonly createAsyncBulkDownload: {
     readonly id: string;
   } | null | undefined;
 };
@@ -90,7 +90,7 @@ v5 = [
     ],
     "concreteType": "fedCreateBulkDownload",
     "kind": "LinkedField",
-    "name": "CreateBulkDownload",
+    "name": "createAsyncBulkDownload",
     "plural": false,
     "selections": [
       {
@@ -134,16 +134,16 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "a16f3467f2094d7015ce5a561eb768cf",
+    "cacheID": "8ee2078b01a481a4136367aa368bbeb0",
     "id": null,
     "metadata": {},
     "name": "BulkDownloadModalMutation",
     "operationKind": "mutation",
-    "text": "mutation BulkDownloadModalMutation(\n  $workflowRunIdsStrings: [String]\n  $downloadFormat: String\n  $downloadType: String!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  CreateBulkDownload(input: {workflowRunIdsStrings: $workflowRunIdsStrings, downloadFormat: $downloadFormat, downloadType: $downloadType, workflow: $workflow, authenticityToken: $authenticityToken}) {\n    id\n  }\n}\n"
+    "text": "mutation BulkDownloadModalMutation(\n  $workflowRunIdsStrings: [String]\n  $downloadFormat: String\n  $downloadType: String!\n  $workflow: String!\n  $authenticityToken: String!\n) {\n  createAsyncBulkDownload(input: {workflowRunIdsStrings: $workflowRunIdsStrings, downloadFormat: $downloadFormat, downloadType: $downloadType, workflow: $workflow, authenticityToken: $authenticityToken}) {\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "0cc41c0a1a985f0a93e67b0c5148d4ce";
+(node as any).hash = "b68bb7d4cf8c27326e2c1e34e91fde15";
 
 export default node;

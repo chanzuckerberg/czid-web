@@ -657,9 +657,9 @@ export class ProjectPage extends PageObject {
       this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click(),
     ]);
     const responseJson = await response.json();
-    if (responseJson.data && responseJson.data.CreateBulkDownload) {
+    if (responseJson.data && responseJson.data.createAsyncBulkDownload) {
       // graphqlfed
-      return responseJson.data.CreateBulkDownload.id;
+      return responseJson.data.createAsyncBulkDownload.id;
     } else {
       // bulk_downloads
       return responseJson.id;

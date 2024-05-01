@@ -91,7 +91,7 @@ const BulkDownloadModalMutation = graphql`
     $workflow: String!
     $authenticityToken: String!
   ) {
-    CreateBulkDownload(
+    createAsyncBulkDownload(
       input: {
         workflowRunIdsStrings: $workflowRunIdsStrings
         downloadFormat: $downloadFormat
@@ -191,7 +191,7 @@ export const BulkDownloadModal = ({
         authenticityToken,
       },
       onCompleted: data => {
-        if (data.CreateBulkDownload?.id != null) {
+        if (data.createAsyncBulkDownload?.id != null) {
           onGenerate();
         } else {
           onCreateDownloadError(DEFAULT_CREATION_ERROR);
