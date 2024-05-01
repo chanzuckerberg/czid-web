@@ -52,11 +52,13 @@ class SampleEntityCreationService
     end
 
     # Fetch the next gen taxon entity (if present)
+    # Only applies to SARS-Cov-2 and Viral Consensus Genome workflows
     workflow_run_taxon_id = if creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
                               ConsensusGenomeWorkflowRun::SARS_COV_2_TAXON_ID
                             else
                               @workflow_run.get_input("taxon_id")
                             end
+
     if workflow_run_taxon_id
       taxon_response = CzidGraphqlFederation
                        .query_with_token(

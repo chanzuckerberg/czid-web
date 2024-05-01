@@ -9,6 +9,7 @@ end
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 require_relative 'support/user_macros'
+require_relative 'support/graphql_responses'
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -76,6 +77,9 @@ RSpec.configure do |config|
 
   # Rails URL helpers
   config.include Rails.application.routes.url_helpers
+
+  # Rails graphQL response helper
+  config.include GraphqlResponses
 end
 
 # This will load all the Rake tasks for any Rake tests. You should only have this once:
