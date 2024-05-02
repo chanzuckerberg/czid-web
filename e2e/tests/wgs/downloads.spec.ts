@@ -6,12 +6,12 @@ import {
   SAMPLE_FILE_NO_HOST_2,
 } from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
+import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import AdmZip = require("adm-zip");
 import moment = require("moment-timezone");
 import * as tar from "tar";
 import { ProjectPage } from "../../page-objects/project-page";
-import { setupSamples } from "@e2e/page-objects/user-actions";
 
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const NO_HOST_1 = "wgs_SARS_CoV2_no_host";
@@ -657,7 +657,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
         // {Sample_Name}_{UID} directory format
         expect(directories[i]).toMatch(new RegExp(`${selectedSamples[i]}_${UID_REGEX}`));
-        
+
         for (const expectedContent of expectedExtractedContents) {
           expectedEntries.push(`${directories[i]}/${expectedContent}`);
         }
@@ -672,8 +672,8 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
   test("SNo 24: Download All - Sample report link", async ({ page }) => {
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject("SNo_SC2-42");
-    const samples = await setupSamples(
+    const project = await projectPage.getOrCreateProject("SNo_WGS-22");
+    await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
@@ -682,6 +682,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
       {
         hostOrganism: "Human",
         taxon: "Unknown",
+        includeTrimPrimer: true,
       },
     );
 
