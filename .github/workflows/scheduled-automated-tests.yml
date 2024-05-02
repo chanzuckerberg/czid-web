@@ -21,38 +21,14 @@ jobs:
       should-run-with-feature-flags: "false"
     secrets: inherit
 
-  # Run Smoke tests on staging with feature flags
-  run_staging_playwright_smoke_tests_with_feature_flags:
-    if: ${{ always() }}
-    needs: run_staging_playwright_smoke_tests
-    name: Run Smoke tests on staging with feature flags
-    uses: ./.github/workflows/e2e-automation.yml
-    with:
-      node-environment: "staging"
-      test-category: "smoke"
-      should-run-with-feature-flags: "true"
-    secrets: inherit
-
   # Run E2E tests on staging
   run_staging_playwright_e2e_tests:
     if: ${{ always() }}
-    needs: run_staging_playwright_smoke_tests_with_feature_flags
+    needs: run_staging_playwright_smoke_tests
     name: Run E2E tests on staging
     uses: ./.github/workflows/e2e-automation.yml
     with:
       node-environment: "staging"
       test-category: "e2e"
       should-run-with-feature-flags: "false"
-    secrets: inherit
-
-  # Run E2E tests on staging with feature flags
-  run_staging_playwright_e2e_tests_with_feature_flags:
-    if: ${{ always() }}
-    needs: run_staging_playwright_e2e_tests
-    name: Run E2E tests on staging with feature flags
-    uses: ./.github/workflows/e2e-automation.yml
-    with:
-      node-environment: "staging"
-      test-category: "e2e"
-      should-run-with-feature-flags: "true"
     secrets: inherit
