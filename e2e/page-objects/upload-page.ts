@@ -193,6 +193,7 @@ export class UploadPage extends PageObject {
   }
 
   public async clickAuthorize() {
+    await this.page.locator(BASESPACE_AUTHORIZE).waitFor({timeout: 90_000});
     const [newPage] = await Promise.all([
       this.page.context().waitForEvent("page"),
       await this.page.locator(BASESPACE_AUTHORIZE).click(),
