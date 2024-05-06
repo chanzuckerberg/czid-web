@@ -805,9 +805,12 @@ export class SamplesPage extends PageObject {
       await this.pause(1);
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
 
-      await this.pause(1);
-      await this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION).getByText(option).click();
-      await this.pause(1);
+      const consensusGenomeOptions = this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION);
+      await consensusGenomeOptions.getByText(option).waitFor({timeout: 90_000});
+      await consensusGenomeOptions.getByText(option).click();
+
+      const selectedValue = await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).getByTestId("filter-value").textContent();
+      expect(selectedValue).toEqual(option);
     }
     // #endregion Macro
 

@@ -783,8 +783,10 @@ export class ProjectPage extends PageObject {
     const rows = await this.page.locator(COMPLETED_ROWS).all();
     const indexes = [];
     for (const row of rows) {
-      const rowIndex = await row.getAttribute(ARIA_ROWINDEX);
-      indexes.push(+rowIndex);
+      const rowIndex = await row.getAttribute(ARIA_ROWINDEX, {timeout: 4_000}).catch(() => null);
+      if (rowIndex !== null) {
+        indexes.push(+rowIndex);
+      }
     }
 
     return indexes;
