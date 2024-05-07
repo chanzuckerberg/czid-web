@@ -791,6 +791,9 @@ export class UploadPage extends PageObject {
       await this.fillCollectionDate(inputs[sampleName].collectionDate, i);
       await this.fillCollectionLocation(inputs[sampleName].collectionLocation, i);
     }
+
+    const errors = await this.getErrors();
+    expect(errors).toEqual([]);
     return inputs;
   }
 

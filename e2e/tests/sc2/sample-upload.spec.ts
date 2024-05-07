@@ -128,9 +128,10 @@ test.describe("Sample upload (web): Functional: P-0", () => {
       // #endregion 6. Select Sample files and click on Continue (see Data section)
 
       // #region 7. Enter required Metadata and click on Continue
+      let sampleNames = await uploadPage.getMetadataSampleNames();
       let inputs = await uploadPage.getRandomizedSampleInputs(
         SAMPLE_FILES,
-        SAMPLE_NAMES,
+        sampleNames,
       );
       inputs = await uploadPage.setManualInputs(inputs);
       await uploadPage.clickContinue();
@@ -146,7 +147,6 @@ test.describe("Sample upload (web): Functional: P-0", () => {
       // - Sent to Pipeline status displayed
       // - Uploads completed! message displayed
       // - Go to Project button enabled / displayed
-      let sampleNames = Object.keys(inputs);
       for (const sampleName of sampleNames) {
         const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(
           sampleName,
@@ -323,9 +323,10 @@ test.describe("Sample upload (web): Functional: P-0", () => {
     // #endregion 7. Select Sample files and click on Continue (see Data section)
 
     // #region 8. Enter required Metadata and click on Continue
+    let sampleNames = await uploadPage.getMetadataSampleNames();
     let inputs = await uploadPage.getRandomizedSampleInputs(
       [SAMPLE_FILE_CT20K],
-      [CT20K_SAMPLE_NAME],
+      sampleNames,
     );
     inputs = await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
@@ -341,7 +342,6 @@ test.describe("Sample upload (web): Functional: P-0", () => {
     // - Sent to Pipeline status displayed
     // - Uploads completed! message displayed
     // - Go to Project button enabled / displayed
-    let sampleNames = Object.keys(inputs);
     for (const sampleName of sampleNames) {
       const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(
         sampleName,
@@ -520,9 +520,10 @@ test.describe("Sample upload (web): Functional: P-0", () => {
     // #endregion 8. Select Sample files and click on Continue (see Data section)
 
     // #region 9. Enter required Metadata and click on Continue
+    let sampleNames = await uploadPage.getMetadataSampleNames();
     let inputs = await uploadPage.getRandomizedSampleInputs(
       [SAMPLE_FILE_CT20K],
-      [CT20K_SAMPLE_NAME],
+      sampleNames,
     );
     inputs = await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
@@ -538,7 +539,6 @@ test.describe("Sample upload (web): Functional: P-0", () => {
     // - Sent to Pipeline status displayed
     // - Uploads completed! message displayed
     // - Go to Project button enabled / displayed
-    let sampleNames = Object.keys(inputs);
     for (const sampleName of sampleNames) {
       const hostSentToPipeline = await uploadPage.waitForSampleSentToPipeline(
         sampleName,

@@ -31,6 +31,7 @@ const config: PlaywrightTestConfig = {
   testDir: "../",
   timeout: 90000,
   use: {
+    actionTimeout: 90000,
     channel: "chromium",
     baseURL: "https://sandbox.czid.org",
     ignoreHTTPSErrors: true,
