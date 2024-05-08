@@ -17,7 +17,6 @@ import { useAllowedFeatures } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { CONCAT_FILES_HELP_LINK } from "~/components/utils/documentationLinks";
-import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { Project, SampleFromApi } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
@@ -118,13 +117,12 @@ class LocalSampleFileUploadCC extends React.Component<LocalSampleFileUploadWithC
   };
 
   getFilePickerTitle = () => {
-    const { allowedFeatures, hasSamplesLoaded, samples } = this.props;
+    const { hasSamplesLoaded, samples } = this.props;
 
     const fileCount = sumBy(s => size(s.input_files_attributes), samples);
 
     if (fileCount) {
       if (
-        allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         !samples.every(element => element.finishedValidating)
       ) {

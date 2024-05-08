@@ -32,10 +32,7 @@ import {
   UserContext,
 } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import {
-  HEATMAP_ELASTICSEARCH_FEATURE,
-  SHOULD_READ_FROM_NEXTGEN,
-} from "~/components/utils/features";
+import { SHOULD_READ_FROM_NEXTGEN } from "~/components/utils/features";
 import {
   AMR_PIPELINE,
   isPipelineFeatureAvailable,
@@ -43,7 +40,6 @@ import {
 } from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
-import { TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { showBulkDownloadNotification } from "~/components/views/components/BulkDownloadNotification";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -378,35 +374,20 @@ const SamplesView = forwardRef(function SamplesView(
           hideArrow
           className={cx(cs.action)}
           items={heatmapOptions.map(option => {
-            if (
-              allowedFeatures.includes("taxon_heatmap_presets") &&
-              option.text === "Taxon Heatmap" &&
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-              selectedIds.size > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM &&
-              !allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE)
-            ) {
-              return (
-                <BareDropdown.Item
-                  key={option.text}
-                  text={option.text}
-                  onClick={() => setHeatmapCreationModalOpen(true)}
-                />
-              );
-            } else {
-              const params = getURLParamString({
-                // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
-                sampleIds: Array.from(selectedIds),
-              });
-              return (
-                <RouterLink
-                  to={`${option.value}?${params}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <BareDropdown.Item key={option.text} text={option.text} />
-                </RouterLink>
-              );
-            }
+            const params = getURLParamString({
+              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
+              sampleIds: Array.from(selectedIds),
+            });
+            return (
+              <RouterLink
+                key={`${option.text}-link`}
+                to={`${option.value}?${params}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <BareDropdown.Item key={option.text} text={option.text} />
+              </RouterLink>
+            );
           })}
           trigger={
             <ToolbarButtonIcon

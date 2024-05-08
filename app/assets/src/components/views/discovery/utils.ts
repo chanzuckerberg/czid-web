@@ -1,6 +1,5 @@
 import { map } from "lodash/fp";
 import moment from "moment";
-import { TAXON_THRESHOLD_FILTERING_FEATURE } from "~/components/utils/features";
 import { ThresholdForAPI } from "~/components/utils/ThresholdMap";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { NextGenFilters, SelectedFilters } from "~/interface/discoveryView";
@@ -50,7 +49,6 @@ export const getSessionOrderFieldsKeys = () => {
 
 export const prepareFilters = (
   filters: SelectedFilters | Record<string, never>,
-  allowedFeatures: string[],
 ) => {
   const preparedFilters = {} as FilterList;
   const filtersToFormat = [
@@ -86,14 +84,8 @@ export const prepareFilters = (
 
   // Taxon is formatted: this filter needs to store complete option, so need to convert to values only
   if (filters.taxonSelected && filters.taxonSelected.length) {
-    let mapKey = "value";
-
-    if (allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)) {
-      mapKey = "id";
-      preparedFilters.taxaLevels = map("level", filters.taxonSelected);
-    }
-
-    preparedFilters.taxon = map(mapKey, filters.taxonSelected);
+    preparedFilters.taxaLevels = map("level", filters.taxonSelected);
+    preparedFilters.taxon = map("id", filters.taxonSelected);
   }
 
   // Taxon Threshold is formatted: for compatibility with the API query

@@ -1,13 +1,11 @@
 import { Icon, Tooltip } from "@czi-sds/components";
-import React, { useContext } from "react";
+import React from "react";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
 import { MenuOptionWithDisabledTooltip } from "~/components/common/MenuOptionWithDisabledTooltip";
-import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Link from "~/components/ui/controls/Link";
 import { BACKGROUND_MODELS_LINK } from "~/components/utils/documentationLinks";
-import { HEATMAP_KNOWN_PATHOGEN_FILTER } from "~/components/utils/features";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import { RawBackground } from "../../SamplesHeatmapView";
 import { metricIsZscore } from "../../utils";
@@ -77,9 +75,6 @@ const SamplesHeatmapFilters = ({
   selectedOptions,
   onSelectedOptionsChange,
 }: SamplesHeatmapFiltersPropsType) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
-
   const onTaxonLevelChange = (taxonLevel: SDSFormattedOption) => {
     const value = taxonLevel.value;
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
@@ -434,32 +429,30 @@ const SamplesHeatmapFilters = ({
         <div className={cs.viewOptionsDropdownContainer}>
           {renderSpecificityFilter()}
         </div>
-        {allowedFeatures.includes(HEATMAP_KNOWN_PATHOGEN_FILTER) && (
-          <div className={cs.taxonTagsContainer}>
-            <span className={cs.filterTitle}>Pathogen Tag</span>
-            <SamplesHeatmapTaxonTagCheckbox
-              label={"Known Pathogens Only"}
-              value={"known_pathogens"}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-              selectedOptions={selectedOptions}
-              onSelectedOptionsChange={onSelectedOptionsChange}
-              showInfoIcon={true}
-              infoIconTooltipContent={
-                <span>
-                  Organisms with known human pathogenicity based on{" "}
-                  <Link external href="/pathogen_list">
-                    CZ ID&#39;s current pathogen list.
-                  </Link>{" "}
-                  <br />
-                  <br />
-                  Please cross-reference the literature to verify tagged
-                  pathogens.
-                </span>
-              }
-              disabled={loading || !data}
-            />
-          </div>
-        )}
+        <div className={cs.taxonTagsContainer}>
+          <span className={cs.filterTitle}>Pathogen Tag</span>
+          <SamplesHeatmapTaxonTagCheckbox
+            label={"Known Pathogens Only"}
+            value={"known_pathogens"}
+            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
+            selectedOptions={selectedOptions}
+            onSelectedOptionsChange={onSelectedOptionsChange}
+            showInfoIcon={true}
+            infoIconTooltipContent={
+              <span>
+                Organisms with known human pathogenicity based on{" "}
+                <Link external href="/pathogen_list">
+                  CZ ID&#39;s current pathogen list.
+                </Link>{" "}
+                <br />
+                <br />
+                Please cross-reference the literature to verify tagged
+                pathogens.
+              </span>
+            }
+            disabled={loading || !data}
+          />
+        </div>
       </div>
       <Divider />
       <div className={cs.lowerFilterSection}>

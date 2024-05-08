@@ -5,7 +5,6 @@ import React from "react";
 import { CellMeasurer, CellMeasurerCache } from "react-virtualized";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import Checkbox from "~ui/controls/Checkbox";
 import cs from "./sample_upload_table_renderers.scss";
 
@@ -32,41 +31,34 @@ export class SampleUploadTableRenderers extends React.Component {
       >
         <div>
           {cellData.fileName.map((fileName: $TSFixMe) => (
-            <UserContext.Consumer key={fileName}>
-              {(currentUser: $TSFixMe) => (
-                <div
-                  key={fileName}
-                  className={cx(
-                    cs.fileName,
-                    cellData.isValid &&
-                      cellData.isValid[fileName] === false &&
-                      cs.disabled,
-                  )}
-                >
-                  {fileName}
-                  {currentUser.allowedFeatures.includes(
-                    PRE_UPLOAD_CHECK_FEATURE,
-                  ) &&
-                    isEmpty(fileName) === false &&
-                    cellData.isValid &&
-                    cellData.isValid[fileName] === false && (
-                      <ColumnHeaderTooltip
-                        trigger={
-                          <span>
-                            <Icon
-                              sdsIcon="infoCircle"
-                              sdsSize="s"
-                              sdsType="interactive"
-                              className={cs.iconInfo}
-                            />
-                          </span>
-                        }
-                        content={cellData.error[fileName]}
-                      />
-                    )}
-                </div>
+            <div
+              key={fileName}
+              className={cx(
+                cs.fileName,
+                cellData.isValid &&
+                  cellData.isValid[fileName] === false &&
+                  cs.disabled,
               )}
-            </UserContext.Consumer>
+            >
+              {fileName}
+              {isEmpty(fileName) === false &&
+                cellData.isValid &&
+                cellData.isValid[fileName] === false && (
+                  <ColumnHeaderTooltip
+                    trigger={
+                      <span>
+                        <Icon
+                          sdsIcon="infoCircle"
+                          sdsSize="s"
+                          sdsType="interactive"
+                          className={cs.iconInfo}
+                        />
+                      </span>
+                    }
+                    content={cellData.error[fileName]}
+                  />
+                )}
+            </div>
           ))}
         </div>
       </CellMeasurer>
@@ -100,35 +92,20 @@ export class SampleUploadTableRenderers extends React.Component {
     const disabled = !finishedValidating || !isValid;
     return (
       <div>
-        <UserContext.Consumer>
-          {(currentUser: $TSFixMe) => (
-            <div>
-              {!currentUser.allowedFeatures.includes(
-                PRE_UPLOAD_CHECK_FEATURE,
-              ) ? (
-                <Checkbox
-                  className={cx(selectableCellClassName, cs.checkbox)}
-                  checked={selected.has(cellData.id)}
-                  onChange={onSelectRow}
-                  value={disabled ? -1 : cellData.id}
-                  disabled={disabled}
-                  testId="row-select-checkbox"
-                />
-              ) : finishedValidating ? (
-                <Checkbox
-                  className={cx(selectableCellClassName, cs.checkbox)}
-                  checked={selected.has(cellData.id)}
-                  onChange={onSelectRow}
-                  value={disabled ? -1 : cellData.id}
-                  disabled={disabled}
-                  testId="row-select-checkbox"
-                />
-              ) : (
-                <i className="fa fa-spinner fa-pulse fa-fw" />
-              )}
-            </div>
+        <div>
+          {finishedValidating ? (
+            <Checkbox
+              className={cx(selectableCellClassName, cs.checkbox)}
+              checked={selected.has(cellData.id)}
+              onChange={onSelectRow}
+              value={disabled ? -1 : cellData.id}
+              disabled={disabled}
+              testId="row-select-checkbox"
+            />
+          ) : (
+            <i className="fa fa-spinner fa-pulse fa-fw" />
           )}
-        </UserContext.Consumer>
+        </div>
       </div>
     );
   };

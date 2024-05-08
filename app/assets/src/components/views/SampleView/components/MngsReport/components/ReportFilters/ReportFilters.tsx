@@ -14,10 +14,7 @@ import React, { useContext } from "react";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { UserContext } from "~/components/common/UserContext";
-import {
-  ANNOTATION_FILTER_FEATURE,
-  PATHOGEN_FLAG_FILTER_FEATURE,
-} from "~/components/utils/features";
+import { PATHOGEN_FLAG_FILTER_FEATURE } from "~/components/utils/features";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import {
   getWorkflowTypeFromLabel,
@@ -413,20 +410,19 @@ export const ReportFilters = ({
             }
           />
         </div>
-        {view === "table" &&
-          allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) && (
-            <div className={cs.filterListElement}>
-              <AnnotationFilter
-                selectedAnnotations={selected.annotations}
-                onChange={(value: string) =>
-                  handleFilterChange({
-                    key: "annotations",
-                    value,
-                  })
-                }
-              />
-            </div>
-          )}
+        {view === "table" && (
+          <div className={cs.filterListElement}>
+            <AnnotationFilter
+              selectedAnnotations={selected.annotations}
+              onChange={(value: string) =>
+                handleFilterChange({
+                  key: "annotations",
+                  value,
+                })
+              }
+            />
+          </div>
+        )}
         {view === "table" &&
           allowedFeatures.includes(PATHOGEN_FLAG_FILTER_FEATURE) && (
             <div className={cs.filterListElement}>

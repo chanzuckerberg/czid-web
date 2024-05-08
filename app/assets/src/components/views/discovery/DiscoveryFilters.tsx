@@ -11,15 +11,10 @@ import {
   BaseMultipleFilter,
   BaseSingleFilter,
   LocationFilter,
-  TaxonFilter,
 } from "~/components/common/filters";
 import { FilterOption } from "~/components/common/filters/BaseMultipleFilter";
 import TaxonThresholdFilter from "~/components/common/filters/TaxonThresholdFilter";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
-import {
-  ANNOTATION_FILTER_FEATURE,
-  TAXON_THRESHOLD_FILTERING_FEATURE,
-} from "~/components/utils/features";
 import ThresholdMap from "~/components/utils/ThresholdMap";
 import { WORKFLOWS, WorkflowType } from "~/components/utils/workflows";
 import {
@@ -478,14 +473,12 @@ class DiscoveryFilters extends React.Component<
     const {
       hostSelected,
       locationV2Selected,
-      taxonSelected,
       timeSelected,
       tissueSelected,
       visibilitySelected,
     } = this.state;
 
     const {
-      allowedFeatures,
       className,
       currentTab,
       domain,
@@ -496,16 +489,6 @@ class DiscoveryFilters extends React.Component<
       visibility,
       workflow,
     } = this.props;
-
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    const hasTaxonThresholdFilterFeature = allowedFeatures.includes(
-      TAXON_THRESHOLD_FILTERING_FEATURE,
-    );
-
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-    const hasAnnotationsFilter = allowedFeatures.includes(
-      ANNOTATION_FILTER_FEATURE,
-    );
 
     // Taxon threshold and annotations filters are not available for some workflows
     const taxonFilterDisabled =
@@ -530,48 +513,30 @@ class DiscoveryFilters extends React.Component<
             <div
               className={cx(
                 cs.filterContainer,
-                hasTaxonThresholdFilterFeature &&
-                  cs.taxonThresholdFilterContainer,
+                cs.taxonThresholdFilterContainer,
               )}
             >
-              {hasTaxonThresholdFilterFeature ? (
-                this.renderTaxonThresholdFilter({
-                  disabled: taxonFilterDisabled,
-                  disableThreshold: disableTaxonThreshold,
-                  workflow,
-                })
-              ) : (
-                <TaxonFilter
-                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-                  domain={domain}
-                  onChange={this.handleChange.bind(this, KEY_TAXON_SELECTED)}
-                  // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-                  selectedOptions={taxonSelected}
-                  disabled={taxonFilterDisabled}
-                />
-              )}
+              {this.renderTaxonThresholdFilter({
+                disabled: taxonFilterDisabled,
+                disableThreshold: disableTaxonThreshold,
+                workflow,
+              })}
               {!taxonFilterDisabled && (
                 <>
-                  {!hasTaxonThresholdFilterFeature && this.renderTags("taxon")}
-                  {hasTaxonThresholdFilterFeature &&
-                    this.renderTaxonFilterTags()}
-                  {hasTaxonThresholdFilterFeature &&
-                    !disableTaxonThreshold &&
+                  {this.renderTaxonFilterTags()}
+                  {!disableTaxonThreshold &&
                     this.renderTaxonThresholdFilterTags()}
                 </>
               )}
             </div>
-            {hasAnnotationsFilter && (
-              <div className={cs.filterContainer}>
-                {this.renderAnnotationsFilter({
-                  disabled: annotationFilterDisabled,
-                  workflow,
-                })}
-                {!annotationFilterDisabled &&
-                  this.renderAnnotationsFilterTags()}
-              </div>
-            )}
-            {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}
+            <div className={cs.filterContainer}>
+              {this.renderAnnotationsFilter({
+                disabled: annotationFilterDisabled,
+                workflow,
+              })}
+              {!annotationFilterDisabled && this.renderAnnotationsFilterTags()}
+            </div>
+            <div className={cs.divider} />
             <div className={cs.filterHeader}> Metadata Filters </div>
             <div className={cs.filterContainer}>
               <LocationFilter

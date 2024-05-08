@@ -6,7 +6,6 @@ import { difference, flatten, get, isEmpty, map, size } from "lodash/fp";
 import React from "react";
 import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 import { UserContext } from "~/components/common/UserContext";
-import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
 import { Table } from "~/components/visualizations/table";
 import { SampleUploadType } from "~/interface/shared";
@@ -135,12 +134,8 @@ export class SampleUploadTable extends React.Component<SampleUploadTableProps> {
 
   rowRenderer = (rowProps: $TSFixMe) => {
     const { sampleUploadType } = this.props;
-    const { allowedFeatures = [] } = this.context || {};
     const data = rowProps.rowData;
-    if (
-      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
-      sampleUploadType === "local"
-    ) {
+    if (sampleUploadType === "local") {
       // If any file is still being validated, disable the entire sample row.
       const finishedValidating = Object.values(data.finishedValidating).every(
         fileFinished => fileFinished,

@@ -48,7 +48,6 @@ import ProjectSelect from "~/components/common/ProjectSelect";
 import { useAllowedFeatures } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { SampleUploadType } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
@@ -925,17 +924,13 @@ class UploadSampleStepCC extends React.Component<
     checked: boolean,
     sampleType: SampleUploadType,
   ) => {
-    const { allowedFeatures } = this.props;
     this.props.onDirty();
     const samplesKey = this.getSamplesKey(sampleType);
     const samples = this.state[samplesKey];
 
     // If the user tries to select an invalid sample, do nothing.
     // Note: we currently only run validation checks on locally uploaded samples
-    if (
-      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
-      sampleType === LOCAL_UPLOAD
-    ) {
+    if (sampleType === LOCAL_UPLOAD) {
       const sample = samples.find(
         (sample: $TSFixMe) => sample[SELECT_ID_KEY] === value,
       );
@@ -982,7 +977,6 @@ class UploadSampleStepCC extends React.Component<
   };
 
   handleAllSamplesSelect = (checked: $TSFixMe, sampleType: $TSFixMe) => {
-    const { allowedFeatures } = this.props;
     this.props.onDirty();
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
     const samplesKey = this.getSamplesKey(sampleType);
@@ -990,10 +984,7 @@ class UploadSampleStepCC extends React.Component<
 
     // Filter out invalid samples.
     // Note: we currently only run validation checks on locally uploaded samples
-    if (
-      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
-      sampleType === LOCAL_UPLOAD
-    ) {
+    if (sampleType === LOCAL_UPLOAD) {
       samples = samples.filter(
         (sample: $TSFixMe) =>
           sample.isValid && this.validateCorrectFormat(sample),
@@ -1176,11 +1167,9 @@ class UploadSampleStepCC extends React.Component<
       selectedWetlabProtocol,
       selectedWorkflows,
     } = this.state;
-    const { allowedFeatures } = this.props;
     // Note: we currently only run validation checks on locally uploaded samples
     if (
       currentTab === LOCAL_UPLOAD &&
-      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
       !localSamples.every(element => element.finishedValidating)
     ) {
       return "Please wait for file validation to complete";
@@ -1275,7 +1264,6 @@ class UploadSampleStepCC extends React.Component<
       refSeqFile,
       selectedTaxon,
     } = this.state;
-    const { allowedFeatures } = this.props;
 
     let isMNGSWorkflowValid = !this.isWorkflowSelected(
       UPLOAD_WORKFLOWS.MNGS.value,
@@ -1335,8 +1323,7 @@ class UploadSampleStepCC extends React.Component<
       isWGSWorkflowValid;
 
     // Note: we currently only run validation checks on locally uploaded samples
-    return allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
-      currentTab === LOCAL_UPLOAD
+    return currentTab === LOCAL_UPLOAD
       ? selectedProject !== null &&
           size(this.getSelectedSamples(currentTab)) > 0 &&
           !validatingSamples &&
@@ -1487,7 +1474,6 @@ class UploadSampleStepCC extends React.Component<
   render() {
     const {
       admin,
-      allowedFeatures,
       biohubS3UploadEnabled,
       latestMajorPipelineVersions,
       pipelineVersions,
@@ -1620,17 +1606,16 @@ class UploadSampleStepCC extends React.Component<
             sampleUploadType={currentTab}
             files={files}
           />
-          {localSamples.length > 0 &&
-            allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) && (
-              // Note: we currently only run validation checks on locally uploaded samples
-              <PreUploadQCCheck
-                samples={localSamples}
-                changeState={this.handleValidatedFilesChange}
-                CLI={CLI}
-                handleSampleDeselect={this.handleInvalidSample}
-                sequenceTechnology={this.getSequenceTechnology()}
-              />
-            )}
+          {localSamples.length > 0 && (
+            // Note: we currently only run validation checks on locally uploaded samples
+            <PreUploadQCCheck
+              samples={localSamples}
+              changeState={this.handleValidatedFilesChange}
+              CLI={CLI}
+              handleSampleDeselect={this.handleInvalidSample}
+              sequenceTechnology={this.getSequenceTechnology()}
+            />
+          )}
         </div>
         <div className={cs.controls}>
           {readyForBasespaceAuth && (

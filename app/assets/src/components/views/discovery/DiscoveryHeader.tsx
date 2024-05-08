@@ -20,7 +20,7 @@ interface DiscoveryHeaderProps {
     result: {
       key: string;
       value: string | number;
-      text: string;
+      text?: string;
       sdsTaxonFilterData:
         | {
             id: number;

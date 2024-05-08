@@ -32,10 +32,7 @@ import { IconLoading } from "~/components/ui/icons";
 import {
   BENCHMARKING_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
-  SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
   SORTING_V0_ADMIN_FEATURE,
-  SORTING_V0_FEATURE,
-  TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { isNotNullish } from "~/components/utils/typeUtils";
@@ -549,7 +546,7 @@ export class DiscoveryView extends React.Component<
   // TODO: Delete this unnecessary method.
   getConditions = (workflow?: WorkflowType): Conditions => {
     const { filters, projectId, search, orderBy, orderDirection } = this.state;
-    const { allowedFeatures, snapshotShareId } = this.props;
+    const { snapshotShareId } = this.props;
 
     return {
       projectId,
@@ -559,7 +556,7 @@ export class DiscoveryView extends React.Component<
       orderBy,
       orderDir: orderDirection,
       filters: {
-        ...prepareFilters(filters, allowedFeatures),
+        ...prepareFilters(filters),
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         workflow,
       },
@@ -973,7 +970,7 @@ export class DiscoveryView extends React.Component<
   };
 
   refreshFilteredStats = async (refreshStatsCallback = null) => {
-    const { allowedFeatures, domain, snapshotShareId } = this.props;
+    const { domain, snapshotShareId } = this.props;
     const { filters, projectId, search } = this.state;
 
     this.setState({
@@ -984,7 +981,7 @@ export class DiscoveryView extends React.Component<
       domain,
       projectId,
       snapshotShareId,
-      filters: prepareFilters(filters, allowedFeatures),
+      filters: prepareFilters(filters),
       search,
     });
 
@@ -1074,7 +1071,7 @@ export class DiscoveryView extends React.Component<
   };
 
   refreshFilteredDimensions = async () => {
-    const { allowedFeatures, domain, snapshotShareId } = this.props;
+    const { domain, snapshotShareId } = this.props;
     const { filters, projectId, search } = this.state;
 
     this.setState({
@@ -1088,7 +1085,7 @@ export class DiscoveryView extends React.Component<
       domain,
       projectId,
       snapshotShareId,
-      filters: prepareFilters(filters, allowedFeatures),
+      filters: prepareFilters(filters),
       search,
     });
 
@@ -1100,7 +1097,7 @@ export class DiscoveryView extends React.Component<
   };
 
   refreshFilteredLocations = async () => {
-    const { allowedFeatures, domain } = this.props;
+    const { domain } = this.props;
     const { filters, mapLevel, projectId, search } = this.state;
 
     this.setState({
@@ -1110,7 +1107,7 @@ export class DiscoveryView extends React.Component<
     const mapLocationData = await getDiscoveryLocations({
       domain,
       projectId,
-      filters: prepareFilters(filters, allowedFeatures),
+      filters: prepareFilters(filters),
       search,
     });
 
@@ -1297,12 +1294,10 @@ export class DiscoveryView extends React.Component<
     {
       key,
       value,
-      text,
       sdsTaxonFilterData,
     }: {
       key: string;
       value: string;
-      text: string;
       sdsTaxonFilterData: {
         id: number;
         level: string;
@@ -1311,7 +1306,6 @@ export class DiscoveryView extends React.Component<
     },
     currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
-    const { allowedFeatures } = this.props;
     const { filters, search } = this.state;
 
     const dimensions = this.getCurrentDimensions();
@@ -1325,21 +1319,12 @@ export class DiscoveryView extends React.Component<
         // (since we do know which options are available, we always added)
         let filteredTaxa = [];
 
-        if (allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)) {
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-          filteredTaxa = xorBy(
-            "id",
-            [sdsTaxonFilterData],
-            newFilters[selectedKey],
-          );
-        } else {
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-          filteredTaxa = xorBy(
-            "value",
-            [{ value, text }],
-            newFilters[selectedKey],
-          );
-        }
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
+        filteredTaxa = xorBy(
+          "id",
+          [sdsTaxonFilterData],
+          newFilters[selectedKey],
+        );
 
         newFilters[selectedKey] = filteredTaxa;
         filtersChanged = true;
@@ -2308,8 +2293,7 @@ export class DiscoveryView extends React.Component<
     // TODO: verify if sorting works for AMR
     const sortable =
       allowedFeatures.includes(SORTING_V0_ADMIN_FEATURE) ||
-      (allowedFeatures.includes(SORTING_V0_FEATURE) &&
-        domain === DISCOVERY_DOMAIN_MY_DATA);
+      domain === DISCOVERY_DOMAIN_MY_DATA;
 
     // Note: If the user has not defined an ordered table column in the given session,
     // we update the UI to indicate default sort behavior but do not update session storage.
@@ -2322,12 +2306,11 @@ export class DiscoveryView extends React.Component<
     // If showAllMetadata is false, only a subset of metadata will be available. (Refer to fixedMetadata in ColumnConfigurations.jsx.)
     const showAllMetadata =
       allowedFeatures.includes(SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE) ||
-      (allowedFeatures.includes(SAMPLES_TABLE_METADATA_COLUMNS_FEATURE) &&
-        domain === DISCOVERY_DOMAIN_MY_DATA);
+      domain === DISCOVERY_DOMAIN_MY_DATA;
 
     const hasAtLeastOneFilterApplied = some(
       filter => !isEmpty(filter),
-      Object.values(prepareFilters(filters, allowedFeatures)),
+      Object.values(prepareFilters(filters)),
     );
     return (
       <>
@@ -2390,7 +2373,7 @@ export class DiscoveryView extends React.Component<
                     currentDisplay={currentDisplay}
                     currentTab={currentTab}
                     domain={domain}
-                    filters={prepareFilters(filters, allowedFeatures)}
+                    filters={prepareFilters(filters)}
                     getRows={this.configForWorkflow[workflow].getRows}
                     hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
                     mapLevel={mapLevel}

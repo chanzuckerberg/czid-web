@@ -47,7 +47,6 @@ import ArrayUtils from "~/components/utils/ArrayUtils";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import {
-  HEATMAP_ELASTICSEARCH_FEATURE,
   HEATMAP_PATHOGEN_FLAGGING_FEATURE,
   NCBI_COMPRESSED_INDEX,
   REMOVE_HEATMAP_DEFAULT_BG,
@@ -755,10 +754,6 @@ class SamplesHeatmapViewCC extends React.Component<
       background,
       taxonTags,
     } = this.state.selectedOptions;
-    const { allowedFeatures = [] } = this.props;
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
 
     // If using client-side filtering, the server should still return info
     // related to removed taxa in case the user decides to add the taxon back.
@@ -808,12 +803,8 @@ class SamplesHeatmapViewCC extends React.Component<
       taxonTags: JSON.stringify(fetchHeatmapDataParams.taxonTags),
     };
 
-    if (useHeatmapES) {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      fetchHeatmapDataParams.addedTaxonIds = Array.from(
-        this.state.addedTaxonIds,
-      );
-    }
+    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
+    fetchHeatmapDataParams.addedTaxonIds = Array.from(this.state.addedTaxonIds);
 
     const heatmapData = await getSampleTaxons(
       fetchHeatmapDataParams,
@@ -825,21 +816,10 @@ class SamplesHeatmapViewCC extends React.Component<
 
     this.props.trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-      {
-        ...fetchHeatmapDataParams,
-        loadTimeInMilliseconds,
-        useHeatmapES,
-      },
-    );
-
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED_ALLISON_TESTING,
       {
         ...fetchHeatmapDataParamsCompliantTypes,
         loadTimeInMilliseconds,
-        useHeatmapES,
+        useHeatmapES: true,
       },
     );
 
@@ -859,7 +839,7 @@ class SamplesHeatmapViewCC extends React.Component<
     const { sampleIds } = this.state;
     const selectedBackgroundId = this.state.selectedOptions.background;
 
-    this.setState({ loading: true }); // Gets false from this.updateFilters
+    this.setState({ loading: true }); // Gets false from this.filterTaxaES
 
     const { validIds, invalidSampleNames } = await validateSampleIds({
       sampleIds,
@@ -965,16 +945,12 @@ class SamplesHeatmapViewCC extends React.Component<
 
       this.updateHistoryState();
       // this.state.loading will be set to false at the end of updateFilters
-      this.setState(newState, this.updateFilters);
+      this.setState(newState, this.filterTaxaES);
     });
   }
 
   handleLoadingFailure = (err: $TSFixMe) => {
     const { allTaxonIds, sampleIds } = this.state;
-    const { allowedFeatures = [] } = this.props;
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
 
     this.setState({
       loading: false,
@@ -982,9 +958,7 @@ class SamplesHeatmapViewCC extends React.Component<
     });
 
     const logSingleError = (e: $TSFixMe) => {
-      const errorMessage = `SamplesHeatmapView: Error loading heatmap data${
-        useHeatmapES ? " from ElasticSearch" : ""
-      }`;
+      const errorMessage = `SamplesHeatmapView: Error loading heatmap data from ElasticSearch`;
       logError({
         message: errorMessage,
         details: {
@@ -994,7 +968,7 @@ class SamplesHeatmapViewCC extends React.Component<
           sampleIds,
           status: e?.status,
           statusText: e?.statusText,
-          usesElasticSearch: useHeatmapES,
+          usesElasticSearch: true,
         },
       });
     };
@@ -1010,20 +984,8 @@ class SamplesHeatmapViewCC extends React.Component<
       {
         numSamples: size(sampleIds),
         numTaxons: size(allTaxonIds),
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line ignore ts error for now while we add types to withAnalytics/trackEvent
-        sampleIds,
-        useHeatmapES,
-      },
-    );
-
-    this.props.trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR_ALLISON_TESTING,
-      {
-        numSamples: size(sampleIds),
-        numTaxons: size(allTaxonIds),
         sampleIds: JSON.stringify(sampleIds),
-        useHeatmapES,
+        useHeatmapES: true,
       },
     );
   };
@@ -1183,7 +1145,7 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   async fetchBackground() {
-    this.setState({ loading: true }); // Gets false from this.updateFilters
+    this.setState({ loading: true }); // Gets false from this.filterTaxaES
     let backgroundData;
     try {
       backgroundData = await this.fetchBackgroundData();
@@ -1197,7 +1159,7 @@ class SamplesHeatmapViewCC extends React.Component<
     newState.loadingFailed = false;
 
     this.updateHistoryState();
-    this.setState(newState, this.updateFilters);
+    this.setState(newState, this.filterTaxaES);
   }
 
   extractBackgroundMetrics(rawData: $TSFixMe) {
@@ -1235,10 +1197,10 @@ class SamplesHeatmapViewCC extends React.Component<
       this.getTaxonThresholdFilterState();
     const { allTaxonIds, notifiedFilteredOutTaxonIds, addedTaxonIds } =
       this.state;
-    let { newestTaxonId, allTaxonDetails } = this.state;
+    let { newestTaxonId } = this.state;
+    const { allTaxonDetails } = this.state;
     let taxonIds = new Set();
     let filteredData = {};
-    const addedTaxonIdsPassingFilters = new Set();
 
     allTaxonIds.forEach((taxonId: $TSFixMe) => {
       const taxon = allTaxonDetails[taxonId];
@@ -1249,9 +1211,6 @@ class SamplesHeatmapViewCC extends React.Component<
         taxonPassesThresholdFilters[taxon["index"]]
       ) {
         taxonIds.add(taxon["id"]);
-        if (addedTaxonIds.has(taxon["id"])) {
-          addedTaxonIdsPassingFilters.add(taxon["id"]);
-        }
       } else {
         // Check notifiedFilteredOutTaxonIds to prevent filtered out taxa from
         // notifying the user every time a selection is made.
@@ -1265,10 +1224,8 @@ class SamplesHeatmapViewCC extends React.Component<
         }
       }
     });
-    [taxonIds, allTaxonDetails, filteredData] = this.getTopTaxaPerSample(
-      taxonIds,
-      addedTaxonIdsPassingFilters,
-    );
+
+    filteredData = this.state.allData;
     // @ts-expect-error ts-migrate(2740) FIXME: Type 'unknown[]' is missing the following properti... Remove this comment to see the full error message
     taxonIds = Array.from(taxonIds);
 
@@ -1463,84 +1420,6 @@ class SamplesHeatmapViewCC extends React.Component<
     return true;
   }
 
-  getTopTaxaPerSample(filteredTaxonIds: $TSFixMe, addedTaxonIds: $TSFixMe) {
-    const { allowedFeatures = [] } = this.props;
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
-
-    // Fetch the top N taxa from each sample, sorted by the selected metric,
-    // that passed all selected filters.
-    const { sampleDetails, allData, allTaxonDetails, selectedOptions } =
-      this.state;
-    const { metric, taxonsPerSample } = selectedOptions;
-    const { metrics } = this.props;
-
-    if (useHeatmapES) return [filteredTaxonIds, allTaxonDetails, allData];
-
-    const topTaxIds = new Set();
-    const topTaxonDetails = {};
-    const filteredData = {};
-    Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
-      const filteredTaxaInSample = sample.taxa.filter((taxonId: $TSFixMe) => {
-        return filteredTaxonIds.has(taxonId);
-      });
-
-      filteredTaxaInSample.sort(
-        (taxId1: $TSFixMe, taxId2: $TSFixMe) =>
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
-          allData[metric][allTaxonDetails[taxId2].index][sample.index] -
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
-          allData[metric][allTaxonDetails[taxId1].index][sample.index],
-      );
-
-      let count = 0;
-      for (const taxId of filteredTaxaInSample) {
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        if (count >= taxonsPerSample) {
-          break;
-        } else if (!topTaxIds.has(taxId) && !this.removedTaxonIds.has(taxId)) {
-          const taxon = allTaxonDetails[taxId];
-          topTaxIds.add(taxId);
-          topTaxonDetails[taxId] = allTaxonDetails[taxId];
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
-          topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
-
-          // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-          metrics.forEach(metric => {
-            filteredData[metric.value] = filteredData[metric.value] || [];
-            filteredData[metric.value].push(
-              allData[metric.value][taxon["index"]],
-            );
-          });
-        }
-        count++;
-      }
-    });
-
-    // Make sure that taxa manually added by the user that pass filters
-    // are included.
-    addedTaxonIds.forEach((taxId: $TSFixMe) => {
-      if (!topTaxIds.has(taxId)) {
-        const taxon = allTaxonDetails[taxId];
-        topTaxIds.add(taxId);
-        topTaxonDetails[taxId] = allTaxonDetails[taxId];
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
-        topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
-
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-        metrics.forEach(metric => {
-          filteredData[metric.value] = filteredData[metric.value] || [];
-          filteredData[metric.value].push(
-            allData[metric.value][taxon["index"]],
-          );
-        });
-      }
-    });
-
-    return [topTaxIds, topTaxonDetails, filteredData];
-  }
-
   handleMetadataUpdate = (key: $TSFixMe, value: $TSFixMe) => {
     this.setState({
       sampleDetails: set(
@@ -1570,7 +1449,7 @@ class SamplesHeatmapViewCC extends React.Component<
     // Given a list of taxa for which details are currently missing,
     // fetch the information for those taxa from the server and
     // update the appropriate data structures to include the new taxa.
-    this.setState({ loading: true }); // Gets false from this.updateFilters
+    this.setState({ loading: true }); // Gets false from this.filterTaxaES
 
     const newTaxaInfo = await this.fetchNewTaxa(taxaMissingInfo);
     const extractedData = this.extractData(newTaxaInfo);
@@ -1636,7 +1515,7 @@ class SamplesHeatmapViewCC extends React.Component<
         allTaxonDetails,
         sampleDetails,
       },
-      this.updateFilters,
+      this.filterTaxaES,
     );
   }
 
@@ -1695,7 +1574,7 @@ class SamplesHeatmapViewCC extends React.Component<
         if (taxaMissingInfo.length > 0) {
           this.updateTaxa(taxaMissingInfo);
         } else {
-          this.updateFilters();
+          this.filterTaxaES();
         }
       },
     );
@@ -1710,9 +1589,9 @@ class SamplesHeatmapViewCC extends React.Component<
     // Only update state if something changed (slightly faster not to update state when not necessary)
     if (addedTaxonIds.has(taxonId)) {
       addedTaxonIds.delete(taxonId);
-      this.setState({ addedTaxonIds }, this.updateFilters);
+      this.setState({ addedTaxonIds }, this.filterTaxaES);
     } else {
-      this.updateFilters();
+      this.filterTaxaES();
     }
   };
 
@@ -1872,10 +1751,6 @@ class SamplesHeatmapViewCC extends React.Component<
 
   handleSelectedOptionsChange = (newOptions: $TSFixMe) => {
     const { selectedOptions } = this.state;
-    const { allowedFeatures = [] } = this.props;
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
 
     // don't refetch if options have not actually changed
     if (!newOptions) return;
@@ -1906,42 +1781,28 @@ class SamplesHeatmapViewCC extends React.Component<
 
     if (!haveOptionsChanged) return;
 
-    // When using heatmap ES, all filtering operations happen on the backend
-    let frontendFilters = [];
-    let backendFilters = ["background"];
-    if (useHeatmapES) backendFilters = backendFilters.concat(HEATMAP_FILTERS);
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-    else frontendFilters = HEATMAP_FILTERS;
+    // When using heatmap ES (always true now), all filtering operations happen on the backend
+    const backendFilters = ["background"].concat(HEATMAP_FILTERS);
 
     const shouldRefetchData =
       intersection(keys(newOptions), backendFilters).length > 0;
-    const shouldRefilterData =
-      intersection(keys(newOptions), frontendFilters).length > 0;
 
-    // Infer which function to use to either fetch the data or filter it in the front-end
-    let callbackFn = null;
-    if (!useHeatmapES) {
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      if (shouldRefetchData) callbackFn = this.updateBackground;
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-      else if (shouldRefilterData) callbackFn = this.updateFilters;
-      // Slightly more verbose but should make it easier to remove the feature flag in the future
-    } else {
-      if (shouldRefetchData)
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
-        callbackFn = async () => {
-          // TODO: We can remove this notification once we pre-compute custom backgrounds or speed up Spark jobs
-          if (newOptions?.background)
-            // @ts-expect-error ts-migrate(2554) FIXME: Expected 2 arguments, but got 1.
-            this.showNotification(NOTIFICATION_TYPES.customBackground);
-          await this.fetchViewData();
-        };
+    let callbackFn: (() => Promise<void>) | null = null;
+
+    if (shouldRefetchData) {
+      callbackFn = async () => {
+        // TODO: We can remove this notification once we pre-compute custom backgrounds or speed up Spark jobs
+        if (newOptions?.background)
+          // @ts-expect-error ts-migrate(2554) FIXME: Expected 2 arguments, but got 1.
+          this.showNotification(NOTIFICATION_TYPES.customBackground);
+        await this.fetchViewData();
+      };
     }
 
     this.setState(
       {
         selectedOptions: assign(this.state.selectedOptions, newOptions),
-        loading: shouldRefilterData,
+        loading: shouldRefetchData,
         // Don't re-notify the user if their manually selected taxa do not pass the new filters.
         notifiedFilteredOutTaxonIds: this.state.addedTaxonIds,
       },
@@ -1952,18 +1813,6 @@ class SamplesHeatmapViewCC extends React.Component<
 
   updateBackground() {
     this.fetchBackground();
-  }
-
-  updateFilters() {
-    const { allowedFeatures = [] } = this.props;
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
-    if (useHeatmapES) {
-      this.filterTaxaES();
-    } else {
-      this.filterTaxa();
-    }
   }
 
   renderLoading() {
