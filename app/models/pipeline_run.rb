@@ -54,7 +54,7 @@ class PipelineRun < ApplicationRecord
 
   # Mapping the technology input to the outputs produced by the pipeline.
   TARGET_OUTPUTS = {
-    TECHNOLOGY_INPUT[:illumina] => %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metrics accession_coverage_stats],
+    TECHNOLOGY_INPUT[:illumina] => %w[ercc_counts taxon_counts contig_counts taxon_byteranges insert_size_metrics accession_coverage_stats],
     TECHNOLOGY_INPUT[:nanopore] => %w[taxon_counts contig_counts taxon_byteranges accession_coverage_stats],
   }.freeze
 
@@ -217,7 +217,6 @@ class PipelineRun < ApplicationRecord
                         "taxon_counts" => "db_load_taxon_counts",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
-                        "amr_counts" => "db_load_amr_counts",
                         "insert_size_metrics" => "db_load_insert_size_metrics",
                         "accession_coverage_stats" => "db_load_accession_coverage_stats", }.freeze
   # Functions for checking if an optional output should have been generated
@@ -851,39 +850,6 @@ class PipelineRun < ApplicationRecord
     accession_stats
   end
 
-  def db_load_amr_counts
-    amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
-    if amr_results.nil?
-      Rails.logger.error("No AMR results file found for PipelineRun ##{id}. Is the pipeline okay?")
-      return
-    end
-    amr_counts_array = []
-    amr_counts_keys = [:gene, :allele, :coverage, :depth, :drug_family, :total_reads, :rpm, :dpm]
-    amr_results_keys = %w[gene allele coverage depth gene_family total_reads rpm dpm]
-    # results can be as small as ~80 bytes, so play it safe; empty results are 1 byte files
-    unless File.size?(amr_results) < 10
-      amr_results_table = CSV.read(amr_results, headers: true)
-      amr_results_table.each do |row|
-        amr_count_for_gene = {}
-        amr_counts_keys.each_with_index do |counts_key, index|
-          result_value = row[amr_results_keys[index]]
-          if result_value.present?
-            amr_count_for_gene[counts_key] = result_value
-          end
-        end
-        if row["annotation"].present?
-          split_annotation = row["annotation"].split(";")
-          if split_annotation.length >= 5
-            amr_count_for_gene[:annotation_gene] = split_annotation[2]
-            amr_count_for_gene[:genbank_accession] = split_annotation[4]
-          end
-        end
-        amr_counts_array << amr_count_for_gene
-      end
-    end
-    update(amr_counts_attributes: amr_counts_array)
-  end
-
   def invalid_family_call?(tcnt)
     # TODO:  Better family support.
     tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
@@ -1061,7 +1027,7 @@ class PipelineRun < ApplicationRecord
     full_path = case output
                 when "ercc_counts"
                   "#{host_filter_output_s3_path}/#{ercc_output_path}"
-                when "amr_counts"
+                when "amr_counts" # deprecated
                   "#{postprocess_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
                 when "taxon_counts"
                   "#{assembly_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"

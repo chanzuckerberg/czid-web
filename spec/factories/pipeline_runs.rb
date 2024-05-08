@@ -31,7 +31,12 @@ FactoryBot.define do
         create(:amr_count, pipeline_run: pipeline_run, **amr_count_data)
       end
       options.output_states_data.each do |output_states_data|
-        pipeline_run.output_states.find_by(output: output_states_data[:output]).update(state: output_states_data[:state])
+        target_output = pipeline_run.output_states.find_by(output: output_states_data[:output])
+        if target_output.present?
+          target_output.update(state: output_states_data[:state])
+        else
+          create(:output_state, pipeline_run: pipeline_run, **output_states_data)
+        end
       end
       unless options.pipeline_run_stages_data.nil?
         pipeline_run.pipeline_run_stages = options.pipeline_run_stages_data.map do |pipeline_run_stage_data|
