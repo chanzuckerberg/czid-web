@@ -43,7 +43,6 @@
     ]
   },
   "dependencies": {
-    "line-reader": "^0.4.0",
-    "package.json": "^2.0.1"
+    "line-reader": "^0.4.0"
   }
 }
