@@ -5,11 +5,11 @@ import React from "react";
 import { MenuOptionWithDisabledTooltip } from "~/components/common/MenuOptionWithDisabledTooltip";
 import IconCloseSmall from "~/components/ui/icons/IconCloseSmall";
 import { BACKGROUND_MODELS_LINK } from "~/components/utils/documentationLinks";
-import { SDSFormattedOption } from "~/components/views/compare/SamplesHeatmapView/components/SamplesHeatmapFilters/SamplesHeatmapFilters";
+import { SDSFormattedOption } from "~/components/views/SamplesHeatmapView/components/SamplesHeatmapFilters/SamplesHeatmapFilters";
 import {
   optionsToSDSFormat,
   valueToSDSFormatOption,
-} from "~/components/views/compare/SamplesHeatmapView/components/SamplesHeatmapFilters/samplesHeatmapFilterUtils";
+} from "~/components/views/SamplesHeatmapView/components/SamplesHeatmapFilters/samplesHeatmapFilterUtils";
 import {
   MetricOption,
   ThresholdFilterData,

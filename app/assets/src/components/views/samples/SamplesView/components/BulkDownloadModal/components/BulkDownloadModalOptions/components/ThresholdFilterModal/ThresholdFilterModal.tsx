@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ThresholdFilterList from "~/components/ui/controls/dropdowns/ThresholdFilterList";
-import { THRESHOLDS } from "~/components/views/compare/SamplesHeatmapView/constants";
+import { THRESHOLDS } from "~/components/views/SamplesHeatmapView/constants";
 import { ThresholdFilterData } from "~/interface/dropdown";
 
 interface ThresholdFilterModalProps {

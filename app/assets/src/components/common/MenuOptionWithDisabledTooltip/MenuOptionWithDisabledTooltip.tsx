@@ -1,6 +1,6 @@
 import { MenuItem, Tooltip } from "@czi-sds/components";
 import React from "react";
-import { SDSFormattedOption } from "~/components/views/compare/SamplesHeatmapView/components/SamplesHeatmapFilters/SamplesHeatmapFilters";
+import { SDSFormattedOption } from "~/components/views/SamplesHeatmapView/components/SamplesHeatmapFilters/SamplesHeatmapFilters";
 
 interface MenuOptionWithDisabledTooltipProps {
   option: SDSFormattedOption;

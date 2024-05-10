@@ -64,10 +64,9 @@ import {
   HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
 } from "~/components/utils/urls";
 import { WorkflowType } from "~/components/utils/workflows";
-import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
-import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapView/components/SamplesHeatmapVis";
 import { showBulkDownloadNotification } from "~/components/views/components/BulkDownloadNotification";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
+import SamplesHeatmapVis from "~/components/views/SamplesHeatmapView/components/SamplesHeatmapVis";
 import { URL_FIELDS } from "~/components/views/SampleView/utils";
 import {
   ActionType,
@@ -2115,7 +2114,6 @@ class SamplesHeatmapViewCC extends React.Component<
       // data,
       downloadModalOpen,
       // enableMassNormalizedBackgrounds,
-      heatmapCreationModalOpen,
       hideFilters,
       loading,
       sampleIds,
@@ -2197,14 +2195,6 @@ class SamplesHeatmapViewCC extends React.Component<
           onClose={this.closeSidebar}
           params={this.getSidebarParams()}
         />
-        {heatmapCreationModalOpen && (
-          <HeatmapCreationModal
-            continueInNewTab={true}
-            open
-            onClose={this.handleHeatmapCreationModalClose}
-            selectedIds={sampleIds}
-          />
-        )}
         {downloadModalOpen && (
           <SamplesHeatmapDownloadModal
             open

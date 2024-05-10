@@ -1,6 +1,6 @@
 import React from "react";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
-import { HeatmapDownloadType } from "~/components/views/compare/SamplesHeatmapView/constants";
+import { HeatmapDownloadType } from "~/components/views/SamplesHeatmapView/constants";
 import cs from "./metric_dropdown.scss";
 
 interface MetricDropdownProps {

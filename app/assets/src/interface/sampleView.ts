@@ -1,7 +1,7 @@
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import { WorkflowLabelType } from "~/components/utils/workflows";
-import { PathogenFlags } from "~/components/views/compare/SamplesHeatmapView/SamplesHeatmapView";
+import { PathogenFlags } from "~/components/views/SamplesHeatmapView/SamplesHeatmapView";
 import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {

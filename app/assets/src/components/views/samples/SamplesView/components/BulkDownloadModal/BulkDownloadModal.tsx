@@ -19,8 +19,8 @@ import {
   DEFAULT_BACKGROUND_MODEL,
   WORKFLOW_OBJECT_LABELS,
 } from "~/components/views/BulkDownloadListView/constants";
-import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import cs from "~/components/views/samples/SamplesView/components/BulkDownloadModal/bulk_download_modal.scss";
+import { METRIC_OPTIONS } from "~/components/views/SamplesHeatmapView/constants";
 import { getURLParamString } from "~/helpers/url";
 import { Entry } from "~/interface/samplesView";
 import { BulkDownloadType } from "~/interface/shared";

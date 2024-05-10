@@ -39,7 +39,6 @@ import {
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
-import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import { showBulkDownloadNotification } from "~/components/views/components/BulkDownloadNotification";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -175,8 +174,6 @@ const SamplesView = forwardRef(function SamplesView(
   const [bulkDownloadModalOpen, setBulkDownloadModalOpen] = useState(false);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] =
     useState<boolean>(false);
-  const [heatmapCreationModalOpen, setHeatmapCreationModalOpen] =
-    useState(false);
   const [nextcladeModalOpen, setNextcladeModalOpen] = useState(false);
   const [metadataFields, setMetadataFields] = useState<
     MetadataType[] | undefined
@@ -1178,13 +1175,6 @@ const SamplesView = forwardRef(function SamplesView(
         isShortReadMngs={workflow === WorkflowType.SHORT_READ_MNGS}
         workflowLabel={WORKFLOWS[workflow]?.label}
       />
-      {heatmapCreationModalOpen && (
-        <HeatmapCreationModal
-          open
-          onClose={() => setHeatmapCreationModalOpen(false)}
-          selectedIds={selectedIds}
-        />
-      )}
       {nextcladeModalOpen && (
         <NextcladeModal
           isOpen

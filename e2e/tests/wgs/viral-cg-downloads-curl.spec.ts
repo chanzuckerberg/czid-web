@@ -159,7 +159,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
               // {pathTo}/{Sample_Name}_{UID}.fa
               extractedFilePath = pathToExtractedContent;
             }
-            
+
             const fileContent = await fs.readFile(extractedFilePath, {encoding: "utf-8"});
 
             const lines = fileContent.split(/\r?\n/);
