@@ -137,7 +137,7 @@ class UploadSampleStepCC extends React.Component<
     selectedTaxon: null,
     // we can only select one technology at a time. If the user attempts to select a second technology
     // the first will automatically be deselected for them and we will use the tech most recently chosen
-    selectedTechnology: null,
+    selectedTechnology: NO_TECHNOLOGY_SELECTED,
     selectedProject: null,
     selectedMedakaModel: DEFAULT_MEDAKA_MODEL_OPTION,
     selectedWetlabProtocol: null,
@@ -1177,7 +1177,7 @@ class UploadSampleStepCC extends React.Component<
 
     if (!selectedProject) return "Please select a project to continue";
 
-    if (!selectedWorkflows || !selectedTechnology) {
+    if (!selectedWorkflows || selectedTechnology === NO_TECHNOLOGY_SELECTED) {
       return "Please select an analysis type to continue";
     }
 
@@ -1568,7 +1568,6 @@ class UploadSampleStepCC extends React.Component<
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedTaxon={selectedTaxon}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedTechnology={selectedTechnology}
             selectedWorkflows={selectedWorkflows}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322

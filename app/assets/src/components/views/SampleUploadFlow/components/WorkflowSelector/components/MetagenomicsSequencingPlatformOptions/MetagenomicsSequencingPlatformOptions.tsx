@@ -5,6 +5,7 @@ import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/
 import { PipelineVersions, SampleUploadType } from "~/interface/shared";
 import {
   NCBI_INDEX,
+  NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_OPTIONS,
   UploadWorkflows,
   UPLOAD_WORKFLOWS,
@@ -24,7 +25,9 @@ interface MetagenomicsSequencingPlatformOptionsProps {
   ): void;
   onWetlabProtocolChange(value: string): void;
   selectedGuppyBasecallerSetting: string;
-  selectedTechnology: SEQUENCING_TECHNOLOGY_OPTIONS;
+  selectedTechnology:
+    | SEQUENCING_TECHNOLOGY_OPTIONS
+    | typeof NO_TECHNOLOGY_SELECTED;
   selectedWetlabProtocol: string;
   projectPipelineVersions?: PipelineVersions;
 }

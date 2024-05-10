@@ -9,6 +9,7 @@ import {
   BASESPACE_UPLOAD,
   LOCAL_UPLOAD,
   NANOPORE,
+  NO_TECHNOLOGY_SELECTED,
   REMOTE_UPLOAD,
   SEQUENCING_TECHNOLOGY_OPTIONS,
   Technology,
@@ -49,7 +50,9 @@ interface WorkflowSelectorProps {
   selectedMedakaModel?: string;
   selectedGuppyBasecallerSetting?: string;
   selectedTaxon: TaxonOption;
-  selectedTechnology?: SEQUENCING_TECHNOLOGY_OPTIONS;
+  selectedTechnology:
+    | SEQUENCING_TECHNOLOGY_OPTIONS
+    | typeof NO_TECHNOLOGY_SELECTED;
   selectedWetlabProtocol?: string;
   selectedWorkflows?: Set<UploadWorkflows>;
   s3UploadEnabled?: boolean;
@@ -129,7 +132,6 @@ const WorkflowSelector = ({
             projectPipelineVersions={projectPipelineVersions}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedTechnology={selectedTechnology}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedWetlabProtocol={selectedWetlabProtocol}
@@ -252,7 +254,6 @@ const WorkflowSelector = ({
             selectedWetlabProtocol={selectedWetlabProtocol}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onWetlabProtocolChange={onWetlabProtocolChange}
-            // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             selectedTechnology={selectedTechnology}
             // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
             onTechnologyToggle={onTechnologyToggle}

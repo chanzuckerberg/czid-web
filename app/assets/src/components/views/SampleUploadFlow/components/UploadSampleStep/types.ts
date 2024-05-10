@@ -1,6 +1,7 @@
 import { TaxonOption } from "~/components/common/filters/types";
 import { PipelineVersions, SampleUploadType } from "~/interface/shared";
 import {
+  NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_OPTIONS,
   UploadWorkflows,
 } from "../../constants";
@@ -41,7 +42,9 @@ export interface UploadSampleStepState {
   removedLocalFiles: $TSFixMe[];
   selectedGuppyBasecallerSetting: $TSFixMe;
   selectedTaxon: TaxonOption | null;
-  selectedTechnology: SEQUENCING_TECHNOLOGY_OPTIONS | null;
+  selectedTechnology:
+    | SEQUENCING_TECHNOLOGY_OPTIONS
+    | typeof NO_TECHNOLOGY_SELECTED;
   selectedProject: $TSFixMe;
   selectedMedakaModel: string; // TODO: This should be an enum of available models
   selectedWetlabProtocol: string | null; // TODO: This should be an enum of available protocols
