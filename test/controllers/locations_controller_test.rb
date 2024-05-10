@@ -31,26 +31,6 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "user can see their map playground results" do
-    # TODO: Use non-admin user once released
-    sign_in @user
-    get map_playground_locations_path, as: :json
-
-    assert_response :success
-    results = JSON.parse(@response.body)
-    assert_equal 3, results.count
-    assert_includes @response.body, locations(:swamp).name
-  end
-
-  test "user can see a map playground error" do
-    sign_in @user
-    MetadataField.stub :find_by, nil do
-      get map_playground_locations_path, as: :json
-      assert_response :error
-      assert_equal LocationsController::LOCATION_LOAD_ERR_MSG, JSON.parse(@response.body)["message"]
-    end
-  end
-
   # TODO: Add a test like this for non-admin users once released
   test "user can load location data for the map for a set of samples" do
     sign_in @user
@@ -76,14 +56,4 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_includes results.keys, loc.country_id.to_s
     assert_includes results.keys, loc.state_id.to_s
   end
-
-  # TODO: Uncomment and use non-admin user once released
-  # test "joe cannot see someone else's private map playground results" do
-  #   sign_in @user
-  #   get map_playground_locations_path, as: :json
-  #
-  #   assert_response :success
-  #   results = JSON.parse(@response.body).map { |r| r["location"] }
-  #   assert_not results.include?(metadata(:sample_collection_location).string_validated_value)
-  # end
 end

@@ -40,24 +40,6 @@ export const AdminPage = () => {
           <a href="/host_genomes">{`/host_genomes`}</a>
         </li>
       </ul>
-      <h2>Playground</h2>
-      <ul>
-        <li>
-          <a href="/playground/controls">/playground/controls</a>
-        </li>
-        <li>
-          <a href="/playground/controls">/playground/components</a>
-        </li>
-        <li>
-          <a href="/playground/icons">/playground/icons</a>
-        </li>
-        <li>
-          <a href="/playground/controls">/playground/typography</a>
-        </li>
-        <li>
-          <a href="/playground/controls">/playground/viz</a>
-        </li>
-      </ul>
     </div>
   );
 };

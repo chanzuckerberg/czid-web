@@ -268,14 +268,6 @@ Rails.application.routes.draw do
 
   resources :benchmarks, only: [:index]
 
-  namespace :playground do
-    get :controls
-    get :components
-    get :icons
-    get :typography
-    get :viz
-  end
-
   resource :metadata do
     collection do
       get :dictionary
@@ -292,7 +284,6 @@ Rails.application.routes.draw do
   resource :locations do
     collection do
       get :external_search
-      get :map_playground
       get :sample_locations
     end
   end
