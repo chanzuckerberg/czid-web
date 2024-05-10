@@ -8,13 +8,8 @@
 
 import React, { Suspense, useContext } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
-import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
-import {
-  CREATE_NEXT_GEN_ENTITIES,
-  SHOULD_READ_FROM_NEXTGEN,
-} from "~/components/utils/features";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
 import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
@@ -56,29 +51,12 @@ const DiscoveryViewRouter = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
-  const {
-    userSignedIn,
-    allowedFeatures,
-    admin: isAdmin,
-  } = useContext(UserContext);
-  const shouldReadFromNextGen = allowedFeatures.includes(
-    SHOULD_READ_FROM_NEXTGEN,
-  );
-  const createNextGenEntities = allowedFeatures.includes(
-    CREATE_NEXT_GEN_ENTITIES,
-  );
+  const { userSignedIn } = useContext(UserContext);
   const history = useHistory();
   const location = useLocation();
 
   return (
     <>
-      <AnnouncementBanner
-        id="nextGenEnabled"
-        visible={isAdmin}
-        message={`Read from Next Gen ${
-          shouldReadFromNextGen ? "✅" : "⛔️"
-        } ~ Create Next Gen Entities ${createNextGenEntities ? "✅" : "⛔️"}`}
-      />
       <Switch>
         <Route exact path="/user_profile_form">
           <UserProfileForm />
