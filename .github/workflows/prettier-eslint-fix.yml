@@ -3,6 +3,7 @@ on:
     paths:
       - .github/**
       - app/assets/src/**
+      - package-lock.json # This action also formats package-lock.json by running npm ci.
 
 name: lint-bot
 jobs:
