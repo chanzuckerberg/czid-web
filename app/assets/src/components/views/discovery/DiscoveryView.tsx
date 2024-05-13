@@ -831,6 +831,13 @@ export class DiscoveryView extends React.Component<
         mapSidebarSampleCount: null,
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         mapSidebarSampleStats: null,
+        selectedSampleIdsByWorkflow: {
+          [WorkflowType.AMR]: new Set(),
+          [WorkflowType.CONSENSUS_GENOME]: new Set(),
+          [WorkflowType.SHORT_READ_MNGS]: new Set(),
+          [WorkflowType.LONG_READ_MNGS]: new Set(),
+          [WorkflowType.BENCHMARK]: new Set(),
+        },
       },
       () => {
         this.resetSamplesView();

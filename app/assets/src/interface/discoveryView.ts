@@ -1,7 +1,11 @@
 import { RouteComponentProps } from "react-router-dom";
 import { SortDirectionType } from "react-virtualized";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
-import { WorkflowCount, WorkflowType } from "~/components/utils/workflows";
+import {
+  NonDeprecatedWorkflowType,
+  WorkflowCount,
+  WorkflowType,
+} from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { FilterList, ObjectType } from "./samplesView";
 import { Project } from "./shared";
@@ -53,10 +57,6 @@ export type SelectedFilters = {
   visibilitySelected?: string;
 };
 
-export type WorkflowSets = {
-  [K in WorkflowType]: Set<string>;
-};
-
 export type MapEntry = {
   geo_level: string;
   id: number;
@@ -100,7 +100,9 @@ export interface DiscoveryViewState {
   sampleWasDeleted: string | null;
   search: string;
   selectableSampleIds: string[];
-  selectedSampleIdsByWorkflow: WorkflowSets;
+  selectedSampleIdsByWorkflow: {
+    [workflow in NonDeprecatedWorkflowType]: Set<string>;
+  };
   showFilters: boolean;
   showStats: boolean;
   userDataCounts: {

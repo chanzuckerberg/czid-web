@@ -20,10 +20,15 @@ export enum WorkflowType {
   AMR_DEPRECATED = "amr-deprecated",
 }
 
+export type NonDeprecatedWorkflowType = Exclude<
+  WorkflowType,
+  WorkflowType.AMR_DEPRECATED
+>;
+
 export type WorkflowConfigType<T> = Record<Required<WorkflowType>, T>;
 
 export type WorkflowCount = {
-  [key in Exclude<WorkflowType, WorkflowType.AMR_DEPRECATED>]?: number;
+  [key in NonDeprecatedWorkflowType]?: number;
 };
 
 type WorkflowStrings = {

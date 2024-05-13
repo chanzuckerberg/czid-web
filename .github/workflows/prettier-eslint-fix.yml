@@ -3,7 +3,9 @@ on:
     paths:
       - .github/**
       - app/assets/src/**
-      - package-lock.json # This action also formats package-lock.json by running npm ci.
+      # This action also syncs package.json + package-lock.json (npm ci).
+      - package.json
+      - package-lock.json
 
 name: lint-bot
 jobs:
@@ -43,6 +45,7 @@ jobs:
           git config --global url."https://github.com/".insteadOf
           ssh://git@github.com/
       - name: Install older version of npm
+        # See: https://github.com/chanzuckerberg/czid-web-private/pull/2227
         run: npm install -g npm@v8.5.5
       - name: Install Dependencies
         # Verifies that package.json and package-lock.json match.
