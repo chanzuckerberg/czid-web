@@ -90,13 +90,30 @@ describe "update_pathogen_list" do
   end
 
   context "doing a dry run" do
+    before do
+      # Redirect stdout from running rake task for this task to a var (otherwise it's
+      # very difficult to test for end of output because middle has lots of boilerplate).
+      @capture_stdout = StringIO.new
+      $stdout = @capture_stdout
+    end
+
     it "should generate the correct dry-run input/output and version if the taxon does not exist" do
       allow(STDIN).to receive(:gets).and_return(@version, accept_dryrun_stdin)
-      expect(STDOUT).to receive(:puts).with(PathogenListHelper::PROMPT_FOR_LIST_VERSION)
-      expect(STDOUT).to receive(:puts).with(PathogenListHelper::PROMPT_FOR_DRY_RUN)
-      expect(STDOUT).to receive(:puts).with("csv_name,lineage_name,csv_taxid,lineage_species_taxid\nspecies_a,NOT_FOUND,1,NOT_FOUND\n")
-
       subject
+      @capture_stdout.rewind # StringIO objects are treated like tape
+      stdout_lines_for_run = @capture_stdout.read.split("\n")
+      # Verify top matter of run matches expectation before going to pathogen misses CSV.
+      expect(stdout_lines_for_run[0]).to eq(PathogenListHelper::PROMPT_FOR_LIST_VERSION)
+      expect(stdout_lines_for_run[1]).to eq(PathogenListHelper::PROMPT_FOR_DRY_RUN)
+      expect(stdout_lines_for_run[2]).to eq("Resolving taxids from file: pathogen-list/global_pathogen_list_#{@version}.csv")
+      # Pathogen misses CSV is very bottom of output, so check final two lines for that.
+      expect(stdout_lines_for_run[-2]).to eq("csv_name,lineage_name,csv_taxid,lineage_species_taxid,appears_in_latest_lineage_version")
+      expect(stdout_lines_for_run[-1]).to eq("species_a,NOT_FOUND,1,NOT_FOUND,false")
+    end
+
+    after do
+      # Return stdout back to original, system STDOUT at end of test.
+      $stdout = STDOUT # return to normal stdout interaction
     end
   end
 
