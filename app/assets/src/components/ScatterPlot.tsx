@@ -34,11 +34,12 @@ class ScatterPlot extends React.Component<ScatterPlotProps> {
 
   // eslint-disable-next-line camelcase
   UNSAFE_componentWillReceiveProps(nextProps: ScatterPlotProps) {
-    d3.select(this.container).select("svg").remove();
     this.renderD3(nextProps);
   }
 
   renderD3(props: ScatterPlotProps) {
+    d3.select(this.container).select("svg").remove();
+
     this.data = props.data;
     this.margin = {
       top: 10,
