@@ -46,11 +46,7 @@ import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
-import {
-  HEATMAP_PATHOGEN_FLAGGING_FEATURE,
-  NCBI_COMPRESSED_INDEX,
-  REMOVE_HEATMAP_DEFAULT_BG,
-} from "~/components/utils/features";
+import { HEATMAP_PATHOGEN_FLAGGING_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
 import {
@@ -223,15 +219,7 @@ class SamplesHeatmapViewCC extends React.Component<
       ...this.urlParams,
     };
 
-    const defaultBgValue = this.props.allowedFeatures.includes(
-      REMOVE_HEATMAP_DEFAULT_BG,
-    )
-      ? null
-      : this.props.backgrounds?.[0].value;
-    const background = parseAndCheckInt(
-      this.urlParams.background,
-      defaultBgValue,
-    );
+    const background = parseAndCheckInt(this.urlParams.background, null);
 
     this.initOnBeforeUnload(props.savedParamValues);
     // IMPORTANT NOTE: These default values should be kept in sync with the
@@ -914,18 +902,16 @@ class SamplesHeatmapViewCC extends React.Component<
 
     // if samples have multiple index versions, show samples warning
     // if samples have same index version but background doesn't match, show bg warning
-    if (allowedFeatures.includes(NCBI_COMPRESSED_INDEX)) {
-      if (indexVersions.length > 1) {
-        this.showNotification(
-          NOTIFICATION_TYPES.multipleIndexVersions,
-          indexVersions,
-        );
-      } else if (nonMatchingBackgroundIndexVersions.length > 0) {
-        this.showNotification(
-          NOTIFICATION_TYPES.backgroundDifferentIndexVersion,
-          {},
-        );
-      }
+    if (indexVersions.length > 1) {
+      this.showNotification(
+        NOTIFICATION_TYPES.multipleIndexVersions,
+        indexVersions,
+      );
+    } else if (nonMatchingBackgroundIndexVersions.length > 0) {
+      this.showNotification(
+        NOTIFICATION_TYPES.backgroundDifferentIndexVersion,
+        {},
+      );
     }
 
     this.setState({ pathogenFlags }, () => {

@@ -11,10 +11,7 @@ import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import TaxonSelector from "~/components/common/TaxonSelector";
 import { UserContext } from "~/components/common/UserContext";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
-import {
-  HEATMAP_PATHOGEN_FLAGGING_FEATURE,
-  REMOVE_HEATMAP_DEFAULT_BG,
-} from "~/components/utils/features";
+import { HEATMAP_PATHOGEN_FLAGGING_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { generateUrlToSampleView } from "~/components/utils/urls";
@@ -656,20 +653,16 @@ export class SamplesHeatmapVis extends React.Component<
 
   handleCellClick = (cell: $TSFixMe, currentEvent: $TSFixMe) => {
     const { tempSelectedOptions } = this.props;
-    const { allowedFeatures = [] } = this.context || {};
 
     // Disable cell click if spacebar is pressed to pan the heatmap.
     if (!this.state.spacePressed) {
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
       const sampleId = this.props.sampleIds[cell.columnIndex];
-      const shouldPersistDefaultBg = allowedFeatures.includes(
-        REMOVE_HEATMAP_DEFAULT_BG,
-      );
       const url = generateUrlToSampleView({
         sampleId,
         // @ts-expect-error Type 'object' is not assignable to type 'TempSelectedOptionsShape | Record<string, never>'.
         tempSelectedOptions,
-        persistDefaultBg: shouldPersistDefaultBg,
+        persistDefaultBg: true,
       });
       // @ts-expect-error Expected 1 arguments, but got 2.
       openUrlInNewTab(url, currentEvent);

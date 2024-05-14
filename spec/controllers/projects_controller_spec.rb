@@ -2,10 +2,28 @@ require 'rails_helper'
 
 WebMock.allow_net_connect!
 
+def create_workflow_versions
+  before do
+    workflow_versions = {
+      "consensus-genome" => "3.4.18",
+      "short-read-mngs" => "8.2.2",
+      "phylotree-ng" => "6.11.0",
+      "amr" => "1.2.5",
+      "long-read-mngs" => "0.7.3",
+    }
+
+    workflow_versions.each do |workflow, version|
+      create(:app_config, key: "#{workflow}-version", value: version)
+      create(:workflow_version, workflow: workflow.underscore, version: version)
+    end
+  end
+end
+
 RSpec.describe ProjectsController, type: :controller do
   KLEBSIELLA_TAX_ID = 2
 
   create_users
+  create_workflow_versions
 
   # Admin specific behavior
   context "Admin user" do
@@ -984,6 +1002,7 @@ end
 
 RSpec.describe ProjectsController, type: :request do
   create_users
+  create_workflow_versions
 
   before do
     @auth0_management_client_double = double("Auth0Client")

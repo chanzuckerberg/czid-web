@@ -10,6 +10,17 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     @user = users(:admin_one)
     @user_nonadmin = users(:joe)
     AppConfigHelper.set_app_config(AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, "2021-01-22")
+    workflow_versions = {
+      "consensus-genome" => "3.4.18",
+      "short-read-mngs" => "8.2.2",
+      "phylotree-ng" => "6.11.0",
+      "amr" => "1.2.5",
+      "long-read-mngs" => "0.7.3",
+    }
+
+    workflow_versions.each do |workflow, version|
+      AppConfigHelper.set_app_config("#{workflow}-version", version)
+    end
   end
 
   test 'should get index' do

@@ -13,8 +13,6 @@ export const PATHOGEN_FLAG_FILTER_FEATURE = "pathogen_filter";
 export const HEATMAP_PATHOGEN_FLAGGING_FEATURE = "heatmap_pathogens";
 // add a new filter to the heatmap to filter to taxa with known pathogen flags
 export const BENCHMARKING_FEATURE = "benchmarking";
-export const NCBI_COMPRESSED_INDEX = "ncbi_compressed_index";
-export const REMOVE_HEATMAP_DEFAULT_BG = "remove_heatmap_default_bg";
 // WGS to NextGen pipeline migration
 export const CREATE_NEXT_GEN_ENTITIES = "create_next_gen_entities";
 export const SHOULD_READ_FROM_NEXTGEN = "should_read_from_nextgen";

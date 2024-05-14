@@ -49,10 +49,7 @@ import {
   computeMngsReportTableValuesForCSV,
   createCSVObjectURL,
 } from "~/components/utils/csv";
-import {
-  MULTITAG_PATHOGENS_FEATURE,
-  NCBI_COMPRESSED_INDEX,
-} from "~/components/utils/features";
+import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
   COVERAGE_VIZ_FEATURE,
@@ -629,10 +626,7 @@ const SampleViewComponent = ({
         backgroundAlignmentConfigs,
       );
 
-      if (
-        nonMatchingAlignmentConfigs.length > 0 &&
-        allowedFeatures.includes(NCBI_COMPRESSED_INDEX)
-      ) {
+      if (nonMatchingAlignmentConfigs.length > 0) {
         setShowIndexWarning(true);
       }
 

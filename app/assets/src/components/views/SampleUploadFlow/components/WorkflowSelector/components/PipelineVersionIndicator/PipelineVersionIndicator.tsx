@@ -1,9 +1,7 @@
 import { Icon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import React from "react";
-import { useAllowedFeatures } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { NCBI_COMPRESSED_INDEX } from "~/components/utils/features";
 import commonStyles from "../../workflow_selector.scss";
 import cs from "./pipeline_version_indicator.scss";
 
@@ -22,11 +20,6 @@ export const PipelineVersionIndicator = ({
   isPipelineVersion,
   isNewVersionAvailable,
 }: PipelineVersionIndicatorProps) => {
-  const allowedFeatures = useAllowedFeatures();
-  if (!allowedFeatures.includes(NCBI_COMPRESSED_INDEX) && !isPipelineVersion) {
-    return null;
-  }
-
   const newVersionAvailableText = (
     <div>
       A new {isPipelineVersion ? "major version" : "NCBI Index"} is available.

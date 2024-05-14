@@ -3,8 +3,6 @@
 /* eslint-disable react/prop-types */
 import { Dropdown } from "@czi-sds/components";
 import React from "react";
-import { useAllowedFeatures } from "~/components/common/UserContext";
-import { REMOVE_HEATMAP_DEFAULT_BG } from "~/components/utils/features";
 import { NONE_BACKGROUND } from "../../../../constants";
 import { RawBackground } from "../../../../SamplesHeatmapView";
 import { SDSFormattedOption } from "../../SamplesHeatmapFilters";
@@ -32,7 +30,6 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
     ...props
   }: SamplesHeatmapBackgroundDropdownProps) => {
     let disabled = props.disabled || false;
-    const allowedFeatures = useAllowedFeatures();
 
     const backgroundValue = value || 0;
 
@@ -40,14 +37,12 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
       backgrounds: RawBackground[],
     ): SDSFormattedOption[] => {
       const options: SDSFormattedOption[] = [];
-      if (allowedFeatures.includes(REMOVE_HEATMAP_DEFAULT_BG)) {
-        options.push({
-          name: NONE_BACKGROUND.name,
-          text: NONE_BACKGROUND.name,
-          value: 0,
-          disabled: false,
-        });
-      }
+      options.push({
+        name: NONE_BACKGROUND.name,
+        text: NONE_BACKGROUND.name,
+        value: 0,
+        disabled: false,
+      });
 
       const backgroundOptions = backgrounds.map(background => {
         const disabledOption =

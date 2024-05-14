@@ -8,7 +8,6 @@ import {
 } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { NCBI_COMPRESSED_INDEX } from "~/components/utils/features";
 import { GlobalContext } from "~/globalContext/reducer";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
@@ -237,7 +236,7 @@ class CollectionModal extends React.Component<
   };
 
   renderForm = () => {
-    const { allowedFeatures, numDescriptionRows } = this.props;
+    const { numDescriptionRows } = this.props;
 
     const {
       appliedMethod,
@@ -327,21 +326,20 @@ class CollectionModal extends React.Component<
           onChange={this.handleMethodChange}
         />
         {this.renderSampleList()}
-        {indexVersions.length > 1 &&
-          allowedFeatures.includes(NCBI_COMPRESSED_INDEX) && (
-            <Notification
-              className={cs.notificationContainer}
-              type="warning"
-              displayStyle="flat"
-            >
-              <span className={cs.highlight}>
-                The selected samples were run using different versions of our
-                NCBI index: {indexVersions.join(", ")}.{" "}
-              </span>
-              We recommend using samples that were run against the same NCBI
-              index date.
-            </Notification>
-          )}
+        {indexVersions.length > 1 && (
+          <Notification
+            className={cs.notificationContainer}
+            type="warning"
+            displayStyle="flat"
+          >
+            <span className={cs.highlight}>
+              The selected samples were run using different versions of our NCBI
+              index: {indexVersions.join(", ")}.{" "}
+            </span>
+            We recommend using samples that were run against the same NCBI index
+            date.
+          </Notification>
+        )}
         {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
         <div className={cs.buttons}>
           <PrimaryButton text="Create" onClick={this.handleCreateBackground} />

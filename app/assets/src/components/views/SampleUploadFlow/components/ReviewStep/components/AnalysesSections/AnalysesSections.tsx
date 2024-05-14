@@ -1,8 +1,6 @@
 import { Icon } from "@czi-sds/components";
 import { compact, map } from "lodash/fp";
 import React from "react";
-import { useAllowedFeatures } from "~/components/common/UserContext";
-import { NCBI_COMPRESSED_INDEX } from "~/components/utils/features";
 import {
   NCBI_INDEX,
   NO_TECHNOLOGY_SELECTED,
@@ -61,8 +59,6 @@ const AnalysesSections = ({
   wetlabProtocol,
   workflows,
 }: AnalysesSectionsType) => {
-  const allowedFeatures = useAllowedFeatures();
-
   return (
     <div data-testid="upload-input-review">
       {map(workflow => {
@@ -85,9 +81,7 @@ const AnalysesSections = ({
           pipelineVersions[project.id][workflowForPipelineVersion];
 
         const indexDate = pipelineVersions?.[project.id][NCBI_INDEX];
-        const showIndexDate =
-          AnalysisSectionsConfig[workflow].showIndexVersion &&
-          allowedFeatures.includes(NCBI_COMPRESSED_INDEX);
+        const showIndexDate = AnalysisSectionsConfig[workflow].showIndexVersion;
 
         return (
           <div className={cs.section}>
