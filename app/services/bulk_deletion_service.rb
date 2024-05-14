@@ -69,12 +69,6 @@ class BulkDeletionService
     # If mngs, get pipeline runs from sample ids and clean up visualizations.
     # If workflow runs, get workflow run objects from workflow run ids.
     nextgen_ids = {}
-    token = TokenCreationService
-            .call(
-              user_id: user.id,
-              should_include_project_claims: true,
-              service_identity: "rails"
-            )["token"]
     if WorkflowRun::MNGS_WORKFLOWS.include?(workflow)
       technology = WorkflowRun::MNGS_WORKFLOW_TO_TECHNOLOGY[workflow]
       deletable_rails_objects = current_power.deletable_pipeline_runs.where(sample_id: object_ids, technology: technology)
@@ -87,8 +81,7 @@ class BulkDeletionService
         user: user,
         object_ids: object_ids,
         workflow: workflow,
-        delete_timestamp: delete_timestamp,
-        token: token
+        delete_timestamp: delete_timestamp
       ).values_at(:rails_ids, :nextgen_ids)
       deletable_rails_ids, sample_ids = rails_ids.values_at(:workflow_run_ids, :sample_ids)
       deletable_rails_objects = current_power.deletable_workflow_runs.where(id: deletable_rails_ids).by_workflow(workflow).non_deprecated
@@ -108,7 +101,7 @@ class BulkDeletionService
     # rubocop:enable Rails/SkipsModelValidations
 
     # Update initial workflow on Rails samples or soft delete them
-    count_by_workflow = get_workflow_counts(user, sample_ids, token)
+    count_by_workflow = get_workflow_counts(user, sample_ids)
     samples = current_power.destroyable_samples.where(id: sample_ids)
     soft_deleted_sample_ids = update_initial_workflows_or_soft_delete(samples, workflow, delete_timestamp, count_by_workflow)
 
@@ -210,7 +203,7 @@ class BulkDeletionService
   # Get counts for all samples using 4 queries
   # Get hash of sample ids that have a workflow of each type in the form
   # count = { [workflow] => set(sample_id1, sample_id2...) }
-  def get_workflow_counts(user, sample_ids, token)
+  def get_workflow_counts(user, sample_ids)
     counts = {}
     counts["short-read-mngs"] = PipelineRun.where(
       sample_id: sample_ids,
@@ -230,8 +223,7 @@ class BulkDeletionService
                                    BulkDeletionServiceNextgen.get_rails_samples_with_nextgen_workflow(
                                      user.id,
                                      sample_ids,
-                                     WorkflowRun::WORKFLOW[:consensus_genome],
-                                     token
+                                     WorkflowRun::WORKFLOW[:consensus_genome]
                                    )
                                  else
                                    WorkflowRun.where(
