@@ -43,10 +43,10 @@ import { showBulkDownloadNotification } from "~/components/views/components/Bulk
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
-import { NextcladeModal } from "~/components/views/NextcladeModal";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
-import CollectionModal from "~/components/views/samples/CollectionModal";
-import { BulkDownloadModal } from "~/components/views/samples/SamplesView/components/BulkDownloadModal";
+import { BulkDownloadModal } from "~/components/views/SamplesView/components/BulkDownloadModal";
+import CollectionModal from "~/components/views/SamplesView/components/CollectionModal/CollectionModal";
+import { NextcladeModal } from "~/components/views/SamplesView/components/NextcladeModal";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
 import { CreationSource } from "~/interface/sample";
@@ -69,18 +69,19 @@ import {
   WORKFLOW_ENTITIES,
   WORKFLOW_TABS,
 } from "~utils/workflows";
-import { DISCOVERY_DOMAIN_PUBLIC } from "../../discovery/discovery_api";
-import QualityControl from "../../discovery/QualityControl";
-import { BenchmarkModal } from "./BenchmarkModal";
-import BulkDeleteModal from "./BulkDeleteModal";
-import { BulkDeleteTrigger } from "./BulkDeleteTrigger";
-import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
+import { DISCOVERY_DOMAIN_PUBLIC } from "../discovery/discovery_api";
+import QualityControl from "../discovery/QualityControl";
 import {
   computeColumnsByWorkflow,
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
-} from "./ColumnConfiguration";
+} from "./columnConfiguration";
+import { BenchmarkModal } from "./components/BenchmarkModal";
+import BulkDeleteModal from "./components/BulkDeleteModal";
+import { BulkDeleteTrigger } from "./components/BulkDeleteTrigger";
+import BulkSamplesActionsMenu from "./components/BulkSamplesActionsMenu/BulkSamplesActionsMenu";
 import { FilteredCount } from "./components/FilteredCount";
+import ToolbarButtonIcon from "./components/ToolbarButtonIcon/ToolbarButtonIcon";
 import {
   PipelineRunStatuses,
   SARS_COV_2,
@@ -89,7 +90,6 @@ import {
   WORKFLOW_TRIGGERS,
 } from "./constants";
 import cs from "./samples_view.scss";
-import ToolbarButtonIcon from "./ToolbarButtonIcon";
 import { getStatusCounts } from "./utils";
 
 const MAX_NEXTCLADE_SAMPLES = 200;

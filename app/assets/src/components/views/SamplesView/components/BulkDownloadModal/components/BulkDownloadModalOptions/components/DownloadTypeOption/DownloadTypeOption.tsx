@@ -4,15 +4,15 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import RadioButton from "~/components/ui/controls/RadioButton";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { BULK_DOWNLOAD_DOCUMENTATION_LINKS } from "~/components/views/BulkDownloadListView/constants";
-import cs from "~/components/views/samples/SamplesView/components/BulkDownloadModal/components/BulkDownloadModalOptions/bulk_download_modal_options.scss";
 import {
   BackgroundOptionType,
   MetricsOptionType,
   SelectedFieldsType,
   SelectedFieldValueType,
-} from "~/components/views/samples/SamplesView/components/BulkDownloadModal/types";
+} from "~/components/views/SamplesView/components/BulkDownloadModal/types";
 import { BulkDownloadType } from "~/interface/shared";
 import LinkCS from "~ui/controls/link.scss";
+import cs from "../../bulk_download_modal_options.scss";
 import { BulkDownloadDataField } from "../BulkDownloadDataField";
 
 interface DownloadTypeOptionProps {

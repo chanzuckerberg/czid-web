@@ -24,7 +24,7 @@ import {
   Metadata,
   ReferenceAccession,
   WorkflowRunRow,
-} from "../samples/SamplesView/SamplesView";
+} from "../SamplesView/SamplesView";
 import {
   DiscoveryViewFCConsensusGenomeIdsQuery as DiscoveryViewFCConsensusGenomeIdsQueryType,
   DiscoveryViewFCConsensusGenomeIdsQuery$data,

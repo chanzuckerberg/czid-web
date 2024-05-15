@@ -7,8 +7,8 @@ import {
   WORKFLOW_ENTITIES,
 } from "~/components/utils/workflows";
 import { ObjectType } from "~/interface/samplesView";
-import cs from "../samples_view.scss";
-import ToolbarButtonIcon from "../ToolbarButtonIcon";
+import cs from "../../samples_view.scss";
+import ToolbarButtonIcon from "../ToolbarButtonIcon/ToolbarButtonIcon";
 
 interface BulkDeleteTriggerProps {
   onClick(): void;

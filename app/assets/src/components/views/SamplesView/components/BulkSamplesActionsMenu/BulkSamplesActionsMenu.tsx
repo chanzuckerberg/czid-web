@@ -4,9 +4,9 @@ import cx from "classnames";
 import React, { useContext, useState } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { BENCHMARKING_FEATURE } from "~/components/utils/features";
-import { BenchmarkSamplesMenuItem } from "./BenchmarkSamplesMenuItem";
-import cs from "./samples_view.scss";
-import ToolbarButtonIcon from "./ToolbarButtonIcon";
+import cs from "../../samples_view.scss";
+import { BenchmarkSamplesMenuItem } from "../BenchmarkSamplesMenuItem";
+import ToolbarButtonIcon from "../ToolbarButtonIcon/ToolbarButtonIcon";
 
 interface BulkSamplesActionsMenuProps {
   noObjectsSelected: boolean;

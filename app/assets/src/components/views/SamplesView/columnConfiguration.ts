@@ -5,12 +5,12 @@ import {
   LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS,
   SHARED_SAMPLE_TABLE_COLUMNS,
   SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
-} from "~/components/views/samples/constants";
+} from "~/components/views/SamplesView/components/CollectionModal/constants";
 import { MetadataType } from "~/interface/shared";
 import { WorkflowType } from "~utils/workflows";
-import { StackedBasicValues } from "../../discovery/components/StackedBasicValues";
-import { StackedSampleIds } from "../../discovery/components/StackedSampleIds";
-import { ValueWithTooltip } from "../../discovery/components/ValueWithTooltip";
+import { StackedBasicValues } from "../discovery/components/StackedBasicValues";
+import { StackedSampleIds } from "../discovery/components/StackedSampleIds";
+import { ValueWithTooltip } from "../discovery/components/ValueWithTooltip";
 import cs from "./samples_view.scss";
 
 // Label constants

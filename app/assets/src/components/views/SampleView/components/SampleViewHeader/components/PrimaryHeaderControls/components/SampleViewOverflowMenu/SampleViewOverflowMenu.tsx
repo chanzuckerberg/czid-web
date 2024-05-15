@@ -4,7 +4,7 @@ import { WORKFLOWS, WorkflowType } from "~/components/utils/workflows";
 import {
   FINALIZED_SAMPLE_UPLOAD_ERRORS,
   SampleUploadErrors,
-} from "~/components/views/samples/constants";
+} from "~/components/views/SamplesView/components/CollectionModal/constants";
 import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";

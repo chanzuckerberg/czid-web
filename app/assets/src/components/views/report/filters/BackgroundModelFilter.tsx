@@ -4,7 +4,7 @@ import SectionsDropdown from "~ui/controls/dropdowns/SectionsDropdown";
 import SubtextDropdown, {
   Option,
 } from "~ui/controls/dropdowns/SubtextDropdown";
-import { BackgroundOptionType } from "../../samples/SamplesView/components/BulkDownloadModal/types";
+import { BackgroundOptionType } from "../../SamplesView/components/BulkDownloadModal/types";
 
 interface BackgroundModelFilterProps {
   allBackgrounds?: RawBackground[] | BackgroundOptionType[] | null;

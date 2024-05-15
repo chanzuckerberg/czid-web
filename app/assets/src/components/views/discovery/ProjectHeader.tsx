@@ -4,8 +4,8 @@ import React from "react";
 import { saveProjectName, validateProjectName } from "~/api";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
-import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
-import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
+import ProjectSettingsModal from "~/components/views/discovery/ProjectSettingsModal";
+import ProjectUploadMenu from "~/components/views/discovery/ProjectUploadMenu";
 import { DateString, Project } from "~/interface/shared";
 import cs from "./project_header.scss";
 

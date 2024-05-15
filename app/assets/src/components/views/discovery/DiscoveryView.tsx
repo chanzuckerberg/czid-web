@@ -57,7 +57,7 @@ import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import {
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
-} from "~/components/views/samples/SamplesView/ColumnConfiguration";
+} from "~/components/views/SamplesView/columnConfiguration";
 import {
   NOTIFICATION_TYPES,
   showNotification,
@@ -89,7 +89,7 @@ import {
 } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 import ProjectsView from "../projects/ProjectsView";
-import SamplesView, { CgRow } from "../samples/SamplesView/SamplesView";
+import SamplesView, { CgRow } from "../SamplesView/SamplesView";
 import VisualizationsView, {
   Visualization,
 } from "../visualizations/VisualizationsView";

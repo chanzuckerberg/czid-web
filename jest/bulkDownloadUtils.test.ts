@@ -2,8 +2,8 @@ import {
   parseIsUserOwnerOfAllObjects,
   parseRailsValidationInfo,
   parseValidationInfo,
-} from "../app/assets/src/components/views/samples/SamplesView/components/BulkDownloadModal/utils.ts";
-import { WorkflowRunStatusType } from "../app/assets/src/components/views/samples/SamplesView/components/BulkDownloadModal/types.ts";
+} from "../app/assets/src/components/views/SamplesView/components/BulkDownloadModal/utils.ts";
+import { WorkflowRunStatusType } from "../app/assets/src/components/views/SamplesView/components/BulkDownloadModal/types.ts";
 
 const railsValidationInfo = {
   validIds: [123, 456],

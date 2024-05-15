@@ -4,7 +4,7 @@ import { PopoverProps } from "@mui/material";
 import React, { useContext, useState } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { WorkflowLabelType } from "~/components/utils/workflows";
-import BulkDeleteModal from "~/components/views/samples/SamplesView/BulkDeleteModal";
+import BulkDeleteModal from "~/components/views/SamplesView/components/BulkDeleteModal";
 import { SampleId } from "~/interface/shared";
 import cs from "./overflow_menu.scss";
 

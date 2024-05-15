@@ -9,7 +9,7 @@ import {
   CONDITIONAL_FIELDS,
   HOST_GENOME_NAMES,
   OPTIONAL_FIELDS,
-} from "../../../../../../BulkDownloadListView/constants";
+} from "../../../../../BulkDownloadListView/constants";
 import { SelectedFieldsType } from "../../types";
 import cs from "./bulk_download_modal_footer.scss";
 import { BulkDownloadWarning } from "./components/BulkDownloadWarning";

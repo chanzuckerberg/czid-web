@@ -405,7 +405,7 @@ class WorkflowRun < ApplicationRecord
     WorkflowRun.where(sample: sample, status: WorkflowRun::STATUS[:failed]).order(created_at: :desc).first&.update(status: WorkflowRun::STATUS[:created])
   end
 
-  # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
+  # order_by stores a sortable column's dataKey (refer to: columnConfigurations.ts)
   def self.sort_workflow_runs(workflow_runs, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
     metadata_sort_key = sanitize_metadata_field_name(order_by)

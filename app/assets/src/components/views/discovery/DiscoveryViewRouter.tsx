@@ -12,7 +12,7 @@ import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
 import ImpactPage from "~/components/views/ImpactPage/ImpactPage";
-import MetadataDictionary from "~/components/views/metadata/MetadataDictionary";
+import MetadataDictionary from "~/components/views/MetadataDictionary/MetadataDictionary";
 import { PathogenListView } from "~/components/views/PathogenListView/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
 import SampleView from "~/components/views/SampleView";

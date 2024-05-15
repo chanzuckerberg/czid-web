@@ -1,4 +1,4 @@
-import { SampleMetadataResponseType } from "~/components/views/samples/SamplesView/components/BulkDownloadModal/types";
+import { SampleMetadataResponseType } from "~/components/views/SamplesView/components/BulkDownloadModal/types";
 import { BulkDownloadType } from "~/interface/shared";
 import { WorkflowType, WORKFLOW_ENTITIES } from "~utils/workflows";
 import { get, postWithCSRF } from "./core";

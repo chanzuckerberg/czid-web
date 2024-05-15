@@ -7,7 +7,7 @@ import {
   MetricsOptionType,
   SelectedFieldsType,
   SelectedFieldValueType,
-} from "~/components/views/samples/SamplesView/components/BulkDownloadModal/types";
+} from "~/components/views/SamplesView/components/BulkDownloadModal/types";
 import { BulkDownloadType } from "~/interface/shared";
 import { DownloadTypeOption } from "../DownloadTypeOption/DownloadTypeOption";
 

@@ -3,7 +3,7 @@ import Checkbox from "~/components/ui/controls/Checkbox";
 import { Dropdown } from "~/components/ui/controls/dropdowns";
 import { CONDITIONAL_FIELDS } from "~/components/views/BulkDownloadListView/constants";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
-import cs from "~/components/views/samples/SamplesView/components/BulkDownloadModal/components/BulkDownloadModalOptions/bulk_download_modal_options.scss";
+import { MICROBIOME_DOWNLOAD_METRIC_OPTIONS } from "~/components/views/SamplesHeatmapView/constants";
 import {
   BackgroundOptionType,
   DropdownOptionType,
@@ -11,10 +11,10 @@ import {
   SelectedFieldsType,
   SelectedFieldType,
   SelectedFieldValueType,
-} from "~/components/views/samples/SamplesView/components/BulkDownloadModal/types";
-import { triggersConditionalField } from "~/components/views/samples/SamplesView/components/BulkDownloadModal/utils";
-import { MICROBIOME_DOWNLOAD_METRIC_OPTIONS } from "~/components/views/SamplesHeatmapView/constants";
+} from "~/components/views/SamplesView/components/BulkDownloadModal/types";
+import { triggersConditionalField } from "~/components/views/SamplesView/components/BulkDownloadModal/utils";
 import { BulkDownloadFieldType, BulkDownloadType } from "~/interface/shared";
+import cs from "../../bulk_download_modal_options.scss";
 import { TaxonHitSelect } from "../TaxonHitSelect";
 import { ThresholdFilterModal } from "../ThresholdFilterModal";
 

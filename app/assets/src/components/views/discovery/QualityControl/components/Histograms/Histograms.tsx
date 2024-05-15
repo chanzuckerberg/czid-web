@@ -16,7 +16,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import { SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS } from "~/components/views/samples/constants";
+import { SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS } from "~/components/views/SamplesView/components/CollectionModal/constants";
 import Histogram from "~/components/visualizations/Histogram";
 import { numberWithPercent } from "~/helpers/strings";
 import Sample from "~/interface/sample";

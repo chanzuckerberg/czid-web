@@ -7,7 +7,7 @@ import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
-import { SHARED_SAMPLE_TABLE_COLUMNS } from "~/components/views/samples/constants";
+import { SHARED_SAMPLE_TABLE_COLUMNS } from "~/components/views/SamplesView/components/CollectionModal/constants";
 import BarChartToggle from "~/components/visualizations/bar_charts/BarChartToggle";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
 import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";

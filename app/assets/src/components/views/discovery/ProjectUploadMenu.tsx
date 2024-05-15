@@ -1,7 +1,7 @@
 import { Button } from "@czi-sds/components";
 import React, { useState } from "react";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import MetadataUploadModal from "./MetadataUploadModal";
+import MetadataUploadModal from "../SamplesView/components/MetadataUploadModal";
 import cs from "./project_upload_menu.scss";
 
 interface ProjectUploadMenuProps {
