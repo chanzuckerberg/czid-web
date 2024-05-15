@@ -11,8 +11,7 @@ import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
-import ImpactPage from "~/components/views/ImpactPage";
-import LandingV2 from "~/components/views/LandingV2";
+import ImpactPage from "~/components/views/ImpactPage/ImpactPage";
 import MetadataDictionary from "~/components/views/metadata/MetadataDictionary";
 import { PathogenListView } from "~/components/views/PathogenListView/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
@@ -25,6 +24,7 @@ import { AdminPage } from "../AdminPage";
 import { AdminProject } from "../AdminProject";
 import { AdminSample } from "../AdminSample";
 import AdminSettings from "../AdminSettings/AdminSettings";
+import LandingPage from "../LandingPage/LandingPage";
 import { DiscoveryViewFC } from "./DiscoveryViewFC";
 
 // These props come from Rails .html.erb views via the react_component function in app/assets/src/index.tsx (the entrypoint)
@@ -159,7 +159,7 @@ const DiscoveryViewRouter = ({
           />
         ) : (
           <Route>
-            <LandingV2
+            <LandingPage
               announcementBannerEnabled={announcementBannerEnabled}
               emergencyBannerMessage={emergencyBannerMessage}
             />
