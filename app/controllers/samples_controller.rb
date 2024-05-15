@@ -1863,7 +1863,10 @@ class SamplesController < ApplicationController
     # These logs get scanned by the cloudwatch-alerting lambda in the idseq monorepo and sent to slack.
     msg = "LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name}." \
     " See: #{project.status_url}" \
-    " cc: @xochitl @nchourasia @sgupta @czid-oncall-eng"
+    " cc: <@U061CR7HN8M> <@U02M47NLG4W> <@U03CP0QCEUQ> <!subteam^S03NF7H8NET>"
+    # The order of the people tagged: <Sanchit>, <Xochitl>, <Neha>, <CZ ID Oncall Eng>
+    # The alphanumerical characters are the slack IDs of the users.
+
     Rails.logger.info(msg)
   rescue StandardError => e
     # catch all errors because we don't want to ever block uploads
