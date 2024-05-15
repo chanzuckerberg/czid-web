@@ -24,3 +24,9 @@ DeleteOldBulkDownloads:
   class: DeleteOldBulkDownloads
   queue: delete_old_bulk_downloads
   description: "This job deletes all BulkDownloads (and associated S3 files) that are 7+ days old."
+
+ClearFailedResqueJobs:
+  cron: "0 1 * * 0" # 1:00am PT every Sunday
+  class: ClearResqueFailureQueue
+  queue: clear_resque_failure_queue
+  description: "This job clears the Resque failure queue of failed jobs every week"
