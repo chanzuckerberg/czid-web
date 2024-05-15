@@ -11,10 +11,7 @@ import { test, expect } from "@playwright/test";
 import { kebabCase } from "lodash";
 
 const SAMPLE_FILES = [SAMPLE_FILE_1_PAIRED_R1, SAMPLE_FILE_1_PAIRED_R2];
-const SAMPLE_1_PAIRED = "Sample_1_Paired";
-const SAMPLE_NAMES = [SAMPLE_1_PAIRED];
 const UPLOAD_COMPLETE_LITERAL = "Uploads completed!";
-const CT20K_SAMPLE_NAME = "Ct20K";
 const WAIT_FOR_PIPELINE = false;
 const IN_PROGRESS = "IN PROGRESS";
 const IN_PROGRESS_MESSAGE =

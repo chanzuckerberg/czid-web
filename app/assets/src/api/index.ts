@@ -689,15 +689,6 @@ const userIsCollaboratorOnAllSamples = async (sampleIds: string[]) => {
 
 const getHeatmapMetrics = () => get("/visualizations/heatmap_metrics.json");
 
-const getUserSettingMetadataByCategory = () =>
-  get("/user_settings/metadata_by_category");
-
-const updateUserSetting = (key: $TSFixMe, value: $TSFixMe) =>
-  postWithCSRF("user_settings/update", {
-    key,
-    value,
-  });
-
 const getTaxaDetails = (params: $TSFixMe) =>
   postWithCSRF("/visualizations/taxa_details.json", {
     sampleIds: params.sampleIds,
@@ -842,7 +833,6 @@ export {
   getTaxaWithReadsSuggestions,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
-  getUserSettingMetadataByCategory,
   getVisualizations,
   getWorkflowRuns,
   getWorkflowRunsInfo,
@@ -860,7 +850,6 @@ export {
   setAppConfig,
   setWorkflowVersion,
   shortenUrl,
-  updateUserSetting,
   samplesUploadedByCurrentUser,
   uploadFileToUrl,
   userIsCollaboratorOnAllSamples,

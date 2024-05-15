@@ -7,10 +7,6 @@ export default interface UserContextType {
     maxObjectsBulkDownload?: number;
     maxSamplesBulkDownloadOriginalFiles?: number;
   };
-  userSettings: {
-    example_user_setting?: boolean;
-    show_skip_processing_option?: boolean;
-  };
   userSignedIn: boolean;
   userId?: number | null;
   userName?: string | null;

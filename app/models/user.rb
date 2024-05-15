@@ -188,47 +188,6 @@ class User < ApplicationRecord
     projects.exists?(project_id)
   end
 
-  def get_user_setting(key)
-    user_setting = user_settings.find_by(key: key)
-
-    return user_setting.value unless user_setting.nil?
-
-    return UserSetting::METADATA[key][:default]
-  end
-
-  def save_user_setting(key, value)
-    user_setting = user_settings.find_or_initialize_by(key: key)
-
-    user_setting.value = value
-    user_setting.save!
-  end
-
-  # Remove any user settings gated on allowed_features that the user doesn't have access to due to allowed_feature flags.
-  def viewable_user_setting_keys
-    parsed_allowed_feature_list = allowed_feature_list
-    UserSetting::METADATA.select do |_key, metadata|
-      metadata[:required_allowed_feature].nil? || parsed_allowed_feature_list.include?(metadata[:required_allowed_feature])
-    end.keys
-  end
-
-  # Get all viewable user settings, excluding any that are guarded on feature flags.
-  def viewable_user_settings
-    # Fetch viewable user settings.
-    existing_user_settings = user_settings
-                             .where(key: viewable_user_setting_keys)
-                             .map { |setting| [setting.key, setting.value] }
-                             .to_h
-
-    # Fill in all missing user settings with the default value.
-    viewable_user_setting_keys.each do |key|
-      if existing_user_settings[key].nil?
-        existing_user_settings[key] = UserSetting::METADATA[key][:default]
-      end
-    end
-
-    existing_user_settings
-  end
-
   # Update login trackable fields
   def update_tracked_fields!(request)
     # This method has been adapted from Devise trackable module to keep previous behavior (IDSEQ-1558 / IDSEQ-1720)

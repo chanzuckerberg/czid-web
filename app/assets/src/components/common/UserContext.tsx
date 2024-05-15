@@ -6,7 +6,6 @@ const UserContextValues: UserContextType = {
   firstSignIn: false,
   allowedFeatures: [],
   appConfig: {},
-  userSettings: {},
   userSignedIn: false,
   userId: null,
   userName: null,

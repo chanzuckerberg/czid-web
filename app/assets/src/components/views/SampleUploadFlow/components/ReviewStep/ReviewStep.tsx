@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { get, keyBy } from "lodash/fp";
+import { keyBy } from "lodash/fp";
 import React, { useContext } from "react";
 import {
   TrackEventType,
@@ -20,7 +20,6 @@ import {
   SampleFromApi,
 } from "~/interface/shared";
 import { UploadStepType } from "~/interface/upload";
-import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { Technology, UploadWorkflows, UPLOAD_WORKFLOWS } from "../../constants";
 import { UploadProgressModal } from "../UploadProgressModal";
@@ -160,13 +159,10 @@ class ReviewStepCC extends React.Component<
       project,
       samples,
       uploadType,
-      userContext,
       visible,
       wetlabProtocol,
       workflows,
     } = this.props;
-
-    const { userSettings } = userContext || {};
 
     const areLinksEnabled = !showUploadModal;
 
@@ -228,15 +224,6 @@ class ReviewStepCC extends React.Component<
             <HostOrganismMessage
               hostGenomes={originalHostGenomes}
               samples={samples}
-            />
-          )}
-          {/* This is only for admins and QA testers. */}
-          {get("show_skip_processing_option", userSettings) && (
-            <Checkbox
-              className={cs.sampleProcessingOption}
-              checked={skipSampleProcessing}
-              onChange={this.toggleSkipSampleProcessing}
-              label="Skip sample processing after upload is complete."
             />
           )}
           <TermsAgreement

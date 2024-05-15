@@ -1,6 +1,0 @@
-<div id="UserSettingsView_page">
-  <%= javascript_tag do %>
-    react_component('UserSettingsView', {}, 'UserSettingsView_page',
-    JSON.parse('<%= raw escape_json(user_context)%>'));
-  <% end %>
-</div>
