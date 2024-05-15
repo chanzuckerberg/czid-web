@@ -14,20 +14,8 @@ end
 chdir APP_ROOT do
   system('brew help 1>/dev/null') || abort('install homebrew from directions at https://brew.sh/')
   system('open -a Docker 1>/dev/null') || abort('install docker from directions at https://docs.docker.com/docker-for-mac/install/')
-  puts '== Updating homebrew Formulae =='
-  system!('brew update')
-  dependencies = ['mysql', 'hub', 'bash-completion', 'node']
-  puts '== Installing dependencies =='
-  if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4.1')
-    puts("== Updating ruby ... ==")
-    system!('brew install ruby')
-  end
-  dependencies.each do |pkg|
-    package_exists = system("brew ls #{pkg} >/dev/null")
-    package_exists ? puts("== #{pkg} already up-to-date. ==") :
-    puts("== Installing #{pkg} ... ==")
-    system!("brew install #{pkg}") unless package_exists
-  end
+  `cat .node-version` == `node -v | tr -d 'v'` || abort('node version mismatch. Run `nvm use` to switch to the correct version')
+  `cat .ruby-version`.strip == `ruby -v`.split(' ')[1].split('p')[0].strip || abort('ruby version mismatch. use chruby to switch to the correct version')
 
   system! './bin/setup-shared'
 end

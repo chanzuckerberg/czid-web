@@ -40,7 +40,7 @@ Makefile:
 	fi
 
 .PHONY: local-init
-local-init: .env.localdev ## Set up a local dev environment
+local-init: local-pull .env.localdev ## Set up a local dev environment
 	@export $$(cat .env.localdev); \
 	if [ "$$(uname -s)" == "Darwin" ]; then \
 		./bin/setup-macos; \
