@@ -477,10 +477,10 @@ module PipelineRunsHelper
     select_query = default_select_query.concat(select_options)
 
     # Gets the first pipeline runs for multiple samples in an efficient way.
-    created_dates = PipelineRun.select("sample_id, MAX(created_at) as created_at").where(sample_id: samples.pluck(:id)).group(:sample_id)
+    pipeline_run_ids = PipelineRun.select("sample_id, MAX(id) as id").where(sample_id: samples.pluck(:id)).group(:sample_id)
     valid_pipeline_runs = PipelineRun
                           .select(select_query)
-                          .where("(sample_id, created_at) IN (?)", created_dates)
+                          .where("(sample_id, id) IN (?)", pipeline_run_ids)
                           .where(finalized: 1)
 
     if strict && valid_pipeline_runs.length != samples.length
