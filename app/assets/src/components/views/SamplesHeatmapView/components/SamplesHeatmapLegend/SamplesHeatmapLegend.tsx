@@ -19,13 +19,16 @@ export const SamplesHeatmapLegend = ({
     return null;
   }
   const values = data[selectedOptions.metric];
+  const flatValues = values
+    .flat()
+    .filter(v => v !== "empty" && v !== undefined);
   const scaleIndex = selectedOptions.dataScaleIdx;
 
   return (
     <div className={cs.samplesHeatmapLegend}>
       <SequentialLegendVis
-        min={Math.min(...values.flat())}
-        max={Math.max(...values.flat())}
+        min={Math.min(...flatValues)}
+        max={Math.max(...flatValues)}
         scale={options.scales[scaleIndex][1]}
       />
     </div>

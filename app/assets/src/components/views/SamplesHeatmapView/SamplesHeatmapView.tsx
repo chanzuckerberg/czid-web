@@ -2095,11 +2095,7 @@ class SamplesHeatmapViewCC extends React.Component<
   render() {
     const {
       addedTaxonIds,
-      // allGeneraIds,
-      // allSpeciesIds,
-      // data,
       downloadModalOpen,
-      // enableMassNormalizedBackgrounds,
       hideFilters,
       loading,
       sampleIds,
@@ -2109,10 +2105,9 @@ class SamplesHeatmapViewCC extends React.Component<
       taxonIds,
     } = this.state;
 
-    // @ts-expect-error ts-migrate(2554) FIXME: Expected 0-1 arguments, but got 2.
-    let shownTaxa = new Set(taxonIds, addedTaxonIds);
-    shownTaxa = new Set(
-      [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId)),
+    const unfilteredTaxa = [...taxonIds, ...addedTaxonIds];
+    const shownTaxa = new Set(
+      [...unfilteredTaxa].filter(taxId => !this.removedTaxonIds.has(taxId)),
     );
 
     return (
