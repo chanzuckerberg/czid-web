@@ -1,8 +1,6 @@
 @import "~@czi-sds/components/dist/variables";
 
 :global(.ui):global(.dropdown).multipleDropdown {
-  z-index: 901;
-
   &:global(.active) {
     .dropdownTrigger {
       border: $sds-borders-primary-400;
