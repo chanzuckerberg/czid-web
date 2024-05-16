@@ -262,8 +262,6 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :benchmarks, only: [:index]
-
   resource :metadata do
     collection do
       get :dictionary
