@@ -49,20 +49,6 @@ module ReportHelper
   ].freeze
   CATEGORIES_TAXID_BY_NAME = ALL_CATEGORIES.map { |category| { category['name'] => category['taxid'] } }.reduce({}, :merge)
 
-  # use the metric's NT <=> NR dual as a tertiary sort key (so, for example,
-  # when you sort by NT R, entries without NT R will be ordered amongst
-  # themselves based on their NR R (as opposed to arbitrary ordder);
-  # and within the Z, for things with equal Z, use the R as tertiary
-  OTHER_COUNT_TYPE = {
-    'NT' => 'NR',
-    'NR' => 'NT',
-  }.freeze
-  OTHER_METRIC = {
-    'zscore' => 'r',
-    'r' => 'zscore',
-    'rpm' => 'zscore',
-  }.freeze
-
   # TODO: (gdingle): refactor to class method
   def generate_heatmap_csv(sample_taxa_hash, background_id, pathogen_flags_by_sample = nil)
     attribute_names = [

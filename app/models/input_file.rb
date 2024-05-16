@@ -42,7 +42,6 @@ class InputFile < ApplicationRecord
 
   BULK_FILE_PAIRED_REGEX = /\A([A-Za-z0-9_][-.A-Za-z0-9_]{1,119})_R(\d)(_001)?\.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.freeze
   BULK_FILE_SINGLE_REGEX = /\A([A-Za-z0-9_][-.A-Za-z0-9_]{1,119})\.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.freeze
-  S3_CP_PIPE_ERROR = '[Errno 32] Broken pipe'.freeze
 
   def s3_source_check
     source.strip! if source.present?

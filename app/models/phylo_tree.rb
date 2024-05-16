@@ -135,47 +135,6 @@ class PhyloTree < ApplicationRecord
     AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
   end
 
-  def monitor_job(throttle = true)
-    # Detect if batch job has failed so we can stop polling for results.
-    # Also, populate job_log_id.
-    return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
-
-    job_status, job_log_id_response, self.job_description = job_info(job_id, id)
-    self.job_log_id = job_log_id_response unless job_log_id # don't overwrite once it's been set (job_log_id_response could be nil after job has terminated)
-    required_outputs = select_outputs("required")
-    update_pipeline_version(self, :dag_version, dag_version_file) if job_status == "SUCCEEDED" && dag_version.blank?
-    if job_status == PipelineRunStage::STATUS_FAILED ||
-       (job_status == "SUCCEEDED" && !required_outputs.all? { |ro| exists_in_s3?(s3_outputs[ro]["s3_path"]) })
-      self.status = STATUS_FAILED
-      LogUtil.log_error(
-        "Phylo tree creation failed for #{name} (#{id}). See #{log_url} for further details.",
-        phylo_tree_name: name,
-        phylo_tree_id: id,
-        log_url: log_url
-      )
-    end
-    save
-  end
-
-  def kickoff
-    return unless [STATUS_INITIALIZED, STATUS_FAILED].include?(status)
-
-    self.command_stdout, self.command_stderr, command_status = Open3.capture3(job_command)
-    if command_status.exitstatus.zero?
-      output = JSON.parse(command_stdout)
-      self.job_id = output['jobId']
-      self.status = STATUS_IN_PROGRESS
-    else
-      self.status = STATUS_FAILED
-      LogUtil.log_error(
-        "Phylo tree failed to kick off for #{name} (#{id}).",
-        phylo_tree_name: name,
-        phylo_tree_id: id
-      )
-    end
-    save
-  end
-
   private
 
   # We need to create a visualization object here to register the new phylo_tree
@@ -205,86 +164,6 @@ class PhyloTree < ApplicationRecord
 
   def select_outputs(property, value = true)
     s3_outputs.select { |_output, props| props[property] == value }.keys
-  end
-
-  def job_command
-    # Get byte ranges for each pipeline run's taxon fasta.
-    # We construct taxon_byteranges_hash to have the following format for integration with idseq-dag:
-    # { pipeline_run_id_1: {
-    #     'NT': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file],
-    #     'NR': [first_byte, last_byte, source_s3_file, sample_id, align_viz_s3_file]
-    #   },
-    #   pipeline_run_id_2: ... }
-    pipeline_run_ids = pipeline_runs.pluck(:id)
-    taxon_byteranges = TaxonByterange.where(pipeline_run_id: pipeline_run_ids).where(taxid: taxid)
-    taxon_byteranges_hash = {}
-    taxon_byteranges.each do |tbr|
-      taxon_byteranges_hash[tbr.pipeline_run_id] ||= {}
-      taxon_byteranges_hash[tbr.pipeline_run_id][tbr.hit_type] = [tbr.first_byte, tbr.last_byte]
-    end
-    # If the tree is for genus level or higher, get the top species underneath (these species will have genbank records pulled in idseq-dag)
-    if tax_level > TaxonCount::TAX_LEVEL_SPECIES
-      level_str = (TaxonCount::LEVEL_2_NAME[tax_level]).to_s
-      taxid_column = ActiveRecord::Base.connection.quote_column_name("#{level_str}_taxid")
-      species_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where("#{taxid_column} = ?", taxid).where(tax_level: TaxonCount::TAX_LEVEL_SPECIES)
-      species_counts = species_counts.order('pipeline_run_id, count DESC')
-      top_taxid_by_run_id = {}
-      species_counts.each do |sc|
-        top_taxid_by_run_id[sc.pipeline_run_id] ||= sc.tax_id
-      end
-      reference_taxids = top_taxid_by_run_id.values.uniq
-    else
-      reference_taxids = [taxid]
-    end
-    # Retrieve superkigdom name for idseq-dag
-    superkingdom_name = TaxonLineage.where(taxid: taxid).last.superkingdom_name
-    # Get fasta paths and hitsummary2 paths for each pipeline_run
-    hitsummary2_files = {}
-    pipeline_runs.each do |pr|
-      hitsummary2_files[pr.id] = [
-        "#{pr.assembly_s3_path}/gsnap.hitsummary2.tab",
-        "#{pr.assembly_s3_path}/rapsearch2.hitsummary2.tab",
-      ]
-      entry = taxon_byteranges_hash[pr.id]
-      entry.keys.each do |hit_type|
-        entry[hit_type] += [pr.s3_paths_for_taxon_byteranges[tax_level][hit_type]]
-      end
-    end
-    # Get the alignment config specifying the location of the NCBI reference used in the pipeline run
-    alignment_config = pipeline_runs.last.alignment_config # TODO: revisit case where pipeline_runs have different alignment configs
-    # Generate DAG
-    attribute_dict = {
-      phylo_tree_output_s3_path: phylo_tree_output_s3_path,
-      newick_basename: File.basename(s3_outputs["newick"]["s3_path"]),
-      ncbi_metadata_basename: File.basename(s3_outputs["ncbi_metadata"]["s3_path"]),
-      taxid: taxid,
-      reference_taxids: reference_taxids,
-      superkingdom_name: superkingdom_name,
-      taxon_byteranges: taxon_byteranges_hash,
-      hitsummary2_files: hitsummary2_files,
-      nt_db: alignment_config.s3_nt_db_path,
-      nt_loc_db: alignment_config.s3_nt_loc_db_path,
-      sample_names_by_run_ids: sample_names_by_run_ids,
-    }
-    dag_commands = prepare_dag("phylo_tree", attribute_dict)
-    # Dispatch command
-    base_command = [install_pipeline(dag_branch),
-                    upload_version(dag_version_file),
-                    dag_commands,].join("; ")
-    aegea_batch_submit_command(base_command)
-  end
-
-  # The template below is in app/views/phylo_trees:
-  def prepare_dag(dag_name, attribute_dict)
-    dag_s3 = "#{phylo_tree_output_s3_path}/#{dag_name}.json"
-    dag = DagGenerator.new("phylo_trees/#{dag_name}",
-                           project_id,
-                           nil,
-                           nil,
-                           attribute_dict,
-                           parse_dag_vars)
-    self.dag_json = dag.render
-    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
   end
 
   def sample_names_by_run_ids

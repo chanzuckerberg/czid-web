@@ -61,10 +61,6 @@ class Syscall
     return nil
   end
 
-  def self.s3_rm(s3_path)
-    run("aws", "s3", "rm", s3_path)
-  end
-
   def self.s3_cp(source_s3_path, destination_s3_path)
     run("aws", "s3", "cp", source_s3_path, destination_s3_path)
   end

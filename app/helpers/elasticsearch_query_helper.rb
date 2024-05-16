@@ -13,8 +13,6 @@ module ElasticsearchQueryHelper
     retry_limit: 0 # TODO: retry on networking error?
   )
 
-  DEFAULT_QUERY_FETCH_SIZE = 100
-
   METRICS_MAPPING = {
     r: "counts",
     percentidentity: "percent_identity",

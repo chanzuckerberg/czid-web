@@ -7,9 +7,7 @@ module HeatmapHelper
   # decided on 10 as the best default number of taxons to show per sample.
   DEFAULT_MAX_NUM_TAXONS = 10
   DEFAULT_TAXON_SORT_PARAM = 'highest_nt_rpm'.freeze
-  READ_SPECIFICITY = true
   MINIMUM_READ_THRESHOLD = 5
-  DEFAULT_NUM_RESULTS = 1_000_000
 
   # The number of taxa per sample to load
   # this should be high enough to compensate for any filters and thresholds
@@ -18,11 +16,6 @@ module HeatmapHelper
   # that being significantly higher (10x) than the maximum value for taxa per
   # sample (100)  that the user can select on the frontend interface.
   CLIENT_FILTERING_TAXA_PER_SAMPLE = 1000
-
-  # Overfetch by a factor of 4 to allow for
-  #   a) both count types, and
-  #   b) any post-SQL filtering
-  SERVER_FILTERING_OVERFETCH_FACTOR = 4
 
   # Samples and background are assumed here to be vieweable.
   def self.sample_taxons_dict(params, samples, background_id)

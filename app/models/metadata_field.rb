@@ -180,17 +180,6 @@ class MetadataField < ApplicationRecord
     end
   end
 
-  def remove_examples(examples_to_remove, host_genome = "all")
-    if host_genome == "all"
-      remove_examples_helper(examples_to_remove, "all")
-    # If a host genome is specified, make sure the metadata field applies to that host.
-    elsif host_genomes.where(name: host_genome).length == 1
-      remove_examples_helper(examples_to_remove, host_genomes.find_by(name: host_genome).id)
-    else
-      raise "Invalid host genome"
-    end
-  end
-
   def validated_field
     base = self.class.convert_type_to_string(base_type)
     "#{base}_validated_value"
@@ -246,15 +235,6 @@ class MetadataField < ApplicationRecord
     existing_examples_set = (existing_examples[host_genome] || []).to_set
     existing_examples_set.merge(new_examples)
     existing_examples[host_genome] = existing_examples_set.to_a
-
-    update(examples: JSON.dump(existing_examples))
-  end
-
-  def remove_examples_helper(examples_to_remove, host_genome)
-    existing_examples = examples ? JSON.parse(examples) : {}
-
-    existing_examples[host_genome] ||= []
-    existing_examples[host_genome] -= examples_to_remove
 
     update(examples: JSON.dump(existing_examples))
   end

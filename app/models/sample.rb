@@ -87,32 +87,12 @@ class Sample < ApplicationRecord
   ].freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
-  LOG_BASENAME = 'log.txt'.freeze
-
   LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
   ASSEMBLY_DIR = 'assembly'.freeze
-
-  # TODO: Make all these params configurable without code change
-  DEFAULT_STORAGE_IN_GB = 1000
-  DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
-  HIMEM_IN_MB = 240_000
-
-  DEFAULT_QUEUE = (Rails.env.prod? ? 'idseq-prod-lomem' : 'idseq-staging-lomem').freeze
-  DEFAULT_VCPUS = 16
-
-  DEFAULT_QUEUE_HIMEM = (Rails.env.prod? ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
-  DEFAULT_VCPUS_HIMEM = 32
 
   METADATA_FIELDS = [:sample_notes].freeze
 
   SLEEP_SECONDS_BETWEEN_RETRIES = 10
-
-  # Maximum allowed line length in characters for fastq/fasta files
-  MAX_LINE_LENGTH = 10_000
-  # Error message to identify parse errors from fastq-fasta-line-validation.awk
-  PARSE_ERROR_MESSAGE = 'PARSE ERROR'.freeze
-  # Script parameters
-  FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT = Rails.root.join("scripts", "fastq-fasta-line-validation.awk").to_s
 
   FILTERING_OPERATORS = [">=", "<="].freeze
 
@@ -606,13 +586,6 @@ class Sample < ApplicationRecord
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/results"
   end
 
-  def sample_host_filter_output_s3_path
-    pr = first_pipeline_run
-    return pr.host_filter_output_s3_path
-  rescue StandardError
-    return sample_output_s3_path
-  end
-
   def subsample_suffix
     pr = first_pipeline_run
     pr.subsample_suffix
@@ -902,55 +875,6 @@ class Sample < ApplicationRecord
              Time.current)
   end
 
-  def archive_old_pipeline_runs
-    old_pipeline_runs = pipeline_runs.order('id desc').offset(1)
-    old_pipeline_runs.each do |pr|
-      # Write pipeline_run data to file
-      json_output = pr.to_json(include: [:pipeline_run_stages,
-                                         :taxon_counts,
-                                         :taxon_byteranges,
-                                         :job_stats,])
-      file = Tempfile.new
-      file.write(json_output)
-      file.close
-      # Copy file to S3
-      pr_s3_file_name = "pipeline_run_#{pr.id}.json"
-      _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", file.path.to_s,
-                                                "#{pr.archive_s3_path}/#{pr_s3_file_name}")
-      # Delete any taxon_counts / taxon_byteranges associated with the pipeline run
-      if !File.zero?(file.path) && status.exitstatus && status.exitstatus.zero?
-        TaxonCount.where(pipeline_run_id: pr.id).delete_all
-        TaxonByterange.where(pipeline_run_id: pr.id).delete_all
-      end
-      file.unlink
-    end
-  end
-
-  def reload_old_pipeline_runs
-    old_pipeline_runs = pipeline_runs.order('id desc').offset(1)
-    old_pipeline_runs.each do |pr|
-      next unless pr.succeeded?
-      next unless pr.taxon_counts.empty?
-
-      pr_s3_file_name = "#{pr.archive_s3_path}/pipeline_run_#{pr.id}.json"
-      pr_local_file_name = PipelineRun.download_file(pr_s3_file_name, pr.local_json_path)
-      next unless pr_local_file_name
-
-      json_dict = JSON.parse(File.read(pr_local_file_name))
-      json_dict = json_dict["pipeline_output"] if json_dict["pipeline_output"]
-      taxon_counts = (json_dict["taxon_counts"] || {}).map do |txn|
-        txn.slice("tax_id", "tax_level", "count", "created_at", "name", "count_type", "percent_identity", "alignment_length", "e_value", "genus_taxid", "superkingdom_taxid", "percent_concordant", "species_total_concordant", "genus_total_concordant", "family_total_concordant", "common_name", "family_taxid", "is_phage")
-      end
-      taxon_byteranges = (json_dict["taxon_byteranges"] || {}).map do |txn|
-        txn.slice("taxid", "first_byte", "last_byte", "created_at", "hit_type", "tax_level")
-      end
-
-      pr.taxon_counts_attributes = taxon_counts unless taxon_counts.empty?
-      pr.taxon_byteranges_attributes = taxon_byteranges unless taxon_byteranges.empty?
-      pr.save
-    end
-  end
-
   def self.pipeline_commit(branch)
     o = Syscall.pipe_with_output(["git", "ls-remote", "https://github.com/chanzuckerberg/idseq-dag.git"], ["grep", "refs/heads/#{branch}"])
     return false if o.blank?
@@ -1158,14 +1082,6 @@ class Sample < ApplicationRecord
       # The existing metadata field that was used to validate this metadatum.
       metadata_field: m.metadata_field,
     }
-  end
-
-  def initiate_s3_prod_sync_to_staging
-    return unless Rails.env.staging?
-
-    from_path = "s3://idseq-samples-prod/#{sample_path}"
-    to_path = "s3://idseq-samples-staging/#{sample_path}"
-    Syscall.run("aws", "s3", "cp", "--recursive", from_path, to_path)
   end
 
   def private_until

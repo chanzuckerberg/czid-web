@@ -1,5 +1,3 @@
-BASESPACE_OAUTH_URL = "https://api.basespace.illumina.com/v1pre3/oauthv2/token".freeze
-
 class BasespaceController < ApplicationController
   include HttpHelper
   include BasespaceHelper

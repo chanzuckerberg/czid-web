@@ -104,10 +104,6 @@ class User < ApplicationRecord
     admin? ? 'admin user' : 'non-admin user'
   end
 
-  def archetypes_list
-    JSON.parse(archetypes || "[]")
-  end
-
   def launched_feature_list
     AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
   end

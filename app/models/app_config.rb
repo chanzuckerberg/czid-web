@@ -7,9 +7,6 @@ class AppConfig < ApplicationRecord
   AUTO_RESTART_ALLOWED_STAGES = 'auto_restart_allowed_stages'.freeze
   # The ECR image to use for the s3 tar writer service. Defaults to "idseq-s3-tar-writer:latest"
   S3_TAR_WRITER_SERVICE_ECR_IMAGE = 's3_tar_writer_service_ecr_image'.freeze
-  # When this is "1", new users will also be created in the Auth0 database.
-  # Enable when Auth0 rolls out.
-  USE_AUTH0_FOR_NEW_USERS = 'use_auth0_for_new_users'.freeze
   # The maximum number of objects (samples or workflow runs) that can be part of one bulk download.
   MAX_OBJECTS_BULK_DOWNLOAD = 'max_objects_bulk_download'.freeze
   # The maximum number of samples that can be part of an original input files bulk download.
@@ -24,16 +21,11 @@ class AppConfig < ApplicationRecord
   # The ARN of the mNGS pipeline's Step Function
   SFN_MNGS_ARN = 'sfn_mngs_arn'.freeze
   SFN_ARN = 'sfn_arn'.freeze
-  # The pipeline version to use
-  SFN_PIPELINE_VERSION = 'sfn_pipeline_version'.freeze
   # The ARN of a single stage pipeline's Step Function
   SFN_SINGLE_WDL_ARN = 'sfn_single_wdl_arn'.freeze
   SFN_CG_ARN = 'sfn_cg_arn'.freeze
   # When this is "1", the COVID-19 Public Site banner on the landing page will be shown.
   SHOW_LANDING_PUBLIC_SITE_BANNER = 'show_landing_public_site_banner'.freeze
-  # Switch for additional ActiveRecord validations that were added en masse in Feb 2020.
-  # Presence of the flag switches on the feature.
-  ENABLE_MASS_VALIDATION = 'enable_mass_validation'.freeze
   # List of launched features still guarded by a flag.
   # Use the features rake tasks for editing this key
   LAUNCHED_FEATURES = 'launched_features'.freeze
@@ -59,10 +51,6 @@ class AppConfig < ApplicationRecord
   BYPASS_ES_TAXON_SEARCH = "bypass_es_taxon_search".freeze
   # When this is "1", PipelineReportService will return the decimal type columns for rpm, percent_identity, and alignment_length (instead of the float type columns)
   PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS = "pipeline_report_service_use_decimal_type_columns".freeze
-  # Version of the short-read-mngs pipeline that uses the modern host filtering step. Initally set to "8.1.1-beta"
-  MODERN_SHORT_READ_MNGS_VERSION = "modern_short_read_mngs_version".freeze
-  # Version of the AMR pipeline that uses the modern host filtering step. Initally set to "1.0.0-beta"
-  MODERN_AMR_VERSION = "modern_amr_version".freeze
   # When this is "1", automatic account creation will be enabled.
   AUTO_ACCOUNT_CREATION_V1 = "auto_account_creation_v1".freeze
   # When this is "0", old unclaimed accounts will be logged in Sentry, but not deleted. (Monitor mode.)

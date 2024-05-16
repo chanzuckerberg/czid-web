@@ -90,54 +90,8 @@ module PipelineRunsHelper
       },
     },
   }.freeze
-  ALL_STEP_NAMES = STEP_DESCRIPTIONS.values.map { |stage| stage["steps"].keys }.flatten
-
   PIPELINE_RUN_STILL_RUNNING_ERROR = "PIPELINE_RUN_STILL_RUNNING_ERROR".freeze
   PIPELINE_RUN_FAILED_ERROR = "PIPELINE_RUN_FAILED_ERROR".freeze
-
-  def aegea_batch_submit_command(base_command,
-                                 memory: Sample::DEFAULT_MEMORY_IN_MB,
-                                 vcpus: Sample::DEFAULT_VCPUS,
-                                 job_queue: Sample::DEFAULT_QUEUE,
-                                 docker_image: "idseq_dag",
-                                 sample_id: 0,
-                                 stage_name: "misc")
-    # TODO: https://jira.czi.team/browse/IDSEQ-2647
-    #   environment values once we use the new pipeline infra
-    #   that new infra uses dev rather than development
-    #   once we switch to that for the pipeline these values won't be needed
-    deployment_environment = SfnPipelineDispatchService::ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env]
-    command = "aegea batch submit --command=#{Shellwords.escape(base_command)} "
-    command += " --name=idseq-#{Rails.env}-#{sample_id}-#{stage_name} "
-    command += " --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
-    command += " --mount-instance-storage "
-    command += " --environment DEPLOYMENT_ENVIRONMENT=#{deployment_environment} PROVISIONING_MODEL=EC2 PRIORITY_NAME=normal "
-    command
-  end
-
-  def job_info(job_id, run_id)
-    job_status = nil
-    job_log_id = nil
-    job_hash = nil
-    stdout, stderr, status = Open3.capture3("aegea", "batch", "describe", job_id.to_s)
-    if status.exitstatus.zero?
-      job_description = stdout
-      job_hash = JSON.parse(job_description)
-      job_status = job_hash['status']
-      if job_hash['container'] && job_hash['container']['logStreamName']
-        job_log_id = job_hash['container']['logStreamName']
-      end
-    else
-      LogUtil.log_error(
-        "Error for update job status for record #{run_id} with error #{stderr}",
-        job_id: job_id,
-        run_id: run_id
-      )
-      job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
-      job_status = PipelineRunStage::STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
-    end
-    [job_status, job_log_id, stdout]
-  end
 
   def sfn_info(sfn_execution_arn, run_id, stage_number)
     job_status = nil
@@ -266,37 +220,6 @@ module PipelineRunsHelper
       Rails.logger.error("Failed to get pipeline version at #{s3_file}. Error: #{e}")
       return nil
     end
-  end
-
-  def upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
-    upload_dag_json(dag_json, dag_s3)
-    generate_job_command(dag_s3, dag_name, key_s3_params, copy_done_file)
-  end
-
-  def upload_dag_json(dag_json, dag_s3)
-    # Upload dag json
-    Syscall.pipe_with_output(["echo", dag_json], ["aws", "s3", "cp", "-", dag_s3])
-  end
-
-  def generate_job_command(dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
-    # Generate job command
-    dag_path_on_worker = "/mnt/#{dag_name}.json"
-    download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
-    execute_dag = "idseq_dag #{key_s3_params} #{dag_path_on_worker}"
-    [download_dag, execute_dag, copy_done_file].join(";")
-  end
-
-  def install_pipeline(commit_or_branch)
-    "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
-    "cd /mnt; rm -rf idseq-workflows idseq/results; df -h; " \
-    "git clone https://github.com/chanzuckerberg/idseq-workflows.git; " \
-    "cd idseq-workflows/short-read-mngs/idseq-dag; " \
-    "git checkout #{Shellwords.escape(commit_or_branch)}; " \
-    "pip3 install -e ."
-  end
-
-  def upload_version(s3_file)
-    "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{Shellwords.escape(s3_file)}"
   end
 
   def download_to_filename?(s3_file, local_file)

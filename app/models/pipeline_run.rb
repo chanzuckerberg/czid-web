@@ -79,21 +79,15 @@ class PipelineRun < ApplicationRecord
   CDHITDUP_HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.czid_dedup.priceseqfilter.unmapped.star.fasta'.freeze
 
-  GSNAP_M8 = "gsnap.m8".freeze
-  RAPSEARCH2_M8 = "rapsearch2.m8".freeze
-  OUTPUT_JSON_NAME = 'taxon_counts_with_dcr.json'.freeze
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
   INVALID_STEP_NAME = "invalid_step_input.json".freeze
-  NONHOST_FASTQ_OUTPUT_NAME = 'taxid_annot.fasta'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   BOWTIE2_ERCC_OUTPUT_NAME = "bowtie2_ERCC_counts.tsv".freeze
   KALLISTO_ERCC_OUTPUT_NAME = "ERCC_counts.tsv".freeze
   HOST_TRANSCRIPT_READS_OUTPUT_NAME = "reads_per_transcript.kallisto.tsv".freeze
-  AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
-  TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   REFINED_TAXON_COUNTS_JSON_NAME = 'refined_taxon_counts_with_dcr.json'.freeze
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'refined_taxid_locations_combined.json'.freeze
   READS_PER_GENE_STAR_TAB_NAME = 'reads_per_gene.star.tab'.freeze
@@ -121,8 +115,6 @@ class PipelineRun < ApplicationRecord
   CONTIG_BASE_COUNTS_NAME = 'contig_base_counts.json'.freeze
 
   LOCAL_JSON_PATH = '/tmp/results_json'.freeze
-  LOCAL_AMR_FULL_RESULTS_PATH = '/tmp/amr_full_results'.freeze
-
   # ONT specific constants
   ONT_NONHOST_READS_NAME = 'sample.humanfiltered.fastq'.freeze
 
@@ -167,7 +159,6 @@ class PipelineRun < ApplicationRecord
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_FAILED = 'FAILED'.freeze
   STATUS_RUNNING = 'RUNNING'.freeze
-  STATUS_RUNNABLE = 'RUNNABLE'.freeze # TODO: (gdingle): not used anywhere?
   STATUS_READY = 'READY'.freeze
   # NOTE: The current stored job_status are...
   # +-------------------------------------------+
@@ -235,7 +226,6 @@ class PipelineRun < ApplicationRecord
     IN_PROGRESS,
     FINALIZED_SUCCESS,
     FINALIZED_FAIL,
-    # See also pre_result_monitor?
   ] }
 
   validates :finalized, presence: true, inclusion: { in: [0, 1] }
@@ -305,10 +295,6 @@ class PipelineRun < ApplicationRecord
   def check_box_label
     project_name = sample.project ? sample.project.name : 'Unknown Project'
     "#{project_name} : #{sample.name} (#{id})"
-  end
-
-  def archive_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/pipeline_runs/#{id}_sample#{sample.id}"
   end
 
   def self.in_progress
@@ -433,20 +419,6 @@ class PipelineRun < ApplicationRecord
     # TODO(tiago): we should not have to access aws. see IDSEQ-2602.
     align_summary_file = "#{postprocess_output_s3_path}/align_viz.summary"
     return align_summary_file && S3Util.get_s3_file(align_summary_file) ? true : false
-  end
-
-  # NOTE: not clear whether this is the complement of report_ready? method
-  def report_failed?
-    # ONT samples don't have separate stages for Host Filtering or Alignment,
-    # so the report fails if the entire run failed.
-    if technology == TECHNOLOGY_INPUT[:nanopore]
-      job_status == STATUS_FAILED
-    else
-      # The report failed if host filtering or alignment failed.
-      host_filtering_status = output_states.find_by(output: "ercc_counts").state
-      alignment_status = output_states.find_by(output: "taxon_byteranges").state
-      host_filtering_status == STATUS_FAILED || alignment_status == STATUS_FAILED
-    end
   end
 
   def succeeded?
@@ -1068,10 +1040,6 @@ class PipelineRun < ApplicationRecord
     status_display_helper(output_state_hash(output_states_by_pipeline_run_id), results_finalized, technology)
   end
 
-  def pre_result_monitor?
-    results_finalized.nil?
-  end
-
   def check_and_enqueue(output_state)
     # If the pipeline monitor tells us that no jobs are running anymore,
     # yet outputs are not available, we need to draw the conclusion that
@@ -1421,10 +1389,6 @@ class PipelineRun < ApplicationRecord
 
   def local_json_path
     "#{LOCAL_JSON_PATH}/#{id}"
-  end
-
-  def local_amr_full_results_path
-    "#{LOCAL_AMR_FULL_RESULTS_PATH}/#{id}"
   end
 
   def self.download_file_with_retries(s3_path, destination, max_tries, dest_is_dir = true)

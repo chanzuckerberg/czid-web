@@ -23,7 +23,6 @@ class Background < ApplicationRecord
   after_save :submit_store_summary_job
   attr_accessor :just_updated
 
-  DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
 
   scope :created_by_idseq, -> { where(user: nil, public_access: 1) }

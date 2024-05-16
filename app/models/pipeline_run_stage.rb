@@ -9,18 +9,11 @@ class PipelineRunStage < ApplicationRecord
   validates :step_number, presence: true, numericality: { greater_than: 0, integer_only: true }
   validates :job_command_func, presence: true
 
-  JOB_TYPE_BATCH = 1
-  COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
-
   STATUS_STARTED = 'STARTED'.freeze
   STATUS_FAILED  = 'FAILED'.freeze
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_ERROR = 'ERROR'.freeze
   STATUS_SUCCEEDED = 'SUCCEEDED'.freeze
-
-  # Status file parameters for integration with pipeline
-  JOB_SUCCEEDED_FILE_SUFFIX = "succeeded".freeze
-  JOB_FAILED_FILE_SUFFIX = "failed".freeze
 
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
@@ -73,9 +66,6 @@ class PipelineRunStage < ApplicationRecord
     DAG_NAME_EXPERIMENTAL => ["accession_coverage_stats"],
   }.freeze
 
-  # Max number of times we resubmit a job when it gets killed by EC2.
-  MAX_RETRIES = 5
-
   # Older alignment configs might not have an s3_nt_info_db_path field, so use a reasonable default in this case.
   def self.default_s3_nt_info_db_path
     "s3://#{S3_DATABASE_BUCKET}/ncbi-indexes-prod/#{AlignmentConfig.default_name}/index-generation-2/nt_info.db".freeze
@@ -83,11 +73,6 @@ class PipelineRunStage < ApplicationRecord
 
   def started?
     job_command.present?
-  end
-
-  def stage_status_file(status)
-    basename = "#{job_id}.#{status}"
-    "#{pipeline_run.sample.sample_output_s3_path}/#{basename}"
   end
 
   def dag_name
@@ -127,13 +112,6 @@ class PipelineRunStage < ApplicationRecord
       end
     end
     {}
-  end
-
-  def check_status_file_and_update(status_file_suffix, job_status_value)
-    status_file_present = file_generated_since_run(pipeline_run, stage_status_file(status_file_suffix))
-    if status_file_present && job_status != job_status_value
-      update(job_status: job_status_value)
-    end
   end
 
   def succeeded?
@@ -185,10 +163,6 @@ class PipelineRunStage < ApplicationRecord
     end
   end
 
-  def due_for_aegea_check?
-    rand < 0.1
-  end
-
   def update_job_status
     # Only pipeline_execution_strategy=step_function is supported.
     # this logic will be replaced soon by step functions async notifications (IDSEQ-2310)
@@ -210,28 +184,6 @@ class PipelineRunStage < ApplicationRecord
     return nil unless job_log_id
 
     AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
-  end
-
-  # Gets the URL to the AWS console page of the batch job for display on
-  # admin-only pages.
-  def batch_job_status_url
-    return if job_description.blank?
-
-    job_hash = JSON.parse(job_description)
-    if job_hash && job_hash['jobId']
-      AwsUtil.get_batch_job_url(job_hash['jobQueue'], job_hash['jobId'])
-    end
-  end
-
-  # Returns the exit reason of the AWS batch job. For example: "Essential
-  # container in task exited".
-  def batch_job_status_reason
-    return if job_description.blank?
-
-    job_hash = JSON.parse(job_description)
-    if job_hash
-      job_hash['statusReason']
-    end
   end
 
   private

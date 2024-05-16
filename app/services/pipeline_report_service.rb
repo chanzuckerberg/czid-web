@@ -354,7 +354,6 @@ class PipelineReportService
     add_children_species_to_genus(species_counts, genus_counts)
     @timer.split("add_children_species_to_genus")
 
-    # TODO: we should try to use TaxonLineage::fetch_lineage_by_taxid
     lineage_version = PipelineRun
                       .select("alignment_configs.lineage_version")
                       .joins(:alignment_config)

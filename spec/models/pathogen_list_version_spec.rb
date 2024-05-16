@@ -47,23 +47,4 @@ describe PathogenListVersion, type: :model do
       expect(result).to eq(expected)
     end
   end
-
-  context "#fetch_pathogen_names" do
-    it "should return an empty set if the list version is empty" do
-      expect(@list_version.fetch_pathogen_names).to eq(Set[])
-    end
-
-    it "should return the correct pathogen names" do
-      pathogen_a = create(:pathogen, tax_id: 1)
-      pathogen_b = create(:pathogen, tax_id: 2)
-      species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", superkingdom_name: "superkingdom_a")
-      species_b = create(:taxon_lineage, tax_name: "species a", taxid: 2, species_taxid: 2, species_name: "species b", superkingdom_name: "superkingdom_b")
-      @list_version.pathogens << pathogen_a
-      @list_version.pathogens << pathogen_b
-
-      result = @list_version.fetch_pathogen_names
-      expected = Set[species_a.species_name, species_b.species_name]
-      expect(result).to eq(expected)
-    end
-  end
 end

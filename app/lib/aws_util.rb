@@ -7,11 +7,6 @@ class AwsUtil
       "#logEventViewer:group=#{log_group};stream=#{log_stream}"
   end
 
-  def self.get_batch_job_url(job_queue, job_id)
-    "https://#{AWS_REGION}.console.aws.amazon.com/batch/home?region=#{AWS_REGION}" \
-      "#/jobs/queue/#{job_queue.gsub('/', '~2F')}/job/#{job_id}"
-  end
-
   def self.get_sfn_execution_url(sfn_execution_arn)
     "https://#{AWS_REGION}.console.aws.amazon.com/states/home?region=#{AWS_REGION}" \
       "#/executions/details/#{sfn_execution_arn}"
