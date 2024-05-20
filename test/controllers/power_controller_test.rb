@@ -327,57 +327,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_equal is_tree_absent_from_response, true
   end
 
-  test 'joe cannot retry public_phylo_tree' do
-    sign_in(:joe)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      post "/phylo_trees/retry?id=#{phylo_trees(:public_phylo_tree).id}"
-    end
-  end
-
-  test 'joe can retry joe_failed_phylo_tree' do
-    sign_in(:joe)
-    post "/phylo_trees/retry?id=#{phylo_trees(:joe_failed_phylo_tree).id}"
-    assert_equal "ok", JSON.parse(@response.body)['status']
-  end
-
-  test 'joe cannot create phylo_tree from pipeline_runs he cannot view' do
-    sign_in(:joe)
-    entrypoint_taxon_count = taxon_counts(:three)
-    post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
-                                          taxId: entrypoint_taxon_count.tax_id, pipelineRunIds: [pipeline_runs(:three).id, pipeline_runs(:four).id],
-                                          taxName: entrypoint_taxon_count.name, }
-    assert_equal "unauthorized", JSON.parse(@response.body)['status']
-  end
-
-  test 'joe can create phylo_tree to joe_project from public samples' do
-    sign_in(:joe)
-    post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
-                                          taxId: 573, pipelineRunIds: [pipeline_runs(:public_project_sampleA_run).id,
-                                                                       pipeline_runs(:public_project_sampleB_run).id,],
-                                          taxName: 'some species', }
-    assert_equal "ok", JSON.parse(@response.body)['status']
-  end
-
-  test 'joe can create phylo_tree to joe_project from samples in joe_project' do
-    sign_in(:joe)
-    post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
-                                          taxId: 573, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
-                                                                       pipeline_runs(:joe_project_sampleB_run).id,],
-                                          taxName: 'some species', }
-    assert_equal "ok", JSON.parse(@response.body)['status']
-  end
-
-  test 'joe cannot create phylo_tree to public_project' do
-    sign_in(:joe)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      sign_in(:joe)
-      post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:public_project).id,
-                                            taxId: 573, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
-                                                                         pipeline_runs(:joe_project_sampleB_run).id,],
-                                            taxName: 'some species', }
-    end
-  end
-
   # Visualizations
   test 'joe can see own visualizations and not others on my data domain' do
     sign_in(:joe)

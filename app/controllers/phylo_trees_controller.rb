@@ -34,7 +34,6 @@ class PhyloTreesController < ApplicationController
   # This limit was added because the phylo tree creation was timing out for admins
   # and otherwise the results will grow without bound per user.
   ELIGIBLE_PIPELINE_RUNS_LIMIT = 1000
-  PIPELINE_RUN_IDS_WITH_TAXID_LIMIT = 10_000
 
   def index
     @project = []
@@ -140,51 +139,6 @@ class PhyloTreesController < ApplicationController
     render json: JSON.dump(taxon_list)
   end
 
-  def new
-    taxid = params[:taxId].to_i
-    if HUMAN_TAX_IDS.include? taxid.to_i
-      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
-      return
-    end
-    project_id = params[:projectId].to_i
-
-    @project = current_power.updatable_projects.find(project_id)
-
-    # Retrieve the top (most recent) pipeline runs from samples that contains the specified taxid.
-    eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
-    pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).order(id: :desc).limit(PIPELINE_RUN_IDS_WITH_TAXID_LIMIT).pluck(:pipeline_run_id)
-    eligible_pipeline_run_ids_with_taxid =
-      eligible_pipeline_runs.where(id: pipeline_run_ids_with_taxid)
-                            .order(id: :desc).limit(ELIGIBLE_PIPELINE_RUNS_LIMIT).pluck(:id)
-    # Always include the project's top pipeline runs (in case they were excluded due to the ELIGIBLE_PIPELINE_RUNS_LIMIT)
-    project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: taxid, samples: { project_id: project_id }).pluck(:pipeline_run_id)
-    top_project_pipeline_run_ids_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs.pluck(:id)
-
-    # Retrieve information for displaying the tree's sample list.
-    pipeline_run_ids = (eligible_pipeline_run_ids_with_taxid | top_project_pipeline_run_ids_with_taxid).uniq
-    @samples = sample_details_json(
-      pipeline_run_ids,
-      taxid
-    )
-
-    # Retrieve information about the taxon
-    taxon_lineage = TaxonLineage.where(taxid: taxid).last
-    @taxon = { taxid: taxid,
-               name: taxon_lineage.name, }
-
-    respond_to do |format|
-      format.html
-      format.json do
-        render json: {
-          project: @project,
-          taxon: @taxon,
-          samples: @samples,
-          csrf: form_authenticity_token,
-        }
-      end
-    end
-  end
-
   def validate_name
     # current flow saves a sanitized name, thus use the same sanitized name to check
     name = sanitize_title_name(params[:name])
@@ -194,17 +148,6 @@ class PhyloTreesController < ApplicationController
       valid: !pt.errors.key?(:name),
       sanitizedName: name,
     }
-  end
-
-  def retry
-    if @phylo_tree.status == PhyloTree::STATUS_FAILED
-      @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED,
-                         job_id: nil, job_log_id: nil, job_description: nil, command_stdout: nil, command_stderr: nil)
-      Resque.enqueue(KickoffPhyloTree, @phylo_tree.id)
-      render json: { status: :ok, message: "retry submitted" }
-    else
-      render json: { status: :conflict, message: "a tree run is already in progress for this project and taxon" }
-    end
   end
 
   def download
@@ -217,45 +160,6 @@ class PhyloTreesController < ApplicationController
       local_file.close
       LogUtil.log_error("downloading #{s3_file} failed", s3_file: s3_file)
       head :not_found
-    end
-  end
-
-  def create
-    taxid = params[:taxId].to_i
-    if HUMAN_TAX_IDS.include? taxid.to_i
-      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
-      return
-    end
-
-    @project = current_power.updatable_projects.find(params[:projectId])
-    pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
-
-    name = sanitize_title_name(params[:name])
-    tax_name = params[:taxName]
-    dag_branch = if current_user.admin?
-                   params[:dagBranch] || "main"
-                 else
-                   "main"
-                 end
-    dag_vars = params[:dagVars] if current_user.admin?
-
-    tax_level = TaxonLineage.where(taxid: taxid).last.tax_level
-
-    non_viewable_pipeline_run_ids = pipeline_run_ids.to_set - current_power.pipeline_runs.pluck(:id).to_set
-    if !non_viewable_pipeline_run_ids.empty?
-      render json: {
-        status: :unauthorized,
-        message: "You are not authorized to view all pipeline runs in the list.",
-      }
-    else
-      pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids, dag_branch: dag_branch, dag_vars: dag_vars)
-      if pt.save
-        Resque.enqueue(KickoffPhyloTree, pt.id)
-        Rails.logger.info("PhyloTreeCreation: Starting to run phylo tree job #{name}...")
-        render json: { status: :ok, message: "tree creation job submitted", phylo_tree_id: pt.id }
-      else
-        render json: { status: :not_acceptable, message: pt.errors.full_messages }
-      end
     end
   end
 

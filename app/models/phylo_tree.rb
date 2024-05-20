@@ -29,7 +29,6 @@ class PhyloTree < ApplicationRecord
     STATUS_IN_PROGRESS,
   ] }
 
-  after_create :create_visualization
   before_destroy :cleanup_s3
 
   def self.in_progress
@@ -92,43 +91,6 @@ class PhyloTree < ApplicationRecord
     }
   end
 
-  def monitor_results
-    # Retrieve dag version, which is needed to construct the output path:
-    update_pipeline_version(self, :dag_version, dag_version_file)
-    return if dag_version.blank?
-
-    # Retrieve outputs to local db:
-    local_outputs = select_outputs("remote", false)
-    temp_files_by_output = {}
-    local_outputs.each do |out|
-      temp_files_by_output[out] = Tempfile.new
-      download_status = Open3.capture3("aws", "s3", "cp", s3_outputs[out]["s3_path"], temp_files_by_output[out].path.to_s)[2]
-      temp_files_by_output[out].open
-      self[out] = temp_files_by_output[out].read if download_status.success?
-    end
-
-    # Check for remote outputs:
-    remote_outputs = select_outputs("remote")
-    remote_outputs.each do |out|
-      s3_path = s3_outputs[out]["s3_path"]
-      self[out] = s3_path if Open3.capture3("aws", "s3", "ls", s3_path)[2].success?
-    end
-
-    # Update status:
-    required_outputs = select_outputs("required")
-    if required_outputs.all? { |ro| self[ro].present? }
-      self.status = STATUS_READY
-      self.ready_at = Time.current
-    end
-    save
-
-    # Clean up:
-    temp_files_by_output.values.each do |tf|
-      tf.close
-      tf.unlink
-    end
-  end
-
   def log_url
     return nil unless job_log_id
 
@@ -137,51 +99,12 @@ class PhyloTree < ApplicationRecord
 
   private
 
-  # We need to create a visualization object here to register the new phylo_tree
-  # as a generic visualization. Other types of visualizations are saved on-demand only.
-  # Because phylo_trees are created explictly, the user will expect them to persist.
-  # TODO: (gdingle): destroy visualization objects when phylo_tree is destroyed,
-  # and rename when renamed.
-  def create_visualization
-    Visualization.create(
-      user: user,
-      visualization_type: "phylo_tree",
-      data: { treeId: id },
-      name: name,
-      samples: Sample.joins(:pipeline_runs)
-        .where(pipeline_runs: { id: [pipeline_run_ids] })
-        .distinct
-    )
-  end
-
   def phylo_tree_output_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/phylo_trees/#{id}"
   end
 
   def versioned_output_s3_path
     "#{phylo_tree_output_s3_path}/#{dag_version}"
-  end
-
-  def select_outputs(property, value = true)
-    s3_outputs.select { |_output, props| props[property] == value }.keys
-  end
-
-  def sample_names_by_run_ids
-    query_results = ActiveRecord::Base.connection.select_all("
-      select pipeline_runs.id, samples.name
-      from pipeline_runs, samples
-      where pipeline_runs.id in (#{pipeline_run_ids.join(',')}) and
-            pipeline_runs.sample_id = samples.id
-    ").to_a
-    result = {}
-    query_results.each do |entry|
-      result[entry["id"]] = entry["name"]
-    end
-    result
-  end
-
-  def dag_version_file
-    "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
   end
 
   def parse_dag_vars
