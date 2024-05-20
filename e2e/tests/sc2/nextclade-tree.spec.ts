@@ -14,7 +14,6 @@ const CT20K_SAMPLE_NAMES = [SAMPLE_1_PAIRED];
 
 const NEXTCLADE_REFERENCE_JSON_FILE = require.resolve("@e2e/fixtures/nextclade_trees/pawnee_fake_example.json");
 
-let wgs_project = null;
 let projectPage = null;
 const timeout = 60 * 1000 * 5;
 const RUN_PIPELINE = false;
@@ -83,8 +82,9 @@ test.describe("NextClade Tree: Functional: P-0", () => {
   });
 
   test("SNo 25: Create a Nextclade Tree with a mixture of samples with and without reference assension", async ({ page }) => {
+    // #region Setup
     const sc2_project = await projectPage.getOrCreateProject(`SNo-25_NextClade_${WORKFLOWS.SC2}`);
-    await setupSamples(
+    const sc2_samples = await setupSamples(
       page,
       sc2_project,
       WGS_SAMPLE_FILES,
@@ -92,23 +92,27 @@ test.describe("NextClade Tree: Functional: P-0", () => {
       WORKFLOWS.SC2,
       {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
     );
+    const wgs_samples = await setupSamples(
+      page,
+      sc2_project,
+      WGS_SAMPLE_FILES,
+      ["wgs_SARS_CoV2_no_host_1"],
+      WORKFLOWS.WGS,
+      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+    );
+    // #endregion Setup
 
     // #region 1. Log in to Project
     await projectPage.navigateToMyData();
     // #endregion 1. Log in to Project
 
     // #region 2. Navigate to Consensus Genome tab
-    wgs_project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
-    await projectPage.navigateToSamples(wgs_project.id, WORKFLOWS.WGS);
+    await projectPage.navigateToSamples(sc2_project.id, WORKFLOWS.WGS);
     // #endregion 2. Navigate to Consensus Genome tab
 
     // #region 3. Select SC2 and WGS Samples
-    let wgsSampleNames = await projectPage.selectCompletedSamples(2);
-
-    await projectPage.fillSearchMyDataInput(sc2_project.name);
-    await projectPage.clickProjectSearchResult(sc2_project.name);
-
-    const sampleNamesSentToNextclade = await projectPage.selectCompletedSamples(1);
+    await projectPage.clickSampleCheckbox(wgs_samples[0].name);
+    await projectPage.clickSampleCheckbox(sc2_samples[0].name);
     // #endregion 3. Select SC2 and WGS Samples
 
     // #region 4. Click on Nextclade tree icon
@@ -119,10 +123,9 @@ test.describe("NextClade Tree: Functional: P-0", () => {
     // {sample_name_X1}
     // {sample_name_X2}
     const notificationMessages = await projectPage.getNotificationMessages();
-    let expectedNotification = `${wgsSampleNames.length} consensus genome${wgsSampleNames.length > 1 ? "s" : ""} won't be sent to Nextclade, because Nextclade only accepts SARS-CoV-2 genomes currently:`;
-    wgsSampleNames = await wgsSampleNames.reverse();
-    for (const sampleName of wgsSampleNames.sort()) {
-      expectedNotification += sampleName;
+    let expectedNotification = `${wgs_samples.length} consensus genome${wgs_samples.length > 1 ? "s" : ""} won't be sent to Nextclade, because Nextclade only accepts SARS-CoV-2 genomes currently:`;
+    for (const wgs_sample of wgs_samples) {
+      expectedNotification += wgs_sample.name;
     }
     expect(notificationMessages).toEqual([expectedNotification]);
     // #endregion 4. Click on Nextclade tree icon
@@ -144,7 +147,7 @@ test.describe("NextClade Tree: Functional: P-0", () => {
     expect(errorMessages).toEqual([]);
 
     const nextcladeSampleNames = (await nextcladePage.getSampleNames()).sort();
-    expect(nextcladeSampleNames).toEqual(sampleNamesSentToNextclade);
+    expect(nextcladeSampleNames).toEqual([sc2_samples[0].name]);
   });
 
   /*
