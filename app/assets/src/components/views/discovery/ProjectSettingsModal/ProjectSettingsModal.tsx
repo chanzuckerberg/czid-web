@@ -4,6 +4,7 @@ import cx from "classnames";
 import React, { useContext, useState } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import Divider from "~/components/layout/Divider";
+import { EDIT_SNAPSHOT_LINKS_FEATURE } from "~/components/utils/features";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import ShareButton from "~ui/controls/buttons/ShareButton";
@@ -121,7 +122,7 @@ const ProjectSettingsModal = ({
                 users={users}
               />
             </div>
-            {allowedFeatures.includes("edit_snapshot_links") &&
+            {allowedFeatures.includes(EDIT_SNAPSHOT_LINKS_FEATURE) &&
               project.creator_id === userId && (
                 <div>
                   <Divider />

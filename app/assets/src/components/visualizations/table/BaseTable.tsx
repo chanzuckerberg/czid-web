@@ -2,7 +2,6 @@ import { Icon } from "@czi-sds/components";
 import cx from "classnames";
 import { concat, difference, find, includes, kebabCase, map } from "lodash/fp";
 import React from "react";
-import Draggable from "react-draggable";
 import {
   AutoSizer,
   Column,
@@ -14,9 +13,7 @@ import {
 import "react-virtualized/styles.css";
 import { TrackEventType, useTrackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import { useAllowedFeatures } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import { DRAGGABLE_COLUMNS_FEATURE } from "~/components/utils/features";
 import { humanize } from "~/helpers/strings";
 import { ColumnProps } from "~/interface/sampleView";
 import Checkbox from "~ui/controls/Checkbox";
@@ -77,7 +74,6 @@ interface BaseTableCalculatedProps extends BaseTableProps {
 }
 
 interface BaseTableCalculatedPropsWithContext extends BaseTableCalculatedProps {
-  allowedFeatures: string[];
   trackEvent: TrackEventType;
 }
 
@@ -170,142 +166,6 @@ class BaseTableCC extends React.Component<
         )}
       </div>
     );
-  };
-
-  draggableHeaderRenderer = ({
-    dataKey,
-    nextDataKey,
-    columnData,
-    label,
-    sortBy,
-    sortDirection,
-    totalTableWidth,
-    totalTableHeight,
-    isFirstColumn,
-    isSortableColumn,
-  }) => {
-    const { columnCurrentlyDragged, mouseOverDraggableAreaForColumn } =
-      this.state;
-
-    let header;
-    if (isSortableColumn) {
-      header = this._sortableHeaderRenderer({
-        columnData,
-        dataKey,
-        label,
-        sortBy,
-        sortDirection,
-      });
-    } else {
-      header = this.basicHeaderRenderer({ columnData, label });
-    }
-
-    return (
-      <React.Fragment key={dataKey}>
-        {/*
-          If the column is not the first column, add the empty div first so we can
-          properly position the column name in the middle and the draggable component
-          to the far right (alignment done via justify-content: space-between).
-        */}
-        {!isFirstColumn && <div />}
-        {header}
-        {/*
-          If the column is the first column, align the header to the far left by putting an empty div
-          in the middle of the label and draggable icon (alginment done via justify-content: space-between).
-        */}
-        {isFirstColumn && <div />}
-        <Draggable
-          axis="x"
-          onDrag={(_, { deltaX }) =>
-            this.resizeRow({
-              dataKey,
-              deltaX,
-              nextDataKey,
-              totalTableWidth,
-            })
-          }
-          // @ts-expect-error ts-migrate(2769) FIXME: No overload matches this call.
-          position={{ x: 0 }}
-          onStart={() => this.setState({ columnCurrentlyDragged: dataKey })}
-          onStop={() => this.setState({ columnCurrentlyDragged: null })}
-        >
-          <div
-            className={cs.draggableArea}
-            onMouseOver={() =>
-              this.setState({ mouseOverDraggableAreaForColumn: dataKey })
-            }
-            onFocus={() =>
-              this.setState({ mouseOverDraggableAreaForColumn: dataKey })
-            }
-            onMouseLeave={() =>
-              this.setState({ mouseOverDraggableAreaForColumn: null })
-            }
-          >
-            <div className={cs.dragHandleIcon} />
-            {(columnCurrentlyDragged === dataKey ||
-              mouseOverDraggableAreaForColumn === dataKey) &&
-              // The ruler is naturally centered in the draggableArea and does not start at the top of the table
-              // and end at the bottom of the table by default.
-              // To make the ruler start at the top of the table and end at the bottom of the table we must
-              // transform/translate the Y cooridnate by half of the height (table height) minus the height of
-              // the header cell (21px).
-              this.displayRuler({
-                height: totalTableHeight,
-                additionalStyling: {
-                  transform: `translate(0, ${totalTableHeight / 2 - 21}px)`,
-                },
-              })}
-          </div>
-        </Draggable>
-      </React.Fragment>
-    );
-  };
-
-  displayRuler = ({ height, additionalStyling = {} }) => {
-    return (
-      <div className={cs.ruler} style={{ height, ...additionalStyling }} />
-    );
-  };
-
-  resizeRow = ({
-    dataKey,
-    deltaX,
-    nextDataKey,
-    totalTableWidth,
-  }: {
-    dataKey: string;
-    deltaX: number;
-    nextDataKey: string;
-    totalTableWidth: number;
-  }) => {
-    const { columns } = this.state;
-
-    this.setState(prevState => {
-      const prevColumnWidthPercentages = prevState.columnWidthPercentages;
-      // The amount of dragging the user has performed (as a percentage)
-      const percentDelta = deltaX / totalTableWidth;
-
-      return {
-        columnWidthPercentages: {
-          ...prevColumnWidthPercentages,
-          [dataKey]:
-          // If the previous column width percentage does not exist (happens when you haven't dragged a column yet)
-          // calculate the percentage based on the column width / totalTableWidth.
-            (prevColumnWidthPercentages[dataKey]
-              ? prevColumnWidthPercentages[dataKey]
-              : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-                find({ dataKey }, columns).width / totalTableWidth) +
-            percentDelta,
-          // Compute the nextDataKey's width percentage as well since dragging a column affects the next column.
-          [nextDataKey]:
-            (prevColumnWidthPercentages[nextDataKey]
-              ? prevColumnWidthPercentages[nextDataKey]
-              : // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
-                find({ dataKey: nextDataKey }, columns).width /
-                totalTableWidth) - percentDelta,
-        },
-      };
-    });
   };
 
   _sortableHeaderRenderer = ({
@@ -452,13 +312,11 @@ class BaseTableCC extends React.Component<
 
   render() {
     const {
-      allowedFeatures,
       cellClassName,
       defaultCellRenderer,
       defaultHeaderHeight,
       defaultRowHeight,
       defaultSelectColumnWidth,
-      draggableColumns,
       forwardRef,
       gridClassName,
       headerClassName,
@@ -481,9 +339,7 @@ class BaseTableCC extends React.Component<
     const { activeColumns, columns, columnWidthPercentages } = this.state;
 
     const columnOrder = activeColumns || map("dataKey", columns);
-    const numberOfColumns = columnOrder.length;
-    const draggableColumnsFeatureEnabled =
-      allowedFeatures.includes(DRAGGABLE_COLUMNS_FEATURE) && draggableColumns;
+
     return (
       <div
         className={cs.tableContainer}
@@ -527,23 +383,17 @@ class BaseTableCC extends React.Component<
                   width={defaultSelectColumnWidth}
                 />
               )}
-              {columnOrder.map((dataKey, index) => {
+              {columnOrder.map(dataKey => {
                 const columnProps = find({ dataKey }, columns);
                 if (!columnProps) {
                   return null;
                 }
 
-                const isLastColumn = index === numberOfColumns - 1;
                 const isSortableColumn = sortable && !columnProps.disableSort;
-                const isDraggableColumn =
-                  draggableColumnsFeatureEnabled &&
-                  !columnProps.disableDrag &&
-                  !isLastColumn;
 
                 const {
                   cellRenderer,
                   className,
-                  headerClassName,
                   // The px width value is destuctured here because we don't want it to override
                   // the width dervived from the percentage of the column * total width of the table.
                   // The column percentages are critical to the functionality of draggable columns.
@@ -552,18 +402,7 @@ class BaseTableCC extends React.Component<
                 } = columnProps;
 
                 let headerRenderer;
-                if (isDraggableColumn) {
-                  headerRenderer = args =>
-                    this.draggableHeaderRenderer({
-                      // Columns first in the order are aligned left, all others are aligned in the center
-                      isFirstColumn: index === 0,
-                      totalTableWidth: width,
-                      totalTableHeight: height,
-                      nextDataKey: columnOrder[index + 1],
-                      isSortableColumn,
-                      ...args,
-                    });
-                } else if (isSortableColumn) {
+                if (isSortableColumn) {
                   headerRenderer = this._sortableHeaderRenderer;
                 } else {
                   headerRenderer = this.basicHeaderRenderer;
@@ -586,12 +425,6 @@ class BaseTableCC extends React.Component<
                     }
                     headerRenderer={headerRenderer}
                     cellRenderer={cellRenderer || defaultCellRenderer}
-                    headerClassName={cx(
-                      headerClassName,
-                      draggableColumnsFeatureEnabled && !isLastColumn
-                        ? cs.draggableHeader
-                        : "",
-                    )}
                     {...extraProps}
                   />
                 );
@@ -637,16 +470,9 @@ BaseTableCC.defaultProps = {
 // access useContext from multiple providers without the class component to function component
 // conversion.
 const BaseTable = (props: BaseTableCalculatedProps) => {
-  const allowedFeatures = useAllowedFeatures();
   const trackEvent = useTrackEvent();
 
-  return (
-    <BaseTableCC
-      {...props}
-      allowedFeatures={allowedFeatures}
-      trackEvent={trackEvent}
-    />
-  );
+  return <BaseTableCC {...props} trackEvent={trackEvent} />;
 };
 
 export default BaseTable;
