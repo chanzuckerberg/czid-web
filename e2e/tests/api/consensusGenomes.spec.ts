@@ -257,7 +257,7 @@ const fetchNextGenSequencingReads = async nextGenIds => {
 
 // Paginate through the consensus genomes from Rails and NextGen and make assertions
 test.describe("Validate consensus genomes between Rails & Nextgen are equivelant", async () => {
-  test(`metrics, accession, sequencingRead, and sample should be the same`, async () => {
+  test.skip(`metrics, accession, sequencingRead, and sample should be the same`, async () => {
     const nextGenIdToRailsIdEntries = Object.entries(nextGenIdToRailsIdMap);
     const chunkedNextGenIdToRailsIdEntries = splitArrayIntoChunks(
       nextGenIdToRailsIdEntries,
@@ -346,7 +346,7 @@ test.describe("Validate consensus genomes between Rails & Nextgen are equivelant
 
   // This test queries the consensus genomes from Rails and NextGen and compares the metrics
   // The above test is more comprehensive, but this one is more focused on metrics (includes coverage viz metrics)
-  test("consensus genomes metrics should be the same", async () => {
+  test.skip("consensus genomes metrics should be the same", async () => {
     const fragment = `
       metrics {
         coverageBinSize

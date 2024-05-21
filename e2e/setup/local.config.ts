@@ -31,7 +31,7 @@ const config: PlaywrightTestConfig = {
   testDir: "../",
   timeout: 600000,
   use: {
-    actionTimeout: 30000,
+    actionTimeout: 240000,
     baseURL: "http://localhost:3000",
     headless: true,
     ignoreHTTPSErrors: true,

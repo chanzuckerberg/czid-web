@@ -173,3 +173,7 @@ frontend-lint:
 	exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')
 	npx tsc -p ./app/assets/tsconfig.json --noemit
 	bin/ts-peek.sh
+
+.PHONY: local-start-webapp
+local-start-webapp: local-start ## Start docker containers & webpack server. Web app will be running on http://localhost:3001
+	npm start
