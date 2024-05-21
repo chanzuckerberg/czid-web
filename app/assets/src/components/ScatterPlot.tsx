@@ -1,9 +1,14 @@
 import d3 from "d3";
-import React from "react";
+import React, { memo, useEffect, useRef } from "react";
 import { TRANSFORM, TRANSLATE } from "~/helpers/cssConstants";
 
+const MARGIN_TOP = 10;
+const MARGIN_LEFT = 40;
+const MARGIN_RIGHT = 10;
+const MARGIN_BOTTOM = 40;
+
 interface ScatterPlotProps {
-  data: $TSFixMe[];
+  data: Array<Record<string, number>>;
   xKey: string;
   yKey: string;
   width: number;
@@ -12,223 +17,148 @@ interface ScatterPlotProps {
   yLabel: string;
 }
 
-class ScatterPlot extends React.Component<ScatterPlotProps> {
-  container: $TSFixMe;
-  data: $TSFixMe;
-  height: $TSFixMe;
-  margin: $TSFixMe;
-  scale: $TSFixMe;
-  svg: $TSFixMe;
-  width: $TSFixMe;
-  xKey: $TSFixMe;
-  xLabel: $TSFixMe;
-  xMinMax: $TSFixMe;
-  xScale: $TSFixMe;
-  yKey: $TSFixMe;
-  yLabel: $TSFixMe;
-  yMinMax: $TSFixMe;
-  yScale: $TSFixMe;
-  componentDidMount() {
-    this.renderD3(this.props);
-  }
+export default memo(function ScatterPlot(props: ScatterPlotProps) {
+  const svgContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // eslint-disable-next-line camelcase
-  UNSAFE_componentWillReceiveProps(nextProps: ScatterPlotProps) {
-    this.renderD3(nextProps);
-  }
-
-  renderD3(props: ScatterPlotProps) {
-    d3.select(this.container).select("svg").remove();
-
-    this.data = props.data;
-    this.margin = {
-      top: 10,
-      left: 40,
-      right: 10,
-      bottom: 40,
-    };
-
-    this.scale = d3.scale.linear;
-    this.xKey = props.xKey || 0;
-    this.yKey = props.yKey || 1;
-
-    this.xLabel = props.xLabel || "X-Value";
-    this.yLabel = props.yLabel || "Y-Value";
-    this.width = props.width || 960;
-    this.height = props.height || 500;
-
-    this.width -= this.margin.left + this.margin.right;
-    this.height -= this.margin.top + this.margin.bottom;
-
-    this.xMinMax = d3.extent(this.data, (d: $TSFixMe) => {
-      return d[this.xKey];
-    });
-    this.xMinMax = [this.xMinMax[0] - 1, this.xMinMax[1] + 1];
-
-    this.yMinMax = d3.extent(this.data, (d: $TSFixMe) => {
-      return d[this.yKey];
-    });
-    this.yMinMax = [this.yMinMax[0] - 1, this.yMinMax[1] + 1];
-
-    this.xScale = this.scale().domain(this.xMinMax).range([0, this.width]);
-
-    this.yScale = this.scale().domain(this.yMinMax).range([this.height, 0]);
-
-    this.svg = d3
-      .select(this.container)
-      .append("svg")
-      .attr("width", this.width + this.margin.left + this.margin.right)
-      .attr("height", this.height + this.margin.top + this.margin.bottom);
-
-    this.renderXAxis();
-    this.renderYAxis();
-    this.renderPoints();
-    this.renderFitLine();
-  }
-  renderXAxis() {
-    const xAxis = d3.svg
-      .axis()
-      .scale(this.xScale)
-      .ticks(10, ".2f")
-      .orient("bottom");
-
-    this.svg
-      .append("g")
-      .attr("class", "x axis")
-      .attr(
-        TRANSFORM,
-        `${TRANSLATE}(${this.margin.left},${this.height + this.margin.top})`,
-      )
-      .call(xAxis)
-      .append("text")
-      .attr("class", "label")
-      .attr("x", this.width)
-      .attr("y", -6)
-      .style("text-anchor", "end")
-      .text(this.xLabel);
-  }
-
-  renderYAxis() {
-    const yAxis = d3.svg
-      .axis()
-      .scale(this.yScale)
-      .ticks(10, ",.2f")
-      .orient("left");
-
-    this.svg
-      .append("g")
-      .attr("class", "y axis")
-      .attr(TRANSFORM, `${TRANSLATE}(${this.margin.left},${this.margin.top})`)
-      .call(yAxis)
-      .append("text")
-      .attr("class", "label")
-      .attr("x", 6)
-      .attr("y", 6)
-      .text(this.yLabel);
-  }
-
-  renderPoints() {
-    this.svg
-      .append("g")
-      .attr("class", "points")
-      .attr(
-        TRANSFORM,
-        "translate(" + this.margin.left + "," + this.margin.top + ")",
-      )
-      .selectAll(".point")
-      .data(this.data)
-      .enter()
-      .append("circle")
-      .attr("class", "point")
-      .attr("r", 2)
-      .attr("data-x", (d: $TSFixMe) => {
-        return d[this.xKey];
-      })
-      .attr("data-y", (d: $TSFixMe) => {
-        return d[this.yKey];
-      })
-      .attr("cx", (d: $TSFixMe) => {
-        return this.xScale(d[this.xKey]);
-      })
-      .attr("cy", (d: $TSFixMe) => {
-        return this.yScale(d[this.yKey]);
-      });
-  }
-
-  renderFitLine() {
-    if (this.data.length < 2) {
-      return;
-    }
-    const leastSquares = this.leastSquares();
-    const slope = leastSquares[0];
-    const intercept = leastSquares[1];
-
-    const x1 = Math.max((this.yMinMax[0] - intercept) / slope, this.xMinMax[0]);
-
-    this.svg
-      .append("g")
-      .attr(
-        TRANSFORM,
-        "translate(" + this.margin.left + "," + this.margin.top + ")",
-      )
-      .append("line")
-      .attr("x1", this.xScale(x1))
-      .attr("y1", this.yScale(x1 * slope + intercept))
-      .attr("x2", this.xScale(this.xMinMax[1]))
-      .attr("y2", this.yScale(this.xMinMax[1] * slope + intercept))
-      .classed("trendline", true);
-  }
-
-  leastSquares() {
-    const xSeries = this.data.map((d: $TSFixMe) => {
-      return d[this.xKey];
-    });
-    const ySeries = this.data.map((d: $TSFixMe) => {
-      return d[this.yKey];
-    });
-
-    const reduceSumFunc = function(prev: $TSFixMe, cur: $TSFixMe) {
-      return prev + cur;
-    };
-
-    const xBar = (xSeries.reduce(reduceSumFunc) * 1.0) / xSeries.length;
-    const yBar = (ySeries.reduce(reduceSumFunc) * 1.0) / ySeries.length;
-
-    const ssXX = xSeries
-      .map(function(d: $TSFixMe) {
-        return Math.pow(d - xBar, 2);
-      })
-      .reduce(reduceSumFunc);
-
-    const ssYY = ySeries
-      .map(function(d: $TSFixMe) {
-        return Math.pow(d - yBar, 2);
-      })
-      .reduce(reduceSumFunc);
-
-    const ssXY = xSeries
-      .map(function(d: $TSFixMe, i: $TSFixMe) {
-        return (d - xBar) * (ySeries[i] - yBar);
-      })
-      .reduce(reduceSumFunc);
-
-    const slope = ssXY / ssXX;
-    const intercept = yBar - xBar * slope;
-    const rSquare = Math.pow(ssXY, 2) / (ssXX * ssYY);
-
-    return [slope, intercept, rSquare];
-  }
-
-  render() {
-    return (
-      <div
-        className="scatterplot"
-        ref={container => {
-          this.container = container;
-        }}
-      />
+  useEffect(() => {
+    // CALCULATE CONSTANTS:
+    const svgWidth = props.width - (MARGIN_LEFT + MARGIN_RIGHT);
+    const svgHeight = props.height - (MARGIN_TOP + MARGIN_BOTTOM);
+    let xMinMax = d3.extent(
+      props.data,
+      (d: Record<string, number>) => d[props.xKey],
     );
-  }
+    let yMinMax = d3.extent(
+      props.data,
+      (d: Record<string, number>) => d[props.yKey],
+    );
+    xMinMax = [xMinMax[0] - 1, xMinMax[1] + 1];
+    yMinMax = [yMinMax[0] - 1, yMinMax[1] + 1];
+    const xScale = d3.scale.linear().domain(xMinMax).range([0, svgWidth]);
+    const yScale = d3.scale.linear().domain(yMinMax).range([svgHeight, 0]);
+    // RESET SVG:
+    d3.select(svgContainerRef.current).select("svg").remove();
+    const svg: SVGElement = d3
+      .select(svgContainerRef.current)
+      .append("svg")
+      .attr("width", svgWidth + MARGIN_LEFT + MARGIN_RIGHT)
+      .attr("height", svgHeight + MARGIN_TOP + MARGIN_BOTTOM);
+    // RENDER CHART:
+    renderXAxis(props, svg, svgWidth, svgHeight, xScale);
+    renderYAxis(props, svg, yScale);
+    renderPoints(props, svg, xScale, yScale);
+    renderFitLine(props, svg, xMinMax, yMinMax, xScale, yScale);
+  });
+
+  return <div className="scatterplot" ref={svgContainerRef} />;
+});
+
+function renderXAxis(
+  props: ScatterPlotProps,
+  svg,
+  width: number,
+  height: number,
+  scale,
+): void {
+  const xAxis = d3.svg.axis().scale(scale).ticks(10, ".2f").orient("bottom");
+
+  svg
+    .append("g")
+    .attr("class", "x axis")
+    .attr(TRANSFORM, `${TRANSLATE}(${MARGIN_LEFT},${height + MARGIN_TOP})`)
+    .call(xAxis)
+    .append("text")
+    .attr("class", "label")
+    .attr("x", width)
+    .attr("y", -6)
+    .style("text-anchor", "end")
+    .text(props.xLabel);
 }
 
-export default ScatterPlot;
+function renderYAxis(props: ScatterPlotProps, svg, scale): void {
+  const yAxis = d3.svg.axis().scale(scale).ticks(10, ",.2f").orient("left");
+
+  svg
+    .append("g")
+    .attr("class", "y axis")
+    .attr(TRANSFORM, `${TRANSLATE}(${MARGIN_LEFT},${MARGIN_TOP})`)
+    .call(yAxis)
+    .append("text")
+    .attr("class", "label")
+    .attr("x", 6)
+    .attr("y", 6)
+    .text(props.yLabel);
+}
+
+function renderPoints(props: ScatterPlotProps, svg, xScale, yScale): void {
+  svg
+    .append("g")
+    .attr("class", "points")
+    .attr(TRANSFORM, "translate(" + MARGIN_LEFT + "," + MARGIN_TOP + ")")
+    .selectAll(".point")
+    .data(props.data)
+    .enter()
+    .append("circle")
+    .attr("class", "point")
+    .attr("r", 2)
+    .attr("data-x", (d: Record<string, number>) => d[props.xKey])
+    .attr("data-y", (d: Record<string, number>) => d[props.yKey])
+    .attr("cx", (d: Record<string, number>) => xScale(d[props.xKey]))
+    .attr("cy", (d: Record<string, number>) => yScale(d[props.yKey]));
+}
+
+function renderFitLine(
+  props: ScatterPlotProps,
+  svg,
+  xMinMax,
+  yMinMax,
+  xScale,
+  yScale,
+): void {
+  if (props.data.length < 2) {
+    return;
+  }
+  const { slope, intercept } = leastSquares(props);
+
+  const x1 = Math.max((yMinMax[0] - intercept) / slope, xMinMax[0]);
+
+  svg
+    .append("g")
+    .attr(TRANSFORM, "translate(" + MARGIN_LEFT + "," + MARGIN_TOP + ")")
+    .append("line")
+    .attr("x1", xScale(x1))
+    .attr("y1", yScale(x1 * slope + intercept))
+    .attr("x2", xScale(xMinMax[1]))
+    .attr("y2", yScale(xMinMax[1] * slope + intercept))
+    .classed("trendline", true);
+}
+
+function leastSquares(props: ScatterPlotProps): {
+  slope: number;
+  intercept: number;
+  rSquare: number;
+} {
+  const xSeries = props.data.map((d: Record<string, number>) => d[props.xKey]);
+  const ySeries = props.data.map((d: Record<string, number>) => d[props.yKey]);
+
+  const xBar = xSeries.reduce(sum) / xSeries.length;
+  const yBar = ySeries.reduce(sum) / ySeries.length;
+
+  const ssXX = xSeries.map((d: number) => Math.pow(d - xBar, 2)).reduce(sum);
+
+  const ssYY = ySeries.map((d: number) => Math.pow(d - yBar, 2)).reduce(sum);
+
+  const ssXY = xSeries
+    .map((d: number, i: number) => (d - xBar) * (ySeries[i] - yBar))
+    .reduce(sum);
+
+  const slope = ssXY / ssXX;
+  const intercept = yBar - xBar * slope;
+  const rSquare = Math.pow(ssXY, 2) / (ssXX * ssYY);
+
+  return { slope, intercept, rSquare };
+}
+
+function sum(prev: number, cur: number): number {
+  return prev + cur;
+}

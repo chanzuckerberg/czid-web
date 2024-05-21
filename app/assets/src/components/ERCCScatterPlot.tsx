@@ -4,13 +4,13 @@ import cs from "./ercc_scatterplot.scss";
 import ScatterPlot from "./ScatterPlot";
 
 interface ERCCScatterPlotProps {
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
   erccComparison?: ReadonlyArray<ERCCComparisonShape | null | undefined>;
 }
 
 const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
-  const data: { name: string; actual: number; expected: number }[] = [];
+  const data: { actual: number; expected: number }[] = [];
 
   if (props.erccComparison) {
     for (const row of props.erccComparison) {
@@ -24,7 +24,6 @@ const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
         continue;
       }
       data.push({
-        name: row.name ?? "",
         actual: Math.log10(row.actual),
         expected: Math.log10(row.expected),
       });
@@ -35,7 +34,6 @@ const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
   }
 
   return (
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
     <ScatterPlot
       data={data}
       xKey="expected"
