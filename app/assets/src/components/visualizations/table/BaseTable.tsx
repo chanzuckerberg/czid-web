@@ -243,6 +243,7 @@ class BaseTableCC extends React.Component<
           <MultipleDropdown
             data-testid="plus-circle"
             direction="left"
+            upward={false}
             hideArrow
             hideCounter
             rounded
