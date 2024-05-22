@@ -271,7 +271,9 @@ export default class CoverageVizBottomSidebar extends React.Component<
     }));
   };
 
-  getAccessionMetrics = (): {
+  getAccessionMetrics = (
+    alignedReads: number,
+  ): {
     referenceNCBIEntry?: JSX.Element;
     referenceLength?: number;
     alignedContigs?: number;
@@ -318,8 +320,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
       maxAlignedLength: currentAccessionData.max_aligned_length,
       coverageDepth: `${currentAccessionData.coverage_depth}x`,
       coverageBreadth: formatPercent(currentAccessionData.coverage_breadth),
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
-      alignedReads: currentAccessionSummary.num_reads,
+      alignedReads: alignedReads,
       avgMismatchedPercent: formatPercent(
         currentAccessionData.avg_prop_mismatch,
       ),
@@ -532,7 +533,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
       );
     }
 
-    const metrics = this.getAccessionMetrics();
     const contigHitGroups = selectContigsFromHitGroups(
       currentAccessionData.hit_groups,
     );
@@ -543,6 +543,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
     const totalContigs = currentAccessionSummary.num_contigs; // total number of contigs not contig fragments
     const totalReads = sum(readHitGroups.map(hitGroup => hitGroup[1]));
+    const metrics = this.getAccessionMetrics(totalReads);
 
     return (
       <div className={cx(cs.body, !isEmpty(readHitGroups) && cs.withReads)}>
