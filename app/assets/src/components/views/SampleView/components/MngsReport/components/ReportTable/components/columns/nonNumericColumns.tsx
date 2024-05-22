@@ -18,7 +18,6 @@ import { getNameRenderer } from "./renderers/nameRenderer";
 import { nestedSortFunction } from "./utils";
 
 export const getNonNumericColumns = (
-  allowedFeatures: string[],
   consensusGenomeData: Record<string, object[]>,
   currentTab: CurrentTabSample,
   expandedGenusIds: Set<number>,
@@ -67,7 +66,6 @@ export const getNonNumericColumns = (
     },
     {
       cellRenderer: getNameRenderer(
-        allowedFeatures,
         consensusGenomeData,
         currentTab,
         onCoverageVizClick,

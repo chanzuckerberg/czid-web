@@ -11,7 +11,6 @@ import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import TaxonSelector from "~/components/common/TaxonSelector";
 import { UserContext } from "~/components/common/UserContext";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
-import { HEATMAP_PATHOGEN_FLAGGING_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { generateUrlToSampleView } from "~/components/utils/urls";
@@ -150,7 +149,6 @@ export class SamplesHeatmapVis extends React.Component<
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         values: this.props.data[this.props.metric],
-        pathogenFlags: this.props.pathogenFlagsData,
         taxonFilterState: taxonFilterState,
       },
       {
@@ -190,9 +188,6 @@ export class SamplesHeatmapVis extends React.Component<
         shouldSortRows: this.props.taxaSortType === "genus", // else cluster
         // Shrink to fit the viewport width
         maxWidth: this.heatmapContainer.offsetWidth,
-        shouldShowPathogenFlagsOutlines: allowedFeatures.includes(
-          HEATMAP_PATHOGEN_FLAGGING_FEATURE,
-        ),
       },
     );
     this.heatmap.start();

@@ -223,19 +223,12 @@ export const createCSVRowForAppliedFilters = (
   return [sanitizeCSVRow(filterRow).join()];
 };
 
-const _addPathogenFlagColumns = (datum, withMultiFlags) => {
+const _addPathogenFlagColumns = datum => {
   // get the genus count of pathogens out of datum.pathogens
-  const {
-    [CATEGORIES.knownPathogen.code]: known_pathogen,
-    [CATEGORIES.lcrp.code]: lcrp_pathogen,
-    [CATEGORIES.divergent.code]: divergent_pathogen,
-  } = datum.pathogens || {};
+  const { [CATEGORIES.knownPathogen.code]: known_pathogen } =
+    datum.pathogens || {};
 
   datum.known_pathogen = known_pathogen || 0;
-  if (withMultiFlags) {
-    datum.lcrp_pathogen = lcrp_pathogen || 0;
-    datum.divergent_pathogen = divergent_pathogen || 0;
-  }
 
   datum.filteredSpecies.forEach(species => {
     species.known_pathogen = (species.pathogenFlags || []).includes(
@@ -243,18 +236,6 @@ const _addPathogenFlagColumns = (datum, withMultiFlags) => {
     )
       ? 1
       : 0;
-    if (withMultiFlags) {
-      species.lcrp_pathogen = (species.pathogenFlags || []).includes(
-        CATEGORIES.lcrp.code,
-      )
-        ? 1
-        : 0;
-      species.divergent_pathogen = (species.pathogenFlags || []).includes(
-        CATEGORIES.divergent.code,
-      )
-        ? 1
-        : 0;
-    }
   });
 };
 
@@ -332,7 +313,6 @@ export const computeMngsReportTableValuesForCSV = (
   selectedOptions,
   backgrounds,
   currentTab,
-  withMultiFlags = false,
 ): [string[], string[][]] => {
   const workflow = getWorkflowTypeFromLabel(currentTab);
   const csvRows: string[][] = [];
@@ -343,13 +323,10 @@ export const computeMngsReportTableValuesForCSV = (
     ...Array.from(TAXON_COUNT_TYPE_METRICS[workflow], metric => "nr." + metric),
   ];
   const pathogenFlagHeaders = ["known_pathogen"];
-  if (withMultiFlags) {
-    pathogenFlagHeaders.push("lcrp_pathogen", "divergent_pathogen");
-  }
   csvHeaders.push(...pathogenFlagHeaders);
 
   filteredReportData.forEach((datum: $TSFixMe) => {
-    _addPathogenFlagColumns(datum, withMultiFlags);
+    _addPathogenFlagColumns(datum);
     const genusRow: $TSFixMe = [];
     csvHeaders.forEach(column => {
       let val = JSON.stringify(getOr("-", column, datum));

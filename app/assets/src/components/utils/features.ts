@@ -16,13 +16,6 @@ export const SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE =
 // is looking into why this wasn't released to all users.
 export const EDIT_SNAPSHOT_LINKS_FEATURE = "edit_snapshot_links";
 
-// sample report filter on multiple taxon tags (e.g., pathogens, lcrp, etc)
-export const MULTITAG_PATHOGENS_FEATURE = "multitag_pathogens";
-// pathogen flag filter on sample report
-export const PATHOGEN_FLAG_FILTER_FEATURE = "pathogen_filter";
-// prototype of fetching taxon flag data including divergent viruses and lcrp for the heatmap
-export const HEATMAP_PATHOGEN_FLAGGING_FEATURE = "heatmap_pathogens";
-
 // (2024-05-20) BENCHMARKING_FEATURE is an internal tool
 export const BENCHMARKING_FEATURE = "benchmarking";
 

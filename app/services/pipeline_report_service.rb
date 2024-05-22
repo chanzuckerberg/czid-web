@@ -175,7 +175,7 @@ class PipelineReportService
     NANOPORE => CSV_LONG_READS_COLUMNS,
   }.freeze
 
-  def initialize(pipeline_run, background_id, csv: false, parallel: true, merge_nt_nr: false, show_annotations: false, multitag: false)
+  def initialize(pipeline_run, background_id, csv: false, parallel: true, merge_nt_nr: false, show_annotations: false)
     @pipeline_run = pipeline_run
     @technology = pipeline_run.technology
     # In ont_v1, we are not supporting backgrounds for nanopore mngs samples
@@ -185,7 +185,6 @@ class PipelineReportService
     @merge_nt_nr = merge_nt_nr
     @show_annotations = show_annotations
     @use_decimal_columns = AppConfigHelper.get_app_config(AppConfig::PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS, false) == "1"
-    @multitag = multitag # feature flag for tagging pathogens above and beyond known_pathogens
   end
 
   def call
@@ -391,8 +390,6 @@ class PipelineReportService
       species_counts: species_counts,
       selected_flags: [
         FLAG_KNOWN_PATHOGEN,
-        *(FLAG_LCRP if @multitag),
-        *(FLAG_DIVERGENT if @multitag),
       ]
     )
 
@@ -930,9 +927,6 @@ class PipelineReportService
 
     CSVSafe.generate(headers: true) do |csv|
       columns = CSV_COLUMNS[@technology]
-      if @multitag
-        columns += ["lcrp_pathogen", "divergent_pathogen"]
-      end
 
       csv << columns
       rows.each do |tax_info|

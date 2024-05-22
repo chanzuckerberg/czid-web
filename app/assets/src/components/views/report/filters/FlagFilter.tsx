@@ -1,15 +1,8 @@
 import { map } from "lodash/fp";
-import React, { useContext } from "react";
-import { UserContext } from "~/components/common/UserContext";
+import React from "react";
 import { MultipleNestedDropdown } from "~/components/ui/controls/dropdowns";
 import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
-import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import { DropdownOption } from "~/interface/shared";
-
-const FLAG_OPTIONS = Object.keys(CATEGORIES).map(key => ({
-  name: CATEGORIES[key].text,
-  code: CATEGORIES[key].code,
-}));
 
 interface FlagFilterProps {
   selectedFlags: DropdownOption[] | string[];
@@ -17,18 +10,14 @@ interface FlagFilterProps {
 }
 
 const FlagFilter = ({ selectedFlags, onChange }: FlagFilterProps) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
-  // if a user doesn't have the multi-tagging feature enabled we need to limit the filtering
-  // options to "knownPathogen"
-  const flagOptions = allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE)
-    ? FLAG_OPTIONS
-    : [
-        {
-          name: CATEGORIES.knownPathogen.text,
-          code: CATEGORIES.knownPathogen.code,
-        },
-      ];
+  // We are removing the multi-tagging feature, so we need to limit the filtering
+  // options to "knownPathogen". This should probably not be a dropdown in the future.
+  const flagOption = [
+    {
+      name: CATEGORIES.knownPathogen.text,
+      code: CATEGORIES.knownPathogen.code,
+    },
+  ];
 
   return (
     <MultipleNestedDropdown
@@ -37,7 +26,7 @@ const FlagFilter = ({ selectedFlags, onChange }: FlagFilterProps) => {
           text: option.name,
           value: option.code,
         }),
-        flagOptions,
+        flagOption,
       )}
       selectedOptions={selectedFlags}
       onChange={onChange}

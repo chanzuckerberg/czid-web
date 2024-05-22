@@ -24,12 +24,7 @@ import {
 } from "lodash/fp";
 import queryString from "query-string";
 import React, { useContext } from "react";
-import {
-  getPathogenFlags,
-  getSampleTaxons,
-  getTaxaDetails,
-  saveVisualization,
-} from "~/api";
+import { getSampleTaxons, getTaxaDetails, saveVisualization } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import {
   ANALYTICS_EVENT_NAMES,
@@ -46,7 +41,6 @@ import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
-import { HEATMAP_PATHOGEN_FLAGGING_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
 import {
@@ -364,23 +358,10 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   componentDidMount() {
-    const { allowedFeatures, projectIds, updateDiscoveryProjectIds } =
-      this.props;
+    const { projectIds, updateDiscoveryProjectIds } = this.props;
 
-    // temporarily set includePathogens to true for all users with the
-    // heatmap_pathogens feature flag. Later this will be togglable by the user.
-    const usePathogenFlagging = allowedFeatures.includes(
-      HEATMAP_PATHOGEN_FLAGGING_FEATURE,
-    );
-    if (usePathogenFlagging) {
-      this.setState({ includePathogens: true }, () => {
-        this.fetchViewData();
-        updateDiscoveryProjectIds(uniq(projectIds));
-      });
-    } else {
-      this.fetchViewData();
-      updateDiscoveryProjectIds(uniq(projectIds));
-    }
+    this.fetchViewData();
+    updateDiscoveryProjectIds(uniq(projectIds));
   }
 
   parseUrlParams = () => {
@@ -819,10 +800,7 @@ class SamplesHeatmapViewCC extends React.Component<
   }
 
   async fetchViewData() {
-    const { allowedFeatures = [], backgrounds } = this.props;
-    const useHeatmapPathogensFeature = allowedFeatures.includes(
-      HEATMAP_PATHOGEN_FLAGGING_FEATURE,
-    );
+    const { backgrounds } = this.props;
     const { sampleIds } = this.state;
     const selectedBackgroundId = this.state.selectedOptions.background;
 
@@ -847,20 +825,11 @@ class SamplesHeatmapViewCC extends React.Component<
     );
 
     let heatmapData, metadataFields;
-    let pathogenFlags: PathogenFlags;
     try {
       [heatmapData, metadataFields] = await Promise.all([
         this.fetchHeatmapData(validIds),
         this.fetchMetadataFieldsBySampleIds(validIds),
       ]);
-      // request pathogenFlags after heatmapData to ensure that all data required
-      // for the heatmap is already is ES for the pathogenFlags computation to use
-      pathogenFlags = useHeatmapPathogensFeature
-        ? await getPathogenFlags({
-            sampleIds: validIds,
-            background: selectedBackgroundId,
-          })
-        : Promise.resolve({});
     } catch (err) {
       this.handleLoadingFailure(err);
       return; // Return early so that loadingFailed is not set to false later
@@ -914,24 +883,22 @@ class SamplesHeatmapViewCC extends React.Component<
       );
     }
 
-    this.setState({ pathogenFlags }, () => {
-      let newState = {};
-      if (!isEmpty(heatmapData)) {
-        newState = this.extractData(heatmapData);
-      }
+    let newState = {};
+    if (!isEmpty(heatmapData)) {
+      newState = this.extractData(heatmapData);
+    }
 
-      // Only calculate the metadataTypes once.
-      if (metadataFields !== null) {
-        // @ts-expect-error ts-migrate(2339) FIXME: Property 'metadataTypes' does not exist on type '{... Remove this comment to see the full error message
-        newState.metadataTypes = metadataFields;
-      }
-      // @ts-expect-error Property 'loadingFailed' does not exist on type '{}'.
-      newState.loadingFailed = false;
+    // Only calculate the metadataTypes once.
+    if (metadataFields !== null) {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'metadataTypes' does not exist on type '{... Remove this comment to see the full error message
+      newState.metadataTypes = metadataFields;
+    }
+    // @ts-expect-error Property 'loadingFailed' does not exist on type '{}'.
+    newState.loadingFailed = false;
 
-      this.updateHistoryState();
-      // this.state.loading will be set to false at the end of updateFilters
-      this.setState(newState, this.filterTaxaES);
-    });
+    this.updateHistoryState();
+    // this.state.loading will be set to false at the end of updateFilters
+    this.setState(newState, this.filterTaxaES);
   }
 
   handleLoadingFailure = (err: $TSFixMe) => {

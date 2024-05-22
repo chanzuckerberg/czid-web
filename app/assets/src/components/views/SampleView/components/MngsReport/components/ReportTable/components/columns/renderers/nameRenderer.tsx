@@ -3,7 +3,6 @@ import { get } from "lodash/fp";
 import React from "react";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
-import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import AnnotationMenu from "~/components/views/report/AnnotationMenu";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import cs from "~/components/views/SampleView/components/MngsReport/components/ReportTable/report_table.scss";
@@ -27,7 +26,6 @@ import { GenusLevelPreview } from "../components/GenusLevelPreview";
 // This returns a function that returns a component, this does not return the
 // component directly
 export const getNameRenderer = (
-  allowedFeatures: string[],
   consensusGenomeData: Record<string, object[]>,
   currentTab: CurrentTabSample,
   onCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void,
@@ -117,23 +115,14 @@ export const getNameRenderer = (
                   {` )`}
                 </span>
               ))}
-            {allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE) ? (
-              rowData.pathogenFlags &&
-              rowData.pathogenFlags.map(flag => (
-                <span key={flag}>
-                  <PathogenLabel type={flag} isDimmed={isDimmed} />
-                </span>
-              ))
-            ) : (
-              <span>
-                {rowData.pathogenFlag && (
-                  <PathogenLabel
-                    type={rowData.pathogenFlag}
-                    isDimmed={isDimmed}
-                  />
-                )}
-              </span>
-            )}
+            <span>
+              {rowData.pathogenFlag && (
+                <PathogenLabel
+                  type={rowData.pathogenFlag}
+                  isDimmed={isDimmed}
+                />
+              )}
+            </span>
             <span>
               <HoverActions
                 className={cs.hoverActions}

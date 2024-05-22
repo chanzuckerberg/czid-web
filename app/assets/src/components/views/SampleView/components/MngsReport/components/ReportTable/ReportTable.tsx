@@ -1,6 +1,6 @@
 import { cx } from "@emotion/css";
 import { compact, map } from "lodash/fp";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import {
   defaultTableRowRenderer,
   SortDirection,
@@ -114,8 +114,6 @@ export const ReportTable = ({
   const [phyloTreeModalParams, setPhyloTreeModalParams] =
     useState<PhyloTreeModalParamsType | null>(null);
 
-  const { allowedFeatures = [] } = useContext(UserContext) || {};
-
   const handlePhyloTreeModalClose = () => {
     setPhyloTreeModalParams(null);
   };
@@ -151,7 +149,6 @@ export const ReportTable = ({
 
   // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
   const nonNumericColumns: Array<ColumnProps> = getNonNumericColumns(
-    allowedFeatures,
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     consensusGenomeData,
     currentTab,

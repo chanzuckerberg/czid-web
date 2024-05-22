@@ -29,21 +29,3 @@ export const getGeneraPathogenCounts = (speciesCounts: {
   });
   return genusPathogenCnt;
 };
-
-export const getAllGeneraPathogenCounts = (speciesCounts: {
-  [key: string]: { pathogenFlags: string[]; genus_tax_id: string };
-}) => {
-  const genusPathogenCnt: { [id: string]: { [tag: string]: number } } = {};
-  Object.values(speciesCounts).forEach(speciesInfo => {
-    (speciesInfo.pathogenFlags || []).forEach(pathogenFlag => {
-      genusPathogenCnt[speciesInfo.genus_tax_id] =
-        genusPathogenCnt[speciesInfo.genus_tax_id] || {};
-
-      const genusTaxid = speciesInfo.genus_tax_id;
-      const tag = pathogenFlag;
-      genusPathogenCnt[genusTaxid][tag] =
-        (genusPathogenCnt[genusTaxid][tag] || 0) + 1;
-    });
-  });
-  return genusPathogenCnt;
-};

@@ -49,7 +49,6 @@ import {
   computeMngsReportTableValuesForCSV,
   createCSVObjectURL,
 } from "~/components/utils/csv";
-import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
   COVERAGE_VIZ_FEATURE,
@@ -69,10 +68,7 @@ import {
   GlobalContext,
 } from "~/globalContext/reducer";
 import { usePrevious } from "~/helpers/customHooks/usePrevious";
-import {
-  getAllGeneraPathogenCounts,
-  getGeneraPathogenCounts,
-} from "~/helpers/taxon";
+import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import Project from "~/interface/project";
 import { ReportMetadata } from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -538,13 +534,9 @@ const SampleViewComponent = ({
       const reportData: Taxon[] = [];
       const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
       if (rawReportData.sortedGenus) {
-        const generaPathogenCounts = allowedFeatures.includes(
-          MULTITAG_PATHOGENS_FEATURE,
-        )
-          ? getAllGeneraPathogenCounts(
-              rawReportData.counts[SPECIES_LEVEL_INDEX],
-            )
-          : getGeneraPathogenCounts(rawReportData.counts[SPECIES_LEVEL_INDEX]);
+        const generaPathogenCounts = getGeneraPathogenCounts(
+          rawReportData.counts[SPECIES_LEVEL_INDEX],
+        );
 
         rawReportData.sortedGenus.forEach((genusTaxId: number) => {
           let hasHighlightedChildren = false;
@@ -1219,15 +1211,11 @@ const SampleViewComponent = ({
   };
 
   const getDownloadReportTableWithAppliedFiltersLink = () => {
-    const includePathogenFlags = allowedFeatures.includes(
-      MULTITAG_PATHOGENS_FEATURE,
-    );
     const [csvHeaders, csvRows] = computeMngsReportTableValuesForCSV(
       filteredReportData,
       selectedOptions,
       backgrounds,
       currentTab,
-      includePathogenFlags,
     );
 
     return createCSVObjectURL(csvHeaders, csvRows);

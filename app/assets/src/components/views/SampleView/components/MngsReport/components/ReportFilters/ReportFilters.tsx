@@ -10,11 +10,9 @@ import {
   transform,
   values,
 } from "lodash/fp";
-import React, { useContext } from "react";
+import React from "react";
 import { ANALYTICS_EVENT_NAMES, useTrackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
-import { UserContext } from "~/components/common/UserContext";
-import { PATHOGEN_FLAG_FILTER_FEATURE } from "~/components/utils/features";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import {
   getWorkflowTypeFromLabel,
@@ -75,8 +73,6 @@ export const ReportFilters = ({
   snapshotShareId,
 }: ReportFiltersProps) => {
   const trackEvent = useTrackEvent();
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
   const showBackgroundFilter = currentTab === WORKFLOW_TABS.SHORT_READ_MNGS;
   const handleFilterRemove = ({
     key,
@@ -423,20 +419,19 @@ export const ReportFilters = ({
             />
           </div>
         )}
-        {view === "table" &&
-          allowedFeatures.includes(PATHOGEN_FLAG_FILTER_FEATURE) && (
-            <div className={cs.filterListElement}>
-              <FlagFilter
-                selectedFlags={selected.flags}
-                onChange={(value: string) =>
-                  handleFilterChange({
-                    key: "flags",
-                    value,
-                  })
-                }
-              />
-            </div>
-          )}
+        {view === "table" && (
+          <div className={cs.filterListElement}>
+            <FlagFilter
+              selectedFlags={selected.flags}
+              onChange={(value: string) =>
+                handleFilterChange({
+                  key: "flags",
+                  value,
+                })
+              }
+            />
+          </div>
+        )}
         {view === "tree" && (
           <div className={cs.filterListElement}>
             <MetricPicker

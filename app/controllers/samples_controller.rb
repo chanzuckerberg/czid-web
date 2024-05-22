@@ -900,8 +900,7 @@ class SamplesController < ApplicationController
   def report_csv
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
-    is_multitag_enabled = current_user && current_user.allowed_feature?("multitag_pathogens")
-    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, multitag: is_multitag_enabled)
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -1019,8 +1018,6 @@ class SamplesController < ApplicationController
     annotation_allowed = current_user && current_user.allowed_feature?("annotation")
     show_annotations = editable_sample && annotation_allowed
 
-    is_multitag_enabled = current_user && current_user.allowed_feature?("multitag_pathogens")
-
     if pipeline_run
       # Don't cache the response until all results for the pipeline run are available
       # so the displayed pipeline run status and report hover actions will be updated correctly.
@@ -1046,10 +1043,10 @@ class SamplesController < ApplicationController
 
       json =
         fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate) do
-          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], show_annotations: show_annotations, multitag: is_multitag_enabled)
+          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], show_annotations: show_annotations)
         end
     else
-      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], show_annotations: show_annotations, multitag: is_multitag_enabled)
+      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], show_annotations: show_annotations)
     end
     render json: json
   rescue PipelineReportService::MassNormalizedBackgroundError => e
