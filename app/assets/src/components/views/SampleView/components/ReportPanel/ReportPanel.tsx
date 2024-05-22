@@ -1,5 +1,4 @@
 import React from "react";
-import DeprecatedAmrView from "~/components/DeprecatedAmrView";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
@@ -7,6 +6,7 @@ import { AmrView } from "../AmrView";
 import { BenchmarkView } from "../BenchmarkView";
 import { ConsensusGenomeView } from "../ConsensusGenomeView";
 import { MngsReport } from "../MngsReport";
+import { DeprecatedAmrView } from "./components/DeprecatedAmrView";
 import { ReportPanelProps } from "./types";
 
 export const ReportPanel = ({

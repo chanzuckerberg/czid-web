@@ -16,7 +16,7 @@ import {
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
-import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
+import PhyloTreeChecks from "~/components/views/PhyloTree/PhyloTreeChecks";
 import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import {
   DOWNLOAD_CONTIGS,

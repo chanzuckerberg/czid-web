@@ -31,7 +31,7 @@ const getExamplesForHostGenome = (field, hostGenomeId) =>
     ", ",
   ) || "--";
 
-class MetadataDictionary extends React.Component {
+export class MetadataDictionary extends React.Component {
   state = {
     officialFields: null,
     hostGenomes: null,
@@ -163,5 +163,3 @@ class MetadataDictionary extends React.Component {
     );
   }
 }
-
-export default MetadataDictionary;

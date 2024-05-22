@@ -9,7 +9,7 @@ interface LandingPageProps {
   emergencyBannerMessage?: string;
 }
 
-const LandingPage = ({
+export const LandingPage = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: LandingPageProps) => {
@@ -25,5 +25,3 @@ const LandingPage = ({
     </div>
   );
 };
-
-export default LandingPage;

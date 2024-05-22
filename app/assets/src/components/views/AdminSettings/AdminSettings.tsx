@@ -18,7 +18,7 @@ export interface AppConfigParams {
   value: string;
 }
 
-const AdminSettings = () => {
+export const AdminSettings = () => {
   const [appConfigs, setAppConfigs] = useState<AppConfigType[]>([]);
   const [workflowVersions, setWorkflowVersions] = useState<AppConfigType[]>([]);
 
@@ -56,5 +56,3 @@ const AdminSettings = () => {
     </div>
   );
 };
-
-export default AdminSettings;

@@ -11,20 +11,18 @@ import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { LoadingPage } from "~/components/common/LoadingPage";
 import { UserContext } from "~/components/common/UserContext";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
-import ImpactPage from "~/components/views/ImpactPage/ImpactPage";
-import MetadataDictionary from "~/components/views/MetadataDictionary/MetadataDictionary";
-import { PathogenListView } from "~/components/views/PathogenListView/PathogenListView";
-import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
+import { FAQPage } from "~/components/views/FAQPage";
+import { ImpactPage } from "~/components/views/ImpactPage/ImpactPage";
+import { MetadataDictionary } from "~/components/views/MetadataDictionary";
+import { PathogenListView } from "~/components/views/PathogenListView";
+import PhyloTreeListView from "~/components/views/PhyloTree/PhyloTreeListView";
+import { PrivacyNoticeForUserResearch } from "~/components/views/PrivacyNoticeForUserResearch";
 import SampleView from "~/components/views/SampleView";
-import FAQPage from "~/components/views/support/FAQPage";
-import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoticeForUserResearch";
-import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";
-import TermsOfUsePreview from "~/components/views/support/TermsOfUsePreview";
 import { AdminPage } from "../AdminPage";
 import { AdminProject } from "../AdminProject";
 import { AdminSample } from "../AdminSample";
-import AdminSettings from "../AdminSettings/AdminSettings";
-import LandingPage from "../LandingPage/LandingPage";
+import { AdminSettings } from "../AdminSettings";
+import { LandingPage } from "../LandingPage";
 import { DiscoveryViewFC } from "./DiscoveryViewFC";
 
 // These props come from Rails .html.erb views via the react_component function in app/assets/src/index.tsx (the entrypoint)
@@ -110,12 +108,6 @@ const DiscoveryViewRouter = ({
             />
           )}
         />
-        <Route exact path="/privacy_preview">
-          <PrivacyNoticePreview />
-        </Route>
-        <Route exact path="/terms_preview">
-          <TermsOfUsePreview />
-        </Route>
         <Route exact path="/metadata/dictionary">
           <MetadataDictionary />
         </Route>

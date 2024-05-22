@@ -43,7 +43,7 @@ import { showBulkDownloadNotification } from "~/components/views/components/Bulk
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import PhyloTreeCreationModal from "~/components/views/PhyloTree/PhyloTreeCreationModal";
 import { BulkDownloadModal } from "~/components/views/SamplesView/components/BulkDownloadModal";
 import CollectionModal from "~/components/views/SamplesView/components/CollectionModal/CollectionModal";
 import { NextcladeModal } from "~/components/views/SamplesView/components/NextcladeModal";
@@ -105,7 +105,7 @@ const SHORT_READ_MNGS_VALUE = WorkflowType.SHORT_READ_MNGS;
  * https://beta.reactjs.org/reference/react/forwardRef (01/2023 - smccany)
  */
 
-const SamplesView = forwardRef(function SamplesView(
+export const SamplesView = forwardRef(function SamplesView(
   {
     activeColumns = DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[SHORT_READ_MNGS_VALUE],
     currentDisplay = "table",
@@ -1185,8 +1185,6 @@ const SamplesView = forwardRef(function SamplesView(
     </div>
   );
 });
-
-export default SamplesView;
 
 /** Combined from Workflows and Entities Services. */
 export type CgRow = WorkflowRunRow & CgEntityRow;

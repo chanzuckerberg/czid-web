@@ -89,10 +89,7 @@ import {
 } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 import ProjectsView from "../projects/ProjectsView";
-import SamplesView, { CgRow } from "../SamplesView/SamplesView";
-import VisualizationsView, {
-  Visualization,
-} from "../visualizations/VisualizationsView";
+import { CgRow, SamplesView } from "../SamplesView";
 import { ConsensusGenomesTabCount } from "./components/ConsensusGenomesTabCount";
 import { SamplesTabCount } from "./components/SamplesTabCount";
 import {
@@ -132,6 +129,10 @@ import {
   prepareFilters,
   prepareNextGenFilters,
 } from "./utils";
+import {
+  Visualization,
+  VisualizationsView,
+} from "./VisualizationsView/VisualizationsView";
 
 const SAMPLES_UPLOAD_URL = "/samples/upload";
 

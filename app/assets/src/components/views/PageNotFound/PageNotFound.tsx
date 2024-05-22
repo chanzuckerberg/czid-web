@@ -1,7 +1,7 @@
 import React from "react";
 import ImgMicrobeSecondary from "~/components/ui/illustrations/ImgMicrobeSecondary";
 import InfoBanner from "~/components/views/discovery/InfoBanner";
-import LandingHeaderV1 from "~/components/views/PageNotFound/LandingHeaderV1";
+import { LandingHeaderV1 } from "./components/LandingHeaderV1";
 import cs from "./page_not_found.scss";
 
 interface PageNotFoundProps {
@@ -12,7 +12,7 @@ interface PageNotFoundProps {
   showLandingHeader?: boolean;
 }
 
-const PageNotFound = ({
+export const PageNotFound = ({
   browserInfo,
   showLandingHeader,
 }: PageNotFoundProps) => {
@@ -34,5 +34,3 @@ const PageNotFound = ({
     </div>
   );
 };
-
-export default PageNotFound;

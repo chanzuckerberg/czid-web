@@ -15,7 +15,7 @@ import { getCsrfToken } from "~/api/utils";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { UserContext } from "~/components/common/UserContext";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import PhyloTreeCreationModal from "~/components/views/PhyloTree/PhyloTreeCreationModal";
 import {
   ANNOTATION_NOT_A_HIT,
   NANOPORE_DEFAULT_COLUMN_WIDTH,

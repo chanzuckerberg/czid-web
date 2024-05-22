@@ -8,7 +8,7 @@ import ImpactHero from "~/components/views/ImpactPage/components/ImpactHero/Impa
 import { ImpactIntro } from "~/components/views/ImpactPage/components/ImpactIntro/ImpactIntro";
 import { ImpactVideoSection } from "~/components/views/ImpactPage/components/ImpactVideoSection";
 
-const ImpactPage = () => {
+export const ImpactPage = () => {
   const [selectedCountry, setSelectedCountry] = useState(ImpactCountryData[0]);
 
   return (
@@ -29,5 +29,3 @@ const ImpactPage = () => {
     </>
   );
 };
-
-export default ImpactPage;
