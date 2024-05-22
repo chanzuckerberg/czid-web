@@ -1,3 +1,4 @@
+# Note (5/21/24): Leaving this one-time task as an example of a well-batched job that processes a large number of records.
 # Backfills RPM values on TaxonCount
 # Will delete this rake task once the values are successfully backfilled
 # rake backfill_rpm_values_on_taxon_count

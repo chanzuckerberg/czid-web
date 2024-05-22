@@ -1,3 +1,4 @@
+# Note (5/21/24): Leaving this one-time task as an example of a complex one-off backfill task in case it is useful in the future.
 # Collect samples with latest amr run workflow versions 1.0.0 to 1.2.14
 # Get s3 output directories for the latest workflow run
 # Collect s3 locations for contigs.fasta and comprehensive_AMR_metrics.tsv

@@ -1,3 +1,5 @@
+# Note (5/21/24): Leaving this task to explain how we populate the data for the taxon description sidebar
+# but we no longer have the workflow that generates the taxid2description.json file.
 # Load taxon descriptions
 # rake load_taxon_descriptions['s3://idseq-samples-prod/yunfang/taxid2description.json']
 # To run an individual taxon: rake load_taxon_descriptions['s3://idseq-developers/omar/taxid2descriptiontest/4.9/taxid2description.json']
