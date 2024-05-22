@@ -6,7 +6,7 @@
 # an array of deleted sample ids.
 class BulkDeletionService
   include Callable
-  HARD_DELETION_BATCH_SIZE = 10
+  HARD_DELETION_BATCH_SIZE = 30
 
   def initialize(object_ids:, user:, workflow:)
     if object_ids.blank?

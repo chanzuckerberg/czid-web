@@ -276,10 +276,11 @@ RSpec.describe BulkDeletionService, type: :service do
     end
 
     context "when a user submits a large bulk deletion" do
+      let(:batch_size) { BulkDeletionService::HARD_DELETION_BATCH_SIZE }
       before do
         @sample_ids = []
         @pipeline_run_ids = []
-        11.times do |n|
+        (batch_size + 1).times do |n|
           sample = create(:sample, project: @project,
                                    user: @joe,
                                    name: "sample #{n}",
@@ -301,15 +302,15 @@ RSpec.describe BulkDeletionService, type: :service do
         )
         expect(Resque).to receive(:enqueue).with(
           HardDeleteObjects,
-          @pipeline_run_ids.slice(0, 10),
-          @sample_ids.slice(0, 10),
+          @pipeline_run_ids.slice(0, batch_size),
+          @sample_ids.slice(0, batch_size),
           short_read_mngs,
           @joe.id
         )
         expect(Resque).to receive(:enqueue).with(
           HardDeleteObjects,
-          [@pipeline_run_ids[10]],
-          [@sample_ids[10]],
+          [@pipeline_run_ids[batch_size]],
+          [@sample_ids[batch_size]],
           short_read_mngs,
           @joe.id
         )

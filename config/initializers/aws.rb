@@ -16,7 +16,12 @@ module AwsClient
   end
 
   CLIENT_INITIALIZERS = {
-    s3: -> { Aws::S3::Client.new(stub_responses: stub_responses) },
+    s3: lambda {
+      Aws::S3::Client.new(
+        stub_responses: stub_responses,
+        max_attempts: 10
+      )
+    },
     states: lambda {
       Aws::States::Client.new(
         # Default retry_limit is 3. Default retry_base_delay is 0.3 sec.
