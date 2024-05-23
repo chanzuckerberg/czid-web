@@ -1,5 +1,5 @@
 import React from "react";
-import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
+import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 
 const NAME_TYPE_OPTIONS = [
   { text: "Scientific", value: "Scientific name" },

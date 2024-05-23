@@ -1,4 +1,4 @@
-import { getTaxonMetric } from "~/components/views/report/utils/taxon";
+import { getTaxonMetric } from "~/components/utils/taxon";
 
 function ThresholdMap(options) {
   this.options = options;

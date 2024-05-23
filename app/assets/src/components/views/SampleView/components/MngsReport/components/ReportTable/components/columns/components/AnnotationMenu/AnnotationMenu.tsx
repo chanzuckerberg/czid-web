@@ -24,7 +24,7 @@ interface AnnotationMenuProps {
   analyticsContext?: object;
 }
 
-const AnnotationMenu = ({
+export const AnnotationMenu = ({
   onAnnotationUpdate,
   pipelineRunId,
   taxonId,
@@ -140,5 +140,3 @@ const AnnotationMenu = ({
     </>
   );
 };
-
-export default AnnotationMenu;

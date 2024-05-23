@@ -11,7 +11,7 @@ import {
 import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import List from "~/components/ui/List";
-import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
+import BackgroundModelFilter from "~/components/views/SampleView/components/MngsReport/components/ReportFilters/components/BackgroundModelFilter";
 import { copyUrlToClipboard } from "~/helpers/url";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import HelpIcon from "~ui/containers/HelpIcon";

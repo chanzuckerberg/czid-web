@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import React from "react";
+import { BackgroundOptionType } from "~/components/views/SamplesView/components/BulkDownloadModal/types";
 import SectionsDropdown from "~ui/controls/dropdowns/SectionsDropdown";
 import SubtextDropdown, {
   Option,
 } from "~ui/controls/dropdowns/SubtextDropdown";
-import { BackgroundOptionType } from "../../SamplesView/components/BulkDownloadModal/types";
 
 interface BackgroundModelFilterProps {
   allBackgrounds?: RawBackground[] | BackgroundOptionType[] | null;

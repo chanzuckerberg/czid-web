@@ -2,7 +2,6 @@ import React from "react";
 import Checkbox from "~/components/ui/controls/Checkbox";
 import { Dropdown } from "~/components/ui/controls/dropdowns";
 import { CONDITIONAL_FIELDS } from "~/components/views/BulkDownloadListView/constants";
-import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { MICROBIOME_DOWNLOAD_METRIC_OPTIONS } from "~/components/views/SamplesHeatmapView/constants";
 import {
   BackgroundOptionType,
@@ -13,6 +12,7 @@ import {
   SelectedFieldValueType,
 } from "~/components/views/SamplesView/components/BulkDownloadModal/types";
 import { triggersConditionalField } from "~/components/views/SamplesView/components/BulkDownloadModal/utils";
+import BackgroundModelFilter from "~/components/views/SampleView/components/MngsReport/components/ReportFilters/components/BackgroundModelFilter";
 import { BulkDownloadFieldType, BulkDownloadType } from "~/interface/shared";
 import cs from "../../bulk_download_modal_options.scss";
 import { TaxonHitSelect } from "../TaxonHitSelect";

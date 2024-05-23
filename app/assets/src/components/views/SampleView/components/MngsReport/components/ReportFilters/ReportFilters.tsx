@@ -18,14 +18,6 @@ import {
   getWorkflowTypeFromLabel,
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
-import AnnotationFilter from "~/components/views/report/filters/AnnotationFilter";
-import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
-import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
-import FlagFilter from "~/components/views/report/filters/FlagFilter";
-import MetricPicker from "~/components/views/report/filters/MetricPicker";
-import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
-import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
-import ThresholdFilterDropdown from "~/components/views/report/filters/ThresholdFilterDropdown/ThresholdFilterDropdown";
 import {
   CATEGORIES,
   DispatchSelectedOptionsType,
@@ -42,6 +34,14 @@ import {
 import { Background, SampleId } from "~/interface/shared/specific";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
+import AnnotationFilter from "./components/AnnotationFilter";
+import BackgroundModelFilter from "./components/BackgroundModelFilter";
+import CategoryFilter from "./components/CategoryFilter";
+import FlagFilter from "./components/FlagFilter";
+import MetricPicker from "./components/MetricPicker";
+import NameTypeFilter from "./components/NameTypeFilter";
+import SpecificityFilter from "./components/SpecificityFilter";
+import ThresholdFilterDropdown from "./components/ThresholdFilterDropdown/ThresholdFilterDropdown";
 import cs from "./report_filters.scss";
 
 interface ReportFiltersProps {

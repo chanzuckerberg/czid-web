@@ -9,6 +9,7 @@ import BasicPopup from "~/components/BasicPopup";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
+import { getDownloadContigUrl } from "~/components/utils/download";
 import {
   CONSENSUS_GENOME_FEATURE,
   COVERAGE_VIZ_FEATURE,
@@ -17,7 +18,6 @@ import {
 } from "~/components/utils/pipeline_versions";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import PhyloTreeChecks from "~/components/views/PhyloTree/PhyloTreeChecks";
-import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,

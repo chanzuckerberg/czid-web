@@ -11,7 +11,7 @@ interface AnnotationPreviewProps {
   tag2Count?: object;
 }
 
-const AnnotationPreview = ({ tag2Count }: AnnotationPreviewProps) => {
+export const AnnotationPreview = ({ tag2Count }: AnnotationPreviewProps) => {
   // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
   const hitCount = tag2Count[ANNOTATION_HIT];
   // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
@@ -42,5 +42,3 @@ const AnnotationPreview = ({ tag2Count }: AnnotationPreviewProps) => {
     </span>
   );
 };
-
-export default AnnotationPreview;

@@ -5,14 +5,14 @@ import SvgSaver from "svgsaver";
 import { useTrackEvent } from "~/api/analytics";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
-import { logError } from "~/components/utils/logUtil";
-import { showToast } from "~/components/utils/toast";
-import { WorkflowType } from "~/components/utils/workflows";
 import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
   logDownloadOption,
-} from "~/components/views/report/utils/download";
+} from "~/components/utils/download";
+import { logError } from "~/components/utils/logUtil";
+import { showToast } from "~/components/utils/toast";
+import { WorkflowType } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";

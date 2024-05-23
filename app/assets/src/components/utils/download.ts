@@ -87,10 +87,6 @@ export const getDownloadLinks = (sampleId: $TSFixMe, pipelineRun: $TSFixMe) => {
   }));
 };
 
-export const getWorkflowRunZipLink = (workflowRunId: number) => {
-  return `/workflow_runs/${workflowRunId}/zip_link`;
-};
-
 export const logDownloadOption = ({
   trackEvent,
   component,

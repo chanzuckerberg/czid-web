@@ -1,7 +1,5 @@
 import { isEmpty } from "lodash/fp";
 import React from "react";
-import AnnotationPreview from "~/components/views/report/AnnotationPreview";
-import PathogenPreview from "~/components/views/report/PathogenPreview";
 import cs from "~/components/views/SampleView/components/MngsReport/components/ReportTable/report_table.scss";
 import {
   ANNOTATION_HIT,
@@ -9,6 +7,8 @@ import {
   ANNOTATION_NOT_A_HIT,
 } from "~/components/views/SampleView/utils";
 import { Taxon } from "~/interface/shared";
+import { AnnotationPreview } from "./components/AnnotationPreview";
+import { PathogenPreview } from "./components/PathogenPreview";
 interface GenusLevelPreviewProps {
   rowData: Taxon;
 }

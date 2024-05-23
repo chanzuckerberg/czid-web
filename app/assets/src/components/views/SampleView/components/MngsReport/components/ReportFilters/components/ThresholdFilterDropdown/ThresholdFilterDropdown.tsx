@@ -4,14 +4,14 @@ threshold filter component to SDS. This version still uses Semantic UI
 and should be deprecated when all sample report filters are refactored to SDS. */
 import { get } from "lodash/fp";
 import React from "react";
-import { GlobalContext } from "~/globalContext/reducer";
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import {
   PrimaryButton,
   SecondaryButton,
-} from "../../../../ui/controls/buttons";
-import DropdownLabel from "../../../../ui/controls/dropdowns/common/DropdownLabel";
-import DropdownTrigger from "../../../../ui/controls/dropdowns/common/DropdownTrigger";
+} from "~/components/ui/controls/buttons";
+import DropdownLabel from "~/components/ui/controls/dropdowns/common/DropdownLabel";
+import DropdownTrigger from "~/components/ui/controls/dropdowns/common/DropdownTrigger";
+import { GlobalContext } from "~/globalContext/reducer";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import cs from "./threshold_filter_dropdown.scss";
 import ThresholdFilterListSemantic from "./ThresholdFilterListSemantic/ThresholdFilterListSemantic";
 

@@ -8,6 +8,7 @@ import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { getDownloadLinks } from "~/components/utils/download";
 import { isPipelineVersionAtLeast } from "~/components/utils/pipeline_versions";
 import {
   READ_DEDUP_KEYS,
@@ -22,7 +23,6 @@ import {
   WorkflowType,
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
-import { getDownloadLinks } from "~/components/views/report/utils/download";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { WorkflowRun } from "~/interface/sample";
 import {

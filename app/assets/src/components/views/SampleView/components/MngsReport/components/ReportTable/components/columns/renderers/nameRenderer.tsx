@@ -3,8 +3,7 @@ import { get } from "lodash/fp";
 import React from "react";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
-import AnnotationMenu from "~/components/views/report/AnnotationMenu";
-import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
+import { getCategoryAdjective } from "~/components/utils/taxon";
 import cs from "~/components/views/SampleView/components/MngsReport/components/ReportTable/report_table.scss";
 import { HoverActions } from "~/components/views/SampleView/components/ReportPanel/components/HoverActions";
 import {
@@ -20,6 +19,7 @@ import {
 } from "~/interface/sampleView";
 import { SampleId, Taxon } from "~/interface/shared";
 import { PhyloTreeModalParamsType } from "../../../ReportTable";
+import { AnnotationMenu } from "../components/AnnotationMenu";
 import { GenusLevelPreview } from "../components/GenusLevelPreview";
 
 // The output of this function is passed to cellRenderer which takes a function of type CellRendererType

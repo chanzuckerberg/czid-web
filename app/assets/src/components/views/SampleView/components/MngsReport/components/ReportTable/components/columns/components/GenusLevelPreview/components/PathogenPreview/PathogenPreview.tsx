@@ -8,7 +8,7 @@ interface PathogenPreviewProps {
   tag2Count?: object;
 }
 
-const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
+export const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
   // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2769
   const tags = Object.keys(tag2Count).sort();
   if (tags.length === 0) {
@@ -53,5 +53,3 @@ const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
     );
   }
 };
-
-export default PathogenPreview;
