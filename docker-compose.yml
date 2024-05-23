@@ -3,12 +3,12 @@
 # setup here may need to be reproduced in check.yml.
 
 x-web-variables: &web-variables
-  ? SAMPLES_BUCKET_NAME=idseq-samples-development
-  ? SAMPLES_BUCKET_NAME_V1=czi-infectious-disease-development-samples
-  ? S3_DATABASE_BUCKET=czid-public-references
-  ? S3_WORKFLOWS_BUCKET=idseq-workflows
-  ? S3_AEGEA_ECS_EXECUTE_BUCKET=aegea-ecs-execute-development
-  ? ES_ADDRESS=http://opensearch:9200
+  ? SAMPLES_BUCKET_NAME
+  ? SAMPLES_BUCKET_NAME_V1
+  ? S3_DATABASE_BUCKET
+  ? S3_WORKFLOWS_BUCKET
+  ? S3_AEGEA_ECS_EXECUTE_BUCKET
+  ? ES_ADDRESS
   ? AIRTABLE_ACCESS_TOKEN
   ? AIRTABLE_BASE_ID
   ? AUTH_TOKEN_SECRET
@@ -33,10 +33,10 @@ x-web-variables: &web-variables
   ? SMTP_USER
   ? SYSTEM_ADMIN_USER_ID
   ? SYSTEM_ADMIN_PROJECT_ID
-  ? HEATMAP_ES_ADDRESS=http://opensearch:9200
-  ? INDEXING_LAMBDA_MODE=local
-  ? LOCAL_TAXON_INDEXING_URL=concurrency-lambda:8080
-  ? LOCAL_EVICTION_URL=eviction-lambda:8080
+  ? HEATMAP_ES_ADDRESS
+  ? INDEXING_LAMBDA_MODE
+  ? LOCAL_TAXON_INDEXING_URL
+  ? LOCAL_EVICTION_URL
 
 x-auth0-variables: &auth0-variables
   ? AUTH0_CLIENT_ID
@@ -125,7 +125,7 @@ services:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     volumes:
-      - .:/app:ro
+      - .:/app
       - ./log:/app/log
       - ./tmp:/app/tmp
       - ./db:/app/db
@@ -141,6 +141,8 @@ services:
       - redis
       - opensearch
       - shoryuken
+    env_file:
+      - web.env
     environment:
       <<: [*web-variables, *aws-variables, *auth0-variables, *env-variables]
       GRAPHQL_FEDERATION_SERVICE_URL: http://web-proxy:3000/graphqlfed
@@ -158,6 +160,8 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - web.env
     environment:
       <<: [*web-variables, *aws-variables]
       GRAPHQL_FEDERATION_SERVICE_URL: http://web-proxy:3000/graphqlfed
@@ -176,6 +180,8 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - web.env
     environment:
       <<: [*web-variables, *aws-variables]
     command: bundle exec "rake resque:scheduler"
@@ -192,6 +198,8 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - web.env
     environment:
       <<: [*web-variables, *aws-variables]
     command: bundle exec "rake result_monitor"
@@ -208,6 +216,8 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - web.env
     environment:
       <<: [*web-variables, *aws-variables]
     command: bundle exec "rake pipeline_monitor"
