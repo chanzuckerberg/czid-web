@@ -256,6 +256,12 @@ export class DiscoveryView extends React.Component<
       ...sessionState,
       ...urlState,
     };
+    // getCurrentTabOrderByKey() relies on other states already being set.
+    this.state = {
+      ...this.state,
+      orderBy: sessionState[this.getCurrentTabOrderByKey()],
+      orderDirection: sessionState[this.getCurrentTabOrderDirKey()],
+    };
 
     this.workflowEntity = WORKFLOWS[this.state.workflow].entity;
 
@@ -584,13 +590,11 @@ export class DiscoveryView extends React.Component<
 
   getCurrentTabOrderByKey() {
     const { currentTab, workflow } = this.state;
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     return getOrderByKeyFor(currentTab, workflow);
   }
 
   getCurrentTabOrderDirKey() {
     const { currentTab, workflow } = this.state;
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     return getOrderDirKeyFor(currentTab, workflow);
   }
 
@@ -601,10 +605,8 @@ export class DiscoveryView extends React.Component<
     orderBy: string | undefined;
     orderDirection: SortDirectionType | undefined;
   } => {
-    const sessionState = loadState(sessionStorage, "DiscoveryViewOptions");
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
+    const sessionState = loadState(sessionStorage, KEY_DISCOVERY_VIEW_OPTIONS);
     const orderBy = sessionState[`${getOrderByKeyFor(tab, workflow)}`];
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
     const orderDirection = sessionState[`${getOrderDirKeyFor(tab, workflow)}`];
     return { orderBy, orderDirection };
   };
@@ -623,12 +625,12 @@ export class DiscoveryView extends React.Component<
 
     const { updatedAt: updatedAtFromLocalStorage } = loadState(
       localStorage,
-      "DiscoveryViewOptions",
+      KEY_DISCOVERY_VIEW_OPTIONS,
     );
 
     const currentSessionStorageState = loadState(
       sessionStorage,
-      "DiscoveryViewOptions",
+      KEY_DISCOVERY_VIEW_OPTIONS,
     );
 
     const { updatedAt: updatedAtFromSessionStorage } =

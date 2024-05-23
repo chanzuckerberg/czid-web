@@ -17,7 +17,7 @@ interface ScatterPlotProps {
   yLabel: string;
 }
 
-export default memo(function ScatterPlot(props: ScatterPlotProps) {
+export const ScatterPlot = memo(function ScatterPlot(props: ScatterPlotProps) {
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

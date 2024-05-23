@@ -1,7 +1,7 @@
 import { map } from "lodash/fp";
 import moment from "moment";
 import { ThresholdForAPI } from "~/components/utils/ThresholdMap";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WORKFLOWS, WorkflowType } from "~/components/utils/workflows";
 import { NextGenFilters, SelectedFilters } from "~/interface/discoveryView";
 import { FilterList } from "~/interface/samplesView";
 import { TAB_PROJECTS, TAB_SAMPLES, TAB_VISUALIZATIONS } from "./constants";
@@ -15,24 +15,20 @@ export const getOrderKeyPrefix = (tab, workflow) => {
   return tab === TAB_SAMPLES ? `${tab}-${workflow}` : tab;
 };
 
-export const getOrderByKeyFor = (tab, workflow = null) => {
+export const getOrderByKeyFor = (tab, workflow?: WorkflowType) => {
   return `${getOrderKeyPrefix(tab, workflow)}OrderBy`;
 };
 
-export const getOrderDirKeyFor = (tab, workflow = null) => {
+export const getOrderDirKeyFor = (tab, workflow?: WorkflowType) => {
   return `${getOrderKeyPrefix(tab, workflow)}OrderDir`;
 };
 
 const getOrderKeysForSamplesTab = () => {
-  const orderKeys = [];
-  const workflowKeys = Object.keys(WORKFLOWS);
+  const orderKeys: string[] = [];
+  const workflowKeys = Object.keys(WORKFLOWS) as WorkflowType[];
   workflowKeys.forEach(workflowKey => {
-    // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-    orderKeys.push(getOrderByKeyFor(TAB_SAMPLES, WORKFLOWS[workflowKey].value));
-    orderKeys.push(
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-      getOrderDirKeyFor(TAB_SAMPLES, WORKFLOWS[workflowKey].value),
-    );
+    orderKeys.push(getOrderByKeyFor(TAB_SAMPLES, workflowKey));
+    orderKeys.push(getOrderDirKeyFor(TAB_SAMPLES, workflowKey));
   });
   return orderKeys;
 };
