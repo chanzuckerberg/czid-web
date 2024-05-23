@@ -1,12 +1,20 @@
 #!/bin/bash
 # multi-platform compatible setup script to be shared by platform specific setup scripts
 
-echo "== Creating ES indices for heatmap=="
+echo "== Stopping containers and deleting existing OpenSearch Data =="
 make local-stop
 rm -rf ./docker_data/opensearch/*
+
+echo "== Creating ES indices for search =="
+aws-oidc exec -- docker-compose run web rake create_elasticsearch_indices
+
+echo "== Creating ES indices for heatmap =="
 aws-oidc exec -- docker-compose run --rm web curl --retry 6 --retry-delay 10 --retry-connrefused -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_index_template/scored_taxon_counts  --data-binary "@./docker/open_distro/scored_taxon_counts_template.json"
 aws-oidc exec -- docker-compose run --rm web curl -XPUT http://opensearch:9200/scored_taxon_counts-v1
 aws-oidc exec -- docker-compose run --rm web curl -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_index_template/pipeline_runs  --data-binary "@./docker/open_distro/pipeline_runs_template.json"
 aws-oidc exec -- docker-compose run --rm web curl -XPUT http://opensearch:9200/pipeline_runs-v1
+
+echo "== Creating ES aliases =="
 aws-oidc exec -- docker-compose run --rm web curl -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_aliases  --data-binary "@./docker/open_distro/alias_update.json"
+
 make local-stop

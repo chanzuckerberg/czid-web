@@ -13,12 +13,6 @@
         "alias": "pipeline_runs",
         "is_write_index": true
       }
-    },
-    {
-      "add": {
-        "index": "taxon_lineages",
-        "alias": "taxon_lineages_alias"
-      }
     }
  ]
 }

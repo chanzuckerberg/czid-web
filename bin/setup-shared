@@ -33,7 +33,4 @@ echo "== Bringing up all services =="
 aws-oidc exec -- docker-compose up -d db redis web resque resque-result-monitor resque-pipeline-monitor
 sleep 10
 
-echo "== Creating ES indices =="
-aws-oidc exec -- docker-compose run web rake create_elasticsearch_indices
-
-bash bin/setup-heatmap-es
+bash bin/setup-elasticsearch
