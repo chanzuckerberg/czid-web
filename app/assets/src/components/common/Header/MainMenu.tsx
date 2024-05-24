@@ -4,7 +4,7 @@ import {
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
-} from "~/components/views/discovery/discovery_api";
+} from "~/components/views/DiscoveryView/discovery_api";
 import cs from "./header.scss";
 
 interface MainMenuProps {

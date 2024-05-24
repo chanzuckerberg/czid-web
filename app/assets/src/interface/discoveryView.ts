@@ -6,7 +6,7 @@ import {
   WorkflowCount,
   WorkflowType,
 } from "~/components/utils/workflows";
-import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
+import { ObjectCollectionView } from "~/components/views/DiscoveryView/DiscoveryDataLayer";
 import { FilterList, ObjectType } from "./samplesView";
 import { Project } from "./shared";
 

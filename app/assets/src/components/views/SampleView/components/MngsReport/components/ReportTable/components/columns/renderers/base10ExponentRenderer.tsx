@@ -1,5 +1,5 @@
 import React from "react";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { TableRenderers } from "~/components/views/components/TableRenderers";
 import { CellRendererType, DBType } from "~/interface/sampleView";
 import { NtNrStack } from "../components/NtNrStack";
 

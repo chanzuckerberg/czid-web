@@ -5,7 +5,7 @@ import { createProject } from "~/api";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks";
-import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
+import { MAX_DESCRIPTION_LENGTH } from "~/components/views/DiscoveryView/components/ProjectsView/constants";
 import Modal from "~ui/containers/Modal";
 import Input from "~ui/controls/Input";
 import RadioButton from "~ui/controls/RadioButton";

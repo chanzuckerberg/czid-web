@@ -17,7 +17,7 @@ import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
 import {
   KEY_DISCOVERY_VIEW_OPTIONS,
   SAMPLE_WAS_DELETED,
-} from "~/components/views/discovery/constants";
+} from "~/components/views/DiscoveryView/constants";
 import Sample from "~/interface/sample";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";

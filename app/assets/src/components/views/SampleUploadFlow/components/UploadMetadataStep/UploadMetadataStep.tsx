@@ -8,7 +8,7 @@ import {
 } from "~/components/common/Metadata/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import Instructions from "~/components/views/SamplesView/components/MetadataUploadModal/Instructions";
+import Instructions from "~/components/views/DiscoveryView/components/SamplesView/components/MetadataUploadModal/Instructions";
 import { HostGenome, MetadataBasic } from "~/interface/shared/";
 import cs from "../../sample_upload_flow.scss";
 
