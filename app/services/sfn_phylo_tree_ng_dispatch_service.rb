@@ -104,7 +104,8 @@ class SfnPhyloTreeNgDispatchService
     }
 
     if Gem::Version.new(@wdl_version) >= Gem::Version.new("1.2.5")
-      alignment_config = AlignmentConfig.find_by(name: AlignmentConfig.default_name)
+      project_alignment_config = VersionRetrievalService.call(@phylo_tree.project.id, AlignmentConfig::NCBI_INDEX)
+      alignment_config = AlignmentConfig.find_by(name: project_alignment_config)
       run_inputs[:nt_s3_path] = alignment_config.s3_nt_db_path
       run_inputs[:nt_loc_db] = alignment_config.s3_nt_loc_db_path
       run_inputs[:nr_s3_path] = alignment_config.s3_nr_db_path
