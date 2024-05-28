@@ -50,24 +50,36 @@ local-init: local-pull .env.localdev ## Set up a local dev environment
 
 
 .PHONY: local-migrate
-local-migrate: .env.localdev ## Set up a local dev environment
-	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rake db:migrate:with_data'
+local-migrate: .env.localdev ## Run database schema and data migrations
+	$(docker_compose) run --rm web bin/rails db:migrate:with_data RAILS_ENV=development
 
 .PHONY: local-migrate-down
-local-migrate-down: .env.localdev ## revert a migration; Useage: make local-migrate-down version=319487398
+local-migrate-down: .env.localdev ## revert a migration; Usage: make local-migrate-down version=319487398
 	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rails db:migrate:down VERSION=$(version)'
 
+.PHONY: local-seed-migrate
+local-seed-migrate: .env.localdev ## Run seed migrations; Usage: make local-seed-migrate
+	$(docker_compose) run --rm web sh -c bin/rails seed:migrate RAILS_ENV=development
+
+.PHONY: local-seed-migrate-version
+local-seed-migrate-version: .env.localdev ## Run seed migrations; Usage: make local-seed-migrate-version version=20200517175758_seed_migration_file_name.rb
+	$(docker_compose) run --rm web bin/rails seed:migrate MIGRATION=$(version) RAILS_ENV=development
+
 .PHONY: local-generate-migration
-local-generate-migration: .env.localdev ## Generate a migration; Useage: make local-generate-migration migration_name=backpopulate_data
-	$(docker_compose) run web rails generate migration $(migration_name)
+local-generate-migration: .env.localdev ## Generate a migration; Usage: make local-generate-migration migration_name=backpopulate_data
+	$(docker_compose) run web rails g migration $(migration_name)
 
 .PHONY: local-generate-data-migration
 local-generate-data-migration: .env.localdev ## Generate a data migration; Usage: make local-generate-data-migration migration_name=backpopulate_data
-	$(docker_compose) run web rails generate data_migration $(migration_name)
+	$(docker_compose) run web rails g data_migration $(migration_name)
+
+.PHONY: local-generate-seed-migration
+local-generate-seed-migration: .env.localdev ## Generate a seed migration; Usage: make local-generate-seed-migration migration_name=backpopulate_data
+	$(docker_compose) run web rails g seed_migration $(migration_name)
 
 .PHONY: local-db-drop
 local-db-drop: .env.localdev ## Wipe out the local db for a fresh start
-	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rake db:drop'
+	$(docker_compose) run --rm web bin/rails db:drop RAILS_ENV=development
 
 .PHONY: local-import-staging-data
 local-import-staging-data: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
@@ -75,7 +87,14 @@ local-import-staging-data: .env.localdev ## Import staging data into the local m
 	if [ ! -e idseq_development.sql.gz ]; then \
 	    $(docker_compose_simple) exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz; \
 	fi
-	export $$(cat .env.localdev); bin/clam staging 'mysqldump --no-data -h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging | gzip -c' > idseq_staging_tables.sql.gz
+	export $$(cat .env.localdev); bin/clam staging 'mysqldump --no-data '
+			'--ignore-table=idseq_staging._new_names '\
+	    '--ignore-table=idseq_staging._new_taxid_lineages '\
+	    '--ignore-table=idseq_staging._new_taxon_lineages '\
+	    '--ignore-table=idseq_staging.taxon_lineages_new '\
+	    '--ignore-table=idseq_staging.taxon_lineages_old '\
+			'-h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging '\
+			'| gzip -c' > idseq_staging_tables.sql.gz
 	export $$(cat .env.localdev); bin/clam staging 'mysqldump --lock-tables=false --no-create-info '\
 	    '--ignore-table=idseq_staging._new_names '\
 	    '--ignore-table=idseq_staging._new_taxid_lineages '\

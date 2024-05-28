@@ -758,51 +758,6 @@ ActiveRecord::Schema.define(version: 2024_03_26_201829) do
     t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
   end
 
-  create_table "taxon_lineages_old", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.integer "taxid", null: false
-    t.integer "superkingdom_taxid", default: -700, null: false
-    t.integer "phylum_taxid", default: -600, null: false
-    t.integer "class_taxid", default: -500, null: false
-    t.integer "order_taxid", default: -400, null: false
-    t.integer "family_taxid", default: -300, null: false
-    t.integer "genus_taxid", default: -200, null: false
-    t.integer "species_taxid", default: -100, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "superkingdom_name", default: "", null: false
-    t.string "phylum_name", default: "", null: false
-    t.string "class_name", default: "", null: false
-    t.string "order_name", default: "", null: false
-    t.string "family_name", default: "", null: false
-    t.string "genus_name", default: "", null: false
-    t.string "species_name", default: "", null: false
-    t.string "superkingdom_common_name", default: "", null: false
-    t.string "phylum_common_name", default: "", null: false
-    t.string "class_common_name", default: "", null: false
-    t.string "order_common_name", default: "", null: false
-    t.string "family_common_name", default: "", null: false
-    t.string "genus_common_name", default: "", null: false
-    t.string "species_common_name", default: "", null: false
-    t.integer "kingdom_taxid", default: -650, null: false
-    t.string "kingdom_name", default: "", null: false
-    t.string "kingdom_common_name", default: "", null: false
-    t.string "tax_name"
-    t.boolean "is_phage", default: false, null: false
-    t.string "version_start", limit: 10, null: false, comment: "The first version for which the lineage is valid"
-    t.string "version_end", limit: 10, null: false, comment: "The last version for which the lineage is valid"
-    t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
-    t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
-    t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
-    t.index ["order_taxid"], name: "index_taxon_lineages_on_order_taxid"
-    t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
-    t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
-    t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
-    t.index ["tax_name"], name: "index_taxon_lineages_on_tax_name"
-    t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end", unique: true
-    t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end", unique: true
-    t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
-  end
-
   create_table "taxon_summaries", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "background_id"
     t.integer "tax_id"

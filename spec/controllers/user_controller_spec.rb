@@ -188,7 +188,7 @@ RSpec.describe UsersController, type: :request do
   context "Host Genomes" do
     before do
       sign_in @joe
-      @host_genome = create(:host_genome, id: 1, user_id: @joe.id)
+      @host_genome = create(:host_genome, user_id: @joe.id)
     end
 
     it "host genome -non admin shouldnt get new" do

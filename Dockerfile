@@ -1,4 +1,4 @@
-FROM ruby:3.1.2-buster
+FROM ruby:3.1.3
 
 # Install apt based dependencies required to run Rails as
 # well as RubyGems. As the Ruby image itself is based on a

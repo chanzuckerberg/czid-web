@@ -58,7 +58,6 @@ x-env-variables: &env-variables
   ? ENVIRONMENT
   ? OFFLINE
 
-version: '3.8'
 services:
   opensearch:
     image: opensearchproject/opensearch:2.7.0

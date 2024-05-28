@@ -25,20 +25,21 @@ module FactoryBot
 
       def find_or_create_model(evaluation, attributes)
         check_if_record_exists = {
-          User => ->(user_attributes) { User.where(email: user_attributes[:email]).first },
+          AlignmentConfig => ->(alignment_config_attributes) { AlignmentConfig.where(name: alignment_config_attributes[:name]).first },
           AppConfig => ->(app_config_attributes) { AppConfig.where(key: app_config_attributes[:key]).first },
-          Project => ->(project_attributes) { Project.where(name: project_attributes[:name]).first },
+          Background => ->(background_attributes) { Background.where(name: background_attributes[:name]).first },
+          Citation => ->(citation_attributes) { Citation.where(key: citation_attributes[:key]).first },
           HostGenome => ->(host_genome_attributes) { HostGenome.where(name: host_genome_attributes[:name]).first },
-          Sample => ->(sample_attributes) { Sample.where(name: sample_attributes[:name]).first },
+          MetadataField => ->(metadata_field_attributes) { MetadataField.where(name: metadata_field_attributes[:name]).first },
+          OutputState => ->(output_state_attributes) { OutputState.where(pipeline_run_id: output_state_attributes[:pipeline_run_id], output: output_state_attributes[:output]).first },
+          Pathogen => ->(pathogen_attributes) { Pathogen.where(tax_id: pathogen_attributes[:tax_id]).first },
           PipelineRun => ->(pipeline_run_attributes) { PipelineRun.where(sample_id: pipeline_run_attributes[:sample_id], technology: pipeline_run_attributes[:technology]).first },
+          Project => ->(project_attributes) { Project.where(name: project_attributes[:name]).first },
+          Sample => ->(sample_attributes) { Sample.where(name: sample_attributes[:name]).first },
           TaxonCount => ->(taxon_count_attributes) { TaxonCount.where(pipeline_run_id: taxon_count_attributes[:pipeline_run_id], tax_id: taxon_count_attributes[:tax_id]).first },
           TaxonLineage => ->(taxon_lineage_attributes) { TaxonLineage.where(taxid: taxon_lineage_attributes[:taxid]).first },
-          OutputState => ->(output_state_attributes) { OutputState.where(pipeline_run_id: output_state_attributes[:pipeline_run_id], output: output_state_attributes[:output]).first },
+          User => ->(user_attributes) { User.where(email: user_attributes[:email]).first },
           WorkflowVersion => ->(workflow_version_attributes) { WorkflowVersion.where(workflow: workflow_version_attributes[:workflow], version: workflow_version_attributes[:version]).first },
-          MetadataField => ->(metadata_field_attributes) { MetadataField.where(name: metadata_field_attributes[:name]).first },
-          Citation => ->(citation_attributes) { Citation.where(key: citation_attributes[:key]).first },
-          Pathogen => ->(pathogen_attributes) { Pathogen.where(tax_id: pathogen_attributes[:tax_id]).first },
-          Background => ->(background_attributes) { Background.where(name: background_attributes[:name]).first },
         }
 
         check_for_presence = check_if_record_exists.key?(evaluation.object.class) ? check_if_record_exists[evaluation.object.class].call(attributes) : evaluation.object.class.where(attributes).first

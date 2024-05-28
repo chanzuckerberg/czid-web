@@ -19,4 +19,5 @@ SimpleCov.start 'rails' do
 
   # Exclude mostly manual tasks for now:
   add_filter "/lib/tasks"
+  add_filter "/lib/seed_resources"
 end

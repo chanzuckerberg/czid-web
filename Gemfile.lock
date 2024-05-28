@@ -1422,7 +1422,8 @@ GEM
       execjs (~> 2.0)
     bcrypt (3.1.18)
     bindex (0.8.1)
-    brakeman (5.4.0)
+    brakeman (6.1.2)
+      racc
     builder (3.2.4)
     bullet (7.0.7)
       activesupport (>= 3.0.0)
@@ -1859,7 +1860,7 @@ DEPENDENCIES
   aws-sdk-sqs
   aws-sdk-states
   bcrypt (~> 3.1.7)
-  brakeman
+  brakeman (~> 6.1.2)
   bullet
   byebug
   capybara (~> 2.17, >= 2.17.0)

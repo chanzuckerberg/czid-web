@@ -7,15 +7,38 @@ jobs:
     # This action is for inline GitHub diff annotations via ReviewDog
     runs-on: ubuntu-latest
     steps:
-      - id: checkout
-        name: Checkout
-        uses: actions/checkout@v2
-      - run: |
-          sudo chown -R root:root $GITHUB_WORKSPACE
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # No need to set `ruby-version`, it gets automatically set to the .ruby-version if it is not specified.
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - name: ReviewDog Brakeman
-        if: ${{ steps.checkout.conclusion }} == "success"
-        uses: reviewdog/action-brakeman@v1
+        uses: reviewdog/action-brakeman@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          brakeman_version: gemfile
           fail_on_error: true
-          brakeman_flags: '--no-exit-on-warn --no-exit-on-error'
+          use_bundler: true
+          reporter: github-pr-review
+
+  rubocop:
+    # This action is for inline GitHub diff annotations via ReviewDog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # No need to set `ruby-version`, it gets automatically set to the .ruby-version if it is not specified.
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: ReviewDog Rubocop
+        uses: reviewdog/action-rubocop@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          rubocop_version: gemfile
+          fail_on_error: true
+          use_bundler: true
+          reporter: github-pr-review

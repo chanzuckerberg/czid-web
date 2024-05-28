@@ -15,19 +15,29 @@ aws-oidc exec -- docker-compose up -d db
 sleep 10
 
 echo "== Syncing DB =="
-if aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web rake db:exists; then
-    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web rake db:migrate
+if aws-oidc exec -- docker-compose run --rm web bin/rails db:exists RAILS_ENV=development; then
+    echo "=== development DB exists, running migrations ==="
+    aws-oidc exec -- docker-compose run --rm web bin/rails db:migrate:with_data RAILS_ENV=development
 else
-    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web rake db:create db:migrate:with_data
-    # aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web rake db:seed
+    echo "=== development DB does not exist, setting up DB ==="
+    # rails db:setup creates the database, loads the schema, and initializes with the seed in db/seeds.rb
+    # TODO: once we have db/seeds.rb populated, we can remove the seed migration below
+    # TODO: there is a potential issue with this flow because db:setup loads the up to date schema for dev envs
+    #       but data migrations may be based on an older schema.
+    #       To get around this, we should remove migrations from this command, and recommend that all data migrations
+    #       that we want to be seeded should be added as a seed migration and generated in seeds.rb.
+    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web sh -c 'bin/rails db:setup && bin/rails seed:migrate MIGRATION=20230706192000_create_baseline_seed.rb && bin/rails db:migrate:with_data'
 fi
-if aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:exists; then
-    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:migrate
+if aws-oidc exec -- docker-compose run --rm web bin/rails db:exists RAILS_ENV=test; then
+    echo "=== test DB exists, running migrations ==="
+    # No seeded / data migrations needed for test DB
+    aws-oidc exec -- docker-compose run --rm web bin/rails db:migrate RAILS_ENV=test
 else
-    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:create db:migrate:with_data
-    # aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:seed
+    echo "=== test DB does not exist, setting up DB ==="
+    # This would be reached if the test DB gets dropped without the dev DB getting dropped
+    # Avoid seeding the test DB because it causes issues with our tests
+    aws-oidc exec -- docker-compose run --rm web bin/rails db:create db:schema:load RAILS_ENV=test
 fi
-
 
 echo "== Bringing up all services =="
 aws-oidc exec -- docker-compose up -d db redis web resque resque-result-monitor resque-pipeline-monitor

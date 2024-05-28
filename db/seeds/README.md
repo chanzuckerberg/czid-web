@@ -8,11 +8,11 @@ As the web app evolves and we add more Playwright E2E tests, we may need to add 
 
 ## How Seed Migrations work
 
-Call a factory inside a seed migration to incrementally build the seeded database. Tools: [FactoryBot](https://github.com/thoughtbot/factory_bot_rails) (sponsored open source project) with [Seed Migrations](https://github.com/pboling/seed_migration). 
+Call a factory inside a seed migration to incrementally build the seeded database. Tools: [FactoryBot](https://github.com/thoughtbot/factory_bot_rails) (sponsored open source project) with [Seed Migrations](https://github.com/pboling/seed_migration).
 
 We’re currently using FactoryBot to stub data for our Rspec unit tests. We actively maintain our existing factories so we could continuously expand our test coverage when new functionality is introduced. We should reuse our existing factories to create a maintainable Rails seed that stays up-to-date whenever we make schema or data changes.
 
-Seed migrations follow the same concept as creating a schema or data migration. Run the seed migrations in the CICD environment to populate the DB. **If you've ever created a Rails schema or data migration, you'll easily learn how to create a seed migration.** 
+Seed migrations follow the same concept as creating a schema or data migration. Run the seed migrations in the CICD environment to populate the DB. **If you've ever created a Rails schema or data migration, you'll easily learn how to create a seed migration.**
 
 
 ### Creating a Seed Migration
@@ -58,8 +58,7 @@ aws-oidc exec -- docker-compose run web rails seed:rollback MIGRATION=2014040716
 docker-compose exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz
 
 # Replace your current database with the seeded database
-aws-oidc exec -- docker-compose run web rails db:drop db:create db:migrate
-aws-oidc exec -- docker-compose run web rails db:migrate:with_data
+aws-oidc exec -- docker-compose run web rails db:drop db:create db:migrate:with_data
 aws-oidc exec -- docker-compose run web rails seed:migrate
 ```
 

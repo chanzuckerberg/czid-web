@@ -33,7 +33,7 @@ gem 'aws-sdk-resources'
 gem "aws-sdk-sqs"
 gem 'aws-sdk-states'
 
-gem 'brakeman'
+gem 'brakeman', '~> 6.1.2', require: false
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 gem 'consul', '~> 1.0.3'

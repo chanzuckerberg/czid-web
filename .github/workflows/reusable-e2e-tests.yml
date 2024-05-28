@@ -30,9 +30,9 @@ jobs:
       id-token: write
       contents: read
       actions: read
-    
+
     steps:
-      - uses: actions/checkout@v3 
+      - uses: actions/checkout@v3
       - uses: actions/cache@v1
         with:
           path: ~/.cache
@@ -68,8 +68,8 @@ jobs:
           secret-ids: |
             LOGIN, czid-login
             SAUCE, czid-sauce
-            SLACK, czid-slack         
-          parse-json-secrets: true 
+            SLACK, czid-slack
+          parse-json-secrets: true
 
       - name: Configuring services
         run: |
@@ -79,17 +79,16 @@ jobs:
 
       - name: Initialize dev DB
         run: |
-          docker-compose run web rails db:create db:migrate
-          docker-compose run web rails db:migrate:with_data
-          docker-compose run web rake seed:migrate
-      
+          docker-compose run web rails db:create db:migrate:with_data
+          docker-compose run web bin/rails seed:migrate MIGRATION=20230706192000_create_baseline_seed.rb
+
       - name: Starting services
         run: |
           docker-compose up -d web web-proxy
 
       - name: Check app is running
         run: wget --retry-connrefused --waitretry=1 --read-timeout=30 --timeout=15 -t 300 -O /dev/null http://127.0.0.1:3001/
-      
+
       - name: Git references
         shell: bash
         run: |
@@ -110,12 +109,11 @@ jobs:
           npm install -g saucectl
           npm run sauce:${{ inputs.environment }}
 
-        env: 
-          CZID_USERNAME: ${{ env.LOGIN_USERNAME }}      
+        env:
+          CZID_USERNAME: ${{ env.LOGIN_USERNAME }}
           CZID_PASSWORD: ${{ env.LOGIN_PASSWORD }}
           SAUCE_USERNAME: ${{ env.SAUCE_USERNAME }}
           SAUCE_ACCESS_KEY: ${{ env.SAUCE_ACCESS_KEY }}
           SAUCE_REST_ENDPOINT: 'https://us-west-1.saucelabs.com/'
           CI_COMMIT_SHORT_SHA: ${{ env.CI_COMMIT_SHORT_SHA }}
           BRANCH: ${{ env.BRANCH }}
-          

@@ -3,6 +3,8 @@ require_relative 'seed_resource'
 
 module SeedResource
   class AppConfigs < Base
+    CURRENT_ALIGNMENT_CONFIG_NAME = "2024-02-06".freeze
+
     def seed
       launched_features
       workflow_versions
@@ -36,7 +38,7 @@ module SeedResource
     end
 
     def alignment_config
-      find_or_create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: "2021-01-22")
+      find_or_create(:app_config, key: AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME, value: CURRENT_ALIGNMENT_CONFIG_NAME)
       find_or_create(:workflow_version, workflow: AlignmentConfig::NCBI_INDEX, version: "2021-01-22")
     end
 
