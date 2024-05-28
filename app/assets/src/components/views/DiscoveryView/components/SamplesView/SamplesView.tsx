@@ -27,10 +27,7 @@ import {
   getWorkflowRunMetadataFields,
 } from "~/api/metadata";
 import { LoadingPage } from "~/components/common/LoadingPage";
-import {
-  useAllowedFeatures,
-  UserContext,
-} from "~/components/common/UserContext";
+import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { SHOULD_READ_FROM_NEXTGEN } from "~/components/utils/features";
 import {
@@ -472,7 +469,6 @@ export const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderNextcladeTrigger = () => {
-    const allowedFeatures = useAllowedFeatures();
     const shouldReadFromNextGen = allowedFeatures.includes(
       SHOULD_READ_FROM_NEXTGEN,
     );
