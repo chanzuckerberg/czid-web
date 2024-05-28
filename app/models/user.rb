@@ -3,15 +3,6 @@ require 'auth0'
 require 'active_support/core_ext/securerandom'
 
 class User < ApplicationRecord
-  if ELASTICSEARCH_ON
-    include Elasticsearch::Model
-    # WARNING: using this means you must ensure activerecord callbacks are
-    #  called on all updates. This module updates elasticsearch using these
-    #  callbacks. If you must circumvent them somehow (eg. using raw SQL or
-    #  bulk_import) you must explicitly update elasticsearch appropriately.
-    include ElasticsearchCallbacksHelper
-  end
-
   before_create { self.salt ||= SecureRandom.base58(24) }
 
   # Tell rails to ignore these columns since they have been dropped from the db.

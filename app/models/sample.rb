@@ -6,14 +6,6 @@ require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
 
 class Sample < ApplicationRecord
-  if ELASTICSEARCH_ON
-    include Elasticsearch::Model
-    # WARNING: using this means you must ensure activerecord callbacks are
-    #  called on all updates. This module updates elasticsearch using these
-    #  callbacks. If you must circumvent them somehow (eg. using raw SQL or
-    #  bulk_import) you must explicitly update elasticsearch appropriately.
-    include ElasticsearchCallbacksHelper
-  end
   include AppConfigHelper
   include BasespaceHelper
   include ErrorHelper

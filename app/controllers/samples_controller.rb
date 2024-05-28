@@ -388,12 +388,6 @@ class SamplesController < ApplicationController
     # Not permission-dependent
     results = {}
 
-    # Need users
-    if !categories || ["project", "sample", "location", "tissue", "uploader"].any? { |i| categories.include? i }
-      # Admin-only for now: needs permissions scoping
-      users = current_user.admin ? prefix_match(User, "name", query, {}) : []
-    end
-
     if !categories || categories.include?("project")
       projects = current_power.projects_by_domain(domain).search_by_name(query)
       unless projects.empty?
@@ -405,36 +399,11 @@ class SamplesController < ApplicationController
         }
       end
     end
-    if (!categories || categories.include?("uploader")) && !users.empty?
-      results["Uploader"] = {
-        "name" => "Uploader",
-        "results" => users.group_by(&:name).map do |val, records|
-          { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
-        end,
-      }
-    end
 
     # Permission-dependent
-    if !categories || ["sample", "location", "tissue", "taxon"].any? { |i| categories.include? i }
+    if !categories || ["sample", "taxon"].any? { |i| categories.include? i }
       constrained_samples = samples_by_domain(domain).non_deleted
       constrained_samples = filter_samples(constrained_samples, params)
-      constrained_sample_ids = constrained_samples.pluck(:id)
-
-    end
-
-    if !categories || categories.include?("host")
-      hosts = constrained_samples
-              .joins(:host_genome)
-              .where("`host_genomes`.name LIKE :search", search: "#{query}%")
-              .distinct(:host_genome)
-      unless hosts.empty?
-        results["Host"] = {
-          "name" => "Host",
-          "results" => hosts.map do |h|
-            { "category" => "Host", "title" => h.name, "id" => h.id }
-          end,
-        }
-      end
     end
 
     if !categories || categories.include?("sample")
@@ -455,32 +424,6 @@ class SamplesController < ApplicationController
                 "title" => record.name,
               }
             end
-          end,
-        }
-      end
-    end
-
-    if !categories || categories.include?("location")
-      locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "collection_location")
-      unless locations.empty?
-        results["Location"] = {
-          "name" => "Location",
-          "results" => locations.pluck(:string_validated_value).uniq.map do |val|
-                         { "category" => "Location", "title" => val, "id" => val }
-                       end,
-        }
-      end
-    end
-
-    if !categories || categories.include?("tissue")
-      sample_types = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
-      unless sample_types.empty?
-        # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
-        # instances to "sample_type".
-        results["Tissue"] = {
-          "name" => "Tissue",
-          "results" => sample_types.pluck(:string_validated_value).uniq.map do |val|
-            { "category" => "Tissue", "title" => val, "id" => val }
           end,
         }
       end
