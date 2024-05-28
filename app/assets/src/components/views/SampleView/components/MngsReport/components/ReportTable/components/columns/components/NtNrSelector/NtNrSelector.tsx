@@ -1,5 +1,5 @@
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { DBType } from "~/interface/sampleView";
 import { NtNrStack } from "../NtNrStack";
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { ERCCComparisonShape } from "~/interface/shared";
+import { ScatterPlot } from "./components/ScatterPlot";
 import cs from "./ercc_scatterplot.scss";
-import { ScatterPlot } from "./ScatterPlot";
 
 interface ERCCScatterPlotProps {
   width: number;
@@ -9,7 +9,7 @@ interface ERCCScatterPlotProps {
   erccComparison?: ReadonlyArray<ERCCComparisonShape | null | undefined>;
 }
 
-const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
+export const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
   const data: { actual: number; expected: number }[] = [];
 
   if (props.erccComparison) {
@@ -45,5 +45,3 @@ const ERCCScatterPlot = (props: ERCCScatterPlotProps) => {
     />
   );
 };
-
-export default ERCCScatterPlot;

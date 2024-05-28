@@ -5,7 +5,7 @@ import { filter, get, getOr, kebabCase, size } from "lodash/fp";
 import React, { useState } from "react";
 import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";

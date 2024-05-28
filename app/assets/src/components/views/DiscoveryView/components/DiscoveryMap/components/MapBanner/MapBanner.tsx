@@ -1,6 +1,6 @@
 import { Icon } from "@czi-sds/components";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { GlobalContext } from "~/globalContext/reducer";
 import cs from "./map_banner.scss";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { PopupProps } from "semantic-ui-react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import cs from "./column_header_tooltip.scss";
 

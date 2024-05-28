@@ -2,7 +2,7 @@
 
 import { ButtonIcon } from "@czi-sds/components";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import cs from "./toolbar_button_icon.scss";
 
 export default function ToolbarButtonIcon({

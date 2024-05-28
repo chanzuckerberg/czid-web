@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 import { ANALYTICS_EVENT_NAMES, useWithAnalytics } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import cs from "~/components/common/DetailsSidebar/BulkDownloadDetailsMode/bulk_download_details_mode.scss";
 import {
   FailedStatus,

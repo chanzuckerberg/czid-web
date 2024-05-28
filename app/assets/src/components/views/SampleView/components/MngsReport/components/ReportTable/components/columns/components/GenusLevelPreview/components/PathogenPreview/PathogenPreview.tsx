@@ -1,5 +1,5 @@
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import Link from "~/components/ui/controls/Link";
 import Label from "~/components/ui/labels/Label";
 import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";

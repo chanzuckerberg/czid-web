@@ -5,7 +5,7 @@ import Checkbox from "~ui/controls/Checkbox";
 import Input from "~ui/controls/Input";
 import cs from "./user_form.scss";
 
-const UserForm = ({
+export const UserForm = ({
   archetypes,
   email,
   errorMessage,
@@ -228,5 +228,3 @@ interface UserFormProps {
   success: boolean;
   successMessage: string;
 }
-
-export default UserForm;

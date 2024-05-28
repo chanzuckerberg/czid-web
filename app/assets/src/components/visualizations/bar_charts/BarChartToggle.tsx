@@ -1,7 +1,7 @@
 import cx from "classnames";
 import { capitalize } from "lodash/fp";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import IconBarChartHorizontal3Small from "~ui/icons/IconBarChartHorizontal3Small";
 import IconPercentageSmall from "~ui/icons/IconPercentageSmall";

@@ -35,8 +35,8 @@ import {
 } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import ErrorBoundary from "~/components/common/ErrorBoundary";
 import { useAllowedFeatures } from "~/components/common/UserContext";
-import ErrorBoundary from "~/components/ErrorBoundary";
 import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";

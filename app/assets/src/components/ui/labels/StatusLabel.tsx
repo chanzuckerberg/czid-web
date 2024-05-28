@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import cs from "./status_label.scss";
 
 interface StatusLabelProps {

@@ -7,7 +7,7 @@ import ReactDOM from "react-dom";
 // Helper Functions and Constants
 import { getCoverageVizData } from "~/api";
 // Components
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";

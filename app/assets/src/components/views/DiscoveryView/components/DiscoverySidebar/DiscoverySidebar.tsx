@@ -2,7 +2,7 @@ import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { Accordion } from "~/components/layout";
 import { GlobalContext } from "~/globalContext/reducer";
 import { DimensionsDetailed, DimensionValue } from "~/interface/discoveryView";

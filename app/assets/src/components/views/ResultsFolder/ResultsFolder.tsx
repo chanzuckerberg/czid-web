@@ -3,10 +3,10 @@ import {
   RESULTS_FOLDER_STAGE_KEYS,
   RESULTS_FOLDER_STEP_KEYS,
 } from "~/components/utils/resultsFolder";
-import Divider from "./layout/Divider";
+import Divider from "../../layout/Divider";
+import { downloadStringToFile, openUrl } from "../../utils/links";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../SampleUploadFlow/constants";
 import cs from "./results_folder.scss";
-import { downloadStringToFile, openUrl } from "./utils/links";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "./views/SampleUploadFlow/constants";
 
 interface OutputFileProps {
   file?: {

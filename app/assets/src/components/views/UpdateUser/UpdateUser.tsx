@@ -1,8 +1,8 @@
 import { includes } from "lodash/fp";
 import React, { useState } from "react";
 import { updateUser as userUpdater } from "~/api/user";
-import UserForm from "~/components/views/users/UserForm";
 import { openUrl } from "~utils/links";
+import { UserForm } from "./components/UserForm";
 
 const DPH = "DPH";
 const GCE = "GCE";

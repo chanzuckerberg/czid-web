@@ -2,7 +2,7 @@ import { ButtonIcon, Tabs } from "@czi-sds/components";
 import cx from "classnames";
 import { findIndex, startCase } from "lodash/fp";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
 import { WorkflowType } from "~/components/utils/workflows";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";

@@ -10,7 +10,7 @@ import {
   useWithAnalytics,
   WithAnalyticsType,
 } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import { getURLParamString } from "~/helpers/url";

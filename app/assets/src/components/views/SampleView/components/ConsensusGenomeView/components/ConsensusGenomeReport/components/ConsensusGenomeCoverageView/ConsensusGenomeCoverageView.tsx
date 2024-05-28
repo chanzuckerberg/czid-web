@@ -3,7 +3,7 @@ import { cx } from "@emotion/css";
 import React from "react";
 import { graphql, useFragment } from "react-relay";
 import { FragmentRefs } from "relay-runtime";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { HelpIcon } from "~/components/ui/containers";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { formatPercent } from "~/components/utils/format";

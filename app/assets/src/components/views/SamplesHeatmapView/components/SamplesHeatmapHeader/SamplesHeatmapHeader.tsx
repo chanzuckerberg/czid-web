@@ -2,7 +2,7 @@ import { ButtonIcon, Icon } from "@czi-sds/components";
 import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
 import { updateHeatmapName } from "~/api/visualization";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader } from "~/components/layout";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";

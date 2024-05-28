@@ -41,7 +41,7 @@ import {
   useWithAnalytics,
   WithAnalyticsType,
 } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { TaxonOption } from "~/components/common/filters/types";
 import ProjectCreationModal from "~/components/common/ProjectCreationModal";
 import ProjectSelect from "~/components/common/ProjectSelect";

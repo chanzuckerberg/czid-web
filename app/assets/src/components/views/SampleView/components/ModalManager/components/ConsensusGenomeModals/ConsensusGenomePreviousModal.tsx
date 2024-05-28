@@ -2,7 +2,7 @@ import { Button, Icon } from "@czi-sds/components";
 import { get } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
 import { ConsensusGenomeData } from "~/interface/shared";

@@ -12,7 +12,7 @@ import {
 } from "react-virtualized";
 import "react-virtualized/styles.css";
 import { TrackEventType, useTrackEvent } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { humanize } from "~/helpers/strings";
 import { ColumnProps } from "~/interface/sampleView";

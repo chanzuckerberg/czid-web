@@ -1,6 +1,6 @@
 import React from "react";
 import { useWithAnalytics, WithAnalyticsType } from "~/api/analytics";
-import ReadViz from "../../../../ReadViz";
+import ReadViz from "./components/ReadViz";
 
 interface AccessionVizProps {
   accession?: string;

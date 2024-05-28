@@ -3,7 +3,7 @@ import cx from "classnames";
 import d3 from "d3";
 import { find, isEmpty, isEqual, keyBy, orderBy } from "lodash/fp";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import PinSampleSelector from "~/components/common/Heatmap/PinSampleSelector";

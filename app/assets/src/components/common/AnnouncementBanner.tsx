@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React, { useEffect, useState } from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { IconAlert, IconCloseSmall } from "~ui/icons";
 import cs from "./announcement_banner.scss";
 

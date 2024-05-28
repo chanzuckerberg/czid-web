@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import { BULK_DOWNLOAD_TYPES } from "~/components/views/BulkDownloadListView/constants";
 import {

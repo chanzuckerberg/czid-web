@@ -10,7 +10,7 @@ import {
 } from "~/api";
 import { useWithAnalytics, WithAnalyticsType } from "~/api/analytics";
 import { getPhyloTreeNg, rerunPhyloTreeNg } from "~/api/phylo_tree_ngs";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";

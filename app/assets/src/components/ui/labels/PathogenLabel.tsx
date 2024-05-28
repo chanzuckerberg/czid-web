@@ -1,6 +1,6 @@
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import BasicPopup from "../../BasicPopup";
+import BasicPopup from "../../common/BasicPopup";
 import Label from "./Label";
 import cs from "./pathogen_label.scss";
 

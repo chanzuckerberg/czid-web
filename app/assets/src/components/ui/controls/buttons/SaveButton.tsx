@@ -1,6 +1,6 @@
 import { Button, Icon } from "@czi-sds/components";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 
 interface SaveButtonProps {
   onClick: () => void;

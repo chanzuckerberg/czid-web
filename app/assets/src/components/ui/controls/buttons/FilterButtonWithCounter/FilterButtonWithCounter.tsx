@@ -1,7 +1,7 @@
 import { ButtonIcon } from "@czi-sds/components";
 import cx from "classnames";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import Label from "~ui/labels/Label";
 import cs from "./filter_button_with_counter.scss";
 

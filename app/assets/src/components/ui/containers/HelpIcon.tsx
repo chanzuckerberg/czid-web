@@ -1,7 +1,7 @@
 import { Icon } from "@czi-sds/components";
 import React from "react";
 import { useTrackEvent } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import ExternalLink from "../controls/ExternalLink";
 import cs from "./help_icon.scss";
 

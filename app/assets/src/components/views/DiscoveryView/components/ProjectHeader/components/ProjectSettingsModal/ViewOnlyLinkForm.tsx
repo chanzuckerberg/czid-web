@@ -8,7 +8,7 @@ import {
   getSnapshotInfo,
   updateSnapshotBackground,
 } from "~/api/snapshot_links";
-import BasicPopup from "~/components/BasicPopup";
+import BasicPopup from "~/components/common/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import List from "~/components/ui/List";
 import BackgroundModelFilter from "~/components/views/SampleView/components/MngsReport/components/ReportFilters/components/BackgroundModelFilter";
