@@ -13,6 +13,7 @@ interface BulkSamplesActionsMenuProps {
   handleBulkKickoffAmr: () => void;
   handleClickBenchmark: () => void;
   handleClickPhyloTree: () => void;
+  popupPosition?: "top left" | "top center";
 }
 
 const BulkSamplesActionsMenu = ({
@@ -20,6 +21,7 @@ const BulkSamplesActionsMenu = ({
   handleBulkKickoffAmr,
   handleClickPhyloTree,
   handleClickBenchmark,
+  popupPosition,
 }: BulkSamplesActionsMenuProps) => {
   const { admin, allowedFeatures = [] } = useContext(UserContext) || {};
   const [menuAnchorEl, setMenuAnchorEl] =
@@ -101,6 +103,7 @@ const BulkSamplesActionsMenu = ({
         icon="dotsHorizontal"
         popupText={"More Actions"}
         popupSubtitle={noObjectsSelected ? "Select at least 1 sample" : ""}
+        popupPosition={popupPosition}
         disabled={noObjectsSelected}
         onClick={openActionsMenu}
       />

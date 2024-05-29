@@ -15,6 +15,7 @@ interface BulkDeleteTriggerProps {
   selectedObjects: ObjectType[];
   workflow: WorkflowType;
   workflowEntity: string;
+  popupPosition?: "top left" | "top center";
 }
 
 const BulkDeleteTrigger = ({
@@ -22,6 +23,7 @@ const BulkDeleteTrigger = ({
   selectedObjects,
   workflow,
   workflowEntity,
+  popupPosition,
 }: BulkDeleteTriggerProps) => {
   const { userId } = useContext(UserContext) ?? {};
 
@@ -90,6 +92,7 @@ const BulkDeleteTrigger = ({
       onClick={onClick}
       inverted={shouldInvertTooltip}
       testId="bulk-delete-trigger"
+      popupPosition={popupPosition}
     />
   );
 };

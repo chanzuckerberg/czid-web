@@ -333,7 +333,7 @@ export const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const renderHeatmapTrigger = () => {
+  const renderHeatmapTrigger = (popupPosition: ToolbarPopupPositionOptions) => {
     // Should still show deprecated after feature flag is removed
     // (until we've updated the heatmap)
     const amrHeatmapText = "AMR Heatmap (Deprecated)";
@@ -350,6 +350,7 @@ export const SamplesView = forwardRef(function SamplesView(
         icon="grid"
         popupText="Heatmap"
         popupSubtitle={subtitle}
+        popupPosition={popupPosition}
         disabled
       />
     );
@@ -388,6 +389,7 @@ export const SamplesView = forwardRef(function SamplesView(
               className={cs.action}
               icon="grid"
               popupText="Heatmap"
+              popupPosition={popupPosition}
             />
           }
         />
@@ -403,7 +405,9 @@ export const SamplesView = forwardRef(function SamplesView(
     setBenchmarkModalOpen(true);
   };
 
-  const renderBulkDownloadTrigger = () => {
+  const renderBulkDownloadTrigger = (
+    popupPosition: ToolbarPopupPositionOptions,
+  ) => {
     return (
       <ToolbarButtonIcon
         testId="download-icon"
@@ -413,6 +417,7 @@ export const SamplesView = forwardRef(function SamplesView(
         popupText={bulkDownloadButtonTempTooltip || "Download"}
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
+        popupPosition={popupPosition}
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
         disabled={selectedIds.size === 0}
         onClick={handleBulkDownloadModalOpen}
@@ -420,7 +425,9 @@ export const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const renderCollectionTrigger = () => {
+  const renderCollectionTrigger = (
+    popupPosition: ToolbarPopupPositionOptions,
+  ) => {
     const targetSamples = getRows();
 
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2532
@@ -431,6 +438,7 @@ export const SamplesView = forwardRef(function SamplesView(
         icon="squareOnDashedSquare"
         popupText="Background Model"
         popupSubtitle="Select at least 2 samples"
+        popupPosition={popupPosition}
         disabled
       />
     ) : (
@@ -468,7 +476,9 @@ export const SamplesView = forwardRef(function SamplesView(
       }, 0);
   };
 
-  const renderNextcladeTrigger = () => {
+  const renderNextcladeTrigger = (
+    popupPosition: ToolbarPopupPositionOptions,
+  ) => {
     const shouldReadFromNextGen = allowedFeatures.includes(
       SHOULD_READ_FROM_NEXTGEN,
     );
@@ -494,6 +504,7 @@ export const SamplesView = forwardRef(function SamplesView(
         icon="treeDendogram"
         popupText="Nextclade"
         popupSubtitle={getPopupSubtitle()}
+        popupPosition={popupPosition}
         // TODO: re-enable Nextclade when it's connected to NextGen
         disabled={
           shouldReadFromNextGen
@@ -506,7 +517,7 @@ export const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const renderGenEpiTrigger = () => {
+  const renderGenEpiTrigger = (popupPosition: ToolbarPopupPositionOptions) => {
     const sendToNextcladeCount = getSendToNextcladeCount();
 
     if (!allowedFeatures.includes("genepi")) {
@@ -529,6 +540,7 @@ export const SamplesView = forwardRef(function SamplesView(
         icon="share"
         popupText="Send samples to CZ Gen Epi"
         popupSubtitle={getPopupSubtitle()}
+        popupPosition={popupPosition}
         disabled={sendToNextcladeCount === 0}
       />
     );
@@ -835,17 +847,22 @@ export const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const renderBulkDeleteTrigger = () => (
+  const renderBulkDeleteTrigger = (
+    popupPosition: ToolbarPopupPositionOptions,
+  ) => (
     <BulkDeleteTrigger
       onClick={() => setIsBulkDeleteModalOpen(true)}
       selectedObjects={selectedObjects}
+      popupPosition={popupPosition}
       workflow={workflow}
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       workflowEntity={workflowEntity}
     />
   );
 
-  const renderBulkSamplesActionsMenu = () => (
+  const renderBulkSamplesActionsMenu = (
+    popupPosition: ToolbarPopupPositionOptions,
+  ) => (
     <BulkSamplesActionsMenu
       noObjectsSelected={size(selectedObjects) === 0}
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
@@ -854,29 +871,44 @@ export const SamplesView = forwardRef(function SamplesView(
       }
       handleClickPhyloTree={handleClickPhyloTree}
       handleClickBenchmark={handleClickBenchmark}
+      popupPosition={popupPosition}
     />
   );
 
+  type ToolbarPopupPositionOptions = "top left" | "top center";
+
   const renderTriggers = () => {
     const triggers = {
-      [TRIGGERS.backgroundModel]: renderCollectionTrigger,
-      [TRIGGERS.heatmap]: renderHeatmapTrigger,
-      [TRIGGERS.download]: renderBulkDownloadTrigger,
-      [TRIGGERS.nextclade]: renderNextcladeTrigger,
-      [TRIGGERS.genepi]: renderGenEpiTrigger,
-      [TRIGGERS.bulk_delete]: renderBulkDeleteTrigger,
-      [TRIGGERS.more_actions]: renderBulkSamplesActionsMenu,
+      [TRIGGERS.backgroundModel]: (
+        popupPosition: ToolbarPopupPositionOptions,
+      ) => renderCollectionTrigger(popupPosition),
+      [TRIGGERS.heatmap]: (popupPosition: ToolbarPopupPositionOptions) =>
+        renderHeatmapTrigger(popupPosition),
+      [TRIGGERS.download]: (popupPosition: ToolbarPopupPositionOptions) =>
+        renderBulkDownloadTrigger(popupPosition),
+      [TRIGGERS.nextclade]: (popupPosition: ToolbarPopupPositionOptions) =>
+        renderNextcladeTrigger(popupPosition),
+      [TRIGGERS.genepi]: (popupPosition: ToolbarPopupPositionOptions) =>
+        renderGenEpiTrigger(popupPosition),
+      [TRIGGERS.bulk_delete]: (popupPosition: ToolbarPopupPositionOptions) =>
+        renderBulkDeleteTrigger(popupPosition),
+      [TRIGGERS.more_actions]: (popupPosition: ToolbarPopupPositionOptions) =>
+        renderBulkSamplesActionsMenu(popupPosition),
     };
     // Get workflows triggers available in the current workflow tab
     const triggersAvailable = intersection(
       Object.values(TRIGGERS),
       WORKFLOW_TRIGGERS[workflow],
     );
-    const triggersToRender = triggersAvailable.map((trigger: string) => (
-      <React.Fragment key={`${workflow}-${trigger}`}>
-        {triggers[trigger]()}
-      </React.Fragment>
-    ));
+    const triggersToRender = triggersAvailable.map(
+      (trigger: string, i: number) => (
+        <React.Fragment key={`${workflow}-${trigger}`}>
+          {triggersAvailable.length - 1 === i
+            ? triggers[trigger]("top left")
+            : triggers[trigger]("top center")}
+        </React.Fragment>
+      ),
+    );
 
     return (
       <>

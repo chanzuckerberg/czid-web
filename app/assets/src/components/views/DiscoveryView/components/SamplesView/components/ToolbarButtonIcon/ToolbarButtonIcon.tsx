@@ -15,6 +15,7 @@ export default function ToolbarButtonIcon({
   popperDependencies,
   inverted,
   testId,
+  popupPosition,
 }: ToolbarButtonIconProps) {
   const iconWrapper = (
     <div className={className} data-testid={testId}>
@@ -41,7 +42,7 @@ export default function ToolbarButtonIcon({
           <div className={cs.popupSubtitle}>{popupSubtitle}</div>
         </div>
       }
-      position="top center"
+      position={popupPosition ?? "top center"}
       basic={false}
       popperDependencies={popperDependencies}
       inverted={inverted}
@@ -66,4 +67,5 @@ interface ToolbarButtonIconProps {
   popperDependencies?: string[];
   inverted?: boolean;
   testId?: string;
+  popupPosition?: "top left" | "top center";
 }
