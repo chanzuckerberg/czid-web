@@ -22,6 +22,7 @@ const TOGGLE_SAMPLE_NAMES = "button[class*='toggleNames']";
 const APPCUES_CONTAINER = "[class*='appcues-tooltip-container']";
 const APPCUES_GOT_IT_BUTTON = "[class*='appcues-button-success']";
 const NOTIFICATION_CONTAINER = "[class*='notificationContainer']";
+const FILTER_PANEL_CONTAINER = "[class*='filterPanelContainer']";
 
 export class HeatmapPage extends PageObject {
   // #region Api
@@ -55,6 +56,10 @@ export class HeatmapPage extends PageObject {
   // #region Hover
   public async hoverOverCell(index: number) {
     await this.page.locator(CELLS).nth(index).hover();
+  }
+
+  public async hoverOverFIlterPanel() {
+    await this.page.locator(FILTER_PANEL_CONTAINER).hover();
   }
   // #endregion Hover
 
@@ -90,10 +95,12 @@ export class HeatmapPage extends PageObject {
     const metric = await this.page
       .locator(HOVER_HIGHLIGHTED_METIC)
       .allTextContents();
-    return {
+    const metrics = {
       label: metric[0],
       value: metric[1],
     };
+    await this.hoverOverFIlterPanel(); // Remove cell hover to hide tooltip
+    return metrics;
   }
 
   public async getHeatmapWidthHeight() {
