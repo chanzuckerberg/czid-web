@@ -926,7 +926,6 @@ function getConsensusGenomesOrderBys(
 }
 
 async function querySequencingReadObjects(
-  offset: number,
   sequencingReadIds: string[],
   workflowRunIds: string[],
   { projectId, search, orderBy, orderDir, filters }: Partial<Conditions>,
@@ -938,9 +937,6 @@ async function querySequencingReadObjects(
     DiscoveryViewFCSequencingReadsQuery,
     {
       input: {
-        // limit and offset are for Rails only (they should be in todoRemove)
-        limit: DEFAULT_PAGE_SIZE,
-        offset,
         where: {
           id: {
             _in: sequencingReadIds,
@@ -967,6 +963,7 @@ async function querySequencingReadObjects(
           orderBy,
           orderDir,
           workflow: WorkflowType.CONSENSUS_GENOME,
+          workflowRunIds: workflowRunIds.map(Number).filter(Number.isInteger),
         },
       },
     },
@@ -1384,7 +1381,6 @@ export const DiscoveryViewFC = (props: DiscoveryViewProps) => {
       offset + DEFAULT_PAGE_SIZE,
     );
     const sequencingReads = await querySequencingReadObjects(
-      offset, // TODO: Remove.
       workflowRunsPage.map(run => run.inputSequencingReadId),
       workflowRunsPage.map(run => run.id),
       cgConditions.current,
