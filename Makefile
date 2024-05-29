@@ -59,7 +59,7 @@ local-migrate-down: .env.localdev ## revert a migration; Usage: make local-migra
 
 .PHONY: local-seed-migrate
 local-seed-migrate: .env.localdev ## Run seed migrations; Usage: make local-seed-migrate
-	$(docker_compose) run --rm web sh -c bin/rails seed:migrate RAILS_ENV=development
+	$(docker_compose) run --rm web bin/rails seed:migrate RAILS_ENV=development
 
 .PHONY: local-seed-migrate-version
 local-seed-migrate-version: .env.localdev ## Run seed migrations; Usage: make local-seed-migrate-version version=20200517175758_seed_migration_file_name.rb
