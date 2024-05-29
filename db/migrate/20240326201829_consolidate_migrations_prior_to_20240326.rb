@@ -1,7 +1,7 @@
 # The previous migration with this timestamp was replace with DB schema version: 2024_03_26_201829
 class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
   def change
-    create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
       t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
       t.text "accession_name", null: false, comment: "The NCBI GenBank name of the accession the coverage stats were created for"
@@ -16,7 +16,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pipeline_run_id", "accession_id"], name: "index_accession_coverage_stats_on_pr_id_and_accession_id"
     end
 
-    create_table "alignment_configs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "alignment_configs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name"
       t.string "index_dir_suffix"
       t.text "s3_nt_db_path"
@@ -37,7 +37,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.string "diamond_db_path", comment: "The S3 path prefix to the diamond index"
     end
 
-    create_table "amr_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "amr_counts", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "gene"
       t.string "allele"
       t.float "coverage"
@@ -54,7 +54,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
     end
 
-    create_table "annotations", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "annotations", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pipeline_run_id", null: false, comment: "The pipeline run id associated with the annotated sample report."
       t.integer "tax_id", null: false, comment: "The id of the annotated taxon."
       t.integer "content", comment: "An enum describing the annotation content. Will be set to null if an existing annotation is cleared."
@@ -64,13 +64,13 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pipeline_run_id", "tax_id"], name: "index_annotations_on_pipeline_run_id_and_tax_id"
     end
 
-    create_table "app_configs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "app_configs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "key"
       t.text "value"
       t.index ["key"], name: "index_app_configs_on_key", unique: true
     end
 
-    create_table "backgrounds", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "backgrounds", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name"
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
@@ -82,14 +82,14 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["name"], name: "index_backgrounds_on_name", unique: true
     end
 
-    create_table "backgrounds_pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "backgrounds_pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "background_id"
       t.bigint "pipeline_run_id"
       t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
       t.index ["pipeline_run_id"], name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
     end
 
-    create_table "bulk_downloads", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "bulk_downloads", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.text "params_json", comment: "JSON of the params for this bulk download"
       t.string "download_type", null: false, comment: "The type of bulk download"
       t.string "status", null: false, comment: "The current status of the download, e.g. waiting, running, error, success"
@@ -106,21 +106,21 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
     end
 
-    create_table "bulk_downloads_pipeline_runs", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "bulk_downloads_pipeline_runs", id: false, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pipeline_run_id", null: false
       t.bigint "bulk_download_id", null: false
       t.index ["bulk_download_id"], name: "index_bulk_downloads_pipeline_runs_on_bulk_download_id"
       t.index ["pipeline_run_id"], name: "index_bulk_downloads_pipeline_runs_on_pipeline_run_id"
     end
 
-    create_table "bulk_downloads_workflow_runs", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "bulk_downloads_workflow_runs", id: false, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "bulk_download_id", null: false
       t.bigint "workflow_run_id", null: false
       t.index ["bulk_download_id"], name: "index_bulk_downloads_workflow_runs_on_bulk_download_id"
       t.index ["workflow_run_id"], name: "index_bulk_downloads_workflow_runs_on_workflow_run_id"
     end
 
-    create_table "citations", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "citations", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "key", null: false, comment: "Key used to identify the citation (ie. niaid_2020)."
       t.text "footnote", null: false, comment: "Use MLA footnote citation style."
       t.datetime "created_at", precision: 6, null: false
@@ -128,14 +128,14 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["key"], name: "index_citations_on_key", unique: true
     end
 
-    create_table "citations_pathogen_list_versions", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "citations_pathogen_list_versions", id: false, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "citation_id", null: false
       t.bigint "pathogen_list_version_id", null: false
       t.index ["citation_id"], name: "index_citation_pathogen_list_version_on_citation_id"
       t.index ["pathogen_list_version_id"], name: "index_citation_pathogen_list_version_on_pathogen_list_version_id"
     end
 
-    create_table "contigs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "contigs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pipeline_run_id"
       t.string "name"
       t.text "sequence", size: :long
@@ -161,10 +161,10 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pipeline_run_id", "species_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nt"
     end
 
-    create_table "data_migrations", primary_key: "version", id: :string, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "data_migrations", primary_key: "version", id: :string, charset: "utf8", collation: "utf8_unicode_ci" do |t|
     end
 
-    create_table "deletion_logs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "deletion_logs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "object_id", null: false, comment: "The id of the object that was deleted"
       t.bigint "user_id", null: false, comment: "The user id of the user who deleted the object"
       t.string "user_email", comment: "The email of the user who deleted the object"
@@ -176,7 +176,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.datetime "updated_at", precision: 6, null: false
     end
 
-    create_table "ercc_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "ercc_counts", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pipeline_run_id"
       t.string "name"
       t.integer "count"
@@ -185,7 +185,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pipeline_run_id", "name"], name: "index_ercc_counts_on_pipeline_run_id_and_name", unique: true
     end
 
-    create_table "host_genomes", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "host_genomes", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name", null: false, comment: "Friendly name of host genome. May be common name or scientific name of species. Must be unique and start with a capital letter."
       t.string "s3_star_index_path", default: "s3://idseq-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
       t.string "s3_bowtie2_index_path", default: "s3://idseq-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
@@ -208,14 +208,14 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["user_id"], name: "index_host_genomes_on_user_id"
     end
 
-    create_table "host_genomes_metadata_fields", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "host_genomes_metadata_fields", id: false, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "host_genome_id", null: false
       t.bigint "metadata_field_id", null: false
       t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields", unique: true
       t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes", unique: true
     end
 
-    create_table "input_files", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "input_files", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name"
       t.text "presigned_url"
       t.bigint "sample_id"
@@ -229,7 +229,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["sample_id"], name: "index_input_files_on_sample_id"
     end
 
-    create_table "insert_size_metric_sets", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "insert_size_metric_sets", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pipeline_run_id", null: false
       t.integer "median", null: false
       t.integer "mode", null: false
@@ -245,7 +245,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
     end
 
-    create_table "job_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "job_stats", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "task"
       t.integer "reads_after"
       t.datetime "created_at", null: false
@@ -256,7 +256,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["task"], name: "index_job_stats_on_task"
     end
 
-    create_table "locations", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "locations", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name", default: "", null: false, comment: "Full display name, such as a complete address"
       t.string "geo_level", limit: 20, default: "", null: false, comment: "Level of specificity (country, state, subdivision, or city)"
       t.string "country_name", limit: 100, default: "", null: false, comment: "Country (or equivalent) of this location if available"
@@ -282,7 +282,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["osm_type", "osm_id"], name: "index_locations_on_osm_type_and_osm_id"
     end
 
-    create_table "metadata", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "metadata", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "key", null: false, collation: "latin1_swedish_ci"
       t.string "raw_value"
       t.string "string_validated_value"
@@ -299,7 +299,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["string_validated_value"], name: "index_metadata_on_string_validated_value"
     end
 
-    create_table "metadata_fields", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "metadata_fields", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name", null: false
       t.string "display_name"
       t.string "description"
@@ -317,14 +317,14 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["group"], name: "index_metadata_fields_on_group"
     end
 
-    create_table "metadata_fields_projects", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "metadata_fields_projects", id: false, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "project_id", null: false
       t.bigint "metadata_field_id", null: false
       t.index ["metadata_field_id"], name: "metadata_fields_projects_metadata_field_id_fk"
       t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
     end
 
-    create_table "nextgen_deletion_logs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "nextgen_deletion_logs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "user_id", null: false, comment: "The user id of the user who deleted the object"
       t.string "user_email", comment: "The email of the user who deleted the object"
       t.bigint "rails_object_id", comment: "The id of the object that was deleted (Rails ID)"
@@ -337,7 +337,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.datetime "updated_at", precision: 6, null: false
     end
 
-    create_table "output_states", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "output_states", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "output"
       t.string "state"
       t.bigint "pipeline_run_id"
@@ -346,7 +346,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
     end
 
-    create_table "pathogen_list_versions", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "pathogen_list_versions", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pathogen_list_id"
       t.string "version", null: false, comment: "Use semantic versioning numbers."
       t.datetime "created_at", precision: 6, null: false
@@ -354,21 +354,21 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pathogen_list_id"], name: "index_pathogen_list_versions_on_pathogen_list_id"
     end
 
-    create_table "pathogen_list_versions_pathogens", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "pathogen_list_versions_pathogens", id: false, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pathogen_id", null: false
       t.bigint "pathogen_list_version_id", null: false
       t.index ["pathogen_id"], name: "index_pathogen_pathogen_list_version_on_pathogen_id"
       t.index ["pathogen_list_version_id"], name: "index_pathogen_pathogen_list_version_on_pathogen_list_version_id"
     end
 
-    create_table "pathogen_lists", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "pathogen_lists", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "creator_id", comment: "The user_id that created the pathogen list. Null if the list is admin-managed."
       t.datetime "created_at", precision: 6, null: false
       t.datetime "updated_at", precision: 6, null: false
       t.boolean "is_global", default: false, null: false
     end
 
-    create_table "pathogens", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "pathogens", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.integer "tax_id", null: false, comment: "The taxon id of the pathogen."
       t.datetime "created_at", precision: 6, null: false
       t.datetime "updated_at", precision: 6, null: false
@@ -376,7 +376,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["citation_id"], name: "index_pathogens_on_citation_id"
     end
 
-    create_table "persisted_backgrounds", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "persisted_backgrounds", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "user_id", null: false, comment: "The id of the user that has the persisted_background"
       t.bigint "project_id", null: false, comment: "The id of the project that the persisted background is persisted for"
       t.bigint "background_id", comment: "The id of the background that is being persisted. Will be set to null if the user selects a background with an incompatible sample."
@@ -385,7 +385,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["user_id", "project_id"], name: "index_user_id_project_id", unique: true
     end
 
-    create_table "phylo_tree_ngs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "phylo_tree_ngs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.json "inputs_json", comment: "Generic JSON field for recording execution inputs."
       t.string "status", default: "CREATED", null: false, comment: "A soft enum (string) describing the execution status."
       t.string "wdl_version", comment: "Version of the WDL used in execution."
@@ -406,7 +406,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["user_id"], name: "index_phylo_tree_ngs_on_user_id"
     end
 
-    create_table "phylo_tree_ngs_pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "phylo_tree_ngs_pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "phylo_tree_ng_id"
       t.bigint "pipeline_run_id"
       t.datetime "created_at", null: false
@@ -414,7 +414,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["phylo_tree_ng_id", "pipeline_run_id"], name: "index_ptng_pr_id", unique: true
     end
 
-    create_table "phylo_trees", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "phylo_trees", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.integer "taxid"
       t.integer "tax_level"
       t.string "tax_name"
@@ -444,14 +444,14 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["user_id"], name: "index_phylo_trees_on_user_id"
     end
 
-    create_table "phylo_trees_pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "phylo_trees_pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "phylo_tree_id"
       t.bigint "pipeline_run_id"
       t.index ["phylo_tree_id", "pipeline_run_id"], name: "index_pt_pr_id", unique: true
       t.index ["pipeline_run_id"], name: "phylo_trees_pipeline_runs_pipeline_run_id_fk"
     end
 
-    create_table "pipeline_run_stages", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "pipeline_run_stages", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "pipeline_run_id"
       t.integer "step_number"
       t.integer "job_type"
@@ -478,7 +478,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
     end
 
-    create_table "pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "sample_id"
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
@@ -537,14 +537,14 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["total_reads"], name: "index_pipeline_runs_on_total_reads"
     end
 
-    create_table "project_workflow_versions", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "project_workflow_versions", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.integer "project_id", null: false, comment: "The project to which this workflow version applies"
       t.string "workflow", null: false, comment: "The workflow to which this version applies"
       t.string "version_prefix", null: false, comment: "The version prefix that will be used to run the workflow - can be major, patch, or minor"
       t.index ["project_id", "workflow"], name: "index_project_workflow_versions_on_project_id_and_workflow", unique: true
     end
 
-    create_table "projects", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "projects", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name"
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
@@ -559,14 +559,14 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["name"], name: "index_projects_on_name", unique: true
     end
 
-    create_table "projects_users", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "projects_users", id: false, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "project_id", null: false
       t.bigint "user_id", null: false
       t.index ["project_id"], name: "index_projects_users_on_project_id"
       t.index ["user_id"], name: "index_projects_users_on_user_id"
     end
 
-    create_table "sample_types", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "sample_types", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name", null: false, comment: "Canonical name of the sample type. This should be immutable after creation. It is used as a key to join with MetadataField sample_type values."
       t.string "group", null: false, comment: "Mutually exclusive grouping of names. Example: \"Organs\"."
       t.boolean "insect_only", default: false, null: false, comment: "Whether a sample type should only be for insects."
@@ -576,7 +576,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["name"], name: "index_sample_types_on_name", unique: true
     end
 
-    create_table "samples", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "samples", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "name"
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
@@ -611,20 +611,20 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["user_id"], name: "index_samples_on_user_id"
     end
 
-    create_table "samples_visualizations", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "samples_visualizations", id: false, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "visualization_id", null: false
       t.bigint "sample_id", null: false
       t.index ["sample_id"], name: "index_samples_visualizations_on_sample_id"
       t.index ["visualization_id"], name: "index_samples_visualizations_on_visualization_id"
     end
 
-    create_table "seed_migrations", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "seed_migrations", id: :integer, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "version"
       t.integer "runtime"
       t.datetime "migrated_on"
     end
 
-    create_table "shortened_urls", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "shortened_urls", id: :integer, charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.integer "owner_id"
       t.string "owner_type", limit: 20
       t.text "url", null: false
@@ -640,7 +640,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["url"], name: "index_shortened_urls_on_url", length: 254
     end
 
-    create_table "snapshot_links", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "snapshot_links", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "project_id"
       t.text "content", null: false, comment: "Content stored as {samples: [<sample_id>: {pipeline_run_id: <pipeline_run_id>}]}"
       t.string "share_id", limit: 20, null: false, comment: "Used for accessing the SnapshotLink URL"
@@ -651,7 +651,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["share_id"], name: "index_snapshot_links_on_share_id", unique: true
     end
 
-    create_table "taxon_byteranges", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "taxon_byteranges", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.integer "taxid"
       t.bigint "first_byte"
       t.bigint "last_byte"
@@ -663,7 +663,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["taxid"], name: "index_taxon_byteranges_on_taxid"
     end
 
-    create_table "taxon_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "taxon_counts", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.integer "tax_id"
       t.integer "tax_level"
       t.integer "count"
@@ -691,7 +691,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["tax_id"], name: "index_taxon_counts_on_tax_id"
     end
 
-    create_table "taxon_descriptions", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "taxon_descriptions", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.integer "taxid", null: false
       t.bigint "wikipedia_id"
       t.string "title"
@@ -702,7 +702,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
     end
 
-    create_table "taxon_lineages", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "taxon_lineages", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.integer "taxid", null: false
       t.integer "superkingdom_taxid", default: -700, null: false
       t.integer "phylum_taxid", default: -600, null: false
@@ -747,7 +747,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
     end
 
-    create_table "taxon_summaries", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "taxon_summaries", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "background_id"
       t.integer "tax_id"
       t.string "count_type"
@@ -763,7 +763,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["background_id", "tax_id", "count_type", "tax_level"], name: "index_bg_tax_ct_level", unique: true
     end
 
-    create_table "user_settings", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "user_settings", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "user_id"
       t.string "key", comment: "The name of the user setting, e.g. receives_bulk_download_success_emails"
       t.string "serialized_value", comment: "The serialized value of the user setting. The schema of this value (e.g. boolean, number) is determined by the hard-coded data type associated with the key."
@@ -771,7 +771,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["user_id"], name: "index_user_settings_on_user_id"
     end
 
-    create_table "users", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "users", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "email"
       t.string "name"
       t.datetime "created_at", null: false
@@ -795,7 +795,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["email"], name: "index_users_on_email", unique: true
     end
 
-    create_table "visualizations", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "visualizations", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "user_id"
       t.string "visualization_type"
       t.text "data"
@@ -809,7 +809,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["user_id"], name: "index_visualizations_on_user_id"
     end
 
-    create_table "workflow_runs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "workflow_runs", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.bigint "sample_id"
       t.string "status", default: "CREATED", null: false, comment: "A soft enum (string) describing the execution status."
       t.string "workflow", null: false, comment: "Name of the workflow to use, e.g. consensus-genome."
@@ -832,7 +832,7 @@ class ConsolidateMigrationsPriorTo20240326 < ActiveRecord::Migration[6.1]
       t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
     end
 
-    create_table "workflow_versions", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    create_table "workflow_versions", charset: "utf8", collation: "utf8_unicode_ci" do |t|
       t.string "workflow", null: false, comment: "Name of the workflow (e.g. short-read-mngs)"
       t.string "version", null: false, comment: "The specific version of the workflow (e.g. 1.2.3)"
       t.boolean "deprecated", comment: "A workflow version is deprecated if it's no longer receiving patches, but is runnable"
