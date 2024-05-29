@@ -124,18 +124,19 @@ class PhyloTreesController < ApplicationController
   # NOTE: this is used by the report page as well as phylo trees
   # See https://jira.czi.team/browse/IDSEQ-2127
   def choose_taxon
-    taxon_search_args = [params[:query]]
-    taxon_search_args << params[:args].split(",") if params[:args].present?
+    query = params[:query]
+    taxon_levels = params[:args].split(",") if params[:args].present?
     filters = {}
+
     if params[:projectId]
-      filters[:projectId] = current_power.projects.find(params[:projectId]).id
+      filters[:project_id] = current_power.projects.find(params[:projectId]).id
     end
     if params[:sampleId]
       # Note: 'where' because downstream expects a Relation.
       filters[:samples] = current_power.samples.where(id: params[:sampleId])
     end
-    taxon_search_args << filters
-    taxon_list = taxon_search(*taxon_search_args)
+
+    taxon_list = taxon_search(query, taxon_levels, filters)
     render json: JSON.dump(taxon_list)
   end
 

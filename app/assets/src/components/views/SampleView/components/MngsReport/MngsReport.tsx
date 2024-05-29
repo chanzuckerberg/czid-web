@@ -55,6 +55,7 @@ export const MngsReport = ({
           ownedBackgrounds={ownedBackgrounds}
           otherBackgrounds={otherBackgrounds}
           sampleId={sample?.id}
+          projectId={project?.id}
           selected={selectedOptions}
           view={view}
           enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}

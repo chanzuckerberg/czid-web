@@ -11,8 +11,9 @@ interface LiveSearchBoxProps {
   minChars?: number;
   placeholder?: string;
   value?: string;
+  projectId?: string;
   onEnter?: $TSFixMeFunction;
-  onSearchTriggered?: (query: string) => Promise<$TSFixMe>;
+  onSearchTriggered?: (query: string, projectId: string) => Promise<$TSFixMe>;
   onSearchChange?: $TSFixMeFunction;
   onResultSelect?: (params: {
     currentEvent:
@@ -30,6 +31,7 @@ interface LiveSearchBoxState {
   value: string;
   selectedResult: boolean;
   lastSearchedTerm: string;
+  projectId: string | null;
 }
 
 class LiveSearchBox extends React.Component<
@@ -50,6 +52,7 @@ class LiveSearchBox extends React.Component<
       selectedResult: null,
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       lastSearchedTerm: null,
+      projectId: null,
     };
 
     this.lastestTimerId = null;
@@ -113,7 +116,7 @@ class LiveSearchBox extends React.Component<
   };
 
   triggerSearch = async () => {
-    const { onSearchTriggered } = this.props;
+    const { onSearchTriggered, projectId } = this.props;
     const { value } = this.state;
 
     if (!value) return;
@@ -123,8 +126,7 @@ class LiveSearchBox extends React.Component<
 
     const timerId = this.lastestTimerId;
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-    const results = await onSearchTriggered(value);
-
+    const results = await onSearchTriggered(value, projectId);
     if (timerId === this.lastestTimerId) {
       this.setState({
         isLoading: false,

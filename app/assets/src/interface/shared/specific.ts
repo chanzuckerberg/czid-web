@@ -282,6 +282,8 @@ export interface SampleFromApi {
 
 export type SampleId = number | string;
 
+export type ProjectId = number | string;
+
 export interface SampleType {
   created_at: string;
   group: string;

@@ -31,7 +31,7 @@ import {
   FilterSelections,
   SampleReportViewMode,
 } from "~/interface/sampleView";
-import { Background, SampleId } from "~/interface/shared/specific";
+import { Background, ProjectId, SampleId } from "~/interface/shared/specific";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
 import AnnotationFilter from "./components/AnnotationFilter";
@@ -52,6 +52,7 @@ interface ReportFiltersProps {
   otherBackgrounds?: Background[];
   ownedBackgrounds?: Background[];
   sampleId?: SampleId;
+  projectId?: ProjectId;
   selected: FilterSelections;
   view?: SampleReportViewMode;
   enableMassNormalizedBackgrounds?: boolean;
@@ -67,6 +68,7 @@ export const ReportFilters = ({
   otherBackgrounds,
   ownedBackgrounds,
   sampleId,
+  projectId,
   selected,
   view,
   enableMassNormalizedBackgrounds,
@@ -279,6 +281,7 @@ export const ReportFilters = ({
                 // TODO (gdingle): change backend to support filter by sampleId
                 args: "species,genus",
                 sampleId,
+                projectId,
               }}
               onResultSelect={(
                 _: unknown,

@@ -972,7 +972,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
 
       it "limits results by project id" do
         project_id = allowed_project.id
-        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, { projectId: project_id }).and_return(fake_results)
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, { project_id: project_id }).and_return(fake_results)
 
         get :choose_taxon, params: { query: query, projectId: project_id }
 

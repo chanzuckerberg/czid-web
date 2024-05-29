@@ -1560,23 +1560,25 @@ export class DiscoveryView extends React.Component<
     });
   };
 
-  getServerSideSuggestions = async (query: string) => {
+  getServerSideSuggestions = async (query: string, projectId: string) => {
     const { domain } = this.props;
-
-    return getSearchSuggestions({
+    return getSearchSuggestions(
       // NOTE: backend also supports "tissue", "location", "host" and more
-      categories: ["sample", "project", "taxon"],
-      query,
-      domain,
-    });
+      {
+        categories: ["sample", "project", "taxon"],
+        query: query,
+        domain: domain,
+        projectId: projectId,
+      },
+    );
   };
 
-  handleSearchTriggered = async (query: string) => {
+  handleSearchTriggered = async (query: string, projectId: string) => {
     const [clientSideSuggestions, serverSideSuggestions] = await Promise.all([
       // client side: for dimensions (host, location, tissue)
       this.getClientSideSuggestions(query),
       // server side: for taxa, projects and samples search (filter by domain)
-      this.getServerSideSuggestions(query),
+      this.getServerSideSuggestions(query, projectId),
     ]);
 
     return merge(clientSideSuggestions, serverSideSuggestions);
@@ -2644,6 +2646,7 @@ export class DiscoveryView extends React.Component<
             showFilters={displayFilters}
             tabs={tabs}
             workflow={workflow}
+            projectId={projectId}
           />
         </div>
         <Divider style="medium" />

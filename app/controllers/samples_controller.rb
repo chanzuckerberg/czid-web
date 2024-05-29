@@ -383,6 +383,7 @@ class SamplesController < ApplicationController
     categories = params[:categories]
     domain = params[:domain]
     superkingdom = params[:superkingdom]
+    project_id = params[:projectId]
 
     # Generate structure required by CategorySearchBox
     # Not permission-dependent
@@ -508,8 +509,16 @@ class SamplesController < ApplicationController
         if superkingdom.present?
           filters[:superkingdom] = superkingdom
         end
+        if project_id.present?
+          filters[:project_id] = project_id
+        end
+        if constrained_samples.present? && domain.present?
+          # If no domain is specified, do not filter by constrained_samples
+          filters[:samples] = constrained_samples
+        end
         # If no domain is specified, do not filter by constrained_samples
-        taxon_list = domain.present? ? taxon_search(query, ["species", "genus"], samples: constrained_samples, filters: filters) : taxon_search(query, ["species", "genus"], filters)
+        taxon_list = taxon_search(query, ["species", "genus"], filters)
+
         unless taxon_list.empty?
           results["Taxon"] = {
             "name" => "Taxon",

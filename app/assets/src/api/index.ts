@@ -364,15 +364,18 @@ const getSearchSuggestions = ({
   query,
   domain,
   superkingdom = undefined,
-}: $TSFixMe) =>
-  get("/search_suggestions", {
+  projectId = undefined,
+}: $TSFixMe) => {
+  return get("/search_suggestions", {
     params: {
       categories,
       query,
       domain,
       superkingdom,
+      projectId,
     },
   });
+};
 
 const createBackground = ({
   description,

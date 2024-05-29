@@ -31,7 +31,7 @@ interface DiscoveryHeaderProps {
     },
     currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => void;
-  onSearchTriggered?: (query: string) => Promise<$TSFixMe>;
+  onSearchTriggered?: (query: string, projectId: string) => Promise<$TSFixMe>;
   onTabChange?: $TSFixMeFunction;
   searchValue?: string;
   showFilters?: boolean;
@@ -41,6 +41,7 @@ interface DiscoveryHeaderProps {
     label: JSX.Element;
   }>;
   workflow: WorkflowType;
+  projectId: string;
 }
 
 export const DiscoveryHeader = ({
@@ -58,6 +59,7 @@ export const DiscoveryHeader = ({
   showStats,
   tabs,
   workflow,
+  projectId,
 }: DiscoveryHeaderProps) => {
   const handleSearchResultSelected = ({
     currentEvent,
@@ -153,6 +155,7 @@ export const DiscoveryHeader = ({
             onEnter={handleSearchEnterPressed}
             placeholder={`Search ${startCase(domain)}...`}
             value={searchValue}
+            projectId={projectId}
           />
         )}
       </div>

@@ -312,8 +312,9 @@ class PhyloTreeNgsController < ApplicationController
 
     filters = {}
     if collection_params[:projectId]
-      filters[:projectId] = current_power.projects.find(collection_params[:projectId]).id
+      filters[:project_id] = current_power.projects.find(collection_params[:projectId]).id
     end
+
     if collection_params[:sampleId]
       # Note: 'where' because downstream expects a Relation.
       filters[:samples] = current_power.samples.where(id: collection_params[:sampleId])

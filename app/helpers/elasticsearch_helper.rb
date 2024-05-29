@@ -32,6 +32,9 @@ module ElasticsearchHelper
 
     matching_taxa = []
     taxon_ids = []
+
+    ncbi_version = filters[:project_id] ? get_ncbi_version(filters[:project_id]) : AppConfigHelper.get_app_config(AppConfig::DEFAULT_ALIGNMENT_CONFIG_NAME)
+
     tax_levels.each do |level|
       # NOTE(tiago): We tried to use a query of type `match` before but did not work
       # with partial matching. The default analyzers (standard english) used to
@@ -47,6 +50,7 @@ module ElasticsearchHelper
       # in particular if there are performance issues. Probably replace by extra constraints.
       #
       # tokenize query and add wildcards for partial matching
+
       tokens = query.scan(/\w+/).map { |t| "*#{t}*" }
       search_params = {
         size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
@@ -69,27 +73,7 @@ module ElasticsearchHelper
       search_response = TaxonLineage.search(search_params)
       search_taxon_ids = search_response.aggregations.distinct_taxa.buckets.pluck(:key)
 
-      # Make a list of lineages with unique taxids and sorted by record ID
-      # descending. We use `uniq` below instead of `distinct` to comply with
-      # MySQL 5.7 ONLY_FULL_GROUP_BY behavior. If you include `id` in the
-      # `pluck`/`select`, that counts as deduping with the record ID, which is
-      # not what we want because the record ID is already unique.
-
-      taxon_data = TaxonLineage
-                   .where("#{level}_taxid" => search_taxon_ids)
-                   .order(id: :desc)
-                   .uniq { |lin| lin["#{level}_taxid"] }
-                   .pluck("#{level}_name", "#{level}_taxid")
-                   .map do |name, taxid|
-                     {
-                       "title" => name,
-                       "description" => "Taxonomy ID: #{taxid}",
-                       "taxid" => taxid,
-                       "level" => level,
-                     }
-                   end
-
-      matching_taxa += taxon_data
+      matching_taxa += fetch_taxon_data(search_taxon_ids, ncbi_version, level)
       taxon_ids += search_taxon_ids
     end
     taxon_ids = filter_by_samples(taxon_ids, filters[:samples]) if filters[:samples]
@@ -132,5 +116,66 @@ module ElasticsearchHelper
     # Add \\ to escape special characters. Four \ to escape the backslashes.
     # Escape anything that isn't in "a-zA-Z0-9 ._|'/"
     text.gsub(%r{([^a-zA-Z0-9 ._|'\/])}, '\\\\\1') if text
+  end
+
+  def fetch_taxon_data(search_taxon_ids, ncbi_version, level)
+    taxid_column, name_column = get_taxid_name_columns(level)
+
+    # Make a list of lineages with unique taxids and sorted by tax ID
+    # descending. We use `uniq` below instead of `distinct` to comply with
+    # MySQL 5.7 ONLY_FULL_GROUP_BY behavior. If you include `id` in the
+    # `pluck`/`select`, that counts as deduping with the record ID, which is
+    # not what we want because the record ID is already unique.
+
+    taxon_query = TaxonLineage.where("#{taxid_column}": search_taxon_ids)
+    taxon_query = taxon_query.where(version_end: ncbi_version)
+
+    return taxon_query
+           .where(taxid_column => search_taxon_ids)
+           .order(id: :desc)
+           .uniq { |lin| lin[taxid_column] }
+           .pluck(name_column, taxid_column)
+           .map do |name, taxid|
+          {
+            "title" => name,
+            "description" => "Taxonomy ID: #{taxid}",
+            "taxid" => taxid,
+            "level" => level,
+          }
+        end
+  end
+
+  def get_taxid_name_columns(level)
+    # sanitize user input to prevent SQL injection
+    case level
+    when "species"
+      taxid_column = "species_taxid"
+      name_column = "species_name"
+    when "genus"
+      taxid_column = "genus_taxid"
+      name_column = "genus_name"
+    when "family"
+      taxid_column = "family_taxid"
+      name_column = "family_name"
+    when "order"
+      taxid_column = "order_taxid"
+      name_column = "order_name"
+    when "class"
+      taxid_column = "class_taxid"
+      name_column = "class_name"
+    when "phylum"
+      taxid_column = "phylum_taxid"
+      name_column = "phylum_name"
+    when "superkingdom"
+      taxid_column = "superkingdom_taxid"
+      name_column = "superkingdom_name"
+    else
+      raise "Invalid level"
+    end
+    return taxid_column, name_column
+  end
+
+  def get_ncbi_version(project_id)
+    ProjectWorkflowVersion.find_by(project_id: project_id, workflow: AlignmentConfig::NCBI_INDEX).version_prefix
   end
 end
