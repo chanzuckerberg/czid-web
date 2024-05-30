@@ -9,7 +9,9 @@ task clean_up_soft_deleted_data: :environment do
     STDIN.gets.chomp
   end
 
-  batch_size = prompt("Enter batch size for hard delete jobs (default 100): ").to_i || 100
+  user_input_batch_size = prompt("Enter batch size for hard delete jobs (default 100): ")
+  batch_size = user_input_batch_size.present? ? user_input_batch_size.to_i : 100
+  puts("Batch size set to #{batch_size}")
 
   # get user ids for soft deleted pipeline runs
   user_ids = PipelineRun.joins(:sample).where("pipeline_runs.deleted_at < ?", Time.now.utc - DELAY).pluck("samples.user_id").uniq.to_set
