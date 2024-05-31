@@ -154,14 +154,12 @@ class WorkflowRun < ApplicationRecord
   INSERT_SIZE_MEAN_KEY = "insert_size_mean".freeze
   INSERT_SIZE_STD_DEV_KEY = "insert_size_standard_deviation".freeze
 
-  # Constants related to sorting
+  # Query param sort keys that must be converted
   DATA_KEY_TO_SORT_KEY = {
     "sample" => "name",
     "createdAt" => "id",
-    "host" => "host",
     "referenceAccession" => "accession_id",
     "wetlabProtocol" => "wetlab_protocol",
-    "technology" => "technology",
     "medakaModel" => "medaka_model",
     "totalReadsCG" => "total_reads",
     "percentGenomeCalled" => "percent_genome_called",
@@ -183,7 +181,7 @@ class WorkflowRun < ApplicationRecord
     "meanInsertSize" => INSERT_SIZE_MEAN_KEY,
   }.freeze
 
-  INPUT_SORT_KEYS = ["accession_id", "wetlab_protocol", "technology", "medaka_model"].freeze
+  INPUT_SORT_KEYS = ["accession_id", "wetlab_protocol", "technology", "medaka_model", "creation_source"].freeze
   CACHED_RESULT_QUALITY_METRICS_KEY = "quality_metrics".freeze
   CACHED_RESULT_COVERAGE_VIZ_KEY = "coverage_viz".freeze
   CACHED_RESULT_SORT_KEYS = [
@@ -407,7 +405,10 @@ class WorkflowRun < ApplicationRecord
 
   # order_by stores a sortable column's dataKey (refer to: columnConfigurations.ts)
   def self.sort_workflow_runs(workflow_runs, order_by, order_dir)
-    sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
+    sort_key = order_by.to_s
+    if DATA_KEY_TO_SORT_KEY.key?(sort_key)
+      sort_key = DATA_KEY_TO_SORT_KEY[sort_key]
+    end
     metadata_sort_key = sanitize_metadata_field_name(order_by)
 
     if sort_key == "id"
