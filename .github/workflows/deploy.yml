@@ -32,6 +32,7 @@ jobs:
       force: ${{ github.event.inputs.force == 'true' }}
       developer_name: ${{ github.actor }}
       deployment_reason: ${{ github.event.inputs.release_notes }}
+    secrets: inherit
 
   run_staging_playwright_e2e_tests:
     if: ${{ github.event.inputs.destination == 'staging' }}

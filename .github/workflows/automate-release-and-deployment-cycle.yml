@@ -34,6 +34,7 @@ jobs:
       destination: prod
       developer_name: ${{ github.actor }}
       deployment_reason: scheduled deployment of staging to prod
+    secrets: inherit
 
   deploy-staging:
     needs: [run-deployment-prerequisites, deploy-prod]
@@ -43,6 +44,7 @@ jobs:
       destination: staging
       developer_name: ${{ github.actor }}
       deployment_reason: scheduled deployment of main to staging
+    secrets: inherit
 
   run_staging_playwright_e2e_tests:
     name: Run Playwright E2E tests on staging

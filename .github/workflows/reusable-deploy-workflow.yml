@@ -21,55 +21,51 @@ on:
         type: string
 
 env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    # GITHUB_TOKEN is provided by Actions and can create deployment objects, but these objects won't trigger workflows.
-    # A separate token, bound to a specific developer with access to the repo, is required to create GitHub deployment
-    # objects that can trigger a deployment workflow. The secret for this token (with repo_deployment scope) is created in
-    # https://github.com/settings/tokens and can be managed in https://github.com/chanzuckerberg/idseq/settings/secrets.
-    GH_DEPLOY_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
-    DEBIAN_FRONTEND: noninteractive
-    GH_CLI_VERSION: 0.11.1
-    LC_ALL: C.UTF-8
-    LANG: C.UTF-8
+  AWS_DEFAULT_OUTPUT: json
+  AWS_REGION: us-west-2
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # GITHUB_TOKEN is provided by Actions and can create deployment objects, but these objects won't trigger workflows.
+  # A separate token, bound to a specific developer with access to the repo, is required to create GitHub deployment
+  # objects that can trigger a deployment workflow. The secret for this token (with repo_deployment scope) is created in
+  # https://github.com/settings/tokens and can be managed in https://github.com/chanzuckerberg/idseq/settings/secrets.
+  GH_DEPLOY_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
+  DEBIAN_FRONTEND: noninteractive
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+
 
 jobs:
   production-deploy:
     name: Deploy ${{ inputs.source }} to prod
     if: ${{ inputs.destination == 'prod' }}
-    runs-on: [self-hosted, idseq-prod]
-    container: ruby:3.1.3
+    runs-on: ubuntu-latest
+    permissions: # these permissions must be set for AWS auth to work!
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Determine Kernel Version
-        run: |
-          echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
-      - name: Cache Ruby Dependencies
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
         with:
-          path: vendor/bundle
-          # Include kernel version for under-the-hood gem changes:
-          key: ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems
-      - name: Install Ruby Dependencies
-        run: |
-          gem install bundler
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
+          path: ~/.cache
+          key: ${{runner.os}}-cache
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # No need to set `ruby-version`, it gets automatically set to the .ruby-version if it is not specified.
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Configure AWS Credentials
+        id: configure_aws_credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
+          role-session-name: czid-web-prod-deploy
       - name: Install release script dependencies
+        # jq, httpie, curl, and awscli are required for the deploy_rev.sh script, but httpie is not installed by default in the ubuntu-latest image so we manually install it
         run: |
-          apt-get -qq update
-          apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie curl awscli
-          curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
-          dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
-
-          export token=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-          export AWS_DEFAULT_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
-          aws configure set default.region $AWS_DEFAULT_REGION
-      - name: Enable czid-web-private as a safe directory
-        # If this breaks, cross reference the github actions checkout step to see if the directory below (/__w/czid-web-private/czid-web-private) matches the checkout directory
-        run: /usr/bin/git config --global --add safe.directory /__w/czid-web-private/czid-web-private
+          sudo apt-get -qq update
+          sudo apt-get -qq install -o=Dpkg::Use-Pty=0 --yes httpie
       - name: Deploy ${{ inputs.source }} to production
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }} "${{ inputs.developer_name }}" "${{ inputs.deployment_reason }}"
@@ -80,40 +76,35 @@ jobs:
   development-deploy:
     name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
     if: ${{ inputs.destination != 'prod' }}
-    runs-on: [self-hosted, idseq-dev]
-    container: ruby:3.1.3
+    runs-on: ubuntu-latest
+    permissions: # these permissions must be set for AWS auth to work!
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Determine Kernel Version
-        run: |
-          echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
-      - name: Cache Ruby Dependencies
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
         with:
-          path: vendor/bundle
-          # Include kernel version for under-the-hood gem changes:
-          key: ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems
-      - name: Install Ruby Dependencies
-        run: |
-          gem install bundler
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
+          path: ~/.cache
+          key: ${{runner.os}}-cache
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # No need to set `ruby-version`, it gets automatically set to the .ruby-version if it is not specified.
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Configure AWS Credentials
+        id: configure_aws_credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ secrets.DEV_AWS_ROLE }}
+          role-session-name: czid-web-dev-deploy
       - name: Install release script dependencies
+        # jq, httpie, curl, and awscli are required for the deploy_rev.sh script, but httpie is not installed by default in the ubuntu-latest image so we manually install it
+        # You can find the packages installed in the ubuntu-latest image here: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
         run: |
-          apt-get -qq update
-          apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie git curl awscli
-          curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
-          dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
-
-          export token=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-          export AWS_DEFAULT_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
-          aws configure set default.region $AWS_DEFAULT_REGION
-      - name: Enable czid-web-private as a safe directory
-        # If this breaks, cross reference the github actions checkout step to see if the directory below (/__w/czid-web-private/czid-web-private) matches the checkout directory
-        run: /usr/bin/git config --global --add safe.directory /__w/czid-web-private/czid-web-private
+          sudo apt-get -qq update
+          sudo apt-get -qq install -o=Dpkg::Use-Pty=0 --yes httpie
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }} "${{ inputs.developer_name }}" "${{ inputs.deployment_reason }}"
