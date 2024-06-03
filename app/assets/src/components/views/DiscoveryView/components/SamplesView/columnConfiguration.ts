@@ -1,6 +1,6 @@
 import { camelCase, get, map, merge, values } from "lodash/fp";
+import { TableRenderers } from "~/components/common/TableRenderers";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
-import { TableRenderers } from "~/components/views/components/TableRenderers";
 import {
   LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS,
   SHARED_SAMPLE_TABLE_COLUMNS,

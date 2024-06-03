@@ -1,6 +1,6 @@
 import React from "react";
-import { Footer } from "~/components/views/components/Footer";
-import { LandingHeader as Header } from "~/components/views/components/LandingHeader";
+import { Footer } from "~/components/common/Footer";
+import { LandingHeader as Header } from "~/components/common/LandingHeader";
 import { Content } from "~/components/views/LandingPage/components/Content";
 import { Hero } from "~/components/views/LandingPage/components/Hero";
 

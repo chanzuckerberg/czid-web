@@ -6,7 +6,7 @@ import React from "react";
 import BasicPopup from "~/components/common/BasicPopup";
 import { numberWithCommas } from "~/helpers/strings";
 import StatusLabel from "~ui/labels/StatusLabel";
-import { ProjectCountsType } from "../../DiscoveryView/DiscoveryViewFC";
+import { ProjectCountsType } from "../../views/DiscoveryView/DiscoveryViewFC";
 import { WorkflowCounts } from "./components/WorkflowCounts";
 import cs from "./table_renderers.scss";
 

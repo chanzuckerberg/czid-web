@@ -1,6 +1,6 @@
 import React from "react";
+import { SampleMessage } from "~/components/common/SampleMessage";
 import { IconLoading } from "~/components/ui/icons";
-import { SampleMessage } from "~/components/views/components/SampleMessage";
 import {
   CREATED_STATE,
   RUNNING_STATE,

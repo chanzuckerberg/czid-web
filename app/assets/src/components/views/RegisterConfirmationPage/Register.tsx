@@ -1,6 +1,6 @@
 import React from "react";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { ConfirmationMessage } from "../components/ConfirmationMessage";
+import { ConfirmationMessage } from "../../common/ConfirmationMessage";
 
 const urlParser = new UrlQueryParser({ error: "string" });
 

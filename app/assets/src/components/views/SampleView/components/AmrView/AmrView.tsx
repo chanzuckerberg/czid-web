@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { getWorkflowRunResults } from "~/api";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import { SampleMessage } from "~/components/common/SampleMessage";
 import { IconLoading } from "~/components/ui/icons";
 import {
   computeAmrReportTableValuesForCSV,
@@ -16,7 +17,6 @@ import {
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
 import { WorkflowType } from "~/components/utils/workflows";
-import { SampleMessage } from "~/components/views/components/SampleMessage";
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
 import csIcon from "~/components/views/SampleView/components/SampleReportConent/sample_report_content.scss";
 import { SUCCEEDED_STATE } from "~/components/views/SampleView/utils";

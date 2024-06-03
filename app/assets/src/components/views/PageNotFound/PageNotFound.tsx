@@ -1,6 +1,6 @@
 import React from "react";
+import { InfoBanner } from "~/components/common/InfoBanner";
 import ImgMicrobeSecondary from "~/components/ui/illustrations/ImgMicrobeSecondary";
-import { InfoBanner } from "~/components/views/components/InfoBanner";
 import { LandingHeaderV1 } from "./components/LandingHeaderV1";
 import cs from "./page_not_found.scss";
 

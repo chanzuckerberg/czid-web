@@ -1,7 +1,7 @@
 import cx from "classnames";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";
-import csTableRenderer from "~/components/views/components/TableRenderers/table_renderers.scss";
+import csTableRenderer from "~/components/common/TableRenderers/table_renderers.scss";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 // CSS file must be loaded after any elements you might want to override
 import { ColumnProps } from "~/interface/sampleView";

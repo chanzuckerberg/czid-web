@@ -1,7 +1,7 @@
 import { isNil } from "lodash/fp";
 import React from "react";
 import { WorkflowType } from "~/components/utils/workflows";
-import { ProjectCountsType } from "../../../../DiscoveryView/DiscoveryViewFC";
+import { ProjectCountsType } from "../../../../views/DiscoveryView/DiscoveryViewFC";
 import cs from "./workflow_counts.scss";
 
 interface WorkflowCountsProps {

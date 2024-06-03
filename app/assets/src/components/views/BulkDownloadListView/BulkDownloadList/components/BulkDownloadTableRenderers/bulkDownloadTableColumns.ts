@@ -1,4 +1,4 @@
-import { TableRenderers } from "~/components/views/components/TableRenderers";
+import { TableRenderers } from "~/components/common/TableRenderers";
 import { ColumnProps } from "~/interface/sampleView";
 import cs from "./bulk_download_table_renderers.scss";
 import { BulkDownloadTableRenderers } from "./BulkDownloadTableRenderers";

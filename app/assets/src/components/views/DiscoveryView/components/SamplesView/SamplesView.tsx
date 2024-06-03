@@ -26,7 +26,9 @@ import {
   getSampleMetadataFields,
   getWorkflowRunMetadataFields,
 } from "~/api/metadata";
+import { showBulkDownloadNotification } from "~/components/common/BulkDownloadNotification";
 import { LoadingPage } from "~/components/common/LoadingPage";
+import csTableRenderer from "~/components/common/TableRenderers/table_renderers.scss";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { SHOULD_READ_FROM_NEXTGEN } from "~/components/utils/features";
@@ -36,8 +38,6 @@ import {
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
-import { showBulkDownloadNotification } from "~/components/views/components/BulkDownloadNotification";
-import csTableRenderer from "~/components/views/components/TableRenderers/table_renderers.scss";
 import { DiscoveryMap } from "~/components/views/DiscoveryView/components/DiscoveryMap/DiscoveryMap";
 import { DiscoveryViewToggle } from "~/components/views/DiscoveryView/components/DiscoveryViewToggle/DiscoveryViewToggle";
 import { BulkDownloadModal } from "~/components/views/DiscoveryView/components/SamplesView/components/BulkDownloadModal";

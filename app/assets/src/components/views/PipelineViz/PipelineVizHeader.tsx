@@ -4,7 +4,7 @@ import ViewHeader from "~/components/layout/ViewHeader";
 import { WorkflowType } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-import { PipelineVersionSelect } from "../components/PipelineVersionSelect";
+import { PipelineVersionSelect } from "../../common/PipelineVersionSelect";
 import cs from "./pipeline_viz.scss";
 
 interface PipelineVizHeaderProps {

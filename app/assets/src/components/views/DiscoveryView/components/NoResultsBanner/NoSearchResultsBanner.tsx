@@ -1,5 +1,5 @@
 import React from "react";
-import { InfoBanner } from "../../../components/InfoBanner";
+import { InfoBanner } from "../../../../common/InfoBanner";
 
 interface NoSearchResultsBannerProps {
   className?: string;

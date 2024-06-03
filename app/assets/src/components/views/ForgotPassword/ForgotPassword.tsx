@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { requestPasswordReset } from "~/api/user";
 import Input from "~ui/controls/Input";
-import { ConfirmationMessage } from "../components/ConfirmationMessage";
+import { ConfirmationMessage } from "../../common/ConfirmationMessage";
 import cs from "./forgot_password.scss";
 
 export const ForgotPassword = () => {

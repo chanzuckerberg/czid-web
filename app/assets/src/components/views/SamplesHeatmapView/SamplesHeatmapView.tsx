@@ -34,8 +34,10 @@ import {
   WithAnalyticsType,
 } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
+import { showBulkDownloadNotification } from "~/components/common/BulkDownloadNotification";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import ErrorBoundary from "~/components/common/ErrorBoundary";
+import { SampleMessage } from "~/components/common/SampleMessage";
 import { useAllowedFeatures } from "~/components/common/UserContext";
 import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
@@ -54,8 +56,6 @@ import {
   HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
 } from "~/components/utils/urls";
 import { WorkflowType } from "~/components/utils/workflows";
-import { showBulkDownloadNotification } from "~/components/views/components/BulkDownloadNotification";
-import { SampleMessage } from "~/components/views/components/SampleMessage";
 import SamplesHeatmapVis from "~/components/views/SamplesHeatmapView/components/SamplesHeatmapVis";
 import { URL_FIELDS } from "~/components/views/SampleView/utils";
 import {

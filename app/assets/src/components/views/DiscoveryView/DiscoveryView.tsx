@@ -87,7 +87,7 @@ import {
   VISUALIZATIONS_DOC_LINK,
 } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
-import { InfoBanner } from "../components/InfoBanner/InfoBanner";
+import { InfoBanner } from "../../common/InfoBanner";
 import { ConsensusGenomesTabCount } from "./components/ConsensusGenomesTabCount";
 import { DiscoveryFilters } from "./components/DiscoveryFilters";
 import { DiscoveryHeader } from "./components/DiscoveryHeader";

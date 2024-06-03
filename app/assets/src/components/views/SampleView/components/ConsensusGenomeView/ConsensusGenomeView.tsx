@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
-import { SampleMessage } from "~/components/views/components/SampleMessage";
-import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
+import { SampleMessage } from "~/components/common/SampleMessage";
+import csSampleMessage from "~/components/common/SampleMessage/sample_message.scss";
 import Sample, { SampleStatus, WorkflowRun } from "~/interface/sample";
 import { IconLoading } from "~ui/icons";
 import { ConsensusGenomeHeader } from "./components/ConsensusGenomeHeader";

@@ -42,7 +42,7 @@ import {
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { getCoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/utils";
-import { UserContext } from "~/components/common/UserContext";
+import csSampleMessage from "~/components/common/SampleMessage/sample_message.scss";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { IconLoading } from "~/components/ui/icons";
 import {
@@ -61,7 +61,6 @@ import {
   WorkflowType,
   WORKFLOW_TABS,
 } from "~/components/utils/workflows";
-import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
 import {
   ActionType,
   createAction,
@@ -91,7 +90,7 @@ import {
   PipelineRun,
   Taxon,
 } from "~/interface/shared";
-import { SampleMessage } from "../components/SampleMessage";
+import { SampleMessage } from "../../common/SampleMessage";
 import { SampleViewSampleQuery } from "./__generated__/SampleViewSampleQuery.graphql";
 import { initialAmrContext } from "./components/AmrView/amrContext/initialState";
 import {
@@ -213,7 +212,6 @@ const SampleViewComponent = ({
 }: SampleViewProps) => {
   const trackEvent = useRef<TrackEventType | null>(null);
   trackEvent.current = useTrackEvent();
-  const { allowedFeatures } = useContext(UserContext) || {};
   const environment = useRelayEnvironment();
 
   const {
@@ -587,7 +585,7 @@ const SampleViewComponent = ({
         },
       });
     },
-    [allowedFeatures, currentTab, selectedOptions?.nameType],
+    [currentTab, selectedOptions?.nameType],
   );
   const fetchSampleReportData = useCallback(
     async ({ backgroundId }: { backgroundId?: number | null } = {}) => {
@@ -657,7 +655,6 @@ const SampleViewComponent = ({
       }
     },
     [
-      allowedFeatures,
       backgrounds,
       ignoreProjectBackground,
       enableMassNormalizedBackgrounds,

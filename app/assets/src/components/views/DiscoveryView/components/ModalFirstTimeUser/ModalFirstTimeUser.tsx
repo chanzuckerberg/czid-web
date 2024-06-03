@@ -4,7 +4,7 @@ import { UserContext } from "~/components/common/UserContext";
 import Modal from "~ui/containers/Modal";
 import Link from "~ui/controls/Link";
 import BacteriaCultureIcon from "~ui/icons/BacteriaCultureIcon";
-import { InfoBanner } from "../../../components/InfoBanner";
+import { InfoBanner } from "../../../../common/InfoBanner";
 import cs from "./modal_first_time_user.scss";
 
 interface ModalFirstTimeUserProps {

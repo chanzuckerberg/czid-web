@@ -1,7 +1,7 @@
 import { Button } from "@czi-sds/components";
 import React from "react";
+import { PipelineVersionSelect } from "~/components/common/PipelineVersionSelect";
 import { WorkflowType } from "~/components/utils/workflows";
-import { PipelineVersionSelect } from "~/components/views/components/PipelineVersionSelect";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import { PipelineRunsButton } from "./components/PipelineRunsButton";

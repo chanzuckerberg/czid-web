@@ -4,11 +4,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
+import { InfoBanner } from "~/components/common/InfoBanner";
 import { LoadingPage } from "~/components/common/LoadingPage";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WorkflowType } from "~/components/utils/workflows";
-import { InfoBanner } from "~/components/views/components/InfoBanner";
 import { TooltipVizTable } from "~ui/containers";
 import {
   QualityControlQuery as QualityControlQueryType,

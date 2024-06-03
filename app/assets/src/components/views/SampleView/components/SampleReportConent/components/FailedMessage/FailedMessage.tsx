@@ -1,7 +1,7 @@
 import React from "react";
+import { SampleMessage } from "~/components/common/SampleMessage";
 import { IconAlert } from "~/components/ui/icons";
 import { sampleErrorInfo } from "~/components/utils/sample";
-import { SampleMessage } from "~/components/views/components/SampleMessage";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import cs from "../../sample_report_content.scss";
 

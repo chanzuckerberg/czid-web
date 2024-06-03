@@ -2,7 +2,7 @@ import { Icon } from "@czi-sds/components";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";
-import { TableRenderers } from "~/components/views/components/TableRenderers";
+import { TableRenderers } from "~/components/common/TableRenderers";
 import { BaseDiscoveryView } from "~/components/views/DiscoveryView/components/BaseDiscoveryView";
 import { GlobalContext } from "~/globalContext/reducer";
 import { humanize } from "~/helpers/strings";

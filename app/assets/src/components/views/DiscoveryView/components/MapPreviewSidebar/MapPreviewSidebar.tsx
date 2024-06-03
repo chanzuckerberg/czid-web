@@ -10,9 +10,9 @@ import {
   upperFirst,
 } from "lodash/fp";
 import React from "react";
+import { TableRenderers } from "~/components/common/TableRenderers";
+import csTableRenderer from "~/components/common/TableRenderers/table_renderers.scss";
 import Tabs from "~/components/ui/controls/Tabs";
-import csTableRenderer from "~/components/views/components/TableRenderers/table_renderers.scss";
-import { TableRenderers } from "~/components/views/components/TableRenderers/TableRenderers";
 import { DiscoverySidebar } from "~/components/views/DiscoveryView/components/DiscoverySidebar";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { DimensionsDetailed } from "~/interface/discoveryView";

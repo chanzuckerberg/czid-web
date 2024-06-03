@@ -18,7 +18,7 @@ import {
 } from "~/globalContext/reducer";
 import { formatSemanticVersion } from "~/helpers/strings";
 import { Conditions, DiscoveryViewProps } from "~/interface/discoveryView";
-import { STATUS_TYPE } from "../components/TableRenderers/TableRenderers";
+import { STATUS_TYPE } from "../../common/TableRenderers/TableRenderers";
 import {
   DiscoveryViewFCConsensusGenomeIdsQuery as DiscoveryViewFCConsensusGenomeIdsQueryType,
   DiscoveryViewFCConsensusGenomeIdsQuery$data,

@@ -3,7 +3,7 @@ import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { IconAlertType } from "~/interface/icon";
 import { SampleStatus } from "~/interface/sample";
 import { PipelineRun, SampleId } from "../../interface/shared/specific";
-import { STATUS_TYPE } from "../views/components/TableRenderers/TableRenderers";
+import { STATUS_TYPE } from "../common/TableRenderers/TableRenderers";
 
 // Get the basename from a file path
 export const baseName = (str: string) => {

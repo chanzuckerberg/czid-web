@@ -1,9 +1,9 @@
 import React from "react";
+import { SampleMessage } from "~/components/common/SampleMessage";
+import csSampleMessage from "~/components/common/SampleMessage/sample_message.scss";
 import { IconAlert, IconLoading } from "~/components/ui/icons";
 import { sampleErrorInfo, UPLOAD_URL } from "~/components/utils/sample";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
-import { SampleMessage } from "~/components/views/components/SampleMessage";
-import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
 import { ONT_PIPELINE_RUNNING_STATUS_MESSAGE } from "~/components/views/SampleView/utils";
 import { IconAlertType } from "~/interface/icon";
 import { PipelineRunStatus, ReportMetadata } from "~/interface/reportMetaData";

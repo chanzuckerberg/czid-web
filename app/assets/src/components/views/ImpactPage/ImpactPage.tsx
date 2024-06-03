@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Footer } from "~/components/views/components/Footer";
-import { LandingHeader as Header } from "~/components/views/components/LandingHeader";
+import { Footer } from "~/components/common/Footer";
+import { LandingHeader as Header } from "~/components/common/LandingHeader";
 import ImpactBottomCTA from "~/components/views/ImpactPage/components/ImpactBottomCTA/ImpactBottomCTA";
 import { ImpactCountryData } from "~/components/views/ImpactPage/components/ImpactCountryData";
 import { ImpactCountryShowcase } from "~/components/views/ImpactPage/components/ImpactCountryShowcase";
