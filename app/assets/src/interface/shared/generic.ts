@@ -9,11 +9,7 @@ export interface DropdownOption {
   value: string | number;
 }
 
-export interface MustHaveId {
-  id: number | string;
-}
-
-export interface NumberId {
+interface NumberId {
   name: string;
   id: number;
 }

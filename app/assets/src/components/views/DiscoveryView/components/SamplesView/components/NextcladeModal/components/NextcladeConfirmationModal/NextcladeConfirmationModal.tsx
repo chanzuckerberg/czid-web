@@ -65,5 +65,3 @@ export const NextcladeConfirmationModal = ({
     </Modal>
   );
 };
-
-export default NextcladeConfirmationModal;

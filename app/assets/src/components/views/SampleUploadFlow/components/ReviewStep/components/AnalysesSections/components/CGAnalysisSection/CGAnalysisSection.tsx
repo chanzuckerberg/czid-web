@@ -13,7 +13,7 @@ interface CGAnalysisSectionType {
   wetlabProtocol: string;
 }
 
-const CGAnalysisSection = ({
+export const CGAnalysisSection = ({
   clearlabs,
   medakaModel,
   technology,
@@ -42,5 +42,3 @@ const CGAnalysisSection = ({
     </>
   );
 };
-
-export { CGAnalysisSection };

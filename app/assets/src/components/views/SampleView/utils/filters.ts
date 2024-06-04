@@ -15,7 +15,7 @@ import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { Taxon } from "~/interface/shared";
 import { METRIC_DECIMAL_PLACES } from "./constants";
 
-export const applyFilters = ({
+const applyFilters = ({
   row,
   categories,
   subcategories,

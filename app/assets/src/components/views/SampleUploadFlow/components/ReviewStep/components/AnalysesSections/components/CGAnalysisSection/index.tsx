@@ -1,1 +1,2 @@
-export { CGAnalysisSection } from "./CGAnalysisSection";
+import { CGAnalysisSection } from "./CGAnalysisSection";
+export { CGAnalysisSection };

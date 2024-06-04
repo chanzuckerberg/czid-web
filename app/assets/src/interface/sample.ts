@@ -38,12 +38,6 @@ export interface WorkflowRun {
     };
   };
 }
-
-export enum WorkflowValues {
-  CONSENSUS_GENOME = "consensus-genome",
-  SHORT_READ_MNGS = "short-read-mngs",
-}
-
 export interface ThresholdFilterShape {
   metric: string;
   metricDisplay: string;

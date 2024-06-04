@@ -87,11 +87,6 @@ export const isPipelineFeatureAvailable = (
   return isPipelineVersionAtLeast(pipelineVersion, MINIMUM_VERSIONS[feature]);
 };
 
-// Checks if the AMR workflow run uses the latest CARD DB version (as of 5/23/23)
-export const usesLatestCardDbVersion = pipelineVersion => {
-  return isPipelineVersionAtLeast(pipelineVersion, "1.2.4");
-};
-
 // Checks if gene-level downloads are available for the AMR workflow run
 export const isAmrGeneLevelDownloadAvailable = pipelineVersion => {
   return isPipelineVersionAtLeast(pipelineVersion, "1.1.0");

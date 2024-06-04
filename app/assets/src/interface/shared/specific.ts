@@ -69,7 +69,7 @@ export type BulkDownloadFieldType = {
   options: BulkDownloadFieldOptionType[];
 };
 
-export type BulkDownloadFieldOptionType =
+type BulkDownloadFieldOptionType =
   | string
   | { value: string; display_name: string };
 

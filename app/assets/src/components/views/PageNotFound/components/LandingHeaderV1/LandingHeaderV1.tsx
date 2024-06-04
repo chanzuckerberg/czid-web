@@ -1,7 +1,7 @@
 import React from "react";
+import { TransparentButton } from "~ui/controls/buttons";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { CZIDLogoReversed } from "~ui/icons";
-import TransparentButton from "../../../../ui/controls/buttons/TransparentButton";
 import cs from "./landing.scss";
 
 interface LandingHeaderV1Props {

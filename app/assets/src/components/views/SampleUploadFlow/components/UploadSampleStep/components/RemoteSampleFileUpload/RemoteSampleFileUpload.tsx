@@ -178,5 +178,3 @@ export class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUplo
     );
   }
 }
-
-export default RemoteSampleFileUpload;

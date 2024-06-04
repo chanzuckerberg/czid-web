@@ -1,20 +1,12 @@
-import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import { WorkflowLabelType } from "~/components/utils/workflows";
-import { PathogenFlags } from "~/components/views/SamplesHeatmapView/SamplesHeatmapView";
 import { ReportMetadata } from "~/interface/reportMetaData";
-import Sample, { WorkflowRun } from "~/interface/sample";
 import {
-  AccessionData,
-  Background,
   ConsensusGenomeData,
   DateString,
-  NumberId,
-  PipelineRun,
   SampleId,
   Taxon,
 } from "~/interface/shared";
-import { BlastModalInfo } from "../components/views/SampleView/components/ModalManager/components/BlastModals/constants";
 
 export interface SampleViewProps {
   sampleId?: number;
@@ -67,55 +59,6 @@ export interface ConsensusGenomeParams {
   accessionName: string;
   taxonId: number | null;
   taxonName: string;
-}
-
-export interface SampleViewState {
-  amrDeprecatedData?: AmrDeprectatedData[];
-  backgrounds: Background[];
-  blastData: BlastData | Record<string, never>;
-  blastModalInfo: BlastModalInfo;
-  consensusGenomeData: ConsensusGenomeData;
-  consensusGenomeCreationParams: ConsensusGenomeParams | Record<string, never>;
-  consensusGenomePreviousParams: ConsensusGenomeData | Record<string, never>;
-  coverageVizDataByTaxon: {
-    [taxonId: number]: AccessionData;
-  };
-  coverageVizParams: CoverageVizParamsRaw | Record<string, never>;
-  coverageVizVisible: boolean;
-  currentTab?: CurrentTabSample | null;
-  enableMassNormalizedBackgrounds?: boolean;
-  hasPersistedBackground: boolean;
-  filteredReportData: Taxon[];
-  knownPathogens?: number[];
-  pathogenFlags?: PathogenFlags;
-  lineageData?: { [key: string]: Lineage };
-  loadingReport: boolean;
-  loadingWorkflowRunResults: boolean;
-  modalsVisible: {
-    consensusGenomeError: boolean;
-    consensusGenomeCreation: boolean;
-    consensusGenomePrevious: boolean;
-    blastSelection: boolean;
-    blastContigs: boolean;
-    blastReads: boolean;
-  };
-  ownedBackgrounds?: Background[];
-  otherBackgrounds?: Background[];
-  pipelineRun?: PipelineRun;
-  pipelineVersion?: string;
-  project?: NumberId;
-  projectSamples: Pick<Sample, "id" | "name">[];
-  reportData: Taxon[];
-  reportMetadata: ReportMetadata;
-  sample: Sample;
-  selectedOptions: FilterSelections;
-  sidebarMode?: "sampleDetails" | "taxonDetails";
-  sidebarVisible: boolean;
-  sidebarTaxonData?: Taxon;
-  view: SampleReportViewMode;
-  workflowRun?: WorkflowRun;
-  workflowRunId?: number;
-  sharedWithNoBackground: boolean;
 }
 
 export interface FilterSelections {

@@ -9,8 +9,6 @@ export const NEXTCLADE_DEFAULT_TREE_LINK =
   "https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html"; // Beware of link breaking
 export const NEXTCLADE_REFERENCE_TREE_LINK =
   "https://help.czid.org/hc/en-us/articles/360052479232#Uploading-to-Nextclade";
-export const NEXTCLADE_TOOL_DOC_LINK =
-  "https://help.czid.org/hc/en-us/articles/360052479232";
 export const NEXTCLADE_TREE_FORMAT_LINK =
   "https://docs.nextstrain.org/en/latest/reference/formats/data-formats.html";
 export const NEXTCLADE_TREE_ROOT_LINK =
@@ -27,11 +25,8 @@ export const MNGS_NANOPORE_PIPELINE_GITHUB_LINK =
   "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/long-read-mngs";
 export const AMR_PIPELINE_GITHUB_LINK =
   "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/amr";
-export const PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK =
-  "https://help.czid.org/hc/en-us/articles/360058195412";
 export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =
   "https://help.czid.org/hc/en-us/articles/360059656311#Upload";
-export const MAIL_TO_HELP_LINK = "mailto:help@czid.org";
 export const PHYLO_TREE_LINK =
   "https://help.czid.org/hc/en-us/articles/4404223662228";
 export const PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK =
@@ -66,33 +61,6 @@ export const PROJECT_SHARING_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-Data-through-the-Web-App#Project-Sharing";
 export const AMR_PIPELINE_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15091031482644-AMR-Pipeline-Workflow";
-export const TOTAL_READ_HELP_LINK = {
-  url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
-  header: "Do my samples have enough total reads?",
-  pop_up:
-    "Total Reads:Total number of reads uploaded. For paired-end data, each R1 and R2 read counts as one read. Learn more.",
-};
-export const QUALITY_READ_HELP_LINK = {
-  url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Passed-QC",
-  header: "Do my samples have enough quality reads?",
-  pop_up:
-    "Passed QC:The percentage of reads that came out of PriceSeq, step (3) of the host filtration and QC steps, compared to what went into Trimmomatic, step (2). Learn more.",
-};
-export const DUPLICATE_READ_HELP_LINK = {
-  url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
-  header: "Are there too many duplicate reads in my library?",
-  pop_up:
-    "DCR:Duplicate Compression Ratio is the ratio of the total number of sequences present prior to running czid-dedup (duplicate identification) vs the number of unique sequences. Learn more.",
-};
-export const INSERT_LENGTH_HELP_LINK = {
-  url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Mean-Insert-Size",
-  header: "Do my samples have sufficient insert lengths?",
-  pop_up:
-    "Mean Insert Size:The average length of the nucleotide sequence that is inserted between the adapters. Learn more.",
-};
-
-export const READ_URL_HELP_LINK =
-  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Reads-Lost";
 
 export const CONTACT_US_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/requests/new";

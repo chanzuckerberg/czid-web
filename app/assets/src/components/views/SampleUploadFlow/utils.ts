@@ -1,13 +1,7 @@
 import { groupBy, maxBy, sortBy, sum } from "lodash/fp";
 import { openUrlInPopupWindow } from "~/components/utils/links";
-import { WorkflowType } from "~/components/utils/workflows";
 import { getURLParamString } from "~/helpers/url";
-import {
-  PipelineVersions,
-  SampleFromApi,
-  SampleUploadType,
-} from "~/interface/shared";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "./constants";
+import { SampleFromApi, SampleUploadType } from "~/interface/shared";
 
 const BASESPACE_OAUTH_URL = "https://basespace.illumina.com/oauth/authorize";
 const BASESPACE_OAUTH_WINDOW_NAME = "BASESPACE_OAUTH_WINDOW";
@@ -202,24 +196,4 @@ export const groupSamplesByLane = ({
   }
 
   return result;
-};
-
-export const getPipelineVersionString = (
-  projectPipelineVersions: PipelineVersions,
-  workflow: WorkflowType.AMR | WorkflowType.CONSENSUS_GENOME | "mngs",
-  technology: SEQUENCING_TECHNOLOGY_OPTIONS,
-): string | undefined => {
-  if (workflow === "amr") {
-    return projectPipelineVersions[WorkflowType.AMR];
-  } else if (workflow === "consensus-genome") {
-    return projectPipelineVersions[WorkflowType.CONSENSUS_GENOME];
-  } else {
-    // workflow is "mngs"
-    if (technology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA) {
-      return projectPipelineVersions[WorkflowType.SHORT_READ_MNGS];
-    } else {
-      // technology is NANOPORE
-      return projectPipelineVersions[WorkflowType.LONG_READ_MNGS];
-    }
-  }
 };

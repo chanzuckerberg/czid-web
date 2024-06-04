@@ -2,7 +2,6 @@ import { find, getOr, isEmpty, omit, size } from "lodash/fp";
 import { diff } from "~/components/utils/objectUtil";
 import {
   getWorkflowTypeFromLabel,
-  isMngsWorkflow,
   WorkflowCount,
   WORKFLOWS,
   WorkflowType,
@@ -137,17 +136,6 @@ export const hasAppliedFilters = (currentTab, selectedOptions) => {
     hasTaxonFilter ||
     hasThresholdFilters
   );
-};
-
-export const hasMngsRuns = (sample: Sample) => {
-  const workflowCount = getWorkflowCount(sample);
-  // remove keys of workflowCount that are falsy
-  // and count how many of the remaining keys are mngs workflows
-  const mngsWorkflowsCount = Object.entries(workflowCount).filter(
-    ([workflow, count]: [WorkflowType, number]) =>
-      isMngsWorkflow(workflow) && count > 0,
-  ).length;
-  return mngsWorkflowsCount > 0;
 };
 
 export const loadState = (

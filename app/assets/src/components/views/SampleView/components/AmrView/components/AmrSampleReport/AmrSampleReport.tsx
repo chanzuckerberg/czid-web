@@ -18,6 +18,9 @@ import {
   cutoffColumn,
   drugClassColumn,
   geneFamilyColumn,
+  getContigsColumnGroup,
+  getGeneColumn,
+  getGeneInfoColumnGroup,
   getReadsColumnGroup,
   highLevelDrugClassColumn,
   mechanismColumn,
@@ -29,9 +32,6 @@ import {
   readSpeciesColumn,
   readsPerMillionColumn,
 } from "./columnDefinitions";
-import { getContigsColumnGroup } from "./columnDefinitions/contigsColumnGroup";
-import { getGeneColumn } from "./columnDefinitions/geneColumn";
-import { getGeneInfoColumnGroup } from "./columnDefinitions/geneInfoColumnGroup";
 import { StyledTableRow } from "./components/StyledTableRow";
 import { ToggleVisibleColumnsDropdown } from "./components/ToggleVisibleColumnsDropdown";
 import { AmrResult } from "./types";

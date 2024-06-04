@@ -13,7 +13,7 @@ import {
 } from "~/components/views/SampleUploadFlow/constants";
 import { PipelineVersions, Project } from "~/interface/shared";
 import cs from "./analyses_sections.scss";
-import { CGAnalysisSection } from "./components/CGAnalysisSection/CGAnalysisSection";
+import { CGAnalysisSection } from "./components/CGAnalysisSection";
 import { MNGSAnalysisSection } from "./components/MNGSAnalysisSection";
 import { WGSAnalysisSection } from "./components/WGSAnalysisSection";
 import { AnalysisSectionsConfig } from "./workflowTypeConfig";

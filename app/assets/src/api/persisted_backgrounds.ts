@@ -1,7 +1,5 @@
 import { get, postWithCSRF, putWithCSRF } from "./core";
 
-export const getPersistedBackgrounds = () => get("/persisted_backgrounds.json");
-
 export const getPersistedBackground = (
   projectId: number,
 ): Promise<{ background_id: number | null }> =>

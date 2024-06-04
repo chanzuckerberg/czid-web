@@ -72,7 +72,7 @@ import { processMetadata } from "~utils/metadata";
 import { SamplesHeatmapDownloadModal } from "./components/SamplesHeatmapDownloadModal/SamplesHeatmapDownloadModal";
 import SamplesHeatmapFilters from "./components/SamplesHeatmapFilters";
 import { OptionsType } from "./components/SamplesHeatmapFilters/SamplesHeatmapFilters";
-import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
+import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader";
 import {
   APPLIED_FILTERS,
   BackgroundMetricType,

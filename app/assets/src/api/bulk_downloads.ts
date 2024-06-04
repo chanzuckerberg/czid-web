@@ -25,20 +25,6 @@ export const createBulkDownload = (bulkDownload: $TSFixMe) =>
     },
   });
 
-export const getBulkDownloads = ({
-  searchBy,
-  n,
-}: {
-  searchBy?: string | null;
-  n: string | null;
-}) => get("/bulk_downloads.json", { params: { searchBy, n } });
-
-export const getBulkDownload = (bulkDownloadId: number) =>
-  get(`/bulk_downloads/${bulkDownloadId}.json`);
-
-export const getPresignedOutputUrl = (bulkDownloadId: number) =>
-  get(`/bulk_downloads/${bulkDownloadId}/presigned_output_url`);
-
 export const createSampleMetadataBulkDownload = (
   sampleIds: string[],
 ): Promise<SampleMetadataResponseType> =>
