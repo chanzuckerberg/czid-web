@@ -33,7 +33,8 @@
     <!-- The following line is a side fix to work around our issue with @import url(..) declarations in Sass. -->
     <!-- As soon as possible, the Sass issues should be fixed and this streamlined back into our Sass build. -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i,800" rel="stylesheet">
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'vendors' %>
+    <%= javascript_include_tag 'application' %>
     <link rel="icon" type="image/png" href="<%= image_url("logo-#{Rails.env}.png") %>"/>
   </head>
 
