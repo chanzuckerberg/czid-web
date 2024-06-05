@@ -20,13 +20,14 @@ if aws-oidc exec -- docker-compose run --rm web bin/rails db:exists RAILS_ENV=de
     aws-oidc exec -- docker-compose run --rm web bin/rails db:migrate:with_data RAILS_ENV=development
 else
     echo "=== development DB does not exist, setting up DB ==="
-    # rails db:setup creates the database, loads the schema, and initializes with the seed in db/seeds.rb
-    # TODO: once we have db/seeds.rb populated, we can remove the seed migration below
+
+    # description from running bin/rails --tasks
+    # rails db:setup creates the database, loads the schema, and initializes with the seed data
     # TODO: there is a potential issue with this flow because db:setup loads the up to date schema for dev envs
     #       but data migrations may be based on an older schema.
     #       To get around this, we should remove migrations from this command, and recommend that all data migrations
     #       that we want to be seeded should be added as a seed migration and generated in seeds.rb.
-    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web sh -c 'bin/rails db:setup && bin/rails seed:migrate MIGRATION=20230706192000_create_baseline_seed.rb && bin/rails db:migrate:with_data'
+    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web bin/rails db:setup db:migrate:with_data
 fi
 if aws-oidc exec -- docker-compose run --rm web bin/rails db:exists RAILS_ENV=test; then
     echo "=== test DB exists, running migrations ==="

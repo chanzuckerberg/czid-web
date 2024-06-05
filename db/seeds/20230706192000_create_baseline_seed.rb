@@ -14,9 +14,26 @@ class CreateBaselineSeed < SeedMigration::Migration
   end
 
   def down
+    PathogenListVersion.all.each do |pathogen_list_version|
+      pathogen_list_version.citations.clear
+      pathogen_list_version.pathogens.clear
+    end
+
+    Pathogen.destroy_all
+    Citation.destroy_all
+    PathogenListVersion.destroy_all
+    PathogenList.destroy_all
+
     User.destroy_by(email: "czid-e2e@chanzuckerberg.com")
     Sample.destroy_by(name: "E2E Test Sample")
     Project.destroy_by(name: "E2E Test Project")
+
+    SampleType.destroy_all
+    MetadataField.destroy_all
+    WorkflowVersion.destroy_all
+    # HostGenomes will not delete due to association has_many :samples, dependent: :restrict_with_exception
+    AlignmentConfig.destroy_all
+    AppConfig.destroy_all
   end
 
   private
@@ -32,11 +49,14 @@ class CreateBaselineSeed < SeedMigration::Migration
 
   def seed_pathogen_list
     global_list = FactoryBot.find_or_create(:pathogen_list, creator_id: nil, is_global: true)
+    pathogen_list_version = FactoryBot.find_or_create(:pathogen_list_version, version: "1.0.0", pathogen_list_id: global_list.id)
     citation = FactoryBot.find_or_create(:citation, key: "seeded-citation-7-18-23", footnote: "seeded-citation-7-18-23")
-    FactoryBot.find_or_create(:pathogen_list_version, version: "1.0.0", pathogen_list_id: global_list.id)
-
     # Tag Betacoronavirus 1 (tax_id is 694002) as a pathogen
-    FactoryBot.find_or_create(:pathogen, tax_id: 694002)
+    pathogen = FactoryBot.find_or_create(:pathogen, tax_id: 694002)
+
+    # PathogenListVersion HABTM associations
+    pathogen_list_version.citations << citation
+    pathogen_list_version.pathogens << pathogen
   end
 
   def seed_background(pipeline_run_ids, taxon_summaries_data = nil)

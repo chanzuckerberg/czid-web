@@ -18,6 +18,14 @@ export DOCKER_BUILDKIT:=1
 export COMPOSE_DOCKER_CLI_BUILD:=1
 export COMPOSE_PROFILES ?= local-lambdas
 
+current_branch := $(shell git rev-parse --abbrev-ref HEAD)
+
+ifeq ($(current_branch),main)
+    export ECR_BRANCH_TAG := latest
+else
+    export ECR_BRANCH_TAG := branch-$(current_branch)
+endif
+
 ### HELPFUL #################################################
 .PHONY: help
 help: ## display help for this makefile
@@ -79,7 +87,11 @@ local-generate-seed-migration: .env.localdev ## Generate a seed migration; Usage
 
 .PHONY: local-db-drop
 local-db-drop: .env.localdev ## Wipe out the local db for a fresh start
-	$(docker_compose) run --rm web bin/rails db:drop RAILS_ENV=development
+	$(docker_compose) run --rm web bin/rails db:environment:set RAILS_ENV=development db:drop
+
+.PHONY: local-db-reset
+local-db-reset: .env.localdev ## Reset (drop, create, load schema, run seeds) the local db
+	$(docker_compose) run --rm web bin/rails db:environment:set RAILS_ENV=development db:reset
 
 .PHONY: local-import-staging-data
 local-import-staging-data: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
@@ -158,6 +170,7 @@ local-clean: local-stop ## Wipe out the local dev environment (including the db!
 
 .PHONY: local-pull
 local-pull: local-ecr-login ## Pull down the latest upstream docker images to this computer
+	@echo "\nPulling images with tag: ${ECR_BRANCH_TAG}"
 	$(docker_compose) pull --ignore-pull-failures
 
 .PHONY: local-update-gql-schema
@@ -196,3 +209,9 @@ frontend-lint:
 .PHONY: local-start-webapp
 local-start-webapp: local-start ## Start docker containers & webpack server. Web app will be running on http://localhost:3001
 	npm start
+
+# sh -c is necessary because zsh requires square brackets to be escaped
+.PHONY: local-setup-admin-user
+local-setup-admin-user: .env.localdev ## Set up a user for local development; Usage: make local-setup-admin-user user_email="user_email_address" user_name="user name" user_password='password'
+	$(docker_compose) run --rm web sh -c 'bin/rails local_user_creation:admin["$(user_email)","$(user_name)"]'
+	make -C ./e2e set-local-credentials username=$(user_email) password=$(user_password)

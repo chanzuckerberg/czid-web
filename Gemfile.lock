@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/jfoo1984/seed_migration
+  revision: 4860c19f19848d6485886988a5291824c7804136
+  branch: support-habtm-associations
+  specs:
+    seed_migration (1.2.3)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -1761,7 +1768,6 @@ GEM
     rubyzip (2.3.2)
     rufus-scheduler (3.8.2)
       fugit (~> 1.1, >= 1.1.6)
-    seed_migration (1.2.3)
     selenium-webdriver (4.7.1)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
@@ -1917,7 +1923,7 @@ DEPENDENCIES
   rubocop-graphql (~> 0.14.5)
   rubocop-performance
   rubocop-rails
-  seed_migration
+  seed_migration!
   selenium-webdriver
   sentry-raven
   shortener

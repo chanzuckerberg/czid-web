@@ -25,7 +25,7 @@ module SeedResource
     def workflow_versions
       workflow_versions = {
         "consensus-genome" => "3.4.18",
-        "short-read-mngs" => "8.2.2",
+        "short-read-mngs" => "8.3.3",
         "phylotree-ng" => "6.11.0",
         "amr" => "1.2.5",
         "long-read-mngs" => "0.7.3",

@@ -15,7 +15,7 @@ chdir APP_ROOT do
   system('brew help 1>/dev/null') || abort('install homebrew from directions at https://brew.sh/')
   system('open -a Docker 1>/dev/null') || abort('install docker from directions at https://docs.docker.com/docker-for-mac/install/')
   `cat .node-version` == `node -v | tr -d 'v'` || abort('node version mismatch. Run `nvm use $(cat .node-version)` to switch to the correct version')
-  `cat .ruby-version`.strip == `ruby -v`.split(' ')[1].split('p')[0].strip || abort('ruby version mismatch. use chruby to switch to the correct version')
+  `cat .ruby-version`.strip == `ruby -v`.split(' ')[1].split('p')[0].strip || abort('ruby version mismatch. use `chruby $(cat .ruby-version)` to switch to the correct version')
 
   system! './bin/setup-shared'
 end

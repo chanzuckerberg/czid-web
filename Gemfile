@@ -20,11 +20,6 @@
 
 source 'https://rubygems.org'
 
-git_source(:github) do |repo_name|
-  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
-  "https://github.com/#{repo_name}.git"
-end
-
 # -- AWS resources:
 # TODO: We want to replace 'aws-sdk' with only the service gems we use.
 gem 'aws-sdk'
@@ -185,4 +180,4 @@ gem 'net-smtp', require: false
 # need version >= 1.2.3 for M1 macs - https://github.com/cotag/http-parser/issues/12
 gem 'http-parser', '~> 1.2.3'
 
-gem 'seed_migration'
+gem 'seed_migration', git: 'https://github.com/jfoo1984/seed_migration', branch: 'support-habtm-associations'
