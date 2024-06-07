@@ -5,43 +5,37 @@ set -e
 gem install bundler --conservative
 
 echo "== Building docker compose config =="
-aws-oidc exec -- docker-compose build
+make local-build
 
 echo "== Running npm install and webpack =="
 npm install && ./node_modules/.bin/webpack --config webpack.config.dev.js
 
 echo "== Starting DB =="
-aws-oidc exec -- docker-compose up -d db
+make local-start-db
 sleep 10
 
 echo "== Syncing DB =="
-if aws-oidc exec -- docker-compose run --rm web bin/rails db:exists RAILS_ENV=development; then
+if aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web bin/rails db:exists; then
     echo "=== development DB exists, running migrations ==="
-    aws-oidc exec -- docker-compose run --rm web bin/rails db:migrate:with_data RAILS_ENV=development
+    make local-migrate
 else
     echo "=== development DB does not exist, setting up DB ==="
-
-    # description from running bin/rails --tasks
-    # rails db:setup creates the database, loads the schema, and initializes with the seed data
-    # TODO: there is a potential issue with this flow because db:setup loads the up to date schema for dev envs
-    #       but data migrations may be based on an older schema.
-    #       To get around this, we should remove migrations from this command, and recommend that all data migrations
-    #       that we want to be seeded should be added as a seed migration and generated in seeds.rb.
-    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web bin/rails db:setup db:migrate:with_data
+    make local-db-setup
+    make local-import-taxon-lineage-slice
 fi
 if aws-oidc exec -- docker-compose run --rm web bin/rails db:exists RAILS_ENV=test; then
     echo "=== test DB exists, running migrations ==="
     # No seeded / data migrations needed for test DB
-    aws-oidc exec -- docker-compose run --rm web bin/rails db:migrate RAILS_ENV=test
+    make local-migrate-without-data rails_env=test
 else
     echo "=== test DB does not exist, setting up DB ==="
     # This would be reached if the test DB gets dropped without the dev DB getting dropped
     # Avoid seeding the test DB because it causes issues with our tests
-    aws-oidc exec -- docker-compose run --rm web bin/rails db:create db:schema:load RAILS_ENV=test
+    make local-db-create-schema rails_env=test
 fi
 
 echo "== Bringing up all services =="
-aws-oidc exec -- docker-compose up -d db redis web resque resque-result-monitor resque-pipeline-monitor
+make local-start
 sleep 10
 
 bash bin/setup-elasticsearch

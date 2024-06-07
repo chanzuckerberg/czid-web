@@ -18,13 +18,15 @@ export DOCKER_BUILDKIT:=1
 export COMPOSE_DOCKER_CLI_BUILD:=1
 export COMPOSE_PROFILES ?= local-lambdas
 
-current_branch := $(shell git rev-parse --abbrev-ref HEAD)
+branch_basename_for_tag:=$(basename $(shell git rev-parse --abbrev-ref HEAD))
 
-ifeq ($(current_branch),main)
-    export ECR_BRANCH_TAG := latest
+ifeq ($(branch_basename_for_tag),main)
+	export ECR_BRANCH_TAG:=latest
 else
-    export ECR_BRANCH_TAG := branch-$(current_branch)
+	export ECR_BRANCH_TAG:=branch-$(branch_basename_for_tag)
 endif
+
+rails_env ?= development
 
 ### HELPFUL #################################################
 .PHONY: help
@@ -65,6 +67,10 @@ local-migrate: .env.localdev ## Run database schema and data migrations
 local-migrate-down: .env.localdev ## revert a migration; Usage: make local-migrate-down version=319487398
 	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rails db:migrate:down VERSION=$(version)'
 
+.PHONY: local-migrate-without-data
+local-migrate-without-data: .env.localdev ## Run database schema and data migrations; Usage make local-migrate-without-data [rails_env=env]
+	$(docker_compose) run --rm -e RAILS_ENV=$(rails_env) web bin/rails db:migrate
+
 .PHONY: local-seed-migrate
 local-seed-migrate: .env.localdev ## Run seed migrations; Usage: make local-seed-migrate
 	$(docker_compose) run --rm web bin/rails seed:migrate RAILS_ENV=development
@@ -72,6 +78,10 @@ local-seed-migrate: .env.localdev ## Run seed migrations; Usage: make local-seed
 .PHONY: local-seed-migrate-version
 local-seed-migrate-version: .env.localdev ## Run seed migrations; Usage: make local-seed-migrate-version version=20200517175758_seed_migration_file_name.rb
 	$(docker_compose) run --rm web bin/rails seed:migrate MIGRATION=$(version) RAILS_ENV=development
+
+.PHONY: local-seed-rollback
+local-seed-rollback: .env.localdev ## Rollback the most recent seed migration
+	$(docker_compose) run --rm web bin/rails seed:rollback RAILS_ENV=development
 
 .PHONY: local-generate-migration
 local-generate-migration: .env.localdev ## Generate a migration; Usage: make local-generate-migration migration_name=backpopulate_data
@@ -87,11 +97,23 @@ local-generate-seed-migration: .env.localdev ## Generate a seed migration; Usage
 
 .PHONY: local-db-drop
 local-db-drop: .env.localdev ## Wipe out the local db for a fresh start
-	$(docker_compose) run --rm web bin/rails db:environment:set RAILS_ENV=development db:drop
+	$(docker_compose) run --rm -e RAILS_ENV=development web bin/rails db:drop
 
 .PHONY: local-db-reset
 local-db-reset: .env.localdev ## Reset (drop, create, load schema, run seeds) the local db
-	$(docker_compose) run --rm web bin/rails db:environment:set RAILS_ENV=development db:reset
+	$(docker_compose) run --rm -e RAILS_ENV=development web bin/rails db:reset
+
+.PHONY: local-db-setup
+local-db-setup: .env.localdev ## Set up (create, load schema, run seeds) the local db
+	$(docker_compose) run --rm -e RAILS_ENV=development web bin/rails db:setup
+
+.PHONY: local-db-create-schema
+local-db-create-schema: .env.localdev ## Create the local db and load the current schema (without seed data); Usage make local-db-create-schema [rails_env=env]
+	$(docker_compose) run --rm -e RAILS_ENV=$(rails_env) web bin/rails db:create db:schema:load
+
+.PHONY: local-import-taxon-lineage-slice
+local-import-taxon-lineage-slice: .env.localdev ## Import a slice of taxon lineage data from S3 into the local db
+	$(docker_compose) run --rm -e RAILS_ENV=development web bin/rails taxon_lineage_slice:import_data_from_s3
 
 .PHONY: local-import-staging-data
 local-import-staging-data: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
@@ -188,9 +210,12 @@ local-ecr-login: .env.localdev ## Log in to ECR
 		aws ecr get-login-password --region us-west-2 --profile $(AWS_DEV_PROFILE) | docker login --username AWS --password-stdin $$(aws sts get-caller-identity --profile $(AWS_DEV_PROFILE) | jq -r .Account).dkr.ecr.us-west-2.amazonaws.com; \
 	fi
 
-.PHONY: local-rebuild
-local-rebuild: local-ecr-login ## Rebuild containers locally
+.PHONY: local-build
+local-build: local-ecr-login ## Build containers locally
 	$(docker_compose) build
+
+.PHONY: local-rebuild
+local-rebuild: local-build ## Rebuild and start containers locally
 	$(docker_compose_long) up -d
 
 .PHONY: local-logs
