@@ -5,8 +5,8 @@ echo "== Stopping containers and deleting existing OpenSearch Data =="
 make local-stop
 rm -rf ./docker_data/opensearch/*
 
-echo "== Creating ES indices for search =="
-aws-oidc exec -- docker-compose run web rake create_elasticsearch_indices
+echo "== Creating Taxon Lineage ES indices for search =="
+make local-create-taxon-lineages-slice-elasticsearch-index
 
 echo "== Creating ES indices for heatmap =="
 aws-oidc exec -- docker-compose run --rm web curl --retry 6 --retry-delay 10 --retry-connrefused -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_index_template/scored_taxon_counts  --data-binary "@./docker/open_distro/scored_taxon_counts_template.json"

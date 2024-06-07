@@ -52,4 +52,11 @@ namespace :taxon_lineage_slice do
     puts "Removing #{CURRENT_VERSION} taxon lineage slice"
     TaxonLineage.where(version_end: CURRENT_VERSION).destroy_all
   end
+
+  task create_taxon_lineage_slice_es_index: :environment do
+    puts "Creating Elasticsearch index for #{CURRENT_VERSION} slice of taxon lineage data"
+    TaxonLineage.__elasticsearch__.create_index!(force: true)
+    TaxonLineage.__elasticsearch__.import
+    puts "Finished indexing TaxonLineage."
+  end
 end

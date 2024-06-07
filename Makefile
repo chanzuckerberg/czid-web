@@ -115,6 +115,11 @@ local-db-create-schema: .env.localdev ## Create the local db and load the curren
 local-import-taxon-lineage-slice: .env.localdev ## Import a slice of taxon lineage data from S3 into the local db
 	$(docker_compose) run --rm -e RAILS_ENV=development web bin/rails taxon_lineage_slice:import_data_from_s3
 
+.PHONY: local-create-taxon-lineages-slice-elasticsearch-index
+local-create-taxon-lineages-slice-elasticsearch-index: .env.localdev ## Create the taxon lineages slice elasticsearch index
+	$(docker_compose) run --rm -e RAILS_ENV=development web bin/rails taxon_lineage_slice:create_taxon_lineage_slice_es_index
+
+
 .PHONY: local-import-staging-data
 local-import-staging-data: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
 	@if [ -e .database_imported ]; then echo "The database is already populated - please run 'rm .database_imported' and try again if you really want to replace it."; exit 1; fi
