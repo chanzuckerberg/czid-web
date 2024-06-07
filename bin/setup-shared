@@ -4,9 +4,6 @@ set -e
 
 gem install bundler --conservative
 
-echo "== Building docker compose config =="
-make local-build
-
 echo "== Running npm install and webpack =="
 npm install && ./node_modules/.bin/webpack --config webpack.config.dev.js
 
@@ -28,9 +25,9 @@ if aws-oidc exec -- docker-compose run --rm web bin/rails db:exists RAILS_ENV=te
     # No seeded / data migrations needed for test DB
     make local-migrate-without-data rails_env=test
 else
+    # Reached if the test DB gets dropped without the dev DB getting dropped
     echo "=== test DB does not exist, setting up DB ==="
-    # This would be reached if the test DB gets dropped without the dev DB getting dropped
-    # Avoid seeding the test DB because it causes issues with our tests
+    # The test DB does not need to be seeded as our unit tests set up their own data
     make local-db-create-schema rails_env=test
 fi
 

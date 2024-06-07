@@ -18,7 +18,7 @@ export DOCKER_BUILDKIT:=1
 export COMPOSE_DOCKER_CLI_BUILD:=1
 export COMPOSE_PROFILES ?= local-lambdas
 
-branch_basename_for_tag:=$(basename $(shell git rev-parse --abbrev-ref HEAD))
+branch_basename_for_tag:=$(shell basename $(shell git rev-parse --abbrev-ref HEAD))
 
 ifeq ($(branch_basename_for_tag),main)
 	export ECR_BRANCH_TAG:=latest
@@ -55,7 +55,7 @@ local-init: local-pull .env.localdev ## Set up a local dev environment
 	if [ "$$(uname -s)" == "Darwin" ]; then \
 		./bin/setup-macos; \
 	else \
-		./bin/setup-linux; \
+		./bin/setup-ubuntu; \
 	fi
 
 
@@ -169,6 +169,10 @@ local-import-staging-data-all: .env.localdev ## Import staging data into the loc
 .PHONY: local-start
 local-start: .env.localdev ## Start localdev containers or refresh credentials
 	$(docker_compose_long) up -d
+
+.PHONY: local-start-db
+local-start-db: .env.localdev ## Start only the db container
+	$(docker_compose_simple) up -d db
 
 .PHONY: local-stop
 local-stop: .env.localdev ## Stop localdev containers
