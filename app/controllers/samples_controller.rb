@@ -945,6 +945,7 @@ class SamplesController < ApplicationController
             include: {
               project: {
                 only: [:id, :name],
+                methods: [:pinned_alignment_config],
               },
             }
           ).merge(
