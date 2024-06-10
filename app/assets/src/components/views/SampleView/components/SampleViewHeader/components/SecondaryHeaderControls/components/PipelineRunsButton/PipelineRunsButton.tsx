@@ -1,26 +1,19 @@
 import { Button } from "@czi-sds/components";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
-import { WorkflowType } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import cs from "./pipeline_runs_button.scss";
-import { PipelineRunsButtonConfig } from "./workflowTypeConfig";
 
 export interface PipelineRunsButtonProps {
   sample: Sample;
-  workflow: WorkflowType;
 }
 
-export const PipelineRunsButton = ({
-  sample,
-  workflow,
-}: PipelineRunsButtonProps) => {
+export const PipelineRunsButton = ({ sample }: PipelineRunsButtonProps) => {
   const { admin: userIsAdmin } = useContext(UserContext) || {};
-  const { hasPipelineRunsButton } = PipelineRunsButtonConfig[workflow];
 
   return (
     <>
-      {userIsAdmin && hasPipelineRunsButton && (
+      {userIsAdmin && (
         <>
           <Button
             className={cs.controlElement}

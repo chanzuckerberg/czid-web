@@ -38,7 +38,7 @@ export const SecondaryHeaderControls = ({
           onVersionChange={onPipelineVersionChange}
         />
       )}
-      {sample && <PipelineRunsButton sample={sample} workflow={workflow} />}
+      {sample && <PipelineRunsButton sample={sample} />}
       <Button
         data-testid="sample-details"
         sdsType="primary"
