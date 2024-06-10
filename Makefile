@@ -119,7 +119,6 @@ local-import-taxon-lineage-slice: .env.localdev ## Import a slice of taxon linea
 local-create-taxon-lineages-slice-elasticsearch-index: .env.localdev ## Create the taxon lineages slice elasticsearch index
 	$(docker_compose) run --rm -e RAILS_ENV=development web bin/rails taxon_lineage_slice:create_taxon_lineage_slice_es_index
 
-
 .PHONY: local-import-staging-data
 local-import-staging-data: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
 	@if [ -e .database_imported ]; then echo "The database is already populated - please run 'rm .database_imported' and try again if you really want to replace it."; exit 1; fi
@@ -248,4 +247,4 @@ local-start-webapp: local-start ## Start docker containers & webpack server. Web
 .PHONY: local-setup-admin-user
 local-setup-admin-user: .env.localdev ## Set up a user for local development; Usage: make local-setup-admin-user user_email="user_email_address" user_name="user name" user_password='password'
 	$(docker_compose) run --rm web sh -c 'bin/rails local_user_creation:admin["$(user_email)","$(user_name)"]'
-	make -C ./e2e set-local-credentials username=$(user_email) password=$(user_password)
+	make -C ./e2e set-local-credentials username='$(user_email)' password='$(user_password)'

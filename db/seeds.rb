@@ -43,6 +43,10 @@ ActiveRecord::Base.transaction do
 
   AppConfig.create({"key"=>"sfn_cg_arn", "value"=>"arn:aws:states:us-west-2:732052188396:stateMachine:idseq-swipe-dev-default-wdl"})
 
+  AppConfig.create({"key"=>"default_alignment_config_name", "value"=>"2024-02-06"})
+
+  AppConfig.create({"key"=>"card_folder", "value"=>"card-3.2.6-wildcard-4.0.0"})
+
   AlignmentConfig.create({"diamond_db_path"=>nil, "index_dir_suffix"=>nil, "lineage_version"=>"2018-02-15", "lineage_version_old"=>1, "minimap2_long_db_path"=>nil, "minimap2_short_db_path"=>nil, "name"=>"2018-02-15", "s3_accession2taxid_path"=>"s3://idseq-public-references/alignment_data/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/accession2taxid.db", "s3_deuterostome_db_path"=>"s3://idseq-public-references/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/deuterostome_taxids.txt", "s3_lineage_path"=>"s3://idseq-public-references/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/taxid-lineages.db", "s3_nr_db_path"=>"s3://idseq-public-references/20170824/blast_db/nr", "s3_nr_loc_db_path"=>"s3://idseq-public-references/20170824/blast_db/nr_loc.db", "s3_nt_db_path"=>"s3://idseq-public-references/20170824/blast_db/nt", "s3_nt_info_db_path"=>nil, "s3_nt_loc_db_path"=>"s3://idseq-public-references/20170824/blast_db/nt_loc.db", "s3_taxon_blacklist_path"=>"s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt"})
 
   AlignmentConfig.create({"diamond_db_path"=>nil, "index_dir_suffix"=>"2018-04-01", "lineage_version"=>"2018-04-01", "lineage_version_old"=>2, "minimap2_long_db_path"=>nil, "minimap2_short_db_path"=>nil, "name"=>"2018-04-01", "s3_accession2taxid_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/accession2taxid.db", "s3_deuterostome_db_path"=>"s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/deuterostome_taxids.txt", "s3_lineage_path"=>"s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxid-lineages.db", "s3_nr_db_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/nr", "s3_nr_loc_db_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/nr_loc.db", "s3_nt_db_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/nt", "s3_nt_info_db_path"=>nil, "s3_nt_loc_db_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/nt_loc.db", "s3_taxon_blacklist_path"=>"s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt"})
@@ -459,23 +463,25 @@ ActiveRecord::Base.transaction do
 
   User.create({"allowed_features"=>nil, "archetypes"=>nil, "created_by_user_id"=>nil, "current_sign_in_at"=>nil, "current_sign_in_ip"=>nil, "email"=>"czid-e2e@chanzuckerberg.com", "institution"=>nil, "last_sign_in_at"=>nil, "last_sign_in_ip"=>nil, "name"=>"CZ ID Test Account", "phylo_trees_count"=>0, "profile_form_version"=>1, "role"=>1, "salt"=>"9qdDdrs65nkJocGvtoeMc74P", "samples_count"=>0, "segments"=>nil, "sign_in_count"=>0, "visualizations_count"=>0})
 
-  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"3.4.18", "workflow"=>"consensus_genome"})
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"3.4.18", "workflow"=>"consensus-genome"})
 
-  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"8.3.3", "workflow"=>"short_read_mngs"})
-
-  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"6.11.0", "workflow"=>"phylotree_ng"})
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"8.3.3", "workflow"=>"short-read-mngs"})
 
   WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"1.2.5", "workflow"=>"amr"})
 
-  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"0.7.3", "workflow"=>"long_read_mngs"})
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"0.7.3", "workflow"=>"long-read-mngs"})
+
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"2021-01-22", "workflow"=>"ncbi_index_date"})
 
   WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"1", "workflow"=>"human_host_genome"})
 
   WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"2", "workflow"=>"human_host_genome"})
 
-  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"3.5.1", "workflow"=>"consensus_genome"})
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"3.5.1", "workflow"=>"consensus-genome"})
 
-  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"0.7.8", "workflow"=>"long_read_mngs"})
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"0.7.8", "workflow"=>"long-read-mngs"})
+
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"2024-02-06", "workflow"=>"ncbi_index_date"})
 
   PathogenList.create({"creator_id"=>nil, "is_global"=>true})
 
@@ -718,4 +724,4 @@ ActiveRecord::Base.transaction do
   safe_habtm_append(Pathogen.find(1).pathogen_list_versions, PathogenListVersion.where(id: [1] - Pathogen.find(1).pathogen_list_versions.pluck(:id)))
 end
 
-SeedMigration::Migrator.bootstrap(20240606210652)
+SeedMigration::Migrator.bootstrap(20240608061944)

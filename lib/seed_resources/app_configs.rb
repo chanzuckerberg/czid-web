@@ -9,6 +9,7 @@ module SeedResource
       launched_features
       workflow_versions
       sfn_configs
+      alignment_config
     end
 
     private
