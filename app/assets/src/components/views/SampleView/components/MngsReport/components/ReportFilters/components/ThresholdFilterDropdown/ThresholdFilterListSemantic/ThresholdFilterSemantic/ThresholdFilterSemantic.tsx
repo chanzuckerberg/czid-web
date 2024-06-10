@@ -1,3 +1,4 @@
+import { cx } from "@emotion/css";
 import { find, get } from "lodash/fp";
 import React from "react";
 import { Grid } from "semantic-ui-react";
@@ -81,9 +82,12 @@ const ThresholdFilterSemantic = ({
         />
       </Grid.Column>
       <Grid.Column className={cs.inputFieldColumn} width={1}>
-        <div onClick={onRemove} className={cs.removeIcon}>
+        <button
+          onClick={onRemove}
+          className={cx(cs.removeIcon, "noStyleButton")}
+        >
           <IconCloseSmall />
-        </div>
+        </button>
       </Grid.Column>
     </Grid.Row>
   );

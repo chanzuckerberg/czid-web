@@ -1,4 +1,5 @@
 import { Link } from "@czi-sds/components";
+import { cx } from "@emotion/css";
 import React from "react";
 import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { showToast } from "~/components/utils/toast";
@@ -155,10 +156,12 @@ const renderConsensusGenomeCreated = (
       closeWithIcon={true}
       type="info"
     >
-      We&apos;re creating your requested consensus genome, you&apos;ll be able
-      to view it in the Consensus Genome tab.
-      <div
-        className={cs.consensusGenomeLink}
+      <div>
+        We&apos;re creating your requested consensus genome, you&apos;ll be able
+        to view it in the Consensus Genome tab.
+      </div>
+      <button
+        className={cx(cs.consensusGenomeLink, "noStyleButton")}
         onClick={() => {
           // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
           handleTabChange(WORKFLOW_TABS.CONSENSUS_GENOME);
@@ -171,7 +174,7 @@ const renderConsensusGenomeCreated = (
         }}
       >
         View Consensus Genomes
-      </div>
+      </button>
     </Notification>
   );
 };
@@ -189,7 +192,7 @@ const renderPersistedDiscoveryViewThresholds = (
   >
     The taxon filters from the samples page have carried over. If you would like
     to use filters previously applied to the report, click the button below.
-    <div
+    <button
       className={cs.revertFiltersLink}
       onClick={() => {
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
@@ -203,6 +206,6 @@ const renderPersistedDiscoveryViewThresholds = (
       }}
     >
       Revert
-    </div>
+    </button>
   </Notification>
 );

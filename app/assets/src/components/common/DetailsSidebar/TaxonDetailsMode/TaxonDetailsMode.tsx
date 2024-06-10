@@ -42,42 +42,41 @@ export const TaxonDetailsMode = ({
     setParentWikiUrl("");
   };
 
-  const loadTaxonInfo = async () => {
-    const taxonList = [taxonId];
-
-    if (parentTaxonId) {
-      taxonList.push(parentTaxonId);
-    }
-
-    try {
-      const response = await getTaxonDescriptions(taxonList);
-      const taxonInfo = response[taxonId];
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
-      const parentTaxonInfo = response[parentTaxonId];
-
-      if (taxonInfo) {
-        setTaxonDescription(taxonInfo.summary ?? "");
-        setWikiUrl(taxonInfo.wiki_url ?? "");
-      }
-
-      if (parentTaxonInfo) {
-        setTaxonParentName(parentTaxonInfo.title);
-        setTaxonParentDescription(parentTaxonInfo.summary);
-        setParentWikiUrl(parentTaxonInfo.wiki_url);
-      }
-    } catch (error) {
-      // TODO: properly handle error
-      // eslint-disable-next-line no-console
-      console.error("Error loading taxon information: ", error);
-    }
-
-    setIsLoading(false);
-  };
-
   useEffect(() => {
+    const loadTaxonInfo = async () => {
+      const taxonList = [taxonId];
+
+      if (parentTaxonId) {
+        taxonList.push(parentTaxonId);
+      }
+
+      try {
+        const response = await getTaxonDescriptions(taxonList);
+        const taxonInfo = response[taxonId];
+        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
+        const parentTaxonInfo = response[parentTaxonId];
+
+        if (taxonInfo) {
+          setTaxonDescription(taxonInfo.summary ?? "");
+          setWikiUrl(taxonInfo.wiki_url ?? "");
+        }
+
+        if (parentTaxonInfo) {
+          setTaxonParentName(parentTaxonInfo.title);
+          setTaxonParentDescription(parentTaxonInfo.summary);
+          setParentWikiUrl(parentTaxonInfo.wiki_url);
+        }
+      } catch (error) {
+        // TODO: properly handle error
+        // eslint-disable-next-line no-console
+        console.error("Error loading taxon information: ", error);
+      }
+
+      setIsLoading(false);
+    };
     resetState();
     loadTaxonInfo();
-  }, [taxonId, background]);
+  }, [taxonId, background, parentTaxonId]);
 
   const onExpandAnalyticsParams = {
     taxonId,

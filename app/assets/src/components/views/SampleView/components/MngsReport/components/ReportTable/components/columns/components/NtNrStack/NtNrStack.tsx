@@ -12,20 +12,28 @@ interface NtNrStackProps {
 export const NtNrStack = ({ cellData, dbType, onClick }: NtNrStackProps) => {
   return (
     <div className={cs.stack}>
-      <div
-        className={cx(cs.stackElement, dbType === "nt" || cs.lowlightValue)}
+      <button
+        className={cx(
+          cs.stackElement,
+          dbType === "nt" || cs.lowlightValue,
+          "noStyleButton",
+        )}
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         onClick={onClick ? () => onClick[0]("nt") : null}
       >
         {cellData ? cellData[0] : "-"}
-      </div>
-      <div
-        className={cx(cs.stackElement, dbType === "nr" || cs.lowlightValue)}
+      </button>
+      <button
+        className={cx(
+          cs.stackElement,
+          dbType === "nr" || cs.lowlightValue,
+          "noStyleButton",
+        )}
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
         onClick={onClick ? () => onClick[1]("nr") : null}
       >
         {cellData ? cellData[1] : "-"}
-      </div>
+      </button>
     </div>
   );
 };

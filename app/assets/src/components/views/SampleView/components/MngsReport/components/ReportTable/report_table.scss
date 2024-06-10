@@ -78,6 +78,7 @@
   display: inline-block;
 
   .stackElement {
+    display: block;
     @include font-body-s;
     line-height: $sds-spaces-xl;
     font-weight: $font-weight-bold;

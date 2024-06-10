@@ -14,14 +14,17 @@ export const getExpandIconHeaderRenderer: (
 ) => HeaderRendererType = (isExpandAllOpened, toggleExpandAll) =>
   function expandIconHeaderRenderer() {
     return (
-      <div className={cs.expandIcon} data-testid="expand-taxon-parent-all">
+      <button
+        className={cx(cs.expandIcon, "noStyleButton")}
+        data-testid="expand-taxon-parent-all"
+        onClick={() => toggleExpandAll()}
+      >
         <i
           className={cx(
             "fa",
             isExpandAllOpened ? "fa-angle-down" : "fa-angle-right",
           )}
-          onClick={() => toggleExpandAll()}
         />
-      </div>
+      </button>
     );
   };

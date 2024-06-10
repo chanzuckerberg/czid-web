@@ -88,8 +88,13 @@ export const getNameRenderer = (
           <div className={cs.taxonInfo}>
             <span
               className={cx(cs.taxonName, !!cellData || cs.missingName)}
-              // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-              onClick={() => onTaxonNameClick({ ...rowData })}
+              onClick={() =>
+                onTaxonNameClick && onTaxonNameClick({ ...rowData })
+              }
+              onKeyDown={() =>
+                onTaxonNameClick && onTaxonNameClick({ ...rowData })
+              }
+              role={"button"}
             >
               {cellData || rowData.name}
             </span>

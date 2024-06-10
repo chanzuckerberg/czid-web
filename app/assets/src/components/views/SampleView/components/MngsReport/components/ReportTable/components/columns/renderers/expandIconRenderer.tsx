@@ -16,18 +16,21 @@ export const getExpandIconRenderer: (
 ) => CellRendererType = (expandedGenusIds, toggleExpandGenus) =>
   function expandIconRenderer({ rowData }: { rowData: Taxon }) {
     return (
-      // TODO: this should be a button not a div
-      <div className={cs.expandIcon} data-testid="expand-taxon-parent">
+      <div data-testid="expand-taxon-parent">
         {rowData.taxLevel === TAX_LEVEL_GENUS ? (
-          <i
-            className={cx(
-              "fa",
-              expandedGenusIds.has(rowData.taxId)
-                ? "fa-angle-down"
-                : "fa-angle-right",
-            )}
+          <button
+            className={cx(cs.expandIcon, "noStyleButton")}
             onClick={() => toggleExpandGenus({ taxonId: rowData.taxId })}
-          />
+          >
+            <i
+              className={cx(
+                "fa",
+                expandedGenusIds.has(rowData.taxId)
+                  ? "fa-angle-down"
+                  : "fa-angle-right",
+              )}
+            />
+          </button>
         ) : (
           ""
         )}

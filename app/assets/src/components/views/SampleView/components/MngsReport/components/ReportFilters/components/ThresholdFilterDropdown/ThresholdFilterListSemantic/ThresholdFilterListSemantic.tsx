@@ -1,3 +1,4 @@
+import { cx } from "@emotion/css";
 import React from "react";
 import { Grid } from "semantic-ui-react";
 import {
@@ -52,15 +53,15 @@ const ThresholdFilterListSemantic = ({
           ))}
         <Grid.Row className={cs.addThresholdRow}>
           <Grid.Column className={cs.addThresholdColumn}>
-            <span
+            <button
               data-testid="add-threshold"
-              className={cs.addThresholdLink}
+              className={cx(cs.addThresholdLink, "noStyleButton")}
               onClick={() => {
                 onAddThreshold();
               }}
             >
               + ADD THRESHOLD
-            </span>
+            </button>
           </Grid.Column>
         </Grid.Row>
       </Grid>

@@ -265,8 +265,10 @@ test.describe("Validate consensus genomes between Rails & Nextgen are equivelant
     );
 
     for (const nextGenIdToRailsIdChunk of chunkedNextGenIdToRailsIdEntries) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const railsIds = nextGenIdToRailsIdChunk.map(([_, railsId]) => railsId);
       const nextGenIds = nextGenIdToRailsIdChunk.map(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ([nextGenId, _]) => nextGenId,
       );
 

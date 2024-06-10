@@ -268,7 +268,7 @@ class HitGroupVizCC extends React.Component<
       >
         <BasicPopup
           trigger={
-            <div
+            <button
               className={cx(cs.icon, cs.downloadIcon)}
               onClick={withAnalytics(
                 this.handleContigDownload,
@@ -287,7 +287,7 @@ class HitGroupVizCC extends React.Component<
               )}
             >
               <Icon sdsIcon="download" sdsSize="s" sdsType="button" />
-            </div>
+            </button>
           }
           inverted
           wide="very"
@@ -295,13 +295,13 @@ class HitGroupVizCC extends React.Component<
         />
         <BasicPopup
           trigger={
-            <div
+            <button
               className={cx(cs.icon)}
               onClick={this.handleContigCopy}
               onMouseEnter={this.restoreCopyIconMessage}
             >
               <Icon sdsIcon="copy" sdsSize="s" sdsType="button" />
-            </div>
+            </button>
           }
           inverted
           wide="very"
