@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6ba0d838fb5cf30b5684cfc48e79436f>>
+ * @generated SignedSource<<c755f1d4a1492565728d3da4e7de245e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -37,6 +37,7 @@ export type SampleViewSampleQuery$data = {
     readonly project: {
       readonly id: string | null | undefined;
       readonly name: string | null | undefined;
+      readonly pinned_alignment_config: string | null | undefined;
     };
     readonly project_id: number;
     readonly railsSampleId: string | null | undefined;
@@ -245,7 +246,14 @@ v7 = [
         "plural": false,
         "selections": [
           (v1/*: any*/),
-          (v3/*: any*/)
+          (v3/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "pinned_alignment_config",
+            "storageKey": null
+          }
         ],
         "storageKey": null
       },
@@ -428,16 +436,16 @@ return {
     "selections": (v7/*: any*/)
   },
   "params": {
-    "cacheID": "2173de0c0ab91cb17da9642e02188983",
+    "cacheID": "528d7428fd1d755e64e84068f6c76447",
     "id": null,
     "metadata": {},
     "name": "SampleViewSampleQuery",
     "operationKind": "query",
-    "text": "query SampleViewSampleQuery(\n  $railsSampleId: String\n  $snapshotLinkId: String\n) {\n  SampleForReport(railsSampleId: $railsSampleId, snapshotLinkId: $snapshotLinkId) {\n    id\n    created_at\n    default_background_id\n    default_pipeline_run_id\n    editable\n    host_genome_id\n    initial_workflow\n    name\n    pipeline_runs {\n      adjusted_remaining_reads\n      alignment_config_name\n      assembled\n      created_at\n      id\n      pipeline_version\n      run_finalized\n      total_ercc_reads\n      wdl_version\n    }\n    project {\n      id\n      name\n    }\n    project_id\n    railsSampleId\n    status\n    updated_at\n    upload_error\n    user_id\n    workflow_runs {\n      deprecated\n      executed_at\n      id\n      input_error {\n        label\n        message\n      }\n      inputs {\n        accession_id\n        accession_name\n        creation_source\n        ref_fasta\n        taxon_id\n        taxon_name\n        technology\n      }\n      run_finalized\n      status\n      wdl_version\n      workflow\n    }\n  }\n}\n"
+    "text": "query SampleViewSampleQuery(\n  $railsSampleId: String\n  $snapshotLinkId: String\n) {\n  SampleForReport(railsSampleId: $railsSampleId, snapshotLinkId: $snapshotLinkId) {\n    id\n    created_at\n    default_background_id\n    default_pipeline_run_id\n    editable\n    host_genome_id\n    initial_workflow\n    name\n    pipeline_runs {\n      adjusted_remaining_reads\n      alignment_config_name\n      assembled\n      created_at\n      id\n      pipeline_version\n      run_finalized\n      total_ercc_reads\n      wdl_version\n    }\n    project {\n      id\n      name\n      pinned_alignment_config\n    }\n    project_id\n    railsSampleId\n    status\n    updated_at\n    upload_error\n    user_id\n    workflow_runs {\n      deprecated\n      executed_at\n      id\n      input_error {\n        label\n        message\n      }\n      inputs {\n        accession_id\n        accession_name\n        creation_source\n        ref_fasta\n        taxon_id\n        taxon_name\n        technology\n      }\n      run_finalized\n      status\n      wdl_version\n      workflow\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "ccf67b9998dc286eecbede5c072f993d";
+(node as any).hash = "204b07e659f807c0136e2e759b262426";
 
 export default node;

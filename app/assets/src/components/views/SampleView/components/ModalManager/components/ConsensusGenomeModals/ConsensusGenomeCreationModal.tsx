@@ -98,8 +98,7 @@ export const ConsensusGenomeCreationModal = ({
               accession_name: consensusGenomeCreationParams.accessionName,
               taxon_id: consensusGenomeCreationParams.taxonId?.toString(),
               taxon_name: consensusGenomeCreationParams.taxonName,
-              alignment_config_name:
-                sample?.pipeline_runs?.[0]?.alignment_config_name,
+              alignment_config_name: sample?.project?.pinned_alignment_config,
               technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
             },
             authenticityToken: getCsrfToken(),

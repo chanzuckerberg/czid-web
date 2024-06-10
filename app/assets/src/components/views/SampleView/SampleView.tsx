@@ -173,6 +173,7 @@ const SampleQuery = graphql`
       project {
         id
         name
+        pinned_alignment_config
       }
       project_id
       railsSampleId

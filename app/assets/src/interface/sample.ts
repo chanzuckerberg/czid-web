@@ -73,6 +73,7 @@ export default interface Sample {
   project: {
     id: string;
     name: string;
+    pinned_alignment_config: string;
   };
   project_id: number;
   status: SampleStatus;
