@@ -1,4 +1,4 @@
-import { Button, Icon, Tooltip } from "@czi-sds/components";
+import { Button, Icon, InputRadio, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import React, { useEffect, useState } from "react";
 import { createProject } from "~/api";
@@ -8,7 +8,6 @@ import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/DiscoveryView/components/ProjectsView/constants";
 import Modal from "~ui/containers/Modal";
 import Input from "~ui/controls/Input";
-import RadioButton from "~ui/controls/RadioButton";
 import Textarea from "~ui/controls/Textarea";
 import cs from "./project_creation_modal.scss";
 
@@ -114,9 +113,13 @@ const ProjectCreationModal = ({
             data-testid="public-project"
           >
             <div className={cs.radioButtonAndProjectIcon}>
-              <RadioButton
-                selected={accessLevel === ACCESS_LEVEL.publicAccess}
+              <InputRadio
                 className={cs.radioButton}
+                stage={
+                  accessLevel === ACCESS_LEVEL.publicAccess
+                    ? "checked"
+                    : "unchecked"
+                }
               />
               <div className={cs.projectIcon}>
                 <Icon sdsIcon="projectPublic" sdsSize="xl" sdsType="static" />
@@ -141,9 +144,13 @@ const ProjectCreationModal = ({
             data-testid="private-project"
           >
             <div className={cs.radioButtonAndProjectIcon}>
-              <RadioButton
-                selected={accessLevel === ACCESS_LEVEL.privateAccess}
+              <InputRadio
                 className={cs.radioButton}
+                stage={
+                  accessLevel === ACCESS_LEVEL.privateAccess
+                    ? "checked"
+                    : "unchecked"
+                }
               />
               <div className={cs.projectIcon}>
                 <Icon sdsIcon="projectPrivate" sdsSize="xl" sdsType="static" />

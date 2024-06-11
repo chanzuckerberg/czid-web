@@ -90,8 +90,8 @@
   }
 
   .radioButton {
-    margin-right: $sds-spaces-m;
-    margin-top: $sds-spaces-xxs;
+    align-items: start;
+    padding: $sds-spaces-xxs $sds-spaces-m 0 0;
   }
 
   .content {

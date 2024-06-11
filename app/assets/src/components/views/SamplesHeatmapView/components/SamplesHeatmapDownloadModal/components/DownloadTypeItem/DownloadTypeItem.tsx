@@ -1,6 +1,6 @@
+import { InputRadio } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import React from "react";
-import RadioButton from "~/components/ui/controls/RadioButton";
 import {
   HeatmapDownloadOption,
   HeatmapDownloadType,
@@ -42,7 +42,10 @@ export const DownloadTypeItem = ({
         key={downloadType}
         onClick={handleDownloadTypeButtonClick}
       >
-        <RadioButton className={cs.radioButton} selected={isSelected} />
+        <InputRadio
+          className={cs.radioButton}
+          stage={isSelected ? "checked" : "unchecked"}
+        />
         <div className={cs.content}>
           <div className={cs.name}>
             {displayName}

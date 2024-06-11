@@ -1,9 +1,9 @@
+import { InputRadio } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import { head } from "lodash/fp";
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import FilePicker from "~/components/ui/controls/FilePicker";
-import RadioButton from "~/components/ui/controls/RadioButton";
 import {
   NEXTCLADE_DEFAULT_TREE_LINK,
   NEXTCLADE_TREE_FORMAT_LINK,
@@ -45,7 +45,10 @@ export const NextcladeReferenceTreeOptions = ({
         className={cx(cs.treeType, !uploadSelected && cs.selected)}
         onClick={() => onSelect("global")}
       >
-        <RadioButton className={cs.radioButton} selected={!uploadSelected} />
+        <InputRadio
+          className={cs.radioButton}
+          stage={!uploadSelected ? "checked" : "unchecked"}
+        />
         <div className={cs.content}>
           <div className={cs.name}>Nextclade Default Tree</div>
           <div className={cs.description}>
@@ -60,7 +63,10 @@ export const NextcladeReferenceTreeOptions = ({
         className={cx(cs.treeType, uploadSelected && cs.selected)}
         onClick={() => onSelect("upload")}
       >
-        <RadioButton className={cs.radioButton} selected={uploadSelected} />
+        <InputRadio
+          className={cs.radioButton}
+          stage={uploadSelected ? "checked" : "unchecked"}
+        />
         <div className={cs.content}>
           <div className={cs.name}>Upload a Tree</div>
           <div className={cs.description}>

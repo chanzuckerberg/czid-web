@@ -1,7 +1,7 @@
+import { InputRadio } from "@czi-sds/components";
 import { cx } from "@emotion/css";
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import RadioButton from "~/components/ui/controls/RadioButton";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { BULK_DOWNLOAD_DOCUMENTATION_LINKS } from "~/components/views/BulkDownloadListView/constants";
 import {
@@ -63,10 +63,10 @@ export const DownloadTypeOption = ({
         onSelectDownloadType(downloadType.type)
       }
     >
-      <RadioButton
+      <InputRadio
         disabled={isDisabled}
         className={cs.radioButton}
-        selected={isSelected}
+        stage={isSelected ? "checked" : "unchecked"}
       />
       <div className={cs.content}>
         <div className={cs.name}>

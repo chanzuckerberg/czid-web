@@ -1,11 +1,16 @@
-import { Button, List, ListItem, Tooltip } from "@czi-sds/components";
+import {
+  Button,
+  InputRadio,
+  List,
+  ListItem,
+  Tooltip,
+} from "@czi-sds/components";
 import cx from "classnames";
 import { compact, getOr, isEmpty } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React, { useState } from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Modal from "~ui/containers/Modal";
-import RadioButton from "~ui/controls/RadioButton";
 import cs from "./blast_selection_modal.scss";
 import {
   BlastMethods,
@@ -130,10 +135,10 @@ export const BlastSelectionModal = ({
         key={nanoid()}
         role="button"
       >
-        <RadioButton
+        <InputRadio
+          className={cs.radioButton}
+          stage={blastOptionIsSelected ? "checked" : "unchecked"}
           disabled={blastOptionIsDisabled}
-          selected={blastOptionIsSelected}
-          className={cx(cs.radioButton, cs.alignTitle)}
         />
         <div className={cs.optionText}>
           {blastTitle}
