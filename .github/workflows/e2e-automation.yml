@@ -68,7 +68,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: npm install
+      - name: Install dependencies
         working-directory: ./e2e/
         run: |
           npm install
@@ -87,16 +87,15 @@ jobs:
             echo "Running tests without feature flags"
           fi
       - name: Use saucectl
+        id: run-saucelabs
         working-directory: ./e2e/
-        if: failure() || success()
         run: |
           saucectl run -c ./.sauce/${{inputs.test-category}}.yml
-
-      - name: Send custom JSON data to Slack workflow
-        id: slack
-        uses: slackapi/slack-github-action@v1.25.0
+      - name: Notify Slack on success
+        id: slack_message
+        if: ${{ success() }}
+        uses: slackapi/slack-github-action@v1.23.0
         with:
-          # This data can be any valid JSON from a previous step in the GitHub Action
           payload: |
             {
               "blocks": [
@@ -104,44 +103,116 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": ":gear: E2E Automation",
+                    "text": "E2E Automation: ${{inputs.test-category}} tests have passed :white_check_mark:",
                     "emoji": true
                   }
                 },
                 {
                   "type": "section",
-                  "text": {
-                      "type": "mrkdwn",
-                      "text": "*Workflow*: ${{ github.workflow }}"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
+                  "fields": [
+                    {
                       "type": "mrkdwn",
                       "text": "*Env*: ${{inputs.node-environment}}"
-                  }
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Test Category*: ${{inputs.test-category}}"
+                    }
+                  ]
                 },
                 {
                   "type": "section",
-                  "text": {
+                  "fields": [
+                    {
                       "type": "mrkdwn",
                       "text": "*Branch*: ${{ github.ref_name }}"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
+                    },
+                    {
                       "type": "mrkdwn",
                       "text": "*Commit*: ${{ github.sha }}"
-                  }
+                    }
+                  ]
                 },
                 {
                   "type": "section",
                   "text": {
-                      "type": "mrkdwn",
-                      "text": "*Results*: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    "type": "mrkdwn",
+                    "text": "*Results Link*: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "plain_text",
+                      "text": "Automated by Github Actions",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Slack on failure
+        if: ${{ failure() }}
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "E2E Automation: ${{inputs.test-category}} tests failed :x:",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Env*: ${{inputs.node-environment}}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Test Category*: ${{inputs.test-category}}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch*: ${{ github.ref_name }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit*: ${{ github.sha }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Results*: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "plain_text",
+                      "text": "Automated by Github Actions",
+                      "emoji": true
+                    }
+                  ]
                 }
               ]
             }
