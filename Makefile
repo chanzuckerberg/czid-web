@@ -18,14 +18,6 @@ export DOCKER_BUILDKIT:=1
 export COMPOSE_DOCKER_CLI_BUILD:=1
 export COMPOSE_PROFILES ?= local-lambdas
 
-branch_basename_for_tag:=$(shell basename $(shell git rev-parse --abbrev-ref HEAD))
-
-ifeq ($(branch_basename_for_tag),main)
-	export ECR_BRANCH_TAG:=latest
-else
-	export ECR_BRANCH_TAG:=branch-$(branch_basename_for_tag)
-endif
-
 rails_env ?= development
 
 ### HELPFUL #################################################
@@ -207,7 +199,6 @@ local-clean: local-stop ## Wipe out the local dev environment (including the db!
 
 .PHONY: local-pull
 local-pull: local-ecr-login ## Pull down the latest upstream docker images to this computer
-	@echo "\nPulling images with tag: ${ECR_BRANCH_TAG}"
 	$(docker_compose) pull --ignore-pull-failures
 
 .PHONY: local-update-gql-schema

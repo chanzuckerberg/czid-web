@@ -120,8 +120,8 @@ services:
       # See https://testdriven.io/blog/faster-ci-builds-with-docker-cache/
       # and https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#leverage-build-cache#leverage-build-cache
       cache_from:
-        - ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:${ECR_BRANCH_TAG:-latest}
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:${ECR_BRANCH_TAG:-latest}
+        - ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     volumes:
       - .:/app
@@ -147,7 +147,7 @@ services:
       GRAPHQL_FEDERATION_SERVICE_URL: http://web-proxy:3000/graphqlfed
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3001"
   resque:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:${ECR_BRANCH_TAG:-latest}
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     volumes:
       - .:/app:ro
@@ -167,7 +167,7 @@ services:
     command: bundle exec "COUNT=2 rake resque:workers"
   resque-scheduler:
     # See config/resque_schedule.yml for usages.
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:${ECR_BRANCH_TAG:-latest}
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     profiles: ["async-failures"]  # We *very rarely* need to run this in local-dev
     volumes:
@@ -185,7 +185,7 @@ services:
       <<: [*web-variables, *aws-variables]
     command: bundle exec "rake resque:scheduler"
   resque-result-monitor:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:${ECR_BRANCH_TAG:-latest}
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     profiles: ["async-failures"]  # We *very rarely* need to run this in local-dev
     volumes:
@@ -203,7 +203,7 @@ services:
       <<: [*web-variables, *aws-variables]
     command: bundle exec "rake result_monitor"
   resque-pipeline-monitor:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:${ECR_BRANCH_TAG:-latest}
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     profiles: ["async-failures"]  # We *very rarely* need to run this in local-dev
     volumes:
@@ -221,7 +221,7 @@ services:
       <<: [*web-variables, *aws-variables]
     command: bundle exec "rake pipeline_monitor"
   shoryuken:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:${ECR_BRANCH_TAG:-latest}
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     volumes:
       - .:/app:ro

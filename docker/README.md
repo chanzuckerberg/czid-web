@@ -33,26 +33,20 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
 - If working off `main` and gems are not modified locally, pull the latest image from AWS ECR
 
     ```zsh
-    # set AWS account id
-    $ ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
-    # login to ecr so pulling cache succeeds
-    $ aws ecr get-login-password | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web
-    # pull from ECR
-    $ docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:latest
-    # start containers
-    $ aws-oidc exec -- docker-compose up web
+    make local-pull
     ```
 
-- If gems are modified locally or pulling from ECR fails, rebuild the image
+- If gems are modified locally or pulling from ECR fails, there are two options:
+  - Rebuild the docker image locally
 
     ```zsh
-    # set AWS account id
-    $ ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
-    # login to ecr so pulling cache succeeds
-    $ aws ecr get-login-password | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web
-    # build container
-    $ aws-oidc exec -- docker-compose build web
+    make local-rebuild
     ```
+
+  - Modify `docker-compose.yml` config and pull from ECR
+    - If the branch has been pushed to Github, and the dev docker image has been built and pushed to ECR, you can modify references to `idseq-web:latest` in the `docker-compose.yml` to pull from the ECR image tag for your branch.
+    - Run the command `basename $(git rev-parse --abbrev-ref HEAD)`, and replace the `latest` portion with the output of that command.  Then run `make local-pull`.
+    - Note that this should only be done for the `idseq-web` image, and these changes should not be committed.
 
 - To avoid rebuilding your web image temporarily (e.g. after someone adds to the Gemfile), you can try this with your running container
   - `aws-oidc exec -- docker-compose run --entrypoint='' web bundle install`
