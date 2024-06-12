@@ -225,7 +225,9 @@ module BulkDownloadsHelper
         # Don't include 0 values for reads or rPM metrics.
         # Include ALL values for zscore metrics for now, because it's less clear what to omit,
         # since zscore can be nonzero even if the corresponding read count was zero.
-        if metric_value > 0 || metric == "NT.zscore" || metric == "NR.zscore"
+        # Include 0 and negative values for logevalue because the database is actually storing the exponent value
+        # which tends to have negative numbers as real values
+        if metric_value > 0 || metric == "NT.zscore" || metric == "NR.zscore" || metric == "NT.logevalue" || metric == "NR.logevalue"
           sample_metric_values[taxid] = metric_value
           taxids_to_name[taxid] = taxon_counts["name"]
         end
