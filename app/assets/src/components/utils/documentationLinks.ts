@@ -25,8 +25,6 @@ export const MNGS_NANOPORE_PIPELINE_GITHUB_LINK =
   "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/long-read-mngs";
 export const AMR_PIPELINE_GITHUB_LINK =
   "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/amr";
-export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =
-  "https://help.czid.org/hc/en-us/articles/360059656311#Upload";
 export const PHYLO_TREE_LINK =
   "https://help.czid.org/hc/en-us/articles/4404223662228";
 export const PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK =

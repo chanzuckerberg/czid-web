@@ -3,7 +3,7 @@ import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
 import Toggle from "~/components/ui/controls/Toggle";
-import { UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK } from "~/components/utils/documentationLinks";
+import { SARS_COV_2_UPLOAD_LINK } from "~/components/utils/documentationLinks";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import {
   MEDAKA_MODEL_OPTIONS,
@@ -78,7 +78,7 @@ const ConsensusGenomeNanoporeSettings = ({
                 : "For best results, specify the correct model. Where a version of Guppy has been used without a corresponding model, choose a model with the highest version equal to or less than the Guppy version."
             }
             position="top center"
-            link={UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK}
+            link={SARS_COV_2_UPLOAD_LINK}
           />
         </div>
         {usedClearLabs ? (

@@ -1,6 +1,6 @@
 import {
   AMR_DATABASE_HELP_LINK,
-  UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
+  SARS_COV_2_UPLOAD_LINK,
 } from "~/components/utils/documentationLinks";
 
 const TOOLTIP_BUFFER = 10;
@@ -129,7 +129,7 @@ export const FIELDS_METADATA = {
     label: "Medaka Model",
     tooltip:
       "Medaka is a tool to create consensus sequences and variant calls from nanopore sequencing data.",
-    link: UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
+    link: SARS_COV_2_UPLOAD_LINK,
   },
   ct_value: {
     label: "Ct Value",
