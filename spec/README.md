@@ -3,10 +3,10 @@
 
 ## Tips and tricks
 - To run the RSpec suite:
-  - `aws-oidc exec -- docker-compose run web "rspec"`
+  - `make rspec`
 - To run a specific file:
-  - `aws-oidc exec -- docker-compose run web "rspec path/to/file/file.rb"`
-  - Ex: `aws-oidc exec -- docker-compose run web "rspec spec/controllers/workflow_runs_controller_spec.rb"`
+  - `docker compose --env-file .env.localdev exec web rspec path/to/file/file.rb`
+  - Ex: `docker compose --env-file .env.localdev exec web rspec spec/services/pipeline_report_service_spec.rb`
 - To reset the test database:
   - `make local-db-create-schema rails_env=test`
   - See also: `bin/setup-shared`

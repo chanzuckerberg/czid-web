@@ -29,7 +29,6 @@ const CAPTION_LINE_WIDTH = 180;
 
 interface SamplesHeatmapVisProps {
   data?: object;
-  pathogenFlagsData?: string[][][];
   taxonFilterState?: Record<string, Record<string, boolean>>;
   defaultMetadata?: $TSFixMe[];
   metadataTypes?: $TSFixMe[];
@@ -232,7 +231,6 @@ export class SamplesHeatmapVis extends React.Component<
       this.heatmap.updateData({
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         values: this.props.data[this.props.metric],
-        pathogenFlags: this.props.pathogenFlagsData,
         rowLabels: this.extractTaxonLabels(),
       });
       this.scrollToRow();
@@ -242,7 +240,6 @@ export class SamplesHeatmapVis extends React.Component<
       this.heatmap.updateData({
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2538
         values: this.props.data[this.props.metric],
-        pathogenFlags: this.props.pathogenFlagsData,
         rowLabels: this.extractTaxonLabels(),
       });
     }

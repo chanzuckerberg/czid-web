@@ -149,6 +149,13 @@ local-import-staging-data: .env.localdev ## Import staging data into the local m
 	$(docker_compose) run --rm web bin/rails create_elasticsearch_indices
 	touch .database_imported
 
+.PHONY: local-import-staging-taxon-count-data
+local-import-staging-taxon-count-data: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
+	export $$(cat .env.localdev); bin/clam staging 'mysqldump --lock-tables=false --no-create-info '\
+	    '-h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging taxon_counts'\
+	    '| gzip -c' > idseq_staging_taxon_count_data.sql.gz
+	$(docker_compose) run --rm web "gzip -dc idseq_staging_taxon_count_data.sql.gz | mysql -vvv -h db -u root --database idseq_development"
+
 .PHONY: local-import-staging-data-all
 local-import-staging-data-all: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
 	@if [ -e .database_imported ]; then echo "The database is already populated - please run 'rm .database_imported' and try again if you really want to replace it."; exit 1; fi

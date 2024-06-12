@@ -36,6 +36,7 @@ RSpec.describe PipelineReportService, type: :service do
 
   before(:each) do
     allow(PathogenFlaggingService).to receive(:call).and_return({})
+    allow(PathogenList).to receive_message_chain(:find_by, :fetch_list_version, :fetch_pathogens_info, :pluck).and_return([3, 4, 5])
   end
 
   context "Illumina sample report" do

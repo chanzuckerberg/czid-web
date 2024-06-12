@@ -124,11 +124,6 @@ const getSampleTaxons = (params: $TSFixMe, cancelToken: $TSFixMe) =>
     }
   });
 
-const getPathogenFlags = (params: $TSFixMe) =>
-  get("/visualizations/pathogen_flags.json", {
-    params,
-  });
-
 // TODO(tiago): still needs to accepts field to sort by
 const getSamples = ({
   projectId,
@@ -814,7 +809,6 @@ export {
   getMassNormalizedBackgroundAvailability,
   getNewPhyloTreePipelineRunIds,
   getNewPhyloTreePipelineRunInfo,
-  getPathogenFlags,
   getPhyloTree,
   getPhyloTrees,
   getProjectDimensions,

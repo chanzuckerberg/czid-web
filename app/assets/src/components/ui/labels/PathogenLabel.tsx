@@ -18,44 +18,6 @@ export const CATEGORIES = {
       </>
     ),
   },
-  lcrp: {
-    text: "LCRP Pathogen",
-    code: "lcrp",
-    color: "orange",
-    dimmedColor: "dimOrange",
-    tooltip: (
-      <>
-        {
-          "Outlier organism with potential human disease significance. See documentation "
-        }
-        <ExternalLink
-          href={
-            "https://docs.google.com/document/d/1bhG7tEVBN8IFrRddw4CiCw0tZLMf8NPzxi1ZghcsvvM/edit?usp=sharing"
-          }
-        >
-          here.
-        </ExternalLink>
-      </>
-    ),
-  },
-  divergent: {
-    text: "Divergent Virus",
-    code: "divergent",
-    color: "purple",
-    dimmedColor: "dimPurple",
-    tooltip: (
-      <>
-        {"Divergent virus. See documentation "}
-        <ExternalLink
-          href={
-            "https://docs.google.com/document/d/1bhG7tEVBN8IFrRddw4CiCw0tZLMf8NPzxi1ZghcsvvM/edit?usp=sharing"
-          }
-        >
-          here.
-        </ExternalLink>
-      </>
-    ),
-  },
 };
 
 interface PathogenLabelProps {

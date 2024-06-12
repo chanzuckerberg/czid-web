@@ -101,8 +101,6 @@ class PipelineReportService
   DEFAULT_SORT_PARAM = :agg_score
 
   FLAG_KNOWN_PATHOGEN = "knownPathogen".freeze
-  FLAG_LCRP = "lcrp".freeze
-  FLAG_DIVERGENT = "divergent".freeze
 
   CSV_SHORT_READS_COLUMNS = [
     "tax_id",
@@ -387,10 +385,7 @@ class PipelineReportService
     # Flag pathogens (sample-agnostic)
     @timer.split("tag_pathogens")
     flag_pathogens(
-      species_counts: species_counts,
-      selected_flags: [
-        FLAG_KNOWN_PATHOGEN,
-      ]
+      species_counts: species_counts
     )
 
     structured_lineage = encode_taxon_lineage(lineage_by_tax_id)
@@ -879,21 +874,13 @@ class PipelineReportService
     end
   end
 
-  def flag_pathogens(species_counts:, selected_flags:)
-    flagged_taxa_by_pr_id = PathogenFlaggingService.call(
-      pipeline_run_ids: [@pipeline_run.id],
-      background_id: @background&.id,
-      selected_flags: selected_flags
-    )
-    flagged_taxa = flagged_taxa_by_pr_id[@pipeline_run.id] || {}
+  def flag_pathogens(species_counts:)
+    known_pathogens = PathogenList.find_by(is_global: true).fetch_list_version().fetch_pathogens_info().pluck(:tax_id)
 
-    flagged_taxa.each do |tax_id, flags_for_taxon|
-      tax_info = species_counts[tax_id]
-      unless tax_info.nil?
-        (tax_info['pathogenFlags'] ||= []).concat(flags_for_taxon)
-      end
-      # for backwards compatibility with older feature flags
-      if flags_for_taxon.include?(FLAG_KNOWN_PATHOGEN)
+    species_counts.each do |tax_id, tax_info|
+      if tax_id.in?(known_pathogens)
+        tax_info['pathogenFlags'] = [FLAG_KNOWN_PATHOGEN]
+        # for backwards compatibility with older feature flags
         tax_info['pathogenFlag'] = FLAG_KNOWN_PATHOGEN
       end
     end
@@ -935,26 +922,18 @@ class PipelineReportService
         tax_info["nt_e_value"] = tax_info["nt_e_value"].nil? ? nil : "10^#{tax_info['nt_e_value']}"
         tax_info["nr_e_value"] = tax_info["nr_e_value"].nil? ? nil : "10^#{tax_info['nr_e_value']}"
 
-        # Pathogen/LCRP tags: for a genus, consider all its species rows; for a species, consider only itself
+        # Pathogen tags: for a genus, consider all its species rows; for a species, consider only itself
         rows_to_consider = if tax_info["species_tax_ids"]
                              rows.select { |r| tax_info["species_tax_ids"].include?(r["tax_id"]) }
                            else
                              [tax_info]
                            end
 
-        # Count up the number of species that are known pathogen or LCRP
+        # Count up the number of species that are known pathogen
         tax_info["known_pathogen"] = 0
-        tax_info["lcrp_pathogen"] = 0
-        tax_info["divergent_pathogen"] = 0
         rows_to_consider.each do |row|
           if row["pathogenFlag"] == FLAG_KNOWN_PATHOGEN || (row["pathogenFlags"] || []).include?(FLAG_KNOWN_PATHOGEN)
             tax_info["known_pathogen"] += 1
-          end
-          if (row["pathogenFlags"] || []).include?(FLAG_LCRP)
-            tax_info["lcrp_pathogen"] += 1
-          end
-          if (row["pathogenFlags"] || []).include?(FLAG_DIVERGENT)
-            tax_info["divergent_pathogen"] += 1
           end
         end
 

@@ -262,8 +262,7 @@ class VisualizationsController < ApplicationController
     pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
     flags_by_pr_id = PathogenFlaggingService.call(
       pipeline_run_ids: pr_id_to_sample_id.keys(),
-      background_id: background_for_heatmap,
-      es_preflight_success: true # the user has already loaded the heatmap at this point so all es records are present
+      background_id: background_for_heatmap
     )
     return flags_by_pr_id.map { |pr_id, flags| [pr_id_to_sample_id[pr_id], flags] }.to_h
   end

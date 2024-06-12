@@ -163,7 +163,6 @@ interface SamplesHeatmapViewState {
   newestTaxonId?: $TSFixMe;
   metadataTypes?: $TSFixMe;
   enableMassNormalizedBackgrounds?: $TSFixMe;
-  includePathogens?: boolean;
 }
 
 interface TaxonDetails {
@@ -288,7 +287,6 @@ class SamplesHeatmapViewCC extends React.Component<
       taxonFilterState: {},
       pendingPinnedSampleIds: new Set(),
       pinnedSampleIds: new Set(),
-      includePathogens: false, // this will be togglable by the user in the future
     };
 
     this.removedTaxonIds = new Set(
@@ -472,7 +470,6 @@ class SamplesHeatmapViewCC extends React.Component<
         addedTaxonIds: Array.from(this.state.addedTaxonIds),
         removedTaxonIds: Array.from(this.removedTaxonIds),
         sampleIds: this.state.sampleIds,
-        includePathogens: this.state.includePathogens,
       },
       this.state.selectedOptions,
     );
@@ -1821,7 +1818,6 @@ class SamplesHeatmapViewCC extends React.Component<
       <ErrorBoundary>
         <SamplesHeatmapVis
           data={this.state.data}
-          pathogenFlagsData={this.state.pathogenFlagData}
           defaultMetadata={this.state.selectedMetadata}
           metadataTypes={this.state.metadataTypes}
           metadataSortField={this.metadataSortField}
