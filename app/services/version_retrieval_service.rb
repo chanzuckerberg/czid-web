@@ -41,10 +41,11 @@ class VersionRetrievalService
       else
         prepare_specific_workflow_version_for_upload(@user_specified_prefix)
       end
-    elsif @existing_version_prefix
-      prepare_specific_workflow_version_for_upload(@existing_version_prefix)
-    else
+    elsif !@existing_version_prefix || (default_version && default_version.start_with?(@existing_version_prefix))
+      # Allows us to use the version set in app_config even if it's not the latest version
       default_version
+    else
+      prepare_specific_workflow_version_for_upload(@existing_version_prefix)
     end
   end
 
