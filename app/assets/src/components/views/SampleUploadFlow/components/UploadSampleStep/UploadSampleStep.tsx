@@ -1,5 +1,5 @@
 import Aioli from "@biowasm/aioli";
-import { Tab, Tabs, Tooltip } from "@czi-sds/components";
+import { Callout, Tab, Tabs, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import {
   compact,
@@ -1226,6 +1226,9 @@ class UploadSampleStepCC extends React.Component<
     if (size(this.getSelectedSamples(currentTab)) < 1) {
       return "Please select a sample to continue";
     }
+    if (size(this.getSelectedSamples(currentTab)) > 500) {
+      return "CZ ID supports a max of 500 samples per upload. Remove some samples and try again.";
+    }
   };
 
   isWorkflowSelected = (workflow: UploadWorkflows) => {
@@ -1264,6 +1267,11 @@ class UploadSampleStepCC extends React.Component<
       refSeqFile,
       selectedTaxon,
     } = this.state;
+
+    // If the user has selected more than 500 samples, disable the continue button.
+    if (size(this.getSelectedSamples(currentTab)) > 500) {
+      return false;
+    }
 
     let isMNGSWorkflowValid = !this.isWorkflowSelected(
       UPLOAD_WORKFLOWS.MNGS.value,
@@ -1626,6 +1634,7 @@ class UploadSampleStepCC extends React.Component<
           <BasicPopup
             basic={false}
             disabled={this.isValid()}
+            inverted={false}
             position="top center"
             trigger={
               <span data-testid="upload-continue-button">
@@ -1650,6 +1659,15 @@ class UploadSampleStepCC extends React.Component<
               onClick={() => {}}
             />
           </a>
+        </div>
+        <div className={cs.limitInfoCalloutContainer}>
+          <Callout className={cs.callout} intent={"info"}>
+            <div className={cs.calloutTitle}>Friendly Message</div>
+            To ensure every user can use our pipeline smoothly, kindly limit
+            your upload to a max of 500 samples per upload, and a max of 1000
+            samples per week, so we can share the compute equally. Thank you for
+            your cooperation!
+          </Callout>
         </div>
       </div>
     );

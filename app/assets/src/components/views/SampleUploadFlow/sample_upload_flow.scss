@@ -166,6 +166,18 @@
       margin-bottom: 30px;
     }
   }
+
+  .limitInfoCalloutContainer {
+    margin-top: $sds-spaces-xl;
+
+    .callout {
+      width: auto;
+
+      .calloutTitle {
+        font: $sds-font-header-xs-600-font;
+      }
+    }
+  }
 }
 
 .localFilePicker {
