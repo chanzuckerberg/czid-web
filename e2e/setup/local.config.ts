@@ -33,7 +33,7 @@ const config: PlaywrightTestConfig = {
   use: {
     actionTimeout: 240000,
     baseURL: "http://localhost:3000",
-    headless: true,
+    headless: false,
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
     storageState: "/tmp/state.json",

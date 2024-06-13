@@ -87,3 +87,6 @@ blessclientconfig.yml
 
 # Ignore czid-private-key.pem
 /test/fixtures/czid-private-key.pem
+
+# Local Playwright reports run from VS Code Playwright extension
+/html-reports
