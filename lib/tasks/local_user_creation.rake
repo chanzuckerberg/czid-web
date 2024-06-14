@@ -7,7 +7,8 @@ namespace :local_user_creation do
     end
 
     puts "Creating admin user with email: \"#{args[:email]}\" and name: \"#{args[:name]}\""
-    User.create(email: args[:email], name: args[:name], role: 1)
+    # set profile_form_version to bypass profile form
+    User.create(email: args[:email], name: args[:name], role: 1, profile_form_version: 2)
   end
 
   desc "Create a standard user with given email and name in a local dev environment"
@@ -18,6 +19,7 @@ namespace :local_user_creation do
     end
 
     puts "Creating user with email: \"#{args[:email]}\" and name: \"#{args[:name]}\""
-    User.create(email: args[:email], name: args[:name])
+    # set profile_form_version to bypass profile form
+    User.create(email: args[:email], name: args[:name], profile_form_version: 2)
   end
 end
