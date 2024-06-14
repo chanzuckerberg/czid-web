@@ -13,7 +13,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     @host_genome_mosquito = host_genomes(:mosquito)
     @core_field = metadata_fields(:core_field)
     @user_nonadmin = users(:joe)
-    @client_version = "5.0.4"
+    @client_version = "6.0.0"
   end
 
   test 'bulk upload basic remote' do

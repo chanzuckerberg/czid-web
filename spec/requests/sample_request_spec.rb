@@ -250,6 +250,30 @@ RSpec.describe "Sample request", type: :request do
         @client_params = "web"
       end
 
+      def create_n_short_read_mngs_samples(n)
+        samples = []
+        metadata = {}
+
+        n.times do |i|
+          sample_params = @sample_params.dup
+          sample_params[:name] = "short_read_mngs_sample_#{i}"
+          samples << sample_params
+
+          metadata[sample_params[:name]] = {
+            "sex" => "Female",
+            "age" => 100,
+            "host_genome" => "Synthetic",
+            "water_control" => "No",
+            "sample_type" => "CSF",
+            "nucleotide_type" => "DNA",
+            "collection_date" => "2020-01",
+            "collection_location_v2" => { "title" => "Santa Barbara, CA", "name" => "Santa Barbara, CA" },
+          }
+        end
+
+        [samples, metadata]
+      end
+
       def make_successful_request(sample_params, metadata_params, client_params, workflow)
         post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: metadata_params, client: client_params, format: :json }
 
@@ -662,6 +686,20 @@ RSpec.describe "Sample request", type: :request do
               expect(pr.alignment_config_id).to eq(@default_alignment_config.id)
             end
           end
+        end
+      end
+
+      context "when the number of samples uploaded exceeds the sample limit" do
+        before do
+          # Create 501 samples & metadata
+          @number_of_samples = SamplesController::SAMPLE_UPLOAD_LIMIT + 1
+          @samples501, @metadata501 = create_n_short_read_mngs_samples(@number_of_samples)
+        end
+
+        it "returns an error" do
+          expect do
+            post "/samples/bulk_upload_with_metadata", params: { samples: @samples501, metadata: @metadata501, client: @client_params, format: :json }
+          end.to raise_error(ErrorHelper::SampleUploadErrors.exceeded_sample_upload_limit(@number_of_samples, SamplesController::SAMPLE_UPLOAD_LIMIT, @client_params))
         end
       end
     end

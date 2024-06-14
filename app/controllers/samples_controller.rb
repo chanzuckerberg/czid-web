@@ -60,8 +60,9 @@ class SamplesController < ApplicationController
 
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
-  MIN_CLI_VERSION = '5.0.4'.freeze
+  MIN_CLI_VERSION = '6.0.0'.freeze
   CLI_DEPRECATION_MSG = "Outdated command line client. Please install a new version of czid-cli. See installation instructions: https://github.com/chanzuckerberg/czid-cli".freeze
+  SAMPLE_UPLOAD_LIMIT = 500
 
   SAMPLE_DEFAULT_FIELDS = [
     :name,
@@ -663,6 +664,10 @@ class SamplesController < ApplicationController
     metadata = params[:metadata] || {}
     client = params[:client]
     errors = []
+
+    if samples_to_upload.length > SAMPLE_UPLOAD_LIMIT
+      raise SampleUploadErrors.exceeded_sample_upload_limit(samples_to_upload.length, SAMPLE_UPLOAD_LIMIT, client)
+    end
 
     client_type = client == "web" ? client : "cli"
     samples_to_upload.each_with_index do |sample, sample_idx|

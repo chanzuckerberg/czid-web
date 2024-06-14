@@ -69,6 +69,10 @@ module ErrorHelper
   end
 
   module SampleUploadErrors
+    def self.exceeded_sample_upload_limit(num_samples, max_samples, client)
+      "Sample upload limit exceeded from client=#{client}. Attempted to upload #{num_samples} samples, but the maximum is #{max_samples}."
+    end
+
     def self.invalid_project_id(sample)
       "Could not save sample '#{sample['name']}'. Invalid project id."
     end
