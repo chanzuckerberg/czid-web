@@ -6,7 +6,7 @@ module MetricHandlers
       event_log = {
         type: "metric",
         source: "backend",
-        msg: "cached_read.active_support",
+        msg: "cache_read.active_support",
         v: 1,
         details: {
           name: event.name,
