@@ -1,100 +1,67 @@
 import axios from "axios";
 import { getCsrfToken } from "./utils";
 
-const INSTRUMENTATION_ENDPOINT = "/frontend_metrics";
 const MAX_SAMPLES_FOR_GET_REQUEST = 256;
-const DEVELOPMENT_MODE = process.env.NODE_ENV === "development";
 
-const postToFrontendMetrics = async (
-  url: $TSFixMe,
-  resp: $TSFixMe,
-  duration: $TSFixMe,
-) =>
-  axios
-    .post(INSTRUMENTATION_ENDPOINT, {
-      url: url,
-      response_time: duration,
-      http_method: resp.config.method,
-      http_status: resp.status,
-    })
-    .catch(e => Promise.reject(new Error(e?.response?.data)));
-
-const instrument = (func: $TSFixMe) => {
-  return async (url: $TSFixMe, ...args: $TSFixMe[]) => {
-    const startTime = performance.now();
-    try {
-      return await func
-        .apply(this, [url, ...args])
-        .then(async (resp: $TSFixMe) => {
-          !DEVELOPMENT_MODE &&
-            postToFrontendMetrics(url, resp, performance.now() - startTime);
-          return resp.data;
-        });
-    } catch (errorResp) {
-      !DEVELOPMENT_MODE &&
-        postToFrontendMetrics(url, errorResp, performance.now() - startTime);
-      return Promise.reject(errorResp);
-    }
-  };
+const postWithCSRF = async (url: $TSFixMe, ...params: $TSFixMe) => {
+  try {
+    // resp also contains headers, status, etc. that we might use later.
+    const resp = await axios.post(url, {
+      ...params,
+      // Fetch the CSRF token from the DOM.
+      authenticity_token: getCsrfToken(),
+    });
+    // Just return the data.
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
 };
 
-const postWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
-  try {
-    // resp also contains headers, status, etc. that we might use later.
-    return await axios.post(url, {
-      ...params,
-      // Fetch the CSRF token from the DOM.
-      authenticity_token: getCsrfToken(),
-    });
-  } catch (e) {
-    return Promise.reject(e.response);
-  }
-});
-
 // TODO(mark): Remove redundancy in CSRF methods.
-const putWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
+const putWithCSRF = async (url: $TSFixMe, ...params: $TSFixMe) => {
   try {
     // resp also contains headers, status, etc. that we might use later.
-    return await axios.put(url, {
+    const resp = await axios.put(url, {
       ...params,
       // Fetch the CSRF token from the DOM.
       authenticity_token: getCsrfToken(),
     });
+    // Just return the data.
+    return resp.data;
   } catch (e) {
-    return Promise.reject(e.response);
+    return Promise.reject(e.response.data);
   }
-});
+};
 
-const get = instrument(async (url: $TSFixMe, config: $TSFixMe) => {
+const get = async (url: $TSFixMe, ...config: $TSFixMe) => {
   try {
-    return await axios.get(url, config);
+    const resp = await axios.get(url, config);
+    // Just return the data.
+    return resp.data;
   } catch (e) {
-    return Promise.reject(e.response);
+    return Promise.reject(e.response.data);
   }
-});
+};
 
-const deleteAsync = instrument(async (url: $TSFixMe, config: $TSFixMe) => {
-  return axios.delete(url, config);
-});
-
-const deleteWithCSRF = instrument(async (url: $TSFixMe) => {
+const deleteWithCSRF = async (url: $TSFixMe) => {
   try {
-    return await axios.delete(url, {
+    const resp = await axios.delete(url, {
       data: {
         // Fetch the CSRF token from the DOM.
         authenticity_token: getCsrfToken(),
       },
     });
+    return resp.data;
   } catch (e) {
-    return Promise.reject(e.response);
+    return Promise.reject(e.response.data);
   }
-});
+};
 
 export {
   get,
   postWithCSRF,
   putWithCSRF,
-  deleteAsync,
   deleteWithCSRF,
   MAX_SAMPLES_FOR_GET_REQUEST,
 };
