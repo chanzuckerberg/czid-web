@@ -768,10 +768,9 @@ test.describe("Sample upload (web) - SC2  Illumina: Functional: P-1", () => {
     );
 
     // - Learn more link opens ClearLabs new tab:
-    // https://chanzuckerberg.zendesk.com/hc/en-us/articles/360059656311-Upload-Data-and-Assemble-SARS-CoV-2-Genomes-Using-the-Web-App#Upload
     linkedPage = await uploadPage.clickMedakaModelHereLink();
     expect(await linkedPage.url()).toEqual(
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360059656311-Upload-Data-and-Assemble-SARS-CoV-2-Genomes-Using-the-Web-App#Upload",
+      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360059656311-Upload-Data-and-Assemble-SARS-CoV-2-Genomes-Using-the-Web-App",
     );
     // #endregion 13. Hover over ""Medaka Model:"" information icon and click on Learn More LINK
   });

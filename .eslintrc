@@ -111,6 +111,12 @@
         "@typescript-eslint/no-extra-semi": "off",
         "@typescript-eslint/no-non-null-assertion": "off"
       }
+    },
+    {
+      "files": ["*.spec.ts"],
+      "rules": {
+        "sonarjs/no-duplicate-string": "off"
+      }
     }
   ],
   "settings": {
