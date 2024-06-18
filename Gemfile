@@ -33,7 +33,7 @@ gem 'brakeman', '~> 6.1.2', require: false
 gem 'bcrypt', '~> 3.1.7'
 gem 'consul', '~> 1.0.3'
 gem 'data_migrate'
-gem 'health_check', '~> 3.0.0'
+gem 'health_check', '~> 3.1.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.11'
 # Logger
@@ -52,10 +52,13 @@ gem 'parallel', '1.14.0'
 gem 'puma', '~> 5.6'
 # Use Redis adapter to run Action Cable in production
 gem 'redis', '~> 4.3'
+# Sprockets
+gem 'sprockets-rails'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.1'
+gem 'rails', '~>7.0.0'
 gem 'rails-controller-testing', '~> 1.0', '>= 1.0.5'
+gem 'railties', '~> 7.0'
 gem 'rake'
 # Worker/Scheduler management
 gem 'resque', '~> 2.3'
@@ -76,6 +79,9 @@ gem 'uglifier', '~> 4.1'
 gem 'activesupport'
 gem 'rack-host-redirect'
 gem 'useragent'
+
+# Auto terminate long running operation
+gem 'timeout', '~> 0.4.0'
 
 # Performance profiling in all envs
 gem 'flamegraph'
