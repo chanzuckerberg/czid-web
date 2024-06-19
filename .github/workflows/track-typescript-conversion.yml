@@ -34,7 +34,7 @@ jobs:
             --exclude 'app/assets/javascripts/application.js' \
             --exclude 'app/assets/webassembly/htsfile.js' \
             --exclude 'app/assets/dist/main.bundle.min.js'\
-            --exclude 'app/assets/dist/vendors~main.bundle.min.js'\
+            --exclude 'app/assets/dist/vendors.bundle.min.js'\
             --exclude 'app/assets/webassembly/seqtk.js' \
             ' ' \
             app |

@@ -1,5 +1,5 @@
-import querystring from "querystring";
 import { isNull } from "lodash/fp";
+import querystring from "query-string";
 import React from "react";
 import SvgSaver from "svgsaver";
 import { useTrackEvent } from "~/api/analytics";

@@ -1,1 +1,1 @@
-//= require vendors~main.bundle.min.js
+//= require vendors.bundle.min.js

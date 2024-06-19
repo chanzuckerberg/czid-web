@@ -1,9 +1,12 @@
-const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const path = require("path-browserify");
 const TerserPlugin = require("terser-webpack-plugin");
+const webpack = require("webpack");
 
 // modules that are not compatible with IE11
 const includedNodeModules = ["query-string", "strict-uri-encode"];
+
+const STYLES_PATH = "app/assets/src/styles";
 
 const config = {
   entry: `${path.resolve(__dirname, "app/assets/src/")}/index.tsx`,
@@ -17,12 +20,20 @@ const config = {
       "~": path.resolve(__dirname, "app/assets/src"),
       "~ui": path.resolve(__dirname, "app/assets/src/components/ui"),
       "~utils": path.resolve(__dirname, "app/assets/src/components/utils"),
-      styles: path.resolve(__dirname, "app/assets/src/styles"),
+      styles: path.resolve(__dirname, STYLES_PATH),
+    },
+    fallback: {
+      util: require.resolve("util"),
+      path: require.resolve("path-browserify"),
+      process: require.resolve("process/browser"), // for env var __dirname
     },
   },
   plugins: [
     new MiniCssExtractPlugin({
       filename: "dist/[name].bundle.min.css",
+    }),
+    new webpack.ProvidePlugin({
+      process: "process/browser",
     }),
   ],
   devtool: "source-map",
@@ -41,7 +52,7 @@ const config = {
         test: /\.(sa|sc|c)ss$/,
         exclude: [
           path.resolve(__dirname, "node_modules/"),
-          path.resolve(__dirname, "app/assets/src/styles"),
+          path.resolve(__dirname, STYLES_PATH),
           path.resolve(__dirname, "app/assets/src/loader.scss"),
         ],
         use: [
@@ -79,7 +90,7 @@ const config = {
         test: /\.(sa|sc|c)ss$/,
         include: [
           path.resolve(__dirname, "node_modules/"),
-          path.resolve(__dirname, "app/assets/src/styles"),
+          path.resolve(__dirname, STYLES_PATH),
           path.resolve(__dirname, "app/assets/src/loader.scss"),
         ],
         use: [
@@ -145,6 +156,7 @@ const config = {
           test: /[\\/]node_modules[\\/]/,
           chunks: "all",
           enforce: true, // always create a chunk
+          name: "vendors",
         },
       },
     },

@@ -76,8 +76,8 @@ jobs:
         mkdir -p app/assets/dist
         echo foo > app/assets/dist/main.bundle.min.css
         echo foo > app/assets/dist/main.bundle.min.js
-        echo foo > app/assets/dist/vendors~main.bundle.min.css
-        echo foo > app/assets/dist/vendors~main.bundle.min.js
+        echo foo > app/assets/dist/vendors.bundle.min.css
+        echo foo > app/assets/dist/vendors.bundle.min.js
     - name: Create database and load schema
       run: |
         bundle exec bin/rails db:create db:schema:load
