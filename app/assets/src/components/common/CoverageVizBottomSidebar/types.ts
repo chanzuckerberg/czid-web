@@ -27,7 +27,6 @@ export interface CoverageVizParamsRaw {
   taxCommonName: string;
   taxLevel: TaxonLevelType;
   taxSpecies: Taxon[];
-  alignmentVizUrl: string;
   taxonStatsByCountType: {
     ntContigs: number;
     ntReads: number;

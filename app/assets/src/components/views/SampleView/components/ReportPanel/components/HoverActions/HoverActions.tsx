@@ -195,7 +195,6 @@ export const HoverActions = ({
     location.href = `/samples/${sampleId}/fasta/${taxonLevelIndex}/${taxonId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
-  const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxonLevel}_${taxonId}?pipeline_version=${pipelineVersion}`;
   const openCoverageViz = () => {
     onCoverageVizClick({
       taxId: taxonId,
@@ -203,7 +202,6 @@ export const HoverActions = ({
       taxCommonName: taxonCommonName,
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       taxLevel: taxonLevel,
-      alignmentVizUrl,
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
       taxSpecies: taxonSpecies,
       taxonStatsByCountType,
@@ -215,10 +213,6 @@ export const HoverActions = ({
     ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_COVERAGE_VIZ_LINK_CLICKED,
     analyticsContext,
   );
-
-  const openAlignmentVizUrl = () => {
-    window.open(alignmentVizUrl);
-  };
 
   const downloadContigByUrl = () => {
     location.href = getDownloadContigUrl({
@@ -256,16 +250,7 @@ export const HoverActions = ({
           params,
           snapshotEnabled: true,
         }
-      : {
-          key: `alignment_viz_${params.taxId}`,
-          message: "Alignment Visualization",
-          iconName: "linesHorizontal",
-          handleClick: openAlignmentVizUrl,
-          enabled: coverageVizEnabled,
-          disabledMessage:
-            "Alignment Visualization Not Available - requires reads in NT",
-          params,
-        };
+      : null;
 
     const HOVER_ACTIONS_BLAST = {
       key: `blast_${params.taxId}_v1`,
@@ -362,7 +347,7 @@ export const HoverActions = ({
         HOVER_ACTIONS_DOWNLOAD,
       ];
     }
-    // Remove null actions (could happen with HOVER_ACTIONS_CONSENSUS)
+    // Remove null actions
     hoverActions = hoverActions.filter(d => d !== null);
 
     return snapshotShareId

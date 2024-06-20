@@ -14,7 +14,6 @@ import { CONTACT_US_LINK } from "~/components/utils/documentationLinks";
 import { getDownloadContigUrl } from "~/components/utils/download";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import { WorkflowType } from "~/components/utils/workflows";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import Histogram from "~/components/visualizations/Histogram";
 import { getTaxonName } from "~/helpers/taxon";
@@ -450,19 +449,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
         <div className={cs.fill} />
         {!snapshotShareId && (
           <div className={cs.headerControls}>
-            {workflow === WorkflowType.SHORT_READ_MNGS && (
-              <div className={cs.vizLinkContainer}>
-                <a
-                  className={cs.linkWithArrow}
-                  href={params.alignmentVizUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View read-level visualization
-                  <IconArrowRight />
-                </a>
-              </div>
-            )}
             <div className={cs.actionIcons}>
               {this.renderBlastAction()}
               <BasicPopup
@@ -649,7 +635,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
   }
 
   renderNoDataContents() {
-    const { params, snapshotShareId, workflow, wdlVersion } = this.props;
+    const { workflow, wdlVersion } = this.props;
 
     return (
       <NarrowContainer className={cs.contents}>
@@ -665,18 +651,6 @@ export default class CoverageVizBottomSidebar extends React.Component<
                   workflow
                 ].getUnavailableMessage?.(wdlVersion)}
               </div>
-              {!snapshotShareId &&
-                workflow === WorkflowType.SHORT_READ_MNGS && (
-                  <a
-                    className={cs.linkWithArrow}
-                    href={params.alignmentVizUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View read-level visualization
-                    <IconArrowRight />
-                  </a>
-                )}
             </div>
             <ImgMicrobePrimary className={cs.icon} />
           </div>

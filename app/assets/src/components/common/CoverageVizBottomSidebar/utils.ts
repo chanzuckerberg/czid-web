@@ -228,7 +228,6 @@ export const getCoverageVizParams = (
     taxonName: coverageVizParams.taxName,
     taxonCommonName: coverageVizParams.taxCommonName,
     taxonLevel: coverageVizParams.taxLevel,
-    alignmentVizUrl: coverageVizParams.alignmentVizUrl,
     // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2322
     accessionData,
     taxonStatsByCountType: coverageVizParams.taxonStatsByCountType,
