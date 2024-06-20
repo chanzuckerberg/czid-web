@@ -90,12 +90,14 @@ const SEARCH_MY_DATA_INPUT =
 const SEARCH_RESULTS = "[class='results'] [class='title']";
 const HOST_SEARCH_RESULTS = "[category='host'] [class='title']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genomes']";
+const NANOPORE_TAB = "[data-testid='metagenomics---nanopore']";
+const ANTIMICROBIAL_TAB = "[data-testid='antimicrobial-resistance']";
 const PROJECT_SEARCH_RESULTS = "[category='Project'] [class='title']";
 
 const INCLUDE_SAMPLE_METADATA =
   "//span[text()='Include sample metadata in this table']/preceding-sibling::input";
 const SAMPLE_METEDATA = "Sample Metadata";
-const SAMPLE_OVERVIEW = "Samples Overview";
+export const SAMPLE_OVERVIEW = "Samples Overview";
 const SAMPLE_TAXON_REPORTS = "Sample Taxon Reports";
 const COMBINED_SAMPLE_TAXON_RESULTS = "Combined Sample Taxon Results";
 const ORIGINAL_INPUT_FILES = "Original Input Files";
@@ -173,6 +175,13 @@ export const RUN_TYPES = {
   amr: "Antimicrobial Resistance",
 };
 
+const PLQC_READS_LOST_BARS = "//*[@data-testid='read-lost-bar']//*[contains(@class, 'barPiece') and not(@width='1')]";
+const PLQC_MEAN_INSERT_SIZE_BARS = "//*[@data-testid='mean-insert-size-histogram']//*[contains(@class, 'bar')]//*[not(@height='0')]";
+const PLQC_DUPLICATE_COMPRESSION_BARS = "[data-testid='duplicate-compression-histogram'] g[class*='bar']";
+const PLQC_PASSED_QC_BARS = "[data-testid='passed-qc-histogram'] g[class*='bar']";
+const PLQC_HOVER_TOOLTIP = "[data-testid='hover-tooltip'] [class*='dataRow'] div";
+const PLQC_VIEW = "[data-testid='plqc-view']";
+const PLQC_TOTAL_READ_HISTOGRAM_BARS = "[data-testid='total-read-histogram'] g[class*='bar']";
 const COLUMN_PLUS_BUTTON = "[data-testid='plus-circle']";
 const PLUS_OPTIONS =
   "[data-testid='plus-circle'] [role='option'] [data-testid*='dropdown']";
@@ -208,6 +217,14 @@ export class ProjectPage extends PageObject {
   // #endregion Navigate
 
   // #region Api
+  public async getWorkflowRuns(projectId: number, workflow: string) {
+    const response = await this.page
+      .context()
+      .request.get(`${process.env.BASEURL}/workflow_runs.json?projectId=${projectId}&mode=with_sample_info&workflow=${workflow}`);
+    const responseJson = await response.json();
+    return responseJson.workflow_runs;
+  }
+
   public async getBackgrounds() {
     const response = await this.page
       .context()
@@ -342,6 +359,24 @@ export class ProjectPage extends PageObject {
   // #endregion bool
 
   // #region hover
+
+  public async hoverOverPLQCMeanInsertSizeBars(index = 0) {
+    await this.page.locator(PLQC_MEAN_INSERT_SIZE_BARS).nth(index).waitFor();
+    await this.page.locator(PLQC_MEAN_INSERT_SIZE_BARS).nth(index).hover();
+  }
+
+  public async hoverOverPLQCDuplicateCompressionBars(index = 0) {
+    await this.page.locator(PLQC_DUPLICATE_COMPRESSION_BARS).nth(index).hover();
+  }
+
+  public async hoverOverPLQCPassedQCBars(index = 0) {
+    await this.page.locator(PLQC_PASSED_QC_BARS).nth(index).hover();
+  }
+
+  public async hoverOverPLQCTotalReadHistogramBar(index = 0) {
+    await this.page.locator(PLQC_TOTAL_READ_HISTOGRAM_BARS).nth(index).hover();
+  }
+
   public async hoverOverAnnotationFilter() {
     await this.page.locator(ANNOTATION_FILTER).hover({ force: true });
   }
@@ -453,6 +488,10 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickPLQCView() {
+    await this.page.locator(PLQC_VIEW).click();
+  }
+
   public async clickCloseIcon() {
     await this.page.locator(CLOSE_ICON).click();
   }
@@ -476,6 +515,14 @@ export class ProjectPage extends PageObject {
 
   public async clickConsensusGenomeTab() {
     await this.page.locator(CONSENSUS_GENOME_TAB).click();
+  }
+
+  public async clickNanoporeTab() {
+    await this.page.locator(NANOPORE_TAB).click();
+  }
+
+  public async clickAntimicrobialTab() {
+    await this.page.locator(ANTIMICROBIAL_TAB).click();
   }
 
   public async clickDownloadsLink() {
@@ -688,6 +735,30 @@ export class ProjectPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getReadsLostTable(samples = 4) {
+    const readsLostBars = await this.page.locator(PLQC_READS_LOST_BARS).all();
+    const tooltips: { [key: string]: string }[] = [];
+
+    for (let i = 0; i < samples; i++) {
+      tooltips.push({});
+    }
+
+    for (let i = 0; i < readsLostBars.length; i++) {
+      const rowIndex = i % samples;
+      await this.page.locator(PLQC_READS_LOST_BARS).nth(i).hover();
+      const tooltipsForSample = Array.from(new Set(await this.getPLQCHoverTooltip()));
+
+      const key = tooltipsForSample[0];
+      const value = tooltipsForSample[1];
+      tooltips[rowIndex][key.trim()] = value.trim();
+    }
+    return tooltips;
+  }
+
+  public async getPLQCHoverTooltip() {
+    return this.page.locator(PLQC_HOVER_TOOLTIP).allTextContents();
+  }
+
   public async getNextcladeTreeTooltip() {
     await this.page.locator(NEXTCLADE_TREE_BUTTON).focus();
     await this.page.locator(NEXTCLADE_TREE_BUTTON).hover({force: true});
@@ -701,14 +772,8 @@ export class ProjectPage extends PageObject {
   }
 
   public async getDeleteSelectedSamplesCount() {
-    const deleteTitle = await this.page
-      .locator(DELETE_MODAL_TITLE)
-      .textContent();
-    const selected = deleteTitle
-      .replace("Are you sure you want to delete", "")
-      .replace("Consensus Genome run", "")
-      .replace("Consensus Genome runs", "")
-      .trim();
+    const deleteTitle = await this.page.locator(DELETE_MODAL_TITLE).textContent();
+    const selected = deleteTitle.replace(/[^0-9]/g, "");
     return parseInt(selected);
   }
 
@@ -716,10 +781,7 @@ export class ProjectPage extends PageObject {
     const nextcladeTaglineText = await this.page
       .locator(DOWNLOAD_TYPES_TAGLINE)
       .textContent();
-    const selected = nextcladeTaglineText
-      .replace("consensus genomes selected", "")
-      .replace("consensus genome selected", "")
-      .trim();
+    const selected = nextcladeTaglineText.replace(/[^0-9]/g, "");
     return parseInt(selected);
   }
 
@@ -727,10 +789,7 @@ export class ProjectPage extends PageObject {
     const nextcladeTaglineText = await this.page
       .locator(NEXTCLADE_TAGLINE)
       .textContent();
-    const selected = nextcladeTaglineText
-      .replace("Consensus Genomes selected", "")
-      .replace("Consensus Genome selected", "")
-      .trim();
+    const selected = nextcladeTaglineText.replace(/[^0-9]/g, "");
     return parseInt(selected);
   }
 
@@ -738,7 +797,7 @@ export class ProjectPage extends PageObject {
     const counterText = await this.page
       .locator(SELECTED_SAMPLES_COUNTER)
       .textContent();
-    const selected = counterText.replace("Selected", "");
+    const selected = counterText.replace(/[^0-9]/g, "");
     return parseInt(selected);
   }
 

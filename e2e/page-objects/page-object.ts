@@ -1,5 +1,6 @@
 import { Page } from "@playwright/test";
 
+
 export abstract class PageObject {
   public page: Page;
   public baseUrl: string;
@@ -42,7 +43,11 @@ export abstract class PageObject {
       }
       const tdValues = {};
       for (let i = 0; i < tableHeaders.length; i++) {
-        tdValues[tableHeaders[i]] = tdText[i];
+        let headerKey = tableHeaders[i];
+        if (Object.keys(tdValues).includes(headerKey)) {
+          headerKey = `${headerKey}_${i}`;
+        }
+        tdValues[headerKey] = tdText[i];
       }
       if (Object.keys(tdValues).length > 0) {
         tableRowsText.push(tdValues);
@@ -126,5 +131,33 @@ export abstract class PageObject {
   public async isFeatureFlagUser() {
     const userName = process.env.CZID_USERNAME;
     return userName.startsWith("czid-e2e-ff");
+  }
+
+  public async maximizeWindow() {
+    const { width, height } = await this.page.evaluate(() => {
+      return {
+        width: window.screen.width,
+        height: window.screen.height,
+      };
+    });
+    await this.page.setViewportSize({width, height});
+  }
+
+  public async zoomOut() {
+    const viewportSize = this.page.viewportSize();
+    const zoomedViewportSize = {
+      width: viewportSize.width * 2,
+      height: viewportSize.height * 2,
+    };
+    await this.page.setViewportSize(zoomedViewportSize);
+  }
+
+  public async zoomIn() {
+    const viewportSize = this.page.viewportSize();
+    const zoomedViewportSize = {
+      width: viewportSize.width / 2,
+      height: viewportSize.height / 2,
+    };
+    await this.page.setViewportSize(zoomedViewportSize);
   }
 }

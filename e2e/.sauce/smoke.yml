@@ -25,6 +25,16 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "PLQC: SNo 1"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/plqc/plqc-e2e.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 1: PLQC QA test"
+      retries: 3
+    shard: concurrency
   - name: "SC2: Functional: P-1: Sample upload (web) Illumina"
     platformName: "macOS 12"
     screenResolution: "1440x900"
@@ -311,3 +321,4 @@ npm:
     - adm-zip
     - moment-timezone
     - tar
+    - fast-diff
