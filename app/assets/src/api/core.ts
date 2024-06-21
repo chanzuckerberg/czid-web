@@ -3,7 +3,7 @@ import { getCsrfToken } from "./utils";
 
 const MAX_SAMPLES_FOR_GET_REQUEST = 256;
 
-const postWithCSRF = async (url: $TSFixMe, ...params: $TSFixMe) => {
+const postWithCSRF = async (url: $TSFixMe, params: $TSFixMe = {}) => {
   try {
     // resp also contains headers, status, etc. that we might use later.
     const resp = await axios.post(url, {
@@ -19,7 +19,7 @@ const postWithCSRF = async (url: $TSFixMe, ...params: $TSFixMe) => {
 };
 
 // TODO(mark): Remove redundancy in CSRF methods.
-const putWithCSRF = async (url: $TSFixMe, ...params: $TSFixMe) => {
+const putWithCSRF = async (url: $TSFixMe, params: $TSFixMe = {}) => {
   try {
     // resp also contains headers, status, etc. that we might use later.
     const resp = await axios.put(url, {
@@ -34,7 +34,7 @@ const putWithCSRF = async (url: $TSFixMe, ...params: $TSFixMe) => {
   }
 };
 
-const get = async (url: $TSFixMe, ...config: $TSFixMe) => {
+const get = async (url: $TSFixMe, config: $TSFixMe = {}) => {
   try {
     const resp = await axios.get(url, config);
     // Just return the data.
