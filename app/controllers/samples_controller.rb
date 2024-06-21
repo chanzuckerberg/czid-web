@@ -23,7 +23,7 @@ class SamplesController < ApplicationController
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_v2, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
-                  :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
+                  :results_folder, :show_taxid_alignment, :metadata, :amr,
                   :taxid_contigs_for_blast, :taxid_contigs_download, :taxon_five_longest_reads, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials, :pipeline_logs,].freeze
   EDIT_ACTIONS = [:edit, :update, :reupload_source, :kickoff_pipeline,
@@ -1166,52 +1166,6 @@ class SamplesController < ApplicationController
         json: { error: "An unexpected error has occured", details: err },
         status: :internal_server_error
       )
-    end
-  end
-
-  def show_taxid_alignment_viz
-    @taxon_info = params[:taxon_info].split(".")[0]
-    @taxid = @taxon_info.split("_")[2].to_i
-    if HUMAN_TAX_IDS.include? @taxid.to_i
-      render json: { error: "Human taxon ids are not allowed" }
-      return
-    end
-
-    pr = select_pipeline_run(@sample, params[:pipeline_version])
-
-    @tax_level = @taxon_info.split("_")[1]
-    @taxon_name = taxon_name(@taxid, @tax_level)
-    @pipeline_version = pr.pipeline_version if pr
-
-    respond_to do |format|
-      format.json do
-        s3_file_path = pr.alignment_viz_json_s3(@taxon_info.tr('_', '.'))
-        (_tmp1, _tmp2, bucket, key) = s3_file_path.split('/', 4)
-        begin
-          resp = Client.head_object(bucket: bucket, key: key)
-          if resp.content_length < 10_000_000
-            alignment_data = JSON.parse(S3Util.get_s3_file(s3_file_path) || "{}")
-            flattened_data = {}
-            parse_tree(flattened_data, @taxid, alignment_data, true)
-            output_array = []
-            flattened_data.each do |k, v|
-              v["accession"] = k
-              v["reads_count"] = v["reads"].size
-              output_array << v
-            end
-            render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
-          else
-            render json: {
-              error: "alignment file too big",
-            }
-          end
-        rescue StandardError
-          render json: {
-            error: "unexpected error occurred",
-          }
-        end
-      end
-      format.html {}
     end
   end
 
