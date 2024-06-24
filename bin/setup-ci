@@ -62,8 +62,8 @@ if [ "$HAS_RUBY" == "0" ] ; then
     echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
     echo 'eval "$(rbenv init -)"' >> ~/.bashrc
     source ~/.bashrc
-    rbenv install 3.2.4
-    rbenv global 3.2.4
+    rbenv install 2.4.1
+    rbenv global 2.4.1
 fi
 
 if [ "$HAS_MYSQL" == "0" ] ; then

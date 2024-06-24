@@ -1,15 +1,16 @@
 name: idseq-web check
 
-on: push
+on:
+  push
 
 jobs:
   ruby_test:
     name: Ruby Test
     runs-on: ubuntu-latest
-    container: ruby:3.2.4
+    container: ruby:3.1.3
     env:
       # This is a dummy secret, do not use it for anything
-      AUTH_TOKEN_SECRET: "GYbvZ9/uHy75wWWK4BO3jZGJ0noacv7GbTJI96wZgWQ="
+      AUTH_TOKEN_SECRET: 'GYbvZ9/uHy75wWWK4BO3jZGJ0noacv7GbTJI96wZgWQ='
       DB_USERNAME: test_user
       DB_PASSWORD: test_password
       RAILS_ENV: test
@@ -38,170 +39,170 @@ jobs:
           MYSQL_USER: test_user
           MYSQL_PASSWORD: test_password
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Determine Kernel Version
-        run: |
-          echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
-      - name: Cache Ruby Dependencies
-        uses: actions/cache@v3
-        with:
-          path: vendor/bundle
-          # Include kernel version for under-the-hood gem changes:
-          key: ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems
-      - name: Install Ruby Dependencies
-        run: |
-          gem install bundler
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: /root/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip
-      - name: Install Extra Dependencies
-        run: |
-          apt-get update && apt-get install -y python3-pip nodejs
-          pip3 install --upgrade pip --break-system-packages
-          pip3 install --break-system-packages --cache-dir /root/.cache/pip -r requirements.txt
-      - name: Setup Dummy Static Files
-        # Create dummy versions of our javascript and css bundle
-        #   The actual files are not required for testing ruby, just the presence of the files
-        run: |
-          mkdir -p app/assets/dist
-          echo foo > app/assets/dist/main.bundle.min.css
-          echo foo > app/assets/dist/main.bundle.min.js
-          echo foo > app/assets/dist/vendors.bundle.min.css
-          echo foo > app/assets/dist/vendors.bundle.min.js
-      - name: Create database and load schema
-        run: |
-          bundle exec bin/rails db:create db:schema:load
-      - name: RSpec
-        run: bundle exec rspec
-        env:
-          SAMPLES_BUCKET_NAME: idseq-samples-development
-      - name: Rails Test
-        run: bundle exec rails test
-        env:
-          SAMPLES_BUCKET_NAME: idseq-samples-development
-          ALIGNMENT_CONFIG_DEFAULT_NAME: "2024-02-06"
+    - name: Check out code
+      uses: actions/checkout@v4
+    - name: Determine Kernel Version
+      run: |
+        echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
+    - name: Cache Ruby Dependencies
+      uses: actions/cache@v3
+      with:
+        path: vendor/bundle
+        # Include kernel version for under-the-hood gem changes:
+        key: ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems
+    - name: Install Ruby Dependencies
+      run: |
+        gem install bundler
+        bundle config path vendor/bundle
+        bundle install --jobs 4 --retry 3
+    - name: Cache Python Dependencies
+      uses: actions/cache@v3
+      with:
+        path: /root/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip
+    - name: Install Extra Dependencies
+      run: |
+        apt-get update && apt-get install -y python3-pip nodejs
+        pip3 install --upgrade pip
+        pip3 install --cache-dir /root/.cache/pip -r requirements.txt
+    - name: Setup Dummy Static Files
+      # Create dummy versions of our javascript and css bundle
+      #   The actual files are not required for testing ruby, just the presence of the files
+      run: |
+        mkdir -p app/assets/dist
+        echo foo > app/assets/dist/main.bundle.min.css
+        echo foo > app/assets/dist/main.bundle.min.js
+        echo foo > app/assets/dist/vendors.bundle.min.css
+        echo foo > app/assets/dist/vendors.bundle.min.js
+    - name: Create database and load schema
+      run: |
+        bundle exec bin/rails db:create db:schema:load
+    - name: RSpec
+      run: bundle exec rspec
+      env:
+        SAMPLES_BUCKET_NAME: idseq-samples-development
+    - name: Rails Test
+      run: bundle exec rails test
+      env:
+        SAMPLES_BUCKET_NAME: idseq-samples-development
+        ALIGNMENT_CONFIG_DEFAULT_NAME: "2024-02-06"
 
   ruby_code_analysis:
     name: Ruby Code Analysis
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          # No need to set `ruby-version`, it gets automatically set to the .ruby-version if it is not specified.
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Check out code
+      uses: actions/checkout@v4
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        # No need to set `ruby-version`, it gets automatically set to the .ruby-version if it is not specified.
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
-      - name: Rubocop
-        # no annotations yet unfortunately
-        #  There are rubocop github actions but they are buggy
-        #  This one: https://github.com/andrewmcodes/rubocop-linter-action
-        #    uses a strange mechanism in which it creates a new check and
-        #    adds annotations to it. It creates this check in the wrong
-        #    workflow which breaks.
-        #  This one: https://github.com/gimenete/rubocop-action
-        #   offers literally no customization and we want to pin our
-        #   rubocop version.
-        run: bundle exec rubocop
-      - name: Brakeman
-        run: |
-          # No High Confidence warnings.
-          bundle exec brakeman --no-pager -w3
+    - name: Rubocop
+      # no annotations yet unfortunately
+      #  There are rubocop github actions but they are buggy
+      #  This one: https://github.com/andrewmcodes/rubocop-linter-action
+      #    uses a strange mechanism in which it creates a new check and
+      #    adds annotations to it. It creates this check in the wrong
+      #    workflow which breaks.
+      #  This one: https://github.com/gimenete/rubocop-action
+      #   offers literally no customization and we want to pin our
+      #   rubocop version.
+      run: bundle exec rubocop
+    - name: Brakeman
+      run: |
+        # No High Confidence warnings.
+        bundle exec brakeman --no-pager -w3
 
-          # No new Medium Confidence warnings.
-          MAX_MEDIUM_WARNINGS=37
-          if [ $(bundle exec brakeman --no-pager -w2 -f json | jq '.scan_info.security_warnings') -gt $MAX_MEDIUM_WARNINGS ]
-          then
-            echo "No new Medium Confidence Brakeman warnings are allowed."
-            exit 1
-          fi
+        # No new Medium Confidence warnings.
+        MAX_MEDIUM_WARNINGS=37
+        if [ $(bundle exec brakeman --no-pager -w2 -f json | jq '.scan_info.security_warnings') -gt $MAX_MEDIUM_WARNINGS ]
+        then
+          echo "No new Medium Confidence Brakeman warnings are allowed."
+          exit 1
+        fi
 
   javascript:
     name: Javascript
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: Cache Node Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Check the Lockfile Version
-        run: |
-          VERSION=`cat package-lock.json | jq '.lockfileVersion'`
-          if [ "$VERSION" -lt "2"  ]; then
-            echo "Check the lockfileVersion in package-lock.json."
-            exit 1
-          fi
-      - name: Switch git to use HTTP
-        # See: https://github.com/actions/setup-node/issues/214#issuecomment-842538631
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-      - name: Install older version of npm
-        run: npm install -g npm@v8.5.5
-      - name: Install Dependencies
-        # Verifies that package.json and package-lock.json match.
-        # See: https://docs.npmjs.com/cli/v7/commands/npm-ci
-        run: npm ci
-      - name: Test
-        run: npm test
-        env:
-          CI: true
-      - name: ESLint
-        # setup-node automatically creates annotations from this output
-        # Use eslint-disable or fix another warning to stay below the max.
-        run: npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 41
-      - name: ESLint a11y Rules
-        # These rules are related to web accessibility, with a separate warnings budget.
-        # Use eslint-disable or fix another warning to stay below the max.
-        run: npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 152
-      - name: Check for Unused Packages
-        # Uses Depcheck to flag unused dependencies in package.json
-        run: exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')
-      - name: TypeScript Checks
-        run: npx tsc -p ./app/assets/tsconfig.json --noemit
-        # checks for hidden TS errors on  @ts-expect-error escaped lines
-      - name: TypeScript behind ts-expect-errors
-        run: bin/ts-peek.sh
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Cache Node Dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Check the Lockfile Version
+      run: |
+        VERSION=`cat package-lock.json | jq '.lockfileVersion'`
+        if [ "$VERSION" -lt "2"  ]; then
+          echo "Check the lockfileVersion in package-lock.json."
+          exit 1
+        fi
+    - name: Switch git to use HTTP
+      # See: https://github.com/actions/setup-node/issues/214#issuecomment-842538631
+      run: >
+        git config --global url."https://github.com/".insteadOf
+        ssh://git@github.com/
+    - name: Install older version of npm
+      run: npm install -g npm@v8.5.5
+    - name: Install Dependencies
+      # Verifies that package.json and package-lock.json match.
+      # See: https://docs.npmjs.com/cli/v7/commands/npm-ci
+      run: npm ci
+    - name: Test
+      run: npm test
+      env:
+        CI: true
+    - name: ESLint
+      # setup-node automatically creates annotations from this output
+      # Use eslint-disable or fix another warning to stay below the max.
+      run: npx eslint app/assets/src e2e --ext .js,.jsx,.ts,.tsx --max-warnings 41
+    - name: ESLint a11y Rules
+      # These rules are related to web accessibility, with a separate warnings budget.
+      # Use eslint-disable or fix another warning to stay below the max.
+      run: npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 152
+    - name: Check for Unused Packages
+      # Uses Depcheck to flag unused dependencies in package.json
+      run: exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')
+    - name: TypeScript Checks
+      run: npx tsc -p ./app/assets/tsconfig.json --noemit
+      # checks for hidden TS errors on  @ts-expect-error escaped lines
+    - name: TypeScript behind ts-expect-errors
+      run: bin/ts-peek.sh
 
   python:
     name: Python
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.11"
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip
-      - name: Install Python Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-      - name: Flake8
-        uses: julianwachholz/flake8-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Test
-        run: python3 -m unittest discover -v -s test/python/ -p 'test_*.py'
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+    - name: Cache Python Dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+    - name: Flake8
+      uses: julianwachholz/flake8-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Test
+      run: python3 -m unittest discover -v -s test/python/ -p 'test_*.py'

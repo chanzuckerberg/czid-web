@@ -51,7 +51,7 @@ gem 'parallel', '1.14.0'
 # Use Puma as the app server
 gem 'puma', '~> 5.6'
 # Use Redis adapter to run Action Cable in production
-gem 'redis', '~> 5.2'
+gem 'redis', '~> 4.3'
 # Sprockets
 gem 'sprockets-rails'
 
@@ -61,7 +61,7 @@ gem 'rails-controller-testing', '~> 1.0', '>= 1.0.5'
 gem 'railties', '~> 7.0'
 gem 'rake'
 # Worker/Scheduler management
-gem 'resque', '~> 2.5'
+gem 'resque', '~> 2.3'
 gem 'resque-lock'
 gem 'resque-retry', '~>1.8'
 gem 'resque-scheduler', '~> 4.6'
@@ -136,7 +136,7 @@ group :development, :test do
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '~> 2.17', '>= 2.17.0'
   gem 'guard', '~> 2.15'
-  gem 'rspec-rails', '~> 6.1'
+  gem 'rspec-rails', '~> 5.1'
   gem 'rubocop', '~> 0.92'
   gem "rubocop-graphql", "~> 0.14.5"
   gem 'rubocop-performance'

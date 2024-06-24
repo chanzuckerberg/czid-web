@@ -1,4 +1,4 @@
-FROM ruby:3.2.4
+FROM ruby:3.1.3
 
 # Install apt based dependencies required to run Rails as
 # well as RubyGems. As the Ruby image itself is based on a
@@ -23,14 +23,14 @@ RUN apt-get install -y nodejs
 RUN npm i -g npm@8.5.5
 
 # Install pip
-RUN pip3 install --upgrade pip --break-system-packages
+RUN pip3 install --upgrade pip
 
 # Install chamber, for pulling secrets into the container.
 RUN curl -L https://github.com/segmentio/chamber/releases/download/v2.10.8/chamber-v2.10.8-linux-amd64 -o /bin/chamber
 RUN chmod +x /bin/chamber
 
 COPY requirements.txt ./
-RUN pip3 install -r requirements.txt --break-system-packages
+RUN pip3 install -r requirements.txt
 
 # Configure the main working directory. This is the base
 # directory used in any further RUN, COPY, and ENTRYPOINT

@@ -1,9 +1,7 @@
-pyyaml==6.0.1
-aegea==4.4.1
+aegea==3.6.25
 pyOpenSSL>=19.1.0
 setuptools==65.5.1
 miniwdl==0.7.4
 biom-format==2.1.16
 jwcrypto==1.5.1
 typing-extensions==4.7.1
-awscli==1.33.13
