@@ -119,6 +119,14 @@ const EditableInput = ({
           onMouseEnter={() => setEditable(true)}
           onMouseLeave={() => setEditable(false)}
           onClick={() => setInputVisible(true)}
+          onFocus={() => setEditable(true)}
+          onBlur={() => setEditable(false)}
+          onKeyDown={e => {
+            if (e.key === "Enter") {
+              setInputVisible(true);
+            }
+          }}
+          tabIndex={0}
         >
           <div className={cx(className, editable && cs.editableText)}>
             {inputText}
