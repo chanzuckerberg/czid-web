@@ -953,24 +953,21 @@ export const SamplesView = forwardRef(function SamplesView(
 
     return (
       <div className={cs.filteredCount} data-testid="sample-count">
-        {/* TODO(bryanchu): Add more descriptive "- out of X" fallback. */}
-        <Suspense fallback="">
-          <FilteredCount
-            count={
-              hasAtLeastOneFilterApplied
-                ? {
-                    numerator: selectableIds?.length ?? "-",
-                    denominator: totalNumberOfObjects,
-                  }
-                : selectableIds?.length ?? "-"
-            }
-            workflowDisplayText={
-              totalNumberOfObjects === 1
-                ? workflowConfig.singlularDisplay
-                : workflowConfig.pluralDisplay
-            }
-          />
-        </Suspense>
+        <FilteredCount
+          count={
+            hasAtLeastOneFilterApplied
+              ? {
+                  numerator: selectableIds?.length ?? "-",
+                  denominator: totalNumberOfObjects,
+                }
+              : selectableIds?.length ?? "-"
+          }
+          workflowDisplayText={
+            totalNumberOfObjects === 1
+              ? workflowConfig.singlularDisplay
+              : workflowConfig.pluralDisplay
+          }
+        />
         {hasAtLeastOneFilterApplied && (
           <Button
             sdsStyle="minimal"

@@ -22,13 +22,12 @@ import {
   xorBy,
 } from "lodash/fp";
 import { nanoid } from "nanoid";
-import React, { ReactNode, Suspense } from "react";
+import React, { ReactNode } from "react";
 import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
 import { trackPageTransition } from "~/api/analytics";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import { IconLoading } from "~/components/ui/icons";
 import {
   BENCHMARKING_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
@@ -88,7 +87,6 @@ import {
 } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 import { InfoBanner } from "../../common/InfoBanner";
-import { ConsensusGenomesTabCount } from "./components/ConsensusGenomesTabCount";
 import { DiscoveryFilters } from "./components/DiscoveryFilters";
 import { DiscoveryHeader } from "./components/DiscoveryHeader";
 import { DiscoverySidebar } from "./components/DiscoverySidebar";
@@ -97,7 +95,6 @@ import { ModalFirstTimeUser } from "./components/ModalFirstTimeUser";
 import { NoSearchResultsBanner } from "./components/NoResultsBanner";
 import { ProjectHeader } from "./components/ProjectHeader";
 import { ProjectsView } from "./components/ProjectsView/ProjectsView";
-import { SamplesTabCount } from "./components/SamplesTabCount";
 import { CgRow, SamplesView } from "./components/SamplesView";
 import {
   Visualization,
@@ -1218,12 +1215,7 @@ export class DiscoveryView extends React.Component<
         value: TAB_PROJECTS,
       },
       {
-        label: renderTab(
-          "Samples",
-          <Suspense fallback="-">
-            <SamplesTabCount count={filteredSampleStats.count ?? "-"} />
-          </Suspense>,
-        ),
+        label: renderTab("Samples", filteredSampleStats.count ?? "-"),
         value: TAB_SAMPLES,
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
@@ -2164,11 +2156,7 @@ export class DiscoveryView extends React.Component<
       this.getWorkflowTab(WorkflowType.LONG_READ_MNGS),
       this.getWorkflowTab(
         WorkflowType.CONSENSUS_GENOME,
-        <Suspense fallback="-">
-          <ConsensusGenomesTabCount
-            count={this.props.cgWorkflowIds?.length ?? "-"}
-          />
-        </Suspense>,
+        this.props.cgWorkflowIds?.length,
       ),
       this.getWorkflowTab(WorkflowType.AMR),
       ...(isAdmin || allowedFeatures.includes(BENCHMARKING_FEATURE)
@@ -2177,7 +2165,7 @@ export class DiscoveryView extends React.Component<
     ];
   };
 
-  getWorkflowTab = (workflow: WorkflowType, countNode?: ReactNode) => {
+  getWorkflowTab = (workflow: WorkflowType, count?: number) => {
     const workflowName = `${WORKFLOWS[workflow].pluralizedLabel}`;
 
     let workflowCount: number | string =
@@ -2194,15 +2182,13 @@ export class DiscoveryView extends React.Component<
           data-testid={workflowName.toLowerCase().replace(/ /g, "-")}
           label={workflowName}
           count={
-            countNode || (
-              <span
-                data-testid={`${workflowName
-                  .toLowerCase()
-                  .replace(/ /g, "-")}-count`}
-              >
-                {workflowCount || "0"}
-              </span>
-            )
+            <span
+              data-testid={`${workflowName
+                .toLowerCase()
+                .replace(/ /g, "-")}-count`}
+            >
+              {count ?? workflowCount ?? "0"}
+            </span>
           }
         />
       ),
@@ -2373,57 +2359,54 @@ export class DiscoveryView extends React.Component<
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
-              {/* TODO(bchu): Style <Suspense> fallback. */}
               {workflowCounts && !workflowCounts[workflow] ? (
                 this.renderNoDataWorkflowBanner()
               ) : (
-                <Suspense fallback={<IconLoading />}>
-                  <SamplesView
-                    activeColumns={sampleActiveColumnsByWorkflow[workflow]}
-                    admin={isAdmin}
-                    currentDisplay={currentDisplay}
-                    currentTab={currentTab}
-                    domain={domain}
-                    filters={prepareFilters(filters)}
-                    getRows={this.configForWorkflow[workflow].getRows}
-                    hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
-                    mapLevel={mapLevel}
-                    mapLocationData={mapLocationData}
-                    mapPreviewedLocationId={mapPreviewedLocationId}
-                    mapTilerKey={mapTilerKey}
-                    onActiveColumnsChange={this.handleSampleActiveColumnsChange}
-                    onClearFilters={this.handleClearFilters}
-                    onDeleteSample={this.resetDataFromFilterChange}
-                    onDisplaySwitch={this.handleDisplaySwitch}
-                    onLoadRows={this.configForWorkflow[workflow].fetchPage}
-                    onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
-                    onMapClick={this.clearMapPreview}
-                    onMapLevelChange={this.handleMapLevelChange}
-                    onMapMarkerClick={this.handleMapMarkerClick}
-                    onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
-                    onObjectSelected={this.handleObjectSelected}
-                    onSortColumn={this.handleSortColumn}
-                    projectId={projectId}
-                    snapshotShareId={snapshotShareId}
-                    sortable={sortable}
-                    ref={this.samplesView}
-                    selectableIds={selectableIds}
-                    selectedIds={selectedIds}
-                    showAllMetadata={showAllMetadata}
-                    sortBy={orderByForCurrentTab}
-                    sortDirection={orderDirection}
-                    onUpdateSelectedIds={updateSelectedIds}
-                    handleNewWorkflowRunsCreated={
-                      this.handleNewWorkflowRunsCreated
-                    }
-                    filtersSidebarOpen={showFilters}
-                    sampleStatsSidebarOpen={showStats}
-                    hideAllTriggers={hideAllTriggers}
-                    totalWorkflowCounts={workflowCounts}
-                    workflow={workflow}
-                    workflowEntity={workflowEntity}
-                  />
-                </Suspense>
+                <SamplesView
+                  activeColumns={sampleActiveColumnsByWorkflow[workflow]}
+                  admin={isAdmin}
+                  currentDisplay={currentDisplay}
+                  currentTab={currentTab}
+                  domain={domain}
+                  filters={prepareFilters(filters)}
+                  getRows={this.configForWorkflow[workflow].getRows}
+                  hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
+                  mapLevel={mapLevel}
+                  mapLocationData={mapLocationData}
+                  mapPreviewedLocationId={mapPreviewedLocationId}
+                  mapTilerKey={mapTilerKey}
+                  onActiveColumnsChange={this.handleSampleActiveColumnsChange}
+                  onClearFilters={this.handleClearFilters}
+                  onDeleteSample={this.resetDataFromFilterChange}
+                  onDisplaySwitch={this.handleDisplaySwitch}
+                  onLoadRows={this.configForWorkflow[workflow].fetchPage}
+                  onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
+                  onMapClick={this.clearMapPreview}
+                  onMapLevelChange={this.handleMapLevelChange}
+                  onMapMarkerClick={this.handleMapMarkerClick}
+                  onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
+                  onObjectSelected={this.handleObjectSelected}
+                  onSortColumn={this.handleSortColumn}
+                  projectId={projectId}
+                  snapshotShareId={snapshotShareId}
+                  sortable={sortable}
+                  ref={this.samplesView}
+                  selectableIds={selectableIds}
+                  selectedIds={selectedIds}
+                  showAllMetadata={showAllMetadata}
+                  sortBy={orderByForCurrentTab}
+                  sortDirection={orderDirection}
+                  onUpdateSelectedIds={updateSelectedIds}
+                  handleNewWorkflowRunsCreated={
+                    this.handleNewWorkflowRunsCreated
+                  }
+                  filtersSidebarOpen={showFilters}
+                  sampleStatsSidebarOpen={showStats}
+                  hideAllTriggers={hideAllTriggers}
+                  totalWorkflowCounts={workflowCounts}
+                  workflow={workflow}
+                  workflowEntity={workflowEntity}
+                />
               )}
             </div>
             {workflowCounts &&
