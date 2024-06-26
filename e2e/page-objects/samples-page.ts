@@ -401,6 +401,12 @@ export class SamplesPage extends PageObject {
     // #endregion Get
 
     // #region Click
+    public async clickGenerateConsensusGenomeDropdown() {
+      await this.pause(1);
+      await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).waitFor();
+      await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+    }
+
     public async clickBackToProject(projectName: string) {
       await this.page.locator(BACK_TO_PROJECT(projectName)).click();
     }
@@ -643,6 +649,13 @@ export class SamplesPage extends PageObject {
     // #endregion Hover
 
     // #region Macro
+    public async expandGenerateConsensusGenomeDropdown() {
+      const consensusGenomeOptions = this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION);
+      if (!await consensusGenomeOptions.first().isVisible()) {
+        await this.clickGenerateConsensusGenomeDropdown();
+      }
+    }
+
     public async waitForAllSamplesComplete(sampleIds: Array<number>) {
       const samples = [];
       for (const sampleId of sampleIds) {
@@ -802,10 +815,13 @@ export class SamplesPage extends PageObject {
     }
 
     public async selectReferenceAccession(option: string) {
-      await this.pause(1);
-      await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+      await this.expandGenerateConsensusGenomeDropdown();
 
       const consensusGenomeOptions = this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION);
+      if (!await consensusGenomeOptions.first().isVisible()) {
+        // Try expanding the dropdown again
+        await this.expandGenerateConsensusGenomeDropdown();
+      }
       await consensusGenomeOptions.getByText(option).waitFor({timeout: 90_000});
       await consensusGenomeOptions.getByText(option).click();
 
