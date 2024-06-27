@@ -12,7 +12,7 @@ export const Hero = () => {
   useEffect(() => {
     const rotatingHeroText = ["Free", "Fast", "Accessible"];
     let i = 0;
-    setInterval(function() {
+    setInterval(function () {
       const textTarget = document.querySelector(".rotating-text");
 
       if (i === 2) {
@@ -24,7 +24,7 @@ export const Hero = () => {
       setFade(true);
       setMoveUp(false);
 
-      setTimeout(function() {
+      setTimeout(function () {
         if (i === 2) {
           setLongUnderline(true);
         } else {
@@ -34,7 +34,7 @@ export const Hero = () => {
         textTarget.textContent = rotatingHeroText[i];
       }, 400);
 
-      setTimeout(function() {
+      setTimeout(function () {
         setFade(false);
         setMoveUp(true);
       }, 700);

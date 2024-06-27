@@ -20,6 +20,18 @@ import { formatSemanticVersion } from "~/helpers/strings";
 import { Conditions, DiscoveryViewProps } from "~/interface/discoveryView";
 import { STATUS_TYPE } from "../../common/TableRenderers/TableRenderers";
 import {
+  CgEntityRow,
+  CgRow,
+  Metadata,
+  ReferenceAccession,
+  WorkflowRunRow,
+} from "./components/SamplesView/SamplesView";
+import { DiscoveryView } from "./DiscoveryView";
+import {
+  DISCOVERY_DOMAIN_ALL_DATA,
+  formatWetlabProtocol,
+} from "./discovery_api";
+import {
   DiscoveryViewFCConsensusGenomeIdsQuery as DiscoveryViewFCConsensusGenomeIdsQueryType,
   DiscoveryViewFCConsensusGenomeIdsQuery$data,
   queryInput_fedConsensusGenomes_input_Input,
@@ -47,18 +59,6 @@ import {
   queryInput_fedWorkflowRuns_input_orderByArray_items_Input,
   queryInput_fedWorkflowRuns_input_where_collectionId_Input,
 } from "./__generated__/DiscoveryViewFCWorkflowsQuery.graphql";
-import {
-  CgEntityRow,
-  CgRow,
-  Metadata,
-  ReferenceAccession,
-  WorkflowRunRow,
-} from "./components/SamplesView/SamplesView";
-import {
-  DISCOVERY_DOMAIN_ALL_DATA,
-  formatWetlabProtocol,
-} from "./discovery_api";
-import { DiscoveryView } from "./DiscoveryView";
 
 /**
  * Categorizations of legacy column keys by NextGen query that they come from:

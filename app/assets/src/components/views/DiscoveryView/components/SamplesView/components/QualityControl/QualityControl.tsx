@@ -10,14 +10,14 @@ import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WorkflowType } from "~/components/utils/workflows";
 import { TooltipVizTable } from "~ui/containers";
-import {
-  QualityControlQuery as QualityControlQueryType,
-  QualityControlQuery$data,
-} from "./__generated__/QualityControlQuery.graphql";
 import { Histograms } from "./components/Histograms";
 import { ReadsLostChart } from "./components/ReadsLostChart";
 import { SampleStatsInfo } from "./components/SampleStatsInfo";
 import cs from "./quality_control.scss";
+import {
+  QualityControlQuery as QualityControlQueryType,
+  QualityControlQuery$data,
+} from "./__generated__/QualityControlQuery.graphql";
 
 const QualityControlQuery = graphql`
   query QualityControlQuery(

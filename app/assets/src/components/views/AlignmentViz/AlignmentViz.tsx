@@ -121,7 +121,7 @@ export class AlignmentViz extends React.Component<
               )}
           </h2>
           <div className={cs.accessionViz}>
-            {alignmentData.map(function(this: $TSFixMe, item, i) {
+            {alignmentData.map(function (this: $TSFixMe, item, i) {
               return (
                 <AccessionViz
                   key={`accession_${i}`}

@@ -11,8 +11,8 @@ import {
 import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 import { WorkflowRun } from "~/interface/sample";
 import { AdditionalInfo } from "../../types";
-import { PipelineTabFragment$data } from "./__generated__/PipelineTabFragment.graphql";
 import { AmrPipelineTabInfo, MngsPipelineInfo } from "./types";
+import { PipelineTabFragment$data } from "./__generated__/PipelineTabFragment.graphql";
 
 const BLANK_TEXT = "unknown";
 const YYYY_MM_DD = "YYYY-MM-DD";

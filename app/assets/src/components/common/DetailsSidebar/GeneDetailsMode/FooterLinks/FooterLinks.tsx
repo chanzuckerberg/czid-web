@@ -1,6 +1,6 @@
 import React from "react";
-import cs from "../gene_details_mode.scss";
 import { OntologyType } from "../GeneDetailsMode";
+import cs from "../gene_details_mode.scss";
 import { Sources } from "../utils";
 import { FooterLink } from "./FooterLink";
 

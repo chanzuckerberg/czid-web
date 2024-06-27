@@ -1,7 +1,7 @@
 import { TableRenderers } from "~/components/common/TableRenderers";
 import { ColumnProps } from "~/interface/sampleView";
-import cs from "./bulk_download_table_renderers.scss";
 import { BulkDownloadTableRenderers } from "./BulkDownloadTableRenderers";
+import cs from "./bulk_download_table_renderers.scss";
 
 export const getBulkDownloadTableColumns = ({
   isAdmin,

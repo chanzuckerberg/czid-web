@@ -37,7 +37,7 @@ const downloadFileFromCSV = (
   fileName: string,
 ) => {
   let csvContent = "data:text/csv;charset=utf-8,";
-  csvJson.forEach(function(rowArray) {
+  csvJson.forEach(function (rowArray) {
     if (!rowArray) return;
     const cleanRowArray = rowArray.map(row => {
       if (!row) return "";

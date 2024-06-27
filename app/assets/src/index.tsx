@@ -29,7 +29,7 @@ Sentry.init({
 if (!function f() {}.name) {
   // eslint-disable-next-line no-extend-native
   Object.defineProperty(Function.prototype, "name", {
-    get: function() {
+    get: function () {
       const name = (this.toString().match(/^function\s*([^\s(]+)/) || [])[1];
       Object.defineProperty(this, "name", { value: name });
       return name;

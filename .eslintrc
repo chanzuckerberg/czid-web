@@ -20,22 +20,11 @@
   "plugins": ["react", "react-hooks", "sonarjs", "standard", "no-only-tests"],
   "rules": {
     "camelcase": "warn",
-    "comma-dangle": ["error", "always-multiline"],
-    "quotes": [
-      "error",
-      "double",
-      {
-        "avoidEscape": true,
-        "allowTemplateLiterals": true
-      }
-    ],
     "no-console": ["error", { "allow": ["warn", "error"] }],
     "no-prototype-builtins": "warn",
     "no-only-tests/no-only-tests": "error",
     "no-unreachable": "error",
     "no-unused-vars": "error",
-    "no-trailing-spaces": "warn",
-    "no-multi-spaces": "error",
     "react/boolean-prop-naming": "warn",
     "react/jsx-key": "warn",
     "react/no-deprecated": "warn",
@@ -49,44 +38,7 @@
     "sonarjs/cognitive-complexity": "off",
     "sonarjs/prefer-single-boolean-return": "off",
     "no-extra-semi": "error",
-    "space-before-function-paren": [
-      "error",
-      {
-        "anonymous": "never",
-        "named": "never",
-        "asyncArrow": "always"
-      }
-    ],
-    "standard/object-curly-even-spacing": "warn",
     "standard/computed-property-even-spacing": "off",
-    "import/order": [
-      "warn",
-      {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          "sibling",
-          "index"
-        ],
-        "pathGroups": [
-          {
-            "pattern": "~/**",
-            "group": "internal"
-          },
-          {
-            "pattern": "~ui/**",
-            "group": "internal"
-          },
-          {
-            "pattern": "~utils/**",
-            "group": "internal"
-          }
-        ],
-        "alphabetize": { "order": "asc", "caseInsensitive": true }
-      }
-    ],
     "react-hooks/exhaustive-deps": "warn" // For checking hook dependencies 
   },
   "ignorePatterns": ["e2e/playwright-report", "e2e/html-reports"],
@@ -106,7 +58,6 @@
         "camelcase": "off",
         "@typescript-eslint/camelcase": "off",
         "semi": "off",
-        "@typescript-eslint/semi": "error",
         "no-extra-semi": "off",
         "@typescript-eslint/no-extra-semi": "off",
         "@typescript-eslint/no-non-null-assertion": "off"

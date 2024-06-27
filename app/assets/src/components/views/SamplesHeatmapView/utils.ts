@@ -2,11 +2,11 @@ import { BACKGROUND_METRICS } from "./constants";
 
 export const throttle = (callbackFn, limit: number) => {
   let wait = false;
-  return function() {
+  return function () {
     if (!wait) {
       callbackFn.call();
       wait = true;
-      setTimeout(function() {
+      setTimeout(function () {
         wait = false;
       }, limit);
     }

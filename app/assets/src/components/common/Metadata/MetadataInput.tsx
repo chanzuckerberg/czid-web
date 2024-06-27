@@ -11,8 +11,8 @@ import GeoSearchInputBox, {
 import Input from "~ui/controls/Input";
 import Toggle from "~ui/controls/Toggle";
 import { IconAlertSmall } from "~ui/icons";
-import cs from "./metadata_input.scss";
 import MetadataAgeInput from "./MetadataAgeInput";
+import cs from "./metadata_input.scss";
 import { MetadataInputProps } from "./types";
 import { ensureDefinedValue } from "./utils";
 

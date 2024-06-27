@@ -1,7 +1,7 @@
 import { Button, InputText } from "@czi-sds/components";
 import React, { useState } from "react";
-import cs from "../../admin_settings.scss";
 import { AppConfigParams } from "../../AdminSettings";
+import cs from "../../admin_settings.scss";
 
 interface CreateAppConfigProps {
   handleSetAppConfig: ({ key, value }: AppConfigParams) => Promise<string>;

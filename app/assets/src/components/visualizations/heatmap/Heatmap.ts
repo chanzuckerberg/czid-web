@@ -21,8 +21,8 @@ const XLINK_HREF = "xlink:href";
 
 // TODO(tcarvalho): temporary hack to send elements to the back.
 // Remove once code is ported to d3 v4, which contains this function.
-d3.selection.prototype.lower = function() {
-  return this.each(function(this: $TSFixMe) {
+d3.selection.prototype.lower = function () {
+  return this.each(function (this: $TSFixMe) {
     const firstChild = this.parentNode.firstChild;
     if (firstChild) {
       this.parentNode.insertBefore(this, firstChild);
@@ -2403,7 +2403,7 @@ export default class Heatmap {
     const cluster = d3.layout
       .cluster()
       .size([width, height])
-      .separation(function() {
+      .separation(function () {
         return 1;
       });
 
@@ -2458,7 +2458,7 @@ export default class Heatmap {
       }
     };
 
-    cluster.children(function(d: $TSFixMe) {
+    cluster.children(function (d: $TSFixMe) {
       const children = [];
       if (d.left) {
         // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345

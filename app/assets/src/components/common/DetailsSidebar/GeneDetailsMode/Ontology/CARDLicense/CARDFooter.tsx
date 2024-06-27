@@ -1,6 +1,6 @@
 import React from "react";
-import cs from "../../gene_details_mode.scss";
 import { OntologyType } from "../../GeneDetailsMode";
+import cs from "../../gene_details_mode.scss";
 import { generateLinkTo, Sources } from "../../utils";
 
 interface CARDFooterProps {

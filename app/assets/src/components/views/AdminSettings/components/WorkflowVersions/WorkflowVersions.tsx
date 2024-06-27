@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { setWorkflowVersion } from "~/api/index";
-import cs from "../../admin_settings.scss";
 import { AppConfigType } from "../../AdminSettings";
+import cs from "../../admin_settings.scss";
 
 interface WorkflowVersionsProps {
   workflowVersions: AppConfigType[];

@@ -4,11 +4,11 @@ import React from "react";
 import { generateHeaderWidthStyles } from "~/components/ui/Table/tableUtils";
 import { ColumnSection } from "~/components/views/SampleView/components/AmrView/constants";
 import { AmrResult } from "../types";
-import cs from "./column_definitions.scss";
 import {
   handleSectionOpenToggled,
   isAllColumnsVisible,
 } from "./columnDefUtils";
+import cs from "./column_definitions.scss";
 
 export const getReadsColumnGroup = (
   columns: ColumnDef<AmrResult, any>[],

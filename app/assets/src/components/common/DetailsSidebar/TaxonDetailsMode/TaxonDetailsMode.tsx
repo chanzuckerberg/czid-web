@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { getTaxonDescriptions } from "~/api";
 import { Background } from "~/interface/shared/specific";
-import cs from "./taxon_details_mode.scss";
 import { TaxonDescription } from "./TaxonDescription";
 import { TaxonHistogram } from "./TaxonHistogram";
 import { TaxonLinks } from "./TaxonLinks";
+import cs from "./taxon_details_mode.scss";
 
 export type TaxonValuesType = {
   NT: { rpm: number | string };

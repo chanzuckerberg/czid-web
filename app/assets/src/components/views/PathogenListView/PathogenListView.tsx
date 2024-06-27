@@ -2,12 +2,12 @@ import throttle from "lodash/throttle";
 import React, { useMemo, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { NarrowContainer } from "~/components/layout";
-import { PathogenListViewQuery as PathogenListViewQueryType } from "./__generated__/PathogenListViewQuery.graphql";
 import { AnchorMenu } from "./components/AnchorMenu";
 import { SectionNavigation } from "./components/AnchorMenu/components/SectionNavigation";
 import { PathogenCitations } from "./components/PathogenCitations";
 import { PathogenIntro } from "./components/PathogenIntro";
 import cs from "./pathogen_list_view.scss";
+import { PathogenListViewQuery as PathogenListViewQueryType } from "./__generated__/PathogenListViewQuery.graphql";
 
 export const PathogenListViewQuery = graphql`
   query PathogenListViewQuery {

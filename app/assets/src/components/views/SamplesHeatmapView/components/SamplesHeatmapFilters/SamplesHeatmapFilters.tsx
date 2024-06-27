@@ -15,8 +15,8 @@ import SamplesHeatmapPresetTooltip from "./components/SamplesHeatmapPresetToolti
 import SamplesHeatmapTaxonSlider from "./components/SamplesHeatmapTaxonSlider";
 import SamplesHeatmapTaxonTagCheckbox from "./components/SamplesHeatmapTaxonTagCheckbox";
 import SamplesHeatmapViewOptionsDropdown from "./components/SamplesHeatmapViewOptionsDropdown";
-import cs from "./samples_heatmap_filters.scss";
 import { optionsToSDSFormat } from "./samplesHeatmapFilterUtils";
+import cs from "./samples_heatmap_filters.scss";
 
 export interface SDSFormattedOption {
   name: string;

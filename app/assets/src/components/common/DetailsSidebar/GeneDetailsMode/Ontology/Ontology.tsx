@@ -1,6 +1,6 @@
 import React from "react";
-import gcs from "../gene_details_mode.scss";
 import { OntologyType } from "../GeneDetailsMode";
+import gcs from "../gene_details_mode.scss";
 import { CARDFooter } from "./CARDLicense";
 import cs from "./ontology.scss";
 import { PropertyList } from "./PropertyList";

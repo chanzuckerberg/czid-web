@@ -25,8 +25,8 @@ import { IconAlert } from "~ui/icons";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import LoadingMessage from "../LoadingMessage";
 import { METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW } from "./constants";
-import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
+import cs from "./metadata_upload.scss";
 import {
   MetadataCSVLocationsMenuProps,
   MetadataUploadProps,

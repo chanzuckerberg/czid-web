@@ -5,9 +5,9 @@ import { WorkflowLabelType } from "~/components/utils/workflows";
 import { Metadata, MetadataTypes, SampleType } from "~/interface/shared";
 import MetadataSection from "../../MetadataSection";
 import { processAdditionalInfo } from "../../utils";
-import { MetadataTabMetadataFragment$key } from "./__generated__/MetadataTabMetadataFragment.graphql";
 import { MetadataSectionContent } from "./components/MetadataSectionContent";
 import { MetadataSectionContentFragment$key } from "./components/MetadataSectionContent/__generated__/MetadataSectionContentFragment.graphql";
+import { MetadataTabMetadataFragment$key } from "./__generated__/MetadataTabMetadataFragment.graphql";
 
 export const MetadataTabMetadataFragment = graphql`
   fragment MetadataTabMetadataFragment on SampleMetadata {

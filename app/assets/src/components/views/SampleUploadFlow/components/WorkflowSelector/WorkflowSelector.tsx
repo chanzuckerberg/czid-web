@@ -21,8 +21,8 @@ import { ConsensusGenomeSequencingPlatformOptions } from "./components/Consensus
 import { MetagenomicsSequencingPlatformOptions } from "./components/MetagenomicsSequencingPlatformOptions";
 import { PipelineVersionIndicator } from "./components/PipelineVersionIndicator";
 import { ViralConsensusGenomeSequencingPlatformOptions } from "./components/ViralConsensusGenomeSequencingPlatformOptions";
-import cs from "./workflow_selector.scss";
 import { WorkflowLinksConfig } from "./workflowTypeConfig";
+import cs from "./workflow_selector.scss";
 
 interface WorkflowSelectorProps {
   bedFileName: string;

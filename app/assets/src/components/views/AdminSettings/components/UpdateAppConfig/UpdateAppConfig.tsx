@@ -1,7 +1,7 @@
 import { Button, Dropdown, InputText } from "@czi-sds/components";
 import React, { useState } from "react";
-import cs from "../../admin_settings.scss";
 import { AppConfigParams, AppConfigType } from "../../AdminSettings";
+import cs from "../../admin_settings.scss";
 
 interface UpdateAppConfigProps {
   appConfigs: AppConfigType[];

@@ -4,7 +4,7 @@ function ThresholdMap(options) {
   this.options = options;
 }
 
-ThresholdMap.isThresholdValid = function(threshold: ThresholdConditions) {
+ThresholdMap.isThresholdValid = function (threshold: ThresholdConditions) {
   if (threshold.metric && threshold.operator && threshold.value) {
     return (
       threshold.metric.length > 0 &&
@@ -16,12 +16,12 @@ ThresholdMap.isThresholdValid = function(threshold: ThresholdConditions) {
   return false;
 };
 
-ThresholdMap.getSavedThresholdFilters = function(): ThresholdConditions[] {
+ThresholdMap.getSavedThresholdFilters = function (): ThresholdConditions[] {
   const activeThresholds = window.localStorage.getItem("activeThresholds");
   return activeThresholds ? JSON.parse(activeThresholds) : [];
 };
 
-ThresholdMap.saveThresholdFilters = function(
+ThresholdMap.saveThresholdFilters = function (
   thresholds: ThresholdConditions[],
 ) {
   const activeThresholds = thresholds.filter(threshold => {
@@ -33,7 +33,7 @@ ThresholdMap.saveThresholdFilters = function(
   );
 };
 
-ThresholdMap.taxonPassThresholdFilter = function(
+ThresholdMap.taxonPassThresholdFilter = function (
   taxon: object,
   rules: ThresholdConditions[],
 ) {

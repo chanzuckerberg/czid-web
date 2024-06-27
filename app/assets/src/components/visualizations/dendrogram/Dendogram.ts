@@ -473,7 +473,7 @@ export default class Dendogram {
       scale
         .append("path")
         .attr("class", "scale-line")
-        .attr("d", function() {
+        .attr("d", function () {
           return drawScale(tickWidth, 0, width);
         });
 
@@ -489,7 +489,7 @@ export default class Dendogram {
         .select("path")
         .transition()
         .duration(500)
-        .attr("d", function() {
+        .attr("d", function () {
           return drawScale(tickWidth, 0, width);
         });
     }
@@ -602,7 +602,7 @@ export default class Dendogram {
       .attr("class", "link")
       .attr("d", this.options.curvedEdges ? curveEdge : rectEdge);
 
-    link.classed("highlight", function(d: $TSFixMe) {
+    link.classed("highlight", function (d: $TSFixMe) {
       return d.data.highlight && d.parent.data.highlight;
     });
 
@@ -631,11 +631,11 @@ export default class Dendogram {
     node
       .transition()
       .duration(500)
-      .attr("transform", function(node: $TSFixMe) {
+      .attr("transform", function (node: $TSFixMe) {
         return "translate(" + node.y + "," + node.x + ")";
       });
 
-    node.classed("highlight", function(d: $TSFixMe) {
+    node.classed("highlight", function (d: $TSFixMe) {
       return d.data.highlight;
     });
 
@@ -643,10 +643,10 @@ export default class Dendogram {
       .select("text")
       .transition()
       .duration(500)
-      .attr("stroke", function(this: $TSFixMe, d: $TSFixMe) {
+      .attr("stroke", function (this: $TSFixMe, d: $TSFixMe) {
         return this.colors[d.data.colorIndex];
       })
-      .attr("x", function(this: $TSFixMe, d: $TSFixMe) {
+      .attr("x", function (this: $TSFixMe, d: $TSFixMe) {
         return d.depth === 0
           ? -(this.getBBox().width + 15)
           : d.children
@@ -657,10 +657,10 @@ export default class Dendogram {
     const nodeEnter = node
       .enter()
       .append("g")
-      .attr("class", function(node: $TSFixMe) {
+      .attr("class", function (node: $TSFixMe) {
         return "node" + (node.children ? " node-internal" : " node-leaf");
       })
-      .attr("transform", function(node: $TSFixMe) {
+      .attr("transform", function (node: $TSFixMe) {
         return `translate(${node.y},${node.x})`;
       });
 
@@ -688,7 +688,7 @@ export default class Dendogram {
 
     nodeEnter
       .append("circle")
-      .attr("r", function(node: $TSFixMe) {
+      .attr("r", function (node: $TSFixMe) {
         return node.children ? 1 : 2;
       })
       .on("click", (node: $TSFixMe) => {
@@ -700,13 +700,13 @@ export default class Dendogram {
 
     nodeEnter
       .append("text")
-      .attr("dy", function(d: $TSFixMe) {
+      .attr("dy", function (d: $TSFixMe) {
         return d.children ? -2 : 5;
       })
-      .attr("x", function(d: $TSFixMe) {
+      .attr("x", function (d: $TSFixMe) {
         return d.children ? -8 : 15;
       })
-      .text(function(d: $TSFixMe) {
+      .text(function (d: $TSFixMe) {
         return d.children ? "" : d.data.name.split("__")[0];
       })
       .on(
@@ -727,7 +727,7 @@ export default class Dendogram {
       .attr("xlink:href", `${this.options.iconPath}/IconAlertSmall.svg`)
       .attr("class", cs.warningIcon)
       .attr("y", -7)
-      .attr("x", function(this: $TSFixMe, d: $TSFixMe) {
+      .attr("x", function (this: $TSFixMe, d: $TSFixMe) {
         // Get the width of the label and its offset to properly set the position of the icon
         const labelWidth = d3
           .select(this.previousSibling)
@@ -736,7 +736,7 @@ export default class Dendogram {
         const labelOffset = d.children ? -8 : 15;
         return labelWidth + labelOffset + 4;
       })
-      .attr("display", function(d: $TSFixMe) {
+      .attr("display", function (d: $TSFixMe) {
         if (d.data.coverage_breadth) {
           return d.data.coverage_breadth < 0.25 ? "default" : "none";
         } else {
@@ -762,11 +762,11 @@ export default class Dendogram {
     if (this.options.colorGroupAttribute && !this.skipColoring) {
       // Apply colors to the nodes from data.colorIndex
       const colors = this.colors;
-      this.viz.selectAll(".node").style("fill", function(d: $TSFixMe) {
+      this.viz.selectAll(".node").style("fill", function (d: $TSFixMe) {
         return colors[d.data.colorIndex];
       });
 
-      this.viz.selectAll(".link").style("stroke", function(d: $TSFixMe) {
+      this.viz.selectAll(".link").style("stroke", function (d: $TSFixMe) {
         return colors[d.data.colorIndex];
       });
     } else {

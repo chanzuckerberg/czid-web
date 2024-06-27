@@ -35,8 +35,8 @@ import {
 } from "~/interface/shared";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import { AUTO_POPULATE_FIELDS, COLUMN_HEADER_TOOLTIPS } from "./constants";
-import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
+import cs from "./metadata_manual_input.scss";
 import { MetadataManualInputProps, MetadataManualInputState } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

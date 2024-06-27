@@ -9,13 +9,13 @@ import {
 import { WORKFLOW_ENTITIES } from "~/components/utils/workflows";
 import { Entry } from "~/interface/samplesView";
 import { Background } from "~/interface/shared";
-import { BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery as BulkDownloadModalValidConsensusGenomeWorkflowRunsQueryType } from "./__generated__/BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery.graphql";
 import {
   BackgroundOptionType,
   RunValidationType,
   SelectedDownloadType,
   WorkflowRunStatusType,
 } from "./types";
+import { BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery as BulkDownloadModalValidConsensusGenomeWorkflowRunsQueryType } from "./__generated__/BulkDownloadModalValidConsensusGenomeWorkflowRunsQuery.graphql";
 
 export const triggersCondtionalFieldMetricList = (
   conditionalField,

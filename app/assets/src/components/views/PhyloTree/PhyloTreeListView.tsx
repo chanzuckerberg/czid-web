@@ -39,9 +39,9 @@ import { IconAlert, IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import Divider from "../../layout/Divider";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
-import cs from "./phylo_tree_list_view.scss";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import PhyloTreeVis from "./PhyloTreeVis";
+import cs from "./phylo_tree_list_view.scss";
 
 // Old PhyloTree statuses:
 const STATUS_INITIALIZED = 0;

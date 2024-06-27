@@ -20,8 +20,8 @@ import {
   READS_REMAINING,
   READS_REMAINING_COLOR,
 } from "../../../../../../constants";
-import { ReadsLostChartQuery as ReadsLostChartQueryType } from "./__generated__/ReadsLostChartQuery.graphql";
 import cs from "./reads_lost_chart.scss";
+import { ReadsLostChartQuery as ReadsLostChartQueryType } from "./__generated__/ReadsLostChartQuery.graphql";
 
 interface ReadsLostChartProps {
   validSamples: Sample[];

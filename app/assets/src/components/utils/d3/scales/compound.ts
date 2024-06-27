@@ -18,12 +18,12 @@ export default function compound(...args: $TSFixMe[]) {
     return scales[scales.length - 1](x);
   }
 
-  scale.domain = function() {
+  scale.domain = function () {
     if (arguments.length) {
       throw new Error("Setting a domain is not supported on compound scales");
     }
     const values = [].concat(
-      ...scales.map(function(s: { domain: () => any }) {
+      ...scales.map(function (s: { domain: () => any }) {
         return s.domain();
       }),
     );
@@ -32,12 +32,12 @@ export default function compound(...args: $TSFixMe[]) {
     return domain;
   };
 
-  scale.range = function() {
+  scale.range = function () {
     if (arguments.length) {
       throw new Error("Setting a range is not supported on compound scales");
     }
     const values = [].concat(
-      ...scales.map(function(s) {
+      ...scales.map(function (s) {
         return s.range();
       }),
     );
@@ -46,17 +46,17 @@ export default function compound(...args: $TSFixMe[]) {
     return range;
   };
 
-  scale.copy = function() {
+  scale.copy = function () {
     // eslint-disable-next-line prefer-spread
     return compound.apply(
       null,
-      scales.map(function(s) {
+      scales.map(function (s) {
         return s.copy();
       }),
     );
   };
 
-  scale.scales = function(_: $TSFixMe) {
+  scale.scales = function (_: $TSFixMe) {
     return arguments.length ? ((scales = _), scale) : scales;
   };
 

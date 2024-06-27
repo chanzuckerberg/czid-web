@@ -4,9 +4,9 @@ import cs from "~/components/views/SampleView/components/ConsensusGenomeView/con
 import { SampleReportContent } from "~/components/views/SampleView/components/SampleReportConent";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { getConsensusGenomeHelpLink } from "../../utils";
-import { ConsensusGenomeReportQuery as ConsensusGenomeReportQueryType } from "./__generated__/ConsensusGenomeReportQuery.graphql";
 import { ConsensusGenomeCoverageView } from "./components/ConsensusGenomeCoverageView";
 import { ConsensusGenomeMetricsTable } from "./components/ConsensusGenomeMetricsTable";
+import { ConsensusGenomeReportQuery as ConsensusGenomeReportQueryType } from "./__generated__/ConsensusGenomeReportQuery.graphql";
 
 const ConsensusGenomeReportQuery = graphql`
   query ConsensusGenomeReportQuery($workflowRunId: String) {

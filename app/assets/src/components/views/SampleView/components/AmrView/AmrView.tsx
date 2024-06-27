@@ -21,13 +21,13 @@ import { SampleReportContent } from "~/components/views/SampleView/components/Sa
 import csIcon from "~/components/views/SampleView/components/SampleReportConent/sample_report_content.scss";
 import { SUCCEEDED_STATE } from "~/components/views/SampleView/utils";
 import Sample, { SampleStatus, WorkflowRun } from "~/interface/sample";
-import cs from "./amr_view.scss";
 import {
   AmrContext,
   AmrContextActionType,
   AmrContextType,
   createAmrContextAction,
 } from "./amrContext/reducer";
+import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";
 import AmrNullResult from "./components/AmrNullResult";

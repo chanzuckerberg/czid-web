@@ -8,15 +8,15 @@ import { BulkDownloadListQuery$data } from "~/components/views/BulkDownloadListV
 import { getDownloadDisplayName } from "~/components/views/BulkDownloadListView/constants";
 import { BulkDownloadStatus } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
-import {
-  BulkDownloadDetailsModeFragment$data,
-  BulkDownloadDetailsModeFragment$key,
-} from "./__generated__/BulkDownloadDetailsModeFragment.graphql";
 import cs from "./bulk_download_details_mode.scss";
 import { AdvancedDownloadTab } from "./components/AdvancedDownloadTab";
 import { AdvancedDownloadTabFragment$key } from "./components/AdvancedDownloadTab/__generated__/AdvancedDownloadTabFragment.graphql";
 import { DetailsTab } from "./components/DetailsTab";
 import { DetailsTabFragment$key } from "./components/DetailsTab/__generated__/DetailsTabFragment.graphql";
+import {
+  BulkDownloadDetailsModeFragment$data,
+  BulkDownloadDetailsModeFragment$key,
+} from "./__generated__/BulkDownloadDetailsModeFragment.graphql";
 
 type TabNames = "Details" | "Advanced Download";
 const TABS: TabNames[] = ["Details", "Advanced Download"];

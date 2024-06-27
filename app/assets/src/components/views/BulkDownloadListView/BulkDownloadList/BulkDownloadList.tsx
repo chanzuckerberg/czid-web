@@ -28,9 +28,9 @@ import {
   getTooltipText,
   InProgressStatus,
 } from "../constants";
-import { BulkDownloadListQuery as BulkDownloadDetailsQueryType } from "./__generated__/BulkDownloadListQuery.graphql";
 import cs from "./bulk_download_list.scss";
 import { getBulkDownloadTableColumns } from "./components/BulkDownloadTableRenderers/bulkDownloadTableColumns";
+import { BulkDownloadListQuery as BulkDownloadDetailsQueryType } from "./__generated__/BulkDownloadListQuery.graphql";
 
 const BulkDownloadListQuery = graphql`
   query BulkDownloadListQuery {

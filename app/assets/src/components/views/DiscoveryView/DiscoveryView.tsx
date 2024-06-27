@@ -109,6 +109,8 @@ import {
   TAB_SAMPLES,
   TAB_VISUALIZATIONS,
 } from "./constants";
+import { DiscoveryDataLayer, ObjectCollectionView } from "./DiscoveryDataLayer";
+import { ProjectCountsType } from "./DiscoveryViewFC";
 import {
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
@@ -120,8 +122,6 @@ import {
   getDiscoveryVisualizations,
 } from "./discovery_api";
 import cs from "./discovery_view.scss";
-import { DiscoveryDataLayer, ObjectCollectionView } from "./DiscoveryDataLayer";
-import { ProjectCountsType } from "./DiscoveryViewFC";
 import {
   getOrderByKeyFor,
   getOrderDirKeyFor,

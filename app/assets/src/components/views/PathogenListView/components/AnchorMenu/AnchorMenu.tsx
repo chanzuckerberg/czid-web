@@ -9,13 +9,13 @@ import React, {
 import { graphql, useFragment } from "react-relay";
 import { categorizeItems } from "../../utils";
 import { Pathogens } from "../Pathogens";
+import cs from "./anchor_menu.scss";
+import { Section } from "./components/Section";
+import { getSectionId } from "./components/SectionNavigation";
 import {
   AnchorMenuFragment$data,
   AnchorMenuFragment$key,
 } from "./__generated__/AnchorMenuFragment.graphql";
-import cs from "./anchor_menu.scss";
-import { Section } from "./components/Section";
-import { getSectionId } from "./components/SectionNavigation";
 interface AnchorMenuProps {
   setCurrentSectionIndex: Dispatch<SetStateAction<number>>;
   pathogenData: AnchorMenuFragment$key;

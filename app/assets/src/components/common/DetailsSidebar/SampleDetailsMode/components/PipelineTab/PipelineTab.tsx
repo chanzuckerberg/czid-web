@@ -41,13 +41,13 @@ import {
 } from "../../constants";
 import MetadataSection from "../../MetadataSection";
 import cs from "../../sample_details_mode.scss";
-import { PipelineTabFragment$key } from "./__generated__/PipelineTabFragment.graphql";
 import { MngsPipelineInfo, PipelineInfo, PipelineStepDictState } from "./types";
 import {
   processAMRWorkflowRun,
   processCGWorkflowRunInfo,
   processPipelineInfo,
 } from "./utils";
+import { PipelineTabFragment$key } from "./__generated__/PipelineTabFragment.graphql";
 
 const READ_COUNTS_TABLE = "readsRemaining";
 const ERCC_PLOT = "erccScatterplot";

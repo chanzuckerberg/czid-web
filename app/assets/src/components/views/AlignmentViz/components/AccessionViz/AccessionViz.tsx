@@ -145,7 +145,7 @@ class AccessionVizCC extends React.Component<
         {coverageSummary}
         {coverageTable}
         <h5>Reads</h5>
-        {this.state.reads.map(function(read, i) {
+        {this.state.reads.map(function (read, i) {
           return (
             <ReadViz
               key={`read_${i}`}

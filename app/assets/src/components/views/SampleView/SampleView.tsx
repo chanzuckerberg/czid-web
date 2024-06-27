@@ -91,7 +91,6 @@ import {
   Taxon,
 } from "~/interface/shared";
 import { SampleMessage } from "../../common/SampleMessage";
-import { SampleViewSampleQuery } from "./__generated__/SampleViewSampleQuery.graphql";
 import { initialAmrContext } from "./components/AmrView/amrContext/initialState";
 import {
   AmrContext,
@@ -132,6 +131,7 @@ import {
   urlParser,
   URL_FIELDS,
 } from "./utils";
+import { SampleViewSampleQuery } from "./__generated__/SampleViewSampleQuery.graphql";
 
 //  Notes from Suzette on converting SampleView to hooks - Aug 2023
 //  1.  First we need to get any persisted options from local storage and the URL

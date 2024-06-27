@@ -10,12 +10,12 @@ import { logDownloadOption } from "~/components/utils/download";
 import { logError } from "~/components/utils/logUtil";
 import { AmrContext } from "~/components/views/SampleView/components/AmrView/amrContext/reducer";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import cs from "./amr_download_dropdown.scss";
 import {
   DownloadOptions,
   getAmrDownloadLink,
   NONHOST_DOWNLOADS_TOOLTIP,
 } from "./amrDownloadUtils";
+import cs from "./amr_download_dropdown.scss";
 
 export interface AmrDownloadDropdownProps {
   readyToDownload?: boolean;

@@ -6,8 +6,8 @@ import {
   ThresholdFilterData,
   ThresholdFilterOperator,
 } from "~/interface/dropdown";
-import cs from "./threshold_filter_list_semantic.scss";
 import ThresholdFilterSemantic from "./ThresholdFilterSemantic/ThresholdFilterSemantic";
+import cs from "./threshold_filter_list_semantic.scss";
 
 interface ThresholdFilterListSemanticProps {
   metrics: MetricOption[];

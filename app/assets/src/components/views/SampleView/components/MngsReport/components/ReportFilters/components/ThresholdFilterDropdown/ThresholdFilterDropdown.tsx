@@ -12,8 +12,8 @@ import DropdownLabel from "~/components/ui/controls/dropdowns/common/DropdownLab
 import DropdownTrigger from "~/components/ui/controls/dropdowns/common/DropdownTrigger";
 import { GlobalContext } from "~/globalContext/reducer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import cs from "./threshold_filter_dropdown.scss";
 import ThresholdFilterListSemantic from "./ThresholdFilterListSemantic/ThresholdFilterListSemantic";
+import cs from "./threshold_filter_dropdown.scss";
 
 interface ThresholdFilterDropdownProps {
   disabled?: boolean;

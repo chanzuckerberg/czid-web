@@ -44,8 +44,8 @@ import Wizard from "../../ui/containers/Wizard";
 import Input from "../../ui/controls/Input";
 import DataTable from "../../visualizations/table/DataTable";
 import { COLUMNS } from "./ColumnConfiguration";
-import cs from "./phylo_tree_creation_modal.scss";
 import PhyloTreeChecks from "./PhyloTreeChecks";
+import cs from "./phylo_tree_creation_modal.scss";
 
 interface PhyloTreeCreationModalProps {
   admin?: number;

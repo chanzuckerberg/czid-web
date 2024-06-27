@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 import { graphql, useFragment } from "react-relay";
 import { categorizeItems } from "~/components/views/PathogenListView/utils";
-import type { SectionNavigationFragment$key } from "./__generated__/SectionNavigationFragment.graphql";
 import { NavLink } from "./components/NavLink";
 import cs from "./section_navigation.scss";
+import type { SectionNavigationFragment$key } from "./__generated__/SectionNavigationFragment.graphql";
 
 export const getSectionId = (section: string) => {
   return section.replace(/\s+/g, "-").toLowerCase();

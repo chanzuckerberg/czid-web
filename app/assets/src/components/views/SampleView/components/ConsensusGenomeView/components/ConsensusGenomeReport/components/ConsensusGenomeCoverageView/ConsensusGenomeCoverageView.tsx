@@ -12,8 +12,8 @@ import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import cs from "~/components/views/SampleView/components/ConsensusGenomeView/consensus_genome_view.scss";
 import { WorkflowRun } from "~/interface/sample";
 import { SampleId } from "~/interface/shared";
-import { ConsensusGenomeCoverageViewFragment$key } from "./__generated__/ConsensusGenomeCoverageViewFragment.graphql";
 import { ConsensusGenomeHistogram } from "./components/ConsensusGenomeHistogram";
+import { ConsensusGenomeCoverageViewFragment$key } from "./__generated__/ConsensusGenomeCoverageViewFragment.graphql";
 
 export const ConsensusGenomeCoverageViewFragment = graphql`
   fragment ConsensusGenomeCoverageViewFragment on query_fedConsensusGenomes_items

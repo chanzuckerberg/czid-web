@@ -9,10 +9,10 @@ import { SampleId } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
-import cs from "./blast_contigs_modal.scss";
 import BlastContigsTable from "./BlastContigsTable";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
+import cs from "./blast_contigs_modal.scss";
 import {
   BlastModalInfo,
   BLAST_CONTIG_HEADER_ROW_WIDTH,

@@ -29,11 +29,6 @@ import {
   SnapshotShareId,
 } from "~/interface/shared";
 import { formatSendValue, processMetadataTypes } from "~utils/metadata";
-import { SampleDetailsModeSampleMetadataFieldsQuery } from "./__generated__/SampleDetailsModeSampleMetadataFieldsQuery.graphql";
-import { SampleDetailsModeSampleMetadataQuery } from "./__generated__/SampleDetailsModeSampleMetadataQuery.graphql";
-import { SampleDetailsModeUpdateMetadataMutation } from "./__generated__/SampleDetailsModeUpdateMetadataMutation.graphql";
-import { SampleDetailsModeUpdateSampleNameMutation } from "./__generated__/SampleDetailsModeUpdateSampleNameMutation.graphql";
-import { SampleDetailsModeUpdateSampleNotesMutation } from "./__generated__/SampleDetailsModeUpdateSampleNotesMutation.graphql";
 import { MetadataTab } from "./components/MetadataTab";
 import { NotesTab } from "./components/NotesTab";
 import { PipelineTab } from "./components/PipelineTab";
@@ -41,6 +36,11 @@ import { SIDEBAR_TABS } from "./constants";
 import cs from "./sample_details_mode.scss";
 import { AdditionalInfo, SidebarTabName } from "./types";
 import { processAdditionalInfo } from "./utils";
+import { SampleDetailsModeSampleMetadataFieldsQuery } from "./__generated__/SampleDetailsModeSampleMetadataFieldsQuery.graphql";
+import { SampleDetailsModeSampleMetadataQuery } from "./__generated__/SampleDetailsModeSampleMetadataQuery.graphql";
+import { SampleDetailsModeUpdateMetadataMutation } from "./__generated__/SampleDetailsModeUpdateMetadataMutation.graphql";
+import { SampleDetailsModeUpdateSampleNameMutation } from "./__generated__/SampleDetailsModeUpdateSampleNameMutation.graphql";
+import { SampleDetailsModeUpdateSampleNotesMutation } from "./__generated__/SampleDetailsModeUpdateSampleNotesMutation.graphql";
 
 export interface SampleDetailsModeProps {
   currentRun?: WorkflowRun | PipelineRun;

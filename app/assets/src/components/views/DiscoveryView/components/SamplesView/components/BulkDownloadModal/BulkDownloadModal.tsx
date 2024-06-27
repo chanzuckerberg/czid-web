@@ -23,8 +23,6 @@ import { METRIC_OPTIONS } from "~/components/views/SamplesHeatmapView/constants"
 import { getURLParamString } from "~/helpers/url";
 import { Entry } from "~/interface/samplesView";
 import { BulkDownloadType } from "~/interface/shared";
-import { BulkDownloadModalMutation as BulkDownloadModalMutationType } from "./__generated__/BulkDownloadModalMutation.graphql";
-import { BulkDownloadModalQuery as BulkDownloadModalQueryType } from "./__generated__/BulkDownloadModalQuery.graphql";
 import cs from "./bulk_download_modal.scss";
 import { BulkDownloadModalFooter } from "./components/BulkDownloadModalFooter";
 import { BulkDownloadModalOptions } from "./components/BulkDownloadModalOptions";
@@ -42,6 +40,8 @@ import {
   fetchBackgrounds,
 } from "./utils";
 import { BulkDownloadModalConfig } from "./workflowTypeConfig";
+import { BulkDownloadModalMutation as BulkDownloadModalMutationType } from "./__generated__/BulkDownloadModalMutation.graphql";
+import { BulkDownloadModalQuery as BulkDownloadModalQueryType } from "./__generated__/BulkDownloadModalQuery.graphql";
 
 const BulkDownloadModalQuery = graphql`
   query BulkDownloadModalQuery(

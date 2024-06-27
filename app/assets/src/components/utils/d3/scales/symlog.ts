@@ -53,7 +53,7 @@ function rescale(range: $TSFixMe, domain: $TSFixMe) {
   // Create the scales
   const scales = [];
   const rangeSize = range[1] - range[0];
-  const rangeExtent = parts.reduce(function(acc, part) {
+  const rangeExtent = parts.reduce(function (acc, part) {
     return part.extent + acc;
   }, 0);
   let rangeStart = range[0];
@@ -80,7 +80,7 @@ export default function symlog() {
   const compoundDomain = scale.domain;
 
   // @ts-expect-error ts-migrate(2531) FIXME: Object is possibly 'null'.
-  scale.domain = function(_: $TSFixMe) {
+  scale.domain = function (_: $TSFixMe) {
     return arguments.length
       ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         scale.scales(rescale(scale.range(), _))
@@ -88,7 +88,7 @@ export default function symlog() {
   };
 
   // @ts-expect-error ts-migrate(2531) FIXME: Object is possibly 'null'.
-  scale.range = function(_: $TSFixMe) {
+  scale.range = function (_: $TSFixMe) {
     return arguments.length
       ? // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2531
         scale.scales(rescale(_, scale.domain()))

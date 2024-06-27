@@ -448,7 +448,7 @@ export default class Histogram {
     // The scale will be naturally simplistic at lower values.
     const logScale = scaleLog().domain([1, scale.domain()[1]]).nice();
 
-    scale.ticks = function(count: $TSFixMe) {
+    scale.ticks = function (count: $TSFixMe) {
       const logTicks = logScale.ticks(count);
       // The log scale ticks function also does not seem to respect the count variable for lower scales.
       // For instance, with count = 2 and for a domain 0-4, it returns ticks [1, 2, 3, ... , 10]

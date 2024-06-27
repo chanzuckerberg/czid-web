@@ -12,8 +12,8 @@ import {
 } from "~/components/ui/controls/buttons";
 import { WorkflowType } from "~/components/utils/workflows";
 import { Entry } from "~/interface/samplesView";
-import cs from "./benchmark_modal.scss";
 import { BenchmarkSamplesTable } from "./BenchmarkSamplesTable";
+import cs from "./benchmark_modal.scss";
 import { GroundTruthFilesDropdown } from "./GroundTruthFilesDropdown/assets/src/components/views/samples/SamplesView/BenchmarkModal/GroundTruthFilesDropdown";
 
 interface BenchmarkModalProps {

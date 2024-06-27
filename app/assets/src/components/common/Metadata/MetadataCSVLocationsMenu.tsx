@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import { NAME_COLUMN } from "./constants";
-import cs from "./metadata_csv_locations_menu.scss";
 import MetadataInput from "./MetadataInput";
+import cs from "./metadata_csv_locations_menu.scss";
 import { MetadataCSVLocationsMenuProps, Row } from "./types";
 import { isRowHuman } from "./utils";
 

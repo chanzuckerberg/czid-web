@@ -19,13 +19,13 @@ import {
   WorkflowLabelType,
 } from "~/components/utils/workflows";
 import { SampleId } from "~/interface/shared";
-import { BulkDeleteModalMutation as BulkDeleteModalMutationType } from "./__generated__/BulkDeleteModalMutation.graphql";
-import { BulkDeleteModalQuery as BulkDeleteModalQueryType } from "./__generated__/BulkDeleteModalQuery.graphql";
 import cs from "./bulk_delete_modal.scss";
 import { DeleteErrorNotification } from "./DeleteErrorNotification";
 import { DeleteSampleModalText } from "./DeleteSampleModalText";
 import { DeleteSuccessNotification } from "./DeleteSuccessNotification";
 import { InvalidSampleDeletionWarning } from "./InvalidSampleDeletionWarning";
+import { BulkDeleteModalMutation as BulkDeleteModalMutationType } from "./__generated__/BulkDeleteModalMutation.graphql";
+import { BulkDeleteModalQuery as BulkDeleteModalQueryType } from "./__generated__/BulkDeleteModalQuery.graphql";
 
 const BulkDeleteModalQuery = graphql`
   query BulkDeleteModalQuery(
