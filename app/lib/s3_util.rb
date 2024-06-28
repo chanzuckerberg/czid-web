@@ -43,6 +43,26 @@ module S3Util
     end
   end
 
+  def self.get_s3_range(s3_path, first_byte, last_byte)
+    if first_byte.nil? || last_byte.nil?
+      LogUtil.log_error("Invalid byte range for S3 file", s3_path: s3_path, first_byte: first_byte, last_byte: last_byte)
+      return nil
+    end
+
+    bucket, key = parse_s3_path(s3_path)
+    byterange = "bytes=#{first_byte}-#{last_byte}"
+    begin
+      resp = AwsClient[:s3].get_object(bucket: bucket, key: key, range: byterange)
+      return resp.body.read
+    rescue StandardError => e
+      LogUtil.log_error(
+        "Error retrieving byte range from S3 file",
+        exception: e
+      )
+      return nil
+    end
+  end
+
   def self.upload_to_s3(bucket, key, content)
     AwsClient[:s3].put_object(bucket: bucket,
                               key: key,

@@ -906,7 +906,7 @@ RSpec.describe SamplesController, type: :controller do
                                job_status: "CHECKED",
                                pipeline_version: 6.10,
                                wdl_version: "5.0")
-        allow(S3Util).to receive(:get_s3_file).and_return(five_longest_reads)
+        allow(S3Util).to receive(:get_s3_range).and_return(five_longest_reads)
       end
 
       it "should fetch the five longest reads from s3 and determine the shortest & longest alignment lengths" do

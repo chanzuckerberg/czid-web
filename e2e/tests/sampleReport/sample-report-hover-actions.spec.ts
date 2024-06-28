@@ -180,7 +180,7 @@ test.describe("Report blast hover action tests", () => {
   );
 
   test.fixme(
-    "BlastN is disabled and 5 longest reads have been identified",
+    "BlastN is disabled and 5 reads have been selected",
     async ({ page }) => {
       // search for Salmonella
       await page.locator(SEARCH_BAR).fill("Salmonella");
@@ -198,7 +198,7 @@ test.describe("Report blast hover action tests", () => {
       // verify contig selection modal functionality
       expect(page.getByText("NT hits", { exact: true })).toBeDisabled();
       expect(
-        page.getByText("Up to 5 of the longest NR reads have been identified."),
+        page.getByText("Up to 5 NR reads have been selected."),
       ).toBeVisible();
     },
   );

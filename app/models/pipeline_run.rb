@@ -917,7 +917,7 @@ class PipelineRun < ApplicationRecord
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
 
     Syscall.run_in_dir(local_json_path, "sed", "-e", "s/$/,#{id}/", "-i", "taxon_byteranges")
-    success = Syscall.run_in_dir(local_json_path, "mysqlimport --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --fields-terminated-by=',' --replace --local --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id idseq_#{Rails.env} taxon_byteranges")
+    success = Syscall.run_in_dir(local_json_path, "mysqlimport --user=root --host=#{rds_host} --fields-terminated-by=',' --replace --local --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id idseq_#{Rails.env} taxon_byteranges")
     LogUtil.log_error("PipelineRun #{id} failed db_load_byteranges import", pipeline_run_id: id) unless success
     Syscall.run("rm", "-f", downloaded_byteranges_path)
   end

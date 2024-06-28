@@ -156,7 +156,7 @@ export const BlastReadsModal = ({
   const renderReadsIdentificationSection = () => (
     <div className={cs.readsIdentification}>
       <div className={cs.description}>
-        {`Up to 5 of the longest ${currentCountType} reads have been identified.`}
+        {`Up to 5 ${currentCountType} reads have been selected.`}
       </div>
       <div className={cs.alignmentRange}>
         Range of alignment lengths: {shortestAlignmentLength}-

@@ -1121,6 +1121,18 @@ class SamplesController < ApplicationController
     send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
   end
 
+  def fetch_taxon_reads(uri, first_byte, last_byte, max_bytes = 10_000_000)
+    # Define the sorting lambda
+    sort_by_read_length = ->(x) { x.split("\n")[1].length }
+    if first_byte && last_byte && (last_byte - first_byte) > max_bytes
+      taxon_reads = S3Util.get_s3_range(uri, first_byte, first_byte + max_bytes)
+      return taxon_reads.split(">")[1...-1].sort_by(&sort_by_read_length).last(5) # Remove the first and last line. First line is empty. Last line could be truncated.
+    else
+      taxon_reads = S3Util.get_s3_range(uri, first_byte, last_byte)
+      return taxon_reads.split(">").drop(1).sort_by(&sort_by_read_length).last(5) # Remove the first line. It is empty.
+    end
+  end
+
   # GET /samples/:id/taxon_five_longest_reads.json?taxid=:taxid&tax_level=:tax_level&pipeline_version=:pipeline_version
   def taxon_five_longest_reads
     permitted_params = params.permit(:taxid, :tax_level, :pipeline_version, :count_type)
@@ -1129,15 +1141,15 @@ class SamplesController < ApplicationController
     return if HUMAN_TAX_IDS.include? taxid
 
     pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
-    tax_level = TaxonCount::LEVEL_2_NAME[permitted_params[:tax_level].to_i]
-    count_type = permitted_params[:count_type].downcase
-    s3_file_path = pr.five_longest_reads_fasta_s3("#{count_type}.#{tax_level}.#{taxid}")
+    tax_level = permitted_params[:tax_level].to_i
+    count_type = permitted_params[:count_type]
 
+    # Fetch the taxon location
+    taxon_location = pr.taxon_byteranges.find_by(taxid: taxid, hit_type: count_type)
+    # Fetch the S3 URI
+    uri = pr.s3_paths_for_taxon_byteranges.dig(tax_level, count_type)
     begin
-      five_longest_reads = S3Util.get_s3_file(s3_file_path)
-      five_longest_reads_with_headers = five_longest_reads.split(">") # NOTE: This split gets rid of the '>' for each sequence. We must add it back later on.
-      # Get rid of empty quotes in the first position of the array
-      five_longest_reads_with_headers.shift
+      five_longest_reads_with_headers = fetch_taxon_reads(uri, taxon_location&.first_byte, taxon_location&.last_byte)
 
       # Calculate shortest and longest alignment reads
       sequence_detector_regex = Regexp.new('\n((.|\n)*)') # Grabs everything after the first new line '\n' is the read sequence. Everything before the first '\n' is the read header.

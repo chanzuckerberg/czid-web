@@ -77,7 +77,7 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     expect(page.getByText("Dismiss")).toBeVisible();
   });
 
-  test.skip("BlastN is disabled and 5 longest reads have been identified", async ({
+  test.skip("BlastN is disabled and 5 reads have been selected", async ({
     page,
   }) => {
     // search for Salmonella
@@ -96,7 +96,7 @@ test.describe("Blast Hover Actions on Sample Report", () => {
     // verify contig selection modal functionality
     expect(page.getByText("NT hits", { exact: true })).toBeDisabled();
     expect(
-      page.getByText("Up to 5 of the longest NR reads have been identified."),
+      page.getByText("Up to 5 NR reads have been selected."),
     ).toBeVisible();
   });
 });
