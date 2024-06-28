@@ -193,15 +193,13 @@ const renderPersistedDiscoveryViewThresholds = (
     The taxon filters from the samples page have carried over. If you would like
     to use filters previously applied to the report, click the button below.
     <button
-      className={cs.revertFiltersLink}
+      className={cx(cs.revertFiltersLink, "noStyleButton")}
       onClick={() => {
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-        revertToSampleViewFilters();
+        revertToSampleViewFilters && revertToSampleViewFilters();
         closeToast();
       }}
       onKeyDown={() => {
-        // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
-        revertToSampleViewFilters();
+        revertToSampleViewFilters && revertToSampleViewFilters();
         closeToast();
       }}
     >

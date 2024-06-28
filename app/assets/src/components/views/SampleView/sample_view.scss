@@ -32,6 +32,7 @@
 
   .revertFiltersLink {
     @include font-caps-xxs;
+    display: block;
     margin-top: $sds-spaces-xs;
     color: $sds-color-gray-black;
     cursor: pointer;
