@@ -1,8 +1,12 @@
 import { compact, map, sum, values } from "lodash/fp";
+import {
+  isPipelineFeatureAvailable,
+  SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE,
+} from "~/components/utils/pipeline_versions";
 import { WORKFLOW_TABS } from "~/components/utils/workflows";
 import { ReportMetadata } from "~/interface/reportMetaData";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
-import { Taxon } from "~/interface/shared";
+import { PipelineRun, Taxon } from "~/interface/shared";
 
 const countReportRows = (filteredReportData: Taxon[], reportData: Taxon[]) => {
   let total = reportData.length;
@@ -35,9 +39,10 @@ const truncatedMessage = (truncatedReadsCount: number) => {
   );
 };
 
-const subsamplingReadsMessage = (
-  preSubsamplingCount: number,
-  postSubsamplingCount: number,
+// Meaning of `preSubsamplingCount` changed after release of Modern Host Filtering.
+const subsamplingReadsMessagePreMhf = (
+  preSubsamplingCount: number | undefined,
+  postSubsamplingCount: number | undefined,
 ) => {
   return (
     preSubsamplingCount &&
@@ -45,6 +50,19 @@ const subsamplingReadsMessage = (
     preSubsamplingCount !== postSubsamplingCount &&
     `Report values are computed from ${postSubsamplingCount.toLocaleString()} unique reads subsampled \
           randomly from the ${preSubsamplingCount.toLocaleString()} reads passing host and quality filters. `
+  );
+};
+const subsamplingReadsMessagePostMhf = (
+  preSubsamplingCount: number | undefined,
+  postSubsamplingCount: number | undefined,
+) => {
+  return (
+    preSubsamplingCount &&
+    postSubsamplingCount &&
+    preSubsamplingCount !== postSubsamplingCount &&
+    `Report values are computed from ${preSubsamplingCount.toLocaleString()} reads \
+      (${postSubsamplingCount.toLocaleString()} unique reads) subsampled randomly from \
+      the reads that passed host and quality filters.`
   );
 };
 
@@ -71,6 +89,7 @@ const whitelistedMessage = (taxonWhitelisted: boolean) => {
 export const renderReportInfo = (
   currentTab: CurrentTabSample,
   reportMetadata: ReportMetadata,
+  pipelineRun: PipelineRun,
 ) => {
   if (currentTab === WORKFLOW_TABS.SHORT_READ_MNGS) {
     const {
@@ -79,11 +98,26 @@ export const renderReportInfo = (
       preSubsamplingCount,
       taxonWhitelisted,
     } = reportMetadata;
+    // Language of subsampling message changes based on run being pre- or post-MHF.
+    const isShortReadRunPostMhf =
+      pipelineRun?.pipeline_version &&
+      isPipelineFeatureAvailable(
+        SHORT_READ_MNGS_MODERN_HOST_FILTERING_FEATURE,
+        pipelineRun.pipeline_version,
+      );
+    const subsamplingMessage = isShortReadRunPostMhf
+      ? subsamplingReadsMessagePostMhf(
+          preSubsamplingCount,
+          postSubsamplingCount,
+        )
+      : subsamplingReadsMessagePreMhf(
+          preSubsamplingCount,
+          postSubsamplingCount,
+        );
     return compact([
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       truncatedMessage(truncatedReadsCount),
-      // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
-      subsamplingReadsMessage(preSubsamplingCount, postSubsamplingCount),
+      subsamplingMessage,
       // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2345
       whitelistedMessage(taxonWhitelisted),
     ]).reduce((reportInfoMsg, msg) => {

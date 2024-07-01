@@ -66,6 +66,7 @@ export const MngsReport = ({
           <ReportStatsRow
             currentTab={currentTab}
             filteredReportData={filteredReportData}
+            pipelineRun={pipelineRun}
             reportData={reportData}
             reportMetadata={reportMetadata}
             selectedOptions={selectedOptions}
