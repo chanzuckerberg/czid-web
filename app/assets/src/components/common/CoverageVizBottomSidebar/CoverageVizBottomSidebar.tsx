@@ -1,5 +1,5 @@
 /* eslint-disable import/order */
-import { ButtonIcon } from "@czi-sds/components";
+import { ButtonIcon, Tooltip } from "@czi-sds/components";
 import cx from "classnames";
 import { find, get, isEmpty, sum } from "lodash/fp";
 import React from "react";
@@ -27,6 +27,7 @@ import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 import { openUrl } from "~utils/links";
 import LoadingMessage from "../LoadingMessage";
 import {
+  BLAST_NOT_AVAILABLE,
   CONTIG_FILL_COLOR,
   METRIC_COLUMNS,
   READ_FILL_COLOR,
@@ -358,16 +359,20 @@ export default class CoverageVizBottomSidebar extends React.Component<
     const { onBlastClick, params, pipelineVersion, sampleId } = this.props;
     const { taxonId, taxonName, taxonStatsByCountType } = params;
 
+    // BLAST is not available unless the taxon has >=1 NT contigs
+    const blastDisabled = !taxonStatsByCountType.ntContigs;
     return (
-      <BasicPopup
+      <Tooltip
         className={cs.actionIconPopup}
-        basic={false}
-        content={"BLAST"}
-        position="top center"
-        inverted
-        trigger={
+        arrow
+        placement="top"
+        sdsStyle={blastDisabled ? "light" : "dark"}
+        title={blastDisabled ? BLAST_NOT_AVAILABLE : "BLAST"}
+      >
+        <span>
           <ButtonIcon
             className={cs.iconButton}
+            disabled={blastDisabled}
             onClick={() =>
               // @ts-expect-error CZID-8698 expect strictNullCheck error: error TS2722
               onBlastClick({
@@ -387,8 +392,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
             sdsType="secondary"
             sdsIcon="searchLinesHorizontal"
           />
-        }
-      />
+        </span>
+      </Tooltip>
     );
   };
 

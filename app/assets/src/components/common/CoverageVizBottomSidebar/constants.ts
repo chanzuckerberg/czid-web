@@ -3,6 +3,9 @@ export const READ_FILL_COLOR = "#A9BDFC";
 export const CONTIG_FILL_COLOR = "#3867FA";
 export const REF_ACC_COLOR = "#EAEAEA";
 
+export const BLAST_NOT_AVAILABLE =
+  "BLAST is only available for taxa with at least one contig matching NT";
+
 export const METRIC_COLUMNS = [
   [
     {
