@@ -25,6 +25,26 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Data report validation (Heatmap): SNo 34"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/heatmap-data-validation.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 34"
+      retries: 3
+    shard: concurrency
+  - name: "Heatmap Proper: SNo 7: Filters"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/heatmap-proper.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 7: Filters"
+      retries: 3
+    shard: concurrency
   - name: "PLQC: SNo 1"
     platformName: "macOS 12"
     screenResolution: "1440x900"
