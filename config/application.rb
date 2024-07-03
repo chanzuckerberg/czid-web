@@ -8,7 +8,11 @@ Bundler.require(*Rails.groups)
 
 module Czid
   class Application < Rails::Application
-    # Initialize configuration defaults for originally generated Rails version.
+    # Load configuration defaults from Rails 6.1.
+    # Some of these are overridden in new_framework_defaults_7_0.rb.
+    # There are a few more framework defaults to turn on to get to 7.0 that involve
+    # resetting the cache and locking in to Rails 7 that should be done after
+    # Rails 7 is stable in production.
     config.load_defaults 6.1
     config.active_support.disable_to_s_conversion = true
 
