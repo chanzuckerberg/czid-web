@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
-
+ActiveRecord::Schema[7.0].define(version: 2024_03_26_201829) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -22,8 +21,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.integer "score", null: false, comment: "max_contig_length + total_contig_length + num_reads, used to score top accessions"
     t.float "coverage_breadth", null: false, comment: "The percentage of the accession that is covered by at least one read or contig"
     t.float "coverage_depth", null: false, comment: "The average read depth of aligned contigs and reads over the length of the accession"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "accession_id"], name: "index_accession_coverage_stats_on_pr_id_and_accession_id"
   end
 
@@ -37,8 +36,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.text "s3_lineage_path"
     t.text "s3_accession2taxid_path"
     t.text "s3_deuterostome_db_path"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.text "s3_nt_info_db_path"
     t.string "s3_taxon_blacklist_path", default: "s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
     t.integer "lineage_version_old", limit: 2
@@ -55,8 +54,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.float "depth"
     t.bigint "pipeline_run_id"
     t.string "drug_family"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "annotation_gene"
     t.string "genbank_accession"
     t.integer "total_reads"
@@ -70,8 +69,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.integer "tax_id", null: false, comment: "The id of the annotated taxon."
     t.integer "content", comment: "An enum describing the annotation content. Will be set to null if an existing annotation is cleared."
     t.bigint "creator_id", comment: "The id of the user that created the annotation."
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "tax_id"], name: "index_annotations_on_pipeline_run_id_and_tax_id"
   end
 
@@ -83,8 +82,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
 
   create_table "backgrounds", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.text "description"
     t.integer "public_access", limit: 1
     t.integer "ready", limit: 1, default: 0
@@ -106,14 +105,14 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "status", null: false, comment: "The current status of the download, e.g. waiting, running, error, success"
     t.string "error_message", comment: "An error message to display to the user."
     t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "access_token"
     t.float "progress"
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
     t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.text "description"
-    t.datetime "deleted_at", comment: "When the user triggered deletion of the bulk download"
+    t.datetime "deleted_at", precision: nil, comment: "When the user triggered deletion of the bulk download"
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end
 
@@ -134,8 +133,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
   create_table "citations", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "key", null: false, comment: "Key used to identify the citation (ie. niaid_2020)."
     t.text "footnote", null: false, comment: "Use MLA footnote citation style."
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["key"], name: "index_citations_on_key", unique: true
   end
 
@@ -151,8 +150,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "name"
     t.text "sequence", size: :long
     t.integer "read_count"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.text "lineage_json", size: :medium
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
@@ -180,19 +179,19 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.bigint "user_id", null: false, comment: "The user id of the user who deleted the object"
     t.string "user_email", comment: "The email of the user who deleted the object"
     t.string "object_type", null: false, comment: "The type of object deleted, e.g. PipelineRun"
-    t.datetime "soft_deleted_at", comment: "When the object was marked as soft deleted"
-    t.datetime "hard_deleted_at", comment: "When the object was successfully hard deleted"
+    t.datetime "soft_deleted_at", precision: nil, comment: "When the object was marked as soft deleted"
+    t.datetime "hard_deleted_at", precision: nil, comment: "When the object was successfully hard deleted"
     t.string "metadata_json", comment: "Generic JSON-string format for recording additional information about the object"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "ercc_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.integer "count"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["pipeline_run_id", "name"], name: "index_ercc_counts_on_pipeline_run_id_and_name", unique: true
   end
 
@@ -201,8 +200,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "s3_star_index_path", default: "s3://idseq-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
     t.string "s3_bowtie2_index_path", default: "s3://idseq-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
     t.bigint "default_background_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "skip_deutero_filter", default: 0, null: false, comment: "See https://en.wikipedia.org/wiki/Deuterostome. This affects the pipeline."
     t.string "taxa_category", default: "unknown", comment: "An informal taxa name for grouping hosts. First implemented for sample type suggestions."
     t.integer "samples_count", default: 0, null: false, comment: "Added to enable ranking of host genomes by popularity"
@@ -230,8 +229,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "name"
     t.text "presigned_url"
     t.bigint "sample_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "source_type"
     t.text "source"
     t.text "parts"
@@ -250,8 +249,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.float "mean", null: false
     t.float "standard_deviation", null: false
     t.integer "read_pairs", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["mean"], name: "index_insert_size_metric_sets_on_mean"
     t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
   end
@@ -259,8 +258,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
   create_table "job_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "task"
     t.integer "reads_after"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "pipeline_run_id"
     t.bigint "bases_after"
     t.index ["pipeline_run_id"], name: "index_job_stats_on_pipeline_run_id"
@@ -279,8 +278,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.bigint "locationiq_id", comment: "Data provider API ID for traceability."
     t.decimal "lat", precision: 10, scale: 6, comment: "The latitude of this location if available"
     t.decimal "lng", precision: 10, scale: 6, comment: "The longitude of this location if available"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "osm_type", limit: 10, default: "", null: false, comment: "OpenStreetMap type (Node, Way, or Relation) to use OSM ID"
     t.integer "country_id", comment: "ID of the country entry in our database"
     t.integer "state_id", comment: "ID of the state entry in our database"
@@ -299,8 +298,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
     t.bigint "sample_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.date "date_validated_value"
     t.bigint "metadata_field_id"
     t.bigint "location_id"
@@ -321,8 +320,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.integer "is_default", limit: 1, default: 0
     t.integer "is_required", limit: 1, default: 0
     t.string "group"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "examples"
     t.integer "default_for_new_host_genome", limit: 1, default: 0
     t.index ["group"], name: "index_metadata_fields_on_group"
@@ -341,27 +340,27 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.bigint "rails_object_id", comment: "The id of the object that was deleted (Rails ID)"
     t.string "object_id", null: false, comment: "The id of the object that was deleted (NextGen UUID)"
     t.string "object_type", null: false, comment: "The type of object deleted, e.g. Sample, Workflow"
-    t.datetime "soft_deleted_at", comment: "When the object was marked as soft deleted"
-    t.datetime "hard_deleted_at", comment: "When the object was successfully hard deleted"
+    t.datetime "soft_deleted_at", precision: nil, comment: "When the object was marked as soft deleted"
+    t.datetime "hard_deleted_at", precision: nil, comment: "When the object was successfully hard deleted"
     t.string "metadata_json", comment: "Generic JSON-string format for recording additional information about the object"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "output_states", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "output"
     t.string "state"
     t.bigint "pipeline_run_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
   end
 
   create_table "pathogen_list_versions", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pathogen_list_id"
     t.string "version", null: false, comment: "Use semantic versioning numbers."
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["pathogen_list_id"], name: "index_pathogen_list_versions_on_pathogen_list_id"
   end
 
@@ -374,15 +373,15 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
 
   create_table "pathogen_lists", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "creator_id", comment: "The user_id that created the pathogen list. Null if the list is admin-managed."
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "is_global", default: false, null: false
   end
 
   create_table "pathogens", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "tax_id", null: false, comment: "The taxon id of the pathogen."
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "citation_id"
     t.index ["citation_id"], name: "index_pathogens_on_citation_id"
   end
@@ -391,8 +390,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.bigint "user_id", null: false, comment: "The id of the user that has the persisted_background"
     t.bigint "project_id", null: false, comment: "The id of the project that the persisted background is persisted for"
     t.bigint "background_id", comment: "The id of the background that is being persisted. Will be set to null if the user selects a background with an incompatible sample."
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["user_id", "project_id"], name: "index_user_id_project_id", unique: true
   end
 
@@ -402,16 +401,16 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "wdl_version", comment: "Version of the WDL used in execution."
     t.string "sfn_execution_arn", comment: "Step Function execution ARN."
     t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/phylo_trees/subpath/results' Never allow users to set this."
-    t.datetime "executed_at", comment: "Self-managed field to track the time of kickoff and dispatch."
+    t.datetime "executed_at", precision: nil, comment: "Self-managed field to track the time of kickoff and dispatch."
     t.boolean "deprecated", default: false, null: false, comment: "If true, don't surface the run to the user."
     t.bigint "rerun_from", comment: "Id of the phylo tree this was rerun from, if applicable"
     t.string "name", null: false, comment: "Name of the NG phylo tree"
     t.virtual "tax_id", type: :integer, comment: "Taxon id of interest", as: "json_unquote(json_extract(`inputs_json`,'$.tax_id'))"
     t.bigint "user_id", null: false
     t.bigint "project_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at", comment: "When the user triggered deletion of the phylo tree"
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "deleted_at", precision: nil, comment: "When the user triggered deletion of the phylo tree"
     t.index ["name"], name: "index_phylo_tree_ngs_on_name"
     t.index ["project_id", "tax_id"], name: "index_phylo_tree_ngs_on_project_id_and_tax_id"
     t.index ["user_id"], name: "index_phylo_tree_ngs_on_user_id"
@@ -420,8 +419,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
   create_table "phylo_tree_ngs_pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "phylo_tree_ng_id"
     t.bigint "pipeline_run_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["phylo_tree_ng_id", "pipeline_run_id"], name: "index_ptng_pr_id", unique: true
   end
 
@@ -440,16 +439,16 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "job_id"
     t.string "job_log_id"
     t.text "job_description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "name"
     t.string "dag_branch"
     t.text "ncbi_metadata"
     t.string "snp_annotations"
-    t.datetime "ready_at"
+    t.datetime "ready_at", precision: nil
     t.string "vcf"
     t.text "dag_vars"
-    t.datetime "deleted_at", comment: "When the user triggered deletion of the phylo tree"
+    t.datetime "deleted_at", precision: nil, comment: "When the user triggered deletion of the phylo tree"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
@@ -475,8 +474,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.text "job_description"
     t.string "job_log_id"
     t.float "job_progress_pct"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "job_command_func"
     t.string "load_db_command_func"
     t.string "job_id"
@@ -484,15 +483,15 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "name"
     t.text "failed_jobs"
     t.text "dag_json"
-    t.datetime "executed_at", comment: "When the pipeline run stage was actually dispatched for processing."
+    t.datetime "executed_at", precision: nil, comment: "When the pipeline run stage was actually dispatched for processing."
     t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing."
     t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
   end
 
   create_table "pipeline_runs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "sample_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "job_status"
     t.integer "finalized", default: 0, null: false
     t.bigint "total_reads"
@@ -518,7 +517,7 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, pipeline processing will filter for a whitelist of taxons."
     t.string "wdl_version"
     t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/samples/subpath/results' Never allow users to set this."
-    t.datetime "executed_at", comment: "When the pipeline run was actually dispatched for processing."
+    t.datetime "executed_at", precision: nil, comment: "When the pipeline run was actually dispatched for processing."
     t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing, not including results loading."
     t.integer "time_to_results_finalized", comment: "Seconds from executed_at to marked as finished with processing and results loading."
     t.float "qc_percent"
@@ -530,7 +529,7 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.bigint "unmapped_bases"
     t.float "fraction_subsampled_bases"
     t.bigint "truncated_bases"
-    t.datetime "deleted_at", comment: "When the user triggered deletion of the pipeline run"
+    t.datetime "deleted_at", precision: nil, comment: "When the user triggered deletion of the pipeline run"
     t.bigint "mapped_reads"
     t.index ["adjusted_remaining_reads"], name: "index_pipeline_runs_on_adjusted_remaining_reads"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
@@ -557,8 +556,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
 
   create_table "projects", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "public_access", limit: 1, default: 0
     t.integer "days_to_keep_sample_private", default: 100000, null: false
     t.integer "background_flag", limit: 1, default: 0
@@ -582,15 +581,15 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "group", null: false, comment: "Mutually exclusive grouping of names. Example: \"Organs\"."
     t.boolean "insect_only", default: false, null: false, comment: "Whether a sample type should only be for insects."
     t.boolean "human_only", default: false, null: false, comment: "Whether a sample type should only be for humans."
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["name"], name: "index_sample_types_on_name", unique: true
   end
 
   create_table "samples", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "project_id"
     t.string "status"
     t.text "sample_notes"
@@ -606,7 +605,7 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "pipeline_commit", default: ""
     t.text "dag_vars"
     t.integer "max_input_fragments"
-    t.datetime "client_updated_at", comment: "Deprecated as of 2021-02-09."
+    t.datetime "client_updated_at", precision: nil, comment: "Deprecated as of 2021-02-09."
     t.integer "uploaded_from_basespace", limit: 1, default: 0
     t.string "upload_error"
     t.string "basespace_access_token"
@@ -614,7 +613,7 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.string "initial_workflow", default: "short-read-mngs", null: false, comment: "A soft enum (string) describing the initial workflow the sample was run on"
-    t.datetime "deleted_at", comment: "When the user triggered deletion of the sample"
+    t.datetime "deleted_at", precision: nil, comment: "When the user triggered deletion of the sample"
     t.index ["created_at"], name: "index_samples_on_created_at"
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["name"], name: "index_samples_on_name"
@@ -632,7 +631,7 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
   create_table "seed_migrations", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "version"
     t.integer "runtime"
-    t.datetime "migrated_on"
+    t.datetime "migrated_on", precision: nil
   end
 
   create_table "shortened_urls", id: :integer, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -642,9 +641,9 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "unique_key", limit: 10, null: false
     t.string "category"
     t.integer "use_count", default: 0, null: false
-    t.datetime "expires_at"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "expires_at", precision: nil
+    t.datetime "created_at", precision: nil
+    t.datetime "updated_at", precision: nil
     t.index ["category"], name: "index_shortened_urls_on_category"
     t.index ["owner_id", "owner_type"], name: "index_shortened_urls_on_owner_id_and_owner_type"
     t.index ["unique_key"], name: "index_shortened_urls_on_unique_key", unique: true
@@ -656,8 +655,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.text "content", null: false, comment: "Content stored as {samples: [<sample_id>: {pipeline_run_id: <pipeline_run_id>}]}"
     t.string "share_id", limit: 20, null: false, comment: "Used for accessing the SnapshotLink URL"
     t.bigint "creator_id", comment: "The user_id that created the snapshot."
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["project_id"], name: "index_snapshot_links_on_project_id"
     t.index ["share_id"], name: "index_snapshot_links_on_share_id", unique: true
   end
@@ -666,8 +665,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.integer "taxid"
     t.bigint "first_byte"
     t.bigint "last_byte"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "hit_type"
     t.bigint "pipeline_run_id"
     t.index ["pipeline_run_id", "taxid", "hit_type"], name: "index_pr_tax_ht_level_tb", unique: true
@@ -678,8 +677,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.integer "tax_id"
     t.integer "tax_level"
     t.integer "count"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "name"
     t.string "count_type"
     t.float "percent_identity"
@@ -708,8 +707,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "title"
     t.text "summary", size: :medium
     t.text "description", size: :medium
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
   end
 
@@ -722,8 +721,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.integer "family_taxid", default: -300, null: false
     t.integer "genus_taxid", default: -200, null: false
     t.integer "species_taxid", default: -100, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "superkingdom_name", default: "", null: false
     t.string "phylum_name", default: "", null: false
     t.string "class_name", default: "", null: false
@@ -765,8 +764,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.integer "tax_level"
     t.float "mean"
     t.float "stdev"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.text "rpm_list"
     t.float "mean_mass_normalized"
     t.float "stdev_mass_normalized"
@@ -785,11 +784,11 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
   create_table "users", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "email"
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "sign_in_count", default: 0, null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
+    t.datetime "current_sign_in_at", precision: nil
+    t.datetime "last_sign_in_at", precision: nil
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
     t.integer "role"
@@ -810,8 +809,8 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.bigint "user_id"
     t.string "visualization_type"
     t.text "data"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "public_access", limit: 1
     t.string "name"
     t.string "status", comment: "A soft enum (string) describing the execution status. Currently only applicable to phylo trees."
@@ -826,17 +825,17 @@ ActiveRecord::Schema[6.1].define(version: 2024_03_26_201829) do
     t.string "workflow", null: false, comment: "Name of the workflow to use, e.g. consensus-genome."
     t.string "wdl_version", comment: "Version of the WDL used in execution."
     t.string "sfn_execution_arn", comment: "Step Function execution ARN."
-    t.datetime "executed_at", comment: "Self-managed field to track the time of kickoff and dispatch."
+    t.datetime "executed_at", precision: nil, comment: "Self-managed field to track the time of kickoff and dispatch."
     t.boolean "deprecated", default: false, null: false, comment: "If true, don't surface the run to the user."
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "rerun_from"
     t.text "cached_results", comment: "JSON-string of cached results for generic loading. Use for simple outputs."
     t.text "inputs_json", comment: "Generic JSON-string field for recording execution inputs."
     t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/samples/subpath/results' Never allow users to set this."
     t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing."
     t.text "error_message"
-    t.datetime "deleted_at", comment: "When the user triggered deletion of the workflow run"
+    t.datetime "deleted_at", precision: nil, comment: "When the user triggered deletion of the workflow run"
     t.bigint "user_id", comment: "The ID of the user who kicked off the workflow run"
     t.json "temp_cg_coverage_viz", comment: "Temporary column to store coverage viz data for consensus-genome workflow runs"
     t.index ["created_at"], name: "index_workflow_runs_on_created_at"
