@@ -38,17 +38,6 @@ RUN pip3 install -r requirements.txt
 RUN mkdir -p /app
 WORKDIR /app
 
-# Copy the Gemfile as well as the Gemfile.lock and install
-# the RubyGems. This is a separate step so the dependencies
-# will be cached unless changes to one of those two files
-# are made.
-COPY Gemfile Gemfile.lock ./
-RUN gem install bundler
-
-# allow nokogiri to install on arm64 / M1 Macs
-RUN bundle config set force_ruby_platform true
-RUN bundle install --jobs 20 --retry 5
-
 # Copy package.json and install packages, allowing the
 # dependencies to be cached
 COPY package.json package-lock.json ./
@@ -76,6 +65,17 @@ COPY webpack.config.common.js webpack.config.prod.js .babelrc ./
 
 # Generate assets
 RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
+
+# Copy the Gemfile as well as the Gemfile.lock and install
+# the RubyGems. This is a separate step so the dependencies
+# will be cached unless changes to one of those two files
+# are made.
+COPY Gemfile Gemfile.lock ./
+RUN gem install bundler
+
+# allow nokogiri to install on arm64 / M1 Macs
+RUN bundle config set force_ruby_platform true
+RUN bundle install --jobs 20 --retry 5
 
 # Copy the main application.
 COPY . ./

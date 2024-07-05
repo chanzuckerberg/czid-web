@@ -1,7 +1,7 @@
 GIT
-  remote: https://github.com/jfoo1984/seed_migration
-  revision: 4860c19f19848d6485886988a5291824c7804136
-  branch: support-habtm-associations
+  remote: https://github.com/pboling/seed_migration
+  revision: e919b6bf89ef33972e48c4c604337ca29b552121
+  ref: e919b6bf89ef33972e48c4c604337ca29b552121
   specs:
     seed_migration (1.2.3)
 
@@ -1954,4 +1954,4 @@ DEPENDENCIES
   webmock (~> 3.6)
 
 BUNDLED WITH
-   2.3.7
+   2.5.14

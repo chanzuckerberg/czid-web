@@ -186,4 +186,4 @@ gem 'net-smtp', require: false
 # need version >= 1.2.3 for M1 macs - https://github.com/cotag/http-parser/issues/12
 gem 'http-parser', '~> 1.2.3'
 
-gem 'seed_migration', git: 'https://github.com/jfoo1984/seed_migration', branch: 'support-habtm-associations'
+gem 'seed_migration', git: "https://github.com/pboling/seed_migration", ref: "e919b6bf89ef33972e48c4c604337ca29b552121"
