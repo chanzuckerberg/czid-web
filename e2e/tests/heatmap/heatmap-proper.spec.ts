@@ -77,7 +77,7 @@ test.describe("Heatmap Proper", () => {
       await heatmapPage.hoverOverCell(i);
       taxonData.push(await heatmapPage.getTaxonInfo());
     }
-    taxonData = taxonData.sort((a,b) => a.Taxon.localeCompare(b.name));
+    taxonData = taxonData.sort((a,b) => b.Taxon.localeCompare(a.Taxon));
     // INFO
     // Sample: RR004_water_2_S23A
     // Taxon: Escherichia coli
@@ -126,6 +126,7 @@ test.describe("Heatmap Proper", () => {
       },
     ];
     expect(taxonData.length).toEqual(expectedTaxonInfo.length);
+
     for (const i in expectedTaxonInfo) {
       const actualRow = taxonData[i];
       const expectedRow = expectedTaxonInfo[i];
