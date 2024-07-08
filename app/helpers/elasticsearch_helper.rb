@@ -121,28 +121,26 @@ module ElasticsearchHelper
   def fetch_taxon_data(search_taxon_ids, ncbi_version, level)
     taxid_column, name_column = get_taxid_name_columns(level)
 
-    # Make a list of lineages with unique taxids and sorted by tax ID
-    # descending. We use `uniq` below instead of `distinct` to comply with
-    # MySQL 5.7 ONLY_FULL_GROUP_BY behavior. If you include `id` in the
-    # `pluck`/`select`, that counts as deduping with the record ID, which is
-    # not what we want because the record ID is already unique.
+    pinned_version_date = Date.parse(ncbi_version)
+    # Fetch all records for the given taxids within the date range
+    all_records = TaxonLineage.where(taxid_column => search_taxon_ids)
+                              .where("? >= version_start AND ? <= version_end", pinned_version_date, pinned_version_date)
+                              .order("version_end DESC")
 
-    taxon_query = TaxonLineage.where("#{taxid_column}": search_taxon_ids)
-    taxon_query = taxon_query.where(version_end: ncbi_version)
+    # Ensure only unique records based on taxid, since the records are ordered by version_end in descending order,
+    # this first occurrence will be the record with the most recent version_end for that taxid
+    unique_records = all_records.uniq { |record| record.send(taxid_column) }
 
-    return taxon_query
-           .where(taxid_column => search_taxon_ids)
-           .order(id: :desc)
-           .uniq { |lin| lin[taxid_column] }
-           .pluck(name_column, taxid_column)
-           .map do |name, taxid|
-          {
-            "title" => name,
-            "description" => "Taxonomy ID: #{taxid}",
-            "taxid" => taxid,
-            "level" => level,
-          }
-        end
+    formatted_results = unique_records.pluck(name_column, taxid_column).map do |name, taxid|
+      {
+        "title" => name,
+        "description" => "Taxonomy ID: #{taxid}",
+        "taxid" => taxid,
+        "level" => level,
+      }
+    end
+
+    formatted_results
   end
 
   def get_taxid_name_columns(level)
