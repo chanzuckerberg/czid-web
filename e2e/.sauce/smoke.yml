@@ -25,6 +25,16 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Functional: P-0: Taxon heatmap"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
   - name: "Data report validation (Heatmap): SNo 34"
     platformName: "macOS 12"
     screenResolution: "1440x900"

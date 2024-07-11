@@ -107,6 +107,10 @@ const COMBINED_MICROBIOME_FILE = "Combined Microbiome File";
 const READS_NON_HOST = "Reads (Non-host)";
 const CONTIGS_NON_HOST = "Contigs (Non-host)";
 
+const VISUALIZATIONS_TAB = "[data-testid='visualizations']";
+const VISUALIZATION_NAME_AND_STATUS = "[class*='vizNameAndStatus']";
+const UPDATED_ON_COLUMN_HEADER = "[data-testid='updated-on-column-header']";
+
 export const DOWNLOAD_TYPES = {
   mngs: [
     SAMPLE_METEDATA,
@@ -488,6 +492,30 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickVisualization(value: any) {
+    let locator = null;
+    if (typeof value === typeof String) {
+      locator = this.page.locator(VISUALIZATION_NAME_AND_STATUS).getByText(value);
+    } else if (typeof value === typeof Number) {
+      locator = this.page.locator(VISUALIZATION_NAME_AND_STATUS).nth(value)
+    } else {
+      locator = this.page.locator(VISUALIZATION_NAME_AND_STATUS).nth(0)
+    }
+    await locator.waitFor();
+
+    await this.pause(1)
+    locator.click();
+    const heatmapPage = new HeatmapPage(this.page);
+
+    await this.pause(3);
+    return heatmapPage;
+  }
+
+  public async clickUpdatedOnColumnHeader() {
+    await this.page.locator(UPDATED_ON_COLUMN_HEADER).hover();
+    await this.page.locator(UPDATED_ON_COLUMN_HEADER).click();
+  }
+
   public async clickPLQCView() {
     await this.page.locator(PLQC_VIEW).click();
   }
@@ -515,6 +543,10 @@ export class ProjectPage extends PageObject {
 
   public async clickConsensusGenomeTab() {
     await this.page.locator(CONSENSUS_GENOME_TAB).click();
+  }
+
+  public async clickVisualizationsTab() {
+    await this.page.locator(VISUALIZATIONS_TAB).click();
   }
 
   public async clickNanoporeTab() {
@@ -615,7 +647,9 @@ export class ProjectPage extends PageObject {
   }
 
   public async clickHeatmapButton() {
+    await this.pause(1);
     await this.page.locator(HEATMAP_BUTTON).click();
+    await this.pause(1);
   }
 
   public async clickTaxonHeatmap() {
@@ -887,6 +921,18 @@ export class ProjectPage extends PageObject {
     return this.page.locator(NOTIFICATION_MESSAGE).allTextContents();
   }
 
+  public async getVisualizationTable(timeout = 10000) {
+    await this.page.locator("[role='rowgroup'] [role='row']").first().waitFor({timeout: timeout});
+    await expect(this.page.locator('[class*="loading"]').last()).toHaveCount(0, {
+      timeout: 30_000,
+    });
+    return this.getTable(
+      "[role='columnheader']",
+      "[role='rowgroup'] [role='row']",
+      "[role='gridcell']",
+    );
+  }
+
   public async getProjectsTable(timeout = 120000) {
     await this.page
       .locator(SAMPLES_COUNT_TD_1)
@@ -1024,7 +1070,7 @@ export class ProjectPage extends PageObject {
         }
       }
     }
-    await this.pause(1);
+    await this.pause(2);
     return selectedSampleNames;
   }
 

@@ -55,6 +55,10 @@ export abstract class PageObject {
     }
     return tableRowsText;
   }
+  
+  public async getClipboardText() {
+    return this.page.evaluate(() => navigator.clipboard.readText());
+  }
   // #endregion Get
 
   // #region Click

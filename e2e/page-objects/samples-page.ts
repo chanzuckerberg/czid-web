@@ -46,7 +46,7 @@ const BLAST_SELECTION_MODAL_TESTID = "blast-selection-modal";
 const BLAST_SELECTION_OPTIONS = "[data-testid='blast-selection-modal'] [class*='optionText'] [class*='title']";
 const BLAST_TYPES = ["blastn", "blastx"];
 const PIPELINE_VERSION = "[data-testid='pipeline-version-select']";
-const REPORT_TABLE_ROWS = "[class*='reportTable'] [role='row']";
+const REPORT_TABLE_ROWS = "[class*='reportTable'] [class*='__Table__row'][role='row']";
 const PIPELINES_TAB = "[data-testid='pipelines']";
 const VIEW_PIPELINE_VISUALIZATION_LINK = "[class*='vizLink'] a";
 const REPORT_IN_PROGRESS = "[class*='reportStatus'][class*='inProgress']";
@@ -64,6 +64,7 @@ const GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS = "//*[@data-testid='create-cons
 const CREATE_A_NEW_CONSENSUS_GENOME_BUTTON = "//button[text()='Create a New Consensus Genome']";
 const CREATE_CONSENSUS_GENOME_BUTTON = "//button[text()='Create Consensus Genome']";
 const VIEW_CONSENSUS_GENOME_Link = "[class*='consensusGenomeLink']";
+const BACKGROUND_FILTER_VALUE = "[data-testid='background-filter'] [data-testid='filter-value']";
 
 // Sample Details
 const SAMPLE_DETAILS_BUTTON = "[data-testid='sample-details']";
@@ -116,6 +117,10 @@ export class SamplesPage extends PageObject {
     // #endregion Navigate
 
     // #region Get
+    public async getBackgroundFilterValue() {
+      return this.page.locator(BACKGROUND_FILTER_VALUE).textContent();
+    }
+
     public async getReferenceAccessionOptions() {
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
       await this.pause(2);
@@ -362,9 +367,9 @@ export class SamplesPage extends PageObject {
       return this.page.locator(TAXONS).all();
     }
 
-    public async getFilterTagElements() {
-      await this.page.waitForSelector(FILTER_TAG, { state: "visible" });
-      return this.page.locator(FILTER_TAG).all();
+    public async getFilterTagElements(timeout = 30_000) {
+      await this.page.waitForSelector(FILTER_TAG, { state: "visible", timeout: timeout }).catch(() => null);
+      return this.page.locator(FILTER_TAG).all().catch(() => []);
     }
 
     public async getFilterTagsText() {
