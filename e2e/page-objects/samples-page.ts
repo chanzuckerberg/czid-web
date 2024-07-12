@@ -260,8 +260,8 @@ export class SamplesPage extends PageObject {
       return samples;
     }
 
-    public async getCompletedSamples(projectName = null) {
-      const samples = await this.getSamples(projectName);
+    public async getCompletedSamples(projectName = null, sampleNames = null) {
+      const samples = await this.getSamples(projectName,  sampleNames);
       const completedSamples = [];
       for (const sample of samples) {
         if (sample.details.mngs_run_info && sample.details.mngs_run_info.result_status_description === "COMPLETE") {

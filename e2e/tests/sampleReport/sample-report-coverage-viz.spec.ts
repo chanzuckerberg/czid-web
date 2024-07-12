@@ -1,6 +1,7 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { test } from "@playwright/test";
 import { SamplesPage } from "../../page-objects/samples-page";
+import { ProjectPage } from "../../page-objects/project-page";
 
 let taxon = null;
 let sample = null;
@@ -10,8 +11,15 @@ test.describe("Coverage Viz Smoke Tests", () => {
 
   test.beforeEach(async ({ page }) => {
     // #region Get a random completed sample
+    const projectPage = new ProjectPage(page);
+    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.LMNGS}`);
+    await projectPage.navigateToSamples(project.id, WORKFLOWS.LMNGS);
+    const samplesNames = Object.keys(await projectPage.getSamplesTableOrderedByName());
+
     samplesPage = new SamplesPage(page);
-    sample = await samplesPage.getRandomCompletedSample(`automation_project_${WORKFLOWS.LMNGS}`);
+    let samples = await samplesPage.getCompletedSamples(project.name, samplesNames);
+    samples = samples.filter(sample => sample.name.includes("28A-idseq-mosq.2to4mil_subsample"));
+    sample = samples[Math.floor(Math.random() * samples.length)];
     // #endregion Get a random completed sample
 
     // #region Go to the sample report page
@@ -21,9 +29,10 @@ test.describe("Coverage Viz Smoke Tests", () => {
     // #endregion Go to the sample report page
 
     // #region Pick a random taxon
+    const reportTable = await samplesPage.getReportFilterTable()
     const taxons = await samplesPage.getTaxonsFromReport(
       await samplesPage.getReportV2(sample.id));
-    taxon = taxons[Math.floor(Math.random() * taxons.length)];
+    taxon = taxons.filter(taxon => reportTable[0].Taxon.includes(taxon.name) && taxon.name)[0]
     // #endregion Pick a random taxon
 
     // #region Click "coverage visualisation" on a taxon

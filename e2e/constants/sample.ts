@@ -271,6 +271,7 @@ export const URL_DOWLOAD_TYPES = [
 ];
 
 export const FILTER_VALUE = "filter-value";
+export const SAMPLE_FILE_NANOPORE = "28A-idseq-mosq.2to4mil_subsample.fq.gz";
 export const SAMPLE_FILE_CT = "Ct20K_VarSkip.fastq.gz";
 export const SAMPLE_FILE_R1 = "RR004_water_2_S23A_R1_001.fastq";
 export const SAMPLE_FILE_R2 = "RR004_water_2_S23A_R2_001.fastq";

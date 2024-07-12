@@ -1,5 +1,5 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_R1, SAMPLE_FILE_R2, SAMPLE_FILE_CT, SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import { SAMPLE_FILE_R1, SAMPLE_FILE_R2, SAMPLE_FILE_NANOPORE, SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
 import { test } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 import { UploadPage } from "../../page-objects/upload-page";
@@ -10,7 +10,7 @@ let project = null;
 const createdBy = "automation";
 const SAMPLE_FILES = [SAMPLE_FILE_R1, SAMPLE_FILE_R2];
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
-const LMNGS_SAMPLE_FILES = [SAMPLE_FILE_CT];
+const LMNGS_SAMPLE_FILES = [SAMPLE_FILE_NANOPORE];
 const uploadWorkflows = [WORKFLOWS.MNGS, WORKFLOWS.LMNGS, WORKFLOWS.AMR, WORKFLOWS.WGS, WORKFLOWS.SC2];
 
 
@@ -27,7 +27,7 @@ test.describe("Upload Smoke Tests", () => {
   for (const workflow of uploadWorkflows) {
     test(`Smoke Test: Verify Upload Sample ${workflow}`, async () => {
       const sampleFiles = workflow === WORKFLOWS.LMNGS ? LMNGS_SAMPLE_FILES : SAMPLE_FILES;
-      const sampleNames = workflow === WORKFLOWS.LMNGS ? ["Ct20K_VarSkip"] : ["RR004_water_2_S23A"];
+      const sampleNames = workflow === WORKFLOWS.LMNGS ? ["28A-idseq-mosq.2to4mil_subsample"] : ["RR004_water_2_S23A"];
 
       // Choose project
       project = await projectPage.getOrCreateProject(`automation_project`);
