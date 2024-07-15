@@ -732,19 +732,26 @@ export class SamplesPage extends PageObject {
 
     public async isTaxonVisible(name: string) {
       const reportTableRowIndexAttribute = "aria-rowindex";
-      const taxonLocatorString = `${TAXONS}:text("${name}")`;
+      const taxonLocatorString = `//*[contains(@class, "taxonName") and contains(text(), "${name}")]`;
       const taxonElement = this.page.locator(taxonLocatorString).first();
 
-      if (!(await taxonElement.isVisible())) {
-        await this.clickTableRowByIndex(0);
-        await this.scrollUpToElement(
-          `[${reportTableRowIndexAttribute}="1"]`, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
-
-        await this.scrollDownToElement(
-          taxonLocatorString, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
+      let taxonVisible = await taxonElement.isVisible();
+      for (let i = 0; i <= 3; i++) {
+        if (!taxonVisible) {
+          await this.clickTableRowByIndex(0);
+          await this.scrollUpToElement(
+            `${REPORT_TABLE_ROWS}[${reportTableRowIndexAttribute}="1"]`, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
+  
+          await this.scrollDownToElement(
+            taxonLocatorString, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
+        }
+        taxonVisible = await taxonElement.isVisible();
+        if (taxonVisible) {
+          break;
+        }
       }
 
-      return taxonElement.isVisible();
+      return taxonVisible === true;
     }
 
     public async toggleSortByName() {
@@ -976,7 +983,12 @@ export class SamplesPage extends PageObject {
     }
 
     public async validateTaxonIsVisible(name: string) {
-      expect(await this.isTaxonVisible(name)).toBeTruthy();
+      try {
+        expect(await this.isTaxonVisible(name)).toBeTruthy();
+      } catch (error) {
+        const caughtErrorMsg = (error as Error).message;
+        throw new Error(`Failed to locate taxon "${name}": ${caughtErrorMsg}`)
+      }
     }
 
     public async validateTaxonsAreVisible(taxonNames: string[]) {

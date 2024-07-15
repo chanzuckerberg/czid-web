@@ -108,12 +108,10 @@ export abstract class PageObject {
       if (isElementVisible) {
         break;
       }
-      await this.page.locator(rowsLocator).last().hover();
-      await this.page.locator(rowsLocator).last().focus();
-
       const lastRow = await this.page.locator(rowsLocator).last().getAttribute(indexAttribute);
 
       await this.page.mouse.wheel(0, scrollAmount);
+      await this.pause(1);
 
       const lastRowAfterScroll = await this.page.locator(rowsLocator).last().getAttribute(indexAttribute);
       if (lastRow === lastRowAfterScroll) {

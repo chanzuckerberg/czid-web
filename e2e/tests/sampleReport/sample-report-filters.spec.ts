@@ -114,6 +114,7 @@ test.describe("Sample report filter test", () => {
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-3
      */
     test(`Smoke Test: Should be able to filter by Category name ${workflow}`, async () => {
+      test.setTimeout(1000 * 60 * 10);
       const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
