@@ -131,6 +131,17 @@ class PipelineRunStage < ApplicationRecord
     dag_json.gsub(%r{(\"s3://).*(\")}, '"s3://..."')
   end
 
+  # Gets the URL to the AWS console page of the batch job for display on
+  # admin-only pages.
+  def batch_job_status_url
+    return if job_description.blank?
+
+    job_hash = JSON.parse(job_description)
+    if job_hash && job_hash['jobId']
+      AwsUtil.get_batch_job_url(job_hash['jobQueue'], job_hash['jobId'])
+    end
+  end
+
   def run_job
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
