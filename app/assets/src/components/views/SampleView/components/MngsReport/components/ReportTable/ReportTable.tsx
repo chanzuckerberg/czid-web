@@ -64,7 +64,6 @@ interface ReportTableProps {
   // Consider adding a callback to render the hover actions
   currentTab: CurrentTabSample;
   consensusGenomeData?: Record<string, (WorkflowRun | null | undefined)[]>;
-  isAlignVizAvailable: boolean;
   isConsensusGenomeEnabled: boolean;
   isFastaDownloadEnabled: boolean;
   isPhyloTreeAllowed: boolean;
@@ -88,7 +87,6 @@ export const ReportTable = ({
   rowHeight = 54,
   currentTab,
   consensusGenomeData,
-  isAlignVizAvailable,
   isConsensusGenomeEnabled,
   isFastaDownloadEnabled,
   isPhyloTreeAllowed,
@@ -154,7 +152,6 @@ export const ReportTable = ({
     currentTab,
     expandedGenusIds,
     onCoverageVizClick,
-    isAlignVizAvailable,
     isConsensusGenomeEnabled,
     isExpandAllOpened,
     isFastaDownloadEnabled,

@@ -29,7 +29,6 @@ export const getNameRenderer = (
   consensusGenomeData: Record<string, object[]>,
   currentTab: CurrentTabSample,
   onCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void,
-  isAlignVizAvailable: boolean,
   isConsensusGenomeEnabled: boolean,
   isFastaDownloadEnabled: boolean,
   isPhyloTreeAllowed: boolean,
@@ -142,7 +141,6 @@ export const getNameRenderer = (
                 )}
                 onCoverageVizClick={onCoverageVizClick}
                 isPhyloTreeAllowed={isPhyloTreeAllowed}
-                isAlignVizAvailable={isAlignVizAvailable}
                 onPhyloTreeModalOpened={handlePhyloTreeModalOpen}
                 pipelineVersion={pipelineVersion}
                 snapshotShareId={snapshotShareId}

@@ -6,7 +6,6 @@ export enum PipelineRunStatus {
 interface ReportMetadataSuccess {
   knownUserError?: string;
   errorMessage?: string;
-  alignVizAvailable?: boolean;
   hasByteRanges?: boolean;
   hasErrors?: boolean;
   jobStatus: string;

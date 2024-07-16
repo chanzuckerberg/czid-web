@@ -41,7 +41,6 @@ interface HoverActionsProps {
   consensusGenomeData?: Record<string, object[]>;
   currentTab: CurrentTabSample;
   fastaEnabled?: boolean;
-  isAlignVizAvailable: boolean;
   isPhyloTreeAllowed: boolean; // TODO: this name isn't very descriptive
   onBlastClick: (params: BlastData) => void;
   onConsensusGenomeClick: (options: ConsensusGenomeClick) => void;
@@ -61,7 +60,6 @@ export const HoverActions = ({
   consensusGenomeEnabled,
   currentTab,
   fastaEnabled,
-  isAlignVizAvailable,
   isPhyloTreeAllowed,
   onBlastClick,
   onConsensusGenomeClick,
@@ -96,7 +94,7 @@ export const HoverActions = ({
   );
   const coverageVizEnabled =
     currentTab === WORKFLOW_TABS.LONG_READ_MNGS ||
-    (isAlignVizAvailable && validTaxonId && getOr(0, "nt.count", rowData) > 0);
+    (validTaxonId && getOr(0, "nt.count", rowData) > 0);
   const phyloTreeEnabled =
     isPhyloTreeAllowed &&
     taxonId > 0 &&

@@ -452,7 +452,6 @@ class PipelineReportService
 
   def get_metadata_by_technology(metadata)
     has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
-    align_viz_available = @pipeline_run.align_viz_available?
     @timer.split("compute_options_available_for_pipeline_run")
 
     if @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
@@ -462,8 +461,7 @@ class PipelineReportService
         preSubsamplingCount: @pipeline_run.adjusted_remaining_reads,
         postSubsamplingCount: @pipeline_run.subsampled_reads,
         taxonWhitelisted: @pipeline_run.use_taxon_whitelist,
-        hasByteRanges: has_byte_ranges,
-        alignVizAvailable: align_viz_available
+        hasByteRanges: has_byte_ranges
       )
     elsif @technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
       host_filtered_bases, subsampled_bases = @pipeline_run.bases_before_and_after_subsampling
@@ -472,8 +470,7 @@ class PipelineReportService
         preSubsamplingCount: host_filtered_bases,
         postSubsamplingCount: subsampled_bases,
         taxonWhitelisted: @pipeline_run.use_taxon_whitelist,
-        hasByteRanges: has_byte_ranges,
-        alignVizAvailable: align_viz_available
+        hasByteRanges: has_byte_ranges
       )
     end
   end

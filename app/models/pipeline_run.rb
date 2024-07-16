@@ -415,12 +415,6 @@ class PipelineRun < ApplicationRecord
     return !taxon_byteranges.empty?
   end
 
-  def align_viz_available?
-    # TODO(tiago): we should not have to access aws. see IDSEQ-2602.
-    align_summary_file = "#{postprocess_output_s3_path}/align_viz.summary"
-    return align_summary_file && S3Util.get_s3_file(align_summary_file) ? true : false
-  end
-
   def succeeded?
     job_status == STATUS_CHECKED
   end

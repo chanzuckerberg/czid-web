@@ -79,7 +79,6 @@ export const MngsReport = ({
             consensusGenomeData={getConsensusGenomeData(sample)}
             currentTab={currentTab}
             data={filteredReportData}
-            isAlignVizAvailable={!!reportMetadata?.alignVizAvailable}
             isConsensusGenomeEnabled={sample?.editable}
             isFastaDownloadEnabled={!!reportMetadata?.hasByteRanges}
             isPhyloTreeAllowed={sample ? sample.editable : false}
