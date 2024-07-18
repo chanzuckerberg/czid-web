@@ -443,7 +443,11 @@ module MetadataHelper
     host_genome_names = metadata["rows"].map { |row| row[host_genome_index] }.uniq
     host_genomes = if allow_new_host_genomes
                      host_genome_names.map do |name|
-                       hg = HostGenome.find_by(name: name) # case insensitive
+                       unless name.length <= 256
+                         raise StandardError, "Host name #{name} exceeds 256 characters"
+                       end
+
+                       hg = HostGenome.find_by(name: name, deprecation_status: nil) # case insensitive
                        hg ||= HostGenome.new(name: name, user: current_user)
                        # Return all found or created host genomes until this is resolved:
                        # https://jira.czi.team/browse/IDSEQ-2193.
