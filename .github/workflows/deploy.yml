@@ -34,6 +34,17 @@ jobs:
       deployment_reason: ${{ github.event.inputs.release_notes }}
     secrets: inherit
 
+  run_staging_playwright_smoke_tests:
+    if: ${{ github.event.inputs.destination == 'staging' }}
+    name: Run Playwright smoke tests on staging
+    needs: run_deployment
+    uses: ./.github/workflows/e2e-automation.yml
+    with:
+      node-environment: "staging"
+      test-category: "smoke"
+      should-run-with-feature-flags: "false"
+    secrets: inherit
+
   run_staging_playwright_e2e_tests:
     if: ${{ github.event.inputs.destination == 'staging' }}
     name: Run Playwright E2E tests on staging
@@ -41,6 +52,6 @@ jobs:
     uses: ./.github/workflows/e2e-automation.yml
     with:
       node-environment: "staging"
-      test-category: "smoke"
+      test-category: "e2e"
       should-run-with-feature-flags: "false"
     secrets: inherit
