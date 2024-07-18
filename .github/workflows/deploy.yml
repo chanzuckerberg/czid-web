@@ -48,7 +48,7 @@ jobs:
   run_staging_playwright_e2e_tests:
     if: ${{ github.event.inputs.destination == 'staging' }}
     name: Run Playwright E2E tests on staging
-    needs: run_deployment
+    needs: run_staging_playwright_smoke_tests
     uses: ./.github/workflows/e2e-automation.yml
     with:
       node-environment: "staging"
