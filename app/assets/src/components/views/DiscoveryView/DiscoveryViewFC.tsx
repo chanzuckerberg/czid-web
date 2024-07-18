@@ -62,7 +62,6 @@ import {
 
 /**
  * Categorizations of legacy column keys by NextGen query that they come from:
- *
  *  - Workflows Service contains null and undefined because the default is createdAt.
  *    creation_source is on Workflows Service but NextGen can't sort by it because it's in JSON.
  *  - sequencingReads can also sort by custom metadata, but those strings can be anything.
