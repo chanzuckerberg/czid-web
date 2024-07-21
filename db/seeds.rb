@@ -29,7 +29,7 @@ ActiveRecord::Base.transaction do
 
   AppConfig.create({"key"=>"phylotree-ng-version", "value"=>"6.11.0"})
 
-  AppConfig.create({"key"=>"amr-version", "value"=>"1.2.5"})
+  AppConfig.create({"key"=>"amr-version", "value"=>"1.4.2"})
 
   AppConfig.create({"key"=>"long-read-mngs-version", "value"=>"0.7.8"})
 
