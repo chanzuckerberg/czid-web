@@ -436,7 +436,7 @@ export class SamplesPage extends PageObject {
     public async clickTooltipLearnMore() {
       const [newPage] = await Promise.all([
         this.page.context().waitForEvent("page"),
-        await this.page.locator(TOOLTIP_LEARN_MORE_LINK).click(),
+        await this.page.locator(TOOLTIP_LEARN_MORE_LINK).first().click(),
       ]);
       await newPage.waitForLoadState();
       return new ArticlesPage(newPage);

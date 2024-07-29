@@ -31,7 +31,9 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
 
     // #region 3. Click on an "Heatmap sp961" record in Visualization list
     const heatmapPage = await projectPage.clickVisualization(0);
-    await heatmapPage.gotoHeatmap(heatmapUrl);
+    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
+      await heatmapPage.gotoHeatmap(heatmapUrl);
+    }
     // #endregion 3. Click on an "Heatmap sp961" record in Visualization list
 
     // #region 4. Click on Thresholds filter at Filters left panel
@@ -286,7 +288,7 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
       "We're busy generating your heatmap with a new background model. It may take a couple of minutes to load.");
 
     // 7. Click on Save Button
-    await heatmapPage.clickSave();
+    const heatmapId = await heatmapPage.clickSave();
 
     // - ""Your visualization was saved!"" message displayed when clicking on Save
     const saveNotification = await heatmapPage.getSaveNotification();
@@ -294,8 +296,7 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #endregion 7. Close ""We're busy generating your heatmap with a new background model. It may take a couple of minutes to load"" toast message
 
     // #region 8. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
-    await heatmapPage.clickSave();
-    const heatmapUrl = await heatmapPage.clickShareButton();
+    const heatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
     await heatmapPage.close();
     // #endregion 8. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
 
@@ -305,7 +306,9 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
 
     // - New Taxon Heatmap saves in Visualization records
     heatmapPage = await projectPage.clickVisualization(0);
-    await heatmapPage.gotoHeatmap(heatmapUrl);
+    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
+      await heatmapPage.gotoHeatmap(heatmapUrl);
+    }
     // #endregion 9. Click on latest ""Heatmap"" record
 
     // #region 10. Verify Filters > Background value
@@ -362,15 +365,15 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     expect(backgroundValue).toEqual(background);
 
     // 7. Click on Save Button
-    await heatmapPage.clickSave();
+    const heatmapId = await heatmapPage.clickSave();
 
     const saveNotification = await heatmapPage.getSaveNotification();
     expect(saveNotification).toEqual("Your visualization was saved!")
+
     // #endregion 7. Close ""We're busy generating your heatmap with a new background model. It may take a couple of minutes to load"" toast message
 
     // #region 8. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
-    await heatmapPage.clickSave();
-    let heatmapUrl = await heatmapPage.clickShareButton();
+    const heatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
     await heatmapPage.close();
     // #endregion 8. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
 
@@ -379,7 +382,9 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     await projectPage.clickVisualizationsTab();
 
     heatmapPage = await projectPage.clickVisualization(0);
-    await heatmapPage.gotoHeatmap(heatmapUrl);
+    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
+      await heatmapPage.gotoHeatmap(heatmapUrl);
+    }
 
     backgroundValue = await heatmapPage.getSelectedBackground();
     expect(backgroundValue).toEqual(background);
@@ -388,8 +393,6 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #region 10. Click on Background dropdown list, pick ""None"" value, and click on Save
     await heatmapPage.setBackground(NONE);
     await heatmapPage.clickSave();
-
-    heatmapUrl = await heatmapPage.clickShareButton();
     // #endregion 10. Click on Background dropdown list, pick ""None"" value, and click on Save
 
     // #region 11. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
@@ -399,7 +402,9 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
 
     // #region 12. Click on latest ""Heatmap"" record and verify Filters > Background value is ""None""
     heatmapPage = await projectPage.clickVisualization(0);
-    await heatmapPage.gotoHeatmap(heatmapUrl);
+    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
+      await heatmapPage.gotoHeatmap(heatmapUrl);
+    }
     const backgroundValueAfter = await heatmapPage.getSelectedBackground();
 
     // - Saved ""None"" BG option persists when chosen back
@@ -570,7 +575,7 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #region 3. Click on OLD Heatmap records (older than 2/1/2024)
     await projectPage.clickUpdatedOnColumnHeader();
     await projectPage.clickUpdatedOnColumnHeader();
-    const vizTable = await projectPage.getVisualizationTable();
+    const vizTable = await projectPage.getVisualizationTable(TEST_TIMEOUT);
 
     expect(new Date(vizTable[0]['Updated On'][0]).getTime()).toBeLessThan(new Date("2/1/2024").getTime())
     // #endregion 3. Click on OLD Heatmap records (older than 2/1/2024)
@@ -854,21 +859,21 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #endregion 5. Verify Filters left panel > Background filter is ""None""
 
     // #region 6. Click on Share button
-    await heatmapPage.clickSave();
-    let shareLink = await heatmapPage.clickShareButton();
+    const heatmapId = await heatmapPage.clickSave();
+    const heatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
     // #endregion 6. Click on Share button
 
     // #region 7. Paste and Go clipboard URL in a new browser tab
     let newBrowserTab = await page.context().newPage();
     let newHeatmapPage = new HeatmapPage(newBrowserTab);
-    await newHeatmapPage.gotoHeatmap(shareLink);
+    await newHeatmapPage.gotoHeatmap(heatmapUrl);
     // #endregion 7. Paste and Go clipboard URL in a new browser tab
 
     // #region 8. Verify Background filter persists in shared Taxon Heatmap tab
-    let selectedBackgroundInNewTab = await newHeatmapPage.getSelectedBackground();
+    const selectedBackgroundInNewTabFirst = await newHeatmapPage.getSelectedBackground();
 
     // - ""None"" BG persisted
-    expect(selectedBackgroundInNewTab).toEqual(NONE);
+    expect(selectedBackgroundInNewTabFirst).toEqual(NONE);
     // #endregion 8. Verify Background filter persists in shared Taxon Heatmap tab
 
     // #region 9. Close shared TH and go back to original TH
@@ -885,15 +890,14 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
 
     // #region 11. Repeat steps 6-9
     await heatmapPage.clickSave();
-    shareLink = await heatmapPage.clickShareButton();
     newBrowserTab = await page.context().newPage();
-    await newBrowserTab.goto(shareLink);
+    await newBrowserTab.goto(heatmapUrl);
 
     newHeatmapPage = new HeatmapPage(newBrowserTab);
-    selectedBackgroundInNewTab = await newHeatmapPage.getSelectedBackground();
+    const selectedBackgroundInNewTab2nd = await newHeatmapPage.getSelectedBackground();
 
     // - ""NID Human CSF HC"" BG persisted
-    expect(selectedBackgroundInNewTab).toEqual(randomBackground);
+    expect(selectedBackgroundInNewTab2nd).toEqual(randomBackground);
     await newHeatmapPage.close();
     // #endregion 11. Repeat steps 6-9
 
@@ -905,16 +909,15 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
 
     // #region 13. Repeat steps 6-9
     await heatmapPage.clickSave();
-    shareLink = await heatmapPage.clickShareButton();
     newBrowserTab = await page.context().newPage();
-    await newBrowserTab.goto(shareLink);
+    await newBrowserTab.goto(heatmapUrl);
 
     // Taxon Heatmap background selected persists when sharing link opens a Taxon Heatmap in new tab:
     newHeatmapPage = new HeatmapPage(newBrowserTab);
-    selectedBackgroundInNewTab = await newHeatmapPage.getSelectedBackground();
+    const selectedBackgroundInNewTab3rd = await newHeatmapPage.getSelectedBackground();
 
     // - ""floo sp97"" BG persisted
-    expect(selectedBackgroundInNewTab).toEqual(randomBackground);
+    expect(selectedBackgroundInNewTab3rd).toEqual(randomBackground);
     // #endregion 13. Repeat steps 6-9
   });
 
@@ -934,7 +937,9 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
 
     // #region 3. Click on an ""Heatmap sp961"" record in Visualization list
     const heatmapPage = await projectPage.clickVisualization(0);
-    heatmapPage.gotoHeatmap(heatmapUrl);
+    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
+      await heatmapPage.gotoHeatmap(heatmapUrl);
+    }
     // #endregion 3. Click on an ""Heatmap sp961"" record in Visualization list
 
     // #region 4. Select ""floo sp97"" background value
@@ -1089,7 +1094,9 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
 
     // #region 3. Click on an ""Heatmap sp961"" record in Visualization list
     const heatmapPage = await projectPage.clickVisualization(0);
-    heatmapPage.gotoHeatmap(heatmapUrl);
+    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
+      await heatmapPage.gotoHeatmap(heatmapUrl);
+    }
     // #endregion 3. Click on an ""Heatmap sp961"" record in Visualization list
 
     // #region 4. Select ""floo sp97"" background value
@@ -1220,8 +1227,8 @@ async function createHeatmap(projectPage: any) {
     await projectPage.selectCompletedSamples(2);
     await projectPage.clickHeatmapButton();
     const heatmapPage = await projectPage.clickTaxonHeatmap();
-    await heatmapPage.clickSave();
-    const heatmapUrl = await heatmapPage.clickShareButton();
+    const heatmapId = await heatmapPage.clickSave();
+    const heatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
     heatmapPage.close();
 
     return heatmapUrl;

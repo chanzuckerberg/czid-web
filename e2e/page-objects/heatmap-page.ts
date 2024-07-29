@@ -117,13 +117,15 @@ export class HeatmapPage extends PageObject {
   }
 
   public async clickCloseAlertButton() {
-    await this.page.locator(CLOSE_ALERT_BUTTON).waitFor();
+    await this.pause(1);
+    await this.page.locator(CLOSE_ALERT_BUTTON).first().waitFor();
+
     await this.pause(1);
     await this.page.locator(CLOSE_ALERT_BUTTON).first().click();
   }
 
   public async clickSearchResult(value: string) {
-    await this.page.locator(`${SEARCH_RESULTS}//*[text()="${value}"]`).click();
+    await this.page.locator(`${SEARCH_RESULTS}//*[normalize-space(text())="${value}"]`).click();
   }
 
   public async clickBackgroundDropdown() {
@@ -159,7 +161,17 @@ export class HeatmapPage extends PageObject {
   public async clickSave() {
     await this.pause(1);
     await this.page.locator(SAVE_BUTTON).hover();
-    await this.page.locator(SAVE_BUTTON).click();
+
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        response =>
+          (response.url().includes("/visualizations/heatmap/save") &&
+            response.request().method() === "POST")
+      ),
+      this.page.locator(SAVE_BUTTON).click(),
+    ]);
+    const responseJson = await response.json();
+    return responseJson.id;
   }
 
   public async clickZoomButton(zoom: "+" | "-") {
@@ -392,6 +404,8 @@ export class HeatmapPage extends PageObject {
     await this.page.goto(heatmapUrl);
     await this.page.waitForLoadState();
     await this.pause(3);
+
+    await this.page.locator(CELLS).first().waitFor();
   }
 
   public async removeAllFilters() {
@@ -401,6 +415,8 @@ export class HeatmapPage extends PageObject {
       await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).nth(0).click();
       await this.pause(1);
     }
+
+    await this.pause(4);
     filters = await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).all();
     for (let i = 0; i < filters.length; i++) {
       await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).nth(0).click();
@@ -520,21 +536,29 @@ export class HeatmapPage extends PageObject {
       await this.clickAddThreshold();
     }
     for (let i = 0; i < options.length; i++) {
+      await this.pause(1);
+
       const option = options[i];
       if (option.value) {
+        await this.pause(1);
         await this.page.locator(THRESHOLDS_INPUT).nth(i).fill(option.value);
       }
       if (option.operator) {
+        await this.pause(1);
         await this.setThresholdOperator(option.operator, i);
       }
       if (option.metric) {
+        await this.pause(1);
         await this.page.locator(THRESHOLDS_METRIC_BUTTON).nth(i).click()
+        await this.pause(1);
         await this.page.locator(VIEW_OPTIONS).getByText(option.metric).click();
       }
       if (options[i +1] !== undefined) {
+        await this.pause(1);
         await this.clickAddThreshold();
       }
     }
+    await this.pause(1);
     await this.page.locator(THRESHOLDS_APPLY_BUTTON).click();
   }
   // #endregion Macro
