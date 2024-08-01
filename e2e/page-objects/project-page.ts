@@ -158,6 +158,7 @@ const ROWS =
   "//div[contains(@class, 'sampleStatus')]//ancestor::div[@aria-rowindex]";
 const SAMPLE_NAME_BY_INDEX = (index: number) =>
   `//div[contains(@class, "sampleStatus")]//ancestor::div[@aria-rowindex="${index}"]//div[contains(@class, "sampleName-")]`;
+const SAMPLE_NAMES = "[class*='sampleName-']";
 const DELETE_CONFIRMATION_BUTTON = "//button[text()='Delete']";
 const DELETE_CANCEL_BUTTON =
   "//*[@data-testid='bulk-delete-modal']//button[text()='Cancel']";
@@ -787,6 +788,11 @@ export class ProjectPage extends PageObject {
       tooltips[rowIndex][key.trim()] = value.trim();
     }
     return tooltips;
+  }
+
+  public async getSampleNames(timeout = 10000) {
+    await this.page.locator(SAMPLE_NAMES).first().waitFor({timeout: timeout});
+    return this.page.locator(SAMPLE_NAMES).allTextContents();
   }
 
   public async getPLQCHoverTooltip() {

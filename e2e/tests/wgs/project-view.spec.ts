@@ -296,8 +296,16 @@ test.describe("Project View: Functional: P-1", () => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject(`SNo_WGS-44_${WORKFLOWS.WGS}`);
 
+    // #region Get sample type counts
     const sampleType = await new UploadPage(page).getRandomSampleTissueType();
-    await setupSamples(
+    await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
+    await projectPage.fillSampleTypeFilter([sampleType]);
+    const consensusGenomesCountBefore = await projectPage.getConsensusGenomesCount();
+    const expectedSampleNames = await projectPage.getSampleNames();
+    await projectPage.fillSampleTypeFilter([sampleType]);
+    // #endregion Get sample type counts
+
+    const samples = await setupSamples(
       page,
       project,
       WGS_SARS_COV2_NO_HOST_FILES,
@@ -305,6 +313,10 @@ test.describe("Project View: Functional: P-1", () => {
       WORKFLOWS.WGS,
       {sampleTissueType: sampleType, runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
     );
+    // Add the newly created samples to the expectedSampleNames
+    for (const sample of samples) {
+      expectedSampleNames.push(sample.name);
+    }
     // #endregion 1. Log in to Project
 
     // #region 2. Navigate to Consensus Genome tab
@@ -312,16 +324,17 @@ test.describe("Project View: Functional: P-1", () => {
     // #endregion 2. Navigate to Consensus Genome tab
 
     // #region 3. Select a Sample Type option from list and observe
+    const consensusGenomesCountNoFilter = await projectPage.getConsensusGenomesCount();
     await projectPage.selectPlusColumnOptions(["Sample Type"]);
     await projectPage.fillSampleTypeFilter([sampleType]);
 
     // Metadata Filters - SAMPLE TYPE filter applied and Consensus Genome sample list is filtered with filtering criteria.
     // Sample count will reduce in the sample details panel."
-    const graphqlfed = new Graphqlfed(page);
-    const expectedSampleNames = await graphqlfed.projectSamplesSampleType(project, sampleType);
+    const consensusGenomesCountWithFilter = await projectPage.getConsensusGenomesCount();
+    expect(consensusGenomesCountWithFilter).toBeLessThan(consensusGenomesCountNoFilter);
 
-    const consensusGenomesCount = await projectPage.getConsensusGenomesCount();
-    expect(consensusGenomesCount).toEqual(expectedSampleNames.length);
+    // The current consensusGenomesCount is equal to the consensusGenomesCountBefore + samples.length
+    expect(consensusGenomesCountWithFilter).toEqual(consensusGenomesCountBefore + samples.length);
 
     const samplesTable = await projectPage.getSamplesTable();
     for (const tableRow of samplesTable) {
