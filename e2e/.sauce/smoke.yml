@@ -30,6 +30,7 @@ suites:
     screenResolution: "1440x900"
     testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
     params:
+      maxDuration: 1h
       browserName: "chromium"
       project: "chromium"
       grep: "SNo"

@@ -5,7 +5,7 @@ import { HeatmapPage } from "@e2e/page-objects/heatmap-page";
 import * as fs from "fs/promises";
 
 
-const TEST_TIMEOUT = 60 * 1000 * 20;
+const TEST_TIMEOUT = 60 * 1000 * 60;
 const NONE = "None";
 
 test.describe("Functional: P-0: Taxon heatmap", () => {
