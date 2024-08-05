@@ -1732,7 +1732,8 @@ GEM
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
     retryable (3.0.5)
-    rexml (3.2.5)
+    rexml (3.3.3)
+      strscan
     rspec-core (3.12.0)
       rspec-support (~> 3.12.0)
     rspec-expectations (3.12.0)
@@ -1818,6 +1819,7 @@ GEM
     stackprof (0.2.23)
     strong_migrations (1.4.0)
       activerecord (>= 5.2)
+    strscan (3.1.0)
     thor (1.2.1)
     thread (0.2.2)
     tilt (2.0.11)
