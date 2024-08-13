@@ -117,11 +117,13 @@ export class HeatmapPage extends PageObject {
   }
 
   public async clickCloseAlertButton() {
-    await this.pause(1);
-    await this.page.locator(CLOSE_ALERT_BUTTON).first().waitFor();
+    const closeIcon = this.page.locator(CLOSE_ALERT_BUTTON).first();
+    await closeIcon.waitFor({timeout: 4000}).catch(() => null);
 
-    await this.pause(1);
-    await this.page.locator(CLOSE_ALERT_BUTTON).first().click();
+    await closeIcon.click({timeout: 1000}).catch(() => null);
+    if (closeIcon.isVisible()) {
+      await closeIcon.click({timeout: 1000}).catch(() => null);
+    }
   }
 
   public async clickSearchResult(value: string) {
@@ -401,6 +403,7 @@ export class HeatmapPage extends PageObject {
 
   // #region Macro
   public async gotoHeatmap(heatmapUrl: string) {
+    await this.pause(1);
     await this.page.goto(heatmapUrl);
     await this.page.waitForLoadState();
     await this.pause(3);

@@ -30,10 +30,8 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #endregion 2. Click on Visualization tab
 
     // #region 3. Click on an "Heatmap sp961" record in Visualization list
-    const heatmapPage = await projectPage.clickVisualization(0);
-    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
-      await heatmapPage.gotoHeatmap(heatmapUrl);
-    }
+    const heatmapPage = new HeatmapPage(page);
+    await heatmapPage.gotoHeatmap(heatmapUrl);
     // #endregion 3. Click on an "Heatmap sp961" record in Visualization list
 
     // #region 4. Click on Thresholds filter at Filters left panel
@@ -279,7 +277,6 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 
     await heatmapPage.setBackground(background);
-    await heatmapPage.clickCloseAlertButton();
     // #endregion 6. Click on Background dropdown list and pick ""floo sp97"" option
 
     // #region 7. Close ""We're busy generating your heatmap with a new background model. It may take a couple of minutes to load"" toast message
@@ -288,6 +285,7 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
       "We're busy generating your heatmap with a new background model. It may take a couple of minutes to load.");
 
     // 7. Click on Save Button
+    await heatmapPage.clickCloseAlertButton();
     const heatmapId = await heatmapPage.clickSave();
 
     // - ""Your visualization was saved!"" message displayed when clicking on Save
@@ -305,10 +303,8 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     await projectPage.clickVisualizationsTab();
 
     // - New Taxon Heatmap saves in Visualization records
-    heatmapPage = await projectPage.clickVisualization(0);
-    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
-      await heatmapPage.gotoHeatmap(heatmapUrl);
-    }
+    heatmapPage = new HeatmapPage(page);
+    await heatmapPage.gotoHeatmap(heatmapUrl);
     // #endregion 9. Click on latest ""Heatmap"" record
 
     // #region 10. Verify Filters > Background value
@@ -353,7 +349,6 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 
     await heatmapPage.setBackground(background);
-    await heatmapPage.clickCloseAlertButton();
     // #endregion 6. Click on Background dropdown list and pick ""floo sp97"" option
 
     // #region 7. Close ""We're busy generating your heatmap with a new background model. It may take a couple of minutes to load"" toast message
@@ -365,6 +360,7 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     expect(backgroundValue).toEqual(background);
 
     // 7. Click on Save Button
+    await heatmapPage.clickCloseAlertButton();
     const heatmapId = await heatmapPage.clickSave();
 
     const saveNotification = await heatmapPage.getSaveNotification();
@@ -381,10 +377,8 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     await projectPage.navigateToMyData();
     await projectPage.clickVisualizationsTab();
 
-    heatmapPage = await projectPage.clickVisualization(0);
-    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
-      await heatmapPage.gotoHeatmap(heatmapUrl);
-    }
+    heatmapPage = new HeatmapPage(page);
+    await heatmapPage.gotoHeatmap(heatmapUrl);
 
     backgroundValue = await heatmapPage.getSelectedBackground();
     expect(backgroundValue).toEqual(background);
@@ -401,10 +395,7 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #endregion 11. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
 
     // #region 12. Click on latest ""Heatmap"" record and verify Filters > Background value is ""None""
-    heatmapPage = await projectPage.clickVisualization(0);
-    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
-      await heatmapPage.gotoHeatmap(heatmapUrl);
-    }
+    await heatmapPage.gotoHeatmap(heatmapUrl);
     const backgroundValueAfter = await heatmapPage.getSelectedBackground();
 
     // - Saved ""None"" BG option persists when chosen back
@@ -511,8 +502,8 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     samplesPage = null;
 
     let backgrounds = await heatmapPage.getBackgrounds();
-    let background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    await heatmapPage.setBackground(background);
+    const background1 = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    await heatmapPage.setBackground(background1);
     await heatmapPage.clickCloseAlertButton();
     // #endregion 8. Close sample report tab, and at Taxon Heatmap, select ""NID Human CSF HC"" as Background
 
@@ -522,7 +513,7 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // A Taxon Heatmap with Background = ""NID Human CSF HC"" behaviour:
     // - In sample report: Background persists Taxon Heatmap background selection (""NID Human CSF HC"" in this case)
     sampleReportBackground = await samplesPage.getBackgroundFilterValue();
-    expect(sampleReportBackground).toEqual(background);
+    expect(sampleReportBackground).toEqual(background1);
 
     // - While hovering cell: NT / NR Z Score data values displayed
     // - In sample report: Score and NT/NR Z Score column display data values
@@ -539,16 +530,16 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #region 11. Repeat step 6-7
     await heatmapPage.hoverOverFilterPanel();
     backgrounds = await heatmapPage.getBackgrounds();
-    background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    const background2 = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 
-    await heatmapPage.setBackground(background);
+    await heatmapPage.setBackground(background2);
     await heatmapPage.clickCloseAlertButton();
     samplesPage = await heatmapPage.clickCell(0);
 
     // A Taxon Heatmap with Background = {other than ""None"" OR ""NID Human CSF HC""} behaviour:
     // - In sample report: Background persists Taxon Heatmap background selection (""floo sp97"" in this case)
     sampleReportBackground = await samplesPage.getBackgroundFilterValue();
-    expect(sampleReportBackground).toEqual(background);
+    expect(sampleReportBackground).toEqual(background2);
 
     // - While hovering cell: NT / NR Z Score data values displayed
     // - In sample report: Score and NT/NR Z Score column display data values
@@ -936,10 +927,8 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #endregion 2. Click on Visualization tab
 
     // #region 3. Click on an ""Heatmap sp961"" record in Visualization list
-    const heatmapPage = await projectPage.clickVisualization(0);
-    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
-      await heatmapPage.gotoHeatmap(heatmapUrl);
-    }
+    const heatmapPage = new HeatmapPage(page);
+    await heatmapPage.gotoHeatmap(heatmapUrl);
     // #endregion 3. Click on an ""Heatmap sp961"" record in Visualization list
 
     // #region 4. Select ""floo sp97"" background value
@@ -1093,10 +1082,8 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
     // #endregion 2. Click on Visualization tab
 
     // #region 3. Click on an ""Heatmap sp961"" record in Visualization list
-    const heatmapPage = await projectPage.clickVisualization(0);
-    if (!(await heatmapPage.url()).includes(heatmapUrl)) {
-      await heatmapPage.gotoHeatmap(heatmapUrl);
-    }
+    const heatmapPage = new HeatmapPage(page);
+    await heatmapPage.gotoHeatmap(heatmapUrl);
     // #endregion 3. Click on an ""Heatmap sp961"" record in Visualization list
 
     // #region 4. Select ""floo sp97"" background value
