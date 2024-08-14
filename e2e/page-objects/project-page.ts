@@ -82,7 +82,7 @@ const BACKGROUND_FILTER_DROPDOWN =
   "//div[contains(@class, 'downloadType')]//div[text()='Background' and contains(@class, 'label')]/following-sibling::div[contains(@class, 'dropdown')]";
 const BACKGROUND_SEARCH_INPUT =
   "[class*='portalDropdown'] [data-testid='filter-search-bar'] input";
-const BACKGROUND_SEARCH_RESULTS = "[class*='optionText']";
+const BACKGROUND_SEARCH_RESULTS = "[class*=' option'] [class*='optionText']";
 const BACKGROUND_FILTER_LABEL =
   "//div[contains(@class, 'downloadType')]//div[text()='Background' and contains(@class, 'label')]";
 const SEARCH_MY_DATA_INPUT =
@@ -1101,16 +1101,21 @@ export class ProjectPage extends PageObject {
   }
 
   public async pickBackground(backgroundName = null) {
-    let background = null;
-    const backgrounds = await this.getBackgrounds();
-    if (backgroundName !== null) {
-      background = backgrounds.filter(b => b.name === backgroundName)[0];
-    } else {
-      background = backgrounds[0];
-    }
+    await this.pause(3);
 
+    let background = null;
     await this.clickBackgroundFilterDropdown();
+
+    await this.page.locator(BACKGROUND_SEARCH_RESULTS).first().waitFor();
+    const backgroundsFE = await this.page.locator(BACKGROUND_SEARCH_RESULTS).allTextContents();
+    const backgrounds = await this.getBackgrounds();
+    if (backgroundName === null) {
+      backgroundName = backgroundsFE[Math.floor(Math.random() * backgroundsFE.length)];
+    }
+    background = backgrounds.filter(b => b.name === backgroundName)[0];
+
     await this.fillBackgroundSearchInput(background.name);
+    await this.pause(3);
     await this.clickBackgroundSearchOption(background.name);
     return background;
   }
