@@ -25,6 +25,15 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Smoke Test: impact page"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/impact/impact.smoke.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      retries: 3
+    shard: concurrency
   - name: "Functional: P-0: Taxon heatmap"
     platformName: "macOS 12"
     screenResolution: "1440x900"
