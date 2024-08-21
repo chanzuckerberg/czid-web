@@ -1,5 +1,5 @@
 import { PageObject } from "./page-object";
-const LIMIT = 10000;
+const LIMIT = 100000;
 
 export class Graphqlfed extends PageObject {
 

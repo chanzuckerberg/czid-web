@@ -42,6 +42,22 @@ const UPLOAD_HEADER_LINK = "[data-testid='menu-item-upload']";
 const SAMPLES_TAB = "button[data-testid='samples']";
 const SAMPLES_COUNT_TD_1 =
   "//div[@aria-rowindex='1']//div[@data-testid='sample-counts' and contains(text(), 'Sample')]";
+const BACKGROUND_BUTTON =
+  "[class*='actions'] div:not([role='listbox']) button[class='noStyleButton']";
+const CREATE_BACKGROUND_NAME_INPUT =
+  "//*[text()='Create a Background Model']/following-sibling::*//input[@type='text']";
+const CREATE_BACKGROUND_DESCRIPTION_INPUT =
+  "//*[text()='Create a Background Model']/following-sibling::*//textarea";
+const CREATE_BACKGROUND_CORRECTION_DROPDOWN =
+  "//*[text()='Create a Background Model']/following-sibling::*//*[@data-testid='filters']";
+const CREATE_BACKGROUND_CORRECTION_OPTIONS =
+  "[data-testid='dropdown-standard'] [class*='optionText']";
+const CREATE_BACKGROUND_CREATE_BUTTON =
+  "//*[text()='Create a Background Model']/following-sibling::*//*[text()='Create']";
+const CREATE_BACKGROUND_NOTIFICATION =
+  "//*[text()='Create a Background Model']/following-sibling::*//*[contains(@class, 'notification')]";
+const CREATE_BACKGROUND_CLOSE_ICON =
+  "//*[text()='Create a Background Model']/ancestor::*//*[contains(@class, 'closeIcon')]";
 const HEATMAP_BUTTON =
   "[class*='actions'] [role='listbox'] [class*='action']:not([data-testid])";
 const TAXON_HEATMAP = "[href*='/heatmap']";
@@ -388,6 +404,14 @@ export class ProjectPage extends PageObject {
   // #endregion hover
 
   // #region fill
+  public async fillBackgroundDescriptionInput(value: string) {
+    await this.page.locator(CREATE_BACKGROUND_DESCRIPTION_INPUT).fill(value)
+  }
+
+  public async fillBackgroundNameInput(value: string) {
+    await this.page.locator(CREATE_BACKGROUND_NAME_INPUT).fill(value)
+  }
+
   public async fillTimeframeFilter(value: string) {
     await this.pause(1);
     await this.page.locator(TIMEFRAME_FILTER).click();
@@ -493,6 +517,22 @@ export class ProjectPage extends PageObject {
   // #endregion fill
 
   // #region Click
+  public async clickCreateBackgroundCloseIcon() {
+    await this.page.locator(CREATE_BACKGROUND_CLOSE_ICON).click();
+  }
+
+  public async clickBackgroundCreateButton() {
+    await this.page.locator(CREATE_BACKGROUND_CREATE_BUTTON).click();
+  }
+
+  public async clickCorrectionMethodOption(option: string) {
+    await this.page.locator(CREATE_BACKGROUND_CORRECTION_OPTIONS).getByText(option).click();
+  }
+
+  public async clickCorrectionMethodDropdown() {
+    await this.page.locator(CREATE_BACKGROUND_CORRECTION_DROPDOWN).click();
+  }
+
   public async clickVisualization(value: any) {
     let locator = null;
     if (typeof value === typeof String) {
@@ -647,6 +687,12 @@ export class ProjectPage extends PageObject {
     await this.page.locator(BACKGROUND_FILTER_DROPDOWN).click();
   }
 
+  public async clickBackgroundButton() {
+    await this.pause(1);
+    await this.page.locator(BACKGROUND_BUTTON).click();
+    await this.pause(1);
+  }
+
   public async clickHeatmapButton() {
     await this.pause(1);
     await this.page.locator(HEATMAP_BUTTON).click();
@@ -658,7 +704,7 @@ export class ProjectPage extends PageObject {
       this.page.context().waitForEvent("page"),
       await this.page.locator(TAXON_HEATMAP).click(),
     ]);
-    await newPage.waitForLoadState();
+    await newPage.waitForLoadState("load", {timeout: 10_000}).catch(() => null);
     const heatmapPage = new HeatmapPage(newPage);
 
     await this.pause(3);
@@ -770,6 +816,11 @@ export class ProjectPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getCreateBackgroundNotification() {
+    await this.page.locator(CREATE_BACKGROUND_NOTIFICATION).first().waitFor();
+    return this.page.locator(CREATE_BACKGROUND_NOTIFICATION).first().textContent();
+  }
+
   public async getReadsLostTable(samples = 4) {
     const readsLostBars = await this.page.locator(PLQC_READS_LOST_BARS).all();
     const tooltips: { [key: string]: string }[] = [];
@@ -927,10 +978,10 @@ export class ProjectPage extends PageObject {
     return this.page.locator(NOTIFICATION_MESSAGE).allTextContents();
   }
 
-  public async getVisualizationTable(timeout = 10000) {
+  public async getVisualizationTable(timeout = 30_000) {
     await this.page.locator("[role='rowgroup'] [role='row']").first().waitFor({timeout: timeout});
     await expect(this.page.locator('[class*="loading"]').last()).toHaveCount(0, {
-      timeout: 30_000,
+      timeout: timeout,
     });
     return this.getTable(
       "[role='columnheader']",

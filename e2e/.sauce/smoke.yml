@@ -25,6 +25,72 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Functional: P-1: Taxon heatmap - Top Links"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/top-links.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-1: long mNGS - Coverage Visualization"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/coverageViz/long-mngs.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-1: short mNGS - Coverage Visualization"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/coverageViz/short-mngs.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-1: short mNGS - BLASTX"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/blastn/short-mngs-blastx.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-1: short mNGS - BLASTN"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/blastn/short-mngs-blastn.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Create BG model"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/background/create-background.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
   - name: "Smoke Test: impact page"
     platformName: "macOS 12"
     screenResolution: "1440x900"
@@ -34,15 +100,48 @@ suites:
       project: "chromium"
       retries: 3
     shard: concurrency
-  - name: "Functional: P-0: Taxon heatmap"
+  - name: "Functional: P-0: Taxon heatmap - 4"
     platformName: "macOS 12"
     screenResolution: "1440x900"
     testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
     params:
-      maxDuration: 1h
+      maxDuration: 3600
       browserName: "chromium"
       project: "chromium"
-      grep: "SNo"
+      grep: "Functional: P-0: Taxon heatmap - 4"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Taxon heatmap - 3"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Functional: P-0: Taxon heatmap - 3"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Taxon heatmap - 2"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Functional: P-0: Taxon heatmap - 2"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-0: Taxon heatmap - 1"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Functional: P-0: Taxon heatmap - 1"
       retries: 3
     shard: concurrency
   - name: "Data report validation (Heatmap): SNo 34"

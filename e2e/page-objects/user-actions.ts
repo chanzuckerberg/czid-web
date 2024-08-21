@@ -14,7 +14,7 @@ type runOptions = {
   sequencingPlatform?: string;
 };
 
-export async function setupSamples(page: any, project: any, sampleFiles: Array<string>, sampleNames: Array<string>, workflow: string, runOptions?: runOptions) {
+export async function setupSamples(page: any, project: any, sampleFiles: Array<string>, sampleNames: Array<string>, workflow: string, runOptions?: runOptions, uploadTimeout = 90_000) {
     runOptions = runOptions || {};
     const samplesPage = new SamplesPage(page);
 
@@ -41,6 +41,7 @@ export async function setupSamples(page: any, project: any, sampleFiles: Array<s
         sampleFiles, project, workflow, inputs, includeTrimPrimer,
         runOptions.taxon ? runOptions.taxon : "Unknown",
         runOptions.sequencingPlatform ? runOptions.sequencingPlatform : SEQUENCING_PLATFORMS.MNGS,
+        uploadTimeout
       );
       sampleNames = Object.keys(inputs);
 

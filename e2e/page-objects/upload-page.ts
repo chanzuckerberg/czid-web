@@ -117,7 +117,6 @@ const SAMPLE_UPLOAD_STATUS_BAR = (sampleName: string) => `//div[contains(@class,
 const LOADING_BARS = "//div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]";
 // #endregion Uploads completed
 
-
 export class UploadPage extends PageObject {
 
   // #region Navigate
@@ -667,8 +666,8 @@ export class UploadPage extends PageObject {
     await this.clickProjectName(projectName);
   }
 
-  public async uploadSampleFiles(sampleFiles: Array<string>, waitForConfirmation = true) {
-    await this.selectFiles(FILE_INPUT_SELECTOR, FIXTURE_DIR, sampleFiles, waitForConfirmation);
+  public async uploadSampleFiles(sampleFiles: Array<string>, waitForConfirmation = true , timeout = 90_000) {
+    await this.selectFiles(FILE_INPUT_SELECTOR, FIXTURE_DIR, sampleFiles, waitForConfirmation, timeout);
   }
 
   public async uploadCSVMetaData(metadataFileName: string, inputs: any) {
@@ -797,24 +796,24 @@ export class UploadPage extends PageObject {
     return inputs;
   }
 
-  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null) {
+  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null, timeout = 90_000) {
     await this.goto();
     await this.dismissCookieBanner();
 
     await this.selectProject(project.name);
     await this.setWorkFlow(workflow, includeTrimPrimer, taxonName, sequencingPlatform);
-    await this.uploadSampleFiles(sampleFiles);
+    await this.uploadSampleFiles(sampleFiles, true, timeout);
 
     // Continue
     await this.clickContinue();
 
     // Update the sample inputs using to the dynamically generated sample names
     // ex sample_name_{number}
-    const sampleNames = await this.getMetadataSampleNames();
+    const sampleNames = (await this.getMetadataSampleNames()).sort();
     if (inputs === null) {
       inputs = await this.getRandomizedSampleInputs(sampleFiles, sampleNames);
     } else {
-      const keys = Object.keys(inputs);
+      const keys = Object.keys(inputs).sort();
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const newKey = sampleNames[i];

@@ -27,6 +27,61 @@ env:
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "mNGS IP: Functional: P-0: mNGS-3: long mNGS Illumina sample Basespace upload"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/mngs/sample-upload.spec.ts']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "mNGS-3: long mNGS Illumina sample Basespace upload"
+      retries: 3
+    shard: concurrency
+  - name: "mNGS IP: Functional: P-0: mNGS-2: short mNGS Illumina sample Basespace upload"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/mngs/sample-upload.spec.ts']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "mNGS-2: short mNGS Illumina sample Basespace upload"
+      retries: 3
+    shard: concurrency
+  - name: "mNGS IP: Functional: P-0: mNGS-1: short mNGS Illumina sample web upload"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/mngs/sample-upload.spec.ts']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "mNGS-1: short mNGS Illumina sample web upload"
+      retries: 3
+    shard: concurrency
+  - name: "Functional P-1: short mNGS - CG run: SNo 34: CG run kick off from short mNGS - OldIndex"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/consensusGenome/short-mngs.spec.ts']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 34: CG run kick off from short mNGS - OldIndex"
+      retries: 3
+    shard: concurrency
+  - name: "Functional P-1: short mNGS - CG run: SNo 35: CG run kick off from short mNGS - NewIndex"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/consensusGenome/short-mngs.spec.ts']
+    params:
+      maxDuration: 3h
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo 35: CG run kick off from short mNGS - NewIndex"
+      retries: 3
+    shard: concurrency
   - name: "Functional: P-0: SNo SC2-42: Project count when CG running from mNGS"
     platformName: "macOS 12"
     screenResolution: "1440x900"

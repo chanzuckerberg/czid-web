@@ -280,6 +280,19 @@ export const SAMPLE_FILE_NO_HOST_2 = "wgs_SARS_CoV2_no_host_R2.fastq.gz";
 export const SAMPLE_FILE_1_PAIRED_R1 = "Sample_1_Paired_R1.fastq.gz";
 export const SAMPLE_FILE_1_PAIRED_R2 = "Sample_1_Paired_R2.fastq.gz";
 export const SAMPLE_FILE_CT20K = "Ct20K.fastq.gz";
+export const IDSEQ_MOSQ_2TO4MIL_SUBSAMPLE_10P = "28A-idseq-mosq.2to4mil_subsample_10p.fq.gz";
+export const MWGS_SE_SRR7002140_TA_252_DNA_BLAC_VANP_10P = "mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p_R1.fastq.gz";
+export const HG002_LONG_READS_METAG = "HG002_long_reads_metaG.fastq.gz";
+export const MWGS_PE_SRR7002140_TAP_R1 = "mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p_R1.fastq.gz";
+export const MWGS_PE_SRR7002140_TAP_R2 = "mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p_R2.fastq.gz";
+export const MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1 = "mWGS_RNA_mosquito-1-aedes-rna_10p_R1.fastq.gz";
+export const MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2 = "mWGS_RNA_mosquito-1-aedes-rna_10p_R2.fastq.gz";
+export const MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1 = "mWGS_RNA_human-128-lung-rna_10p_R1.fastq.gz";
+export const MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2 = "mWGS_RNA_human-128-lung-rna_10p_R2.fastq.gz";
+export const RR004_WATER_2_S23A_R1 = "RR004_water_2_S23A_R1.fastq";
+export const RR004_WATER_2_S23A_R2 = "RR004_water_2_S23A_R2.fastq";
+export const SAMPLE1_R1_001 = "Sample1_r1_001.fastq";
+export const SAMPLE2_R2_001 = "Sample2_r2_001.fastq";
 
 export const SAMPLE_NAMES: Record<string, string[]> = {
   STAGING: ["RNAEnr_10e4_viralcopies_RVOPv2_iSeq"],

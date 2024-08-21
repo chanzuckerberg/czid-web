@@ -33,19 +33,30 @@ import {
 } from "../constants/sample";
 // #endregion constants
 
+import { NCBIPage } from "./ncbi-page";
 import { ArticlesPage } from "./articles-page";
 import { PageObject } from "./page-object";
 import { PipelineVizPage } from "./pipeline_viz-page";
 import { ProjectPage } from "./project-page";
 const BACK_TO_PROJECT = (projectName: string) => `//a[text()='${projectName}']`;
 const TAXON_HOVER_ACTIONS = (taxonName: string) => `//span[text()='${taxonName}']/parent::div//span[@data-testid='hover-actions']//button`;
+const ACCESSION_LABEL = "[class*='accessionLabel']";
+const CONTIG_DOWNLOAD_ICON = "[class*='contigDownloader'] [class*='downloadIcon']";
+const NT_CONTIGS_BAR = "//*[contains(text(), 'NT Contigs')]/following-sibling::*/*/*[contains(@class, 'bar-container')]/*";
+const CLOSE_ICON = "[class*='closeIcon']";
+const METRIC_LINK = "[class*='metric'] [class*='value'] a";
+const CONTINUE_BUTTON = "//button[text()='Continue']";
+const BLAST_CONTINUE_BUTTON = "//*[contains(@class, 'blastRedirectionModal')]//button[text()='Continue']";
 const SAMPLE_MESSAGE = "[data-testid='sample-message']";
 const COVERAGE_VIZ_HISTOGRAM_LOCATOR = "[class*='coverageVizHistogram']";
+const BLAST_HOVER_ACTION = (genusTaxId: string) => `[data-testid*='hover-action-blast-${genusTaxId}']`;
 const ACTION_BUTTONS_LOCATOR = "[class*='actionIcons'] button";
+const BLAST_CONTIG_INPUTS = "[class*='blastContigsModal'] [role='rowgroup'] div[class*='checkbox']";
 const BLAST_SELECTION_MODAL_TESTID = "blast-selection-modal";
 const BLAST_SELECTION_OPTIONS = "[data-testid='blast-selection-modal'] [class*='optionText'] [class*='title']";
 const BLAST_TYPES = ["blastn", "blastx"];
 const PIPELINE_VERSION = "[data-testid='pipeline-version-select']";
+const NCBI_INDEX_DATE = "//*[@data-testid='pipeline-version-select']/following-sibling::span";
 const REPORT_TABLE_ROWS = "[class*='reportTable'] [class*='__Table__row'][role='row']";
 const PIPELINES_TAB = "[data-testid='pipelines']";
 const VIEW_PIPELINE_VISUALIZATION_LINK = "[class*='vizLink'] a";
@@ -117,6 +128,10 @@ export class SamplesPage extends PageObject {
     // #endregion Navigate
 
     // #region Get
+    public async getAccessionLabel() {
+      return this.page.locator(ACCESSION_LABEL).textContent();
+    }
+
     public async getBackgroundFilterValue() {
       return this.page.locator(BACKGROUND_FILTER_VALUE).textContent();
     }
@@ -177,6 +192,12 @@ export class SamplesPage extends PageObject {
 
     public async getPipelineVersion() {
       return this.page.locator(PIPELINE_VERSION).textContent();
+    }
+
+    public async getNCBIIndexDate() {
+      const ncbiIndexDateText = await this.page.locator(NCBI_INDEX_DATE).textContent();
+      const ncbiIndexDateTextParts = ncbiIndexDateText.split("|")
+      return ncbiIndexDateTextParts[1].replace("NCBI Index Date: ", "").trim();
     }
 
     public async getReportFilterTable() {
@@ -412,6 +433,44 @@ export class SamplesPage extends PageObject {
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
     }
 
+    public async clickCloseIcon() {
+      await this.page.locator(CLOSE_ICON).first().click();
+    }
+
+    public async clickBlastContinue() {
+      const [newPage] = await Promise.all([
+        this.page.context().waitForEvent("page"),
+        await this.page.locator(BLAST_CONTINUE_BUTTON).click(),
+      ]);
+      await newPage.waitForLoadState();
+      return new NCBIPage(newPage);
+    }
+
+    public async clickContigDownloadIcon() {
+      const [downloadPromise] = await Promise.all([
+        this.page.waitForEvent("download"),
+        await this.page.locator(CONTIG_DOWNLOAD_ICON).click(),
+      ]);
+      return downloadPromise;
+    }
+
+    public async clickNTContigsBar() {
+      await this.page.locator(NT_CONTIGS_BAR).first().hover({force: true});
+      await this.page.locator(NT_CONTIGS_BAR).first().click({force: true});
+    }
+
+    public async clickContinue() {
+      await this.page.locator(CONTINUE_BUTTON).click();
+    }
+
+    public async clickBlastContigCheckbox(index = 0) {
+      await this.page.locator(BLAST_CONTIG_INPUTS).nth(index).click();
+    }
+
+    public async clickBlastOption(option: string) {
+      await this.page.locator(BLAST_SELECTION_OPTIONS).getByText(option).click();
+    }
+
     public async clickBackToProject(projectName: string) {
       await this.page.locator(BACK_TO_PROJECT(projectName)).click();
     }
@@ -595,28 +654,41 @@ export class SamplesPage extends PageObject {
       await this.page.locator(SEARCH_BAR).click();
     }
 
+    public async clickNCBIReferenceLink() {
+      const [newPage] = await Promise.all([
+        this.page.context().waitForEvent("page"),
+        await this.page.locator(METRIC_LINK).click(),
+      ]);
+      await newPage.waitForLoadState();
+      return new NCBIPage(newPage);
+    }
+
     public async clickTaxonCoverageVisualisation(taxonName: string) {
-      const taxonElement = await this.getTaxonElementByName(taxonName);
-     await taxonElement.hover();
+      await this.hoverOverTaxon(taxonName)
 
-     const hoverElement = this.page.locator(TAXON_HOVER_ACTIONS(taxonName)).first();
+      const hoverElement = this.page.locator(TAXON_HOVER_ACTIONS(taxonName)).first();
 
-     await hoverElement.hover();
-     await hoverElement.click();
+      await hoverElement.hover();
+      await hoverElement.click();
     }
 
     public async clickConsensusGenomeIcon(taxonName: string) {
-      const taxonElement = await this.getTaxonElementByName(taxonName);
-     await taxonElement.hover();
+      await this.hoverOverTaxon(taxonName)
 
-     const hoverElement = this.page.locator(TAXON_HOVER_ACTIONS(taxonName)).nth(3);
+      const hoverElement = this.page.locator(TAXON_HOVER_ACTIONS(taxonName)).nth(3);
 
-     await hoverElement.hover();
-     await hoverElement.click();
+      await hoverElement.hover();
+      await hoverElement.click();
     }
 
     public async clickCreateANewConsensusGenome() {
       await this.page.locator(CREATE_A_NEW_CONSENSUS_GENOME_BUTTON).click();
+    }
+
+    public async clickBlastHoverButton(genusTaxId: string) {
+      await this.page.locator(BLAST_HOVER_ACTION(genusTaxId)).first().hover({force: true})
+      await this.pause(2);
+      await this.page.locator(BLAST_HOVER_ACTION(genusTaxId)).first().click()
     }
 
     public async clickBlastButton() {
@@ -625,8 +697,11 @@ export class SamplesPage extends PageObject {
     }
 
     public async clickContigFastaButton() {
-      const downloadContigFastaButton = this.page.locator(ACTION_BUTTONS_LOCATOR).nth(1);
-      await downloadContigFastaButton.click();
+      const [downloadPromise] = await Promise.all([
+        this.page.waitForEvent("download"),
+        await this.page.locator(ACTION_BUTTONS_LOCATOR).nth(1).click()
+      ]);
+      return downloadPromise;
     }
     // #endregion Click
 
@@ -651,6 +726,16 @@ export class SamplesPage extends PageObject {
       await this.page.locator(HOW_GOOD_IS_THE_COVERAGE_TOOLTIP).hover();
     }
 
+    public async hoverOverTaxon(taxonName: string) {
+      const taxonElement = await this.getTaxonElementByName(taxonName);
+      await taxonElement.first().hover({force: true});
+      await this.pause(3);
+    }
+
+    public async hoverOverNCBIReferenceLink() {
+      await this.page.locator(METRIC_LINK).hover();
+      await this.pause(2);
+    }
     // #endregion Hover
 
     // #region Macro
@@ -849,9 +934,7 @@ export class SamplesPage extends PageObject {
     }
 
     public async validateContigFastaDownload(sample: any, taxon: any) {
-      const downloadPromise = this.page.waitForEvent("download");
-      await this.clickContigFastaButton();
-      const download = await downloadPromise;
+      const download = await this.clickContigFastaButton();
 
       const expectedFileName = `${sample.name}_tax_${taxon.id}_contigs.fasta`;
       expect(expectedFileName).toMatch(download.suggestedFilename());

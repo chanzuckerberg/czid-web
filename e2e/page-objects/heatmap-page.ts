@@ -39,6 +39,7 @@ const HOVER_HIGHLIGHTED_METIC =
 const TOGGLE_SAMPLE_NAMES = "button[class*='toggleNames']";
 const APPCUES_CONTAINER = "[class*='appcues-tooltip-container']";
 const APPCUES_GOT_IT_BUTTON = "[class*='appcues-button-success']";
+const NOTIFICATION_MESSAGE = "[class*='notification']";
 const NOTIFICATION_CONTAINER = "[class*='notificationContainer']";
 const FILTER_PANEL_CONTAINER = "[class*='filterPanelContainer']";
 const CATEGORIES_BUTTON = "//*[text()='Categories']/ancestor::button";
@@ -106,7 +107,24 @@ export class HeatmapPage extends PageObject {
   }
 
   public async clickStartDownloadButton() {
-    await this.page.locator(START_DOWNLOAD_MODAL_BUTTON).click();
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        response =>
+          (response.url().includes("bulk_downloads") &&
+            response.request().method() === "POST") ||
+          (response.url().includes("graphqlfed") &&
+            response.request().method() === "POST"),
+      ),
+      this.page.locator(START_DOWNLOAD_MODAL_BUTTON).click(),
+    ]);
+    const responseJson = await response.json();
+    if (responseJson.data && responseJson.data.createAsyncBulkDownload) {
+      // graphqlfed
+      return responseJson.data.createAsyncBulkDownload.id;
+    } else {
+      // bulk_downloads
+      return responseJson.id;
+    }
   }
 
   public async clickDownloadConfirmationButton() {
@@ -140,6 +158,10 @@ export class HeatmapPage extends PageObject {
 
   public async clickKnownPathogensOnlyCheckbox() {
     await this.page.locator(KNOWN_PATHOGENS_ONLY_CHECKBOX).click();
+  }
+  
+  public async isSampleNamesToggleDisabled() {
+    return this.page.locator(TOGGLE_SAMPLE_NAMES).isDisabled()
   }
 
   public async clickSampleNamesToggle() {
@@ -182,7 +204,9 @@ export class HeatmapPage extends PageObject {
   }
 
   public async clickRemoveFilterButton(index = 0) {
+    await this.pause(1);
     await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).nth(index).click();
+    await this.pause(1);
   }
 
   public async clickCell(index: number, axis = "") {
@@ -214,6 +238,10 @@ export class HeatmapPage extends PageObject {
   // #endregion Hover
 
   // #region Get
+  public async getNotificationMessage() {
+    return this.page.locator(NOTIFICATION_MESSAGE).textContent();
+  }
+
   public async getMetricSelection() {
     return this.page.locator(METRIC_SELECTION).textContent();
   }
@@ -322,7 +350,7 @@ export class HeatmapPage extends PageObject {
   }
 
   public async getCellsCount() {
-    await this.page.locator(CELLS).first().waitFor();
+    await this.page.locator(CELLS).first().waitFor().catch(() => null);
     const cells = await this.page.locator(CELLS).all();
     return cells.length;
   }
@@ -413,17 +441,14 @@ export class HeatmapPage extends PageObject {
 
   public async removeAllFilters() {
     await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).last().waitFor();
-    let filters = await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).all();
-    for (let i = 0; i < filters.length; i++) {
-      await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).nth(0).click();
-      await this.pause(1);
-    }
-
-    await this.pause(4);
-    filters = await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).all();
-    for (let i = 0; i < filters.length; i++) {
-      await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).nth(0).click();
-      await this.pause(1);
+    for (let r = 0; r < 3; r++) {
+      const filters = await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).all();
+      await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).last().waitFor({timeout: 1_000}).catch(() => null);
+      for (let i = 0; i < filters.length; i++) {
+        await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).nth(0).click();
+        await this.pause(1);
+      }
+      await this.pause(4);
     }
   }
 
