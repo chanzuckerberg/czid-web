@@ -993,8 +993,8 @@ export class UploadPage extends PageObject {
     await this.page.getByText(UPLOAD_COMPLETE).waitFor();
   }
 
-  public async waitForBasespaceUploadComplete() {
-    await this.page.locator(LOADING_BARS).last().waitFor({state: "detached"});
+  public async waitForBasespaceUploadComplete(timeout = 90_000) {
+    await this.page.locator(LOADING_BARS).last().waitFor({state: "detached", timeout: timeout});
   }
   // #endregion Wait
 }

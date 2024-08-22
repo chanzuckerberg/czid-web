@@ -32,7 +32,7 @@ suites:
     screenResolution: "1440x900"
     testMatch: ['tests/mngs/sample-upload.spec.ts']
     params:
-      maxDuration: 3h
+      maxDuration: 10800
       browserName: "chromium"
       project: "chromium"
       grep: "mNGS-3: long mNGS Illumina sample Basespace upload"
@@ -43,7 +43,7 @@ suites:
     screenResolution: "1440x900"
     testMatch: ['tests/mngs/sample-upload.spec.ts']
     params:
-      maxDuration: 3h
+      maxDuration: 10800
       browserName: "chromium"
       project: "chromium"
       grep: "mNGS-2: short mNGS Illumina sample Basespace upload"
@@ -54,7 +54,7 @@ suites:
     screenResolution: "1440x900"
     testMatch: ['tests/mngs/sample-upload.spec.ts']
     params:
-      maxDuration: 3h
+      maxDuration: 10800
       browserName: "chromium"
       project: "chromium"
       grep: "mNGS-1: short mNGS Illumina sample web upload"

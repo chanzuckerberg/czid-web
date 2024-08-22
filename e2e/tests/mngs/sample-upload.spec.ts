@@ -12,6 +12,7 @@ const IN_PROGRESS_MESSAGE = "IN PROGRESSRunning Host FilteringView Pipeline Visu
 const BASESPACE_PROJECT_NAME = "Mark Test Project";
 
 const TEST_TIMEOUT = 60 * 1000 * 60; 
+const UPLOAD_TIMEOUT = 60 * 1000 * 5; 
 
 /*
  * mNGS IP: Sample upload (web) Functional: P-0
@@ -60,7 +61,7 @@ test.describe("mNGS IP: Functional: P-0", () => {
       "mngs_illumina/RR004_water_2_S23A_L003_R2_001.fastq",    
       "mngs_illumina/RR004_water_2_S23A_L004_R2_001.fastq"
     ]
-    await uploadPage.uploadSampleFiles(MNGS_ILLUMINA_SAMPLE_FILES);
+    await uploadPage.uploadSampleFiles(MNGS_ILLUMINA_SAMPLE_FILES, true, UPLOAD_TIMEOUT);
     await uploadPage.clickContinue();
     // #endregion 5. Select Sample files and click on Continue (see Data section)
       
@@ -216,7 +217,7 @@ test.describe("mNGS IP: Functional: P-0", () => {
     // #endregion 11. Check on Terms and Privacy policies checkbox and click Start Upload
 
     // #region 12. Click on Go to Project in [X] Samples successfully created! window
-    await uploadPage.waitForBasespaceUploadComplete();
+    await uploadPage.waitForBasespaceUploadComplete(UPLOAD_TIMEOUT);
 
     const goToProjectButtonEnabled =
       await uploadPage.isGoToProjectButtonEnabled();
@@ -287,7 +288,7 @@ test.describe("mNGS IP: Functional: P-0", () => {
 
     // "long mNGS Nanopore sample:
     // https://drive.google.com/file/d/1oSg7OPly6WnOEfh0YqP-Pr-YnMlLg9ft/view?usp=drive_link
-    await uploadPage.uploadSampleFiles([SAMPLE_FILE_CT20K]);
+    await uploadPage.uploadSampleFiles([SAMPLE_FILE_CT20K], true, UPLOAD_TIMEOUT);
     await uploadPage.clickContinue();
     // #endregion 5. Select Sample files and click on Continue (see Data section)
 
