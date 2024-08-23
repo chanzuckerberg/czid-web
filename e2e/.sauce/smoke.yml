@@ -6,25 +6,79 @@ kind: playwright
 showConsoleLog: true
 sauce:
   region: us-west-1
-  concurrency: 5 
+  concurrency: 5
   metadata:
     tags:
       - e2e
       - czid
       - $NODE_ENV
     build: COMMIT $CI_COMMIT_SHORT_SHA
-  # comment out when running locally  
+  # comment out when running locally
   # tunnel:
-  #   name: czid-github-sauce-connect 
+  #   name: czid-github-sauce-connect
 playwright:
-  version: package.json 
-  configFile: ./setup/$NODE_ENV.config.ts 
+  version: package.json
+  configFile: ./setup/$NODE_ENV.config.ts
 rootDir: ./
 env:
   CZID_USERNAME: $CZID_USERNAME
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
 suites:
+  - name: "Functional: P-0: Heatmap Happy Path"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/heatmap-happy-path.spec.ts']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-1: Heatmap Top Links"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/heatmap-top-links.spec.ts']
+    params:
+      maxDuration: 3600
+      browserName: "chromium"
+      project: "chromium"
+      grep: "SNo"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-1: Heatmap NT Combined Microbiome File Download"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
+    excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Verify downloaded Combined Microbiome File for metric NT"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-1: Heatmap NR Combined Microbiome File Download"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
+    excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Verify downloaded Combined Microbiome File for metric NR"
+      retries: 3
+    shard: concurrency
+  - name: "Functional: P-1: Heatmap Image Downloads"
+    platformName: "macOS 12"
+    screenResolution: "1440x900"
+    testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
+    excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
+    params:
+      browserName: "chromium"
+      project: "chromium"
+      grep: "Verify downloaded heatmap image"
+      retries: 3
+    shard: concurrency
   - name: "Functional: P-1: Taxon heatmap - Top Links"
     platformName: "macOS 12"
     screenResolution: "1440x900"

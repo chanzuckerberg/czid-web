@@ -5,7 +5,6 @@ node_modules/
 .env.local
 .env.dev
 storage/state.json
-*.png
 playwright-report/
 html-reports/
 summary.json

@@ -10,13 +10,12 @@ const TEST_TIMEOUT = 60 * 1000 * 60;
 const NONE = "None";
 
 test.describe("Functional: P-0: Taxon heatmap - 1", () => {
-  
   test.beforeEach(async () => {
     test.setTimeout(TEST_TIMEOUT);
   });
 
   /**
-   * Taxon heatmap - Filtering 
+   * Taxon heatmap - Filtering
    * Removal
    */
   test(`SNo 1: Threshold filtering criteria removal`, async ({ page }) => {
@@ -40,7 +39,16 @@ test.describe("Functional: P-0: Taxon heatmap - 1", () => {
     // #endregion 4. Click on Thresholds filter at Filters left panel
 
     // #region 5. Pick more than 2 different Threshold filters, enter values, and click on apply
-    await heatmapPage.setThresholdsOptions([{value: "5000"}, {value: "1000"}]);
+    await heatmapPage.setThresholdsOptions([
+      {
+        metric: "NT rPM",
+        value: "5000"
+      },
+      {
+        metric: "NR rPM",
+        value: "1000"
+      }
+    ]);
     // #endregion 5. Pick more than 2 different Threshold filters, enter values, and click on apply
 
     // #region 6. Verify heatmap refreshes with filtering criteria
@@ -53,6 +61,9 @@ test.describe("Functional: P-0: Taxon heatmap - 1", () => {
     // #region 7. Remove thresholds chosen in step 5 randomly (clicking on x)
     await heatmapPage.clickRemoveFilterButton();
     await heatmapPage.clickRemoveFilterButton();
+
+    // allow heatmap to update - there is sometimes another alert, so do not delay closing the background alert
+    await heatmapPage.pause(2);
 
     // - Threshold filtering removed when clicking x
     expect(vizCellsAfter).toBeLessThanOrEqual(await heatmapPage.getCellsCount());
@@ -68,7 +79,7 @@ test.describe("Functional: P-0: Taxon heatmap - 1", () => {
   });
 
   /**
-   * Taxon heatmap - Creation 
+   * Taxon heatmap - Creation
    * Default BG None
    */
   test(`SNo 2: Default value in a new Taxon heatmap`, async ({ page }) => {
@@ -102,7 +113,7 @@ test.describe("Functional: P-0: Taxon heatmap - 1", () => {
   });
 
   /**
-   * Taxon heatmap - Creation 
+   * Taxon heatmap - Creation
    * None BG filtering UI
    */
   test(`SNo 3: Taxon heatmap NT / NR Z score filtering with None BG`, async ({ page }) => {
@@ -142,7 +153,7 @@ test.describe("Functional: P-0: Taxon heatmap - 1", () => {
 
     // - NT / NR Z Score options displayed and disabled in View Options > Metric
     // - Tooltip displayed while hovering NT / NR Z Score disabled metric options:
-    // To see the Z Score, first choose a background model above. Learn more (link) 
+    // To see the Z Score, first choose a background model above. Learn more (link)
     const expectedZScoreTooltip = "To see the Z Score, first choose a background model above. Learn more.";
     const ntZScore = await heatmapPage.getMetricOptionTooltip('NT Z Score');
     expect(ntZScore).toEqual(expectedZScoreTooltip);
@@ -166,7 +177,7 @@ test.describe("Functional: P-0: Taxon heatmap - 1", () => {
     // #region 10. Hover over NT / NR Z score options in a Threshold drowpdown and verify tooltip is displayed
 
     // - Tooltip displayed while hovering NT / NR Z Score disabled threshold options:
-    // To see the Z Score, first choose a background model above. Learn more (link) 
+    // To see the Z Score, first choose a background model above. Learn more (link)
     const filterNtZScore = await heatmapPage.getThresholdOptionTooptip('NT Z Score');
     expect(filterNtZScore).toEqual(expectedZScoreTooltip);
 
@@ -215,7 +226,7 @@ test.describe("Functional: P-0: Taxon heatmap - 1", () => {
       {
         metric: "NT rPM",
         value: "5000"
-      }, 
+      },
       {
         metric: "NR rPM",
         value: "1000"
@@ -295,6 +306,8 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
 
     // 7. Click on Save Button
     await heatmapPage.clickCloseAlertButton();
+    // allow heatmap to update
+    await heatmapPage.pause(2);
     const heatmapId = await heatmapPage.clickSave();
 
     // - ""Your visualization was saved!"" message displayed when clicking on Save
@@ -325,7 +338,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
   });
 
   /**
-   * Taxon heatmap - BG model persistance 
+   * Taxon heatmap - BG model persistance
    * Selecting None BG back
    */
   test(`SNo 5: Saved Taxon Heatmap behavior when BG model chosen back to None`, async ({ page }) => {
@@ -370,6 +383,10 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
 
     // 7. Click on Save Button
     await heatmapPage.clickCloseAlertButton();
+
+    // allow heatmap to update - there is sometimes another alert, so do not delay closing the background alert
+    await heatmapPage.pause(2);
+
     const heatmapId = await heatmapPage.clickSave();
 
     const saveNotification = await heatmapPage.getSaveNotification();
@@ -453,7 +470,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
   });
 
   /**
-   * Taxon Heatmap - BG model persistance 
+   * Taxon Heatmap - BG model persistance
    * Sample report
    */
   test(`SNo 6: Taxon heatmap BG selected persists in Sample report`, async ({ page }) => {
@@ -491,7 +508,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
     let samplesPage = await heatmapPage.clickCell(0);
     // #endregion 6. While hovering over a Taxon Heatmap cell, verify its data, and click on the cell
 
-    // #region 7. At new sample report tab, verify Score, Z-Score, and Background dropdown list 
+    // #region 7. At new sample report tab, verify Score, Z-Score, and Background dropdown list
 
     // A Taxon Heatmap with Background = ""None"" behaviour:
     // - In sample report: Background selected as ""None""
@@ -504,7 +521,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
     for (const taxon of reportTable) {
       expect(taxon['Z Score']).toEqual("-");
     }
-    // #endregion 7. At new sample report tab, verify Score, Z-Score, and Background dropdown list 
+    // #endregion 7. At new sample report tab, verify Score, Z-Score, and Background dropdown list
 
     // #region 8. Close sample report tab, and at Taxon Heatmap, select ""NID Human CSF HC"" as Background
     await samplesPage.close();
@@ -598,7 +615,7 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
   });
 
   /**
-   * Taxon heatmap - Metrics and Thresholds 
+   * Taxon heatmap - Metrics and Thresholds
    * Coming back to "None" BG
    */
   test(`SNo 8: Using NT / NR Z scores as Threshold and Metrics and switching back to None BG`, async ({ page }) => {
@@ -640,7 +657,7 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
         metric: "NT Z Score",
         operator: ">=",
         value: "1"
-      }, 
+      },
       {
         metric: "NR Z Score",
         operator: ">=",
@@ -733,7 +750,7 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
     // #endregion 5. Verify Filters left panel > Background filter is ""None""
 
     // #region 6. Click on Download
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     // #endregion 6. Click on Download
 
     // #region 7. Download All Heatmap Metrics(.csv) report and verify its content
@@ -742,25 +759,25 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
     // #endregion 7. Download All Heatmap Metrics(.csv) report and verify its content
 
     // #region 8. Download Current Heatmap Metrics (.csv) report and verify its content
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Current Heatmap Metrics");
     const downloadCurrentHeatmapMetrics = await heatmapPage.clickDownloadConfirmationButton();
     // #endregion 8. Download Current Heatmap Metrics (.csv) report and verify its content
 
     // #region 9. Download both Heatmap image formats (.png) & (.svg) and verify its content
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType(".png");
     const downloadHeatmapImagePNG = await heatmapPage.clickDownloadConfirmationButton();
     expect(downloadHeatmapImagePNG.suggestedFilename()).toEqual("heatmap.png")
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType(".svg");
     const downloadHeatmapImageSVG = await heatmapPage.clickDownloadConfirmationButton();
     expect(downloadHeatmapImageSVG.suggestedFilename()).toEqual("heatmap.svg")
     // #endregion 9. Download both Heatmap image formats (.png) & (.svg) and verify its content
 
     // #region 10. Download Combined Microbiome File(.biom) (choose any metric) and verify it Completes in Downloads page (main menu). Download the file
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Combined Microbiome File");
     await heatmapPage.clickDownloadMetric("NT rPM");
     await heatmapPage.clickStartDownloadButton();
@@ -796,25 +813,25 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
     // #endregion 12. Click on Metric dropdown list and select NT Z Score
 
     // #region 13. Repeat steps 6-10
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("All Heatmap Metrics");
     const downloadAllHeatmapMetricsWithBackground = await heatmapPage.clickDownloadConfirmationButton();
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Current Heatmap Metrics");
     const downloadCurrentHeatmapMetricsWithBackground = await heatmapPage.clickDownloadConfirmationButton();
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType(".png");
     const downloadHeatmapImagePNGWithBackground = await heatmapPage.clickDownloadConfirmationButton();
     expect(downloadHeatmapImagePNGWithBackground.suggestedFilename()).toEqual("heatmap.png")
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType(".svg");
     const downloadHeatmapImageSVGWithBackground = await heatmapPage.clickDownloadConfirmationButton();
     expect(downloadHeatmapImageSVGWithBackground.suggestedFilename()).toEqual("heatmap.svg")
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Combined Microbiome File");
     await heatmapPage.clickDownloadMetric("NT rPM");
     await heatmapPage.clickStartDownloadButton();
@@ -846,7 +863,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
   });
 
   /**
-   * Taxon heatmap - BG model persistance 
+   * Taxon heatmap - BG model persistance
    * Taxon Heatmap sharing
    */
   test(`SNo 10: Taxon Heatmap BG selected persist when shared (user with staging project access)`, async ({ page }) => {
@@ -970,7 +987,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
         metric: "NT Z Score",
         operator: ">=",
         value: "1"
-      }, 
+      },
       {
         metric: "NR Z Score",
         operator: ">=",
@@ -1125,7 +1142,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
         metric: "NT Z Score",
         operator: ">=",
         value: "1"
-      }, 
+      },
       {
         metric: "NR Z Score",
         operator: ">=",
@@ -1260,7 +1277,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     // #endregion 5. Verify Filters left panel > Background filter is ""None""
 
     // #region 6. Click on Download
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     // #endregion 6. Click on Download
 
     // #region 7. Download All Heatmap Metrics(.csv) report and verify its content
@@ -1269,24 +1286,24 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     // #endregion 7. Download All Heatmap Metrics(.csv) report and verify its content
 
     // #region 8. Download Current Heatmap Metrics (.csv) report and verify its content
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Current Heatmap Metrics");
     const ntRPMCurrentHeatmapMetricsDownload = await heatmapPage.clickDownloadConfirmationButton();
     // #endregion 8. Download Current Heatmap Metrics (.csv) report and verify its content
 
     // #region 9. Download both Heatmap image formats (.png) & (.svg) and verify its content
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType(".png");
     const ntRPMPngDownload = await heatmapPage.clickDownloadConfirmationButton();
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType(".svg");
     const ntRPMSvgDownload = await heatmapPage.clickDownloadConfirmationButton();
     // #endregion 9. Download both Heatmap image formats (.png) & (.svg) and verify its content
 
-    // #region 10. Download Combined Microbiome File(.biom) (choose any metric) 
+    // #region 10. Download Combined Microbiome File(.biom) (choose any metric)
     // and verify it Completes in Downloads page (main menu). Download the file
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Combined Microbiome File");
     await heatmapPage.clickDownloadMetric("NT rPM");
     const ntRPMdownloadId = await heatmapPage.clickStartDownloadButton();
@@ -1298,7 +1315,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     await downloadsPage.navigateToDownloads();
 
     const ntRPMDownloadComnpleted = await downloadsPage.waitForDownloadComplete(ntRPMdownloadId, TEST_TIMEOUT);
-    // #endregion 10. Download Combined Microbiome File(.biom) (choose any metric) 
+    // #endregion 10. Download Combined Microbiome File(.biom) (choose any metric)
 
     // #region 11. Go back to Taxon Heatmap. Click on Background dropdown list and pick ""floo sp97"" option
     await heatmapPage.gotoHeatmap(heatmapUrl);
@@ -1339,23 +1356,23 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     // #endregion 12. Click on Metric dropdown list and select NT Z Score
 
     // #region 13. Repeat steps 6-10
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("All Heatmap Metrics");
     const ntZScoreAllHeatmapMetricsDownload = await heatmapPage.clickDownloadConfirmationButton();
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Current Heatmap Metrics");
     const ntZScoreCurrentHeatmapMetricsDownload = await heatmapPage.clickDownloadConfirmationButton();
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType(".png");
     const ntZScorePngDownload = await heatmapPage.clickDownloadConfirmationButton();
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType(".svg");
     const ntZScoreSvgDownload = await heatmapPage.clickDownloadConfirmationButton();
 
-    await heatmapPage.clickDownload();
+    await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Combined Microbiome File");
     await heatmapPage.clickDownloadMetric("NT rPM");
     const ntrPMDownloadId = await heatmapPage.clickStartDownloadButton();

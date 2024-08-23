@@ -230,7 +230,7 @@ export class ProjectPage extends PageObject {
     await this.page.waitForSelector(
       ".ReactVirtualized__Grid__innerScrollContainer",
     );
-    await this.pause(1);
+    await this.pause(2);
     await expect(this.page.locator('[class*="loading"]')).toHaveCount(0, {
       timeout: 30_000,
     });

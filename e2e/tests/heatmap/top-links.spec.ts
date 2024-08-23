@@ -26,7 +26,7 @@ const DOWNLOAD_MICROBIOME_COMBINED_CASES = [
 ]
 
 test.describe("Functional: P-1: Taxon heatmap - Top Links", () => {
-  
+
   test.beforeAll(async ({browser}) => {
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -72,7 +72,7 @@ test.describe("Functional: P-1: Taxon heatmap - Top Links", () => {
     heatmapUrl = await createHeatmap(page, project);
   });
 
-  test.beforeEach(async () => { 
+  test.beforeEach(async () => {
     test.setTimeout(TEST_TIMEOUT);
   });
 
@@ -88,47 +88,47 @@ test.describe("Functional: P-1: Taxon heatmap - Top Links", () => {
       // #endregion Load A Taxon heat map.
 
       // #region Click the cloud icon on the top right area
-      heatmapPage.clickDownload();
+      heatmapPage.clickDownloadButton();
       // #endregion Click the cloud icon on the top right area
 
       // #region Select combined Microbiome File
       await heatmapPage.clickDownloadType("Combined Microbiome File");
       // #endregion Select combined Microbiome File
-  
+
       // #region On the dropdown select metric
       await heatmapPage.clickDownloadMetric(c.metric);
-  
+
       const downloadId = await heatmapPage.clickStartDownloadButton();
-  
+
       // blue notification at top right corner, with text ""We've received your download request and are busy preparing your data. To check the status of your download, visit the Downloads page.
-      // Dismiss"" 
+      // Dismiss""
       const notificationMessage = await heatmapPage.getNotificationMessage();
       expect(notificationMessage).toEqual(
         "We've received your download request and are busy preparing your data. " +
         "To check the status of your download, visit the Downloads page." +
         "Dismiss");
-  
+
       // On downloads the item appears.
       const downloadsPage = new DownloadsPage(page);
       await downloadsPage.navigateToDownloads();
-  
+
       const downloadComnpleted = await downloadsPage.waitForDownloadComplete(downloadId, TEST_TIMEOUT);
       expect(downloadComnpleted).toBeTruthy();
-  
+
       // Open The file
       // Compare the file to the original heatmap
       const download = await downloadsPage.clickDownloadFile(downloadId);
       const downloadPath = await download.path();
-  
+
       const downloadFileName = download.suggestedFilename();
       const expectedFileName = "Combined Microbiome File.biom";
       expect(downloadFileName).toEqual(expectedFileName)
-  
+
       // Compare Results vs:
       // Microbiome Combined.biom
       const actualOutputStr = (await fs.readFile(downloadPath)).toString();
       const expectedBaselineStr = (await fs.readFile(OUTPUT_PATH(`heatmap/combined_microbiome_file/${c.metric}`, expectedFileName))).toString();
-  
+
       const expectedMaxDiff = expectedBaselineStr.length * 0.10;
       const actualDiff = fastDiff(actualOutputStr, expectedBaselineStr).length;
       expect(actualDiff).toBeLessThanOrEqual(expectedMaxDiff);

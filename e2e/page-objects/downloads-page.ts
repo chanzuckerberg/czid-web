@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 import { PageObject } from "./page-object";
 
 import { ProjectPage } from "./project-page";
+import { readFileSync } from "fs";
 
 const SAMPLE_METADATA = "Sample Metadata";
 const SAMPLES_IN_DOWNLOAD_DROPDOWN = "//div[text()='Samples in this Download']";
@@ -26,6 +27,9 @@ const BULK_DOWNLOAD_METRICS = {
   "viral-consensus-genome": "consensus-genome",
   "covid-consensus-genome": "consensus-genome",
 };
+
+const COMBINED_MICROBIOME_FILE_NAME = "Combined Microbiome File.biom";
+const EXPECTED_DOWNLOADS_FIXTURE_PATH = "fixtures/heatmap/expected_download_files";
 
 export class DownloadsPage extends PageObject {
 
@@ -277,4 +281,28 @@ export class DownloadsPage extends PageObject {
     expect(download.suggestedFilename()).toMatch(expectedFileName);
     // #endregion Verify the expected file was downloaded
   };
+
+  public async combinedMicrobiomeFileDownloadTest(biomDownloadId, expectedDownloadFixtureName: string, testTimeout = 120000) {
+    const EXPECTED_DOWNLOAD_FIXTURE_PATH = `${EXPECTED_DOWNLOADS_FIXTURE_PATH}/${expectedDownloadFixtureName}`;
+
+    // #region Open Downloads page, wait for the download to complete, and download file
+    await this.navigateToDownloads();
+    await this.waitForDownloadComplete(biomDownloadId, testTimeout);
+    const download = await this.clickDownloadFile(biomDownloadId);
+    const downloadPath = await download.path();
+    const downloadFileName = download.suggestedFilename();
+    // #endregion Open Downloads page and wait for the download to complete, and download file
+
+    // #region Verify download file name and contents against fixture
+    expect(downloadFileName).toEqual(COMBINED_MICROBIOME_FILE_NAME);
+    const downloadFileJSON = JSON.parse(readFileSync(downloadPath, "utf8"));
+    const expectedFileJSON = JSON.parse(readFileSync(EXPECTED_DOWNLOAD_FIXTURE_PATH, "utf8"));
+
+    // Dates will not be equal since fixture is pregenerated, so remove them from the comparison
+    delete downloadFileJSON.date;
+    delete expectedFileJSON.date;
+
+    expect(downloadFileJSON).toEqual(expectedFileJSON);
+    // #endregion Verify download file name and contents against fixture
+  }
 }

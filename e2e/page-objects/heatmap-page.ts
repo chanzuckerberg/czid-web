@@ -1,6 +1,7 @@
-import { expect } from "@playwright/test";
+import { Download, expect } from "@playwright/test";
 import { PageObject } from "./page-object";
 import { SamplesPage } from "./samples-page";
+import { ArticlesPage } from './articles-page';
 
 const HEATMAP_NAME =
   "[class*='sampleName']";
@@ -11,13 +12,17 @@ const HEATMAP_SAMPLE_NAMES =
 const SHARE_BUTTON = "//button[text()='Share']";
 const SAVE_BUTTON = "//button[text()='Save']";
 const DOWNLOAD_BUTTON = "//*[contains(@class, 'controls')]/button[text()='Download']";
+const HELP_BUTTON = "[data-testid='help-button']"
 const DOWNLOAD_TYPES_LOCATOR = "[class*='downloadTypeContainer'] [class*='name']";
 const DOWNLOAD_MODAL_BUTTON = "//*[contains(@class, 'footer')]/button[text()='Download']";
-const START_DOWNLOAD_MODAL_BUTTON = "//button[text()='Start Generating Download']";
+const DOWNLOAD_MODAL_START_GENERATING_DOWNLOAD_BUTTON = "//button[text()='Start Generating Download']";
 const DOWNLOAD_MODAL_METRIC_DROPDOWN = "[class*='metricDropdown'] [class*='dropdownTrigger']";
 const DOWNLOAD_MODAL_METRIC_OPTIONS = "[data-testid='dropdown-menu'] [class*='item item']"
+const DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT = "[role='alert'][class*='toast-body']";
 const CLOSE_MODAL_BUTTON = "[class*='modal'] [class*='closeIcon']";
-const SAVE_NOTIFICATION = "[class*='popup'] [class*='content']";
+const HELP_RESOURCES_IFRAME = "appcues-container iframe";
+const HELP_RESOURCES_CONTENT = "cue";
+const HEADER_BUTTON_POPUP_CONTENT = "[class*='popup'] [class*='content']";
 const TINY_CONFIRMATION = "[class*='tiny basic']";
 const VIEW_OPTIONS = "//*[contains(@class, 'listbox')]//*[contains(@class, 'option')]";
 const AVAILABLE_VIEW_OPTIONS =
@@ -58,12 +63,31 @@ const BACKGROUND_DROPDOWN = "[class*='backgroundDropdownContainer'] button";
 const SELECTED_BACKGROUND = "//*[contains(@class, 'backgroundDropdownContainer')]/button/div";
 const SEARCH_INPUT = "[role='tooltip'] input";
 const SEARCH_RESULTS = "//ul[contains(@class, 'listbox')]//li[@aria-disabled='false']//*[contains(@class, 'primary-text')]";
+// TODO: rename to be specific to new background alert
 const ALERT_MESSAGE = "[class*='Alert-message']";
 const CLOSE_ALERT_BUTTON = "[class*='Alert-action'] button";
 const THRESHOLDS_INPUT = "input[aria-label='threshold-value']";
 const THRESHOLDS_APPLY_BUTTON = "//*[text()='Configure Thresholds']/following-sibling::*//button[text()='Apply']";
 const KNOWN_PATHOGENS_ONLY_CHECKBOX = "//*[text()='Known Pathogens Only']/preceding-sibling::*//input";
 
+export const SHAREABLE_URL_NOTIFICATION = "A shareable URL was copied to your clipboard!";
+export const SHORTENED_URL_LENGTH = 5; // default value in shortener gem
+
+export const DOWNLOAD_TYPES = {
+  COMBINED_MICROBIOME_FILE: "Combined Microbiome File",
+  PNG_IMAGE: ".png",
+  SVG_IMAGE: ".svg",
+};
+type HeatmapImageType = typeof DOWNLOAD_TYPES.PNG_IMAGE | typeof DOWNLOAD_TYPES.SVG_IMAGE;
+
+// .biom is listed as Combined Microbiome File in the download modal
+export const BIOM_DOWNLOAD_METRICS = {
+  NT_RPM: "NT rPM",
+  NT_R_TOTAL_READS: "NT r (total reads)",
+  NR_RPM: "NR rPM",
+  NR_R_TOTAL_READS: "NR r (total reads)",
+};
+export const DOWNLOAD_NOTIFICATION = "We've received your download request and are busy preparing your data. To check the status of your download, visit the Downloads page.Dismiss";
 export class HeatmapPage extends PageObject {
   // #region Api
   public async getHeatmapMetrics() {
@@ -97,6 +121,14 @@ export class HeatmapPage extends PageObject {
     return this.getClipboardText();
   }
 
+  public async clickDownloadButton() {
+    await this.page.locator(DOWNLOAD_BUTTON).click();
+  }
+
+  public async clickHelpButton() {
+    await this.page.locator(HELP_BUTTON).click();
+  }
+
   public async clickDownloadMetric(option: string) {
     await this.page.locator(DOWNLOAD_MODAL_METRIC_DROPDOWN).click();
     await this.page.locator(DOWNLOAD_MODAL_METRIC_OPTIONS).getByText(option).click();
@@ -106,6 +138,7 @@ export class HeatmapPage extends PageObject {
     await this.page.locator(THRESHOLDS_OPERATOR).nth(index).click();
   }
 
+  // TODO: Update function name to StartGeneratingDownload for clarity
   public async clickStartDownloadButton() {
     const [response] = await Promise.all([
       this.page.waitForResponse(
@@ -115,7 +148,7 @@ export class HeatmapPage extends PageObject {
           (response.url().includes("graphqlfed") &&
             response.request().method() === "POST"),
       ),
-      this.page.locator(START_DOWNLOAD_MODAL_BUTTON).click(),
+      this.page.locator(DOWNLOAD_MODAL_START_GENERATING_DOWNLOAD_BUTTON).click(),
     ]);
     const responseJson = await response.json();
     if (responseJson.data && responseJson.data.createAsyncBulkDownload) {
@@ -159,17 +192,13 @@ export class HeatmapPage extends PageObject {
   public async clickKnownPathogensOnlyCheckbox() {
     await this.page.locator(KNOWN_PATHOGENS_ONLY_CHECKBOX).click();
   }
-  
+
   public async isSampleNamesToggleDisabled() {
     return this.page.locator(TOGGLE_SAMPLE_NAMES).isDisabled()
   }
 
   public async clickSampleNamesToggle() {
     await this.page.locator(TOGGLE_SAMPLE_NAMES).click();
-  }
-
-  public async clickDownload() {
-    await this.page.locator(DOWNLOAD_BUTTON).click();
   }
 
   public async clickDownloadType(downloadType: string) {
@@ -281,11 +310,32 @@ export class HeatmapPage extends PageObject {
   }
 
   public async getSaveNotification() {
-    return this.page.locator(SAVE_NOTIFICATION).textContent();
+    // TODO: call getHeaderButtonPopupContent instead
+    return this.page.locator(HEADER_BUTTON_POPUP_CONTENT).textContent();
+  }
+
+  public async getShareNotification() {
+    return this.getHeaderButtonPopupContent();
+  }
+
+  public async getHeaderButtonPopupContent() {
+    return this.page.locator(HEADER_BUTTON_POPUP_CONTENT).textContent();
   }
 
   public async getAlertMessage() {
     return this.page.locator(ALERT_MESSAGE).textContent();
+  }
+
+  public async getBulkDownloadAlertMessage() {
+    await this.page
+      .locator(DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT)
+      .first()
+      .waitFor({ state: "visible" });
+    return this.page.locator(DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT).allTextContents();
+  }
+
+  public async getHelpResourcesIframe() {
+    return this.page.frameLocator(HELP_RESOURCES_IFRAME);
   }
 
   public async getTaxonInfo() {
@@ -300,6 +350,7 @@ export class HeatmapPage extends PageObject {
   public async getSelectedBackground() {
     await this.page.locator(SELECTED_BACKGROUND).waitFor();
     const selectedBackground = await this.page.locator(SELECTED_BACKGROUND).textContent();
+    await this.pause(1);
     return selectedBackground.trim()
   }
 
@@ -446,7 +497,8 @@ export class HeatmapPage extends PageObject {
       await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).last().waitFor({timeout: 1_000}).catch(() => null);
       for (let i = 0; i < filters.length; i++) {
         await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).nth(0).click();
-        await this.pause(1);
+        // allow heatmap to reload, filters are disabled during reload
+        await this.pause(5);
       }
       await this.pause(4);
     }
@@ -589,6 +641,17 @@ export class HeatmapPage extends PageObject {
     await this.pause(1);
     await this.page.locator(THRESHOLDS_APPLY_BUTTON).click();
   }
+
+  public async clickHelpResourceLink(name: string) : Promise<ArticlesPage> {
+    const newPagePromise = this.page.context().waitForEvent("page");
+    const helpResourcesIframe = await this.getHelpResourcesIframe();
+    await helpResourcesIframe.getByRole("link", { name }).click();
+    const newPage = await newPagePromise;
+
+    await newPage.waitForLoadState();
+    return new ArticlesPage(newPage);
+  }
+
   // #endregion Macro
 
   // #region Validation
@@ -616,6 +679,13 @@ export class HeatmapPage extends PageObject {
       expect(notification).toBeUndefined();
     }
   }
+
+  public async validateHelpResourcesPanelVisible() {
+    await expect(
+      (await this.getHelpResourcesIframe())
+        .locator(HELP_RESOURCES_CONTENT)
+    ).toBeVisible();
+  }
   // #endregion Validation
 
   // #region Bool
@@ -623,4 +693,30 @@ export class HeatmapPage extends PageObject {
     return this.page.locator(NOTIFICATION_CONTAINER).isVisible();
   }
   // #endregion Bool
+
+  public async downloadCombinedMicrobiomeFile(downloadMetric: string): Promise<number> {
+    // #region Download Combined Microbiome File for given metric
+    await this.clickDownloadType(DOWNLOAD_TYPES.COMBINED_MICROBIOME_FILE);
+    await this.pause(1);
+    await this.clickDownloadMetric(downloadMetric);
+    const biomDownloadId = await this.clickStartDownloadButton();
+    // #endregion Download Combined Microbiome File for given metric
+
+    // #region Verify the download alert message
+    const alertMessage = await this.getBulkDownloadAlertMessage();
+    expect(alertMessage).toEqual([DOWNLOAD_NOTIFICATION]);
+    // #endregion Verify the download alert message
+
+    return biomDownloadId;
+  };
+
+  public async downloadHeatmapImage(imageType: HeatmapImageType): Promise<Download> {
+    // #region Download heatmap image and verify file name
+    await this.clickDownloadType(imageType);
+    const downloadedHeatmapImage = await this.clickDownloadConfirmationButton();
+    expect(downloadedHeatmapImage.suggestedFilename()).toEqual(`heatmap${imageType}`);
+    // #endregion Download heatmap image and verify file name
+
+    return downloadedHeatmapImage;
+  };
 }
