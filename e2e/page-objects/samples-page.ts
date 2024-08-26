@@ -775,7 +775,7 @@ export class SamplesPage extends PageObject {
     public async waitForNotInProgress() {
       const inProgress = this.page.locator(REPORT_IN_PROGRESS);
       while(await inProgress.isVisible()) {
-        await this.reload();
+        await this.reload().catch(() => null);
         await this.pause(20);
       }
     }

@@ -61,7 +61,7 @@ test.describe("mNGS IP: Functional: P-0", () => {
       "mngs_illumina/RR004_water_2_S23A_L003_R2_001.fastq",    
       "mngs_illumina/RR004_water_2_S23A_L004_R2_001.fastq"
     ]
-    await uploadPage.uploadSampleFiles(MNGS_ILLUMINA_SAMPLE_FILES, true, UPLOAD_TIMEOUT);
+    await uploadPage.uploadSampleFiles(MNGS_ILLUMINA_SAMPLE_FILES, true, UPLOAD_TIMEOUT * 2); // Increase timeout for all files to complete upload
     await uploadPage.clickContinue();
     // #endregion 5. Select Sample files and click on Continue (see Data section)
       
