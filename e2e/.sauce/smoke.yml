@@ -4,18 +4,32 @@
 apiVersion: v1alpha
 kind: playwright
 showConsoleLog: true
+
+# Test Config
+suiteRetries: &suiteRetries 2
+testRetries: &testRetries 3
+testSettings: &testSettings
+  platformName: "macOS 12"
+  screenResolution: "1440x900"
+  shard: concurrency
+testParams: &testParams
+  timeout: 10_800_000 # millisecond
+  maxDuration: 3_600 # seconds
+  browserName: "chromium"
+  project: "chromium"
+  retries: *testRetries
+
+# Sauce Config
 sauce:
   region: us-west-1
   concurrency: 5
+  retries: *suiteRetries
   metadata:
     tags:
       - e2e
       - czid
       - $NODE_ENV
     build: COMMIT $CI_COMMIT_SHORT_SHA
-  # comment out when running locally
-  # tunnel:
-  #   name: czid-github-sauce-connect
 playwright:
   version: package.json
   configFile: ./setup/$NODE_ENV.config.ts
@@ -24,484 +38,286 @@ env:
   CZID_USERNAME: $CZID_USERNAME
   CZID_PASSWORD: $CZID_PASSWORD
   NODE_ENV: $NODE_ENV
+
 suites:
   - name: "Functional: P-0: Heatmap Happy Path"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-happy-path.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: Heatmap Top Links"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-top-links.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: Heatmap NT Combined Microbiome File Download"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
     excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Verify downloaded Combined Microbiome File for metric NT"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: Heatmap NR Combined Microbiome File Download"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
     excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Verify downloaded Combined Microbiome File for metric NR"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: Heatmap Image Downloads"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
     excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Verify downloaded heatmap image"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: Taxon heatmap - Top Links"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/top-links.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: long mNGS - Coverage Visualization"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/coverageViz/long-mngs.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: short mNGS - Coverage Visualization"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/coverageViz/short-mngs.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: short mNGS - BLASTX"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/blastn/short-mngs-blastx.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: short mNGS - BLASTN"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/blastn/short-mngs-blastn.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-0: Create BG model"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/background/create-background.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo"
-      retries: 3
-    shard: concurrency
   - name: "Smoke Test: impact page"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/impact/impact.smoke.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
-      retries: 3
-    shard: concurrency
+      <<: *testParams
   - name: "Functional: P-0: Taxon heatmap - 4"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0: Taxon heatmap - 4"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-0: Taxon heatmap - 3"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0: Taxon heatmap - 3"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-0: Taxon heatmap - 2"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0: Taxon heatmap - 2"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-0: Taxon heatmap - 1"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/taxon-heatmap-tests.spec.ts']
     params:
-      maxDuration: 3600
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0: Taxon heatmap - 1"
-      retries: 3
-    shard: concurrency
   - name: "Data report validation (Heatmap): SNo 34"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-data-validation.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo 34"
-      retries: 3
-    shard: concurrency
   - name: "Heatmap Proper: SNo 7: Filters"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-proper.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo 7: Filters"
-      retries: 3
-    shard: concurrency
   - name: "PLQC: SNo 1"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/plqc/plqc-e2e.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "SNo 1: PLQC QA test"
-      retries: 3
-    shard: concurrency
   - name: "SC2: Functional: P-1: Sample upload (web) Illumina"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/sc2/sample-upload.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-1"
-      retries: 3
-    shard: concurrency
   - name: "SC2: Functional: P-0: Sample view list"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/sc2/sample-view-list.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0"
-      retries: 3
-    shard: concurrency
   - name: "SC2: Functional: P-0: Delete samples"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/sc2/delete-samples.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0"
-      retries: 3
-    shard: concurrency
   - name: "WGS: Functional: P-1: Project View"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/project-view.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-1"
-      retries: 3
-    shard: concurrency
   - name: "WGS: Functional: P-0: Delete samples"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/delete-samples.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0"
-      retries: 3
-    shard: concurrency
   - name: "WGS: Functional: P-0: NextClade Tree"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/nextclade.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0"
-      retries: 3
-    shard: concurrency
   - name: "SC2: Functional: P-0: NextClade Tree"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/sc2/nextclade-tree.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-2: Viral CG (WGS) - Sample upload (web) Nanopore unavailable"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/viral-cg-sample-upload.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-2"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-1: Viral CG (WGS) - Sample report"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/viral-cg-sample-report.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-1"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-2: Viral CG (WGS) - Sample report"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/viral-cg-sample-report.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-2"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-2: Viral CG (WGS) - Downloads (CURL)"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/viral-cg-downloads-curl.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-2"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-0: WGS - Downloads"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/downloads.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0"
-      retries: 3
-    shard: concurrency
   - name: "Functional: P-0: WGS - Downloads (CURL)"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/downloads-curl.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Functional: P-0"
-      retries: 3
-    shard: concurrency
   - name: "Data Validation: P-0: Viral CG (WGS) - Report files"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/report-files.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Data Validation: P-0"
-      retries: 3
-    shard: concurrency
   - name: "Data Validation: P-0: Viral CG (WGS) - Sample report: Values & Data type"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/sample-report-values-and-data-type.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Data Validation: P-0"
-      retries: 3
-    shard: concurrency
   - name: "Data Validation: P-0: WGS - Sample report"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/sample-report-p0.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Data Validation: P-0"
-      retries: 3
-    shard: concurrency
   - name: "Data Validation: P-0: WGS - Sample upload: Error handling"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/wgs/sample-upload-error-handling.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Data Validation: P-0"
-      retries: 3
-    shard: concurrency
   - name: "Bulk Download: AMR"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/download/bulk-download-amr-smoke.spec.ts']
     params:
-      maxDuration: 3h
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Bulk Download: LMNGS"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/download/bulk-download-lmngs-smoke.spec.ts']
     params:
-      maxDuration: 3h
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Bulk Download: MNGS"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/download/bulk-download-mngs-smoke.spec.ts']
     params:
-      maxDuration: 3h
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Bulk Download: WGS"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/download/bulk-download-wgs-smoke.spec.ts']
     params:
-      maxDuration: 3h
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Pipeline Visualization"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/view/pipeline-visualization-smoke.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Sample Deletion Smoke Tests"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/sample/sample-deletion-smoke.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Sample Report Filter Smoke Tests"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/sampleReport/sample-report-filters.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Sample Upload Smoke Tests"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['upload/upload-smoke.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Coverage Viz Smoke Tests"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/sampleReport/sample-report-coverage-viz.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
   - name: "Sample Heatmap"
-    platformName: "macOS 12"
-    screenResolution: "1440x900"
+    <<: *testSettings
     testMatch: ['tests/sample/sample-heatmap-smoke.spec.ts']
     params:
-      browserName: "chromium"
-      project: "chromium"
+      <<: *testParams
       grep: "Smoke Test: "
-      retries: 3
-    shard: concurrency
 artifacts:
   cleanup: true
   download:
