@@ -25,13 +25,13 @@ ActiveRecord::Base.transaction do
 
   AppConfig.create({"key"=>"consensus-genome-version", "value"=>"3.5.1"})
 
-  AppConfig.create({"key"=>"short-read-mngs-version", "value"=>"8.3.3"})
+  AppConfig.create({"key"=>"short-read-mngs-version", "value"=>"8.3.11"})
 
   AppConfig.create({"key"=>"phylotree-ng-version", "value"=>"6.11.0"})
 
   AppConfig.create({"key"=>"amr-version", "value"=>"1.4.2"})
 
-  AppConfig.create({"key"=>"long-read-mngs-version", "value"=>"0.7.8"})
+  AppConfig.create({"key"=>"long-read-mngs-version", "value"=>"0.7.11"})
 
   AppConfig.create({"key"=>"sfn_single_wdl_arn", "value"=>"arn:aws:states:us-west-2:732052188396:stateMachine:idseq-swipe-dev-default-wdl"})
 
@@ -49,6 +49,8 @@ ActiveRecord::Base.transaction do
 
   AppConfig.create({"key"=>"max_objects_bulk_download", "value"=>"500"})
 
+  AppConfig.create({"key"=>"max_samples_bulk_download_original_files", "value"=>"100"})
+
   AlignmentConfig.create({"diamond_db_path"=>nil, "index_dir_suffix"=>nil, "lineage_version"=>"2018-02-15", "lineage_version_old"=>1, "minimap2_long_db_path"=>nil, "minimap2_short_db_path"=>nil, "name"=>"2018-02-15", "s3_accession2taxid_path"=>"s3://idseq-public-references/alignment_data/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/accession2taxid.db", "s3_deuterostome_db_path"=>"s3://idseq-public-references/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/deuterostome_taxids.txt", "s3_lineage_path"=>"s3://idseq-public-references/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/taxid-lineages.db", "s3_nr_db_path"=>"s3://idseq-public-references/20170824/blast_db/nr", "s3_nr_loc_db_path"=>"s3://idseq-public-references/20170824/blast_db/nr_loc.db", "s3_nt_db_path"=>"s3://idseq-public-references/20170824/blast_db/nt", "s3_nt_info_db_path"=>nil, "s3_nt_loc_db_path"=>"s3://idseq-public-references/20170824/blast_db/nt_loc.db", "s3_taxon_blacklist_path"=>"s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt"})
 
   AlignmentConfig.create({"diamond_db_path"=>nil, "index_dir_suffix"=>"2018-04-01", "lineage_version"=>"2018-04-01", "lineage_version_old"=>2, "minimap2_long_db_path"=>nil, "minimap2_short_db_path"=>nil, "name"=>"2018-04-01", "s3_accession2taxid_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/accession2taxid.db", "s3_deuterostome_db_path"=>"s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/deuterostome_taxids.txt", "s3_lineage_path"=>"s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxid-lineages.db", "s3_nr_db_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/nr", "s3_nr_loc_db_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/nr_loc.db", "s3_nt_db_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/nt", "s3_nt_info_db_path"=>nil, "s3_nt_loc_db_path"=>"s3://idseq-public-references/alignment_data/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/nt_loc.db", "s3_taxon_blacklist_path"=>"s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt"})
@@ -60,6 +62,12 @@ ActiveRecord::Base.transaction do
   AlignmentConfig.create({"diamond_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/diamond_index_chunksize_5500000000/", "index_dir_suffix"=>nil, "lineage_version"=>"2022-06-02", "lineage_version_old"=>nil, "minimap2_long_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/nt_k14_w8_20_long/", "minimap2_short_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/nt_k14_w8_20/", "name"=>"2022-06-02", "s3_accession2taxid_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/accession2taxid.marisa", "s3_deuterostome_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/deuterostome_taxids.txt", "s3_lineage_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/taxid-lineages.marisa", "s3_nr_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/nr", "s3_nr_loc_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/nr_loc.marisa", "s3_nt_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/nt", "s3_nt_info_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/nt_info.marisa", "s3_nt_loc_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/nt_loc.marisa", "s3_taxon_blacklist_path"=>"s3://czid-public-references/ncbi-indexes-prod/2022-06-02/index-generation-2/taxon_ignore_list.txt"})
 
   AlignmentConfig.create({"diamond_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/diamond_index_chunksize_5500000000/", "index_dir_suffix"=>nil, "lineage_version"=>"2024-02-06", "lineage_version_old"=>nil, "minimap2_long_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/nt_k14_w8_20/", "minimap2_short_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/nt_k14_w8_20/", "name"=>"2024-02-06", "s3_accession2taxid_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/accession2taxid.marisa", "s3_deuterostome_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/deuterostome_taxids.txt", "s3_lineage_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/taxid-lineages.marisa", "s3_nr_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/nr_compressed_shuffled.fa", "s3_nr_loc_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/nr_loc.marisa", "s3_nt_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/nt_compressed_shuffled.fa", "s3_nt_info_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/nt_info.marisa", "s3_nt_loc_db_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/nt_loc.marisa", "s3_taxon_blacklist_path"=>"s3://czid-public-references/ncbi-indexes-prod/2024-02-06/index-generation-2/taxon_ignore_list.txt"})
+
+  Background.create({"description"=>nil, "mass_normalized"=>false, "name"=>"NID human CSF HC", "public_access"=>1, "ready"=>1, "user_id"=>nil})
+
+  Background.create({"description"=>nil, "mass_normalized"=>false, "name"=>"NID Human CSF v3", "public_access"=>1, "ready"=>1, "user_id"=>nil})
+
+  Background.create({"description"=>nil, "mass_normalized"=>true, "name"=>"test mass normalized bg default", "public_access"=>1, "ready"=>1, "user_id"=>nil})
 
   Citation.create({"footnote"=>"seeded-citation-7-18-23", "key"=>"seeded-citation-7-18-23"})
 
@@ -521,11 +529,25 @@ ActiveRecord::Base.transaction do
 
   WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"2024-02-06", "workflow"=>"ncbi_index_date"})
 
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"0.7.11", "workflow"=>"long-read-mngs"})
+
+  WorkflowVersion.create({"deprecated"=>false, "runnable"=>true, "version"=>"8.3.11", "workflow"=>"short-read-mngs"})
+
   PathogenList.create({"creator_id"=>nil, "is_global"=>true})
 
   PathogenListVersion.create({"pathogen_list_id"=>1, "version"=>"1.0.0"})
 
-  Pathogen.create({"tax_id"=>694002})
+  Pathogen.create({"tax_id"=>694003})
+
+  Pathogen.create({"tax_id"=>573})
+
+  Pathogen.create({"tax_id"=>562})
+
+  Pathogen.create({"tax_id"=>28037})
+
+  Pathogen.create({"tax_id"=>108098})
+
+  Pathogen.create({"tax_id"=>329})
 
   # HABTM Associations
 
@@ -796,6 +818,17 @@ ActiveRecord::Base.transaction do
   safe_habtm_append(HostGenome.find(132).metadata_fields, MetadataField.where(id: [1, 2, 3, 6, 7, 8, 11, 12, 13, 14, 15, 21, 23, 24, 25, 29] - HostGenome.find(132).metadata_fields.pluck(:id)))
 
   safe_habtm_append(Pathogen.find(1).pathogen_list_versions, PathogenListVersion.where(id: [1] - Pathogen.find(1).pathogen_list_versions.pluck(:id)))
+
+  safe_habtm_append(Pathogen.find(2).pathogen_list_versions, PathogenListVersion.where(id: [1] - Pathogen.find(2).pathogen_list_versions.pluck(:id)))
+
+  safe_habtm_append(Pathogen.find(3).pathogen_list_versions, PathogenListVersion.where(id: [1] - Pathogen.find(3).pathogen_list_versions.pluck(:id)))
+
+  safe_habtm_append(Pathogen.find(4).pathogen_list_versions, PathogenListVersion.where(id: [1] - Pathogen.find(4).pathogen_list_versions.pluck(:id)))
+
+  safe_habtm_append(Pathogen.find(5).pathogen_list_versions, PathogenListVersion.where(id: [1] - Pathogen.find(5).pathogen_list_versions.pluck(:id)))
+
+  safe_habtm_append(Pathogen.find(6).pathogen_list_versions, PathogenListVersion.where(id: [1] - Pathogen.find(6).pathogen_list_versions.pluck(:id)))
+
 end
 
-SeedMigration::Migrator.bootstrap(20240608061944)
+SeedMigration::Migrator.bootstrap(20240802164435)

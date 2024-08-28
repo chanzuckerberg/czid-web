@@ -21,11 +21,11 @@ async function globalSetup(config: FullConfig): Promise<void> {
     process.env.CI = "true";
   }
 
-  if (!hasRecentlyLoggedIn()) {
+  if (!hasRecentlyLoggedIn(storageState as string)) {
     const username = process.env.CZID_USERNAME;
     const password = process.env.CZID_PASSWORD;
 
-    const browser = await chromium.launch({ headless: true });
+    const browser = await chromium.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto(process.env.BASEURL);
     expect(page.getByText(tag)).toBeVisible({ timeout: 30 * 1000 }); // Wait upto 30 seconds
@@ -42,20 +42,19 @@ export default globalSetup;
  * This is very helpful during development when we run lots of tests
  * @returns
  */
-const hasRecentlyLoggedIn = (): boolean => {
+const hasRecentlyLoggedIn = (cookieFile: string): boolean => {
   try {
-    const cookieFile = "/tmp/state.json";
     const currentTime = new Date().getTime();
     const cookieJson = JSON.parse(readFileSync(cookieFile).toString())[
       "cookies"
     ];
     const cookie = cookieJson.find(cookie => cookie.name === "auth0");
     const expires = cookie["expires"] as number;
-    const domain = cookie["domain"];
-    if (
-      expires > currentTime &&
-      domain.includes(process.env.NODE_ENV.toUpperCase())
-    ) {
+
+    // /tmp/state.json contains expires as seconds, e.g. 1722725055.953518
+    // so we need to convert it to milliseconds for accurate comparison
+    const expiresMilliseconds = expires * 1000;
+    if (expiresMilliseconds > currentTime) {
       return true;
     } else {
       return false;

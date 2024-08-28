@@ -1,8 +1,10 @@
 import { WORKFLOWS } from "@e2e/constants/common";
 import { test, expect } from "@playwright/test";
 import { SamplesPage } from "../../page-objects/samples-page";
+import { ProjectPage } from "@e2e/page-objects/project-page";
 
 let sample = null;
+let projectPage = null;
 let samplesPage = null;
 let pipelineVizPage = null;
 
@@ -10,8 +12,10 @@ test.describe("Pipeline Visualization", () => {
 
   test.beforeEach(async ({ page }) => {
     // #region Get a random completed sample
+    projectPage = new ProjectPage(page);
     samplesPage = new SamplesPage(page);
-    sample = await samplesPage.getRandomCompletedSample(`automation_project_${WORKFLOWS.MNGS}`);
+    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.MNGS}`);
+    sample = await samplesPage.getRandomCompletedSample(project.name);
     // #endregion Get a random completed sample
 
     // #region Go to the sample report page

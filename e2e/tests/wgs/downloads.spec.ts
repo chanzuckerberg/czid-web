@@ -97,7 +97,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format(DATE_FORMAT);
+    const today = moment().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
 
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);
@@ -266,7 +266,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format(DATE_FORMAT);
+    const today = moment().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);
     expect(downloadCount).toEqual(moreThanOneSample.toString());
@@ -566,7 +566,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format(DATE_FORMAT);
+    const today = moment().format(DATE_FORMAT);
     expect(downloadDate).toEqual(today);
 
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);

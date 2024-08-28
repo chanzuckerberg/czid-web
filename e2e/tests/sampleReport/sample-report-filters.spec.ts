@@ -15,11 +15,13 @@ import {
 } from "@e2e/constants/sample";
 import { test, expect } from "@playwright/test";
 import { SamplesPage } from "../../page-objects/samples-page";
+import { ProjectPage } from "@e2e/page-objects/project-page";
 
 const THRESHOLD_FILTERS = {
   "mngs": SHORT_READS_THRESHOLDS,
   "ONT": LONG_READS_THRESHOLDS,
 };
+let projectPage = null;
 let sampleId = null;
 let samplesPage = null;
 const uploadWorkflows = [WORKFLOWS.MNGS, WORKFLOWS.LMNGS];
@@ -30,10 +32,12 @@ test.describe("Sample report filter test", () => {
   test.beforeEach(async ({ page }) => {
     // go to sample page
     samplesPage = new SamplesPage(page);
+    projectPage = new ProjectPage(page);
   });
 
   test(`Verify url displayed on the columns`, async () => {
-    const randomSample = await samplesPage.getRandomCompletedSample("automation_project");
+    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.MNGS}`);
+    const randomSample = await samplesPage.getRandomCompletedSample(project.name);
     const sampleId = randomSample.id;
     await samplesPage.navigate(sampleId);
 
@@ -60,7 +64,8 @@ test.describe("Sample report filter test", () => {
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-1
      */
     test(`Smoke Test: Should be able to filter by Taxon name ${workflow}`, async () => {
-      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      const randomSample = await samplesPage.getRandomCompletedSample(project.name);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
 
@@ -68,6 +73,8 @@ test.describe("Sample report filter test", () => {
       const taxons = await samplesPage.getSpecificTaxons(sampleReport);
 
       const taxon = taxons[Math.floor(Math.random() * taxons.length)];
+      expect(taxon).toBeDefined();
+
       const genus = await taxon.name.split(" ")[0];
       await samplesPage.fillSearchBar(genus);
       const searchResults = await samplesPage.getSearchResults();
@@ -95,7 +102,8 @@ test.describe("Sample report filter test", () => {
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-2
      */
     test(`Smoke Test: Should be able to filter by Name Type ${workflow}`, async () => {
-      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      const randomSample = await samplesPage.getRandomCompletedSample(project.name);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
 
@@ -115,7 +123,8 @@ test.describe("Sample report filter test", () => {
      */
     test(`Smoke Test: Should be able to filter by Category name ${workflow}`, async () => {
       test.setTimeout(1000 * 60 * 10);
-      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      const randomSample = await samplesPage.getRandomCompletedSample(project.name);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
 
@@ -186,7 +195,8 @@ test.describe("Sample report filter test", () => {
      */
     test(`Smoke Test: Should be able to filter by Threshold ${workflow}`, async () => {
       test.setTimeout(60 * 1000 * 2); // This test sometime takes slightly longer to complete
-      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      const randomSample = await samplesPage.getRandomCompletedSample(project.name);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
 
@@ -212,7 +222,8 @@ test.describe("Sample report filter test", () => {
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-5
      */
     test(`Smoke Test: Should be able to filter by Read Specificity ${workflow}`, async () => {
-      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      const randomSample = await samplesPage.getRandomCompletedSample(project.name);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
 
@@ -239,7 +250,8 @@ test.describe("Sample report filter test", () => {
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-6
      */
     test(`Smoke Test: Should be able to filter by Annotation ${workflow}`, async () => {
-      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      const randomSample = await samplesPage.getRandomCompletedSample(project.name);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
 
@@ -254,7 +266,8 @@ test.describe("Sample report filter test", () => {
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-7
      */
     test(`Should be able to filter by multiple criteria ${workflow}`, async () => {
-      const randomSample = await samplesPage.getRandomCompletedSample(`automation_project_${workflow}`);
+      const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      const randomSample = await samplesPage.getRandomCompletedSample(project.name);
       sampleId = randomSample.id;
       await samplesPage.navigate(sampleId);
 

@@ -136,7 +136,7 @@ test.describe("Data report validation (Heatmap)", () => {
     await heatmapPage.dismissAppcuesContainerIfPresent();
     // #endregion 4. Click on Create heatmap.
 
-    // #region Heamap values displayed:
+    // #region 5. Heatmap values displayed:
 
     // Five Columns Should be displayed
     // RR004_water_2_S23A, sample2, sample1, SRR7002140_TA.252.DNA_blaC_vanP, & SRR7002116_TA.257.DNA
@@ -154,6 +154,23 @@ test.describe("Data report validation (Heatmap)", () => {
 
       expect(collectionLocation).toEqual(samples[i].details.metadata.collection_location_v2);
     }
+    // #endregion 5. Heatmap values displayed:
+
+    // #region 6. Get taxon info for all Klebsiella pneumoniae cells
+    const klebsiellaPneumoniaeRowYAxisValue =
+      await heatmapPage.getYAxisValueForTaxonName(KLEBSIELLA_PNEUMONIAE);
+    const klebsiellaAxis = `[y='${klebsiellaPneumoniaeRowYAxisValue}']`;
+
+    // Make sure there are 3 cells in Klebsiella pneumoniae row
+    const NUM_EXPECTED_KLEBSIELLA_CELLS = 3;
+    await heatmapPage.assertExpectedNumberOfCells(klebsiellaAxis, NUM_EXPECTED_KLEBSIELLA_CELLS);
+
+    const taxonInfoForKlebsiella = await heatmapPage.getTaxonInfoForAllCellsInRow(
+      NUM_EXPECTED_KLEBSIELLA_CELLS,
+      klebsiellaAxis
+    );
+
+    // #endregion 6. Get taxon info for all Klebsiella pneumoniae cells
 
     // On hover over Row Klebsiella pneumoniae and  SRR7002140_TA.252.DNA_blaC_vanP pop up data is consistent with below values and data types:
     // NT Z Score: 98.9382 Float
@@ -162,7 +179,7 @@ test.describe("Data report validation (Heatmap)", () => {
     // NR Z Score: 45.5214 Float
     // NR rPM: 1779.82 Float
     // NR r (total reads): 55 Integer
-    const SRR7002140_TA_252_DNA_BLAC_VANP_KLEBSIELLA_PNEUMONIAE = {
+    const EXPECTED_SRR7002140_TA_252_DNA_BLAC_VANP_KLEBSIELLA_PNEUMONIAE = {
       Sample: "SRR7002140_TA.252.DNA_blaC_vanP",
       Taxon: KLEBSIELLA_PNEUMONIAE,
       Category: "Bacteria",
@@ -173,9 +190,11 @@ test.describe("Data report validation (Heatmap)", () => {
       "NR rPM": "2427.03",
       "NR r (total reads)": "75",
     };
-    await heatmapPage.hoverOverCell(1, "[y='1']");
-    const SRR7002140_TA_KLEBSIELLA_PNEUMONIAE = await heatmapPage.getTaxonInfo();
-    expect(SRR7002140_TA_KLEBSIELLA_PNEUMONIAE).toEqual(SRR7002140_TA_252_DNA_BLAC_VANP_KLEBSIELLA_PNEUMONIAE);
+
+    const SRR7002140_TA_KLEBSIELLA_PNEUMONIAE_INFO = taxonInfoForKlebsiella.find(
+      taxonInfo => taxonInfo.Sample === EXPECTED_SRR7002140_TA_252_DNA_BLAC_VANP_KLEBSIELLA_PNEUMONIAE.Sample
+    );
+    expect(SRR7002140_TA_KLEBSIELLA_PNEUMONIAE_INFO).toEqual(EXPECTED_SRR7002140_TA_252_DNA_BLAC_VANP_KLEBSIELLA_PNEUMONIAE);
 
     // On hover over Row Klebsiella pneumoniae and SRR7002116_TA.257.DNA pop up data is consistent with below values and data types:
 
@@ -185,7 +204,7 @@ test.describe("Data report validation (Heatmap)", () => {
     // NR Z Score: 99 Float
     // NR rPM: 127523 Float
     // NR r (total reads): 139 Integer"
-    const SRR7002116_TA_257_DNA_KLEBSIELLA_PNEUMONIAE = {
+    const EXPECTED_SRR7002116_TA_257_DNA_KLEBSIELLA_PNEUMONIAE = {
       Sample: "SRR7002116_TA.257.DNA",
       Taxon: KLEBSIELLA_PNEUMONIAE,
       Category: "Bacteria",
@@ -196,10 +215,12 @@ test.describe("Data report validation (Heatmap)", () => {
       "NR rPM": "118349",
       "NR r (total reads)": "129",
     };
-    await heatmapPage.hoverOverCell(2, "[y='1']");
-    const SRR7002116_TA_KLEBSIELLA_PNEUMONIAE = await heatmapPage.getTaxonInfo();
-    expect(SRR7002116_TA_KLEBSIELLA_PNEUMONIAE).toEqual(SRR7002116_TA_257_DNA_KLEBSIELLA_PNEUMONIAE);
-    // #endregion Heamap values displayed:
+
+    const SRR7002116_TA_KLEBSIELLA_PNEUMONIAE_INFO = taxonInfoForKlebsiella.find(
+      taxonInfo => taxonInfo.Sample === EXPECTED_SRR7002116_TA_257_DNA_KLEBSIELLA_PNEUMONIAE.Sample
+    );
+    expect(SRR7002116_TA_KLEBSIELLA_PNEUMONIAE_INFO).toEqual(EXPECTED_SRR7002116_TA_257_DNA_KLEBSIELLA_PNEUMONIAE);
+    // #endregion Heatmap values displayed:
   });
 
   test("SNo 34-B: Data report validation (Heatmap)", async ({ page }) => {
@@ -225,7 +246,7 @@ test.describe("Data report validation (Heatmap)", () => {
     await heatmapPage.dismissAppcuesContainerIfPresent();
     // #endregion 4. Click on Create heatmap.
 
-    // #region Heamap values displayed:
+    // #region Heatmap values displayed:
 
     // Five Columns Should be displayed
     // RR004_water_2_S23A, sample2, sample1, SRR7002140_TA.252.DNA_blaC_vanP, & SRR7002116_TA.257.DNA
@@ -244,6 +265,20 @@ test.describe("Data report validation (Heatmap)", () => {
       expect(collectionLocation).toEqual(samples[i].details.metadata.collection_location_v2);
     }
 
+    // Get heatmap row info for Klebsiella pneumoniae
+    const klebsiellaPneumoniaeRowYAxisValue =
+      await heatmapPage.getYAxisValueForTaxonName(KLEBSIELLA_PNEUMONIAE);
+    const klebsiellaAxis = `[y='${klebsiellaPneumoniaeRowYAxisValue}']`;
+
+    // Make sure there are 3 cells in Klebsiella pneumoniae row
+    const NUM_EXPECTED_KLEBSIELLA_CELLS = 3;
+    await heatmapPage.assertExpectedNumberOfCells(klebsiellaAxis, NUM_EXPECTED_KLEBSIELLA_CELLS);
+
+    const taxonInfoForKlebsiella = await heatmapPage.getTaxonInfoForAllCellsInRow(
+      NUM_EXPECTED_KLEBSIELLA_CELLS,
+      klebsiellaAxis
+    );
+
     // On hover over Row Klebsiella pneumoniae and  RR004_water_2_S23A pop up data is consistent with below values and data types:
 
     // NT Z Score: 99 Float
@@ -252,8 +287,6 @@ test.describe("Data report validation (Heatmap)", () => {
     // NR Z Score: 99 Float
     // NR rPM: 179144 Float
     // NR r (total reads): 201 Integer
-    await heatmapPage.hoverOverCell(0, "[y='1']");
-    const RR004_water_2_S23A_KLEBSIELLA_PNEUMONIAE = await heatmapPage.getTaxonInfo();
     const EXPECTED_RR004_water_2_S23A_KLEBSIELLA_PNEUMONIAE = {
       Sample: "RR004_water_2_S23A",
       Taxon: KLEBSIELLA_PNEUMONIAE,
@@ -265,7 +298,25 @@ test.describe("Data report validation (Heatmap)", () => {
       "NR rPM": "168449",
       "NR r (total reads)": "189",
     };
-    expect(RR004_water_2_S23A_KLEBSIELLA_PNEUMONIAE).toEqual(EXPECTED_RR004_water_2_S23A_KLEBSIELLA_PNEUMONIAE);
+    const RR004_water_2_S23A_KLEBSIELLA_PNEUMONIAE_INFO = taxonInfoForKlebsiella.find(
+      taxonInfo => taxonInfo.Sample === EXPECTED_RR004_water_2_S23A_KLEBSIELLA_PNEUMONIAE.Sample
+    );
+    expect(RR004_water_2_S23A_KLEBSIELLA_PNEUMONIAE_INFO).toEqual(EXPECTED_RR004_water_2_S23A_KLEBSIELLA_PNEUMONIAE);
+
+    // #region 7. Get taxon info for all SARS-Cov cells
+    const sarsCovRowYAxisValue =
+      await heatmapPage.getYAxisValueForTaxonName(SEVERE_ACUTE_RESPIRATORY_SYNDROME_RELATED_CORONAVIRUS);
+    const sarsCovAxis = `[y='${sarsCovRowYAxisValue}']`;
+
+    // Make sure there are 2 cells in SARS-Cov row
+    const NUM_EXPECTED_SARS_COV_CELLS = 2;
+    await heatmapPage.assertExpectedNumberOfCells(sarsCovAxis, NUM_EXPECTED_SARS_COV_CELLS);
+
+    const taxonInfoForSarsCov = await heatmapPage.getTaxonInfoForAllCellsInRow(
+      NUM_EXPECTED_SARS_COV_CELLS,
+      sarsCovAxis
+    );
+    // endregion 7. Get taxon info for all SARS-Cov cells
 
     // On hover over Row Severe acute respiratory syndrome-related coronavirus and sample1, sample2 pop up data is consistent with below values and data types:
 
@@ -275,8 +326,6 @@ test.describe("Data report validation (Heatmap)", () => {
     // NR Z Score: 100 Float
     // NR rPM: 999563 Float
     // NR r (total reads): 93681 Integer"
-    await heatmapPage.hoverOverCell(0, "[y='781']");
-    const SAMPLE2_ACUTE_RESPIRATORY_SYNDROME = await heatmapPage.getTaxonInfo();
     const EXPECTED_SAMPLE2_ACUTE_RESPIRATORY_SYNDROME = {
       Sample: "sample2",
       Taxon: SEVERE_ACUTE_RESPIRATORY_SYNDROME_RELATED_CORONAVIRUS,
@@ -288,10 +337,11 @@ test.describe("Data report validation (Heatmap)", () => {
       "NR rPM": "999541",
       "NR r (total reads)": "93679",
     };
-    expect(SAMPLE2_ACUTE_RESPIRATORY_SYNDROME).toEqual(EXPECTED_SAMPLE2_ACUTE_RESPIRATORY_SYNDROME);
+    const SAMPLE2_ACUTE_RESPIRATORY_SYNDROME_INFO = taxonInfoForSarsCov.find(
+      taxonInfo => taxonInfo.Sample === EXPECTED_SAMPLE2_ACUTE_RESPIRATORY_SYNDROME.Sample
+    );
+    expect(SAMPLE2_ACUTE_RESPIRATORY_SYNDROME_INFO).toEqual(EXPECTED_SAMPLE2_ACUTE_RESPIRATORY_SYNDROME);
 
-    await heatmapPage.hoverOverCell(1, "[y='781']");
-    const SAMPLE1_ACUTE_RESPIRATORY_SYNDROME = await heatmapPage.getTaxonInfo();
     const EXPECTED_SAMPLE1_ACUTE_RESPIRATORY_SYNDROME = {
       Sample: "sample1",
       Taxon: SEVERE_ACUTE_RESPIRATORY_SYNDROME_RELATED_CORONAVIRUS,
@@ -303,8 +353,11 @@ test.describe("Data report validation (Heatmap)", () => {
       "NR rPM": "999146",
       "NR r (total reads)": "93642",
     };
-    expect(SAMPLE1_ACUTE_RESPIRATORY_SYNDROME).toEqual(EXPECTED_SAMPLE1_ACUTE_RESPIRATORY_SYNDROME);
-    // #endregion Heamap values displayed:
+    const SAMPLE1_ACUTE_RESPIRATORY_SYNDROME_INFO = taxonInfoForSarsCov.find(
+      taxonInfo => taxonInfo.Sample === EXPECTED_SAMPLE1_ACUTE_RESPIRATORY_SYNDROME.Sample
+    );
+    expect(SAMPLE1_ACUTE_RESPIRATORY_SYNDROME_INFO).toEqual(EXPECTED_SAMPLE1_ACUTE_RESPIRATORY_SYNDROME);
+    // #endregion Heatmap values displayed:
   });
 
   test("SNo 34-C: Data report validation (Heatmap)", async ({ page }) => {
@@ -330,7 +383,7 @@ test.describe("Data report validation (Heatmap)", () => {
     await heatmapPage.dismissAppcuesContainerIfPresent();
     // #endregion 4. Click on Create heatmap.
 
-    // #region Heamap values displayed:
+    // #region 5. Heatmap values displayed:
 
     // Five Columns Should be displayed
     // RR004_water_2_S23A, sample2, sample1, SRR7002140_TA.252.DNA_blaC_vanP, & SRR7002116_TA.257.DNA
@@ -348,6 +401,22 @@ test.describe("Data report validation (Heatmap)", () => {
 
       expect(collectionLocation).toEqual(samples[i].details.metadata.collection_location_v2);
     }
+    // #endregion 5. Heatmap values displayed:
+
+    // #region 6. Get taxon info for all SARS-Cov cells
+    const sarsCovRowYAxisValue =
+      await heatmapPage.getYAxisValueForTaxonName(SEVERE_ACUTE_RESPIRATORY_SYNDROME_RELATED_CORONAVIRUS);
+    const sarsCovAxis = `[y='${sarsCovRowYAxisValue}']`;
+
+    // Make sure there are 2 cells in SARS-Cov row
+    const NUM_EXPECTED_SARS_COV_CELLS = 2;
+    await heatmapPage.assertExpectedNumberOfCells(sarsCovAxis, NUM_EXPECTED_SARS_COV_CELLS);
+
+    const taxonInfoForSarsCov = await heatmapPage.getTaxonInfoForAllCellsInRow(
+      NUM_EXPECTED_SARS_COV_CELLS,
+      sarsCovAxis
+    );
+    // endregion 6. Get taxon info for all SARS-Cov cells
 
     // On hover over Row Severe acute respiratory syndrome-related coronavirus and Sample2 pop up data is consistent with below values and data types:
 
@@ -357,8 +426,6 @@ test.describe("Data report validation (Heatmap)", () => {
     // NR Z Score: 100 Float
     // NR rPM: 999637 Float
     // NR r (total reads): 93688 Integer"
-    await heatmapPage.hoverOverCell(0, "[y='781']");
-    const SAMPLE2_ACUTE_RESPIRATORY_SYNDROME = await heatmapPage.getTaxonInfo();
     const EXPECTED_SAMPLE2_ACUTE_RESPIRATORY_SYNDROME = {
       Sample: "sample2",
       Taxon: SEVERE_ACUTE_RESPIRATORY_SYNDROME_RELATED_CORONAVIRUS,
@@ -370,10 +437,11 @@ test.describe("Data report validation (Heatmap)", () => {
       "NR rPM": "999541",
       "NR r (total reads)": "93679",
     };
+    const SAMPLE2_ACUTE_RESPIRATORY_SYNDROME = taxonInfoForSarsCov.find(
+      taxonInfo => taxonInfo.Sample === EXPECTED_SAMPLE2_ACUTE_RESPIRATORY_SYNDROME.Sample
+    );
     expect(SAMPLE2_ACUTE_RESPIRATORY_SYNDROME).toEqual(EXPECTED_SAMPLE2_ACUTE_RESPIRATORY_SYNDROME);
 
-    await heatmapPage.hoverOverCell(1, "[y='781']");
-    const SAMPLE1_ACUTE_RESPIRATORY_SYNDROME = await heatmapPage.getTaxonInfo();
     const EXPECTED_SAMPLE1_ACUTE_RESPIRATORY_SYNDROME = {
       Sample: "sample1",
       Taxon: SEVERE_ACUTE_RESPIRATORY_SYNDROME_RELATED_CORONAVIRUS,
@@ -385,8 +453,11 @@ test.describe("Data report validation (Heatmap)", () => {
       "NR rPM": "999146",
       "NR r (total reads)": "93642",
     };
+    const SAMPLE1_ACUTE_RESPIRATORY_SYNDROME = taxonInfoForSarsCov.find(
+      taxonInfo => taxonInfo.Sample === EXPECTED_SAMPLE1_ACUTE_RESPIRATORY_SYNDROME.Sample
+    );
     expect(SAMPLE1_ACUTE_RESPIRATORY_SYNDROME).toEqual(EXPECTED_SAMPLE1_ACUTE_RESPIRATORY_SYNDROME);
-    // #endregion Heamap values displayed:
+    // #endregion Heatmap values displayed:
   });
 
 });

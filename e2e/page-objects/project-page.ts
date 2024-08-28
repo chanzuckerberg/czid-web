@@ -257,7 +257,10 @@ export class ProjectPage extends PageObject {
   public async getOrCreateProject(projectName: string, publicAccess = 1) {
     let project = null;
     const userName = process.env.CZID_USERNAME.split("@")[0];
-    const userProjectName = `${userName}_${projectName}`;
+    // Replace + in userName with - as automatically done by CZ ID for project names
+    // Users sometimes use email+1@domain as a way to create unique usernames
+    const sanitizedUserName = userName.replace("+", "-");
+    const userProjectName = `${sanitizedUserName}_${projectName}`;
     const projects = await this.getProjects(userProjectName);
     project = await projects.filter(p => p.name === userProjectName)[0];
     if (project === null || project === undefined) {
@@ -305,6 +308,7 @@ export class ProjectPage extends PageObject {
 
   public async getProjectByName(projectName: string) {
     const projects = await this.getProjects(projectName);
+    // matches ${username}_automation_e2e_${workflow}
     return projects.length >= 1
       ? projects.filter(p => p.name === projectName)[0]
       : null;
@@ -500,6 +504,10 @@ export class ProjectPage extends PageObject {
     options?: { clickResult: boolean },
   ) {
     await this.page.locator(SEARCH_MY_DATA_INPUT).fill(value);
+
+    // Allow search to complete and return results
+    await this.pause(5);
+
     await this.pressEnter();
 
     if (options && options.clickResult === true) {

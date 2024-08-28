@@ -11,6 +11,10 @@ SeedMigration.config do |c|
     exclude :id, :created_at, :updated_at
   end
 
+  c.register "Background" do
+    exclude :id, :created_at, :updated_at
+  end
+
   c.register "Citation" do
     exclude :created_at, :updated_at
   end

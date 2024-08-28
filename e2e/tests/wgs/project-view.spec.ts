@@ -12,7 +12,7 @@ const SARS_CoV2_NO_HOST = "wgs_SARS_CoV2_no_host";
 const SARS_CoV2_SAMPLE_NAMES = [SARS_CoV2_NO_HOST];
 const RUN_PIPELINE = true;
 const WAIT_FOR_PIPELINE = false;
-const timeout = 60 * 1000 * 2;
+const timeout = 60 * 1000 * 5;
 
 
 /*

@@ -29,7 +29,7 @@ set-staging-credentials: # Set up the czid credentials for the staging environme
 # Run `make -C ../ local-start-webapp`, wait ~2 mins for the web app to start up, then run `make run-local-e2e-tests` in a new terminal
 .PHONY: run-upload-tests-locally
 run-upload-tests-locally: # Run the upload test suite locally, seeding sample data into the local environment
-	NODE_ENV=local npx playwright test --headed -c ./setup/local.config.ts tests/upload/upload-smoke.spec.ts
+	NODE_ENV=local npx playwright test --headed --workers 2 -c ./setup/local.config.ts tests/upload/upload-smoke.spec.ts
 
 .PHONY: set-local-credentials
 # Run `make set-local-credentials username="your_username" password="your_password"` to set the czid credentials for your local environment

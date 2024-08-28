@@ -70,6 +70,10 @@ const THRESHOLDS_INPUT = "input[aria-label='threshold-value']";
 const THRESHOLDS_APPLY_BUTTON = "//*[text()='Configure Thresholds']/following-sibling::*//button[text()='Apply']";
 const KNOWN_PATHOGENS_ONLY_CHECKBOX = "//*[text()='Known Pathogens Only']/preceding-sibling::*//input";
 
+const NONE_BACKGROUND_NAME = "None";
+
+// This is an option set in Heatmap.ts
+const HEATMAP_MIN_CELL_HEIGHT = 26;
 export const SHAREABLE_URL_NOTIFICATION = "A shareable URL was copied to your clipboard!";
 export const SHORTENED_URL_LENGTH = 5; // default value in shortener gem
 
@@ -197,8 +201,17 @@ export class HeatmapPage extends PageObject {
     return this.page.locator(TOGGLE_SAMPLE_NAMES).isDisabled()
   }
 
+  public async isSampleNamesToggleEnabled() {
+    // Some tests do not work if we change based on eslint
+    // This rule is deprecated in more recent verions of eslint
+    // eslint-disable-next-line no-return-await
+    return await this.page.locator(TOGGLE_SAMPLE_NAMES).isEnabled({ timeout: 500})
+  }
+
   public async clickSampleNamesToggle() {
-    await this.page.locator(TOGGLE_SAMPLE_NAMES).click();
+    if (await this.isSampleNamesToggleEnabled()) {
+      await this.page.locator(TOGGLE_SAMPLE_NAMES).click();
+    }
   }
 
   public async clickDownloadType(downloadType: string) {
@@ -255,6 +268,39 @@ export class HeatmapPage extends PageObject {
   // #region Hover
   public async hoverOverCollectionLocation(index: number) {
     await this.page.locator(COLLECTION_LOCATION_CELLS).nth(index).hover();
+  }
+
+  public async getYAxisValueForTaxonName(name: string) {
+    // Sorting by genus makes the heatmap display taxon names
+    // in the same order that getTaxonNames returns
+    await this.setSortTaxa("Genus");
+    const taxonNames = await this.getTaxonNames();
+    const taxonRowIndex = taxonNames.indexOf(name);
+    return this.getYAxisValueFromTaxonNameIndex(taxonRowIndex);
+  }
+
+  public getYAxisValueFromTaxonNameIndex(index: number) {
+    // In the heatmap, the individual cells are `rect` elements `x` and `y` attributes
+    // From observation, the formula for calculating the `y` attribute is the below code
+    return (index) * HEATMAP_MIN_CELL_HEIGHT + 1;
+  }
+
+  public async assertExpectedNumberOfCells(axis: string, expectedCount: number) {
+    const locator = this.page.locator(CELLS + axis);
+    await expect(locator).toHaveCount(expectedCount);
+  }
+
+  public async getTaxonInfoForAllCellsInRow(numCells, axis) {
+    const allTaxonInfo = [];
+    for (let i = 0; i < numCells; i++) {
+      await this.hoverOverCell(i, axis);
+      const taxonInfo = await this.getTaxonInfo();
+      allTaxonInfo.push(taxonInfo);
+
+      // hover elsewhere to avoid blocking adjacent cell
+      this.hoverOverCollectionLocation(i);
+    }
+    return allTaxonInfo;
   }
 
   public async hoverOverCell(index: number, axis = "") {
@@ -509,9 +555,28 @@ export class HeatmapPage extends PageObject {
     await this.clickSearchResult(value);
   }
 
+  public async changeToRandomNewBackground(allowNone = true): Promise<string> {
+    const backgrounds = await this.getBackgrounds();
+    const currentBackground = await this.getSelectedBackground();
+
+    // remove current background and (conditionally) None from list of options
+    const filteredBackgrounds = backgrounds.filter((background) => {
+      if (!allowNone && background === NONE_BACKGROUND_NAME) {
+        return false;
+      }
+      return background !== currentBackground;
+    });
+
+    const randomBackground = filteredBackgrounds[Math.floor(Math.random() * filteredBackgrounds.length)];
+
+    await this.setBackground(randomBackground);
+    return randomBackground;
+  }
+
   public async setBackground(value: string) {
     await this.clickBackgroundDropdown();
     await this.fillSearchInput(value);
+    await this.pause(1);
     await this.clickSearchResult(value);
   }
 
@@ -658,7 +723,7 @@ export class HeatmapPage extends PageObject {
   public async validateHeatmapSampleNames(sampleNames: Array<string>) {
     const expectedTruncatedNames = sampleNames.map(name => {
       const truncate_length = 20;
-      if (name.length < truncate_length) return name;
+      if (name.length <= truncate_length) return name;
       return `${name.substring(0, 9)}...${name.slice(-7)}`;
     });
 

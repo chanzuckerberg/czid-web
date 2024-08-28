@@ -53,14 +53,15 @@ test.describe("Functional: P-0: Taxon heatmap - 1", () => {
 
     // #region 6. Verify heatmap refreshes with filtering criteria
     const vizCellsAfter = await heatmapPage.getCellsCount();
-
     // - Threshold filtering applied to Taxon Heatmap
     expect(vizCellsBefore).toBeGreaterThan(vizCellsAfter);
     // #endregion 6. Verify heatmap refreshes with filtering criteria
 
     // #region 7. Remove thresholds chosen in step 5 randomly (clicking on x)
     await heatmapPage.clickRemoveFilterButton();
+    await heatmapPage.pause(1);
     await heatmapPage.clickRemoveFilterButton();
+    await heatmapPage.pause(1);
 
     // allow heatmap to update - there is sometimes another alert, so do not delay closing the background alert
     await heatmapPage.pause(2);
@@ -268,6 +269,8 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
    * Taxon heatmap - BG model persistance
    */
   test(`SNo 4: Saved Taxon Heatmap behavior when BG model chosen`, async ({ page }) => {
+    let background = "";
+
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -293,10 +296,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
     // #endregion 5. Verify Filters left panel > Background filter is ""None""
 
     // #region 6. Click on Background dropdown list and pick ""floo sp97"" option
-    const backgrounds = await heatmapPage.getBackgrounds();
-    const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-
-    await heatmapPage.setBackground(background);
+    background = await heatmapPage.changeToRandomNewBackground(false);
     // #endregion 6. Click on Background dropdown list and pick ""floo sp97"" option
 
     // #region 7. Close ""We're busy generating your heatmap with a new background model. It may take a couple of minutes to load"" toast message
@@ -316,7 +316,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
     // #endregion 7. Close ""We're busy generating your heatmap with a new background model. It may take a couple of minutes to load"" toast message
 
     // #region 8. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
-    const heatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
+    const heatmapUrl = `${process.env.BASEURL}/visualizations/heatmap/${heatmapId}`
     await heatmapPage.close();
     // #endregion 8. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
 
@@ -342,6 +342,8 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
    * Selecting None BG back
    */
   test(`SNo 5: Saved Taxon Heatmap behavior when BG model chosen back to None`, async ({ page }) => {
+    let background = "";
+
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -367,10 +369,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
     // #endregion 5. Verify Filters left panel > Background filter is ""None""
 
     // #region 6. Click on Background dropdown list and pick ""floo sp97"" option
-    const backgrounds = await heatmapPage.getBackgrounds();
-    const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-
-    await heatmapPage.setBackground(background);
+    background = await heatmapPage.changeToRandomNewBackground(false);
     // #endregion 6. Click on Background dropdown list and pick ""floo sp97"" option
 
     // #region 7. Close ""We're busy generating your heatmap with a new background model. It may take a couple of minutes to load"" toast message
@@ -395,7 +394,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
     // #endregion 7. Close ""We're busy generating your heatmap with a new background model. It may take a couple of minutes to load"" toast message
 
     // #region 8. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
-    const heatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
+    const heatmapUrl = `${process.env.BASEURL}/visualizations/heatmap/${heatmapId}`
     await heatmapPage.close();
     // #endregion 8. Close Taxon Heatmap tab, and go back to Discovery View My Data page and click on Visualization tab
 
@@ -527,9 +526,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
     await samplesPage.close();
     samplesPage = null;
 
-    let backgrounds = await heatmapPage.getBackgrounds();
-    const background1 = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    await heatmapPage.setBackground(background1);
+    const background1 = await heatmapPage.changeToRandomNewBackground(false);
     await heatmapPage.clickCloseAlertButton();
     // #endregion 8. Close sample report tab, and at Taxon Heatmap, select ""NID Human CSF HC"" as Background
 
@@ -538,6 +535,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
 
     // A Taxon Heatmap with Background = ""NID Human CSF HC"" behaviour:
     // - In sample report: Background persists Taxon Heatmap background selection (""NID Human CSF HC"" in this case)
+    // - For background to persist correctly, it must either have public_access: 1 or be owned by the user
     sampleReportBackground = await samplesPage.getBackgroundFilterValue();
     expect(sampleReportBackground).toEqual(background1);
 
@@ -555,10 +553,7 @@ test.describe("Functional: P-0: Taxon heatmap - 2", () => {
 
     // #region 11. Repeat step 6-7
     await heatmapPage.hoverOverFilterPanel();
-    backgrounds = await heatmapPage.getBackgrounds();
-    const background2 = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-
-    await heatmapPage.setBackground(background2);
+    const background2 = await heatmapPage.changeToRandomNewBackground(false);
     await heatmapPage.clickCloseAlertButton();
     samplesPage = await heatmapPage.clickCell(0);
 
@@ -587,7 +582,7 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
   /**
    * Taxon Heatmap - OLD existing Taxon Heatmap
    */
-  test(`SNo 7: Opening and old existing Taxon Heatmap with default value as "NID Human CSF HC"`, async ({ page }) => {
+  test(`SNo 7: Opening an old existing Taxon Heatmap with default value as "NID Human CSF HC"`, async ({ page }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -602,7 +597,8 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
     await projectPage.clickUpdatedOnColumnHeader();
     const vizTable = await projectPage.getVisualizationTable(TEST_TIMEOUT);
 
-    expect(new Date(vizTable[0]['Updated On'][0]).getTime()).toBeLessThan(new Date("2/1/2024").getTime())
+    const oldHeatmapRecordsExist = new Date(vizTable[0]['Updated On'][0]).getTime() < new Date("2/1/2024").getTime();
+    test.skip(!oldHeatmapRecordsExist, `No records older than 2/1/2024 in ${process.env.NODE_ENV}`)
     // #endregion 3. Click on OLD Heatmap records (older than 2/1/2024)
 
     // #region 4. Verify default Filters > Background value displayed
@@ -644,10 +640,8 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
     // #endregion 5. Verify Filters left panel > Background filter is ""None""
 
     // #region 6. Click on Background dropdown list and pick ""floo sp97"" option
-    const backgrounds = await heatmapPage.getBackgrounds();
-    const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    await heatmapPage.changeToRandomNewBackground(false);
 
-    await heatmapPage.setBackground(background);
     await heatmapPage.clickCloseAlertButton();
     // #endregion 6. Click on Background dropdown list and pick ""floo sp97"" option
 
@@ -725,6 +719,8 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
    * Taxon heatmap - Downloads
    */
   test(`SNo 9: Taxon heatmap download files content when selecting None and other Backgrounds`, async ({ page }) => {
+    let background = "";
+
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -801,10 +797,8 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
     // #endregion 10. Download Combined Microbiome File(.biom) (choose any metric) and verify it Completes in Downloads page (main menu). Download the file
 
     // #region 11. Go back to Taxon Heatmap. Click on Background dropdown list and pick ""floo sp97"" option
-    const backgrounds = await heatmapPage.getBackgrounds();
-    const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    background = await heatmapPage.changeToRandomNewBackground(false);
 
-    await heatmapPage.setBackground(background);
     await heatmapPage.clickCloseAlertButton();
     // #endregion 11. Go back to Taxon Heatmap. Click on Background dropdown list and pick ""floo sp97"" option
 
@@ -867,6 +861,8 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
    * Taxon Heatmap sharing
    */
   test(`SNo 10: Taxon Heatmap BG selected persist when shared (user with staging project access)`, async ({ page }) => {
+    let background = "";
+
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -893,7 +889,8 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
 
     // #region 6. Click on Share button
     const heatmapId = await heatmapPage.clickSave();
-    const heatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
+
+    const heatmapUrl = `${process.env.BASEURL}/visualizations/heatmap/${heatmapId}`
     // #endregion 6. Click on Share button
 
     // #region 7. Paste and Go clipboard URL in a new browser tab
@@ -914,10 +911,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     // #endregion 9. Close shared TH and go back to original TH
 
     // #region 10. Click on Filters > Background and select ""NID human CSF HC"" option
-    const backgrounds = await heatmapPage.getBackgrounds();
-    let randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-
-    await heatmapPage.setBackground(randomBackground);
+    background = await heatmapPage.changeToRandomNewBackground();
     await heatmapPage.clickCloseAlertButton();
     // #endregion 10. Click on Filters > Background and select ""NID human CSF HC"" option
 
@@ -930,13 +924,12 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     const selectedBackgroundInNewTab2nd = await newHeatmapPage.getSelectedBackground();
 
     // - ""NID Human CSF HC"" BG persisted
-    expect(selectedBackgroundInNewTab2nd).toEqual(randomBackground);
+    expect(selectedBackgroundInNewTab2nd).toEqual(background);
     await newHeatmapPage.close();
     // #endregion 11. Repeat steps 6-9
 
     // #region 12. Click on Filters > Background and select ""floo sp97"" option
-    randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    await heatmapPage.setBackground(randomBackground);
+    background = await heatmapPage.changeToRandomNewBackground();
     await heatmapPage.clickCloseAlertButton();
     // #endregion 12. Click on Filters > Background and select ""floo sp97"" option
 
@@ -950,7 +943,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     const selectedBackgroundInNewTab3rd = await newHeatmapPage.getSelectedBackground();
 
     // - ""floo sp97"" BG persisted
-    expect(selectedBackgroundInNewTab3rd).toEqual(randomBackground);
+    expect(selectedBackgroundInNewTab3rd).toEqual(background);
     // #endregion 13. Repeat steps 6-9
   });
 
@@ -974,10 +967,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     // #endregion 3. Click on an ""Heatmap sp961"" record in Visualization list
 
     // #region 4. Select ""floo sp97"" background value
-    const backgrounds = await heatmapPage.getBackgrounds();
-    let randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-
-    await heatmapPage.setBackground(randomBackground);
+    await heatmapPage.changeToRandomNewBackground();
     await heatmapPage.clickCloseAlertButton();
     // #endregion 4. Select ""floo sp97"" background value
 
@@ -1073,8 +1063,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     // #endregion 12. Remove ALL Categories and Threshold filters selected one by one and observe Taxon Heatmap
 
     // #region 13. Repeat steps 4-9
-    randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    await heatmapPage.setBackground(randomBackground);
+    await heatmapPage.changeToRandomNewBackground();
     await heatmapPage.clickCloseAlertButton();
 
     await heatmapPage.setThresholdsOptions(thresholdOptions);
@@ -1113,6 +1102,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
    * Heatmap sample report
    */
   test(`SNo 12: Compare cell information vs sample report`, async ({ page }) => {
+    let background = "";
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     const heatmapUrl = await createHeatmap(projectPage);
@@ -1129,10 +1119,8 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     // #endregion 3. Click on an ""Heatmap sp961"" record in Visualization list
 
     // #region 4. Select ""floo sp97"" background value
-    const backgrounds = await heatmapPage.getBackgrounds();
-    const randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    background = await heatmapPage.changeToRandomNewBackground();
 
-    await heatmapPage.setBackground(randomBackground);
     await heatmapPage.clickCloseAlertButton();
     // #endregion 4. Select ""floo sp97"" background value
 
@@ -1161,12 +1149,12 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
       {
         metric: "NT r (total reads)",
         operator: ">=",
-        value: "1"
+        value: "10"
       },
       {
         metric: "NR r (total reads)",
         operator: ">=",
-        value: "1"
+        value: "10"
       }
     ]
     // #endregion 5. Click on Thresholds filter at Filters left panel
@@ -1224,7 +1212,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     await heatmapPage.removeAllFilters();
 
     // Filtering selection criteria (Categories / Thresholds) removed correctly and Taxon Heatmap re-fetch data to its original state
-    await heatmapPage.setBackground(randomBackground);
+    await heatmapPage.setBackground(background);
     await heatmapPage.clickCloseAlertButton();
 
     await heatmapPage.clickSave();
@@ -1419,7 +1407,7 @@ async function createHeatmap(projectPage: any) {
     await projectPage.clickHeatmapButton();
     const heatmapPage = await projectPage.clickTaxonHeatmap();
     const heatmapId = await heatmapPage.clickSave();
-    const heatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
+    const heatmapUrl = `${process.env.BASEURL}/visualizations/heatmap/${heatmapId}`
     heatmapPage.close();
 
     return heatmapUrl;

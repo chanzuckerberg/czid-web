@@ -26,7 +26,7 @@ const config: PlaywrightTestConfig = {
     baseURL: "https://czid.org",
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
-    storageState: "/tmp/state.json",
+    storageState: "/tmp/state-prod.json",
     trace: "on",
     viewport: { width: 800, height: 7200 },
     permissions: ["clipboard-read"],

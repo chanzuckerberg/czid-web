@@ -4,11 +4,11 @@ SHELL := /bin/bash
 
 ### Shortcuts for running docker compose with the necessary environment vars and flags
 ### Run containers with short-lived credentials
-export docker_compose:=export $$(cat .env.localdev); aws-oidc exec -- docker compose --env-file .env.localdev
+export docker_compose:=export $$(cat .env.localdev); aws-oidc exec -- docker compose --env-file web.env
 ### Run any commands (mostly docker-compose exec) that don't need aws creds, because running containers already have the creds they need.
-export docker_compose_simple:=docker compose --env-file .env.localdev
+export docker_compose_simple:=export $$(cat .env.localdev); docker compose
 ### We need this one to run the webapp with long-lived credentials
-export docker_compose_long:=export $$(cat .env.localdev); aws-oidc exec --session-duration=12h exec -- docker compose --env-file .env.localdev
+export docker_compose_long:=export $$(cat .env.localdev); aws-oidc exec --session-duration=12h exec -- docker compose --env-file web.env
 
 ### Default AWS profile for working with local dev
 export AWS_DEV_PROFILE=idseq-dev
@@ -50,7 +50,6 @@ local-init: local-pull .env.localdev ## Set up a local dev environment
 		./bin/setup-ubuntu; \
 	fi
 
-
 .PHONY: local-migrate
 local-migrate: .env.localdev ## Run database schema and data migrations
 	$(docker_compose) run --rm web bin/rails db:migrate:with_data RAILS_ENV=development
@@ -64,8 +63,12 @@ local-migrate-without-data: .env.localdev ## Run database schema and data migrat
 	$(docker_compose) run --rm -e RAILS_ENV=$(rails_env) web bin/rails db:migrate
 
 .PHONY: local-seed-migrate
-local-seed-migrate: .env.localdev ## Run seed migrations; Usage: make local-seed-migrate
+local-seed-migrate: .env.localdev ## Run seed migrations
 	$(docker_compose) run --rm web bin/rails seed:migrate RAILS_ENV=development
+
+.PHONY: local-seed-migrate-rollback
+local-seed-migrate-rollback: .env.localdev ## Rollback latest seed migration
+	$(docker_compose) run --rm web bin/rails seed:rollback RAILS_ENV=development
 
 .PHONY: local-seed-migrate-version
 local-seed-migrate-version: .env.localdev ## Run seed migrations; Usage: make local-seed-migrate-version version=20200517175758_seed_migration_file_name.rb
@@ -178,7 +181,7 @@ local-stop: .env.localdev ## Stop localdev containers
 
 .PHONY: local-down
 local-down: .env.localdev ## Tear down localdev containers (will lose data in containers that are not stored in docker volume)
-	$(docker_compose_simple) down
+	$(docker_compose) down
 
 .PHONY: local-console
 local-console: .env.localdev ## Get a bash shell on local host

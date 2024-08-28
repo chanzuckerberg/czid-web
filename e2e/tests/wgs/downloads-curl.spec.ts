@@ -61,7 +61,7 @@ test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format("YYYY-MM-DD");
+    const today = moment().format("YYYY-MM-DD");
     expect(downloadDate).toEqual(today);
 
     const downloadCount = await downloadsPage.getDownloadCount(downloadId);

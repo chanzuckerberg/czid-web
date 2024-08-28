@@ -76,7 +76,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format("YYYY-MM-DD");
+    const today = moment().format("YYYY-MM-DD");
     expect(downloadDate).toEqual(today);
 
     // - Download file status as COMPLETE
@@ -245,7 +245,7 @@ test.describe("Viral CG (WGS) - Downloads (CURL) | Functional: P-2", () => {
 
     // - Download Date / Count is correct
     const downloadDate = await downloadsPage.getDownloadDate(downloadId);
-    const today = moment().utc().format("YYYY-MM-DD");
+    const today = moment().format("YYYY-MM-DD");
     expect(downloadDate).toEqual(today);
 
     // - Download file status as COMPLETE

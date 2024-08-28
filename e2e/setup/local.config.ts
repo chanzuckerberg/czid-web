@@ -36,7 +36,7 @@ const config: PlaywrightTestConfig = {
     headless: false,
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
-    storageState: "/tmp/state.json",
+    storageState: "/tmp/state-local.json",
     trace: "on-first-retry",
     video: "on",
     permissions: ["clipboard-read"],

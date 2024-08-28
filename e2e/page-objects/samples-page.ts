@@ -708,7 +708,7 @@ export class SamplesPage extends PageObject {
     // #region Fill
     public async fillSearchBar(value: string) {
       await this.page.locator(SEARCH_BAR).fill(value);
-      await this.pause(1);
+      await this.pause(3);
     }
 
     public async fillThresholdValue(value: number) {
@@ -826,7 +826,7 @@ export class SamplesPage extends PageObject {
           await this.clickTableRowByIndex(0);
           await this.scrollUpToElement(
             `${REPORT_TABLE_ROWS}[${reportTableRowIndexAttribute}="1"]`, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
-  
+
           await this.scrollDownToElement(
             taxonLocatorString, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
         }

@@ -83,6 +83,11 @@ test.describe("Sample Deletion", () => {
       // #endregion Verify the sample is removed from the table
 
       // #region Verify the sample report returns an error after deleting
+
+      // Pause to allow deletion to complete, otherwise the subsequent API call
+      // may cause an exception if the sample has not been fully deleted
+      await samplesPage.pause(15);
+
       const sampleReportAfter = await samplesPage.getWaitForReportError(
         sample.id,
       );
