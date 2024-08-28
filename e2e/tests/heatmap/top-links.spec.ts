@@ -98,7 +98,7 @@ test.describe("Functional: P-1: Taxon heatmap - Top Links", () => {
       // #region On the dropdown select metric
       await heatmapPage.clickDownloadMetric(c.metric);
 
-      const downloadId = await heatmapPage.clickStartDownloadButton();
+      const downloadId = await heatmapPage.clickStartGeneratingDownloadButton();
 
       // blue notification at top right corner, with text ""We've received your download request and are busy preparing your data. To check the status of your download, visit the Downloads page.
       // Dismiss""

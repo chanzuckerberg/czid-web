@@ -63,8 +63,7 @@ const BACKGROUND_DROPDOWN = "[class*='backgroundDropdownContainer'] button";
 const SELECTED_BACKGROUND = "//*[contains(@class, 'backgroundDropdownContainer')]/button/div";
 const SEARCH_INPUT = "[role='tooltip'] input";
 const SEARCH_RESULTS = "//ul[contains(@class, 'listbox')]//li[@aria-disabled='false']//*[contains(@class, 'primary-text')]";
-// TODO: rename to be specific to new background alert
-const ALERT_MESSAGE = "[class*='Alert-message']";
+const NEW_BACKGROUND_ALERT_MESSAGE = "[class*='Alert-message']";
 const CLOSE_ALERT_BUTTON = "[class*='Alert-action'] button";
 const THRESHOLDS_INPUT = "input[aria-label='threshold-value']";
 const THRESHOLDS_APPLY_BUTTON = "//*[text()='Configure Thresholds']/following-sibling::*//button[text()='Apply']";
@@ -143,7 +142,7 @@ export class HeatmapPage extends PageObject {
   }
 
   // TODO: Update function name to StartGeneratingDownload for clarity
-  public async clickStartDownloadButton() {
+  public async clickStartGeneratingDownloadButton() {
     const [response] = await Promise.all([
       this.page.waitForResponse(
         response =>
@@ -356,8 +355,7 @@ export class HeatmapPage extends PageObject {
   }
 
   public async getSaveNotification() {
-    // TODO: call getHeaderButtonPopupContent instead
-    return this.page.locator(HEADER_BUTTON_POPUP_CONTENT).textContent();
+    return this.getHeaderButtonPopupContent();
   }
 
   public async getShareNotification() {
@@ -369,7 +367,7 @@ export class HeatmapPage extends PageObject {
   }
 
   public async getAlertMessage() {
-    return this.page.locator(ALERT_MESSAGE).textContent();
+    return this.page.locator(NEW_BACKGROUND_ALERT_MESSAGE).textContent();
   }
 
   public async getBulkDownloadAlertMessage() {
@@ -745,6 +743,14 @@ export class HeatmapPage extends PageObject {
     }
   }
 
+  public async validateShareNotificationMessage() {
+    expect(await this.getShareNotification()).toEqual(SHAREABLE_URL_NOTIFICATION);
+  }
+
+  public validateShareableUrlLength(url: string) {
+    expect(url.length).toEqual(SHORTENED_URL_LENGTH);
+  }
+
   public async validateHelpResourcesPanelVisible() {
     await expect(
       (await this.getHelpResourcesIframe())
@@ -764,7 +770,7 @@ export class HeatmapPage extends PageObject {
     await this.clickDownloadType(DOWNLOAD_TYPES.COMBINED_MICROBIOME_FILE);
     await this.pause(1);
     await this.clickDownloadMetric(downloadMetric);
-    const biomDownloadId = await this.clickStartDownloadButton();
+    const biomDownloadId = await this.clickStartGeneratingDownloadButton();
     // #endregion Download Combined Microbiome File for given metric
 
     // #region Verify the download alert message

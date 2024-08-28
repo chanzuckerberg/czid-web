@@ -1,5 +1,5 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { HeatmapPage, SHAREABLE_URL_NOTIFICATION, SHORTENED_URL_LENGTH } from "@e2e/page-objects/heatmap-page";
+import { HeatmapPage } from "@e2e/page-objects/heatmap-page";
 import { ProjectPage } from "@e2e/page-objects/project-page";
 import { test, expect } from "@playwright/test";
 
@@ -29,7 +29,7 @@ test.describe("Heatmap top links", () => {
   test("SNo 2: Share button copies shareable URL to clipboard", async ({ page }) => {
     // #region Click the Share button and verify notification
     const shareableURL = await heatmapPage.clickShareButton();
-    expect(await heatmapPage.getShareNotification()).toEqual(SHAREABLE_URL_NOTIFICATION);
+    await heatmapPage.validateShareNotificationMessage();
     // #endregion Click the Share button and verify notification
 
     // #region Validate the shareable URL was copied to the clipboard
@@ -37,17 +37,13 @@ test.describe("Heatmap top links", () => {
     expect(shareableURL.startsWith(process.env.BASEURL)).toBeTruthy();
     // shareable URL example: "https://staging.czid.org/a1b2c"
     const shortUrl = shareableURL.split("/").pop()
-    expect(shortUrl.length).toEqual(SHORTENED_URL_LENGTH);
+    heatmapPage.validateShareableUrlLength(shortUrl);
     // #endregion Validate the shareable URL was copied to the clipboard
   });
 
   test("SNo 3: Save button propagates background and filters", async ({ page }) => {
-    // TODO: Use shared function for random background
     // #region Change to a random background
-    const backgrounds = await heatmapPage.getBackgrounds();
-    const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-
-    await heatmapPage.setBackground(background);
+    const background = await heatmapPage.changeToRandomNewBackground(false);
     // #endregion Change to a random background
 
     // #region Set a threshold filter
@@ -132,7 +128,7 @@ test.describe("Heatmap top links", () => {
 
     // #region Click the Share button and verify notification
     const shareableURL = await heatmapPage.clickShareButton();
-    expect(await heatmapPage.getShareNotification()).toEqual(SHAREABLE_URL_NOTIFICATION);
+    await heatmapPage.validateShareNotificationMessage();
     // #endregion Click the Share button and verify notification
 
     // #region Paste and Go clipboard URL in a new browser tab

@@ -7,6 +7,10 @@ import { login } from "../utils/login";
 
 config({ path: resolve(`.env.${process.env.NODE_ENV}`) });
 
+const MILLISECONDS_IN_HOUR = 3600000;
+const AUTH0_EXPIRATION_HOURS = 72;
+const REAUTHENTICATE_AFTER_HOURS = 8;
+
 /**
  * This function is run once at the start of the test
  * This is where we established shared cookies and other setups we want to
@@ -49,17 +53,22 @@ const hasRecentlyLoggedIn = (cookieFile: string): boolean => {
       "cookies"
     ];
     const cookie = cookieJson.find(cookie => cookie.name === "auth0");
-    const expires = cookie["expires"] as number;
+    const auth0ExpiresSeconds = cookie["expires"] as number;
 
-    // /tmp/state.json contains expires as seconds, e.g. 1722725055.953518
-    // so we need to convert it to milliseconds for accurate comparison
-    const expiresMilliseconds = expires * 1000;
-    if (expiresMilliseconds > currentTime) {
-      return true;
-    } else {
-      return false;
-    }
+    return getTimeForReauthenticating(auth0ExpiresSeconds) > currentTime;
   } catch (error) {
     return false;
   }
 };
+
+// the auth0 expires time stored in our cookie is 72 hours from login time, but the system generally
+// requires re-authentication after a much shorter period of time depending on activity.
+// This function calculates re-authentication time based on REAUTHENTICATE_AFTER_HOURS
+const getTimeForReauthenticating = (auth0ExpiresSeconds: number): number => {
+  // expires is stored in seconds, e.g. 1722725055.953518
+  // so we need to convert it to milliseconds for accurate comparison
+  const auth0ExpiresMilliseconds = auth0ExpiresSeconds * 1000;
+
+  const millisecondsToSubtract = (AUTH0_EXPIRATION_HOURS - REAUTHENTICATE_AFTER_HOURS) * MILLISECONDS_IN_HOUR;
+  return auth0ExpiresMilliseconds - millisecondsToSubtract;
+}

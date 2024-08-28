@@ -25,7 +25,6 @@ test.describe("Heatmap downloads", () => {
     project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.MNGS}_heatmap_downloads`);
     // #endregion Setup project
 
-    // TODO: Consider uploading new samples each run, instead of just using existing sample
     // #region Setup samples
     // sample name: RR004_water_2_S23A
     // Original file located at: https://drive.google.com/drive/folders/1j55vKp6ucU6bajqPxwnyp4BUwfy0f6Op

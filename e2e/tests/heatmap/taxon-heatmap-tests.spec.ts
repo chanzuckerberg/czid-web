@@ -776,7 +776,7 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
     await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Combined Microbiome File");
     await heatmapPage.clickDownloadMetric("NT rPM");
-    await heatmapPage.clickStartDownloadButton();
+    await heatmapPage.clickStartGeneratingDownloadButton();
 
     // Downloaded files when BG is None:
     // - All Heatmap Metrics (.csv) displays NT_zscore and NR_zcore as blank
@@ -828,7 +828,7 @@ test.describe("Functional: P-0: Taxon heatmap - 3", () => {
     await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Combined Microbiome File");
     await heatmapPage.clickDownloadMetric("NT rPM");
-    await heatmapPage.clickStartDownloadButton();
+    await heatmapPage.clickStartGeneratingDownloadButton();
 
     // - All Heatmap Metrics (.csv) displays NT_zscore and NR_zcore as blank
     // - Combined Microbiome File(.biom) file completes and it's downloaded successfully
@@ -1294,7 +1294,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Combined Microbiome File");
     await heatmapPage.clickDownloadMetric("NT rPM");
-    const ntRPMdownloadId = await heatmapPage.clickStartDownloadButton();
+    const ntRPMdownloadId = await heatmapPage.clickStartGeneratingDownloadButton();
 
     await heatmapPage.clickSave();
     const heatmapUrl = await heatmapPage.clickShareButton();
@@ -1363,7 +1363,7 @@ test.describe("Functional: P-0: Taxon heatmap - 4", () => {
     await heatmapPage.clickDownloadButton();
     await heatmapPage.clickDownloadType("Combined Microbiome File");
     await heatmapPage.clickDownloadMetric("NT rPM");
-    const ntrPMDownloadId = await heatmapPage.clickStartDownloadButton();
+    const ntrPMDownloadId = await heatmapPage.clickStartGeneratingDownloadButton();
 
     await heatmapPage.clickSave();
 
