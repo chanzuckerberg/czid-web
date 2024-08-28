@@ -51,7 +51,7 @@ const CREATE_BACKGROUND_DESCRIPTION_INPUT =
 const CREATE_BACKGROUND_CORRECTION_DROPDOWN =
   "//*[text()='Create a Background Model']/following-sibling::*//*[@data-testid='filters']";
 const CREATE_BACKGROUND_CORRECTION_OPTIONS =
-  "[data-testid='dropdown-standard'] [class*='optionText']";
+  "[data-testid='dropdown-menu'] [class*='optionText']";
 const CREATE_BACKGROUND_CREATE_BUTTON =
   "//*[text()='Create a Background Model']/following-sibling::*//*[text()='Create']";
 const CREATE_BACKGROUND_NOTIFICATION =
@@ -539,6 +539,7 @@ export class ProjectPage extends PageObject {
 
   public async clickCorrectionMethodDropdown() {
     await this.page.locator(CREATE_BACKGROUND_CORRECTION_DROPDOWN).click();
+    await this.page.locator(CREATE_BACKGROUND_CORRECTION_OPTIONS).waitFor({timeout: 5_000}).catch(() => null);
   }
 
   public async clickVisualization(value: any) {

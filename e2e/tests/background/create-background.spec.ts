@@ -1,15 +1,12 @@
-import { WORKFLOWS, SEQUENCING_PLATFORMS } from "@e2e/constants/common";
+import { WORKFLOWS } from "@e2e/constants/common";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 import { getAlphaNumericString } from "@e2e/utils/common";
-import { setupSamples } from "@e2e/page-objects/user-actions";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2, } from "@e2e/constants/sample";
+import { UploadPage } from "@e2e/page-objects/upload-page";
 
-const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
-const NO_HOST = "wgs_SARS_CoV2_no_host";
-const WGS_SAMPLE_NAMES = [NO_HOST];
+const BASESPACE_PROJECT_NAME = "Mark Test Project";
 
-const TEST_TIMEOUT = 60 * 1000 * 20;
+const TEST_TIMEOUT = 60 * 1000 * 30;
 
 test.describe("Functional: P-0: Create BG model", () => {
   
@@ -76,26 +73,15 @@ test.describe("Functional: P-0: Create BG model", () => {
   /**
    * Create BG (normalized)
    */
-  test.skip(`SNo 14: Create a New BG model (Normalized)`, async ({ page }) => {
+  test(`SNo 14: Create a New BG model (Normalized)`, async ({ page }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
     const project = await projectPage.getOrCreateProject("SNo-14-normalized-bg");
-    for (let i = 0; i < 2; i++) {
-      await setupSamples(
-        page,
-        project,
-        WGS_SAMPLE_FILES,
-        WGS_SAMPLE_NAMES,
-        WORKFLOWS.MNGS,
-        {
-          runPipeline: true,
-          hostOrganism: "Human",
-          sequencingPlatform: SEQUENCING_PLATFORMS.MNGS, // Illumina
-          waitForPipeline: false,
-        },
-      );
-    }
+
+    const uploadPage = new UploadPage(page);
+    await uploadPage.uploadBasespaceSample(project.name, BASESPACE_PROJECT_NAME, WORKFLOWS.MNGS)
+    await uploadPage.uploadBasespaceSample(project.name, BASESPACE_PROJECT_NAME, WORKFLOWS.MNGS)
 
     await projectPage.navigateToSamples(project.id, WORKFLOWS.MNGS);
     // #endregion 1. Login to CZ ID staging
@@ -117,7 +103,7 @@ test.describe("Functional: P-0: Create BG model", () => {
 
     // #region 5. Pick ""Normalized by Input Mass"" option in Applied Correction Method and click Create
     await projectPage.clickCorrectionMethodDropdown();
-    await projectPage.clickCorrectionMethodOption("Normalized by Input Mass");
+    await projectPage.clickCorrectionMethodOption("Normalized by input mass");
     await projectPage.clickBackgroundCreateButton();
     // #endregion 5. Pick ""Normalized by Input Mass"" option in Applied Correction Method and click Create
 

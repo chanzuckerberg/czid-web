@@ -5,6 +5,8 @@ const LOGIN_PASSWORD_INPUT = "input[name='password']";
 const SIGNIN_BUTTON_INPUT = "input[value='Sign In']";
 const CLOSE_WINDOW_BUTTON = "//button[text()='Close Window']";
 
+const CONNECTED = "You've successfully authorized CZ ID to connect to Basespace!";
+
 export class IlluminaPage extends PageObject {
 
   public async fillLoginEmail(value: string) {
@@ -25,6 +27,15 @@ export class IlluminaPage extends PageObject {
         throw error;
       }
     });
+  }
+
+  public async isAuthorized() {
+    let connected: any;
+    connected = await this.page.getByText(CONNECTED).waitFor({timeout: 10_000}).catch(() => false);
+    if (connected !== false) {
+      connected = await this.page.getByText(CONNECTED).isVisible();
+    }
+    return connected;
   }
 
   public async authorize() {

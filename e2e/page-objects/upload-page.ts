@@ -117,6 +117,12 @@ const SAMPLE_UPLOAD_STATUS_BAR = (sampleName: string) => `//div[contains(@class,
 const LOADING_BARS = "//div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]";
 // #endregion Uploads completed
 
+type basespaceOptions = {
+  taxonName?: string;
+  sampleNames?: Array<string>;
+  waitForUploadComplete?: boolean;
+};
+
 export class UploadPage extends PageObject {
 
   // #region Navigate
@@ -612,6 +618,50 @@ export class UploadPage extends PageObject {
   // #endregion Fill
 
   // #region Macro
+  public async uploadBasespaceSample(projectName: string, basespaceProjectName: string, workflow: string, options?: basespaceOptions) {
+    options = options || {};
+
+    await this.goto();
+    await this.selectProject(projectName);
+    const taxonName = options.taxonName ? options.taxonName : "Unknown";
+    await this.setWorkFlow(workflow, true, taxonName);
+    await this.clickBasespaceButton();
+
+    const illuminaPage = await this.clickConnectToBasespaceButton();
+    if (await illuminaPage.isAuthorized()) {
+      await illuminaPage.clickCloseWindowButton();
+    } else {
+      await illuminaPage.authorize();
+    }
+
+    await this.selectBasespaceProject(basespaceProjectName);
+    await this.clickConnectToProject();
+    
+    let sampleNames = [];
+    if (!options.sampleNames) {
+      const selectedSamples = await this.getSelectedSamples();
+      sampleNames = selectedSamples.slice(0, 2);
+    } else {
+      sampleNames = options.sampleNames;
+    }
+    await this.clickSamples(sampleNames);
+    await this.clickAuthorizeIllumina();
+
+    sampleNames = await this.getMetadataSampleNames();
+    const inputs = await this.getRandomizedSampleInputs(sampleNames, sampleNames);
+    await this.setManualInputs(inputs);
+
+    await this.clickContinue();
+    await this.pause(10); // stablizes test
+
+    await this.clickTermsAgreementCheckbox();
+    await this.clickStartUploadButton();
+
+    if (options.waitForUploadComplete) {
+      await this.waitForBasespaceUploadComplete();
+    }
+  }
+
   public async selectBasespaceProject(option: string) {
     await this.clickSelectBasespaceProjectDropdown();
     await this.clickSelectBasespaceProjectOption(option);
