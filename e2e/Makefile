@@ -10,9 +10,17 @@ list-e2e-tests: # List all e2e tests
 run-staging-e2e-tests: set-staging-credentials # Run all tests against the staging environment
 	NODE_ENV=staging npx playwright test -c ./setup/staging.config.ts tests/*/*.spec.ts
 
-.PHONY: run-local-e2e-tests
-run-local-e2e-tests: # Run all tests against the local environment
+.PHONY: run-local-all-tests
+run-local-all-tests: # Run all tests against the local environment
 	NODE_ENV=local npx playwright test -c ./setup/local.config.ts tests/*/*.spec.ts
+
+.PHONY: run-local-smoke-tests
+run-local-smoke-tests:
+	npm run local_smoke_tests
+
+.PHONY: run-local-e2e-tests
+run-local-e2e-tests:
+	npm run local_e2e_tests
 
 .PHONY: set-staging-credentials
 set-staging-credentials: # Set up the czid credentials for the staging environment

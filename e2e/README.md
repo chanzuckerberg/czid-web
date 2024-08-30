@@ -23,12 +23,14 @@ Playwright will log in as a user in the CZ ID web app and perform operations to 
 1. `cd e2e`
 2. `npm i` to install the Playwright from the package.json.
 
-#### Credentials 
+#### Credentials
 ##### Executing tests against the staging environment
 
-1. Retrieve [credentials from AWS secrets manager](https://us-west-2.console.aws.amazon.com/secretsmanager/secret?name=czid-login). `AWS_PROFILE=idseq-dev aws secretsmanager get-secret-value --secret-id czid-login`
-2. `cp .env.staging.template .env.staging`
-3. Set the credentials for the account in `USERNAME` and `PASSWORD` in `.env.staging`.
+1. Set staging credentials
+
+    ```bash
+    make set-staging-credentials
+    ```
 
 To execute all tests in the WGS download test suite (must be in the `e2e` directory -- `cd e2e`):
 * `NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts tests/*/*.spec.ts -g "Download: WGS"`
