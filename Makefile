@@ -30,7 +30,12 @@ help: ## display help for this makefile
 Makefile:
 	@echo
 
-.env.localdev: Makefile # Write useful env vars to ".env.localdev" so we can use them later.
+# Check if server-domain.env exists before adding it as a dependency
+ifeq ($(wildcard server-domain.env),server-domain.env)
+  ENV_LOCALDEV_DEPS += server-domain.env
+endif
+
+.env.localdev: Makefile $(ENV_LOCALDEV_DEPS) # Write useful env vars to ".env.localdev" so we can use them later.
 	export AWS_ACCOUNT_ID=$$(aws sts get-caller-identity --profile $(AWS_DEV_PROFILE) | jq -r .Account); \
 	if [ -n "$${AWS_ACCOUNT_ID}" ]; then \
 		echo AWS_ACCOUNT_ID=$${AWS_ACCOUNT_ID} > .env.localdev; \
@@ -39,6 +44,9 @@ Makefile:
 		echo DEPLOYMENT_ENVIRONMENT=dev >> .env.localdev; \
 	else \
 		false; \
+	fi; \
+	if [ -f server-domain.env ]; then \
+		cat server-domain.env >> .env.localdev; \
 	fi
 
 .PHONY: local-init

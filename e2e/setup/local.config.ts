@@ -33,7 +33,6 @@ const config: PlaywrightTestConfig = {
   use: {
     actionTimeout: 240000,
     baseURL: "http://localhost:3000",
-    headless: false,
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
     storageState: "/tmp/state-local.json",
@@ -41,5 +40,7 @@ const config: PlaywrightTestConfig = {
     video: "on",
     permissions: ["clipboard-read"],
   },
+  workers: 3,
+  retries: 3,
 };
 export default config;

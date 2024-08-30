@@ -29,7 +29,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
     const username = process.env.CZID_USERNAME;
     const password = process.env.CZID_PASSWORD;
 
-    const browser = await chromium.launch({ headless: false });
+    const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
     await page.goto(process.env.BASEURL);
     expect(page.getByText(tag)).toBeVisible({ timeout: 30 * 1000 }); // Wait upto 30 seconds

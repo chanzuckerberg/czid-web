@@ -90,3 +90,6 @@ blessclientconfig.yml
 
 # Local Playwright reports run from VS Code Playwright extension
 /html-reports
+
+# ngrok server domain config for local dev
+server-domain.env

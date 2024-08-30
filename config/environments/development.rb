@@ -104,6 +104,12 @@ Rails.application.configure do
   config.hosts << "web"
   config.hosts << "web.czidnet"
 
+  # SERVER_DOMAIN is used for callback URLs for ECS bulk downloads
+  # In local development, an ngrok http endpoint must be configured for ECS bulk downloads to work
+  # See https://github.com/chanzuckerberg/czid-web-private/wiki/1.6-Dev-%E2%80%90-ECS-Bulk-Downloads-on-Localdev
+  # This setting prevents Rails from blocking requests to the ngrok endpoint
+  config.hosts << ENV["SERVER_DOMAIN"].sub("https://", "") if ENV["SERVER_DOMAIN"]
+
   # Development logging configuration
   logger           = ActiveSupport::Logger.new(STDOUT)
   logger.formatter = config.log_formatter
