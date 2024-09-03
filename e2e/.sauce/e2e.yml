@@ -42,6 +42,78 @@ env:
   NODE_ENV: $NODE_ENV
 
 suites:
+  - name: "Functional: P-1: SNo e13: AMR Paired Read RNA Human Sample Report & Download Data Validation"
+    <<: *testSettings
+    testMatch: ['tests/amr/amr-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e13: AMR Paired Read RNA Human Sample Report & Download Data Validation"
+  - name: "Functional: P-1: SNo e12: AMR Paired Read RNA Mosquito Sample Report & Download Data Validation"
+    <<: *testSettings
+    testMatch: ['tests/amr/amr-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e12: AMR Paired Read RNA Mosquito Sample Report & Download Data Validation"
+  - name: "Functional: P-1: SNo e11: AMR Paired Read Sample Report & Download Data Validation"
+    <<: *testSettings
+    testMatch: ['tests/amr/amr-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e11: AMR Paired Read Sample Report & Download Data Validation"
+  - name: "Functional: P-1: SNo e10: AMR Single Read Sample Report & Data Validation"
+    <<: *testSettings
+    testMatch: ['tests/amr/amr-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e10: AMR Single Read Sample Report & Data Validation"
+  - name: "Functional: P-1: SNo e9: mNGS Illumina Paired Read RNA Human Sample Report & Download Data Validation"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mngs-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e9: mNGS Illumina Paired Read RNA Human Sample Report & Download Data Validation"
+  - name: "Functional: P-1: SNo e19: mNGS Illumina Paired Read RNA Human Sample Report & Download Data Validation - New database"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mngs-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e19: mNGS Illumina Paired Read RNA Human Sample Report & Download Data Validation - New database"
+  - name: "Functional: P-1: SNo e6: mNGS Illumina Single Read Sample Report & Download Data Validation"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mngs-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e6: mNGS Illumina Single Read Sample Report & Download Data Validation"
+  - name: "Functional: P-1: SNo e16: mNGS Illumina Single Read Sample Report & Download Data Validation - New database"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mngs-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e16: mNGS Illumina Single Read Sample Report & Download Data Validation - New database"
+  - name: "Functional: P-1: SNo e8: mNGS Illumina Paired Read RNA Mosquito Sample Report & Download Data Validation"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mngs-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e8: mNGS Illumina Paired Read RNA Mosquito Sample Report & Download Data Validation"
+  - name: "Functional: P-1: SNo e18: mNGS Illumina Paired Read RNA Mosquito Sample Report & Download Data Validation - New database"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mngs-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e18: mNGS Illumina Paired Read RNA Mosquito Sample Report & Download Data Validation - New database"
+  - name: "Functional: P-1: SNo e7: mNGS Illumina Paired Read Sample Report & Download Data Validation"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mngs-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e7: mNGS Illumina Paired Read Sample Report & Download Data Validation"
+  - name: "Functional: P-1: SNo e17: mNGS Illumina Paired Read Sample Report & Download Data Validation - New database"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mngs-e2e.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo e17: mNGS Illumina Paired Read Sample Report & Download Data Validation - New database"
   - name: "mNGS IP: Functional: P-0: mNGS-3: long mNGS Illumina sample Basespace upload"
     <<: *testSettings
     testMatch: ['tests/mngs/sample-upload.spec.ts']
@@ -241,3 +313,4 @@ npm:
     - moment-timezone
     - tar
     - fast-diff
+    - csv-parse

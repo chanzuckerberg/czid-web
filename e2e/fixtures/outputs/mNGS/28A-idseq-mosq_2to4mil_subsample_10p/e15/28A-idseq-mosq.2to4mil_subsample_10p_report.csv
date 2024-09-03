@@ -1,0 +1,35 @@
+tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,nt_bpm,nt_base_count,nt_count,nt_contigs,nt_contig_b,nt_percent_identity,nt_alignment_length,nt_e_value,nr_bpm,nr_base_count,nr_count,nr_contigs,nr_contig_b,nr_percent_identity,nr_alignment_length,nr_e_value,species_tax_ids,known_pathogen
+1912216,2,1912216,Cutibacterium,"",bacteria,false,959.523,5614,1,,,96.04,5530.0,10^-307.653,,,,,,,,,[1747],0
+1747,1,1912216,Cutibacterium acnes,"",bacteria,false,959.523,5614,1,,,96.04,5530.0,10^-307.653,,,,,,,,,,0
+1870727,2,1870727,Subacronicta,"",eukaryota,false,367.47,2150,1,,,83.399,765.0,10^-307.653,,,,,,,,,[1870728],0
+1870728,1,1870727,Subacronicta megacephala,"",eukaryota,false,367.47,2150,1,,,83.399,765.0,10^-307.653,,,,,,,,,,0
+1649510,2,1649510,Variibacter,"",bacteria,false,802.451,4695,1,,,81.034,116.0,10^-36.4206,,,,,,,,,[1333996],0
+1333996,1,1649510,Variibacter gotjawalensis,"",bacteria,false,802.451,4695,1,,,81.034,116.0,10^-36.4206,,,,,,,,,,0
+1395974,2,1395974,Tardiphaga,"",bacteria,false,2527.0,14785,3,,,81.997,2324.67,10^-307.653,,,,,,,,,[340268],0
+340268,1,1395974,Tardiphaga alba,"",bacteria,false,2527.0,14785,3,,,81.997,2324.67,10^-307.653,,,,,,,,,,0
+1299308,2,1299308,Quaranjavirus,"",viruses,false,492.409,2881,2,,,98.1315,1247.5,10^-307.653,,,,,,,,,[1608131],0
+1608131,1,1299308,Wuhan Mosquito Virus 6,"",viruses,false,492.409,2881,2,,,98.1315,1247.5,10^-307.653,,,,,,,,,,0
+152053,2,152053,Starkeya,"",bacteria,false,652.9,3820,1,,,81.519,395.0,10^-157.343,,,,,,,,,[2709380],0
+2709380,1,152053,Starkeya sp. ORNL1,"",bacteria,false,652.9,3820,1,,,81.519,395.0,10^-157.343,,,,,,,,,,0
+13687,2,13687,Sphingomonas,"",bacteria,false,1106.17,6472,2,,,88.919,3161.5,10^-307.653,,,,,,,,,"[1938607, 13689]",0
+1938607,1,13687,Sphingomonas sp. LM7,"",bacteria,false,772.541,4520,1,,,81.324,4487.0,10^-307.653,,,,,,,,,,0
+13689,1,13687,Sphingomonas paucimobilis,"",bacteria,false,333.628,1952,1,,,96.514,1836.0,10^-307.653,,,,,,,,,,0
+7174,2,7174,Culex,"",eukaryota,false,2732.78,15989,9,,,82.9331,949.111,10^-144.744,,,,,,,,,"[7177, 7176, 7175]",0
+7177,1,7174,Culex tarsalis,"",eukaryota,false,490.529,2870,1,,,81.746,126.0,10^-41.8741,,,,,,,,,,0
+7176,1,7174,Culex quinquefasciatus,southern house mosquito,eukaryota,false,497.195,2909,3,,,84.5997,710.667,10^-160.337,,,,,,,,,,0
+7175,1,7174,Culex pipiens,northern house mosquito,eukaryota,false,1745.05,10210,5,,,82.1706,1256.8,10^-155.962,,,,,,,,,,0
+1073,2,1073,Rhodopseudomonas,"",bacteria,false,1574.14,9210,2,,,81.8825,3238.5,10^-307.653,,,,,,,,,[475937],0
+475937,1,1073,Rhodopseudomonas boonkerdii,"",bacteria,false,1574.14,9210,2,,,81.8825,3238.5,10^-307.653,,,,,,,,,,0
+561,2,561,Escherichia,"",bacteria,false,555.136,3248,1,,,96.588,3136.0,10^-307.653,,,,,,,,,[562],1
+562,1,561,Escherichia coli,"",bacteria,false,555.136,3248,1,,,96.588,3136.0,10^-307.653,,,,,,,,,,1
+547,2,547,Enterobacter,"",bacteria,false,150.577,881,1,,,95.378,714.0,10^-307.653,,,,,,,,,[299767],0
+299767,1,547,Enterobacter ludwigii,"",bacteria,false,150.577,881,1,,,95.378,714.0,10^-307.653,,,,,,,,,,0
+469,2,469,Acinetobacter,"",bacteria,false,5094.5,29807,6,,,93.9098,4910.0,10^-307.653,,,,,,,,,"[106654, 40214]",0
+106654,1,469,Acinetobacter nosocomialis,"",bacteria,false,671.701,3930,1,,,96.297,3835.0,10^-307.653,,,,,,,,,,0
+40214,1,469,Acinetobacter johnsonii,"",bacteria,false,4422.8,25877,5,,,93.4324,5125.0,10^-307.653,,,,,,,,,,0
+-200,2,-200,all taxa with neither family nor genus classification,,,false,6014.2,35188,9,1,23265,97.9389,5336.78,10^-287.043,,,,,,,,,"[2832643, 2651926, 2304499]",0
+2832643,1,-200,Caudoviricetes sp.,"",viruses,false,543.342,3179,1,,,97.225,3063.0,10^-307.653,,,,,,,,,,0
+2651926,1,-200,Marma virus,"",viruses,false,810.997,4745,2,,,96.3579,2217.0,10^-214.909,,,,,,,,,,0
+2304499,1,-200,Culex Bunyavirus 2,"",viruses,false,4659.86,27264,6,1,23265,98.5848,6755.67,10^-307.653,,,,,,,,,,0
+-201980416,2,-201980416,non-genus-specific reads in family Peribunyaviridae,,viruses,false,,,,,,,,,3976.36,23265,5,,,97.7,2466.0,10^-307.653,[1628184],0
+1628184,1,-201980416,Bunyaviridae environmental sample,"",viruses,false,,,,,,,,,3976.36,23265,5,1,23265,97.7,2466.0,10^-307.653,,0

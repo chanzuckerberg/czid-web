@@ -7,6 +7,7 @@ type runOptions = {
   hostOrganism?: string;
   sampleTissueType?: string;
   taxon?: string;
+  guppyBasecaller?: string;
   collectionLocation?: string;
   includeTrimPrimer?: boolean;
   runPipeline?: boolean;
@@ -41,6 +42,7 @@ export async function setupSamples(page: any, project: any, sampleFiles: Array<s
         sampleFiles, project, workflow, inputs, includeTrimPrimer,
         runOptions.taxon ? runOptions.taxon : "Unknown",
         runOptions.sequencingPlatform ? runOptions.sequencingPlatform : SEQUENCING_PLATFORMS.MNGS,
+        runOptions.guppyBasecaller ? runOptions.guppyBasecaller : "fast",
         uploadTimeout
       );
       sampleNames = Object.keys(inputs);
@@ -50,7 +52,7 @@ export async function setupSamples(page: any, project: any, sampleFiles: Array<s
     }
 
     if (ranPipeline && runOptions.waitForPipeline) {
-      test.setTimeout(60 * 1000 * 20); // Inclease the test runtime to let the piepline run
+      test.setTimeout(60 * 1000 * 60); // Inclease the test runtime to let the piepline run
       const sampleIds = samples.map(sample => sample.id);
       await samplesPage.waitForAllSamplesComplete(sampleIds);
     }

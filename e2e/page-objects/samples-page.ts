@@ -40,6 +40,7 @@ import { PipelineVizPage } from "./pipeline_viz-page";
 import { ProjectPage } from "./project-page";
 const BACK_TO_PROJECT = (projectName: string) => `//a[text()='${projectName}']`;
 const TAXON_HOVER_ACTIONS = (taxonName: string) => `//span[text()='${taxonName}']/parent::div//span[@data-testid='hover-actions']//button`;
+const SAMPLE_NAME = "[class*='sampleViewHeader'] [class*='sampleName']";
 const ACCESSION_LABEL = "[class*='accessionLabel']";
 const CONTIG_DOWNLOAD_ICON = "[class*='contigDownloader'] [class*='downloadIcon']";
 const NT_CONTIGS_BAR = "//*[contains(text(), 'NT Contigs')]/following-sibling::*/*/*[contains(@class, 'bar-container')]/*";
@@ -64,6 +65,8 @@ const REPORT_IN_PROGRESS = "[class*='reportStatus'][class*='inProgress']";
 const MEATBALLS_MENU = "[data-testid='overflow-btn']";
 const DELETE_CG_RUN_BUTTON = "//span[text()='Delete CG Run']";
 const DELETE_CONFIRMATION_BUTTON = "//button[text()='Delete']";
+const DOWNLOAD_BUTTON = "//button[text()='Download']";
+const DOWNLOAD_OPTIONS = "//*[@data-testid='dropdown-menu']/*[@role='option']";
 const DOWNLOAD_ALL_BUTTON = "//button[text()='Download All']";
 const DISMISS_BUTTON = "//*[translate(text(), 'D','d') = 'dismiss']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genome']";
@@ -74,12 +77,32 @@ const GENERATE_CONSENSUS_GENOME_OPTION = "//*[@data-testid='create-consensus-gen
 const GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS = "//*[@data-testid='create-consensus-genome-modal']/parent::*/following-sibling::*//*[not(contains(@class, 'disabledOption'))]/*[contains(@class, 'optionText')]";
 const CREATE_A_NEW_CONSENSUS_GENOME_BUTTON = "//button[text()='Create a New Consensus Genome']";
 const CREATE_CONSENSUS_GENOME_BUTTON = "//button[text()='Create Consensus Genome']";
-const VIEW_CONSENSUS_GENOME_Link = "[class*='consensusGenomeLink']";
+const VIEW_CONSENSUS_GENOME_LINK = "[class*='consensusGenomeLink']";
+const SHOW_HIDE_COLUMNS = "[data-testid='amr-sample-report'] [class*='dropdownWrapper'] button svg";
+const SELECT_ALL_COLUMNS = (columCategory: string) => `//*[@role='tooltip']//div[text()='${columCategory}']/following-sibling::button`;
 const BACKGROUND_FILTER_VALUE = "[data-testid='background-filter'] [data-testid='filter-value']";
 
 // Sample Details
 const SAMPLE_DETAILS_BUTTON = "[data-testid='sample-details']";
 const SAMPLE_DETAILS_HOST_VALUE = "[data-testid='host-value']";
+const SAMPLE_DETAILS_CLOSE_ICON = "[data-testid='details-sidebar'] [class*='closeIcon']";
+
+const SAMPLE_DETAILS_ANALYSIS_TYPE = "[data-testid='analysis-type-value']";
+const SAMPLE_DETAILS_SEQUENCING_PLATFORM = "[data-testid='sequencing-platform-value']";
+const SAMPLE_DETAILS_PIPELINE_VERSION = "[data-testid='pipeline-version-value']";
+const SAMPLE_DETAILS_GUPPY_BASECALLER_VERSION = "[data-testid='guppy-basecaller-version-value']";
+const SAMPLE_DETAILS_NCBI_INDEX_DATE = "[data-testid='ncbi-index-date-value']";
+const SAMPLE_DETAILS_HOST_SUBTRACTED = "[data-testid='host-subtracted-value']";
+const SAMPLE_DETAILS_TOTAL_READS = "[data-testid='total-reads-value']";
+const SAMPLE_DETAILS_ERCC_READS = "[data-testid='ercc-reads-value']";
+const SAMPLE_DETAILS_PASSED_FILTERS = "[data-testid='passed-filters-value']";
+const SAMPLE_DETAILS_UNMAPPED_READS = "[data-testid='unmapped-reads-value']";
+const SAMPLE_DETAILS_PASSED_QUALITY_CONTROL = "[data-testid='passed-quality-control-value']";
+const SAMPLE_DETAILS_COMPRESSION_RATIO = "[data-testid='compression-ratio-value']";
+const SAMPLE_DETAILS_MEAN_INSERT_SIZE = "[data-testid='mean-insert-size-value']";
+const SAMPLE_DETAILS_DATE_PROCESSED = "[data-testid='date-processed-value']";
+const BASES_REMAINING_TOGGLE = "//*[@data-testid='bases-remaining-header']/following-sibling::*[contains(@class, 'toggleContainer')]";
+const READS_REMAINING_TOGGLE = "//*[@data-testid='reads-remaining-header']/following-sibling::*[contains(@class, 'toggleContainer')]";
 
 // Is my consensus genome complete?
 // TODO: Add const
@@ -128,6 +151,66 @@ export class SamplesPage extends PageObject {
     // #endregion Navigate
 
     // #region Get
+    public async getSampleDetailsAnalysisType() {
+      return this.page.locator(SAMPLE_DETAILS_ANALYSIS_TYPE).textContent();
+    }
+
+    public async getSampleDetailsSequencingPlatform() {
+      return this.page.locator(SAMPLE_DETAILS_SEQUENCING_PLATFORM).textContent();
+    }
+
+    public async getSampleDetailsPipelineVersion() {
+      return this.page.locator(SAMPLE_DETAILS_PIPELINE_VERSION).textContent();
+    }
+
+    public async getSampleDetailsGuppyBasecallerVersion() {
+      return this.page.locator(SAMPLE_DETAILS_GUPPY_BASECALLER_VERSION).textContent();
+    }
+
+    public async getSampleDetailsNcbiIndexDate() {
+      return this.page.locator(SAMPLE_DETAILS_NCBI_INDEX_DATE).textContent();
+    }
+
+    public async getSampleDetailsHostSubtracted() {
+      return this.page.locator(SAMPLE_DETAILS_HOST_SUBTRACTED).textContent();
+    }
+
+    public async getSampleDetailsTotalReads() {
+      return this.page.locator(SAMPLE_DETAILS_TOTAL_READS).textContent();
+    }
+
+    public async getSampleDetailsErccReads() {
+      return this.page.locator(SAMPLE_DETAILS_ERCC_READS).textContent();
+    }
+
+    public async getSampleDetailsPassedFilters() {
+      return this.page.locator(SAMPLE_DETAILS_PASSED_FILTERS).textContent();
+    }
+
+    public async getSampleDetailsUnmappedReads() {
+      return this.page.locator(SAMPLE_DETAILS_UNMAPPED_READS).textContent();
+    }
+
+    public async getSampleDetailsPassedQualityControl() {
+      return this.page.locator(SAMPLE_DETAILS_PASSED_QUALITY_CONTROL).textContent();
+    }
+
+    public async getSampleDetailsCompressionRatio() {
+      return this.page.locator(SAMPLE_DETAILS_COMPRESSION_RATIO).textContent();
+    }
+
+    public async getSampleDetailsMeanInsertSize() {
+      return this.page.locator(SAMPLE_DETAILS_MEAN_INSERT_SIZE).textContent();
+    }
+
+    public async getSampleDetailsDateProcessed() {
+      return this.page.locator(SAMPLE_DETAILS_DATE_PROCESSED).textContent();
+    }
+
+    public async getSampleName() {
+      return this.page.locator(SAMPLE_NAME).textContent();
+    }
+
     public async getAccessionLabel() {
       return this.page.locator(ACCESSION_LABEL).textContent();
     }
@@ -194,6 +277,15 @@ export class SamplesPage extends PageObject {
       return this.page.locator(PIPELINE_VERSION).textContent();
     }
 
+    public async getBasesRemainingTable() {
+      await this.pause(5);
+      return this.getTable(
+        "(//*[contains(@class, 'readsRemainingRow')])[position() = 1]//*[contains(@class, 'labelText')]",
+        "(//*[contains(@class, 'readsRemainingRow')])[position() > 1]",
+        "//*[contains(@class, 'narrowMetadataValueContainer') or contains(@class, 'labelText')]",
+      );
+    }
+
     public async getNCBIIndexDate() {
       const ncbiIndexDateText = await this.page.locator(NCBI_INDEX_DATE).textContent();
       const ncbiIndexDateTextParts = ncbiIndexDateText.split("|")
@@ -201,7 +293,22 @@ export class SamplesPage extends PageObject {
     }
 
     public async getReportFilterTable() {
-      return this.getTable("[class*='Table__headerColumn']", REPORT_TABLE_ROWS, "[aria-colindex]");
+      await this.page.locator(REPORT_TABLE_ROWS).first().waitFor({timeout: 10_000}).catch(() => null);
+      await this.pause(1);
+      return this.getTable(
+        "[class*='Table__headerColumn']",
+        REPORT_TABLE_ROWS,
+        "[aria-colindex]",
+      );
+    }
+
+    public async getPipelineInfoTable() {
+      const pipelineInfoTable = await this.getTable(
+        "[data-testid*='field-label']",
+        "[class*='pipelineInfoFields']",
+        "[data-testid*='-value']",
+      );
+      return pipelineInfoTable[0];
     }
 
     public async getIsMyConsensusGenomeCompleteTable() {
@@ -210,6 +317,18 @@ export class SamplesPage extends PageObject {
         "[class*='metricsTable'] [class*='Table__row'][role='row']",
         "[role*='gridcell']",
       );
+    }
+
+    public async getAntimicrobialResistanceTable() {
+      await this.maximizeWindow();
+      await this.zoomOut();
+      const table = await this.getTable(
+        "[data-testid='amr-sample-report'] table thead [data-testid='amr-table-row'] th",
+        "[data-testid='amr-sample-report'] table tbody tr",
+        "td",
+      );
+      await this.zoomIn();
+      return table;
     }
 
     public async getWaitForReportError(sampleId: number) {
@@ -427,10 +546,34 @@ export class SamplesPage extends PageObject {
     // #endregion Get
 
     // #region Click
+    public async clickShowAllColumns() {
+      const columCategories = ["Gene Info", "Contigs", "Reads"];
+      for (const columCategory of columCategories) {
+        await this.page.locator(SELECT_ALL_COLUMNS(columCategory)).click();
+      }
+    }
+
+    public async clickShowHideColumns() {
+      await this.page.locator(SHOW_HIDE_COLUMNS).click();
+    }
+
+    public async clickReadsRemainingToggle() {
+      await this.page.locator(READS_REMAINING_TOGGLE).click();
+    }
+
+    public async clickBasesRemainingToggle() {
+      await this.page.locator(BASES_REMAINING_TOGGLE).click();
+    }
+
     public async clickGenerateConsensusGenomeDropdown() {
       await this.pause(1);
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).waitFor();
       await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
+    }
+
+    public async clickSampleDetailsCloseIcon() {
+      await this.page.locator(SAMPLE_DETAILS_CLOSE_ICON).click();
+      await this.pause(1);
     }
 
     public async clickCloseIcon() {
@@ -476,7 +619,7 @@ export class SamplesPage extends PageObject {
     }
 
     public async clickViewConsensusGenomeLink() {
-      await this.page.locator(VIEW_CONSENSUS_GENOME_Link).click();
+      await this.page.locator(VIEW_CONSENSUS_GENOME_LINK).click();
     }
 
     public async clickCreateConsensusGenomeButton() {
@@ -530,6 +673,17 @@ export class SamplesPage extends PageObject {
 
     public async clickMeatballsMenu() {
       await this.page.locator(MEATBALLS_MENU).click();
+    }
+
+    public async clickDownloadButton() {
+      await this.page.locator(DOWNLOAD_BUTTON).click();
+    }
+
+    public async clickDownloadOption(option: string) {
+      await this.pause(1);
+      const downloadPromise = this.page.waitForEvent("download");
+      await this.page.locator(DOWNLOAD_OPTIONS).getByText(option).click();
+      return downloadPromise;
     }
 
     public async clickDownloadAllButton() {

@@ -194,7 +194,7 @@ test.describe("Sample report filter test", () => {
      * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-4
      */
     test(`Smoke Test: Should be able to filter by Threshold ${workflow}`, async () => {
-      test.setTimeout(60 * 1000 * 2); // This test sometime takes slightly longer to complete
+      test.setTimeout(60 * 1000 * 5); // This test sometime takes slightly longer to complete
       const project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
       const randomSample = await samplesPage.getRandomCompletedSample(project.name);
       sampleId = randomSample.id;

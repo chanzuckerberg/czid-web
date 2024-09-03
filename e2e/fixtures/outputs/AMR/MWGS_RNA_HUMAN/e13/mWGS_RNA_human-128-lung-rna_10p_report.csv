@@ -1,0 +1,4 @@
+gene,gene_family,drug_class,high_level_drug_class,mechanism,model,cutoff,contigs,contig_coverage_breadth,contig_percent_id,contig_species,reads,rpm,read_coverage_breadth,read_coverage_depth,dpm,read_species
+TEM-116,TEM beta-lactamase,monobactam; cephalosporin; penam; penem,beta-lactam antibiotic,antibiotic inactivation,protein homolog,,0,,,,50.0,143.17,81.65,5.72,16.38,Escherichia coli (chromosome or plasmid): 7; Escherichia coli (plasmid): 3; 
+TEM-194,TEM beta-lactamase,monobactam; cephalosporin; penam; penem,beta-lactam antibiotic,antibiotic inactivation,protein homolog,Nudged,1,8.3624,100.0,Unknown taxonomy (chromosome or plasmid),,0.0,,,0.0,
+TEM-229,TEM beta-lactamase,monobactam; cephalosporin; penam; penem,beta-lactam antibiotic,antibiotic inactivation,protein homolog,Nudged,1,72.4739,100.0,Unknown taxonomy (chromosome or plasmid),,0.0,,,0.0,

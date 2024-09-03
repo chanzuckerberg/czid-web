@@ -1,0 +1,7 @@
+tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,nt_bpm,nt_base_count,nt_count,nt_contigs,nt_contig_b,nt_percent_identity,nt_alignment_length,nt_e_value,nr_bpm,nr_base_count,nr_count,nr_contigs,nr_contig_b,nr_percent_identity,nr_alignment_length,nr_e_value,species_tax_ids,known_pathogen
+10375,2,10375,Lymphocryptovirus,"",viruses,false,189668.0,1647549,130,3,1194561,92.6381,63570.0,10^-307.653,137520.0,1194561,115,3,1194561,98.9191,1954.52,10^-303.526,[3050299],0
+3050299,1,10375,Lymphocryptovirus humangamma4,"",viruses,false,189668.0,1647549,130,3,1194561,92.6381,63570.0,10^-307.653,137520.0,1194561,115,3,1194561,98.9191,1954.52,10^-303.526,,0
+7037,2,7037,Bemisia,"",eukaryota,false,176.942,1537,2,,,88.405,507.0,10^-184.341,,,,,,,,,[7038],0
+7038,1,7037,Bemisia tabaci,"",eukaryota,false,176.942,1537,2,,,88.405,507.0,10^-184.341,,,,,,,,,,0
+561,2,561,Escherichia,"",bacteria,false,444.945,3865,3,,,98.2787,1212.33,10^-307.653,,,,,,,,,[562],1
+562,1,561,Escherichia coli,"",bacteria,false,444.945,3865,3,,,98.2787,1212.33,10^-307.653,,,,,,,,,,1

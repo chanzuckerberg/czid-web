@@ -290,6 +290,7 @@ export class HeatmapPage extends PageObject {
   }
 
   public async getTaxonInfoForAllCellsInRow(numCells, axis) {
+    await this.page.locator(CELLS).first().waitFor();
     const allTaxonInfo = [];
     for (let i = 0; i < numCells; i++) {
       await this.hoverOverCell(i, axis);

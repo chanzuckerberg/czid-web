@@ -750,7 +750,7 @@ export class UploadPage extends PageObject {
     }
   }
 
-  public async setWorkFlow(analysisType: string, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null) {
+  public async setWorkFlow(analysisType: string, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null, guppyBasecaller = "fast") {
     if (analysisType === WORKFLOWS.MNGS) {
 
       // Illumina: Short read mNGS
@@ -766,7 +766,7 @@ export class UploadPage extends PageObject {
       await this.clickSequencingPlatform(sequencingPlatform);
 
       await this.clickGuppyBasecallerSettingDropDown();
-      await this.clickGuppyBasecallerSettingOption("fast");
+      await this.clickGuppyBasecallerSettingOption(guppyBasecaller);
     }
     if (analysisType === WORKFLOWS.AMR) {
       await this.clickCheckboxForWorkflow(analysisType);
@@ -846,12 +846,12 @@ export class UploadPage extends PageObject {
     return inputs;
   }
 
-  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null, timeout = 90_000) {
+  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null, guppyBasecaller = "fast", timeout = 90_000) {
     await this.goto();
     await this.dismissCookieBanner();
 
     await this.selectProject(project.name);
-    await this.setWorkFlow(workflow, includeTrimPrimer, taxonName, sequencingPlatform);
+    await this.setWorkFlow(workflow, includeTrimPrimer, taxonName, sequencingPlatform, guppyBasecaller);
     await this.uploadSampleFiles(sampleFiles, true, timeout);
 
     // Continue

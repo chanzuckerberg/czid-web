@@ -196,6 +196,7 @@ export const RUN_TYPES = {
   amr: "Antimicrobial Resistance",
 };
 
+const PLQC_TOTAL_READ_HISTOGRAM = "[data-testid='total-read-histogram'] rect[fill]";
 const PLQC_READS_LOST_BARS = "//*[@data-testid='read-lost-bar']//*[contains(@class, 'barPiece') and not(@width='1')]";
 const PLQC_MEAN_INSERT_SIZE_BARS = "//*[@data-testid='mean-insert-size-histogram']//*[contains(@class, 'bar')]//*[not(@height='0')]";
 const PLQC_DUPLICATE_COMPRESSION_BARS = "[data-testid='duplicate-compression-histogram'] g[class*='bar']";
@@ -384,7 +385,6 @@ export class ProjectPage extends PageObject {
   // #endregion bool
 
   // #region hover
-
   public async hoverOverPLQCMeanInsertSizeBars(index = 0) {
     await this.page.locator(PLQC_MEAN_INSERT_SIZE_BARS).nth(index).waitFor();
     await this.page.locator(PLQC_MEAN_INSERT_SIZE_BARS).nth(index).hover();

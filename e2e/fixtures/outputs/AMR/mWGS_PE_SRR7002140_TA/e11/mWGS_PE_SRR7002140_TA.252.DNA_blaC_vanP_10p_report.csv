@@ -1,0 +1,7 @@
+gene,gene_family,drug_class,high_level_drug_class,mechanism,model,cutoff,contigs,contig_coverage_breadth,contig_percent_id,contig_species,reads,rpm,read_coverage_breadth,read_coverage_depth,dpm,read_species
+RlmA(II),non-erm 23S ribosomal RNA methyltransferase (G748),macrolide antibiotic; lincosamide antibiotic,lincosamide antibiotic; macrolide antibiotic,antibiotic target alteration,protein homolog,,0,,,,2,646.83,29.09,0.29,93.79,
+mel,msr-type ABC-F protein,macrolide antibiotic; streptogramin antibiotic,macrolide antibiotic; streptogramin antibiotic,antibiotic target protection,protein homolog,,0,,,,2,646.83,11.74,0.21,67.92,
+patB,ATP-binding cassette (ABC) antibiotic efflux pump,fluoroquinolone antibiotic,fluoroquinolone antibiotic,antibiotic efflux,protein homolog,,0,,,,2,646.83,14.26,0.14,45.28,
+pmrA,major facilitator superfamily (MFS) antibiotic efflux pump,fluoroquinolone antibiotic,fluoroquinolone antibiotic,antibiotic efflux,protein homolog,,0,,,,3,970.25,26.25,0.27,87.32,Streptococcus pneumoniae (chromosome): 1; 
+tet(M),tetracycline-resistant ribosomal protection protein,tetracycline antibiotic,tetracycline antibiotic,antibiotic target protection,protein homolog,,0,,,,2,646.83,8.28,0.13,42.04,
+vanP,glycopeptide resistance gene cluster; Van ligase,glycopeptide antibiotic,glycopeptide antibiotic,antibiotic target alteration,protein homolog,,0,,,,2,646.83,24.49,0.24,77.62,
