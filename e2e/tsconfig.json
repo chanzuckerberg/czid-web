@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".", // This must be specified if "paths" is.
+    "esModuleInterop": true,
     "paths": {
       "@e2e/*": ["./*"],
     }

@@ -54,30 +54,10 @@ suites:
     params:
       <<: *testParams
       grep: "SNo"
-  - name: "Functional: P-1: Heatmap NT Combined Microbiome File Download"
+  - name: "Functional: P-1: Heatmap Downloads"
     <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
     excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
-    params:
-      <<: *testParams
-      grep: "Verify downloaded Combined Microbiome File for metric NT"
-  - name: "Functional: P-1: Heatmap NR Combined Microbiome File Download"
-    <<: *testSettings
-    testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
-    excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
-    params:
-      <<: *testParams
-      grep: "Verify downloaded Combined Microbiome File for metric NR"
-  - name: "Functional: P-1: Heatmap Image Downloads"
-    <<: *testSettings
-    testMatch: ['tests/heatmap/heatmap-downloads.spec.ts']
-    excludedTestFiles: ['tests/heatmap/heatmap-downloads.spec.ts-snapshots/*']
-    params:
-      <<: *testParams
-      grep: "Verify downloaded heatmap image"
-  - name: "Functional: P-1: Taxon heatmap - Top Links"
-    <<: *testSettings
-    testMatch: ['tests/heatmap/top-links.spec.ts']
     params:
       <<: *testParams
       grep: "SNo"

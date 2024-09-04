@@ -70,7 +70,7 @@ test.describe("Heatmap top links", () => {
     // #region Close heatmap tab, and navigate to saved heatmap
     await heatmapPage.close();
     heatmapPage = new HeatmapPage(page);
-    const savedHeatmapUrl = `https://${process.env.NODE_ENV}.czid.org/visualizations/heatmap/${heatmapId}`
+    const savedHeatmapUrl = `${process.env.BASEURL}/visualizations/heatmap/${heatmapId}`
     await heatmapPage.gotoHeatmap(savedHeatmapUrl);
     // #endregion Close heatmap tab, and navigate to saved heatmap
 

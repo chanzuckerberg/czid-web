@@ -13,6 +13,7 @@
 
 # Ignore yarn.lock because we manage packages using npm
 /yarn.lock
+/node_modules
 
 # Ignore the default SQLite database.
 /db/*.sqlite3
@@ -24,9 +25,10 @@
 !/log/.keep
 !/tmp/.keep
 
-/node_modules
+### Rails ###
 /app/assets/dist
 /app/assets/fonts
+.irb_history
 
 # Ignore awscli bundle files
 /awscli-bundle
