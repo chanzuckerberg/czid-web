@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
-    "@playwright/test": "^1.35.1",
+    "@playwright/test": "^1.46.1",
     "@types/adm-zip": "^0.5.5",
     "@types/fast-diff": "^1.2.0",
     "@types/js-yaml": "^4.0.9",
