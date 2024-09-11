@@ -10,7 +10,8 @@ const LOCAL_CONFIG = "./setup/local.config.ts";
 interface TestSuite {
   testMatch: string[];  // Assuming it's an array of strings
   params: {
-    grep: string;
+    grep?: string;
+    retries?: number;
   };
 }
 
@@ -52,19 +53,37 @@ if (testConfig?.suites === undefined) {
 
 const runTestSuite = async (suite: TestSuite) => {
   const testFile = suite.testMatch[0];
-  const grep = suite.params.grep;
+  const grep = suite.params?.grep;
+  const retries = suite.params?.retries;
 
   const command = "npx";
+
   const args = [
       "playwright",
       "test",
       testFile,
       "-c", LOCAL_CONFIG,
-      "-g", grep
   ];
 
+  if (grep) {
+    args.push("-g", grep);
+  }
+
+  if (retries) {
+    args.push("--retries", retries.toString());
+  }
+
+  // Print command to console
+  const commandToDisplay = `NODE_ENV=${NODE_ENV} ${command}`
+
+  // The displayed command should quote the value passed to -g flag for easier reusability,
+  // but passing quoted argument values to `spawn` does not run the command correctly.
+  const argsToDisplay = args.map((arg, index) => (
+    args[index - 1] === "-g" ? `"${arg}"` : arg
+  )).join(" ");
+
   // eslint-disable-next-line no-console
-  console.info(`NODE_ENV=${NODE_ENV} ${command} playwright test ${testFile} -c ${LOCAL_CONFIG} -g "${grep}"`);
+  console.info(`${commandToDisplay} ${argsToDisplay}`);
 
   // Wrap spawn in a promise to use async/await
   return new Promise<void>((resolve, reject) => {
