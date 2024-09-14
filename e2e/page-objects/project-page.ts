@@ -1,3 +1,4 @@
+import { ANTIMICROBIAL_RESISTANCE } from './../constants/common';
 import { DOWNLOAD_ICON } from "@e2e/constants/common";
 import { expect } from "@playwright/test";
 import { DownloadsPage } from "./downloads-page";
@@ -112,6 +113,10 @@ const PROJECT_SEARCH_RESULTS = "[category='Project'] [class='title']";
 
 const INCLUDE_SAMPLE_METADATA =
   "//span[text()='Include sample metadata in this table']/preceding-sibling::input";
+
+const SAMPLE_TABS_NAME = "Samples";
+const ANTIMICROBIAL_RESISTANCE_TAB_NAME = ANTIMICROBIAL_RESISTANCE;
+
 const SAMPLE_METEDATA = "Sample Metadata";
 export const SAMPLE_OVERVIEW = "Samples Overview";
 const SAMPLE_TAXON_REPORTS = "Sample Taxon Reports";
@@ -255,13 +260,17 @@ export class ProjectPage extends PageObject {
     return responseJson.backgrounds;
   }
 
-  public async getOrCreateProject(projectName: string, publicAccess = 1) {
-    let project = null;
+  public getProjectNameForUser(projectName: string) : string {
     const userName = process.env.CZID_USERNAME.split("@")[0];
     // Replace + in userName with - as automatically done by CZ ID for project names
     // Users sometimes use email+1@domain as a way to create unique usernames
     const sanitizedUserName = userName.replace("+", "-");
-    const userProjectName = `${sanitizedUserName}_${projectName}`;
+    return `${sanitizedUserName}_${projectName}`;
+  }
+
+  public async getOrCreateProject(projectName: string, publicAccess = 1) {
+    let project = null;
+    const userProjectName = this.getProjectNameForUser(projectName);
     const projects = await this.getProjects(userProjectName);
     project = await projects.filter(p => p.name === userProjectName)[0];
     if (project === null || project === undefined) {
@@ -825,6 +834,24 @@ export class ProjectPage extends PageObject {
   // #endregion Click
 
   // #region Get
+  public async getCountForTabName(tabSelector: string, tabName: string) : Promise<number> {
+    await this.page.locator(tabSelector).first().waitFor();
+    const tabText = await this.page.locator(tabSelector).first().textContent();
+    return parseInt(tabText.replace(tabName, ""));
+  }
+
+  public async getSamplesTabCount(): Promise<number> {
+    // Removing await changes behavior, and this rule is deprecated in more recent verions of eslint
+    // eslint-disable-next-line no-return-await
+    return await this.getCountForTabName(SAMPLES_TAB, SAMPLE_TABS_NAME);
+  }
+
+  public async getAntimicrobialTabCount(): Promise<number> {
+    // Removing await changes behavior, and this rule is deprecated in more recent verions of eslint
+    // eslint-disable-next-line no-return-await
+    return await this.getCountForTabName(ANTIMICROBIAL_TAB, ANTIMICROBIAL_RESISTANCE_TAB_NAME);
+  }
+
   public async getCreateBackgroundNotification() {
     await this.page.locator(CREATE_BACKGROUND_NOTIFICATION).first().waitFor();
     return this.page.locator(CREATE_BACKGROUND_NOTIFICATION).first().textContent();

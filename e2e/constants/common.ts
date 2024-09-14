@@ -110,3 +110,5 @@ export const QA_TEST_PROJECTS: Record<string, string> = {
   LOCAL: "E2E Test Project",
   STAGING: "New QA Project",
 };
+
+export const CZID_TEST_ACCOUNT_USER_NAME = "CZ ID Test Account";

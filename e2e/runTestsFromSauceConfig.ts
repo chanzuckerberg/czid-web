@@ -86,14 +86,14 @@ const runTestSuite = async (suite: TestSuite) => {
   console.info(`${commandToDisplay} ${argsToDisplay}`);
 
   // Wrap spawn in a promise to use async/await
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve) => {
     // Use spawn to see real time output
     const childProcess = spawn(command, args, {
       env: { ...process.env, NODE_ENV },  // Set NODE_ENV in the environment
       stdio: "inherit"  // Inherit stdio to see real-time output
     });
 
-    childProcess.on("close", (code) => { resolve(); });
+    childProcess.on("close", () => { resolve(); });
   });
 };
 

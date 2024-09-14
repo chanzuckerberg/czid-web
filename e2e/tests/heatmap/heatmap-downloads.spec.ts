@@ -6,6 +6,7 @@ import { ProjectPage } from "@e2e/page-objects/project-page";
 import { setupSamples } from "@e2e/page-objects/user-actions";
 import { BIOM_DOWNLOAD_METRICS, DOWNLOAD_TYPES } from "@e2e/page-objects/heatmap-page";
 import { COMBINED_MICROBIOME_FILE_NAME, DownloadsPage } from "@e2e/page-objects/downloads-page";
+import { RR004_WATER_2_S23A_R1, RR004_WATER_2_S23A_R2, RR004_WATER_2_S23A_SAMPLE_NAME } from "@e2e/constants/sample";
 
 let heatmapPage = null;
 let project = null;
@@ -43,8 +44,8 @@ test.describe("Heatmap downloads", () => {
     const RR004_water_2_S23A = (await setupSamples(
       page,
       project,
-      ["RR004_water_2_S23A_R1.fastq", "RR004_water_2_S23A_R2.fastq"],
-      ["RR004_water_2_S23A"],
+      [RR004_WATER_2_S23A_R1, RR004_WATER_2_S23A_R2],
+      [RR004_WATER_2_S23A_SAMPLE_NAME],
       WORKFLOWS.MNGS,
       {
         runPipeline: RUN_PIPELINE,

@@ -18,11 +18,11 @@ testParams: &testParams
   browserName: "chromium"
   project: "chromium"
   retries: *testRetries
-  
+
 # Sauce Config
 sauce:
   region: us-west-1
-  concurrency: 5 
+  concurrency: 5
   retries: *suiteRetries
   metadata:
     tags:
@@ -31,8 +31,8 @@ sauce:
       - $NODE_ENV
     build: COMMIT $CI_COMMIT_SHORT_SHA
 playwright:
-  version: package.json 
-  configFile: ./setup/$NODE_ENV.config.ts 
+  version: package.json
+  configFile: ./setup/$NODE_ENV.config.ts
 rootDir: ./
 env:
   BASESPACE_USERNAME: $BASESPACE_USERNAME
@@ -42,6 +42,18 @@ env:
   NODE_ENV: $NODE_ENV
 
 suites:
+  - name: "Functional: AMR E Coli aadS upload"
+    <<: *testSettings
+    testMatch: ['tests/amr/amr-discovery-view.spec.ts']
+    params:
+      <<: *testParams
+      grep: "SNo 1:"
+  - name: "Data Validation: AMR E Coli aadS Discovery View data"
+    <<: *testSettings
+    testMatch: ['tests/amr/amr-discovery-view.spec.ts']
+    params:
+      <<: *testParams
+      grep: "Check data in discovery view"
   - name: "Functional: P-1: SNo e13: AMR Paired Read RNA Human Sample Report & Download Data Validation"
     <<: *testSettings
     testMatch: ['tests/amr/amr-e2e.spec.ts']

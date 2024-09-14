@@ -289,10 +289,14 @@ export const MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1 = "mWGS_RNA_mosquito-1-aedes-r
 export const MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2 = "mWGS_RNA_mosquito-1-aedes-rna_10p_R2.fastq.gz";
 export const MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1 = "mWGS_RNA_human-128-lung-rna_10p_R1.fastq.gz";
 export const MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2 = "mWGS_RNA_human-128-lung-rna_10p_R2.fastq.gz";
+export const RR004_WATER_2_S23A_SAMPLE_NAME = "RR004_water_2_S23A";
 export const RR004_WATER_2_S23A_R1 = "RR004_water_2_S23A_R1.fastq";
 export const RR004_WATER_2_S23A_R2 = "RR004_water_2_S23A_R2.fastq";
 export const SAMPLE1_R1_001 = "Sample1_r1_001.fastq";
 export const SAMPLE2_R2_001 = "Sample2_r2_001.fastq";
+export const E_COLI_AADS_SAMPLE_NAME = "e_coli_aadS_r0.00";
+export const E_COLI_AADS_R1 = "e_coli_aadS_r0.00_R1.fq.gz";
+export const E_COLI_AADS_R2 = "e_coli_aadS_r0.00_R2.fq.gz";
 
 export const SAMPLE_NAMES: Record<string, string[]> = {
   STAGING: ["RNAEnr_10e4_viralcopies_RVOPv2_iSeq"],

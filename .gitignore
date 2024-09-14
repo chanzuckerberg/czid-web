@@ -9,7 +9,6 @@
 
 # Ignore bundler config.
 /.bundle
-/config/initializers/app_environment_variables.rb
 
 # Ignore yarn.lock because we manage packages using npm
 /yarn.lock
@@ -71,12 +70,6 @@ __pycache__/
 /venv/
 /venv.bak/
 
-# Pyre type checker
-.pyre/
-
-# Ignore Solargraph
-.solargraph.yml
-
 # Docker Compose override
 docker-compose.override.yml
 
@@ -90,8 +83,9 @@ blessclientconfig.yml
 # Ignore czid-private-key.pem
 /test/fixtures/czid-private-key.pem
 
-# Local Playwright reports run from VS Code Playwright extension
+# Ignore Playwright reports
 /html-reports
+/playwright-report
 
 # ngrok server domain config for local dev
 server-domain.env
