@@ -3,6 +3,7 @@ import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2, SAMPLE_FILE_1_PAIRED_R1, 
 import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
+import { SamplesPage } from "@e2e/page-objects/samples-page";
 
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const SARS_CoV2_NO_HOST = "wgs_SARS_CoV2_no_host";
@@ -15,9 +16,9 @@ const CT20K_SAMPLE_NAMES = [SAMPLE_1_PAIRED];
 const NEXTCLADE_REFERENCE_JSON_FILE = require.resolve("@e2e/fixtures/nextclade_trees/pawnee_fake_example.json");
 
 let projectPage = null;
-const timeout = 60 * 1000 * 5;
+let timeout = 60 * 1000 * 30;
 const RUN_PIPELINE = false;
-const WAIT_FOR_PIPELINE = false;
+const WAIT_FOR_PIPELINE = true;
 
 /*
  * NextClade Tree
@@ -35,14 +36,26 @@ test.describe("NextClade Tree: Functional: P-0", () => {
 
   test("SNo 23: Create a Nextclade Tree", async ({ page }) => {
     const sc2_project = await projectPage.getOrCreateProject(`SNo-23_NextClade_${WORKFLOWS.SC2}`);
-    await setupSamples(
-      page,
-      sc2_project,
-      WGS_SAMPLE_FILES,
-      SARS_CoV2_SAMPLE_NAMES,
-      WORKFLOWS.SC2,
-      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
-    );
+
+    const setupSampleNames = [];
+    for (let i = 0; i < 4; i++) {
+      const sampleName = i > 0 ? `${SARS_CoV2_NO_HOST}_${i}` : SARS_CoV2_NO_HOST;
+      setupSampleNames.push(sampleName);
+    }
+    const samples = await new SamplesPage(page).getSamples(sc2_project.name, setupSampleNames);
+    if (samples.length <= 0) {
+      timeout = 60 * 1000 * 60;
+      for (let i = 0; i < setupSampleNames.length; i++) {
+        await setupSamples(
+          page,
+          sc2_project,
+          WGS_SAMPLE_FILES,
+          [setupSampleNames[i]],
+          WORKFLOWS.SC2,
+          {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+        );
+      }
+    }
 
     // #region 1. Log in to Project
     await projectPage.navigateToMyData();

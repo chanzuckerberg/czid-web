@@ -272,6 +272,7 @@ export class UploadPage extends PageObject {
   }
 
   public async clickContinue() {
+    await this.pause(3);
     await this.page.getByText(CONTINUE).last().click();
   }
   // #endregion Samples
