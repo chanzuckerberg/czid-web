@@ -192,6 +192,7 @@ const WORKFLOW_PARAM = {
   ONT: "long-read-mngs",
   mngs: "short-read-mngs",
   "viral-consensus-genome": "consensus-genome",
+  "covid-consensus-genome": "consensus-genome",
   amr: "amr",
 };
 export const RUN_TYPES = {
@@ -201,7 +202,6 @@ export const RUN_TYPES = {
   amr: "Antimicrobial Resistance",
 };
 
-const PLQC_TOTAL_READ_HISTOGRAM = "[data-testid='total-read-histogram'] rect[fill]";
 const PLQC_READS_LOST_BARS = "//*[@data-testid='read-lost-bar']//*[contains(@class, 'barPiece') and not(@width='1')]";
 const PLQC_MEAN_INSERT_SIZE_BARS = "//*[@data-testid='mean-insert-size-histogram']//*[contains(@class, 'bar')]//*[not(@height='0')]";
 const PLQC_DUPLICATE_COMPRESSION_BARS = "[data-testid='duplicate-compression-histogram'] g[class*='bar']";
@@ -1084,6 +1084,29 @@ export class ProjectPage extends PageObject {
   }
 
   // #region Macro
+  public async delete6MonthOldSamples(project: any, workflow: string) {
+    await this.navigateToSamples(project.id, workflow);
+    const sampleTable = await this.getSamplesTable();
+
+    const currentDate = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(currentDate.getMonth() - 6);
+
+    const samplesToDelete = [];
+    for (const sample of sampleTable) {
+      if (new Date(sample["Created On"][0]) <= sixMonthsAgo) {
+        samplesToDelete.push(sample["Sample"][0]);
+      }
+    }
+    if (samplesToDelete.length > 0) {
+      for (const sampleName of samplesToDelete) {
+        await this.clickSampleCheckbox(sampleName);
+      }
+      await this.clickDeleteButton();
+      await this.clickDeleteConfirmationButton();
+    }
+  }
+
   public async gotToDownloads() {
     await this.page.locator(USER_DROPDOWN).click();
     await this.page.locator(USER_DROPDOWN_DOWNLOADS_LINK).click();

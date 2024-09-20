@@ -36,6 +36,7 @@ test.describe("NextClade Tree: Functional: P-0", () => {
 
   test("SNo 23: Create a Nextclade Tree", async ({ page }) => {
     const sc2_project = await projectPage.getOrCreateProject(`SNo-23_NextClade_${WORKFLOWS.SC2}`);
+    await projectPage.delete6MonthOldSamples(sc2_project, WORKFLOWS.SC2);
 
     const setupSampleNames = [];
     for (let i = 0; i < 4; i++) {
@@ -97,6 +98,8 @@ test.describe("NextClade Tree: Functional: P-0", () => {
   test("SNo 25: Create a Nextclade Tree with a mixture of samples with and without reference assension", async ({ page }) => {
     // #region Setup
     const sc2_project = await projectPage.getOrCreateProject(`SNo-25_NextClade_${WORKFLOWS.SC2}`);
+    await projectPage.delete6MonthOldSamples(sc2_project, WORKFLOWS.SC2);
+
     const sc2_samples = await setupSamples(
       page,
       sc2_project,
@@ -169,6 +172,8 @@ test.describe("NextClade Tree: Functional: P-0", () => {
    */
   test("SNo SC2-45: Nextclade using Default tree", async ({ page }) => {
     const sc2_project = await projectPage.getOrCreateProject(`SC2-45_NextClade_CT20K_${WORKFLOWS.SC2}`);
+    await projectPage.delete6MonthOldSamples(sc2_project, WORKFLOWS.SC2);
+
     await setupSamples(
       page,
       sc2_project,
@@ -231,6 +236,8 @@ test.describe("NextClade Tree: Functional: P-0", () => {
    */
   test("SNo SC2-46: Nextclade uploading a reference .json tree file", async ({ page }) => {
     const sc2_project = await projectPage.getOrCreateProject(`SC2-46_NextClade_CT20K_${WORKFLOWS.SC2}`);
+    await projectPage.delete6MonthOldSamples(sc2_project, WORKFLOWS.SC2);
+
     await setupSamples(
       page,
       sc2_project,
