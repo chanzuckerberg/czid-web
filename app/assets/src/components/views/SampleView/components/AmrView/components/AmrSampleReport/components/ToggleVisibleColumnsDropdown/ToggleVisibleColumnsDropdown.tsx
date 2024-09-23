@@ -139,6 +139,7 @@ export const ToggleVisibleColumnsDropdown = ({
           sdsIcon="plusCircle"
           sdsSize="small"
           sdsType="tertiary"
+          data-testid="toggle-visible-columns-button"
         />
       </Tooltip>
       <DropdownMenu
