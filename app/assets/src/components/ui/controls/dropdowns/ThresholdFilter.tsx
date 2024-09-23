@@ -118,6 +118,7 @@ const ThresholdFilter = ({
             sdsStage: "userInput",
             label: metricDisplay,
           }}
+          data-testid="threshold-metric-dropdown"
         />
       </div>
       <div className={cs.inputFieldColumn}>

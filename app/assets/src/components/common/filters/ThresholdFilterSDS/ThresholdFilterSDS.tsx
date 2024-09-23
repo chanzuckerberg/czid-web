@@ -166,6 +166,7 @@ export const ThresholdFilterSDS = ({
                   sdsType="primary"
                   disabled={!hasModifiedFilters}
                   onClick={handleApply}
+                  data-testid="apply"
                 >
                   Apply
                 </Button>
