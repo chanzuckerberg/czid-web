@@ -7,6 +7,8 @@ import { NextcladePage } from "./nextclade-page";
 import { PageObject } from "./page-object";
 import { SamplesPage } from "./samples-page";
 
+const LOADING = "[class*='loading']";
+const TABLE_GRID = ".ReactVirtualized__Grid__innerScrollContainer";
 const POPUPTEXT = "[class*='popupText']";
 const CLOSE_ICON = "[class*='closeIcon']";
 const SELECT_ALL_SAMPLES = "//*[@type='checkbox'][@value='all']/parent::*";
@@ -40,6 +42,7 @@ const TOOLTIP_OPTIONS =
 const APPLY_BUTTON = "[data-testid='apply']";
 const ARIA_ROWINDEX = "aria-rowindex";
 const UPLOAD_HEADER_LINK = "[data-testid='menu-item-upload']";
+const PUBLIC_HEADER_LINK = "[data-testid='menu-item-public']";
 const SAMPLES_TAB = "button[data-testid='samples']";
 const SAMPLES_COUNT_TD_1 =
   "//div[@aria-rowindex='1']//div[@data-testid='sample-counts' and contains(text(), 'Sample')]";
@@ -106,6 +109,7 @@ const SEARCH_MY_DATA_INPUT =
   "[class*='header'] [class*='category'][class*='search'] input";
 const SEARCH_RESULTS = "[class='results'] [class='title']";
 const HOST_SEARCH_RESULTS = "[category='host'] [class='title']";
+const METAGENOMICS_TAB = "[data-testid='metagenomics']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genomes']";
 const NANOPORE_TAB = "[data-testid='metagenomics---nanopore']";
 const ANTIMICROBIAL_TAB = "[data-testid='antimicrobial-resistance']";
@@ -234,10 +238,10 @@ export class ProjectPage extends PageObject {
 
     // Wait for table to render with no more loading shimmers.
     await this.page.waitForSelector(
-      ".ReactVirtualized__Grid__innerScrollContainer",
+      TABLE_GRID,
     );
     await this.pause(2);
-    await expect(this.page.locator('[class*="loading"]')).toHaveCount(0, {
+    await expect(this.page.locator(LOADING)).toHaveCount(0, {
       timeout: 30_000,
     });
   }
@@ -508,14 +512,23 @@ export class ProjectPage extends PageObject {
     await this.page.locator(resultLocator).click();
   }
 
+  public async waitForTableLoad(timeout = 90_000) {
+    // Wait for loading to complete
+    await this.page.waitForSelector(
+      TABLE_GRID,
+    );
+    await this.pause(2);
+    await expect(this.page.locator(LOADING)).toHaveCount(0, {
+      timeout: timeout,
+    });
+  }
+
   public async fillSearchMyDataInput(
     value: string,
     options?: { clickResult: boolean },
   ) {
     await this.page.locator(SEARCH_MY_DATA_INPUT).fill(value);
-
-    // Allow search to complete and return results
-    await this.pause(5);
+    await this.page.locator(SEARCH_RESULTS).first().waitFor();
 
     await this.pressEnter();
 
@@ -600,6 +613,10 @@ export class ProjectPage extends PageObject {
     await this.page.locator(APPLY_BUTTON).click();
   }
 
+  public async clickMetagenomicsTab() {
+    await this.page.locator(METAGENOMICS_TAB).click();
+  }
+
   public async clickConsensusGenomeTab() {
     await this.page.locator(CONSENSUS_GENOME_TAB).click();
   }
@@ -619,6 +636,10 @@ export class ProjectPage extends PageObject {
   public async clickDownloadsLink() {
     await this.page.locator(DOWNLOADS_LINK).click();
     return new DownloadsPage(this.page);
+  }
+
+  public async clickPublicHeaderLink() {
+    await this.page.locator(PUBLIC_HEADER_LINK).click();
   }
 
   public async clickUploadHeaderLink() {
@@ -877,7 +898,7 @@ export class ProjectPage extends PageObject {
     return tooltips;
   }
 
-  public async getSampleNames(timeout = 10000) {
+  public async getSampleNames(timeout = 30000) {
     await this.page.locator(SAMPLE_NAMES).first().waitFor({timeout: timeout});
     return this.page.locator(SAMPLE_NAMES).allTextContents();
   }
@@ -1016,7 +1037,7 @@ export class ProjectPage extends PageObject {
 
   public async getVisualizationTable(timeout = 30_000) {
     await this.page.locator("[role='rowgroup'] [role='row']").first().waitFor({timeout: timeout});
-    await expect(this.page.locator('[class*="loading"]').last()).toHaveCount(0, {
+    await expect(this.page.locator(LOADING).last()).toHaveCount(0, {
       timeout: timeout,
     });
     return this.getTable(

@@ -42,6 +42,12 @@ env:
   NODE_ENV: $NODE_ENV
 
 suites:
+  - name: "Functional: P-0: MHF NCBI Index"
+    <<: *testSettings
+    testMatch: ['tests/mngs/mhf-ncbi-index.spec.ts']
+    params:
+      <<: *testParams
+      grep: "mNGS-[0-9]+"
   - name: "Functional: P-0: Heatmap Happy Path"
     <<: *testSettings
     testMatch: ['tests/heatmap/heatmap-happy-path.spec.ts']
