@@ -5,6 +5,7 @@ export const NUMBER_INPUT = 'input[type="number"]';
 export const PATHOGEN_LINk = 'a[class="linkDefault-34rbs"]';
 
 export const TAXONS = '[class*="taxonName"]';
+export const FILTER_PANEL_TRIGGER = "[class*=filtersTrigger]";
 export const FILTER_RESULT = '[data-testid="filter-tag"]';
 export const SEARCH_BAR = '[placeholder="Taxon name"]';
 export const SEARCH_RESULT = "[class='result']";
@@ -297,6 +298,9 @@ export const SAMPLE2_R2_001 = "Sample2_r2_001.fastq";
 export const E_COLI_AADS_SAMPLE_NAME = "e_coli_aadS_r0.00";
 export const E_COLI_AADS_R1 = "e_coli_aadS_r0.00_R1.fq.gz";
 export const E_COLI_AADS_R2 = "e_coli_aadS_r0.00_R2.fq.gz";
+export const E_COLI_CFXA_SAMPLE_NAME = "e_coli_cfxA_r0.00";
+export const E_COLI_CFXA_R1 = "e_coli_cfxA_r0.00_R1.fq.gz";
+export const E_COLI_CFXA_R2 = "e_coli_cfxA_r0.00_R2.fq.gz";
 
 export const SAMPLE_NAMES: Record<string, string[]> = {
   STAGING: ["RNAEnr_10e4_viralcopies_RVOPv2_iSeq"],

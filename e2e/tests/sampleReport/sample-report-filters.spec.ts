@@ -130,7 +130,7 @@ test.describe("Sample report filter test", () => {
 
       const sampleReport = await samplesPage.getReportV2(sampleId);
       await samplesPage.clickExpandAll();
-      await samplesPage.ClickSortByName();
+      await samplesPage.clickSortByName();
 
       const filterCategories = [...CATEGORY_NAMES].sort(() => 0.5 - Math.random()).slice(0, 2);
 

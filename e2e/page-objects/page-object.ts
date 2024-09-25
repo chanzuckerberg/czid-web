@@ -55,7 +55,7 @@ export abstract class PageObject {
     }
     return tableRowsText;
   }
-  
+
   public async getClipboardText() {
     return this.page.evaluate(() => navigator.clipboard.readText());
   }
@@ -145,20 +145,20 @@ export abstract class PageObject {
     await this.page.setViewportSize({width, height});
   }
 
-  public async zoomOut() {
+  public async zoomOut(widthMultiplier = 2, heightMultiplier = 2) {
     const viewportSize = this.page.viewportSize();
     const zoomedViewportSize = {
-      width: viewportSize.width * 2,
-      height: viewportSize.height * 2,
+      width: viewportSize.width * widthMultiplier,
+      height: viewportSize.height * heightMultiplier,
     };
     await this.page.setViewportSize(zoomedViewportSize);
   }
 
-  public async zoomIn() {
+  public async zoomIn(widthDivider = 2, heightDivider = 2) {
     const viewportSize = this.page.viewportSize();
     const zoomedViewportSize = {
-      width: viewportSize.width / 2,
-      height: viewportSize.height / 2,
+      width: viewportSize.width / widthDivider,
+      height: viewportSize.height / heightDivider,
     };
     await this.page.setViewportSize(zoomedViewportSize);
   }

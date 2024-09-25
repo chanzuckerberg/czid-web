@@ -1105,17 +1105,15 @@ export class ProjectPage extends PageObject {
   }
 
   // #region Macro
-  public async delete6MonthOldSamples(project: any, workflow: string) {
+  public async deleteSamplesOlderThanGivenMonths(project: any, workflow: string, months: number) {
     await this.navigateToSamples(project.id, workflow);
     const sampleTable = await this.getSamplesTable();
-
     const currentDate = new Date();
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(currentDate.getMonth() - 6);
-
+    const givenMonthsAgo = new Date();
+    givenMonthsAgo.setMonth(currentDate.getMonth() - months);
     const samplesToDelete = [];
     for (const sample of sampleTable) {
-      if (new Date(sample["Created On"][0]) <= sixMonthsAgo) {
+      if (new Date(sample["Created On"][0]) <= givenMonthsAgo) {
         samplesToDelete.push(sample["Sample"][0]);
       }
     }
@@ -1126,6 +1124,10 @@ export class ProjectPage extends PageObject {
       await this.clickDeleteButton();
       await this.clickDeleteConfirmationButton();
     }
+  }
+
+  public async delete6MonthOldSamples(project: any, workflow: string) {
+    await this.deleteSamplesOlderThanGivenMonths(project, workflow, 6);
   }
 
   public async gotToDownloads() {
