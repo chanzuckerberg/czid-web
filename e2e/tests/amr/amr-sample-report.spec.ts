@@ -209,8 +209,7 @@ test.describe(`AMR Sample Report tests for ${E_COLI_CFXA_SAMPLE_NAME}`, () => {
       // #endregion Verify gene names are sorted alphabetically in ascending order
     });
 
-    // TODO: skip this test for staging until testing new data-testid's in staging
-    test.skip("SNo 11: Verify Reads filter", async () => {
+    test("SNo 11: Verify Reads filter", async () => {
       // #region Get initial full report table
       const reportTableNumRowsBefore = (await samplesPage.getAntimicrobialResistanceTable(2, 9)).length;
       // #endregion Get initial full report table
@@ -228,8 +227,7 @@ test.describe(`AMR Sample Report tests for ${E_COLI_CFXA_SAMPLE_NAME}`, () => {
       // #endregion Validate reads filter reduces number of rows and each row meets threshold
     });
 
-    // TODO: skip this test for staging until testing new data-testid's in staging
-    test.skip("SNo 20: Verify sample report persistence", async () => {
+    test("SNo 20: Verify sample report persistence", async () => {
       const columnToAdd = "Gene Family";
 
       // #region Verify that the column is not present in the table
@@ -313,8 +311,7 @@ test.describe(`AMR Sample Report tests for ${E_COLI_CFXA_SAMPLE_NAME}`, () => {
       // #endregion Compare downloaded CSV to fixture
     });
 
-    // TODO: skip this test for staging until testing new data-testid's in staging
-    test.skip("SNo 15: Verify report table with filters CSV download", async () => {
+    test("SNo 15: Verify report table with filters CSV download", async () => {
       // #region Apply reads filter
       await samplesPage.selectAmrThresholdOption(THRESHOLD_FILTERS_NUMBER_OF_READS, THRESHOLD_VALUE_NUM_READS)
       // #endregion Apply reads filter
