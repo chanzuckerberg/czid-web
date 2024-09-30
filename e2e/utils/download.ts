@@ -139,9 +139,9 @@ export async function numSequencesInDownloadFixtureFasta(
 // #endregion fasta file comparison util functions
 
 // #region CSV comparison util functions
-async function parseCSVArray(drugClassesStr: string) {
+export async function parseCSVArray(arrayValStr: string) {
   const values = [];
-  for (const value of drugClassesStr.split(";")) {
+  for (const value of arrayValStr.split(";")) {
     if (value.trim()) {
       values.push(value.trim());
     }
@@ -155,7 +155,7 @@ async function getUpperAndLowerBounds(expectedValue: number, tolerance = 0.10) {
   return expectedValue >= 0 ? {lowerBound, upperBound} : { lowerBound: upperBound, upperBound: lowerBound };
 }
 
-async function verifyUpperAndLowerBounds(actual: any, expected: any, errorMsg = "", collector: AssertionCollector) {
+export async function verifyUpperAndLowerBounds(actual: any, expected: any, errorMsg = "", collector: AssertionCollector) {
   const expectedRange = await getUpperAndLowerBounds(expected);
   collector.collect(async () => expect(actual).toBeGreaterThanOrEqual(expectedRange.lowerBound), errorMsg);
   collector.collect(async () => expect(actual).toBeLessThanOrEqual(expectedRange.upperBound), errorMsg);

@@ -3,10 +3,10 @@ import { WORKFLOWS } from "@e2e/constants/common";
 import { MWGS_SE_SRR7002140_TA_252_DNA_BLAC_VANP_10P, MWGS_PE_SRR7002140_TAP_R1, MWGS_PE_SRR7002140_TAP_R2, MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1, MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2, MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1, MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2 } from "@e2e/constants/sample";
 import { setupSamples } from "@e2e/page-objects/user-actions";
 import { AssertionCollector } from "@e2e/utils/assertion-collector";
-import { parseCSV } from "@e2e/utils/parsers";
 import { test, expect, Download } from "@playwright/test";
 import fastDiff = require("fast-diff");
 import { ProjectPage } from "../../page-objects/project-page";
+import { compareCSV, parseCSVArray, verifyUpperAndLowerBounds } from "@e2e/utils/download";
 
 const MWGS_SE_SAMPLE = "mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p";
 const MWGS_PE_SRR7002140_TAP = "mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p";
@@ -976,30 +976,18 @@ async function verifyAMRReportTable(reportTable: any, expectedReportTable: any) 
       const expectedValue = expectedRow[key];
       const errorMsg = `Sample Report - ${key} Row ${i}`;
       if (await expectedValue.includes(";")) {
-        const expectedArray = (await parseArray(expectedValue)).sort();
-        const actualArray = (await parseArray(actualValue)).sort();
+        const expectedArray = (await parseCSVArray(expectedValue)).sort();
+        const actualArray = (await parseCSVArray(actualValue)).sort();
         for (const index in expectedArray) {
           collector.collect(async () => expect(actualArray[index]).toEqual(expectedArray[index]), errorMsg + ` index ${index}`);
         }
       } else if (NO_DIFF_FIELDS.includes(key) || expectedValue === "-") {
         collector.collect(async () => expect(actualValue).toEqual(expectedValue), errorMsg);
       } else {
-        await verifyUpperAndLowerBounds(parseFloat(actualValue), parseFloat(expectedValue) , errorMsg + key);
+        await verifyUpperAndLowerBounds(parseFloat(actualValue), parseFloat(expectedValue) , errorMsg + key, collector);
       }
     }
   }
-}
-
-async function getUpperAndLowerBounds(expectedValue: number, tollerance = 0.10) {
-  const lowerBound = expectedValue * (1 - tollerance);
-  const upperBound = expectedValue * (1 + tollerance);
-  return expectedValue >= 0 ? {lowerBound, upperBound} : { lowerBound: upperBound, upperBound: lowerBound };
-}
-
-async function verifyUpperAndLowerBounds(actual: any, expected: any, errorMsg = "") {
-  const expectedRange = await getUpperAndLowerBounds(expected);
-  collector.collect(async () => expect(actual).toBeGreaterThanOrEqual(expectedRange.lowerBound), errorMsg);
-  collector.collect(async () => expect(actual).toBeLessThanOrEqual(expectedRange.upperBound), errorMsg);
 }
 
 async function compareDataFilesWithTolerance(downloadedContent: Array<Download>, fixtureDir: string, sampleName: string, baselineName: string, tollerance = 0.10) {
@@ -1033,67 +1021,11 @@ async function compareDataFilesWithTolerance(downloadedContent: Array<Download>,
 
     const actualDiff = diff.length;
     if (contentName.endsWith(".csv") && (actualDiff > expectedMaxDiff)) {
-      await compareCSV(contentName, actualOutputData, expectedBaselineData);
+      await compareCSV(contentName, actualOutputData, expectedBaselineData, collector);
     } else {
       collector.collect(async () => expect(actualDiff).toBeLessThanOrEqual(expectedMaxDiff), `${contentName} overall diff`);
     }
   }
 }
 
-async function compareCSV(contentName: string, actualOutputData: any, expectedBaselineData: any) {
-  const options = {columns: true, skip_empty_lines: true};
-  const actualData = await parseCSV(actualOutputData, options);
-  const expectedData = await parseCSV(expectedBaselineData, options);
-
-  collector.collect(async () => expect(actualData.length).toEqual(expectedData.length), `${contentName} length`);
-  for (const i in expectedData) {
-    const actualRow = actualData[i];
-    const expectedRow = expectedData[i];
-    collector.collect(async () => expect(actualRow).toBeDefined(), `${contentName} row ${i} undefined`);
-    const errorMsg = `${contentName} row ${i} `;
-    if (actualRow === undefined) {
-      continue;
-    }
-
-    for (const key of Object.keys(expectedRow)) {
-      const actualValue = actualRow[key];
-      const expectedValue = expectedRow[key];
-
-      if (await expectedValue.includes(";")) {
-        const expectedArray = await parseArray(expectedValue);
-        const actualArray = await parseArray(actualValue);
-
-        collector.collect(async () => expect(actualArray).toEqual(expectedArray), errorMsg + key);
-      } else if (NO_DIFF_FIELDS.includes(key) || !expectedValue) {
-        collector.collect(async () => expect(actualValue).toEqual(expectedValue), errorMsg + key);
-      } else if (expectedValue.startsWith("[")) {
-        if (!actualValue.startsWith("[")) {
-          collector.collect(async () => expect(actualValue).toEqual(expectedValue), errorMsg + key);
-        } else {
-
-          const expectedArray = await JSON.parse(expectedValue);
-          const actualArray = await JSON.parse(actualValue);
-          for (const i in expectedArray) {
-            await verifyUpperAndLowerBounds(
-              parseFloat(actualArray[i]),
-              parseFloat(expectedArray[i]), errorMsg + key,
-            );
-          }
-        }
-      } else {
-        await verifyUpperAndLowerBounds(parseFloat(actualValue), parseFloat(expectedValue) , errorMsg + key);
-      }
-    }
-  }
-}
-
-async function parseArray(drugClassesStr: string) {
-  const values = [];
-  for (const value of drugClassesStr.split(";")) {
-    if (value.trim()) {
-      values.push(value.trim());
-    }
-  }
-  return values.sort();
-}
 // #endregion Helpers
