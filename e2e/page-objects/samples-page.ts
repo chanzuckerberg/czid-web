@@ -1156,8 +1156,6 @@ export class SamplesPage extends PageObject {
   }
 
   public async selectReferenceAccession(option: string) {
-    await this.expandGenerateConsensusGenomeDropdown();
-
     const consensusGenomeOptions = this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION);
     if (!await consensusGenomeOptions.first().isVisible()) {
       // Try expanding the dropdown again
