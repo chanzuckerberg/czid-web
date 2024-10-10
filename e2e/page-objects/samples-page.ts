@@ -1156,13 +1156,8 @@ export class SamplesPage extends PageObject {
   }
 
   public async selectReferenceAccession(option: string) {
-    const consensusGenomeOptions = this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION);
-    if (!await consensusGenomeOptions.first().isVisible()) {
-      // Try expanding the dropdown again
-      await this.expandGenerateConsensusGenomeDropdown();
-    }
-    await consensusGenomeOptions.getByText(option).waitFor({ timeout: 90_000 });
-    await consensusGenomeOptions.getByText(option).click();
+    await this.page.getByTestId("create-consensus-genome-modal").getByTestId("filters").click(); // Element is not a <select> element
+    await this.page.getByTestId("dropdown-menu").getByRole("option").getByText(option).click();
 
     const selectedValue = await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).getByTestId("filter-value").textContent();
     expect(selectedValue).toEqual(option);
