@@ -1157,7 +1157,8 @@ export class SamplesPage extends PageObject {
 
   public async selectReferenceAccession(option: string) {
     await this.page.getByTestId("create-consensus-genome-modal").getByTestId("filters").click(); // Element is not a <select> element
-    await this.page.getByTestId("dropdown-menu").getByRole("option").getByText(option).click();
+    await this.pause(1);
+    await this.page.getByTestId("dropdown-menu").getByRole("option").getByText(option.trim()).click();
 
     const selectedValue = await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).getByTestId("filter-value").textContent();
     expect(selectedValue).toEqual(option);
