@@ -8,7 +8,7 @@ on:
     # Visit https://crontab.guru for more info on cron schedule expressions.
     # The default timezone of GitHub Actions is Coordinated Universal Time (UTC).
     # UTC is 7 hours ahead of PT, so 12am PDT is 7am UTC (0700 military time).
-    - cron: '0 7 * * 1-5' # “At 07:00 UTC on every day-of-week from Monday through Friday.”
+    - cron: '0 7 * * 1' # “At 07:00 on Monday.”
 
 jobs:
   # Run Smoke tests on staging
