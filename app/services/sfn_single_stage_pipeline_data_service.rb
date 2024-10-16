@@ -48,17 +48,31 @@ class SfnSingleStagePipelineDataService
     PipelineRun::TECHNOLOGY_INPUT[:nanopore] => "ONT mNGS Pipeline",
   }.freeze
 
+  # Certain steps have access to "raw" data, i.e. data that has not been run through a human
+  # filter yet. Note that these match keys in ONT_STEP_DESCRIPTIONS, which comes from "task_names"
+  # from the underlying @wdl_info of the workflow. Depending on authZ, we need to prevent access
+  # to the any files associated with these steps: see `remove_host_filtering_urls` boolean var.
+  PRE_FILTERED_STEPS = [
+    "RunValidateInput",
+    "RunQualityFilter",
+    "RunHostFilter",
+    "RunHumanFilter",
+  ].freeze
+
   class ParseWdlError < StandardError
     def initialize(error)
       super("Command to parse wdl failed (#{WDL_PARSER}). Error: #{error}")
     end
   end
 
-  def initialize(id, analysis_type)
+  # TODO: [Vince] Should remove default for remove_host_filtering_urls once set up
+  def initialize(id, analysis_type, remove_host_filtering_urls = false)
     # TODO: Update name to WorkflowRun when the PipelineRun model is deprecated
     # An analysis run can be either a PipelineRun or a WorkflowRun.
     set_analysis_run(id, analysis_type)
     @analysis_type = analysis_type
+    # Do we need to prevent access to downloading "raw" data, i.e. non-host-filtered files?
+    @remove_host_filtering_urls = remove_host_filtering_urls
 
     # Get the WDL workflow from the idseq-workflows S3 bucket and parse it with WDL parser found at script/parse_wdl_workflow.py
     s3_folder = @analysis_run.wdl_s3_folder
@@ -203,6 +217,10 @@ class SfnSingleStagePipelineDataService
         }
         file[:to] = []
         file[:data] = get_result_file_data(file[:file])
+        # Redact download URLs when we should not have access to the "raw", unfiltered files
+        if @remove_host_filtering_urls && PRE_FILTERED_STEPS.include?(step)
+          file[:data][:url] = nil
+        end
         file_source_map[file[FILE_SOURCE_MAP_KEY]] = file
       end
     end

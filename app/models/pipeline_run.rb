@@ -1784,11 +1784,12 @@ class PipelineRun < ApplicationRecord
   end
 
   def sfn_outputs_by_step(can_see_stage1_results = false)
+    remove_stage1_urls = !can_see_stage1_results
     case technology
     when TECHNOLOGY_INPUT[:illumina]
-      return illumina_sfn_outputs_by_step(can_see_stage1_results)
+      return illumina_sfn_outputs_by_step(remove_stage1_urls)
     when TECHNOLOGY_INPUT[:nanopore]
-      return ont_sfn_outputs_by_step
+      return ont_sfn_outputs_by_step(remove_stage1_urls)
     end
   end
 
@@ -1800,10 +1801,10 @@ class PipelineRun < ApplicationRecord
     "RunSubsampling" => "subsampled_bases",
   }.freeze
 
-  def ont_sfn_outputs_by_step
+  def ont_sfn_outputs_by_step(remove_stage1_urls = true)
     result_files = {}
 
-    data = SfnSingleStagePipelineDataService.new(id, PipelineRun::TECHNOLOGY_INPUT[:nanopore]).call
+    data = SfnSingleStagePipelineDataService.new(id, PipelineRun::TECHNOLOGY_INPUT[:nanopore], remove_stage1_urls).call
     singular_stage_index = 0
     steps_with_output_files = data[:stages][singular_stage_index][:steps]
     job_stats_by_task = job_stats.index_by(&:task)
@@ -1837,10 +1838,8 @@ class PipelineRun < ApplicationRecord
     result_files
   end
 
-  def illumina_sfn_outputs_by_step(can_see_stage1_results = false)
+  def illumina_sfn_outputs_by_step(remove_stage1_urls = true)
     result_files = {}
-
-    remove_stage1_urls = !can_see_stage1_results
 
     sfn_data_service = SfnPipelineDataService.new(id, true, remove_stage1_urls)
     stage_names = sfn_data_service.stage_names
@@ -2088,7 +2087,7 @@ class PipelineRun < ApplicationRecord
     if technology == TECHNOLOGY_INPUT[:illumina]
       SfnPipelineDataService.call(id, show_experimental, remove_host_filtering_urls)
     elsif technology == TECHNOLOGY_INPUT[:nanopore]
-      SfnSingleStagePipelineDataService.call(id, technology)
+      SfnSingleStagePipelineDataService.call(id, technology, remove_host_filtering_urls)
     end
   end
 
