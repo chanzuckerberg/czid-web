@@ -64,8 +64,7 @@ const ProjectCreationModal = ({
 
       onCreate(newProject);
     } catch (e) {
-      const receivedNameTakenError =
-        e.data[0] === "Name has already been taken";
+      const receivedNameTakenError = e[0] === "Name has already been taken";
       const errorMsg = receivedNameTakenError
         ? "This project name is already taken. Please enter another name."
         : "There was an error creating your project.";
