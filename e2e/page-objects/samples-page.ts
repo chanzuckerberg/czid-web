@@ -236,6 +236,10 @@ export class SamplesPage extends PageObject {
     return this.page.locator(BACKGROUND_FILTER_VALUE).textContent();
   }
 
+  public async getSelectedReferenceAccessionOption() {
+    return this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).getByTestId("filter-value").textContent();
+  }
+
   public async getReferenceAccessionOptions() {
     await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
     await this.pause(2);
@@ -939,6 +943,10 @@ export class SamplesPage extends PageObject {
     ]);
     return downloadPromise;
   }
+    
+  public async clickReferenceAccessionDropdown() {
+    await this.page.getByTestId("create-consensus-genome-modal").getByTestId("filters").click(); // Element is not a <select> element
+  }
   // #endregion Click
 
   // #region Fill
@@ -1155,8 +1163,24 @@ export class SamplesPage extends PageObject {
     await this.clickSearchResult(searchResultText);
   }
 
+  public async selectRandomReferenceAccession() {
+    await this.clickReferenceAccessionDropdown();
+
+    // Randomly choose a Reference Accession option
+    const referenceAccessions = await this.page.locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS).all();
+    const referenceAccession =
+      referenceAccessions[
+        Math.floor(Math.random() * referenceAccessions.length)
+      ];
+
+    const referenceAccessionText = referenceAccession.textContent();
+    await referenceAccession.click();
+
+    return referenceAccessionText;
+  }
+
   public async selectReferenceAccession(option: string) {
-    await this.page.getByTestId("create-consensus-genome-modal").getByTestId("filters").click(); // Element is not a <select> element
+    await this.clickReferenceAccessionDropdown();
     await this.pause(1);
     await this.page.getByTestId("dropdown-menu").getByRole("option").getByText(option.trim()).click();
 

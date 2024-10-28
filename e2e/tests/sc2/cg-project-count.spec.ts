@@ -22,6 +22,7 @@ const TEST_TIMEOUT = 60 * 1000 * 40; // Inclease the test runtime to let the wor
  * Run from mNGS
  */
 test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
+
   /*
    * SNo SC2-42: Project count when CG running from mNGS
    */
@@ -87,12 +88,8 @@ test.describe("CG - Project Count Run from mNGS: Functional: P-0", () => {
     // #endregion 5. Hover over ""Betacoronavirus 1"" species row and click on Consensus Genome icon
 
     // #region 6. Select ""Human coronavirus OC43, complete genome - 99.6%id, Complete Sequence, 31.5x coverage"" Reference Accession option from dropdown list
-    const referenceAccessions = await samplePage.getReferenceAccessionOptions();
-    const referenceAccession =
-      referenceAccessions[
-        Math.floor(Math.random() * referenceAccessions.length)
-      ];
-    await samplePage.selectReferenceAccession(referenceAccession);
+    const selectedReferenceAccession = await samplePage.selectRandomReferenceAccession();
+    expect(await samplePage.getSelectedReferenceAccessionOption()).toEqual(selectedReferenceAccession);
     // #endregion 6. Select ""Human coronavirus OC43, complete genome - 99.6%id, Complete Sequence, 31.5x coverage"" Reference Accession option from dropdown list
 
     // #region 7. Cilck on ""Create Consensus Genome"" button
