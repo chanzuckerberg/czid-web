@@ -1770,11 +1770,9 @@ class SamplesController < ApplicationController
   end
 
   def warn_if_large_bulk_upload(samples)
-    # NOTE(2021-07-14): We raised this to 400 because users will frequently
-    # upload a 384-well plate. CG samples in particular have a lower failure
-    # rate than mngs, so this notification is simply an FYI (you'll get failed
-    # sample alerts separately).
-    if samples.length < 400
+    # NOTE(2024-10-31): We set this to 200 because a majority of our users
+    # upload fewer than 200 samples.
+    if samples.length < 200
       return
     end
 

@@ -48,6 +48,7 @@ import ProjectSelect from "~/components/common/ProjectSelect";
 import { useAllowedFeatures } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { SampleUploadType } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
@@ -1664,9 +1665,13 @@ class UploadSampleStepCC extends React.Component<
           <Callout className={cs.callout} intent={"info"}>
             <div className={cs.calloutTitle}>Friendly Message</div>
             To ensure every user can use our pipeline smoothly, kindly limit
-            your upload to a max of 500 samples per upload, and a max of 1000
-            samples per week, so we can share the compute equally. Thank you for
-            your cooperation!
+            your upload to a max of 200 samples per week so we can share the
+            compute equally. If you need to upload more samples than the limit,
+            please reach out to us at{" "}
+            <ExternalLink href="mailto:help@czid.org">
+              help@czid.org
+            </ExternalLink>
+            . Thank you for your cooperation!
           </Callout>
         </div>
       </div>
