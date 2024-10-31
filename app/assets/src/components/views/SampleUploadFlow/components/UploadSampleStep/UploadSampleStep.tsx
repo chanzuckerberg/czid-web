@@ -1665,7 +1665,7 @@ class UploadSampleStepCC extends React.Component<
           <Callout className={cs.callout} intent={"info"}>
             <div className={cs.calloutTitle}>Friendly Message</div>
             To ensure every user can use our pipeline smoothly, kindly limit
-            your upload to a max of 200 samples per week so we can share the
+            your upload to a max of 200 samples per month so we can share the
             compute equally. If you need to upload more samples than the limit,
             please reach out to us at{" "}
             <ExternalLink href="mailto:help@czid.org">
