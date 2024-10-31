@@ -673,6 +673,8 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
   test("SNo 24: Download All - Sample report link", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("SNo_WGS-22");
+    await projectPage.deleteSamplesOlderThanGivenMonths(project, WORKFLOWS.WGS, 5);
+
     await setupSamples(
       page,
       project,
@@ -683,6 +685,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
         hostOrganism: "Human",
         taxon: "Unknown",
         includeTrimPrimer: true,
+        waitForPipeline: true
       },
     );
 
