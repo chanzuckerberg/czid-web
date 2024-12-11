@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c755f1d4a1492565728d3da4e7de245e>>
+ * @generated SignedSource<<3908a623cb29e3dcd91f1fd4ed727166>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -56,12 +56,26 @@ export type SampleViewSampleQuery$data = {
       readonly inputs: {
         readonly accession_id: string | null | undefined;
         readonly accession_name: string | null | undefined;
+        readonly card_version: string | null | undefined;
         readonly creation_source: string | null | undefined;
         readonly ref_fasta: string | null | undefined;
         readonly taxon_id: string | null | undefined;
         readonly taxon_name: string | null | undefined;
         readonly technology: string | null | undefined;
+        readonly wildcard_version: string | null | undefined;
       };
+      readonly parsed_cached_results: {
+        readonly quality_metrics: {
+          readonly adjusted_remaining_reads: number | null | undefined;
+          readonly compression_ratio: number | null | undefined;
+          readonly insert_size_mean: number | null | undefined;
+          readonly insert_size_standard_deviation: number | null | undefined;
+          readonly percent_remaining: number | null | undefined;
+          readonly qc_percent: number | null | undefined;
+          readonly total_ercc_reads: number | null | undefined;
+          readonly total_reads: number | null | undefined;
+        } | null | undefined;
+      } | null | undefined;
       readonly run_finalized: boolean;
       readonly status: string | null | undefined;
       readonly wdl_version: string | null | undefined;
@@ -112,24 +126,38 @@ v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "run_finalized",
+  "name": "adjusted_remaining_reads",
   "storageKey": null
 },
 v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "wdl_version",
+  "name": "run_finalized",
   "storageKey": null
 },
 v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
+  "name": "total_ercc_reads",
+  "storageKey": null
+},
+v7 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "wdl_version",
+  "storageKey": null
+},
+v8 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
   "name": "status",
   "storageKey": null
 },
-v7 = [
+v9 = [
   {
     "alias": null,
     "args": [
@@ -195,13 +223,7 @@ v7 = [
         "name": "pipeline_runs",
         "plural": true,
         "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "adjusted_remaining_reads",
-            "storageKey": null
-          },
+          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -225,15 +247,9 @@ v7 = [
             "name": "pipeline_version",
             "storageKey": null
           },
-          (v4/*: any*/),
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "total_ercc_reads",
-            "storageKey": null
-          },
-          (v5/*: any*/)
+          (v5/*: any*/),
+          (v6/*: any*/),
+          (v7/*: any*/)
         ],
         "storageKey": null
       },
@@ -271,7 +287,7 @@ v7 = [
         "name": "railsSampleId",
         "storageKey": null
       },
-      (v6/*: any*/),
+      (v8/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -397,13 +413,93 @@ v7 = [
                 "kind": "ScalarField",
                 "name": "technology",
                 "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "card_version",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "wildcard_version",
+                "storageKey": null
               }
             ],
             "storageKey": null
           },
-          (v4/*: any*/),
-          (v6/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "query_SampleForReport_workflow_runs_items_parsed_cached_results",
+            "kind": "LinkedField",
+            "name": "parsed_cached_results",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "query_SampleForReport_workflow_runs_items_parsed_cached_results_quality_metrics",
+                "kind": "LinkedField",
+                "name": "quality_metrics",
+                "plural": false,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "total_reads",
+                    "storageKey": null
+                  },
+                  (v6/*: any*/),
+                  (v4/*: any*/),
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "percent_remaining",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "qc_percent",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "compression_ratio",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "insert_size_mean",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "insert_size_standard_deviation",
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
           (v5/*: any*/),
+          (v8/*: any*/),
+          (v7/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -424,7 +520,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "SampleViewSampleQuery",
-    "selections": (v7/*: any*/),
+    "selections": (v9/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -433,19 +529,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "SampleViewSampleQuery",
-    "selections": (v7/*: any*/)
+    "selections": (v9/*: any*/)
   },
   "params": {
-    "cacheID": "528d7428fd1d755e64e84068f6c76447",
+    "cacheID": "7fb393fcb4e5d87529c85d289f596603",
     "id": null,
     "metadata": {},
     "name": "SampleViewSampleQuery",
     "operationKind": "query",
-    "text": "query SampleViewSampleQuery(\n  $railsSampleId: String\n  $snapshotLinkId: String\n) {\n  SampleForReport(railsSampleId: $railsSampleId, snapshotLinkId: $snapshotLinkId) {\n    id\n    created_at\n    default_background_id\n    default_pipeline_run_id\n    editable\n    host_genome_id\n    initial_workflow\n    name\n    pipeline_runs {\n      adjusted_remaining_reads\n      alignment_config_name\n      assembled\n      created_at\n      id\n      pipeline_version\n      run_finalized\n      total_ercc_reads\n      wdl_version\n    }\n    project {\n      id\n      name\n      pinned_alignment_config\n    }\n    project_id\n    railsSampleId\n    status\n    updated_at\n    upload_error\n    user_id\n    workflow_runs {\n      deprecated\n      executed_at\n      id\n      input_error {\n        label\n        message\n      }\n      inputs {\n        accession_id\n        accession_name\n        creation_source\n        ref_fasta\n        taxon_id\n        taxon_name\n        technology\n      }\n      run_finalized\n      status\n      wdl_version\n      workflow\n    }\n  }\n}\n"
+    "text": "query SampleViewSampleQuery(\n  $railsSampleId: String\n  $snapshotLinkId: String\n) {\n  SampleForReport(railsSampleId: $railsSampleId, snapshotLinkId: $snapshotLinkId) {\n    id\n    created_at\n    default_background_id\n    default_pipeline_run_id\n    editable\n    host_genome_id\n    initial_workflow\n    name\n    pipeline_runs {\n      adjusted_remaining_reads\n      alignment_config_name\n      assembled\n      created_at\n      id\n      pipeline_version\n      run_finalized\n      total_ercc_reads\n      wdl_version\n    }\n    project {\n      id\n      name\n      pinned_alignment_config\n    }\n    project_id\n    railsSampleId\n    status\n    updated_at\n    upload_error\n    user_id\n    workflow_runs {\n      deprecated\n      executed_at\n      id\n      input_error {\n        label\n        message\n      }\n      inputs {\n        accession_id\n        accession_name\n        creation_source\n        ref_fasta\n        taxon_id\n        taxon_name\n        technology\n        card_version\n        wildcard_version\n      }\n      parsed_cached_results {\n        quality_metrics {\n          total_reads\n          total_ercc_reads\n          adjusted_remaining_reads\n          percent_remaining\n          qc_percent\n          compression_ratio\n          insert_size_mean\n          insert_size_standard_deviation\n        }\n      }\n      run_finalized\n      status\n      wdl_version\n      workflow\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "204b07e659f807c0136e2e759b262426";
+(node as any).hash = "2e7dff8affbf63dbbb3e49f13876ac04";
 
 export default node;
