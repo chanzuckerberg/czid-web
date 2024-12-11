@@ -197,6 +197,20 @@ const SampleQuery = graphql`
           taxon_id
           taxon_name
           technology
+          card_version
+          wildcard_version
+        }
+        parsed_cached_results {
+          quality_metrics {
+            total_reads
+            total_ercc_reads
+            adjusted_remaining_reads
+            percent_remaining
+            qc_percent
+            compression_ratio
+            insert_size_mean
+            insert_size_standard_deviation
+          }
         }
         run_finalized
         status

@@ -1644,6 +1644,21 @@ type MultipartUploadResponse {
 
 type Mutation {
   createUser(archetypes: String, email: String!, institution: String, name: String, role: Int, segments: String, sendActivation: Boolean): CreateUserPayload!
+  createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
+  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
+  createWorkflow(input: WorkflowCreateInput!): Workflow!
+  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
+  deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
+  createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
+  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
+  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
+  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
+  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
+  createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
+  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
+  runWorkflowVersion(input: RunWorkflowVersionInput!, executionId: String = null): WorkflowRun!
+  runWorkflowRun(workflowRunId: ID!, executionId: String = null): WorkflowRun!
   createFile(entityId: ID!, entityFieldName: String!, file: FileCreate!): File!
   uploadFile(entityId: ID!, entityFieldName: String!, file: FileUpload!, expiration: Int! = 3600): MultipartUploadResponse!
   uploadTemporaryFile(expiration: Int! = 3600): MultipartUploadResponse!
@@ -1689,21 +1704,6 @@ type Mutation {
   updateBulkDownload(input: BulkDownloadUpdateInput!, where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
   deleteBulkDownload(where: BulkDownloadWhereClauseMutations!): [BulkDownload!]!
   deleteOldBulkDownloads: [BulkDownload!]!
-  createWorkflowRun(input: RunWorkflowVersionInput!): WorkflowRun!
-  updateWorkflowRun(input: WorkflowRunUpdateInput!, where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
-  deleteWorkflowRun(where: WorkflowRunWhereClauseMutations!): [WorkflowRun!]!
-  createWorkflow(input: WorkflowCreateInput!): Workflow!
-  updateWorkflow(input: WorkflowUpdateInput!, where: WorkflowWhereClauseMutations!): [Workflow!]!
-  deleteWorkflow(where: WorkflowWhereClauseMutations!): [Workflow!]!
-  createWorkflowRunStep(input: WorkflowRunStepCreateInput!): WorkflowRunStep!
-  updateWorkflowRunStep(input: WorkflowRunStepUpdateInput!, where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  deleteWorkflowRunStep(where: WorkflowRunStepWhereClauseMutations!): [WorkflowRunStep!]!
-  createWorkflowRunEntityInput(input: WorkflowRunEntityInputCreateInput!): WorkflowRunEntityInput!
-  deleteWorkflowRunEntityInput(where: WorkflowRunEntityInputWhereClauseMutations!): [WorkflowRunEntityInput!]!
-  createWorkflowVersion(input: WorkflowVersionCreateInput!): WorkflowVersion!
-  deleteWorkflowVersion(where: WorkflowVersionWhereClauseMutations!): [WorkflowVersion!]!
-  runWorkflowVersion(input: RunWorkflowVersionInput!, executionId: String = null): WorkflowRun!
-  runWorkflowRun(workflowRunId: ID!, executionId: String = null): WorkflowRun!
   CreateBulkDownload(input: mutationInput_CreateBulkDownload_input_Input): JSON
   createAsyncBulkDownload(input: mutationInput_CreateBulkDownload_input_Input): fedCreateBulkDownload
   DeleteSamples(input: mutationInput_DeleteSamples_input_Input): DeleteSamples
@@ -1919,6 +1919,16 @@ type Query {
     """The IDs of the objects."""
     ids: [GlobalID!]!
   ): [Node!]!
+  workflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRun!]!
+  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Workflow!]!
+  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunStep!]!
+  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunEntityInput!]!
+  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowVersion!]!
+  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
+  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
+  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
+  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
+  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
   files(where: FileWhereClause = null): [File!]!
   samples(where: SampleWhereClause = null, orderBy: [SampleOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Sample!]!
   sequencingReads(where: SequencingReadWhereClause = null, orderBy: [SequencingReadOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [SequencingRead!]!
@@ -1946,16 +1956,6 @@ type Query {
   upstreamDatabasesAggregate(where: UpstreamDatabaseWhereClause = null): UpstreamDatabaseAggregate!
   indexFilesAggregate(where: IndexFileWhereClause = null): IndexFileAggregate!
   bulkDownloadsAggregate(where: BulkDownloadWhereClause = null): BulkDownloadAggregate!
-  workflowRuns(where: WorkflowRunWhereClause = null, orderBy: [WorkflowRunOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRun!]!
-  workflows(where: WorkflowWhereClause = null, orderBy: [WorkflowOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [Workflow!]!
-  workflowRunSteps(where: WorkflowRunStepWhereClause = null, orderBy: [WorkflowRunStepOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunStep!]!
-  workflowRunEntityInputs(where: WorkflowRunEntityInputWhereClause = null, orderBy: [WorkflowRunEntityInputOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowRunEntityInput!]!
-  workflowVersions(where: WorkflowVersionWhereClause = null, orderBy: [WorkflowVersionOrderByClause!] = [], limitOffset: LimitOffsetClause = null): [WorkflowVersion!]!
-  workflowRunsAggregate(where: WorkflowRunWhereClause = null): WorkflowRunAggregate!
-  workflowsAggregate(where: WorkflowWhereClause = null): WorkflowAggregate!
-  workflowRunStepsAggregate(where: WorkflowRunStepWhereClause = null): WorkflowRunStepAggregate!
-  workflowRunEntityInputsAggregate(where: WorkflowRunEntityInputWhereClause = null): WorkflowRunEntityInputAggregate!
-  workflowVersionsAggregate(where: WorkflowVersionWhereClause = null): WorkflowVersionAggregate!
   adminSamples(input: queryInput_adminSamples_input_Input): [query_adminSamples_items]
   adminWorkflowRuns(input: queryInput_adminWorkflowRuns_input_Input): [query_adminWorkflowRuns_items]
   AmrDeprecatedResults(sampleId: String): AmrDeprecatedResults
@@ -2536,6 +2536,7 @@ type query_SampleForReport_workflow_runs_items {
   deprecated: Boolean
   input_error: query_SampleForReport_workflow_runs_items_input_error
   inputs: query_SampleForReport_workflow_runs_items_inputs!
+  parsed_cached_results: query_SampleForReport_workflow_runs_items_parsed_cached_results
   run_finalized: Boolean!
   rails_workflow_run_id: String
 }
@@ -2553,6 +2554,23 @@ type query_SampleForReport_workflow_runs_items_inputs {
   technology: String
   ref_fasta: String
   creation_source: String
+  card_version: String
+  wildcard_version: String
+}
+
+type query_SampleForReport_workflow_runs_items_parsed_cached_results {
+  quality_metrics: query_SampleForReport_workflow_runs_items_parsed_cached_results_quality_metrics
+}
+
+type query_SampleForReport_workflow_runs_items_parsed_cached_results_quality_metrics {
+  total_reads: Int
+  total_ercc_reads: Int
+  adjusted_remaining_reads: Int
+  percent_remaining: Float
+  qc_percent: Float
+  compression_ratio: Float
+  insert_size_mean: Float
+  insert_size_standard_deviation: Float
 }
 
 type query_SampleMetadata_additional_info {
