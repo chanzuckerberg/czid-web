@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_03_26_201829) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_19_001315) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -181,7 +181,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_26_201829) do
     t.string "object_type", null: false, comment: "The type of object deleted, e.g. PipelineRun"
     t.datetime "soft_deleted_at", precision: nil, comment: "When the object was marked as soft deleted"
     t.datetime "hard_deleted_at", precision: nil, comment: "When the object was successfully hard deleted"
-    t.string "metadata_json", comment: "Generic JSON-string format for recording additional information about the object"
+    t.string "metadata_json", limit: 1024, comment: "Generic JSON-string format for recording additional information about the object"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
