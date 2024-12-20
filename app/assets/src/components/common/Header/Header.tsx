@@ -85,7 +85,7 @@ const Header = ({
           <>
             <span className={cs.title}>Low-Support Mode:</span>
             {
-              " We will only be responding to highly urgent issues from 12/20/2024-1/3/2025. For now, check out our "
+              " We will only be responding to highly urgent issues from 12/20/2024-1/6/2025. For now, check out our "
             }
             <ExternalLink className={cs.link} href="https://help.czid.org">
               Help Center

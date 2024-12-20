@@ -207,7 +207,7 @@ class ApplicationController < ActionController::Base
       now = time_zone.now
       # This is for the Low-Support mode banner in LandingHeaderV2.tsx.
       start_time = time_zone.parse("2024-12-20 00:00:00")
-      end_time = time_zone.parse("2025-01-03 09:00:00")
+      end_time = time_zone.parse("2025-01-06 09:00:00")
 
       if start_time < now && now < end_time
         return true
