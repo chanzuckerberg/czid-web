@@ -9,7 +9,7 @@ class WorkflowRunsController < ApplicationController
   MAX_PAGE_SIZE = 100
   CLADE_FASTA_S3_KEY = "clade_exports/fastas/temp-%{path}".freeze
   CLADE_REFERENCE_TREE_S3_KEY = "clade_exports/trees/temp-%{path}".freeze
-  CLADE_EXTERNAL_SITE = "v2.clades.nextstrain.org".freeze
+  CLADE_EXTERNAL_SITE = "clades.nextstrain.org".freeze
 
   def index
     permitted_params = index_params
