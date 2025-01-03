@@ -258,9 +258,10 @@ module BulkDownloadsHelper
     return if prev_taxon_count.nil?
 
     taxon_list = TAXONOMY_LIST.map { |taxonomy_level| prev_taxon_count[taxonomy_level] }
-    taxon_uniq_id = taxon_list.join(";") # must output full taxonomy in tax_id for microbiomeDB to work
+    taxon_uniq_id = taxon_list.join(";")
+
     tsv << sample_metrics.unshift(taxon_uniq_id) # output sample metrics
-    taxonomy_tsv << taxon_list.unshift(taxon_uniq_id)
+    taxonomy_tsv << taxon_list.drop(1).unshift(taxon_uniq_id)
   end
 
   def self.pivot_biom_metrics(
@@ -290,7 +291,6 @@ module BulkDownloadsHelper
           "taxonomy5",
           "taxonomy6",
           "taxonomy7",
-          "taxonomy8",
         ]
         prev_taxon_count = nil
         taxon_metric_ids.in_groups_of(10_000) do |ids|
