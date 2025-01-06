@@ -10,15 +10,26 @@ main() {
   _git_fetch_and_cleanup
 
   declare checklist_json; checklist_json=$(_get_current_release_checklist_json)
-  declare checklist_html_url; checklist_html_url=$(jq -er .html_url <<< "$checklist_json")
-  declare checklist_api_url; checklist_api_url=$(jq -er .url <<< "$checklist_json")
-  declare checklist_body; checklist_body=$(jq -er .body <<< "$checklist_json")
+
+  declare checklist_html_url=""
+  declare checklist_api_url=""
+  declare checklist_body=""
+
+  # If no checklist exists, initialize variables for creating a new checklist
+  if [ "$checklist_json" == "null" ]; then
+    _log "No release checklist found. Preparing to create a new checklist."
+    checklist_body="### Release Checklist\n\nThis checklist is auto-generated.\n"
+  else
+    checklist_html_url=$(jq -er .html_url <<< "$checklist_json")
+    checklist_api_url=$(jq -er .url <<< "$checklist_json")
+    checklist_body=$(jq -er .body <<< "$checklist_json")
+  fi
 
   _log "Checking if updates are required in release checklist"
 
   declare source_commit
   declare target_commit
-  declare new_checklist_body="${checklist_body}";
+  declare new_checklist_body="${checklist_body}"
 
   # Check for release fixes
   # Check for any commits created after current version initial tag

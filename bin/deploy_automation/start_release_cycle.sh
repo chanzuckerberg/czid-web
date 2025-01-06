@@ -5,7 +5,7 @@ source "$SCRIPT_DIR/_global_vars.sh"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
 # Start a new release cycle:
-# - Create a new staging tag, pointing to HEAD of main branch. 
+# - Create a new staging tag, pointing to HEAD of main branch.
 #   The name of this tag bumps minor version from previous staging tag
 #   (ex: if previous staging version is v0.24.1_staging_...,
 #        this step will create tag v0.25_staging_...)
@@ -17,7 +17,7 @@ main() {
 
   # Ensure current branch is not staging
   # This command will set staging HEAD to a different commit,
-  # and we want to be in a different branch to prevent any issues.  
+  # and we want to be in a different branch to prevent any issues.
   _assert_current_branch_is_not "staging"
 
   # make sure release checklist doesn't exist yet
@@ -37,10 +37,10 @@ main() {
   # check if there is any commit in main
   declare commit_count; commit_count=$(git rev-list "origin/$STAGING_BRANCH".."origin/$MAIN_BRANCH" | wc -l)
   if [ "$commit_count" -eq "0" ]; then
-    _exit_with_err_msg "origin/${MAIN_BRANCH} doesn't seem to have any additional commits after origin/${STAGING_BRANCH}." \
-                       "Cannot start a new release cycle."
+    _log "No new commits found from origin/${MAIN_BRANCH} to origin/${STAGING_BRANCH}. Skipping release cycle from main to staging."
+    exit 0 # Gracefully exit without error
   fi
- 
+
   # Bump tag version
   declare next_version; next_version=$(_bump_version_string "$staging_tag_version" 2)
   _log "Bumping $STAGING_BRANCH from version $staging_tag_version to $next_version"
@@ -51,13 +51,28 @@ main() {
   git tag -a -m "Started release cycle $next_version" "${tag}" "origin/$MAIN_BRANCH"
   sleep 5
 
-  # point staging branch head to main
+
+  # Get the commit hash for the tag
   declare sha; sha=$(git log -n1 "${tag}" --format=%h --abbrev=8)
-  _log "Pointing ${STAGING_BRANCH} branch to tag ${tag}..."
+
+  # Validate the tag and commit hash
+  if [ -z "$sha" ]; then
+    _log "ERROR: Target commit hash (sha) for staging is undefined. Exiting to avoid branch deletion."
+    exit 1
+  fi
+  if ! git show-ref --quiet "refs/tags/${tag}"; then
+    _log "ERROR: Tag ${tag} was not created successfully. Exiting to avoid branch issues."
+    exit 1
+  fi
+
+  # point staging branch head to main
+  _log "Updating ${STAGING_BRANCH} branch to point to tag ${tag} (${sha})."
   git branch -f "${STAGING_BRANCH}" "${sha}"
   sleep 5
-
   # Update remote with new tag and branch head
+
+  # Push the changes to the remote
+  _log "Pushing tag ${tag} and branch ${STAGING_BRANCH} to remote..."
   git push --atomic -f origin "${tag}" "${STAGING_BRANCH}"
 
   if [ "$should_make_release_checklist" == true ]; then

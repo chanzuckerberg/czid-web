@@ -24,6 +24,13 @@ __make_release_checklist() {
   declare source_commit; source_commit=$(_get_latest_commit "origin/$source_branch")
   declare target_commit; target_commit=$(_get_latest_commit "origin/$target_branch")
 
+  # Check if there are any commits between source and target
+  declare commit_count; commit_count=$(git rev-list "${target_commit}..${source_commit}" | wc -l)
+  if [ "$commit_count" -eq "0" ]; then
+    _log "No new commits found between ${target_branch} and ${source_branch}. Skipping release checklist creation."
+    exit 0
+  fi
+
   declare release_checklist_body; release_checklist_body=$(
     echo "# Release checklist"
     echo "_Please check your commits after testing. Do not checkoff commits which have dependencies that are not yet deployed in prod:_"

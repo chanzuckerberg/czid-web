@@ -47,8 +47,12 @@ _assert_no_release_checklist() {
 }
 
 _get_current_release_checklist_json() {
-  if ! _fetch_current_release_checklist_from_github | jq -e .; then
-    _exit_with_err_msg "INVALID STATE: Couldn't find an open release checklist."
+  declare checklist_json; checklist_json=$(_fetch_current_release_checklist_from_github)
+  if [ "$checklist_json" == "null" ]; then
+    _log "WARNING: No release checklist found. Continuing without updating checklist."
+    echo "null"
+  else
+    echo "$checklist_json"
   fi
 }
 
@@ -69,8 +73,15 @@ _get_current_version_initial_tag() {
 
 _get_latest_tag() {
   declare env_name="${1:-staging}"
-  declare output; output=$(git tag -l --sort=-version:refname "v*_${env_name}_*")
-  echo "$output" | head -n 1
+  _log "DEBUG: _get_latest_tag called with env_name='$env_name'"
+  local tags
+  tags=$(git tag -l --sort=-version:refname "v*_${env_name}_*")
+  if [ -z "$tags" ]; then
+    _log "WARNING: No tags found for environment '$env_name'."
+    echo ""
+    return 0
+  fi
+  echo "$tags" | head -n 1
 }
 
 _bump_version_string() {
