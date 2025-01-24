@@ -9,12 +9,13 @@ let samplesPage = null;
 let pipelineVizPage = null;
 
 test.describe("Pipeline Visualization", () => {
-
   test.beforeEach(async ({ page }) => {
     // #region Get a random completed sample
     projectPage = new ProjectPage(page);
     samplesPage = new SamplesPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.MNGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.MNGS}`,
+    );
     sample = await samplesPage.getRandomCompletedSample(project.name);
     // #endregion Get a random completed sample
 

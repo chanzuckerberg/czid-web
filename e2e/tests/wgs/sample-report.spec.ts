@@ -1,8 +1,16 @@
 import * as fs from "fs/promises";
 import { WORKFLOWS, SEQUENCING_PLATFORMS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
-import { UploadPage, SARS_COV2_REF_FILENAME, SARS_COV2_TRIM_PRIMER_FILENAME, WETLAB_PROTOCOL } from "@e2e/page-objects/upload-page";
+import {
+  UploadPage,
+  SARS_COV2_REF_FILENAME,
+  SARS_COV2_TRIM_PRIMER_FILENAME,
+  WETLAB_PROTOCOL,
+} from "@e2e/page-objects/upload-page";
 import { test, expect } from "@playwright/test";
 import AdmZip = require("adm-zip");
 import fastDiff = require("fast-diff");
@@ -10,7 +18,6 @@ import { ProjectPage } from "../../page-objects/project-page";
 
 let project = null;
 let projectPage = null;
-
 
 // #region Expected data
 const commonZipFiles = [
@@ -35,22 +42,24 @@ const expectedZipFiles = [
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const SC2_NANOPORE_SAMPLE = "sars-cov-2_SRR11178050_10p";
 const WGS_SARS_SAMPLE = "wgs_SARS_CoV2_no_host";
-const OUTPUT_PATH = (outputDir: string, filename: string) => `./fixtures/outputs/${outputDir}/${filename}`;
+const OUTPUT_PATH = (outputDir: string, filename: string) =>
+  `./fixtures/outputs/${outputDir}/${filename}`;
 const WAIT_TIME = 60 * 1000 * 15;
 const WAIT_FOR_PIPELINE = false;
+const UPLOAD_TIMEOUT = 60 * 1000 * 5;
 // #endregion Expected data
-
 
 /*
  * WGS - Sample report
  */
 test.describe("Data Validation: P-1", () => {
-
   test.beforeEach(async () => {
     test.setTimeout(WAIT_TIME);
   });
 
-  test("SNo e1: WGS Sample Report & Download Data Validation", async ({ page }) => {
+  test("SNo e1: WGS Sample Report & Download Data Validation", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     projectPage = new ProjectPage(page);
     project = await projectPage.getOrCreateProject(`SNo-e1_${WORKFLOWS.WGS}`);
@@ -63,7 +72,7 @@ test.describe("Data Validation: P-1", () => {
 
     // https://drive.google.com/file/d/1U-r_B4bioVGdXGTojzYgPaz-LFpNEpKY/view
     // https://drive.google.com/file/d/1ethRpFJ1DPrUhbQ66V9ZaK8ao_gy4gqt/view
-    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES);
+    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES, true, UPLOAD_TIMEOUT);
 
     await uploadPage.clickCheckboxForWorkflow(WORKFLOWS.WGS);
 
@@ -80,7 +89,10 @@ test.describe("Data Validation: P-1", () => {
 
     // - Host=Human
     let sampleNames = await uploadPage.getMetadataSampleNames();
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     for (const sampleName of sampleNames) {
       inputs[sampleName].hostOrganism = "Human";
     }
@@ -97,17 +109,29 @@ test.describe("Data Validation: P-1", () => {
     const samplePage = new SamplesPage(page);
     if (WAIT_FOR_PIPELINE) {
       await samplePage.waitForAllReportsComplete(project.name, sampleNames);
-      await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, WAIT_TIME);
+      await projectPage.waitForSamplesComplete(
+        project.id,
+        WORKFLOWS.WGS,
+        sampleNames,
+        WAIT_TIME,
+      );
     } else {
       await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
-      sampleNames = await projectPage.selectCompletedSamples(sampleNames.length);
+      sampleNames = await projectPage.selectCompletedSamples(
+        sampleNames.length,
+      );
     }
     const sampleName = sampleNames[0];
     // #endregion 2. Upload sample fastq files for wgs_SARS_CoV2_no_host (see "Data") as a Viral Consensus Genome, use the configuration:
 
     // #region 3. Select "Consensus Genomes" tab
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
-    await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, WAIT_TIME);
+    await projectPage.waitForSamplesComplete(
+      project.id,
+      WORKFLOWS.WGS,
+      sampleNames,
+      WAIT_TIME,
+    );
     // #endregion 3. Select "Consensus Genomes" tab
 
     // #region 4. Verify "Is my consensus genome complete?" and "How good is the coverage?" section data
@@ -127,10 +151,10 @@ test.describe("Data Validation: P-1", () => {
     // - Ambiguous Bases = 1
     const expectedData = [
       {
-        "Taxon": "",
+        Taxon: "",
         "Mapped Reads": "108023",
         "GC Content": "37.9%",
-        "SNPs": "0",
+        SNPs: "0",
         "%id": "100%",
         "Informative Nucleotides": "29639",
         "% Genome Called": "99.5%",
@@ -138,7 +162,8 @@ test.describe("Data Validation: P-1", () => {
         "Ambiguous Bases": "1",
       },
     ];
-    const consensusGenomeTable = await samplePage.getIsMyConsensusGenomeCompleteTable();
+    const consensusGenomeTable =
+      await samplePage.getIsMyConsensusGenomeCompleteTable();
     expect(consensusGenomeTable).toEqual(expectedData);
 
     // ""How good is the coverage?"" data is consistent with below values:
@@ -209,11 +234,18 @@ test.describe("Data Validation: P-1", () => {
     zippedFileNames = zippedFileNames.sort();
     expect(zippedFileNames).toEqual(expectedZippedFiles);
 
-    await compareDataFilesWithTolerance(zipContents, "wgs_SARS_CoV2", sampleName, WGS_SARS_SAMPLE);
+    await compareDataFilesWithTolerance(
+      zipContents,
+      "wgs_SARS_CoV2",
+      sampleName,
+      WGS_SARS_SAMPLE,
+    );
     // #endregion 8. Verify the specified data file outputs against baseline outputs
   });
 
-  test("SNo e2: WGS SC2 Sample Report & Download Data Validation", async ({ page }) => {
+  test("SNo e2: WGS SC2 Sample Report & Download Data Validation", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     projectPage = new ProjectPage(page);
     project = await projectPage.getOrCreateProject(`SNo-e2_${WORKFLOWS.WGS}`);
@@ -229,13 +261,16 @@ test.describe("Data Validation: P-1", () => {
     await uploadPage.clickSequencingPlatform(SEQUENCING_PLATFORMS.MNGS);
     await uploadPage.setWetLabFilter(WETLAB_PROTOCOL);
 
-    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES);
+    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES, true, UPLOAD_TIMEOUT);
 
     await uploadPage.clickContinue();
 
     // - Host=Human
     let sampleNames = await uploadPage.getMetadataSampleNames();
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     for (const sampleName of sampleNames) {
       inputs[sampleName].hostOrganism = "Human";
     }
@@ -252,10 +287,17 @@ test.describe("Data Validation: P-1", () => {
     const samplePage = new SamplesPage(page);
     if (WAIT_FOR_PIPELINE) {
       await samplePage.waitForAllReportsComplete(project.name, sampleNames);
-      await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, WAIT_TIME);
+      await projectPage.waitForSamplesComplete(
+        project.id,
+        WORKFLOWS.WGS,
+        sampleNames,
+        WAIT_TIME,
+      );
     } else {
       await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
-      sampleNames = await projectPage.selectCompletedSamples(sampleNames.length);
+      sampleNames = await projectPage.selectCompletedSamples(
+        sampleNames.length,
+      );
     }
     const sampleName = sampleNames[0];
     // #endregion 2. Upload sample fastq files for wgs_SARS_CoV2_no_host (see ""Data"") as a SARS-CoV-2 Consensus Genome, use the configuration:
@@ -292,7 +334,8 @@ test.describe("Data Validation: P-1", () => {
         "Ambiguous Bases": "1",
       },
     ];
-    const consensusGenomeTable = await samplePage.getIsMyConsensusGenomeCompleteTable();
+    const consensusGenomeTable =
+      await samplePage.getIsMyConsensusGenomeCompleteTable();
     expect(consensusGenomeTable).toEqual(expectedData);
 
     // How good is the coverage?" data is consistent with below values:
@@ -357,14 +400,23 @@ test.describe("Data Validation: P-1", () => {
     zippedFileNames = zippedFileNames.sort();
     expect(zippedFileNames).toEqual(expectedZippedFiles);
 
-    await compareDataFilesWithTolerance(zipContents, "wgs_SARS_CoV2", sampleName, WGS_SARS_SAMPLE);
+    await compareDataFilesWithTolerance(
+      zipContents,
+      "wgs_SARS_CoV2",
+      sampleName,
+      WGS_SARS_SAMPLE,
+    );
     // #endregion 8. Verify the specified data file outputs against baseline outputs"
   });
 
-  test("SNo e3: WGS SC2 Nanopore Sample Report & Download Data Validation", async ({ page }) => {
+  test("SNo e3: WGS SC2 Nanopore Sample Report & Download Data Validation", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     projectPage = new ProjectPage(page);
-    project = await projectPage.getOrCreateProject(`SNo-e3_${SEQUENCING_PLATFORMS.LMNGS}`);
+    project = await projectPage.getOrCreateProject(
+      `SNo-e3_${SEQUENCING_PLATFORMS.LMNGS}`,
+    );
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Upload sample fastq files for sars-cov-2_SRR11178050_10p (see ""Data"") as a SARS-CoV-2 Consensus Genome, use the configuration:
@@ -373,7 +425,11 @@ test.describe("Data Validation: P-1", () => {
     await uploadPage.selectProject(project.name);
     await uploadPage.clickCheckboxForWorkflow(WORKFLOWS.SC2);
 
-    await uploadPage.uploadSampleFiles([`${SC2_NANOPORE_SAMPLE}.fastq.gz`]);
+    await uploadPage.uploadSampleFiles(
+      [`${SC2_NANOPORE_SAMPLE}.fastq.gz`],
+      true,
+      UPLOAD_TIMEOUT,
+    );
 
     // - Sequencing Platform=Nanopore
     await uploadPage.clickSequencingPlatform(WORKFLOWS.LMNGS);
@@ -386,7 +442,10 @@ test.describe("Data Validation: P-1", () => {
 
     // - Host=Human
     let sampleNames = await uploadPage.getMetadataSampleNames();
-    const inputs = await uploadPage.getRandomizedSampleInputs(WGS_SAMPLE_FILES, sampleNames);
+    const inputs = await uploadPage.getRandomizedSampleInputs(
+      WGS_SAMPLE_FILES,
+      sampleNames,
+    );
     for (const sampleName of sampleNames) {
       inputs[sampleName].hostOrganism = "Human";
     }
@@ -403,10 +462,17 @@ test.describe("Data Validation: P-1", () => {
     const samplePage = new SamplesPage(page);
     if (WAIT_FOR_PIPELINE) {
       await samplePage.waitForAllReportsComplete(project.name, sampleNames);
-      await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.WGS, sampleNames, WAIT_TIME);
+      await projectPage.waitForSamplesComplete(
+        project.id,
+        WORKFLOWS.WGS,
+        sampleNames,
+        WAIT_TIME,
+      );
     } else {
       await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
-      sampleNames = await projectPage.selectCompletedSamples(sampleNames.length);
+      sampleNames = await projectPage.selectCompletedSamples(
+        sampleNames.length,
+      );
     }
     const sampleName = sampleNames[0];
     // #endregion 2. Upload sample fastq files for sars-cov-2_SRR11178050_10p (see ""Data"") as a SARS-CoV-2 Consensus Genome, use the configuration:
@@ -489,13 +555,23 @@ test.describe("Data Validation: P-1", () => {
     const expectedZippedFiles = [...commonZipFiles, ...dynamicFileNames].sort();
     expect(zippedFileNames).toEqual(expectedZippedFiles);
 
-    await compareDataFilesWithTolerance(zipContents, "sars-cov-2", sampleName, SC2_NANOPORE_SAMPLE);
+    await compareDataFilesWithTolerance(
+      zipContents,
+      "sars-cov-2",
+      sampleName,
+      SC2_NANOPORE_SAMPLE,
+    );
     // #endregion 8. Verify the specified data file outputs against baseline outputs
   });
-
 });
 
-async function compareDataFilesWithTolerance(zipContents: AdmZip.IZipEntry[], fixtureDir: string, sampleName: string, baselineName: string, percentage = 0.99) {
+async function compareDataFilesWithTolerance(
+  zipContents: AdmZip.IZipEntry[],
+  fixtureDir: string,
+  sampleName: string,
+  baselineName: string,
+  percentage = 0.99,
+) {
   for (const content of zipContents) {
     let contentName = content.name;
     if (contentName.startsWith(sampleName)) {
@@ -505,7 +581,7 @@ async function compareDataFilesWithTolerance(zipContents: AdmZip.IZipEntry[], fi
     const analysisOutputData = content.getData();
 
     const parts = contentName.split(".");
-    const fileExtention = parts[parts.length -1];
+    const fileExtention = parts[parts.length - 1];
     const binaryFiles = ["bam", "png", "gz", "bai"];
     if (binaryFiles.includes(fileExtention)) {
       // Diffing large binary files takes several minutes
@@ -518,11 +594,17 @@ async function compareDataFilesWithTolerance(zipContents: AdmZip.IZipEntry[], fi
 
     let stringifiedAnalysisOutputData = analysisOutputData.toString();
 
-    stringifiedAnalysisOutputData = stringifiedAnalysisOutputData.replace(sampleName, baselineName);
+    stringifiedAnalysisOutputData = stringifiedAnalysisOutputData.replace(
+      sampleName,
+      baselineName,
+    );
 
     const stringifiedBaselineData = baselineData.toString();
 
-    const resultDiff = fastDiff(stringifiedAnalysisOutputData, stringifiedBaselineData);
+    const resultDiff = fastDiff(
+      stringifiedAnalysisOutputData,
+      stringifiedBaselineData,
+    );
     const tollerance = stringifiedBaselineData.length * percentage;
     expect(resultDiff.length).toBeLessThanOrEqual(tollerance);
   }

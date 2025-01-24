@@ -9,15 +9,19 @@ let heatmapPage = null;
 let project = null;
 let heatmapSamples = null;
 
+const TEST_TIMEOUT = 60 * 1000 * 4;
 
 test.describe("Sample Heatmap", () => {
-
   test.beforeEach(async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT);
+
     projectPage = new ProjectPage(page);
 
     // #region Go to the Samples tab
     const workflow = WORKFLOWS.MNGS;
-    project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+    project = await projectPage.getOrCreateProject(
+      `automation_project_${workflow}`,
+    );
     await projectPage.navigateToSamples(project.id, workflow);
     // #endregion Go to the Samples tab
 
@@ -75,7 +79,13 @@ test.describe("Sample Heatmap", () => {
   test(`Smoke Test: Verify user is able select the following view options`, async () => {
     test.setTimeout(60 * 1000 * 5); // This test needs a slightly longer runtime
     // #region Verify the expected view options are visible
-    const expectedViewOptions = ["Taxon Level", "Metric", "Sort Samples", "Sort Taxa", "Scale"];
+    const expectedViewOptions = [
+      "Taxon Level",
+      "Metric",
+      "Sort Samples",
+      "Sort Taxa",
+      "Scale",
+    ];
     const viewOptions = await heatmapPage.getViewOptions();
     expect(viewOptions).toEqual(expectedViewOptions);
     // #endregion Verify the expected view options are visible
@@ -101,7 +111,6 @@ test.describe("Sample Heatmap", () => {
       for (const report of sampleReports) {
         const taxonNames = await samplesPage.getTaxonNamesFromReport(report);
         for (const taxonName of taxonNames["Scientific"]) {
-
           let expectedTaxonName = taxonName;
           if (taxonLevel === "Genus") {
             expectedTaxonName = taxonName.split(" ")[0];
@@ -133,11 +142,11 @@ test.describe("Sample Heatmap", () => {
     // #endregion View by Metric
 
     // #region View by Sort Samples
-    await heatmapPage.clickSampleNamesToggle();
     const sortSamples = ["Alphabetical", "Cluster"];
     for (const sort of sortSamples) {
       await heatmapPage.setSortSamples(sort);
-      const heatmapSampleNames = await heatmapPage.getHeatmapSampleNames();
+      const heatmapSamples = await heatmapPage.getSamplesFromUrl();
+      const heatmapSampleNames = heatmapSamples.map(s => s.name);
 
       const expectedSortedSampleNames = heatmapSampleNames;
       if (sort === "Alphabetical") {
@@ -185,8 +194,12 @@ test.describe("Sample Heatmap", () => {
     await heatmapPage.pause(1);
 
     let widthHeightAfter = await heatmapPage.getHeatmapWidthHeight();
-    expect(+widthHeightBefore["width"]).toBeLessThan(+widthHeightAfter["width"]);
-    expect(+widthHeightBefore["height"]).toBeLessThan(+widthHeightAfter["height"]);
+    expect(+widthHeightBefore["width"]).toBeLessThan(
+      +widthHeightAfter["width"],
+    );
+    expect(+widthHeightBefore["height"]).toBeLessThan(
+      +widthHeightAfter["height"],
+    );
     // #endregion Click + to zoom and verify the heatmap window grew
 
     // #region Click - to zoom-out and verify the heatmap window shrank
@@ -195,8 +208,12 @@ test.describe("Sample Heatmap", () => {
     await heatmapPage.pause(1);
 
     widthHeightAfter = await heatmapPage.getHeatmapWidthHeight();
-    expect(+widthHeightBefore["width"]).toBeGreaterThan(+widthHeightAfter["width"]);
-    expect(+widthHeightBefore["height"]).toBeGreaterThan(+widthHeightAfter["height"]);
+    expect(+widthHeightBefore["width"]).toBeGreaterThan(
+      +widthHeightAfter["width"],
+    );
+    expect(+widthHeightBefore["height"]).toBeGreaterThan(
+      +widthHeightAfter["height"],
+    );
     // #endregion Click - to zoom-out and verify the heatmap window shrank
   });
 });

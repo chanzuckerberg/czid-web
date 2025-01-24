@@ -1,23 +1,37 @@
 import * as fs from "fs/promises";
 import { WORKFLOWS } from "@e2e/constants/common";
-import { MWGS_SE_SRR7002140_TA_252_DNA_BLAC_VANP_10P, MWGS_PE_SRR7002140_TAP_R1, MWGS_PE_SRR7002140_TAP_R2, MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1, MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2, MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1, MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2 } from "@e2e/constants/sample";
+import {
+  MWGS_SE_SRR7002140_TA_252_DNA_BLAC_VANP_10P,
+  MWGS_PE_SRR7002140_TAP_R1,
+  MWGS_PE_SRR7002140_TAP_R2,
+  MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1,
+  MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2,
+  MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1,
+  MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2,
+} from "@e2e/constants/sample";
 import { setupSamples } from "@e2e/page-objects/user-actions";
 import { AssertionCollector } from "@e2e/utils/assertion-collector";
 import { test, expect, Download } from "@playwright/test";
 import fastDiff = require("fast-diff");
 import { ProjectPage } from "../../page-objects/project-page";
-import { compareCSV, parseCSVArray, verifyUpperAndLowerBounds } from "@e2e/utils/download";
+import {
+  compareCSV,
+  parseCSVArray,
+  verifyUpperAndLowerBounds,
+} from "@e2e/utils/download";
 
 const MWGS_SE_SAMPLE = "mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p";
 const MWGS_PE_SRR7002140_TAP = "mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p";
 
 const SAMPLE_REPORT_SAMPLE_NAME = "Sample Report - Sample Name";
 
-const LINCOSAMIDE_ANTIBIOTIC_MACROLIDE_ANTIBIOTIC = "lincosamide antibiotic; macrolide antibiotic";
+const LINCOSAMIDE_ANTIBIOTIC_MACROLIDE_ANTIBIOTIC =
+  "lincosamide antibiotic; macrolide antibiotic";
 const ANTIBIOTIC_TARGET_ALTERATION = "antibiotic target alteration";
 const PROTEIN_HOMOLOG = "protein homolog";
 const MSR_TYPE_ABC_F_PROTEIN = "msr-type ABC-F protein";
-const MACROLIDE_ANTIBIOTIC_STREPTOGRAMIN_ANTIBIOTIC = "macrolide antibiotic; streptogramin antibiotic";
+const MACROLIDE_ANTIBIOTIC_STREPTOGRAMIN_ANTIBIOTIC =
+  "macrolide antibiotic; streptogramin antibiotic";
 const ANTIBIOTIC_TARGET_PROTECTION = "antibiotic target protection";
 const FLUOROQUINOLONE_ANTIBIOTIC = "fluoroquinolone antibiotic";
 const ANTIBIOTIC_EFFLUX = "antibiotic efflux";
@@ -25,13 +39,15 @@ const TETRACYCLINE_ANTIBIOTIC = "tetracycline antibiotic";
 const GLYCOPEPTIDE_ANTIBIOTIC = "glycopeptide antibiotic";
 const ANTIBIOTIC_INACTIVATION = "antibiotic inactivation";
 const TEM_BETA_LACTAMASE = "TEM beta-lactamase";
-const MONOBACTAM_CEPHALOSPORIN_PENAM_PENEM = "monobactam; cephalosporin; penam; penem";
+const MONOBACTAM_CEPHALOSPORIN_PENAM_PENEM =
+  "monobactam; cephalosporin; penam; penem";
 const BETA_LACTAM_ANTIBIOTIC = "beta-lactam antibiotic";
 
 const DOWNLOAD_REPORT_TABLE_CSV = "Download Report table (.csv)";
 const DOWNLOAD_NON_HOST_READS_FASTA = "Download Non-Host Reads (.fasta)";
 const DOWNLOAD_NON_HOST_CONTIGS_FASTA = "Download Non-Host Contigs (.fasta)";
-const DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV = "Download Comprehensive AMR Metrics File (.tsv)";
+const DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV =
+  "Download Comprehensive AMR Metrics File (.tsv)";
 const DOWNLOAD_INTERMEDIATE_FILES_ZIP = "Download Intermediate Files (.zip)";
 
 const KEY_MAPPING = {
@@ -54,8 +70,19 @@ const KEY_MAPPING = {
   read_species: "Read SpeciesBETA",
 };
 
-const NO_DIFF_FIELDS = ["gene", "gene_family", "drug_class", "high_level_drug_class", "mechanism", "model", "read_species", "cutoff", "contig_species"];
-const OUTPUT_PATH = (outputDir: string, filename: string) => `./fixtures/outputs/${outputDir}/${filename}`;
+const NO_DIFF_FIELDS = [
+  "gene",
+  "gene_family",
+  "drug_class",
+  "high_level_drug_class",
+  "mechanism",
+  "model",
+  "read_species",
+  "cutoff",
+  "contig_species",
+];
+const OUTPUT_PATH = (outputDir: string, filename: string) =>
+  `./fixtures/outputs/${outputDir}/${filename}`;
 
 const RUN_PIPELINE = true;
 const WAIT_FOR_PIPELINE = true;
@@ -67,7 +94,6 @@ let collector: AssertionCollector;
  * AMR E2E
  */
 test.describe("AMR E2E | Functional: P-1", () => {
-
   test.beforeEach(() => {
     collector = new AssertionCollector();
   });
@@ -76,12 +102,16 @@ test.describe("AMR E2E | Functional: P-1", () => {
     collector.throwIfAny();
   });
 
-  test("SNo e10: AMR Single Read Sample Report & Data Validation", async ({ page }) => {
+  test("SNo e10: AMR Single Read Sample Report & Data Validation", async ({
+    page,
+  }) => {
     test.setTimeout(TEST_TIMEOUT);
 
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.AMR}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.AMR}`,
+    );
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Upload sample fastq files for mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p (see ""Data"") as Antimicrobial Resistance, use the configuration:
@@ -120,7 +150,10 @@ test.describe("AMR E2E | Functional: P-1", () => {
 
     // ""mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p"" DATA
     const actualSampleName = await samplesPage.getSampleName();
-    collector.collect(async () => expect(actualSampleName).toEqual(sampleName), SAMPLE_REPORT_SAMPLE_NAME);
+    collector.collect(
+      async () => expect(actualSampleName).toEqual(sampleName),
+      SAMPLE_REPORT_SAMPLE_NAME,
+    );
 
     // AMR hits
     await samplesPage.clickShowHideColumns();
@@ -196,7 +229,8 @@ test.describe("AMR E2E | Functional: P-1", () => {
       },
       {
         gene: "pmrA",
-        gene_family: "major facilitator superfamily (MFS) antibiotic efflux pump",
+        gene_family:
+          "major facilitator superfamily (MFS) antibiotic efflux pump",
         drug_class: FLUOROQUINOLONE_ANTIBIOTIC,
         high_level_drug_class: FLUOROQUINOLONE_ANTIBIOTIC,
         mechanism: ANTIBIOTIC_EFFLUX,
@@ -260,37 +294,77 @@ test.describe("AMR E2E | Functional: P-1", () => {
 
     // - Report table (.csv)
     await samplesPage.clickDownloadButton();
-    const reportTableCsv = await samplesPage.clickDownloadOption(DOWNLOAD_REPORT_TABLE_CSV);
+    const reportTableCsv = await samplesPage.clickDownloadOption(
+      DOWNLOAD_REPORT_TABLE_CSV,
+    );
     // - mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p_report.csv"
-    collector.collect(async () => expect(`${sampleName}_report.csv`).toEqual(reportTableCsv.suggestedFilename()), DOWNLOAD_REPORT_TABLE_CSV);
+    collector.collect(
+      async () =>
+        expect(`${sampleName}_report.csv`).toEqual(
+          reportTableCsv.suggestedFilename(),
+        ),
+      DOWNLOAD_REPORT_TABLE_CSV,
+    );
     downloadedContent.push(reportTableCsv);
 
     // - Non-Host Reads (.fasta)
     await samplesPage.clickDownloadButton();
-    const nonHostReadsFasta = await samplesPage.clickDownloadOption(DOWNLOAD_NON_HOST_READS_FASTA);
+    const nonHostReadsFasta = await samplesPage.clickDownloadOption(
+      DOWNLOAD_NON_HOST_READS_FASTA,
+    );
     // - mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p_7529_non_host_reads.fasta
-    collector.collect(async () => expect(nonHostReadsFasta.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*non_host_reads.fasta`)), DOWNLOAD_NON_HOST_READS_FASTA);
+    collector.collect(
+      async () =>
+        expect(nonHostReadsFasta.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*non_host_reads.fasta`),
+        ),
+      DOWNLOAD_NON_HOST_READS_FASTA,
+    );
     downloadedContent.push(nonHostReadsFasta);
 
     // - Non-Host Contigs (.fasta)
     await samplesPage.clickDownloadButton();
-    const nonHostContigsFasta = await samplesPage.clickDownloadOption(DOWNLOAD_NON_HOST_CONTIGS_FASTA);
+    const nonHostContigsFasta = await samplesPage.clickDownloadOption(
+      DOWNLOAD_NON_HOST_CONTIGS_FASTA,
+    );
     // - mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p_7529_contigs.fasta
-    collector.collect(async () => expect(nonHostContigsFasta.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*contigs.fasta`)), DOWNLOAD_NON_HOST_CONTIGS_FASTA);
+    collector.collect(
+      async () =>
+        expect(nonHostContigsFasta.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*contigs.fasta`),
+        ),
+      DOWNLOAD_NON_HOST_CONTIGS_FASTA,
+    );
     downloadedContent.push(nonHostContigsFasta);
 
     // - Comprehensive AMR Metrics File (.tsv)
     await samplesPage.clickDownloadButton();
-    const comprehensiveAmrMetricsTsv = await samplesPage.clickDownloadOption(DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV);
+    const comprehensiveAmrMetricsTsv = await samplesPage.clickDownloadOption(
+      DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV,
+    );
     // - mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p_7529_comprehensive_amr_metrics.tsv
-    collector.collect(async () => expect(comprehensiveAmrMetricsTsv.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*comprehensive_amr_metrics.tsv`)), DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV);
+    collector.collect(
+      async () =>
+        expect(comprehensiveAmrMetricsTsv.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*comprehensive_amr_metrics.tsv`),
+        ),
+      DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV,
+    );
     downloadedContent.push(comprehensiveAmrMetricsTsv);
 
     // - Intermediate Files (.zip)
     await samplesPage.clickDownloadButton();
-    const outputsZip = await samplesPage.clickDownloadOption(DOWNLOAD_INTERMEDIATE_FILES_ZIP);
+    const outputsZip = await samplesPage.clickDownloadOption(
+      DOWNLOAD_INTERMEDIATE_FILES_ZIP,
+    );
     // - mWGS_SE_SRR7002140_TA.252.DNA_blaC_vanP_10p_7529_outputs.zip
-    collector.collect(async () => expect(outputsZip.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*outputs.zip`)), DOWNLOAD_INTERMEDIATE_FILES_ZIP);
+    collector.collect(
+      async () =>
+        expect(outputsZip.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*outputs.zip`),
+        ),
+      DOWNLOAD_INTERMEDIATE_FILES_ZIP,
+    );
     downloadedContent.push(outputsZip);
     // #endregion 5. From the sample report, click on the Download button for:
 
@@ -300,16 +374,25 @@ test.describe("AMR E2E | Functional: P-1", () => {
     // The following files from the downloads folder should match those of the baseline run:
     // Outputs: Output AMR
     // https://drive.google.com/drive/folders/1vZxC7A-y69Oi0j7M-3wRZCoLTWLlML0L?usp=drive_link
-    await compareDataFilesWithTolerance(downloadedContent, "AMR/mWGS_SE_SRR7002140_TA/e10", sampleName, MWGS_SE_SAMPLE);
+    await compareDataFilesWithTolerance(
+      downloadedContent,
+      "AMR/mWGS_SE_SRR7002140_TA/e10",
+      sampleName,
+      MWGS_SE_SAMPLE,
+    );
     // #endregion 6. Verify the specified data file outputs against baseline outputs
   });
 
-  test("SNo e11: AMR Paired Read Sample Report & Download Data Validation", async ({ page }) => {
+  test("SNo e11: AMR Paired Read Sample Report & Download Data Validation", async ({
+    page,
+  }) => {
     test.setTimeout(TEST_TIMEOUT);
 
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.AMR}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.AMR}`,
+    );
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Upload sample fastq files for mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p (see ""Data"") as Antimicrobial Resistance, use the configuration:
@@ -352,7 +435,10 @@ test.describe("AMR E2E | Functional: P-1", () => {
 
     // ""mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p"" DATA
     const actualSampleName = await samplesPage.getSampleName();
-    collector.collect(async () => expect(actualSampleName).toEqual(sampleName), SAMPLE_REPORT_SAMPLE_NAME);
+    collector.collect(
+      async () => expect(actualSampleName).toEqual(sampleName),
+      SAMPLE_REPORT_SAMPLE_NAME,
+    );
 
     // AMR hits
     await samplesPage.clickShowHideColumns();
@@ -428,7 +514,8 @@ test.describe("AMR E2E | Functional: P-1", () => {
       },
       {
         gene: "pmrA",
-        gene_family: "major facilitator superfamily (MFS) antibiotic efflux pump",
+        gene_family:
+          "major facilitator superfamily (MFS) antibiotic efflux pump",
         drug_class: FLUOROQUINOLONE_ANTIBIOTIC,
         high_level_drug_class: FLUOROQUINOLONE_ANTIBIOTIC,
         mechanism: ANTIBIOTIC_EFFLUX,
@@ -492,42 +579,82 @@ test.describe("AMR E2E | Functional: P-1", () => {
 
     // - Report table (.csv)
     await samplesPage.clickDownloadButton();
-    const reportTableCsv = await samplesPage.clickDownloadOption(DOWNLOAD_REPORT_TABLE_CSV);
+    const reportTableCsv = await samplesPage.clickDownloadOption(
+      DOWNLOAD_REPORT_TABLE_CSV,
+    );
 
     // - mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p_report.csv"
-    collector.collect(async () => expect(`${sampleName}_report.csv`).toEqual(reportTableCsv.suggestedFilename()), DOWNLOAD_REPORT_TABLE_CSV);
+    collector.collect(
+      async () =>
+        expect(`${sampleName}_report.csv`).toEqual(
+          reportTableCsv.suggestedFilename(),
+        ),
+      DOWNLOAD_REPORT_TABLE_CSV,
+    );
     downloadedContent.push(reportTableCsv);
 
     // - Non-Host Reads (.fasta)
     await samplesPage.clickDownloadButton();
-    const nonHostReadsFasta = await samplesPage.clickDownloadOption(DOWNLOAD_NON_HOST_READS_FASTA);
+    const nonHostReadsFasta = await samplesPage.clickDownloadOption(
+      DOWNLOAD_NON_HOST_READS_FASTA,
+    );
 
     // - mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p_7528_non_host_reads.fasta
-    collector.collect(async () => expect(nonHostReadsFasta.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*non_host_reads.fasta`)), DOWNLOAD_NON_HOST_READS_FASTA);
+    collector.collect(
+      async () =>
+        expect(nonHostReadsFasta.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*non_host_reads.fasta`),
+        ),
+      DOWNLOAD_NON_HOST_READS_FASTA,
+    );
     downloadedContent.push(nonHostReadsFasta);
 
     // - Non-Host Contigs (.fasta)
     await samplesPage.clickDownloadButton();
-    const nonHostContigsFasta = await samplesPage.clickDownloadOption(DOWNLOAD_NON_HOST_CONTIGS_FASTA);
+    const nonHostContigsFasta = await samplesPage.clickDownloadOption(
+      DOWNLOAD_NON_HOST_CONTIGS_FASTA,
+    );
 
     // - mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p_7528_contigs.fasta
-    collector.collect(async () => expect(nonHostContigsFasta.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*contigs.fasta`)), DOWNLOAD_NON_HOST_CONTIGS_FASTA);
+    collector.collect(
+      async () =>
+        expect(nonHostContigsFasta.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*contigs.fasta`),
+        ),
+      DOWNLOAD_NON_HOST_CONTIGS_FASTA,
+    );
     downloadedContent.push(nonHostContigsFasta);
 
     // - Comprehensive AMR Metrics File (.tsv)
     await samplesPage.clickDownloadButton();
-    const comprehensiveAmrMetricsTsv = await samplesPage.clickDownloadOption(DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV);
+    const comprehensiveAmrMetricsTsv = await samplesPage.clickDownloadOption(
+      DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV,
+    );
 
     // - mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p_7528_comprehensive_amr_metrics.tsv
-    collector.collect(async () => expect(comprehensiveAmrMetricsTsv.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*comprehensive_amr_metrics.tsv`)), DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV);
+    collector.collect(
+      async () =>
+        expect(comprehensiveAmrMetricsTsv.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*comprehensive_amr_metrics.tsv`),
+        ),
+      DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV,
+    );
     downloadedContent.push(comprehensiveAmrMetricsTsv);
 
     // - Intermediate Files (.zip)
     await samplesPage.clickDownloadButton();
-    const outputsZip = await samplesPage.clickDownloadOption(DOWNLOAD_INTERMEDIATE_FILES_ZIP);
+    const outputsZip = await samplesPage.clickDownloadOption(
+      DOWNLOAD_INTERMEDIATE_FILES_ZIP,
+    );
 
     // - mWGS_PE_SRR7002140_TA.252.DNA_blaC_vanP_10p_7528_outputs.zip
-    collector.collect(async () => expect(outputsZip.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*outputs.zip`)), DOWNLOAD_INTERMEDIATE_FILES_ZIP);
+    collector.collect(
+      async () =>
+        expect(outputsZip.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*outputs.zip`),
+        ),
+      DOWNLOAD_INTERMEDIATE_FILES_ZIP,
+    );
     downloadedContent.push(outputsZip);
 
     // "Comparing with baseline sample report(s) (older versions reports of the same sample):
@@ -536,16 +663,25 @@ test.describe("AMR E2E | Functional: P-1", () => {
     // 2021
     // Outputs: Output AMR
     // https://drive.google.com/drive/folders/13rtxmrK0wB9o7tpD28yuK4C56AmloG2o?usp=drive_link
-    await compareDataFilesWithTolerance(downloadedContent, "AMR/mWGS_PE_SRR7002140_TA/e11", sampleName, MWGS_PE_SRR7002140_TAP);
+    await compareDataFilesWithTolerance(
+      downloadedContent,
+      "AMR/mWGS_PE_SRR7002140_TA/e11",
+      sampleName,
+      MWGS_PE_SRR7002140_TAP,
+    );
     // #endregion 5. From the sample report, click on the Download button for:
   });
 
-  test("SNo e12: AMR Paired Read RNA Mosquito Sample Report & Download Data Validation", async ({ page }) => {
+  test("SNo e12: AMR Paired Read RNA Mosquito Sample Report & Download Data Validation", async ({
+    page,
+  }) => {
     test.setTimeout(TEST_TIMEOUT);
 
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.AMR}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.AMR}`,
+    );
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Upload sample fastq files for mWGS_RNA_mosquito-1-aedes-rna_10p (see ""Data"") as Antimicrobial Resistance, use the configuration:
@@ -558,7 +694,10 @@ test.describe("AMR E2E | Functional: P-1", () => {
       // https://drive.google.com/file/d/1cknRbz6wGYwoYDFhH9GO8IfBcDQBBMM9/view?usp=drive_link
       // mWGS_RNA_mosquito-1-aedes-rna_10p_R2.fastq.gz"
       // https://drive.google.com/file/d/1kwdYlFtuPZK8uPfPflayVOuwpUrL-lO8/view?usp=drive_link
-      [MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1, MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2],
+      [
+        MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1,
+        MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2,
+      ],
       [MWGS_RNA_MOSQUITO],
       WORKFLOWS.AMR,
       {
@@ -588,7 +727,10 @@ test.describe("AMR E2E | Functional: P-1", () => {
 
     // ""mWGS_RNA_mosquito-1-aedes-rna_10p"" DATA
     const actualSampleName = await samplesPage.getSampleName();
-    collector.collect(async () => expect(actualSampleName).toEqual(sampleName), SAMPLE_REPORT_SAMPLE_NAME);
+    collector.collect(
+      async () => expect(actualSampleName).toEqual(sampleName),
+      SAMPLE_REPORT_SAMPLE_NAME,
+    );
 
     // AMR hits
     await samplesPage.clickShowHideColumns();
@@ -609,8 +751,10 @@ test.describe("AMR E2E | Functional: P-1", () => {
       {
         gene: "Erm(37)",
         gene_family: "Erm 23S ribosomal RNA methyltransferase",
-        drug_class: "macrolide antibiotic; lincosamide antibiotic; streptogramin antibiotic; streptogramin A antibiotic; streptogramin B antibiotic",
-        high_level_drug_class: "macrolide antibiotic; lincosamide antibiotic; streptogramin antibiotic",
+        drug_class:
+          "macrolide antibiotic; lincosamide antibiotic; streptogramin antibiotic; streptogramin A antibiotic; streptogramin B antibiotic",
+        high_level_drug_class:
+          "macrolide antibiotic; lincosamide antibiotic; streptogramin antibiotic",
         mechanism: ANTIBIOTIC_TARGET_ALTERATION,
         model: PROTEIN_HOMOLOG,
         cutoff: "Nudged",
@@ -627,9 +771,12 @@ test.describe("AMR E2E | Functional: P-1", () => {
       },
       {
         gene: "MexD",
-        gene_family: "resistance-nodulation-cell division (RND) antibiotic efflux pump",
-        drug_class: "macrolide antibiotic; fluoroquinolone antibiotic; aminoglycoside antibiotic; cephalosporin; penam; tetracycline antibiotic; aminocoumarin antibiotic; diaminopyrimidine antibiotic; phenicol antibiotic",
-        high_level_drug_class: "macrolide antibiotic; aminocoumarin antibiotic; tetracycline antibiotic; beta-lactam antibiotic; phenicol antibiotic; fluoroquinolone antibiotic; diaminopyrimidine antibiotic; aminoglycoside antibiotic",
+        gene_family:
+          "resistance-nodulation-cell division (RND) antibiotic efflux pump",
+        drug_class:
+          "macrolide antibiotic; fluoroquinolone antibiotic; aminoglycoside antibiotic; cephalosporin; penam; tetracycline antibiotic; aminocoumarin antibiotic; diaminopyrimidine antibiotic; phenicol antibiotic",
+        high_level_drug_class:
+          "macrolide antibiotic; aminocoumarin antibiotic; tetracycline antibiotic; beta-lactam antibiotic; phenicol antibiotic; fluoroquinolone antibiotic; diaminopyrimidine antibiotic; aminoglycoside antibiotic",
         mechanism: "antibiotic efflux",
         model: PROTEIN_HOMOLOG,
         cutoff: "Nudged",
@@ -704,7 +851,8 @@ test.describe("AMR E2E | Functional: P-1", () => {
       {
         gene: "msrA",
         gene_family: "msr-type ABC-F protein",
-        drug_class: "macrolide antibiotic; streptogramin antibiotic; streptogramin B antibiotic",
+        drug_class:
+          "macrolide antibiotic; streptogramin antibiotic; streptogramin B antibiotic",
         high_level_drug_class: "macrolide antibiotic; streptogramin antibiotic",
         mechanism: "antibiotic target protection",
         model: PROTEIN_HOMOLOG,
@@ -748,37 +896,77 @@ test.describe("AMR E2E | Functional: P-1", () => {
 
     // - Report table (.csv)
     await samplesPage.clickDownloadButton();
-    const reportTableCsv = await samplesPage.clickDownloadOption(DOWNLOAD_REPORT_TABLE_CSV);
+    const reportTableCsv = await samplesPage.clickDownloadOption(
+      DOWNLOAD_REPORT_TABLE_CSV,
+    );
     // - mWGS_RNA_mosquito-1-aedes-rna_10p_report.csv"
-    collector.collect(async () => expect(`${sampleName}_report.csv`).toEqual(reportTableCsv.suggestedFilename()), DOWNLOAD_REPORT_TABLE_CSV);
+    collector.collect(
+      async () =>
+        expect(`${sampleName}_report.csv`).toEqual(
+          reportTableCsv.suggestedFilename(),
+        ),
+      DOWNLOAD_REPORT_TABLE_CSV,
+    );
     downloadedContent.push(reportTableCsv);
 
     // - Non-Host Reads (.fasta)
     await samplesPage.clickDownloadButton();
-    const nonHostReadsFasta = await samplesPage.clickDownloadOption(DOWNLOAD_NON_HOST_READS_FASTA);
+    const nonHostReadsFasta = await samplesPage.clickDownloadOption(
+      DOWNLOAD_NON_HOST_READS_FASTA,
+    );
     // - mWGS_RNA_mosquito-1-aedes-rna_10p_7530_non_host_reads.fasta
-    collector.collect(async () => expect(nonHostReadsFasta.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*non_host_reads.fasta`)), DOWNLOAD_NON_HOST_READS_FASTA);
+    collector.collect(
+      async () =>
+        expect(nonHostReadsFasta.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*non_host_reads.fasta`),
+        ),
+      DOWNLOAD_NON_HOST_READS_FASTA,
+    );
     downloadedContent.push(nonHostReadsFasta);
 
     // - Non-Host Contigs (.fasta)
     await samplesPage.clickDownloadButton();
-    const nonHostContigsFasta = await samplesPage.clickDownloadOption(DOWNLOAD_NON_HOST_CONTIGS_FASTA);
+    const nonHostContigsFasta = await samplesPage.clickDownloadOption(
+      DOWNLOAD_NON_HOST_CONTIGS_FASTA,
+    );
     // - mWGS_RNA_mosquito-1-aedes-rna_10p_7530_contigs.fasta
-    collector.collect(async () => expect(nonHostContigsFasta.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*contigs.fasta`)), DOWNLOAD_NON_HOST_CONTIGS_FASTA);
+    collector.collect(
+      async () =>
+        expect(nonHostContigsFasta.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*contigs.fasta`),
+        ),
+      DOWNLOAD_NON_HOST_CONTIGS_FASTA,
+    );
     downloadedContent.push(nonHostContigsFasta);
 
     // - Comprehensive AMR Metrics File (.tsv)
     await samplesPage.clickDownloadButton();
-    const comprehensiveAmrMetricsTsv = await samplesPage.clickDownloadOption(DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV);
+    const comprehensiveAmrMetricsTsv = await samplesPage.clickDownloadOption(
+      DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV,
+    );
     // - mWGS_RNA_mosquito-1-aedes-rna_10p_7530_comprehensive_amr_metrics.tsv
-    collector.collect(async () => expect(comprehensiveAmrMetricsTsv.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*comprehensive_amr_metrics.tsv`)), DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV);
+    collector.collect(
+      async () =>
+        expect(comprehensiveAmrMetricsTsv.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*comprehensive_amr_metrics.tsv`),
+        ),
+      DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV,
+    );
     downloadedContent.push(comprehensiveAmrMetricsTsv);
 
     // - Intermediate Files (.zip)"
     await samplesPage.clickDownloadButton();
-    const outputsZip = await samplesPage.clickDownloadOption(DOWNLOAD_INTERMEDIATE_FILES_ZIP);
+    const outputsZip = await samplesPage.clickDownloadOption(
+      DOWNLOAD_INTERMEDIATE_FILES_ZIP,
+    );
     // - mWGS_RNA_mosquito-1-aedes-rna_10p_7530_outputs.zip
-    collector.collect(async () => expect(outputsZip.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*outputs.zip`)), DOWNLOAD_INTERMEDIATE_FILES_ZIP);
+    collector.collect(
+      async () =>
+        expect(outputsZip.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*outputs.zip`),
+        ),
+      DOWNLOAD_INTERMEDIATE_FILES_ZIP,
+    );
     downloadedContent.push(outputsZip);
 
     // "Comparing with baseline sample report(s) (older versions reports of the same sample):
@@ -786,16 +974,25 @@ test.describe("AMR E2E | Functional: P-1", () => {
     // 2021
     // Outputs: Output AMR
     // https://drive.google.com/drive/folders/1ub63WaGCKq9owsJmUaTkSG-ipP7VmCF4?usp=drive_link
-    await compareDataFilesWithTolerance(downloadedContent, "AMR/MWGS_RNA_MOSQUITO/e12", sampleName, MWGS_RNA_MOSQUITO);
+    await compareDataFilesWithTolerance(
+      downloadedContent,
+      "AMR/MWGS_RNA_MOSQUITO/e12",
+      sampleName,
+      MWGS_RNA_MOSQUITO,
+    );
     // #endregion 5. From the sample report, click on the Download button for:
   });
 
-  test("SNo e13: AMR Paired Read RNA Human Sample Report & Download Data Validation", async ({ page }) => {
+  test("SNo e13: AMR Paired Read RNA Human Sample Report & Download Data Validation", async ({
+    page,
+  }) => {
     test.setTimeout(TEST_TIMEOUT);
 
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.MNGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.MNGS}`,
+    );
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Upload sample fastq files for mWGS_RNA_human-128-lung-rna_10p_contigs (see ""Data"") as Antimicrobial Resistance, use the configuration:
@@ -803,11 +1000,11 @@ test.describe("AMR E2E | Functional: P-1", () => {
     const samples = await setupSamples(
       page,
       project,
-    // "sample fastq:
-    // mWGS_RNA_human-128-lung-rna_10p_R1.fastq.gz
-    // https://drive.google.com/file/d/1QOwyK6rDitgjIjohj6KWXS5CRsZrLaSE/view?usp=drive_link
-    // mWGS_RNA_human-128-lung-rna_10p_R2.fastq.gz"
-    // https://drive.google.com/file/d/1LwqDvXqb09H59pD-hy_NZk4pPWtznlo9/view?usp=drive_link
+      // "sample fastq:
+      // mWGS_RNA_human-128-lung-rna_10p_R1.fastq.gz
+      // https://drive.google.com/file/d/1QOwyK6rDitgjIjohj6KWXS5CRsZrLaSE/view?usp=drive_link
+      // mWGS_RNA_human-128-lung-rna_10p_R2.fastq.gz"
+      // https://drive.google.com/file/d/1LwqDvXqb09H59pD-hy_NZk4pPWtznlo9/view?usp=drive_link
       [MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1, MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2],
       [MWGS_RNA_HUMAN],
       WORKFLOWS.AMR,
@@ -839,7 +1036,10 @@ test.describe("AMR E2E | Functional: P-1", () => {
 
     // ""mWGS_RNA_human-128-lung-rna_10p_contigs"" DATA
     const actualSampleName = await samplesPage.getSampleName();
-    collector.collect(async () => expect(actualSampleName).toEqual(sampleName), SAMPLE_REPORT_SAMPLE_NAME);
+    collector.collect(
+      async () => expect(actualSampleName).toEqual(sampleName),
+      SAMPLE_REPORT_SAMPLE_NAME,
+    );
 
     // AMR hits
     await samplesPage.clickShowHideColumns();
@@ -870,7 +1070,8 @@ test.describe("AMR E2E | Functional: P-1", () => {
         read_coverage_breadth: "81.65",
         read_coverage_depth: "5.72",
         dpm: "16.38",
-        read_species: "Escherichia coli (chromosome or plasmid): 7; Escherichia coli (plasmid): 3;",
+        read_species:
+          "Escherichia coli (chromosome or plasmid): 7; Escherichia coli (plasmid): 3;",
       },
       {
         gene: "TEM-194",
@@ -920,37 +1121,77 @@ test.describe("AMR E2E | Functional: P-1", () => {
 
     // - Report table (.csv)
     await samplesPage.clickDownloadButton();
-    const reportTableCsv = await samplesPage.clickDownloadOption(DOWNLOAD_REPORT_TABLE_CSV);
+    const reportTableCsv = await samplesPage.clickDownloadOption(
+      DOWNLOAD_REPORT_TABLE_CSV,
+    );
     // - mWGS_RNA_human-128-lung-rna_10p_report.csv"
-    collector.collect(async () => expect(`${sampleName}_report.csv`).toEqual(reportTableCsv.suggestedFilename()), DOWNLOAD_REPORT_TABLE_CSV);
+    collector.collect(
+      async () =>
+        expect(`${sampleName}_report.csv`).toEqual(
+          reportTableCsv.suggestedFilename(),
+        ),
+      DOWNLOAD_REPORT_TABLE_CSV,
+    );
     downloadedContent.push(reportTableCsv);
 
     // - Non-Host Reads (.fasta)
     await samplesPage.clickDownloadButton();
-    const nonHostReadsFasta = await samplesPage.clickDownloadOption(DOWNLOAD_NON_HOST_READS_FASTA);
+    const nonHostReadsFasta = await samplesPage.clickDownloadOption(
+      DOWNLOAD_NON_HOST_READS_FASTA,
+    );
     // - mWGS_RNA_human-128-lung-rna_10p_7531_non_host_reads.fasta
-    collector.collect(async () => expect(nonHostReadsFasta.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*non_host_reads.fasta`)), DOWNLOAD_NON_HOST_READS_FASTA);
+    collector.collect(
+      async () =>
+        expect(nonHostReadsFasta.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*non_host_reads.fasta`),
+        ),
+      DOWNLOAD_NON_HOST_READS_FASTA,
+    );
     downloadedContent.push(nonHostReadsFasta);
 
     // - Non-Host Contigs (.fasta)
     await samplesPage.clickDownloadButton();
-    const nonHostContigsFasta = await samplesPage.clickDownloadOption(DOWNLOAD_NON_HOST_CONTIGS_FASTA);
+    const nonHostContigsFasta = await samplesPage.clickDownloadOption(
+      DOWNLOAD_NON_HOST_CONTIGS_FASTA,
+    );
     // - mWGS_RNA_human-128-lung-rna_10p_7531_contigs.fasta
-    collector.collect(async () => expect(nonHostContigsFasta.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*contigs.fasta`)), DOWNLOAD_NON_HOST_CONTIGS_FASTA);
+    collector.collect(
+      async () =>
+        expect(nonHostContigsFasta.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*contigs.fasta`),
+        ),
+      DOWNLOAD_NON_HOST_CONTIGS_FASTA,
+    );
     downloadedContent.push(nonHostContigsFasta);
 
     // - Comprehensive AMR Metrics File (.tsv)
     await samplesPage.clickDownloadButton();
-    const comprehensiveAmrMetricsTsv = await samplesPage.clickDownloadOption(DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV);
+    const comprehensiveAmrMetricsTsv = await samplesPage.clickDownloadOption(
+      DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV,
+    );
     // - mWGS_RNA_human-128-lung-rna_10p_7531_comprehensive_amr_metrics.tsv
-    collector.collect(async () => expect(comprehensiveAmrMetricsTsv.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*comprehensive_amr_metrics.tsv`)), DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV);
+    collector.collect(
+      async () =>
+        expect(comprehensiveAmrMetricsTsv.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*comprehensive_amr_metrics.tsv`),
+        ),
+      DOWNLOAD_COMPREHENSIVE_AMR_METRICS_FILE_TSV,
+    );
     downloadedContent.push(comprehensiveAmrMetricsTsv);
 
     // - Intermediate Files (.zip)"
     await samplesPage.clickDownloadButton();
-    const outputsZip = await samplesPage.clickDownloadOption(DOWNLOAD_INTERMEDIATE_FILES_ZIP);
+    const outputsZip = await samplesPage.clickDownloadOption(
+      DOWNLOAD_INTERMEDIATE_FILES_ZIP,
+    );
     // - mWGS_RNA_human-128-lung-rna_10p_7531_outputs.zip
-    collector.collect(async () => expect(outputsZip.suggestedFilename()).toMatch(new RegExp(`${sampleName}_[\\d_]*outputs.zip`)), DOWNLOAD_INTERMEDIATE_FILES_ZIP);
+    collector.collect(
+      async () =>
+        expect(outputsZip.suggestedFilename()).toMatch(
+          new RegExp(`${sampleName}_[\\d_]*outputs.zip`),
+        ),
+      DOWNLOAD_INTERMEDIATE_FILES_ZIP,
+    );
     downloadedContent.push(outputsZip);
 
     // "Comparing with baseline sample report(s) (older versions reports of the same sample):
@@ -960,14 +1201,21 @@ test.describe("AMR E2E | Functional: P-1", () => {
     // 2021
     // Outputs: Output AMR
     // https://drive.google.com/drive/folders/1XBLDjWdFZezq7VDyerbErRgfqWnF1b65?usp=drive_link
-    await compareDataFilesWithTolerance(downloadedContent, "AMR/MWGS_RNA_HUMAN/e13", sampleName, MWGS_RNA_HUMAN);
+    await compareDataFilesWithTolerance(
+      downloadedContent,
+      "AMR/MWGS_RNA_HUMAN/e13",
+      sampleName,
+      MWGS_RNA_HUMAN,
+    );
     // #endregion 5. From the sample report, click on the Download button for:
   });
-
 });
 
 // #region Helpers
-async function verifyAMRReportTable(reportTable: any, expectedReportTable: any) {
+async function verifyAMRReportTable(
+  reportTable: any,
+  expectedReportTable: any,
+) {
   for (const i in reportTable) {
     const expectedRow = expectedReportTable[i];
     const actualRow = reportTable[i];
@@ -979,18 +1227,36 @@ async function verifyAMRReportTable(reportTable: any, expectedReportTable: any) 
         const expectedArray = (await parseCSVArray(expectedValue)).sort();
         const actualArray = (await parseCSVArray(actualValue)).sort();
         for (const index in expectedArray) {
-          collector.collect(async () => expect(actualArray[index]).toEqual(expectedArray[index]), errorMsg + ` index ${index}`);
+          collector.collect(
+            async () =>
+              expect(actualArray[index]).toEqual(expectedArray[index]),
+            errorMsg + ` index ${index}`,
+          );
         }
       } else if (NO_DIFF_FIELDS.includes(key) || expectedValue === "-") {
-        collector.collect(async () => expect(actualValue).toEqual(expectedValue), errorMsg);
+        collector.collect(
+          async () => expect(actualValue).toEqual(expectedValue),
+          errorMsg,
+        );
       } else {
-        await verifyUpperAndLowerBounds(parseFloat(actualValue), parseFloat(expectedValue) , errorMsg + key, collector);
+        await verifyUpperAndLowerBounds(
+          parseFloat(actualValue),
+          parseFloat(expectedValue),
+          errorMsg + key,
+          collector,
+        );
       }
     }
   }
 }
 
-async function compareDataFilesWithTolerance(downloadedContent: Array<Download>, fixtureDir: string, sampleName: string, baselineName: string, tollerance = 0.10) {
+async function compareDataFilesWithTolerance(
+  downloadedContent: Array<Download>,
+  fixtureDir: string,
+  sampleName: string,
+  baselineName: string,
+  tollerance = 0.1,
+) {
   for (const content of downloadedContent) {
     let contentName = content.suggestedFilename();
 
@@ -1008,7 +1274,9 @@ async function compareDataFilesWithTolerance(downloadedContent: Array<Download>,
       contentName = contentName.replace(regex, `${baselineName}_`);
     }
     const actualOutputData = await fs.readFile(contentPath);
-    const expectedBaselineData = await fs.readFile(OUTPUT_PATH(fixtureDir, contentName));
+    const expectedBaselineData = await fs.readFile(
+      OUTPUT_PATH(fixtureDir, contentName),
+    );
 
     let actualOutputStr = actualOutputData.toString();
     actualOutputStr = actualOutputStr.replace(sampleName, baselineName).trim();
@@ -1020,10 +1288,18 @@ async function compareDataFilesWithTolerance(downloadedContent: Array<Download>,
     const diff = fastDiff(actualOutputStr, expectedBaselineStr);
 
     const actualDiff = diff.length;
-    if (contentName.endsWith(".csv") && (actualDiff > expectedMaxDiff)) {
-      await compareCSV(contentName, actualOutputData, expectedBaselineData, collector);
+    if (contentName.endsWith(".csv") && actualDiff > expectedMaxDiff) {
+      await compareCSV(
+        contentName,
+        actualOutputData,
+        expectedBaselineData,
+        collector,
+      );
     } else {
-      collector.collect(async () => expect(actualDiff).toBeLessThanOrEqual(expectedMaxDiff), `${contentName} overall diff`);
+      collector.collect(
+        async () => expect(actualDiff).toBeLessThanOrEqual(expectedMaxDiff),
+        `${contentName} overall diff`,
+      );
     }
   }
 }

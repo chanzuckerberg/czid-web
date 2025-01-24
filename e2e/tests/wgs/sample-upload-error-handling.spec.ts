@@ -8,8 +8,9 @@ import { ProjectPage } from "../../page-objects/project-page";
  * Local file (error handling)
  */
 test.describe("WGS - Sample upload: Error handling: Data Validation: P-0", () => {
-
-  test("SNo 37: Viral Consensus Genome - Attempt to upload non-Illumina sample files", async ({ page }) => {
+  test("SNo 37: Viral Consensus Genome - Attempt to upload non-Illumina sample files", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -47,7 +48,9 @@ test.describe("WGS - Sample upload: Error handling: Data Validation: P-0", () =>
     // Selected sample row displayed disabled, greyed out, and with red information icon that reads:
     await uploadPage.hoverOverFileErrorIcon();
     const columnTooltip = await uploadPage.getColumnTooltip();
-    expect(columnTooltip).toEqual("This file does not match the sequencing technology selected. Please make sure that you have selected the correct sequencing technology for this file.");
+    expect(columnTooltip).toEqual(
+      "This file does not match the sequencing technology selected. Please make sure that you have selected the correct sequencing technology for this file.",
+    );
     expect(await uploadPage.isSampleRowDisabled()).toBeTruthy();
     // #endregion 8. Observe and verify selected Sample row
 
@@ -55,7 +58,9 @@ test.describe("WGS - Sample upload: Error handling: Data Validation: P-0", () =>
     // Yellow box error message reads:
     // 1 file will not be uploaded. You selected Illumina as the sequencing platform, but the file does not appear to be an Illumina output.
     const warnings = await uploadPage.getWarningTable();
-    expect(warnings["message"]).toEqual("1 file will not be uploaded. You selected Illumina as the sequencing platform, but the file does not appear to be an Illumina output.");
+    expect(warnings["message"]).toEqual(
+      "1 file will not be uploaded. You selected Illumina as the sequencing platform, but the file does not appear to be an Illumina output.",
+    );
     // File Name
     // {Sample file name}
     expect(warnings["files"].length).toEqual(1);
@@ -64,7 +69,9 @@ test.describe("WGS - Sample upload: Error handling: Data Validation: P-0", () =>
     // Red box error message reads:
     // There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at our Help Center for assistance.
     const errors = await uploadPage.getErrorTable();
-    expect(errors["message"]).toEqual("There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at our Help Center for assistance.");
+    expect(errors["message"]).toEqual(
+      "There are no valid samples available for upload. Please fix the errors or select more files. If needed, contact us at our Help Center for assistance.",
+    );
     // File Name
     // {Sample file name}
     expect(errors["files"].length).toEqual(1);
@@ -74,5 +81,4 @@ test.describe("WGS - Sample upload: Error handling: Data Validation: P-0", () =>
     expect(await uploadPage.isContinueButtonDisabled()).toBeTruthy();
     // #endregion 9. Observe and verify error messages
   });
-
 });

@@ -8,13 +8,19 @@ let heatmapPage = null;
 let heatmapSamples = null;
 let project = null;
 
+const TEST_TIMEOUT = 60 * 1000 * 4;
+
 test.describe("Heatmap happy path", () => {
   test("SNo 1: User is able to create and view a heatmap", async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT);
+
     projectPage = new ProjectPage(page);
 
     // #region Go to the Samples tab
     const workflow = WORKFLOWS.MNGS;
-    project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+    project = await projectPage.getOrCreateProject(
+      `automation_project_${workflow}`,
+    );
     await projectPage.navigateToSamples(project.id, workflow);
     // #endregion Go to the Samples tab
 

@@ -3,9 +3,7 @@ import { test } from "@playwright/test";
 import { DownloadsPage } from "../../page-objects/downloads-page";
 import { DOWNLOAD_TYPES } from "../../page-objects/project-page";
 
-const uploadWorkflows = [
-  WORKFLOWS.MNGS,
-];
+const uploadWorkflows = [WORKFLOWS.MNGS];
 
 test.describe("Bulk Download: MNGS", () => {
   for (const workflow of uploadWorkflows) {
@@ -23,11 +21,17 @@ test.describe("Bulk Download: MNGS", () => {
        * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-50
        * http://watch.test.valuestreamproducts.com/test_case/?project=8&action=edit&issue_key=CZI-69
        */
-      test(`Smoke Test: Bulk Download ${workflow} ${downloadType}`, async ({ page }) => {
+      test(`Smoke Test: Bulk Download ${workflow} ${downloadType}`, async ({
+        page,
+      }) => {
         const timeout = 60 * 1000 * 5;
         test.setTimeout(timeout);
-        await new DownloadsPage(page).downloadSmokeTest(workflow, downloadType, timeout);
+        await new DownloadsPage(page).downloadSmokeTest(
+          workflow,
+          downloadType,
+          timeout,
+        );
       });
-    };
-  };
+    }
+  }
 });

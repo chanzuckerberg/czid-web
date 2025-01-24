@@ -3,7 +3,6 @@ import { PageObject } from "./page-object";
 const SAMPLE_NAMES = "[id*='sequence-label_']";
 
 export class NextcladePage extends PageObject {
-
   // #region Api
   // #endregion Api
 
@@ -16,7 +15,9 @@ export class NextcladePage extends PageObject {
   // #region Get
   public async getSampleNames() {
     await this.page.locator(SAMPLE_NAMES).first().waitFor();
-    const sequenceName = await this.page.locator(SAMPLE_NAMES).allTextContents();
+    const sequenceName = await this.page
+      .locator(SAMPLE_NAMES)
+      .allTextContents();
     const sampleNames = [];
     for (const sequence of sequenceName) {
       let sampleName = sequence;

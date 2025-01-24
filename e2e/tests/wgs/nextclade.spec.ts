@@ -1,5 +1,9 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_CT20K, SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_CT20K,
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
@@ -15,7 +19,6 @@ const WAIT_FOR_PIPELINE = false;
  * WGS Nextclade - Mixed
  */
 test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
-
   test.beforeEach(async ({ page }) => {
     test.setTimeout(timeout);
     projectPage = new ProjectPage(page);
@@ -25,9 +28,23 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
     }
   });
 
-  test("SNo WGS - 46: Nextclade enabled when selecting WGS / SC2 samples", async ({ page }) => {
+  test("SNo WGS - 46: Nextclade enabled when selecting WGS / SC2 samples", async ({
+    page,
+  }) => {
     // #region Setup
-    const sc2_project = await projectPage.getOrCreateProject(`SNo-WGS-46_${WORKFLOWS.SC2}`);
+    const sc2_project = await projectPage.getOrCreateProject(
+      `SNo-WGS-46_${WORKFLOWS.SC2}`,
+    );
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      sc2_project,
+      WORKFLOWS.SC2,
+      5,
+    );
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      sc2_project,
+      WORKFLOWS.WGS,
+      5,
+    );
     const sc2_samples = await setupSamples(
       page,
       sc2_project,
@@ -35,8 +52,11 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
       [CT20K_SAMPLE_NAME],
       WORKFLOWS.SC2,
       {
-        hostOrganism: "Human", taxon: "Unknown", sequencingPlatform: WORKFLOWS.LMNGS,
-        runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE,
+        hostOrganism: "Human",
+        taxon: "Unknown",
+        sequencingPlatform: WORKFLOWS.LMNGS,
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
       },
     );
     const wgs_samples = await setupSamples(
@@ -45,10 +65,14 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
       [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2],
       ["wgs_SARS_CoV2_no_host"],
       WORKFLOWS.WGS,
-      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        hostOrganism: "Human",
+        taxon: "Unknown",
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
     // #endregion Setup
-
 
     // #region 1. Log in to Project
     await projectPage.navigateToMyData();
@@ -77,7 +101,9 @@ test.describe("WGS Nextclade - Mixed: Functional: P-0", () => {
     // Discarded message is displayed in Nextclade popup window (bottom):
     // [X] consensus genomes won't be sent to Nextclade, because Nextclade only accepts SARS-CoV-2 genomes currently: {list of samples}
     expect(notificationMessages.length).toEqual(1);
-    const expectedNotification = `${wgs_samples.length} consensus genome${wgs_samples.length > 1 ? "s" : ""} won't be sent to Nextclade, because Nextclade only accepts SARS-CoV-2 genomes currently:`;
+    const expectedNotification = `${wgs_samples.length} consensus genome${
+      wgs_samples.length > 1 ? "s" : ""
+    } won't be sent to Nextclade, because Nextclade only accepts SARS-CoV-2 genomes currently:`;
     expect(notificationMessages[0]).toContain(expectedNotification);
     const samplesInNotifcation = notificationMessages[0].split(":")[1];
     for (const wgs_sample of wgs_samples) {

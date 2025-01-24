@@ -1,4 +1,3 @@
-
 import { acceptCookies } from "@e2e/utils/page";
 import { expect, test } from "@playwright/test";
 

@@ -1,30 +1,37 @@
 import { Download, expect } from "@playwright/test";
 import { PageObject } from "./page-object";
 import { SamplesPage } from "./samples-page";
-import { ArticlesPage } from './articles-page';
+import { ArticlesPage } from "./articles-page";
+import { Graphqlfed } from "./graphqlfed";
 
-const HEATMAP_NAME =
-  "[class*='sampleName']";
-const HEATMAP_NAME_INPUT =
-  "[class*='sampleName'] input";
+const HEATMAP_NAME = "[class*='sampleName']";
+const HEATMAP_NAME_INPUT = "[class*='sampleName'] input";
 const HEATMAP_SAMPLE_NAMES =
   "[class*='columnLabels'] [class*='columnLabel'] text";
 const SHARE_BUTTON = "//button[text()='Share']";
 const SAVE_BUTTON = "//button[text()='Save']";
-const DOWNLOAD_BUTTON = "//*[contains(@class, 'controls')]/button[text()='Download']";
-const HELP_BUTTON = "[data-testid='help-button']"
-const DOWNLOAD_TYPES_LOCATOR = "[class*='downloadTypeContainer'] [class*='name']";
-const DOWNLOAD_MODAL_BUTTON = "//*[contains(@class, 'footer')]/button[text()='Download']";
-const DOWNLOAD_MODAL_START_GENERATING_DOWNLOAD_BUTTON = "//button[text()='Start Generating Download']";
-const DOWNLOAD_MODAL_METRIC_DROPDOWN = "[class*='metricDropdown'] [class*='dropdownTrigger']";
-const DOWNLOAD_MODAL_METRIC_OPTIONS = "[data-testid='dropdown-menu'] [class*='item item']"
-const DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT = "[role='alert'][class*='toast-body']";
+const DOWNLOAD_BUTTON =
+  "//*[contains(@class, 'controls')]/button[text()='Download']";
+const HELP_BUTTON = "[data-testid='help-button']";
+const DOWNLOAD_TYPES_LOCATOR =
+  "[class*='downloadTypeContainer'] [class*='name']";
+const DOWNLOAD_MODAL_BUTTON =
+  "//*[contains(@class, 'footer')]/button[text()='Download']";
+const DOWNLOAD_MODAL_START_GENERATING_DOWNLOAD_BUTTON =
+  "//button[text()='Start Generating Download']";
+const DOWNLOAD_MODAL_METRIC_DROPDOWN =
+  "[class*='metricDropdown'] [class*='dropdownTrigger']";
+const DOWNLOAD_MODAL_METRIC_OPTIONS =
+  "[data-testid='dropdown-menu'] [class*='item item']";
+const DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT =
+  "[role='alert'][class*='toast-body']";
 const CLOSE_MODAL_BUTTON = "[class*='modal'] [class*='closeIcon']";
 const HELP_RESOURCES_IFRAME = "appcues-container iframe";
 const HELP_RESOURCES_CONTENT = "cue";
 const HEADER_BUTTON_POPUP_CONTENT = "[class*='popup'] [class*='content']";
 const TINY_CONFIRMATION = "[class*='tiny basic']";
-const VIEW_OPTIONS = "//*[contains(@class, 'listbox')]//*[contains(@class, 'option')]";
+const VIEW_OPTIONS =
+  "//*[contains(@class, 'listbox')]//*[contains(@class, 'option')]";
 const AVAILABLE_VIEW_OPTIONS =
   "[class*='listbox'] [class*='option'][aria-disabled='false']";
 const VIEW_OPTION_LABELS =
@@ -36,7 +43,8 @@ const HEATMAP = "svg[class*='heatmap']";
 const ZOOM_BUTTONS = "[class*='plusMinusControl'] button";
 const TAXON_NAMES = "[data-testid='row-label']";
 const CELLS = "rect[class*='cell']";
-const COLLECTION_LOCATION_CELLS = "[class*='collection_location_v2'] [class*='columnMetadataCell']";
+const COLLECTION_LOCATION_CELLS =
+  "[class*='collection_location_v2'] [class*='columnMetadataCell']";
 const TOOLTIP = "[class*='tooltip'][class*='visible']";
 const HEATMAP_TOOLTIP = "[class*='samplesHeatmapVis'] [class*='tooltip']";
 const HOVER_HIGHLIGHTED_METIC =
@@ -48,32 +56,46 @@ const NOTIFICATION_MESSAGE = "[class*='notification']";
 const NOTIFICATION_CONTAINER = "[class*='notificationContainer']";
 const FILTER_PANEL_CONTAINER = "[class*='filterPanelContainer']";
 const CATEGORIES_BUTTON = "//*[text()='Categories']/ancestor::button";
-const CATEGORY_OPTIONS = "//*[text()='Select Categories']/following-sibling::*//*[contains(@class, 'primary-text')]/*";
-const CATEGORY_SELECTIONS = "[class*='categoryDropdownContainer'] [class*='labelText']";
-const CATEGORIES_APPLY_BUTTON = "//*[text()='Select Categories']/following-sibling::*//button[text()='Apply']";
-const CATEGORIES_CANCEL_BUTTON = "//*[text()='Select Categories']/following-sibling::*//button[text()='Cancel']";
+const CATEGORY_OPTIONS =
+  "//*[text()='Select Categories']/following-sibling::*//*[contains(@class, 'primary-text')]/*";
+const CATEGORY_SELECTIONS =
+  "[class*='categoryDropdownContainer'] [class*='labelText']";
+const CATEGORIES_APPLY_BUTTON =
+  "//*[text()='Select Categories']/following-sibling::*//button[text()='Apply']";
+const CATEGORIES_CANCEL_BUTTON =
+  "//*[text()='Select Categories']/following-sibling::*//button[text()='Cancel']";
 const THRESHOLDS_BUTTON = "//*[text()='Thresholds']/ancestor::button";
-const THRESHOLDS_OPERATOR = "//*[contains(@class, 'filterContainer')]//button[@label='>=' or @label='<=']";
-const THRESHOLDS_METRIC_BUTTON = "[class*='thresholdFilter'] [class*='metricColumn'] button";
-const THRESHOLDS_METRIC_FILTERS = "[class*='filterTagsList'] [class*='labelText']";
-const THRESHOLD_SELECTIONS = "[class*='thresholdDropdownContainer'] [class*='labelText']";
-const REMOVE_THRESHOLD_X_BUTTON = "[class*='filterTagsList'] [data-testid='x-close-icon']";
+const THRESHOLDS_OPERATOR =
+  "//*[contains(@class, 'filterContainer')]//button[@label='>=' or @label='<=']";
+const THRESHOLDS_METRIC_BUTTON =
+  "[class*='thresholdFilter'] [class*='metricColumn'] button";
+const THRESHOLDS_METRIC_FILTERS =
+  "[class*='filterTagsList'] [class*='labelText']";
+const THRESHOLD_SELECTIONS =
+  "[class*='thresholdDropdownContainer'] [class*='labelText']";
+const REMOVE_THRESHOLD_X_BUTTON =
+  "[class*='filterTagsList'] [data-testid='x-close-icon']";
 const ADD_THRESHOLD = "[data-testid='add-threshold']";
 const BACKGROUND_DROPDOWN = "[class*='backgroundDropdownContainer'] button";
-const SELECTED_BACKGROUND = "//*[contains(@class, 'backgroundDropdownContainer')]/button/div";
+const SELECTED_BACKGROUND =
+  "//*[contains(@class, 'backgroundDropdownContainer')]/button/div";
 const SEARCH_INPUT = "[role='tooltip'] input";
-const SEARCH_RESULTS = "//ul[contains(@class, 'listbox')]//li[@aria-disabled='false']//*[contains(@class, 'primary-text')]";
+const SEARCH_RESULTS =
+  "//ul[contains(@class, 'listbox')]//li[@aria-disabled='false']//*[contains(@class, 'primary-text')]";
 const NEW_BACKGROUND_ALERT_MESSAGE = "[class*='Alert-message']";
 const CLOSE_ALERT_BUTTON = "[class*='Alert-action'] button";
 const THRESHOLDS_INPUT = "input[aria-label='threshold-value']";
-const THRESHOLDS_APPLY_BUTTON = "//*[text()='Configure Thresholds']/following-sibling::*//button[text()='Apply']";
-const KNOWN_PATHOGENS_ONLY_CHECKBOX = "//*[text()='Known Pathogens Only']/preceding-sibling::*//input";
+const THRESHOLDS_APPLY_BUTTON =
+  "//*[text()='Configure Thresholds']/following-sibling::*//button[text()='Apply']";
+const KNOWN_PATHOGENS_ONLY_CHECKBOX =
+  "//*[text()='Known Pathogens Only']/preceding-sibling::*//input";
 
 const NONE_BACKGROUND_NAME = "None";
 
 // This is an option set in Heatmap.ts
 const HEATMAP_MIN_CELL_HEIGHT = 26;
-export const SHAREABLE_URL_NOTIFICATION = "A shareable URL was copied to your clipboard!";
+export const SHAREABLE_URL_NOTIFICATION =
+  "A shareable URL was copied to your clipboard!";
 export const SHORTENED_URL_LENGTH = 5; // default value in shortener gem
 
 export const DOWNLOAD_TYPES = {
@@ -81,7 +103,9 @@ export const DOWNLOAD_TYPES = {
   PNG_IMAGE: ".png",
   SVG_IMAGE: ".svg",
 };
-type HeatmapImageType = typeof DOWNLOAD_TYPES.PNG_IMAGE | typeof DOWNLOAD_TYPES.SVG_IMAGE;
+type HeatmapImageType =
+  | typeof DOWNLOAD_TYPES.PNG_IMAGE
+  | typeof DOWNLOAD_TYPES.SVG_IMAGE;
 
 // .biom is listed as Combined Microbiome File in the download modal
 export const BIOM_DOWNLOAD_METRICS = {
@@ -90,7 +114,8 @@ export const BIOM_DOWNLOAD_METRICS = {
   NR_RPM: "NR rPM",
   NR_R_TOTAL_READS: "NR r (total reads)",
 };
-export const DOWNLOAD_NOTIFICATION = "We've received your download request and are busy preparing your data. To check the status of your download, visit the Downloads page.Dismiss";
+export const DOWNLOAD_NOTIFICATION =
+  "We've received your download request and are busy preparing your data. To check the status of your download, visit the Downloads page.Dismiss";
 export class HeatmapPage extends PageObject {
   // #region Api
   public async getHeatmapMetrics() {
@@ -134,10 +159,13 @@ export class HeatmapPage extends PageObject {
 
   public async clickDownloadMetric(option: string) {
     await this.page.locator(DOWNLOAD_MODAL_METRIC_DROPDOWN).click();
-    await this.page.locator(DOWNLOAD_MODAL_METRIC_OPTIONS).getByText(option).click();
+    await this.page
+      .locator(DOWNLOAD_MODAL_METRIC_OPTIONS)
+      .getByText(option)
+      .click();
   }
 
-  public async clickThresholdOperator(index=0) {
+  public async clickThresholdOperator(index = 0) {
     await this.page.locator(THRESHOLDS_OPERATOR).nth(index).click();
   }
 
@@ -151,7 +179,9 @@ export class HeatmapPage extends PageObject {
           (response.url().includes("graphqlfed") &&
             response.request().method() === "POST"),
       ),
-      this.page.locator(DOWNLOAD_MODAL_START_GENERATING_DOWNLOAD_BUTTON).click(),
+      this.page
+        .locator(DOWNLOAD_MODAL_START_GENERATING_DOWNLOAD_BUTTON)
+        .click(),
     ]);
     const responseJson = await response.json();
     if (responseJson.data && responseJson.data.createAsyncBulkDownload) {
@@ -172,16 +202,18 @@ export class HeatmapPage extends PageObject {
 
   public async clickCloseAlertButton() {
     const closeIcon = this.page.locator(CLOSE_ALERT_BUTTON).first();
-    await closeIcon.waitFor({timeout: 4000}).catch(() => null);
+    await closeIcon.waitFor({ timeout: 4000 }).catch(() => null);
 
-    await closeIcon.click({timeout: 1000}).catch(() => null);
+    await closeIcon.click({ timeout: 1000 }).catch(() => null);
     if (closeIcon.isVisible()) {
-      await closeIcon.click({timeout: 1000}).catch(() => null);
+      await closeIcon.click({ timeout: 1000 }).catch(() => null);
     }
   }
 
   public async clickSearchResult(value: string) {
-    await this.page.locator(`${SEARCH_RESULTS}//*[normalize-space(text())="${value}"]`).click();
+    await this.page
+      .locator(`${SEARCH_RESULTS}//*[normalize-space(text())="${value}"]`)
+      .click();
   }
 
   public async clickBackgroundDropdown() {
@@ -197,14 +229,16 @@ export class HeatmapPage extends PageObject {
   }
 
   public async isSampleNamesToggleDisabled() {
-    return this.page.locator(TOGGLE_SAMPLE_NAMES).isDisabled()
+    return this.page.locator(TOGGLE_SAMPLE_NAMES).isDisabled();
   }
 
   public async isSampleNamesToggleEnabled() {
     // Some tests do not work if we change based on eslint
     // This rule is deprecated in more recent verions of eslint
     // eslint-disable-next-line no-return-await
-    return await this.page.locator(TOGGLE_SAMPLE_NAMES).isEnabled({ timeout: 500})
+    return await this.page
+      .locator(TOGGLE_SAMPLE_NAMES)
+      .isEnabled({ timeout: 500 });
   }
 
   public async clickSampleNamesToggle() {
@@ -230,8 +264,8 @@ export class HeatmapPage extends PageObject {
     const [response] = await Promise.all([
       this.page.waitForResponse(
         response =>
-          (response.url().includes("/visualizations/heatmap/save") &&
-            response.request().method() === "POST")
+          response.url().includes("/visualizations/heatmap/save") &&
+          response.request().method() === "POST",
       ),
       this.page.locator(SAVE_BUTTON).click(),
     ]);
@@ -254,7 +288,10 @@ export class HeatmapPage extends PageObject {
     await this.pause(1);
     const [newPage] = await Promise.all([
       this.page.context().waitForEvent("page"),
-      await this.page.locator(CELLS + axis).nth(index).click(),
+      await this.page
+        .locator(CELLS + axis)
+        .nth(index)
+        .click(),
     ]);
     await newPage.waitForLoadState();
     const samplesPage = new SamplesPage(newPage);
@@ -281,10 +318,13 @@ export class HeatmapPage extends PageObject {
   public getYAxisValueFromTaxonNameIndex(index: number) {
     // In the heatmap, the individual cells are `rect` elements `x` and `y` attributes
     // From observation, the formula for calculating the `y` attribute is the below code
-    return (index) * HEATMAP_MIN_CELL_HEIGHT + 1;
+    return index * HEATMAP_MIN_CELL_HEIGHT + 1;
   }
 
-  public async assertExpectedNumberOfCells(axis: string, expectedCount: number) {
+  public async assertExpectedNumberOfCells(
+    axis: string,
+    expectedCount: number,
+  ) {
     const locator = this.page.locator(CELLS + axis);
     await expect(locator).toHaveCount(expectedCount);
   }
@@ -304,7 +344,10 @@ export class HeatmapPage extends PageObject {
   }
 
   public async hoverOverCell(index: number, axis = "") {
-    await this.page.locator(CELLS + axis).nth(index).hover();
+    await this.page
+      .locator(CELLS + axis)
+      .nth(index)
+      .hover();
   }
 
   public async hoverOverFilterPanel() {
@@ -331,7 +374,9 @@ export class HeatmapPage extends PageObject {
 
   public async getBackgrounds() {
     await this.clickBackgroundDropdown();
-    const backgrounds = await this.page.locator(SEARCH_RESULTS).allTextContents();
+    const backgrounds = await this.page
+      .locator(SEARCH_RESULTS)
+      .allTextContents();
     const types = ["Standard", "Normalized by input mass"];
     for (let i = 0; i < backgrounds.length; i++) {
       for (const type of types) {
@@ -376,7 +421,9 @@ export class HeatmapPage extends PageObject {
       .locator(DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT)
       .first()
       .waitFor({ state: "visible" });
-    return this.page.locator(DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT).allTextContents();
+    return this.page
+      .locator(DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT)
+      .allTextContents();
   }
 
   public async getHelpResourcesIframe() {
@@ -385,18 +432,22 @@ export class HeatmapPage extends PageObject {
 
   public async getTaxonInfo() {
     await this.pause(1);
-    return (await this.getTable(
-      "[class*='samplesHeatmapVis'] [class*='tooltip'][class*='visible'] [class*='dataRow'] [class*='label']",
-      "[class*='samplesHeatmapVis'] [class*='tooltip'][class*='visible']",
-      "[class*='dataRow'] [class*='value']",
-    ))[0];
+    return (
+      await this.getTable(
+        "[class*='samplesHeatmapVis'] [class*='tooltip'][class*='visible'] [class*='dataRow'] [class*='label']",
+        "[class*='samplesHeatmapVis'] [class*='tooltip'][class*='visible']",
+        "[class*='dataRow'] [class*='value']",
+      )
+    )[0];
   }
 
   public async getSelectedBackground() {
     await this.page.locator(SELECTED_BACKGROUND).waitFor();
-    const selectedBackground = await this.page.locator(SELECTED_BACKGROUND).textContent();
+    const selectedBackground = await this.page
+      .locator(SELECTED_BACKGROUND)
+      .textContent();
     await this.pause(1);
-    return selectedBackground.trim()
+    return selectedBackground.trim();
   }
 
   public async getTooltipText() {
@@ -411,34 +462,34 @@ export class HeatmapPage extends PageObject {
     const tooltipText = await this.getHeatmapTooltipText();
     const toolTipRegex = new RegExp(
       "Info" +
-      "Sample(.+)" +
-      "Taxon(.+)" +
-      "Category(.+)" +
-      "Values" +
-      "NT Z Score(.+)" +
-      "NT rPM(.+)" +
-      "NT r \\(total reads\\)(.+)" +
-      "NR Z Score(.+)" +
-      "NR rPM(.+)" +
-      "NR r \\(total reads\\)(.+)"
+        "Sample(.+)" +
+        "Taxon(.+)" +
+        "Category(.+)" +
+        "Values" +
+        "NT Z Score(.+)" +
+        "NT rPM(.+)" +
+        "NT r \\(total reads\\)(.+)" +
+        "NR Z Score(.+)" +
+        "NR rPM(.+)" +
+        "NR r \\(total reads\\)(.+)",
     );
 
     let tooltipDetails = {};
-    const matchedText = tooltipText.match(toolTipRegex)
+    const matchedText = tooltipText.match(toolTipRegex);
     if (matchedText !== null) {
       tooltipDetails = {
-        "Sample": matchedText[1],
-        "Taxon": matchedText[2],
-        "Category": matchedText[3],
+        Sample: matchedText[1],
+        Taxon: matchedText[2],
+        Category: matchedText[3],
         "NT Z Score": matchedText[4],
         "NT rPM": matchedText[5],
         "NT r (total reads)": matchedText[6],
         "NR Z Score": matchedText[7],
         "NR rPM": matchedText[8],
         "NR r (total reads)": matchedText[9],
-      }
+      };
     }
-    return tooltipDetails
+    return tooltipDetails;
   }
 
   public async getNotificationContainerText() {
@@ -446,7 +497,11 @@ export class HeatmapPage extends PageObject {
   }
 
   public async getCellsCount() {
-    await this.page.locator(CELLS).first().waitFor().catch(() => null);
+    await this.page
+      .locator(CELLS)
+      .first()
+      .waitFor()
+      .catch(() => null);
     const cells = await this.page.locator(CELLS).all();
     return cells.length;
   }
@@ -496,6 +551,22 @@ export class HeatmapPage extends PageObject {
     return this.page.locator(TAXON_NAMES).allTextContents();
   }
 
+  public async getSampleIdsFromUrl() {
+    return new URL(await this.url()).searchParams.getAll("sampleIds[]");
+  }
+
+  public async getSamplesFromUrl() {
+    const sampleIds = await this.getSampleIdsFromUrl();
+
+    const samples = [];
+    const graphqlfed = new Graphqlfed(this.page);
+    for (const sampleId of sampleIds) {
+      const sample = await graphqlfed.sampleViewSampleQuery(sampleId);
+      samples.push(sample);
+    }
+    return samples;
+  }
+
   public async getHeatmapSampleNames() {
     await this.page.locator(HEATMAP_SAMPLE_NAMES).first().waitFor();
     return this.page.locator(HEATMAP_SAMPLE_NAMES).allTextContents();
@@ -514,14 +585,18 @@ export class HeatmapPage extends PageObject {
     await this.page.locator(VIEW_OPTION_LABELS).getByText(view).click();
 
     await this.page.locator(VIEW_OPTIONS).first().waitFor();
-    const options = await this.page.locator(includeDisabled ? VIEW_OPTIONS : AVAILABLE_VIEW_OPTIONS).allTextContents();
+    const options = await this.page
+      .locator(includeDisabled ? VIEW_OPTIONS : AVAILABLE_VIEW_OPTIONS)
+      .allTextContents();
     await this.page.locator(VIEW_OPTION_LABELS).getByText(view).click();
     return options;
   }
 
   private async getAllFilterOptions(includeDisabled = false) {
     await this.page.locator(VIEW_OPTIONS).first().waitFor();
-    return this.page.locator(includeDisabled ? VIEW_OPTIONS : AVAILABLE_VIEW_OPTIONS).allTextContents();
+    return this.page
+      .locator(includeDisabled ? VIEW_OPTIONS : AVAILABLE_VIEW_OPTIONS)
+      .allTextContents();
   }
   // #endregion Get
 
@@ -539,7 +614,11 @@ export class HeatmapPage extends PageObject {
     await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).last().waitFor();
     for (let r = 0; r < 3; r++) {
       const filters = await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).all();
-      await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).last().waitFor({timeout: 1_000}).catch(() => null);
+      await this.page
+        .locator(REMOVE_THRESHOLD_X_BUTTON)
+        .last()
+        .waitFor({ timeout: 1_000 })
+        .catch(() => null);
       for (let i = 0; i < filters.length; i++) {
         await this.page.locator(REMOVE_THRESHOLD_X_BUTTON).nth(0).click();
         // allow heatmap to reload, filters are disabled during reload
@@ -549,7 +628,7 @@ export class HeatmapPage extends PageObject {
     }
   }
 
-  public async setThresholdOperator(value: string, index=0) {
+  public async setThresholdOperator(value: string, index = 0) {
     await this.clickThresholdOperator(index);
     await this.clickSearchResult(value);
   }
@@ -559,14 +638,17 @@ export class HeatmapPage extends PageObject {
     const currentBackground = await this.getSelectedBackground();
 
     // remove current background and (conditionally) None from list of options
-    const filteredBackgrounds = backgrounds.filter((background) => {
+    const filteredBackgrounds = backgrounds.filter(background => {
       if (!allowNone && background === NONE_BACKGROUND_NAME) {
         return false;
       }
       return background !== currentBackground;
     });
 
-    const randomBackground = filteredBackgrounds[Math.floor(Math.random() * filteredBackgrounds.length)];
+    const randomBackground =
+      filteredBackgrounds[
+        Math.floor(Math.random() * filteredBackgrounds.length)
+      ];
 
     await this.setBackground(randomBackground);
     return randomBackground;
@@ -605,16 +687,22 @@ export class HeatmapPage extends PageObject {
   }
 
   public async getMetricOptionTooltip(option: string) {
-    return this.getOptionTooptip("Metric", option)
+    return this.getOptionTooptip("Metric", option);
   }
 
   private async getOptionTooptip(view: string, option: string) {
+    await this.page.locator(VIEW_OPTION_LABELS).getByText(view).waitFor();
     await this.page.locator(VIEW_OPTION_LABELS).getByText(view).click();
 
     await this.pause(1);
-    await this.page.locator(`${VIEW_OPTIONS}//span[text()='${option}']/ancestor::li/parent::span`).hover();
+    await this.page
+      .locator(
+        `${VIEW_OPTIONS}//span[text()='${option}']/ancestor::li/parent::span`,
+      )
+      .hover();
     const tooltip = await this.page.locator("[class*='tooltip']").textContent();
 
+    await this.hoverOverCell(0);
     await this.page.locator(VIEW_OPTION_LABELS).getByText(view).click();
     return tooltip;
   }
@@ -661,7 +749,7 @@ export class HeatmapPage extends PageObject {
 
   public async setCategoryOption(options: any) {
     if (!Array.isArray(options)) {
-      options = [options]
+      options = [options];
     }
     for (const option of options) {
       await this.page.locator(CATEGORIES_BUTTON).click();
@@ -693,11 +781,11 @@ export class HeatmapPage extends PageObject {
       }
       if (option.metric) {
         await this.pause(1);
-        await this.page.locator(THRESHOLDS_METRIC_BUTTON).nth(i).click()
+        await this.page.locator(THRESHOLDS_METRIC_BUTTON).nth(i).click();
         await this.pause(1);
         await this.page.locator(VIEW_OPTIONS).getByText(option.metric).click();
       }
-      if (options[i +1] !== undefined) {
+      if (options[i + 1] !== undefined) {
         await this.pause(1);
         await this.clickAddThreshold();
       }
@@ -706,7 +794,7 @@ export class HeatmapPage extends PageObject {
     await this.page.locator(THRESHOLDS_APPLY_BUTTON).click();
   }
 
-  public async clickHelpResourceLink(name: string) : Promise<ArticlesPage> {
+  public async clickHelpResourceLink(name: string): Promise<ArticlesPage> {
     const newPagePromise = this.page.context().waitForEvent("page");
     const helpResourcesIframe = await this.getHelpResourcesIframe();
     await helpResourcesIframe.getByRole("link", { name }).click();
@@ -745,7 +833,9 @@ export class HeatmapPage extends PageObject {
   }
 
   public async validateShareNotificationMessage() {
-    expect(await this.getShareNotification()).toEqual(SHAREABLE_URL_NOTIFICATION);
+    expect(await this.getShareNotification()).toEqual(
+      SHAREABLE_URL_NOTIFICATION,
+    );
   }
 
   public validateShareableUrlLength(url: string) {
@@ -754,8 +844,7 @@ export class HeatmapPage extends PageObject {
 
   public async validateHelpResourcesPanelVisible() {
     await expect(
-      (await this.getHelpResourcesIframe())
-        .locator(HELP_RESOURCES_CONTENT)
+      (await this.getHelpResourcesIframe()).locator(HELP_RESOURCES_CONTENT),
     ).toBeVisible();
   }
   // #endregion Validation
@@ -766,7 +855,9 @@ export class HeatmapPage extends PageObject {
   }
   // #endregion Bool
 
-  public async downloadCombinedMicrobiomeFile(downloadMetric: string): Promise<number> {
+  public async downloadCombinedMicrobiomeFile(
+    downloadMetric: string,
+  ): Promise<number> {
     // #region Download Combined Microbiome File for given metric
     await this.clickDownloadType(DOWNLOAD_TYPES.COMBINED_MICROBIOME_FILE);
     await this.pause(1);
@@ -780,15 +871,19 @@ export class HeatmapPage extends PageObject {
     // #endregion Verify the download alert message
 
     return biomDownloadId;
-  };
+  }
 
-  public async downloadHeatmapImage(imageType: HeatmapImageType): Promise<Download> {
+  public async downloadHeatmapImage(
+    imageType: HeatmapImageType,
+  ): Promise<Download> {
     // #region Download heatmap image and verify file name
     await this.clickDownloadType(imageType);
     const downloadedHeatmapImage = await this.clickDownloadConfirmationButton();
-    expect(downloadedHeatmapImage.suggestedFilename()).toEqual(`heatmap${imageType}`);
+    expect(downloadedHeatmapImage.suggestedFilename()).toEqual(
+      `heatmap${imageType}`,
+    );
     // #endregion Download heatmap image and verify file name
 
     return downloadedHeatmapImage;
-  };
+  }
 }

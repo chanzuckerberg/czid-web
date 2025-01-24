@@ -3,22 +3,26 @@ import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 import { UploadPage } from "@e2e/page-objects/upload-page";
-import { SAMPLE_FILE_CT20K, SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_CT20K,
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const UPLOAD_COMPLETE_LITERAL = "Uploads completed!";
 const IN_PROGRESS = "IN PROGRESS";
-const IN_PROGRESS_MESSAGE = "IN PROGRESSRunning Host FilteringView Pipeline Visualization";
+const IN_PROGRESS_MESSAGE =
+  "IN PROGRESSRunning Host FilteringView Pipeline Visualization";
 const BASESPACE_PROJECT_NAME = "Mark Test Project";
 
-const TEST_TIMEOUT = 60 * 1000 * 60; 
-const UPLOAD_TIMEOUT = 60 * 1000 * 5; 
+const TEST_TIMEOUT = 60 * 1000 * 60;
+const UPLOAD_TIMEOUT = 60 * 1000 * 5;
 
 /*
  * mNGS IP: Sample upload (web) Functional: P-0
  */
 test.describe("mNGS IP: Functional: P-0", () => {
-
   test.beforeEach(async () => {
     test.setTimeout(TEST_TIMEOUT);
   });
@@ -26,7 +30,7 @@ test.describe("mNGS IP: Functional: P-0", () => {
   /*
    * Sample upload (web) - short mNGS Local file
    */
-  test(`mNGS-1: short mNGS Illumina sample web upload`, async ({page}) => {
+  test(`mNGS-1: short mNGS Illumina sample web upload`, async ({ page }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -55,16 +59,20 @@ test.describe("mNGS IP: Functional: P-0", () => {
       "mngs_illumina/RR004_water_2_S23A_L001_R1_001.fastq",
       "mngs_illumina/RR004_water_2_S23A_L002_R1_001.fastq",
       "mngs_illumina/RR004_water_2_S23A_L003_R1_001.fastq",
-      "mngs_illumina/RR004_water_2_S23A_L004_R1_001.fastq",   
-      "mngs_illumina/RR004_water_2_S23A_L001_R2_001.fastq",    
+      "mngs_illumina/RR004_water_2_S23A_L004_R1_001.fastq",
+      "mngs_illumina/RR004_water_2_S23A_L001_R2_001.fastq",
       "mngs_illumina/RR004_water_2_S23A_L002_R2_001.fastq",
-      "mngs_illumina/RR004_water_2_S23A_L003_R2_001.fastq",    
-      "mngs_illumina/RR004_water_2_S23A_L004_R2_001.fastq"
-    ]
-    await uploadPage.uploadSampleFiles(MNGS_ILLUMINA_SAMPLE_FILES, true, UPLOAD_TIMEOUT * 2); // Increase timeout for all files to complete upload
+      "mngs_illumina/RR004_water_2_S23A_L003_R2_001.fastq",
+      "mngs_illumina/RR004_water_2_S23A_L004_R2_001.fastq",
+    ];
+    await uploadPage.uploadSampleFiles(
+      MNGS_ILLUMINA_SAMPLE_FILES,
+      true,
+      UPLOAD_TIMEOUT * 2,
+    ); // Increase timeout for all files to complete upload
     await uploadPage.clickContinue();
     // #endregion 5. Select Sample files and click on Continue (see Data section)
-      
+
     // #region 6. Enter required Metadata and click on Continue
     const sampleNames = await uploadPage.getMetadataSampleNames();
     const inputs = await uploadPage.getRandomizedSampleInputs(
@@ -152,7 +160,9 @@ test.describe("mNGS IP: Functional: P-0", () => {
   /*
    * Sample upload (web) - short mNGS Basespace
    */
-  test(`mNGS-2: short mNGS Illumina sample Basespace upload`, async ({page}) => {
+  test(`mNGS-2: short mNGS Illumina sample Basespace upload`, async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -232,7 +242,12 @@ test.describe("mNGS IP: Functional: P-0", () => {
     // - Sample report displays ""In Progress"" until completion
     for (const sampleName of sampleNames) {
       const sampleStatus = samplesTable[sampleName]["Sample"][1];
-      expect(["RUNNING", "HOST FILTERING", "IN PROGRESS", "QUEUED FOR PROCESSING"]).toContain(sampleStatus);
+      expect([
+        "RUNNING",
+        "HOST FILTERING",
+        "IN PROGRESS",
+        "QUEUED FOR PROCESSING",
+      ]).toContain(sampleStatus);
     }
     // #endregion 13. Click on Sample row and observe
 
@@ -260,7 +275,9 @@ test.describe("mNGS IP: Functional: P-0", () => {
   /*
    * Sample upload (web) - long mNGS Local file
    */
-  test(`mNGS-3: long mNGS Illumina sample Basespace upload`, async ({page}) => {
+  test(`mNGS-3: long mNGS Illumina sample Basespace upload`, async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -288,7 +305,11 @@ test.describe("mNGS IP: Functional: P-0", () => {
 
     // "long mNGS Nanopore sample:
     // https://drive.google.com/file/d/1oSg7OPly6WnOEfh0YqP-Pr-YnMlLg9ft/view?usp=drive_link
-    await uploadPage.uploadSampleFiles([SAMPLE_FILE_CT20K], true, UPLOAD_TIMEOUT);
+    await uploadPage.uploadSampleFiles(
+      [SAMPLE_FILE_CT20K],
+      true,
+      UPLOAD_TIMEOUT,
+    );
     await uploadPage.clickContinue();
     // #endregion 5. Select Sample files and click on Continue (see Data section)
 
@@ -347,7 +368,9 @@ test.describe("mNGS IP: Functional: P-0", () => {
       IN_PROGRESS,
     );
 
-    expect(sampleStatusMessage).toEqual("IN PROGRESSRunning Pipeline StepsView Pipeline Visualization");
+    expect(sampleStatusMessage).toEqual(
+      "IN PROGRESSRunning Pipeline StepsView Pipeline Visualization",
+    );
     // #endregion 9. Click on Sample row and observe
 
     // #region 10. Go back to project and observe Sample status until it Completes

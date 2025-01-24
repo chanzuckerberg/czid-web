@@ -1,11 +1,15 @@
 import { CZID_TEST_ACCOUNT_USER_NAME, WORKFLOWS } from "@e2e/constants/common";
-import { E_COLI_AADS_R1, E_COLI_AADS_R2, E_COLI_AADS_SAMPLE_NAME } from "@e2e/constants/sample";
+import {
+  E_COLI_AADS_R1,
+  E_COLI_AADS_R2,
+  E_COLI_AADS_SAMPLE_NAME,
+} from "@e2e/constants/sample";
 import { ProjectPage } from "@e2e/page-objects/project-page";
 import { setupSamples } from "@e2e/page-objects/user-actions";
-import moment from 'moment-timezone'
+import moment from "moment-timezone";
 import { test, expect } from "@playwright/test";
 
-const PROJECT_NAME_SUFFIX = "ecoli_aadS"
+const PROJECT_NAME_SUFFIX = "ecoli_aadS";
 
 const TEST_TIMEOUT = 60 * 1000 * 20;
 const PROJECT_CREATION_TIMEOUT = 60 * 1000 * 2;
@@ -15,23 +19,22 @@ const WAIT_FOR_PIPELINE = false;
 
 let project = null;
 let projectPage = null;
-let samples = [];
 
 const SAMPLE_NAMES_TO_WAIT_FOR = [E_COLI_AADS_SAMPLE_NAME];
 
 const PASSED_FILTERS_MAX_DIFF = 1000;
 const TOTAL_READS_MAX_DIFF = 1000;
 
-const expectedSampleInfo ={
+const expectedSampleInfo = {
   sample: [
     "e_coli_aadS_r0.00",
     "COMPLETE",
-    "CZ ID Test Account|czid-e2e_automation_project_amr_ecoli_aadS"
+    "CZ ID Test Account|czid-e2e_automation_project_amr_ecoli_aadS",
   ],
   host: "Unknown",
-  passedFilters: [ "926,918", "99.83%" ],
+  passedFilters: ["926,918", "99.83%"],
   totalReads: "928,500",
-}
+};
 
 const parseDataToFloat = (data: string): number => {
   return parseFloat(data.replace(",", ""));
@@ -40,7 +43,7 @@ const parseDataToFloat = (data: string): number => {
 const getAmrProjectName = (): string => {
   const projectDate = moment().format("YYYYMM");
   return `automation_project_${WORKFLOWS.AMR}_${PROJECT_NAME_SUFFIX}_${projectDate}`;
-}
+};
 
 test.describe("AMR Discovery View for E Coli aadS sample", () => {
   // A new project and sample should be created once per month, to test the latest version of the pipeline
@@ -56,7 +59,7 @@ test.describe("AMR Discovery View for E Coli aadS sample", () => {
       // #endregion Setup project
 
       // #region Setup samples
-      samples = await setupSamples(
+      await setupSamples(
         page,
         project,
         [E_COLI_AADS_R1, E_COLI_AADS_R2],
@@ -70,7 +73,12 @@ test.describe("AMR Discovery View for E Coli aadS sample", () => {
       );
       // #endregion Setup samples
 
-      await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.AMR, SAMPLE_NAMES_TO_WAIT_FOR, TEST_TIMEOUT);
+      await projectPage.waitForSamplesComplete(
+        project.id,
+        WORKFLOWS.AMR,
+        SAMPLE_NAMES_TO_WAIT_FOR,
+        TEST_TIMEOUT,
+      );
       await projectPage.navigateToSamples(project.id, WORKFLOWS.AMR);
       await projectPage.clickAntimicrobialTab();
     });
@@ -88,12 +96,14 @@ test.describe("AMR Discovery View for E Coli aadS sample", () => {
 
       // #region Check that project exists or wait for project to be created
       projectPage = new ProjectPage(page);
-      const projectNameForUser = projectPage.getProjectNameForUser(getAmrProjectName());
+      const projectNameForUser = projectPage.getProjectNameForUser(
+        getAmrProjectName(),
+      );
       project = await projectPage.getProjectByName(projectNameForUser);
 
       const startTime = Date.now();
       // Project timeout is shorter than test timeout, as we do not want to block if there is an issue creating project / uploading sample
-      while (!project && (Date.now() - startTime) < PROJECT_CREATION_TIMEOUT) {
+      while (!project && Date.now() - startTime < PROJECT_CREATION_TIMEOUT) {
         // When a new project and sample are being created, if the project does not exist, wait sufficient time
         // for project to be created and sample upload to begin
         await projectPage.pause(30);
@@ -114,7 +124,12 @@ test.describe("AMR Discovery View for E Coli aadS sample", () => {
       // #endregion Check if there is a sample, and if not, reload project
 
       // #region Wait for samples to be completed and navigate to AMR tab
-      await projectPage.waitForSamplesComplete(project.id, WORKFLOWS.AMR, SAMPLE_NAMES_TO_WAIT_FOR, TEST_TIMEOUT);
+      await projectPage.waitForSamplesComplete(
+        project.id,
+        WORKFLOWS.AMR,
+        SAMPLE_NAMES_TO_WAIT_FOR,
+        TEST_TIMEOUT,
+      );
       await projectPage.navigateToSamples(project.id, WORKFLOWS.AMR);
       await projectPage.clickAntimicrobialTab();
       // #endregion Wait for samples to be created and navigate to AMR tab
@@ -137,14 +152,19 @@ test.describe("AMR Discovery View for E Coli aadS sample", () => {
       // #region Get actual and expected passed filters info
       const sampleInfo = sampleTable[0];
       const [passedFiltersStr, passedFiltersPct] = sampleInfo["Passed Filters"];
-      const [expectedPassedFiltersStr, expectedPassedFiltersPct] = expectedSampleInfo.passedFilters;
+      const [expectedPassedFiltersStr, expectedPassedFiltersPct] =
+        expectedSampleInfo.passedFilters;
       // #endregion Get actual and expected passed filters info
 
       // #region Verify passed filters count falls in expected range
       const passedFiltersValue = parseDataToFloat(passedFiltersStr);
-      const expectedPassedFiltersValue = parseDataToFloat(expectedPassedFiltersStr);
+      const expectedPassedFiltersValue = parseDataToFloat(
+        expectedPassedFiltersStr,
+      );
 
-      expect(Math.abs(passedFiltersValue - expectedPassedFiltersValue)).toBeLessThanOrEqual(PASSED_FILTERS_MAX_DIFF);
+      expect(
+        Math.abs(passedFiltersValue - expectedPassedFiltersValue),
+      ).toBeLessThanOrEqual(PASSED_FILTERS_MAX_DIFF);
       // #endregion Verify passed filters count falls in expected range
 
       expect(passedFiltersPct).toEqual(expectedPassedFiltersPct);
@@ -158,10 +178,14 @@ test.describe("AMR Discovery View for E Coli aadS sample", () => {
       const sampleInfo = sampleTable[0];
       const totalReads = sampleInfo["Total Reads"];
       const totalReadsValue = parseDataToFloat(totalReads);
-      const expectedTotalReadsValue = parseDataToFloat(expectedSampleInfo.totalReads);
+      const expectedTotalReadsValue = parseDataToFloat(
+        expectedSampleInfo.totalReads,
+      );
       // #endregion Get actual and expected total reads info
 
-      expect(Math.abs(expectedTotalReadsValue - totalReadsValue)).toBeLessThanOrEqual(TOTAL_READS_MAX_DIFF);
+      expect(
+        Math.abs(expectedTotalReadsValue - totalReadsValue),
+      ).toBeLessThanOrEqual(TOTAL_READS_MAX_DIFF);
     });
 
     test("SNo 5: Verifier sample upload name", async () => {

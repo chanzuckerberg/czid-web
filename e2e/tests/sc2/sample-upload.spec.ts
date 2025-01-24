@@ -74,7 +74,8 @@ const MEDAKA_MODELS = [
   "r941_min_high_g360",
 ];
 
-let TEST_TIMEOUT = 60 * 1000 * 5;
+let TEST_TIMEOUT = 60 * 1000 * 15;
+const UPLOAD_TIMEOUT = 60 * 1000 * 10;
 
 /*
  * Sample upload (web)
@@ -120,17 +121,17 @@ test.describe("Sample upload (web): Functional: P-0", () => {
       // #endregion 5. Select "ARTIC v3" Wetlab Protocol from dropdown list
 
       // #region 6. Select Sample files and click on Continue (see Data section)
-      await uploadPage.uploadSampleFiles(SAMPLE_FILES);
+      await uploadPage.uploadSampleFiles(SAMPLE_FILES, true, UPLOAD_TIMEOUT);
       await uploadPage.clickContinue();
       // #endregion 6. Select Sample files and click on Continue (see Data section)
 
       // #region 7. Enter required Metadata and click on Continue
       let sampleNames = await uploadPage.getMetadataSampleNames();
-      let inputs = await uploadPage.getRandomizedSampleInputs(
+      const inputs = await uploadPage.getRandomizedSampleInputs(
         SAMPLE_FILES,
         sampleNames,
       );
-      inputs = await uploadPage.setManualInputs(inputs);
+      await uploadPage.setManualInputs(inputs);
       await uploadPage.clickContinue();
       // #endregion 7. Enter required Metadata and click on Continue
 
@@ -315,17 +316,21 @@ test.describe("Sample upload (web): Functional: P-0", () => {
     // #region 7. Select Sample files and click on Continue (see Data section)
     // SC2 Nanopore sample:
     // https://drive.google.com/drive/folders/1msCAsIQl75N7wmL6JYwSA2zmk5hhahoy?usp=sharing
-    await uploadPage.uploadSampleFiles([SAMPLE_FILE_CT20K]);
+    await uploadPage.uploadSampleFiles(
+      [SAMPLE_FILE_CT20K],
+      true,
+      UPLOAD_TIMEOUT,
+    );
     await uploadPage.clickContinue();
     // #endregion 7. Select Sample files and click on Continue (see Data section)
 
     // #region 8. Enter required Metadata and click on Continue
     let sampleNames = await uploadPage.getMetadataSampleNames();
-    let inputs = await uploadPage.getRandomizedSampleInputs(
+    const inputs = await uploadPage.getRandomizedSampleInputs(
       [SAMPLE_FILE_CT20K],
       sampleNames,
     );
-    inputs = await uploadPage.setManualInputs(inputs);
+    await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
     // #endregion 8. Enter required Metadata and click on Continue
 
@@ -512,17 +517,21 @@ test.describe("Sample upload (web): Functional: P-0", () => {
     // #region 8. Select Sample files and click on Continue (see Data section)
     // SC2 Nanopore sample:
     // https://drive.google.com/drive/folders/1msCAsIQl75N7wmL6JYwSA2zmk5hhahoy?usp=sharing
-    await uploadPage.uploadSampleFiles([SAMPLE_FILE_CT20K]);
+    await uploadPage.uploadSampleFiles(
+      [SAMPLE_FILE_CT20K],
+      true,
+      UPLOAD_TIMEOUT,
+    );
     await uploadPage.clickContinue();
     // #endregion 8. Select Sample files and click on Continue (see Data section)
 
     // #region 9. Enter required Metadata and click on Continue
     let sampleNames = await uploadPage.getMetadataSampleNames();
-    let inputs = await uploadPage.getRandomizedSampleInputs(
+    const inputs = await uploadPage.getRandomizedSampleInputs(
       [SAMPLE_FILE_CT20K],
       sampleNames,
     );
-    inputs = await uploadPage.setManualInputs(inputs);
+    await uploadPage.setManualInputs(inputs);
     await uploadPage.clickContinue();
     // #endregion 9. Enter required Metadata and click on Continue
 

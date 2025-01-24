@@ -17,24 +17,31 @@ import { PageObject } from "./page-object";
 const ERRORS = "[class*='errors']";
 const CONSENSUS_GENOME_PIPELINE_MAJOR_VERSION = "3";
 export const SARS_COV2_REF_FILENAME = "wgs_SARS_CoV2_reference.fa";
-export const SARS_COV2_TRIM_PRIMER_FILENAME = "wgs_SARS_CoV2_primers_regions.bed";
+export const SARS_COV2_TRIM_PRIMER_FILENAME =
+  "wgs_SARS_CoV2_primers_regions.bed";
 export const REF_FILENAME = "consensus_TEST_SC2.fa";
 export const TRIM_PRIMER_FILENAME = "Primer_K.bed";
 export const WETLAB_PROTOCOL = "ARTIC v4/ARTIC v4.1";
-const REF_FILE = (refFilename: string) => `./fixtures/reference_sequences/${refFilename}`;
-const TRIM_PRIMER_FILE = (trimPrimerFilename: string) => `./fixtures/trim_primers/${trimPrimerFilename}`;
+const REF_FILE = (refFilename: string) =>
+  `./fixtures/reference_sequences/${refFilename}`;
+const TRIM_PRIMER_FILE = (trimPrimerFilename: string) =>
+  `./fixtures/trim_primers/${trimPrimerFilename}`;
 const METADATA_FILE_NAME = "metadata_template.csv";
 
 // Upload Samples
-const SELECTED_SAMPLES = "//*[contains(@class, 'sampleUploadTable')]//*[@data-testid='check-box']/ancestor::*[@role='gridcell']/following-sibling::*[1]";
+const SELECTED_SAMPLES =
+  "//*[contains(@class, 'sampleUploadTable')]//*[@data-testid='check-box']/ancestor::*[@role='gridcell']/following-sibling::*[1]";
 const PIPELINE_VERSION = "[class*='technologyContent'] [class*='version']";
 const ILLUMINA_LEARN_MORE_LINK = "//*[text()='Learn More' and @href]";
 const GITHUB_HERE_LINK = "[href*='github.com/chanzuckerberg']";
 const CLEAR_HERE_LINK = "[href*='clearlabs']";
 const ARTIC_NETWORK_LINK = "[href*='artic.network']";
-const NANOPORE_LEARN_MORE_LINK = "//*[contains(@href, 'chanzuckerberg.zendesk') and text()='Learn More']";
-const SELECT_BASESPACE_PROJECT_DROPDOWN = "[class*='basespaceSampleImport'] [class*='dropdownTrigger']";
-const SELECT_BASESPACE_PROJECT_OPTIONS = "[class*='basespaceSampleImport'] [role*='option']";
+const NANOPORE_LEARN_MORE_LINK =
+  "//*[contains(@href, 'chanzuckerberg.zendesk') and text()='Learn More']";
+const SELECT_BASESPACE_PROJECT_DROPDOWN =
+  "[class*='basespaceSampleImport'] [class*='dropdownTrigger']";
+const SELECT_BASESPACE_PROJECT_OPTIONS =
+  "[class*='basespaceSampleImport'] [role*='option']";
 const BASESPACE_UPLOAD_WINDOW_TITLE = "[class*='titleWithIcon']";
 const BASESPACE_UPLOAD_WINDOW_DESCRIPTION = "[class*='instructions']";
 const BASESPACE_AUTHORIZE = "//button[text()='Authorize']";
@@ -47,12 +54,15 @@ const FILE_ERROR_INFO_ICON = "[class*='fileName'] svg";
 const COLUMN_TOOLTIP = "[data-testid='column-tooltip']";
 const COLUMN_TOOLTIP_LINK = "[data-testid='column-tooltip'] a";
 const FILE_INPUT_SELECTOR = "[data-testid='drop-sample-files'] input";
-const SAMPLE_NAME_LOCATOR = "[class*='sampleUploadTable'] [role='gridcell'][title]";
+const SAMPLE_NAME_LOCATOR =
+  "[class*='sampleUploadTable'] [role='gridcell'][title]";
 const COOKIE_BANNER_LOCATOR = "[id='onetrust-accept-btn-handler']:visible";
 const SEARCH_PROJECT_INPUT = 'input[placeholder="Search"]';
-const UPLOAD_CONFIRMATION_TEXT = "[data-testid='drop-sample-files'] div[class*='title']";
+const UPLOAD_CONFIRMATION_TEXT =
+  "[data-testid='drop-sample-files'] div[class*='title']";
 const SEQUENCING_TECHNOLOGY_PARTIAL_TESTID = "sequencing-technology-";
-const GUPPY_BASECALLER_SETTING_LOCATOR = "//div[text()='Guppy Basecaller Setting:']/following-sibling::div";
+const GUPPY_BASECALLER_SETTING_LOCATOR =
+  "//div[text()='Guppy Basecaller Setting:']/following-sibling::div";
 const GUPPY_BASECALLER_SETTING_OPTIONS_TESTIDS = {
   FAST: "fast",
   HAC: "hac",
@@ -64,20 +74,31 @@ const CLEAR_UPLOADED_FILE_BUTTON_TESTID = "clear-uploaded-file-button";
 const CLEAR_LABS_TOGGLE = "[class*='clearLabs'] [class*='checkbox']";
 const CLEAR_LABS_INFO_ICON = "[class*='clearLabs'] [class*='subheader'] svg";
 const TAXON_FILTER_VALUE_TESTID = "filter-value";
-const WETLAB_FILTER = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']";
-const WETLAB_FILTER_VALUE = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']//*[@data-testid='filter-value']";
-const WETLAB_OPTION = (wetlab: string) =>`//*[@data-testid="dropdown-menu"]//*[@role="option" and text()="${wetlab}"]`;
-const WETLAB_OPTIONS = "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='dropdown-menu']//*[@role='option']";
-const WETLAB_DESCRIPTION = "//*[text()='Wetlab Protocol:']/following-sibling::*[contains(@class, 'description')]";
-const MEDAKA_MODEL_FILTER = "//*[text()='Medaka Model:']/parent::*//*[@data-testid='filters']";
+const WETLAB_FILTER =
+  "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']";
+const WETLAB_FILTER_VALUE =
+  "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='filters']//*[@data-testid='filter-value']";
+const WETLAB_OPTION = (wetlab: string) =>
+  `//*[@data-testid="dropdown-menu"]//*[@role="option" and text()="${wetlab}"]`;
+const WETLAB_OPTIONS =
+  "//*[text()='Wetlab Protocol:']/following-sibling::*//*[@data-testid='dropdown-menu']//*[@role='option']";
+const WETLAB_DESCRIPTION =
+  "//*[text()='Wetlab Protocol:']/following-sibling::*[contains(@class, 'description')]";
+const MEDAKA_MODEL_FILTER =
+  "//*[text()='Medaka Model:']/parent::*//*[@data-testid='filters']";
 const MEDAKA_MODEL_INFO_ICON = "//*[text()='Medaka Model:']/span";
-const MEDAKA_MODEL_OPTION = (medakaModel: string) => `//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText') and text()='${medakaModel}']`;
-const MEDAKA_MODEL_OPTIONS = "//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText')]";
-const MEDAKA_MODEL_DESCRIPTION = "//*[text()='Medaka Model:']/following-sibling::*[contains(@class, 'description')]";
+const MEDAKA_MODEL_OPTION = (medakaModel: string) =>
+  `//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText') and text()='${medakaModel}']`;
+const MEDAKA_MODEL_OPTIONS =
+  "//*[text()='Medaka Model:']/parent::*//*[contains(@class, 'optionText')]";
+const MEDAKA_MODEL_DESCRIPTION =
+  "//*[text()='Medaka Model:']/following-sibling::*[contains(@class, 'description')]";
 const REFERENCE_SEQUENCE_FILE_UPLOAD_TESTID = "reference-sequence-file-upload";
-const TRIM_PRIMERS_FILE_UPLOAD = "//span[text()='Trim Primers']/parent::div/following-sibling::button";
+const TRIM_PRIMERS_FILE_UPLOAD =
+  "//span[text()='Trim Primers']/parent::div/following-sibling::button";
 const PORTAL_DROPDOWN_LOCATOR = "[class*='portalDropdown']";
-const NANOPORE_TECHNOLOGY_DESCRIPTION = "[data-testid='sequencing-technology-ONT'] [class*='technologyDescription']";
+const NANOPORE_TECHNOLOGY_DESCRIPTION =
+  "[data-testid='sequencing-technology-ONT'] [class*='technologyDescription']";
 
 // #region Metadata locators
 const METADATA_SAMPLE_NAMES = "[data-testid='sample-name']";
@@ -93,29 +114,46 @@ const METADATA_APPLY_TO_ALL_LOCATOR = "[class*='applyToAll']";
 
 // #region Review locators
 const REVIEW_SAMPLE_NAMES = "[class*='visible'] [data-testid='sample-name']";
-const REVIEW_FILENAMES_LOCATORS = "[data-testid='input-files'] [class*='file-']";
-const REVIEW_HOST_ORGANISM_LOCATOR = "//span[text()='Sample Info']/parent::div/following-sibling::div//td[@data-testid='host-organism']";
+const REVIEW_FILENAMES_LOCATORS =
+  "[data-testid='input-files'] [class*='file-']";
+const REVIEW_HOST_ORGANISM_LOCATOR =
+  "//span[text()='Sample Info']/parent::div/following-sibling::div//td[@data-testid='host-organism']";
 const REVIEW_WATER_CONTROL_TESTID = "water-control";
 const REVIEW_SAMPLE_TYPE_TESTID = "sample-type";
 const REVIEW_NUCLEOTIDE_TYPE_TESTID = "nucleotide-type";
 const REVIEW_COLLECTION_DATE_TESTID = "collection-date";
-const REVIEW_COLLECTION_LOCATION_LOCATOR = "//div[contains(@class, 'reviewHeader')]//following-sibling::div//td[@data-testid='collection-location']";
+const REVIEW_COLLECTION_LOCATION_LOCATOR =
+  "//div[contains(@class, 'reviewHeader')]//following-sibling::div//td[@data-testid='collection-location']";
 const REVIEW_CSV_UPLOAD_TESTID = "csv-upload";
-const REVIEW_CSV_FILE_INPUT_SELECTOR = "[class*='metadataCSVUpload'] [data-testid='drop-sample-files'] input";
+const REVIEW_CSV_FILE_INPUT_SELECTOR =
+  "[class*='metadataCSVUpload'] [data-testid='drop-sample-files'] input";
 const ANALYSIS_REVIEW_TESTID = "upload-input-review";
-const PROJECT_INFO_REVIEW_LOCATOR = "//span[text()='Project Info']/parent::div/following-sibling::div[1]";
+const PROJECT_INFO_REVIEW_LOCATOR =
+  "//span[text()='Project Info']/parent::div/following-sibling::div[1]";
 const TERMS_AGREEMENT_LOCATOR = "[class*='termsAgreement'] [class*='checkbox']";
 const START_UPLOAD_BUTTON_LOCATOR = "//button[text()='Start Upload']";
 // #endregion Review locators
 
 // #region Uploads completed
 const UPLOAD_COMPLETE = "Uploads completed!";
-const SENT_TO_PIPELINE = (sampleName: string) => `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/following-sibling::div[contains(@class, 'sampleStatus')]/div[text()='Sent to pipeline']`;
+const SENT_TO_PIPELINE = (sampleName: string) =>
+  `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/following-sibling::div[contains(@class, 'sampleStatus')]/div[text()='Sent to pipeline']`;
 const UPLOAD_WINDOW_TITLE = "[class*='titleWithIcon-']";
 const GO_TO_PROJECT_BUTTON = "//button[text()='Go to Project']";
-const SAMPLE_UPLOAD_STATUS_BAR = (sampleName: string) => `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/ancestor::div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]`;
-const LOADING_BARS = "//div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]";
+const SAMPLE_UPLOAD_STATUS_BAR = (sampleName: string) =>
+  `//div[contains(@class, 'sampleName-') and text()='${sampleName}']/ancestor::div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]`;
+const LOADING_BARS =
+  "//div[contains(@class, 'sample-')]//div[contains(@class, 'loadingBar-')]";
 // #endregion Uploads completed
+
+const SYSTEMIC_INFLAMMATION = "Systemic Inflammation";
+const CENTRAL_NERVOUS_SYSTEM = "Central Nervous System";
+const RESPIRATORY_TRACT = "Respiratory Tract";
+const REPRODUCTIVE_TRACT = "Reproductive Tract";
+const EXCREMENT = "Excrement";
+const ORGANS = "Organs";
+const INSECT_BODY_PARTS = "Insect Body Parts";
+const OTHER = "Other";
 
 type basespaceOptions = {
   taxonName?: string;
@@ -124,7 +162,6 @@ type basespaceOptions = {
 };
 
 export class UploadPage extends PageObject {
-
   // #region Navigate
   public async goto() {
     await this.page.goto(`${process.env.BASEURL}/samples/upload`);
@@ -133,17 +170,189 @@ export class UploadPage extends PageObject {
 
   // #region Api
   public async getAllHostGenomesPublic() {
-    const response = await this.page.context().request.get(
-      `${process.env.BASEURL}/host_genomes/index_public`,
-    );
+    const response = await this.page
+      .context()
+      .request.get(`${process.env.BASEURL}/host_genomes/index_public`);
     return response.json();
   }
 
   public async getAllSampleTypes() {
+    /* This endpoint is choke point for tests
     const response = await this.page.context().request.get(
       `${process.env.BASEURL}/sample_types.json`,
     );
     return response.json();
+    */
+    return [
+      {
+        name: "Plasma",
+        group: SYSTEMIC_INFLAMMATION,
+      },
+      {
+        name: "Serum",
+        group: SYSTEMIC_INFLAMMATION,
+      },
+      {
+        name: "Whole Blood",
+        group: SYSTEMIC_INFLAMMATION,
+      },
+      {
+        name: "Brain",
+        group: CENTRAL_NERVOUS_SYSTEM,
+      },
+      {
+        name: "Cerebrospinal Fluid",
+        group: CENTRAL_NERVOUS_SYSTEM,
+      },
+      {
+        name: "CNS Tissue",
+        group: CENTRAL_NERVOUS_SYSTEM,
+      },
+      {
+        name: "Ocular Fluid",
+        group: CENTRAL_NERVOUS_SYSTEM,
+      },
+      {
+        name: "Lung",
+        group: RESPIRATORY_TRACT,
+      },
+      {
+        name: "Bronchoalveolar Lavage",
+        group: RESPIRATORY_TRACT,
+      },
+      {
+        name: "Nasopharyngeal Swab",
+        group: RESPIRATORY_TRACT,
+      },
+      {
+        name: "Mini Bronchoalveolar Lavage",
+        group: RESPIRATORY_TRACT,
+      },
+      {
+        name: "Oralpharyngeal Swab",
+        group: RESPIRATORY_TRACT,
+      },
+      {
+        name: "Saliva",
+        group: RESPIRATORY_TRACT,
+      },
+      {
+        name: "Sputum",
+        group: RESPIRATORY_TRACT,
+      },
+      {
+        name: "Tracheal Aspirate",
+        group: RESPIRATORY_TRACT,
+      },
+      {
+        name: "Amniotic Fluid",
+        group: REPRODUCTIVE_TRACT,
+      },
+      {
+        name: "Placenta",
+        group: REPRODUCTIVE_TRACT,
+      },
+      {
+        name: "Cervicovaginal Swab",
+        group: REPRODUCTIVE_TRACT,
+      },
+      {
+        name: "Uterus",
+        group: REPRODUCTIVE_TRACT,
+      },
+      {
+        name: "Stool",
+        group: EXCREMENT,
+      },
+      {
+        name: "Urine",
+        group: EXCREMENT,
+      },
+      {
+        name: "Heart",
+        group: ORGANS,
+      },
+      {
+        name: "Intestines",
+        group: ORGANS,
+      },
+      {
+        name: "Kidney",
+        group: ORGANS,
+      },
+      {
+        name: "Liver",
+        group: ORGANS,
+      },
+      {
+        name: "Muscle",
+        group: ORGANS,
+      },
+      {
+        name: "Stomach",
+        group: ORGANS,
+      },
+      {
+        name: "Bladder",
+        group: ORGANS,
+      },
+      {
+        name: "Thyroid",
+        group: ORGANS,
+      },
+      {
+        name: "Skin",
+        group: ORGANS,
+      },
+      {
+        name: "Abdomen",
+        group: INSECT_BODY_PARTS,
+      },
+      {
+        name: "Gaster",
+        group: INSECT_BODY_PARTS,
+      },
+      {
+        name: "Guts",
+        group: INSECT_BODY_PARTS,
+      },
+      {
+        name: "Head",
+        group: INSECT_BODY_PARTS,
+      },
+      {
+        name: "Whole Body",
+        group: INSECT_BODY_PARTS,
+      },
+      {
+        name: "Salivary Gland",
+        group: INSECT_BODY_PARTS,
+      },
+      {
+        name: "Mixed Tissue",
+        group: OTHER,
+      },
+      {
+        name: "Simulation",
+        group: OTHER,
+      },
+      {
+        name: "Cell Line",
+        group: OTHER,
+      },
+      {
+        name: "Cultured Isolate",
+        group: OTHER,
+      },
+      {
+        name: "Unknown",
+        group: OTHER,
+      },
+      {
+        name: "Tumo",
+        group: OTHER,
+      },
+    ];
   }
   // #endregion Api
 
@@ -152,7 +361,10 @@ export class UploadPage extends PageObject {
   // #region Samples
   public async clickSamples(sampleNames: Array<string>) {
     for (const sampleName of sampleNames) {
-      await this.page.locator(SELECTED_SAMPLES).getByText(sampleName, {exact: true}).click();
+      await this.page
+        .locator(SELECTED_SAMPLES)
+        .getByText(sampleName, { exact: true })
+        .click();
     }
   }
 
@@ -185,7 +397,10 @@ export class UploadPage extends PageObject {
   }
 
   public async clickSelectBasespaceProjectOption(option: string) {
-    await this.page.locator(SELECT_BASESPACE_PROJECT_OPTIONS).getByText(option, {exact: true}).click();
+    await this.page
+      .locator(SELECT_BASESPACE_PROJECT_OPTIONS)
+      .getByText(option, { exact: true })
+      .click();
   }
 
   public async clickConnectToBasespaceButton() {
@@ -198,7 +413,7 @@ export class UploadPage extends PageObject {
   }
 
   public async clickAuthorize() {
-    await this.page.locator(BASESPACE_AUTHORIZE).waitFor({timeout: 90_000});
+    await this.page.locator(BASESPACE_AUTHORIZE).waitFor({ timeout: 90_000 });
     const [newPage] = await Promise.all([
       this.page.context().waitForEvent("page"),
       await this.page.locator(BASESPACE_AUTHORIZE).click(),
@@ -236,11 +451,13 @@ export class UploadPage extends PageObject {
   }
 
   public async clickProjectName(projectName: string) {
-    await this.page.getByText(projectName, {exact: true}).click();
+    await this.page.getByText(projectName, { exact: true }).click();
   }
 
   public async clickSequencingPlatform(platformName: string) {
-    await this.page.getByTestId(`${SEQUENCING_TECHNOLOGY_PARTIAL_TESTID}${platformName}`).click();
+    await this.page
+      .getByTestId(`${SEQUENCING_TECHNOLOGY_PARTIAL_TESTID}${platformName}`)
+      .click();
   }
 
   public async clickGuppyBasecallerSettingDropDown() {
@@ -248,7 +465,8 @@ export class UploadPage extends PageObject {
   }
 
   public async clickGuppyBasecallerSettingOption(option: string) {
-    const testId = GUPPY_BASECALLER_SETTING_OPTIONS_TESTIDS[option.toUpperCase()];
+    const testId =
+      GUPPY_BASECALLER_SETTING_OPTIONS_TESTIDS[option.toUpperCase()];
     await this.page.getByTestId(testId).click();
   }
 
@@ -264,7 +482,10 @@ export class UploadPage extends PageObject {
   }
 
   public async clickClearUploadedFile() {
-    await this.page.getByTestId(CLEAR_UPLOADED_FILE_BUTTON_TESTID).getByTestId("ClearIcon").click();
+    await this.page
+      .getByTestId(CLEAR_UPLOADED_FILE_BUTTON_TESTID)
+      .getByTestId("ClearIcon")
+      .click();
   }
 
   public async clickTaxonFilter() {
@@ -291,11 +512,19 @@ export class UploadPage extends PageObject {
   }
 
   public async clickHostOrganismDropDown(index = 0) {
-    await this.page.getByTestId(METADATA_HOST_ORGANISM_TESTID).locator("input").nth(index).click();
+    await this.page
+      .getByTestId(METADATA_HOST_ORGANISM_TESTID)
+      .locator("input")
+      .nth(index)
+      .click();
   }
 
   public async clickSampleTissueTypeDropDown(index = 0) {
-    await this.page.getByTestId(METADATA_SAMPLE_TYPE_TESTID).locator("input").nth(index).click();
+    await this.page
+      .getByTestId(METADATA_SAMPLE_TYPE_TESTID)
+      .locator("input")
+      .nth(index)
+      .click();
   }
 
   public async clickApplyToAll() {
@@ -351,7 +580,10 @@ export class UploadPage extends PageObject {
   }
 
   public async getMedakaModelFilterValue() {
-    return this.page.locator(MEDAKA_MODEL_FILTER).locator("[data-testid='filter-value']").textContent();
+    return this.page
+      .locator(MEDAKA_MODEL_FILTER)
+      .locator("[data-testid='filter-value']")
+      .textContent();
   }
 
   public async getClearLabsValue() {
@@ -375,7 +607,9 @@ export class UploadPage extends PageObject {
   }
 
   public async getSampleUploadProgress(sampleName: string) {
-    const styleAttribute = await this.page.locator(SAMPLE_UPLOAD_STATUS_BAR(sampleName)).getAttribute("style");
+    const styleAttribute = await this.page
+      .locator(SAMPLE_UPLOAD_STATUS_BAR(sampleName))
+      .getAttribute("style");
     let uploadProgress = 0;
     if (styleAttribute) {
       const match = styleAttribute.match(/(\d+(\.\d+)?)/);
@@ -393,8 +627,16 @@ export class UploadPage extends PageObject {
   }
 
   public async getWarningTable() {
-    const warning = await this.page.locator("[class*='issueGroup'][class*='warning'] [class*='header-']:not([class*='toggleable'])").textContent();
-    await this.page.locator("[class*='issueGroup'][class*='warning'] [class*='toggleContainer']").click();
+    const warning = await this.page
+      .locator(
+        "[class*='issueGroup'][class*='warning'] [class*='header-']:not([class*='toggleable'])",
+      )
+      .textContent();
+    await this.page
+      .locator(
+        "[class*='issueGroup'][class*='warning'] [class*='toggleContainer']",
+      )
+      .click();
     const table = await this.getTable(
       "[class*='issueGroup'][class*='warning'] th",
       "[class*='issueGroup'][class*='warning'] tbody tr",
@@ -406,27 +648,39 @@ export class UploadPage extends PageObject {
     }
 
     return {
-      "message": warningLines.join(" "),
-      "files": table,
+      message: warningLines.join(" "),
+      files: table,
     };
   }
 
   public async getErrorTable() {
-    const error = await this.page.locator("[class*='issueGroup'][class*='error'] [class*='header-']:not([class*='toggleable'])").textContent();
-    await this.page.locator("[class*='issueGroup'][class*='error'] [class*='toggleContainer']").click();
+    const error = await this.page
+      .locator(
+        "[class*='issueGroup'][class*='error'] [class*='header-']:not([class*='toggleable'])",
+      )
+      .textContent();
+    await this.page
+      .locator(
+        "[class*='issueGroup'][class*='error'] [class*='toggleContainer']",
+      )
+      .click();
     const table = await this.getTable(
       "[class*='issueGroup'][class*='error'] th",
       "[class*='issueGroup'][class*='error'] tbody tr",
       "td",
     );
     return {
-      "message": error.trim(),
-      "files": table,
+      message: error.trim(),
+      files: table,
     };
   }
 
   public async getErrors(timeout = 1000) {
-    await this.page.locator(ERRORS).first().waitFor({ timeout: timeout }) .catch(() => null);
+    await this.page
+      .locator(ERRORS)
+      .first()
+      .waitFor({ timeout: timeout })
+      .catch(() => null);
     return this.page.locator(ERRORS).allTextContents();
   }
 
@@ -442,7 +696,10 @@ export class UploadPage extends PageObject {
     return this.page.locator(SAMPLE_NAME_LOCATOR).nth(index).textContent();
   }
 
-  public async getRandomizedSampleInputs(inputFiles: Array<string>, sampleNames: Array<string>) {
+  public async getRandomizedSampleInputs(
+    inputFiles: Array<string>,
+    sampleNames: Array<string>,
+  ) {
     const inputs = {};
     for (let i = 0; i < sampleNames.length; i++) {
       inputs[sampleNames[i]] = {
@@ -450,13 +707,18 @@ export class UploadPage extends PageObject {
         inputFile: inputFiles[i],
         inputFiles: inputFiles, // TODO: Remove?
 
-        hostOrganism: [await this.getRandomHostOrganism(), "Human"][Math.floor(Math.random() * 2)], // More Human samples
+        hostOrganism: [await this.getRandomHostOrganism(), "Human"][
+          Math.floor(Math.random() * 2)
+        ], // More Human samples
         sampleTissueType: await this.getRandomSampleTissueType(),
 
         waterControl: ["Yes", "No"][Math.floor(Math.random() * 2)],
-        nucleotideType: NUCLEOTIDES[Math.floor(Math.random() * NUCLEOTIDES.length)],
+        nucleotideType:
+          NUCLEOTIDES[Math.floor(Math.random() * NUCLEOTIDES.length)],
         collectionDate: new Date().toISOString().slice(0, 7), // YYYY-MM (BUG? front-end says YYYY-MM-DD)
-        collectionLocation: ["New York", "Los Angeles"][Math.floor(Math.random() * 2)],
+        collectionLocation: ["New York", "Los Angeles"][
+          Math.floor(Math.random() * 2)
+        ],
       };
     }
     return inputs;
@@ -469,31 +731,51 @@ export class UploadPage extends PageObject {
   }
 
   public async getReviewInputFiles(index = 0) {
-    return this.page.locator(REVIEW_FILENAMES_LOCATORS).nth(index).textContent();
+    return this.page
+      .locator(REVIEW_FILENAMES_LOCATORS)
+      .nth(index)
+      .textContent();
   }
 
   public async getReviewHostOrganismValue(index = 0) {
-    return (await this.page.locator(REVIEW_HOST_ORGANISM_LOCATOR).all())[index].textContent();
+    return (await this.page.locator(REVIEW_HOST_ORGANISM_LOCATOR).all())[
+      index
+    ].textContent();
   }
 
   public async getReviewSampleTissueTypeValue(index = 0) {
-    return this.page.getByTestId(REVIEW_SAMPLE_TYPE_TESTID).nth(index).textContent();
+    return this.page
+      .getByTestId(REVIEW_SAMPLE_TYPE_TESTID)
+      .nth(index)
+      .textContent();
   }
 
   public async getReviewWaterControlValue(index = 0) {
-    return this.page.getByTestId(REVIEW_WATER_CONTROL_TESTID).nth(index).textContent();
+    return this.page
+      .getByTestId(REVIEW_WATER_CONTROL_TESTID)
+      .nth(index)
+      .textContent();
   }
 
   public async getReviewNucleotideTypeValue(index = 0) {
-    return this.page.getByTestId(REVIEW_NUCLEOTIDE_TYPE_TESTID).nth(index).textContent();
+    return this.page
+      .getByTestId(REVIEW_NUCLEOTIDE_TYPE_TESTID)
+      .nth(index)
+      .textContent();
   }
 
   public async getReviewCollectionDateValue(index = 0) {
-    return this.page.getByTestId(REVIEW_COLLECTION_DATE_TESTID).nth(index).textContent();
+    return this.page
+      .getByTestId(REVIEW_COLLECTION_DATE_TESTID)
+      .nth(index)
+      .textContent();
   }
 
   public async getReviewCollectionLocationValue(index = 0) {
-    return this.page.locator(REVIEW_COLLECTION_LOCATION_LOCATOR).nth(index).textContent();
+    return this.page
+      .locator(REVIEW_COLLECTION_LOCATION_LOCATOR)
+      .nth(index)
+      .textContent();
   }
   // #endregion Review
 
@@ -504,13 +786,16 @@ export class UploadPage extends PageObject {
   }
 
   private async getPortalDropdownOptions() {
-    const options = await this.page.locator(PORTAL_DROPDOWN_LOCATOR).locator("[class*='title']").all();
+    const options = await this.page
+      .locator(PORTAL_DROPDOWN_LOCATOR)
+      .locator("[class*='title']")
+      .all();
     const optionStringsArray = [];
     for (const option of options) {
-        const text = await option.textContent();
-        if (text.trim() !== "") {
-          optionStringsArray.push(await option.textContent());
-        }
+      const text = await option.textContent();
+      if (text.trim() !== "") {
+        optionStringsArray.push(await option.textContent());
+      }
     }
     return optionStringsArray;
   }
@@ -548,37 +833,60 @@ export class UploadPage extends PageObject {
 
   public async getAttachedInputFiles() {
     const attchedFilesArray = [];
-    const attachedFiles = await this.page.locator(METADATA_FILENAMES_LOCATORS).all();
+    const attachedFiles = await this.page
+      .locator(METADATA_FILENAMES_LOCATORS)
+      .all();
     for (const attchedFile of attachedFiles) {
-        attchedFilesArray.push(await attchedFile.textContent());
+      attchedFilesArray.push(await attchedFile.textContent());
     }
     return attchedFilesArray;
   }
 
   public async getMetadataHostOrganismValue(index = 0) {
-    const element = this.page.getByTestId(METADATA_HOST_ORGANISM_TESTID).locator("input").nth(index);
+    const element = this.page
+      .getByTestId(METADATA_HOST_ORGANISM_TESTID)
+      .locator("input")
+      .nth(index);
     return element.getAttribute("value");
   }
 
   public async getMetadataSampleTissueTypeValue(index = 0) {
-    const element = this.page.getByTestId(METADATA_SAMPLE_TYPE_TESTID).locator("input").nth(index);
+    const element = this.page
+      .getByTestId(METADATA_SAMPLE_TYPE_TESTID)
+      .locator("input")
+      .nth(index);
     return element.getAttribute("value");
   }
 
   public async getMetadataWaterControlValue(index = 0) {
-    return this.page.getByTestId(METADATA_WATER_CONTROL_TESTID).locator("label").nth(index).textContent();
+    return this.page
+      .getByTestId(METADATA_WATER_CONTROL_TESTID)
+      .locator("label")
+      .nth(index)
+      .textContent();
   }
 
   public async getMetadataNucleotideTypeValue(index = 0) {
-    return this.page.getByTestId(METADATA_NUCLEOTIDE_TYPE_TESTID).nth(index).textContent();
+    return this.page
+      .getByTestId(METADATA_NUCLEOTIDE_TYPE_TESTID)
+      .nth(index)
+      .textContent();
   }
 
   public async getMetadataCollectionDateValue(index = 0) {
-    return this.page.getByTestId(METADATA_COLLECTION_DATE_TESTID).locator("input").nth(index).getAttribute("value");
+    return this.page
+      .getByTestId(METADATA_COLLECTION_DATE_TESTID)
+      .locator("input")
+      .nth(index)
+      .getAttribute("value");
   }
 
   public async getMetadataCollectionLocationValue(index = 0) {
-    return this.page.getByTestId(METADATA_COLLECTION_LOCATION_TESTID).locator("input").nth(index).getAttribute("value");
+    return this.page
+      .getByTestId(METADATA_COLLECTION_LOCATION_TESTID)
+      .locator("input")
+      .nth(index)
+      .getAttribute("value");
   }
   // #endregion Metadata
 
@@ -590,36 +898,75 @@ export class UploadPage extends PageObject {
   }
 
   public async fillHostOrganism(value: string, index = 0) {
-    await this.page.getByTestId(METADATA_HOST_ORGANISM_TESTID).locator("input").nth(index).fill(value);
+    await this.page
+      .getByTestId(METADATA_HOST_ORGANISM_TESTID)
+      .locator("input")
+      .nth(index)
+      .fill(value);
   }
 
   public async fillSampleTissueType(value: string, index = 0) {
-    await this.page.getByTestId(METADATA_SAMPLE_TYPE_TESTID).locator("input").nth(index).fill(value);
+    await this.page
+      .getByTestId(METADATA_SAMPLE_TYPE_TESTID)
+      .locator("input")
+      .nth(index)
+      .fill(value);
   }
 
   public async fillWaterControl(yesNo: string, index = 0) {
-    const currentState = await this.page.getByTestId(METADATA_WATER_CONTROL_TESTID).locator("label").nth(index).textContent();
-    if ((yesNo === "Yes") && (currentState !== "Yes") || (yesNo === "No") && (currentState !== "No")) {
-      await this.page.getByTestId(METADATA_WATER_CONTROL_TESTID).nth(index).click();
+    const currentState = await this.page
+      .getByTestId(METADATA_WATER_CONTROL_TESTID)
+      .locator("label")
+      .nth(index)
+      .textContent();
+    if (
+      (yesNo === "Yes" && currentState !== "Yes") ||
+      (yesNo === "No" && currentState !== "No")
+    ) {
+      await this.page
+        .getByTestId(METADATA_WATER_CONTROL_TESTID)
+        .nth(index)
+        .click();
     }
   }
 
   public async fillNucleotideType(value: string, index = 0) {
-    await this.page.getByTestId(METADATA_NUCLEOTIDE_TYPE_TESTID).nth(index).click();
+    await this.page
+      .getByTestId(METADATA_NUCLEOTIDE_TYPE_TESTID)
+      .nth(index)
+      .waitFor();
+    await this.pause(1);
+    await this.page
+      .getByTestId(METADATA_NUCLEOTIDE_TYPE_TESTID)
+      .nth(index)
+      .click();
     await this.page.getByTestId(value.toLocaleLowerCase()).click();
   }
 
   public async fillCollectionDate(value: string, index = 0) {
-    await this.page.getByTestId(METADATA_COLLECTION_DATE_TESTID).locator("input").nth(index).fill(value);
+    await this.page
+      .getByTestId(METADATA_COLLECTION_DATE_TESTID)
+      .locator("input")
+      .nth(index)
+      .fill(value);
   }
 
   public async fillCollectionLocation(value: string, index = 0) {
-    await this.page.getByTestId(METADATA_COLLECTION_LOCATION_TESTID).locator("input").nth(index).fill(value);
+    await this.page
+      .getByTestId(METADATA_COLLECTION_LOCATION_TESTID)
+      .locator("input")
+      .nth(index)
+      .fill(value);
   }
   // #endregion Fill
 
   // #region Macro
-  public async uploadBasespaceSample(projectName: string, basespaceProjectName: string, workflow: string, options?: basespaceOptions) {
+  public async uploadBasespaceSample(
+    projectName: string,
+    basespaceProjectName: string,
+    workflow: string,
+    options?: basespaceOptions,
+  ) {
     options = options || {};
 
     await this.goto();
@@ -637,7 +984,7 @@ export class UploadPage extends PageObject {
 
     await this.selectBasespaceProject(basespaceProjectName);
     await this.clickConnectToProject();
-    
+
     let sampleNames = [];
     if (!options.sampleNames) {
       const selectedSamples = await this.getSelectedSamples();
@@ -649,7 +996,10 @@ export class UploadPage extends PageObject {
     await this.clickAuthorizeIllumina();
 
     sampleNames = await this.getMetadataSampleNames();
-    const inputs = await this.getRandomizedSampleInputs(sampleNames, sampleNames);
+    const inputs = await this.getRandomizedSampleInputs(
+      sampleNames,
+      sampleNames,
+    );
     await this.setManualInputs(inputs);
 
     await this.clickContinue();
@@ -670,7 +1020,7 @@ export class UploadPage extends PageObject {
 
   public async dismissCookieBanner() {
     const cookieBanner = await this.getLocator(COOKIE_BANNER_LOCATOR);
-    if (await cookieBanner.count() > 0) {
+    if ((await cookieBanner.count()) > 0) {
       await this.clickCookieBanner();
     }
   }
@@ -682,7 +1032,7 @@ export class UploadPage extends PageObject {
     ]);
     await this.pause(2);
     await refSeqFileChooser.setFiles(path.resolve(REF_FILE(fileName)));
-  };
+  }
 
   public async uploadTrimPrimer(fileName = TRIM_PRIMER_FILENAME) {
     const [trimPrimerFileChooser] = await Promise.all([
@@ -690,10 +1040,18 @@ export class UploadPage extends PageObject {
       this.page.locator(TRIM_PRIMERS_FILE_UPLOAD).click(),
     ]);
     await this.pause(2);
-    await trimPrimerFileChooser.setFiles(path.resolve(TRIM_PRIMER_FILE(fileName)));
-  };
+    await trimPrimerFileChooser.setFiles(
+      path.resolve(TRIM_PRIMER_FILE(fileName)),
+    );
+  }
 
-  public async selectFiles(selector: string, filePath: string, files: string[], waitForConfirmation = true, timeout = 90_000) {
+  public async selectFiles(
+    selector: string,
+    filePath: string,
+    files: string[],
+    waitForConfirmation = true,
+    timeout = 90_000,
+  ) {
     for (let i = 0; i < files.length; i++) {
       const fullPath = path.join(filePath, files[i]);
       await this.pause(2); // Brief pause to stabilize tests
@@ -704,11 +1062,15 @@ export class UploadPage extends PageObject {
         if (files[i].endsWith("csv")) {
           confirmationText = `${files[i]} loaded`;
         } else {
-          confirmationText = `${i + 1} File${i === 0? "": "s"} Selected For Upload`;
+          confirmationText = `${i + 1} File${
+            i === 0 ? "" : "s"
+          } Selected For Upload`;
         }
-        await this.page.locator(`text=${confirmationText}`).waitFor({timeout: timeout});
+        await this.page
+          .locator(`text=${confirmationText}`)
+          .waitFor({ timeout: timeout });
       }
-    };
+    }
   }
 
   public async selectProject(projectName: string) {
@@ -717,8 +1079,18 @@ export class UploadPage extends PageObject {
     await this.clickProjectName(projectName);
   }
 
-  public async uploadSampleFiles(sampleFiles: Array<string>, waitForConfirmation = true , timeout = 90_000) {
-    await this.selectFiles(FILE_INPUT_SELECTOR, FIXTURE_DIR, sampleFiles, waitForConfirmation, timeout);
+  public async uploadSampleFiles(
+    sampleFiles: Array<string>,
+    waitForConfirmation = true,
+    timeout = 90_000,
+  ) {
+    await this.selectFiles(
+      FILE_INPUT_SELECTOR,
+      FIXTURE_DIR,
+      sampleFiles,
+      waitForConfirmation,
+      timeout,
+    );
   }
 
   public async uploadCSVMetaData(metadataFileName: string, inputs: any) {
@@ -743,27 +1115,43 @@ export class UploadPage extends PageObject {
         ].join(",");
         csvContent += `${row}\n`;
       }
-      await fs.writeFile(tempFilePath, `${templateContent}\n${csvContent}`, "utf8");
-      await this.selectFiles(REVIEW_CSV_FILE_INPUT_SELECTOR, FIXTURE_METADATA_DIR, [tempFileName]);
-
+      await fs.writeFile(
+        tempFilePath,
+        `${templateContent}\n${csvContent}`,
+        "utf8",
+      );
+      await this.selectFiles(
+        REVIEW_CSV_FILE_INPUT_SELECTOR,
+        FIXTURE_METADATA_DIR,
+        [tempFileName],
+      );
     } finally {
       fs.unlink(tempFilePath);
     }
   }
 
-  public async setWorkFlow(analysisType: string, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null, guppyBasecaller = "fast") {
+  public async setWorkFlow(
+    analysisType: string,
+    includeTrimPrimer = true,
+    taxonName = "Unknown",
+    sequencingPlatform = null,
+    guppyBasecaller = "fast",
+  ) {
     if (analysisType === WORKFLOWS.MNGS) {
-
       // Illumina: Short read mNGS
       await this.clickCheckboxForWorkflow(analysisType);
 
-      sequencingPlatform = sequencingPlatform != null ? sequencingPlatform : SEQUENCING_PLATFORMS.MNGS;
+      sequencingPlatform =
+        sequencingPlatform != null
+          ? sequencingPlatform
+          : SEQUENCING_PLATFORMS.MNGS;
       await this.clickSequencingPlatform(sequencingPlatform);
     }
     if (analysisType === WORKFLOWS.LMNGS) {
       // Nanopore: ONT (long read mNGS)
       await this.clickCheckboxForWorkflow(WORKFLOWS.MNGS);
-      sequencingPlatform = sequencingPlatform != null ? sequencingPlatform : WORKFLOWS.LMNGS;
+      sequencingPlatform =
+        sequencingPlatform != null ? sequencingPlatform : WORKFLOWS.LMNGS;
       await this.clickSequencingPlatform(sequencingPlatform);
 
       await this.clickGuppyBasecallerSettingDropDown();
@@ -785,7 +1173,10 @@ export class UploadPage extends PageObject {
       await this.clickCheckboxForWorkflow(analysisType);
       await this.pause(1);
 
-      sequencingPlatform = sequencingPlatform != null ? sequencingPlatform : SEQUENCING_PLATFORMS.MNGS;
+      sequencingPlatform =
+        sequencingPlatform != null
+          ? sequencingPlatform
+          : SEQUENCING_PLATFORMS.MNGS;
       await this.clickSequencingPlatform(sequencingPlatform);
       await this.pause(1);
 
@@ -806,7 +1197,7 @@ export class UploadPage extends PageObject {
 
   public async setTaxonFilter(filterName: string) {
     await this.clickTaxonFilter();
-    await this.page.getByText(filterName, {exact: true}).click();
+    await this.page.getByText(filterName, { exact: true }).click();
   }
 
   public async setUploadTaxonFilter(filterName: string) {
@@ -819,8 +1210,7 @@ export class UploadPage extends PageObject {
     await this.page.getByText(filterName).first().click();
   }
 
-  public async setManualInputs(inputs: any)
-  {
+  public async setManualInputs(inputs: any) {
     const sampleNames = await this.getMetadataSampleNames();
     const keys = Object.keys(inputs);
     for (let i = 0; i < keys.length; i++) {
@@ -839,7 +1229,10 @@ export class UploadPage extends PageObject {
       await this.fillWaterControl(inputs[sampleName].waterControl, i);
       await this.fillNucleotideType(inputs[sampleName].nucleotideType, i);
       await this.fillCollectionDate(inputs[sampleName].collectionDate, i);
-      await this.fillCollectionLocation(inputs[sampleName].collectionLocation, i);
+      await this.fillCollectionLocation(
+        inputs[sampleName].collectionLocation,
+        i,
+      );
     }
 
     const errors = await this.getErrors();
@@ -847,12 +1240,28 @@ export class UploadPage extends PageObject {
     return inputs;
   }
 
-  public async e2eCSVSampleUpload(sampleFiles: Array<string>, project: any, workflow: string, inputs = null, includeTrimPrimer = true, taxonName = "Unknown", sequencingPlatform = null, guppyBasecaller = "fast", timeout = 90_000) {
+  public async e2eCSVSampleUpload(
+    sampleFiles: Array<string>,
+    project: any,
+    workflow: string,
+    inputs = null,
+    includeTrimPrimer = true,
+    taxonName = "Unknown",
+    sequencingPlatform = null,
+    guppyBasecaller = "fast",
+    timeout = 90_000,
+  ) {
     await this.goto();
     await this.dismissCookieBanner();
 
     await this.selectProject(project.name);
-    await this.setWorkFlow(workflow, includeTrimPrimer, taxonName, sequencingPlatform, guppyBasecaller);
+    await this.setWorkFlow(
+      workflow,
+      includeTrimPrimer,
+      taxonName,
+      sequencingPlatform,
+      guppyBasecaller,
+    );
     await this.uploadSampleFiles(sampleFiles, true, timeout);
 
     // Continue
@@ -898,21 +1307,29 @@ export class UploadPage extends PageObject {
 
   // #region Samples
   public async isSequencingTechnologyDisabled(workflow: string) {
-    return (await this.getCheckboxForWorkflow(workflow.toLocaleLowerCase())).isDisabled();
+    return (
+      await this.getCheckboxForWorkflow(workflow.toLocaleLowerCase())
+    ).isDisabled();
   }
 
   public async isContinueButtonDisabled() {
     return this.page.locator(CONTINUE_BUTTON).isDisabled();
   }
 
-  public async isSampleRowDisabled(index= 0) {
-    const classAttribute = await this.page.locator(ROW_FILENAMES).nth(index).getAttribute("class");
+  public async isSampleRowDisabled(index = 0) {
+    const classAttribute = await this.page
+      .locator(ROW_FILENAMES)
+      .nth(index)
+      .getAttribute("class");
     return classAttribute.includes(" disabled-");
-
   }
   public async validateSampleUploadConfirmation(confirmationText: string) {
-    await this.page.locator(`text=${confirmationText}`).waitFor({state: "visible", timeout: 30000});
-    const actualConfirmationText = await this.page.locator(UPLOAD_CONFIRMATION_TEXT).textContent();
+    await this.page
+      .locator(`text=${confirmationText}`)
+      .waitFor({ state: "visible", timeout: 30000 });
+    const actualConfirmationText = await this.page
+      .locator(UPLOAD_CONFIRMATION_TEXT)
+      .textContent();
 
     expect(actualConfirmationText).toEqual(confirmationText);
   }
@@ -931,7 +1348,9 @@ export class UploadPage extends PageObject {
 
   // #region Metadata
   public async validateUploadMetaDataVisible() {
-    await expect(this.page.getByText(UPLOAD_METADATA)).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByText(UPLOAD_METADATA)).toBeVisible({
+      timeout: 10000,
+    });
   }
 
   public async validateManualInputsValues(inputs: any) {
@@ -939,12 +1358,24 @@ export class UploadPage extends PageObject {
     for (let i = 0; i < Object.keys(inputs).length; i++) {
       const sampleName = metaDataSamples[i];
       const expectedInput = inputs[sampleName];
-      expect(expectedInput.hostOrganism).toEqual(await this.getMetadataHostOrganismValue(i));
-      expect(expectedInput.sampleTissueType).toEqual(await this.getMetadataSampleTissueTypeValue(i));
-      expect(expectedInput.waterControl).toEqual(await this.getMetadataWaterControlValue(i));
-      expect(expectedInput.nucleotideType).toEqual(await this.getMetadataNucleotideTypeValue(i));
-      expect(expectedInput.collectionDate).toEqual(await this.getMetadataCollectionDateValue(i));
-      expect(expectedInput.collectionLocation).toEqual(await this.getMetadataCollectionLocationValue(i));
+      expect(expectedInput.hostOrganism).toEqual(
+        await this.getMetadataHostOrganismValue(i),
+      );
+      expect(expectedInput.sampleTissueType).toEqual(
+        await this.getMetadataSampleTissueTypeValue(i),
+      );
+      expect(expectedInput.waterControl).toEqual(
+        await this.getMetadataWaterControlValue(i),
+      );
+      expect(expectedInput.nucleotideType).toEqual(
+        await this.getMetadataNucleotideTypeValue(i),
+      );
+      expect(expectedInput.collectionDate).toEqual(
+        await this.getMetadataCollectionDateValue(i),
+      );
+      expect(expectedInput.collectionLocation).toEqual(
+        await this.getMetadataCollectionLocationValue(i),
+      );
     }
   }
   // #endregion Metadata
@@ -965,22 +1396,19 @@ export class UploadPage extends PageObject {
         "Analysis Type": "Metagenomics",
         "Pipeline Version": "8", // Major version
       };
-    }
-    else if (sampleType === WORKFLOWS.LMNGS) {
+    } else if (sampleType === WORKFLOWS.LMNGS) {
       expectedResults = {
         "Sequencing Platform": "Nanopore",
         "Analysis Type": "Metagenomics",
         "Guppy Basecaller Setting": "fast",
         "Pipeline Version": "0", // Major version
       };
-    }
-    else if (sampleType === WORKFLOWS.AMR) {
+    } else if (sampleType === WORKFLOWS.AMR) {
       expectedResults = {
         "Analysis Type": "Antimicrobial Resistance",
         "Pipeline Version": "1", // Major version
       };
-    }
-    else if (sampleType === WORKFLOWS.WGS) {
+    } else if (sampleType === WORKFLOWS.WGS) {
       expectedResults = {
         "Analysis Type": "Viral Consensus Genome",
         "Sequencing Platform": "Illumina",
@@ -989,21 +1417,21 @@ export class UploadPage extends PageObject {
         "Trim Primer": "Primer_K.bed",
         "Pipeline Version": CONSENSUS_GENOME_PIPELINE_MAJOR_VERSION,
       };
-    }
-    else if (sampleType === WORKFLOWS.SC2) {
+    } else if (sampleType === WORKFLOWS.SC2) {
       expectedResults = {
         "Analysis Type": "SARS-CoV-2 Consensus Genome",
         "Sequencing Platform": "Illumina",
         "Wetlab Protocol": WETLAB_PROTOCOL,
         "Pipeline Version": CONSENSUS_GENOME_PIPELINE_MAJOR_VERSION,
       };
-    }
-    else {
-        throw new Error(`Unsupported Sample Type: ${sampleType}`);
+    } else {
+      throw new Error(`Unsupported Sample Type: ${sampleType}`);
     }
     for (const analysis in expectedResults) {
       if (analysis === "Pipeline Version") {
-        const pipelineRegex = new RegExp(`Pipeline Version: ${expectedResults[analysis]}.\\d+.\\d+`);
+        const pipelineRegex = new RegExp(
+          `Pipeline Version: ${expectedResults[analysis]}.\\d+.\\d+`,
+        );
         expect(await analysisReview.textContent()).toMatch(pipelineRegex);
       } else {
         await expect(analysisReview).toContainText(expectedResults[analysis]);
@@ -1017,13 +1445,27 @@ export class UploadPage extends PageObject {
       const sampleName = reviewSamples[i];
       const expectedInput = inputs[sampleName];
       expect(sampleName).toEqual(expectedInput["sampleFile"]);
-      expect(await this.getReviewInputFiles(i)).toEqual(expectedInput["inputFile"]);
-      expect(await this.getReviewHostOrganismValue(i)).toEqual(expectedInput["hostOrganism"]);
-      expect(await this.getReviewSampleTissueTypeValue(i)).toEqual(expectedInput["sampleTissueType"]);
-      expect(await this.getReviewWaterControlValue(i)).toEqual(expectedInput["waterControl"]);
-      expect(await this.getReviewNucleotideTypeValue(i)).toEqual(expectedInput["nucleotideType"]);
-      expect(await this.getReviewCollectionDateValue(i)).toEqual(expectedInput["collectionDate"]);
-      expect(await this.getReviewCollectionLocationValue(i)).toContain(expectedInput["collectionLocation"]); // Full location string contains partial location string
+      expect(await this.getReviewInputFiles(i)).toEqual(
+        expectedInput["inputFile"],
+      );
+      expect(await this.getReviewHostOrganismValue(i)).toEqual(
+        expectedInput["hostOrganism"],
+      );
+      expect(await this.getReviewSampleTissueTypeValue(i)).toEqual(
+        expectedInput["sampleTissueType"],
+      );
+      expect(await this.getReviewWaterControlValue(i)).toEqual(
+        expectedInput["waterControl"],
+      );
+      expect(await this.getReviewNucleotideTypeValue(i)).toEqual(
+        expectedInput["nucleotideType"],
+      );
+      expect(await this.getReviewCollectionDateValue(i)).toEqual(
+        expectedInput["collectionDate"],
+      );
+      expect(await this.getReviewCollectionLocationValue(i)).toContain(
+        expectedInput["collectionLocation"],
+      ); // Full location string contains partial location string
     }
   }
   // #endregion Review
@@ -1045,7 +1487,10 @@ export class UploadPage extends PageObject {
   }
 
   public async waitForBasespaceUploadComplete(timeout = 90_000) {
-    await this.page.locator(LOADING_BARS).last().waitFor({state: "detached", timeout: timeout});
+    await this.page
+      .locator(LOADING_BARS)
+      .last()
+      .waitFor({ state: "detached", timeout: timeout });
   }
   // #endregion Wait
 }

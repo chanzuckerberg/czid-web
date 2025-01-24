@@ -1,5 +1,4 @@
-import { ANTIMICROBIAL_RESISTANCE } from './../constants/common';
-import { DOWNLOAD_ICON } from "@e2e/constants/common";
+import { ANTIMICROBIAL_RESISTANCE, DOWNLOAD_ICON } from "@e2e/constants/common";
 import { expect } from "@playwright/test";
 import { DownloadsPage } from "./downloads-page";
 import { HeatmapPage } from "./heatmap-page";
@@ -206,13 +205,19 @@ export const RUN_TYPES = {
   amr: "Antimicrobial Resistance",
 };
 
-const PLQC_READS_LOST_BARS = "//*[@data-testid='read-lost-bar']//*[contains(@class, 'barPiece') and not(@width='1')]";
-const PLQC_MEAN_INSERT_SIZE_BARS = "//*[@data-testid='mean-insert-size-histogram']//*[contains(@class, 'bar')]//*[not(@height='0')]";
-const PLQC_DUPLICATE_COMPRESSION_BARS = "[data-testid='duplicate-compression-histogram'] g[class*='bar']";
-const PLQC_PASSED_QC_BARS = "[data-testid='passed-qc-histogram'] g[class*='bar']";
-const PLQC_HOVER_TOOLTIP = "[data-testid='hover-tooltip'] [class*='dataRow'] div";
+const PLQC_READS_LOST_BARS =
+  "//*[@data-testid='read-lost-bar']//*[contains(@class, 'barPiece') and not(@width='1')]";
+const PLQC_MEAN_INSERT_SIZE_BARS =
+  "//*[@data-testid='mean-insert-size-histogram']//*[contains(@class, 'bar')]//*[not(@height='0')]";
+const PLQC_DUPLICATE_COMPRESSION_BARS =
+  "[data-testid='duplicate-compression-histogram'] g[class*='bar']";
+const PLQC_PASSED_QC_BARS =
+  "[data-testid='passed-qc-histogram'] g[class*='bar']";
+const PLQC_HOVER_TOOLTIP =
+  "[data-testid='hover-tooltip'] [class*='dataRow'] div";
 const PLQC_VIEW = "[data-testid='plqc-view']";
-const PLQC_TOTAL_READ_HISTOGRAM_BARS = "[data-testid='total-read-histogram'] g[class*='bar']";
+const PLQC_TOTAL_READ_HISTOGRAM_BARS =
+  "[data-testid='total-read-histogram'] g[class*='bar']";
 const COLUMN_PLUS_BUTTON = "[data-testid='plus-circle']";
 const PLUS_OPTIONS =
   "[data-testid='plus-circle'] [role='option'] [data-testid*='dropdown']";
@@ -229,6 +234,7 @@ export class ProjectPage extends PageObject {
     projectId: number,
     workflow = "",
     domain = "public",
+    timeout = 30_000,
   ) {
     await this.pause(1);
     const workflowParam =
@@ -237,12 +243,14 @@ export class ProjectPage extends PageObject {
     await this.page.goto(url);
 
     // Wait for table to render with no more loading shimmers.
-    await this.page.waitForSelector(
-      TABLE_GRID,
-    );
+    await this.page
+      .waitForSelector(TABLE_GRID, { timeout: timeout })
+      .catch(() => {
+        return null;
+      });
     await this.pause(2);
     await expect(this.page.locator(LOADING)).toHaveCount(0, {
-      timeout: 30_000,
+      timeout: timeout,
     });
   }
   // #endregion Navigate
@@ -251,7 +259,9 @@ export class ProjectPage extends PageObject {
   public async getWorkflowRuns(projectId: number, workflow: string) {
     const response = await this.page
       .context()
-      .request.get(`${process.env.BASEURL}/workflow_runs.json?projectId=${projectId}&mode=with_sample_info&workflow=${workflow}`);
+      .request.get(
+        `${process.env.BASEURL}/workflow_runs.json?projectId=${projectId}&mode=with_sample_info&workflow=${workflow}`,
+      );
     const responseJson = await response.json();
     return responseJson.workflow_runs;
   }
@@ -264,7 +274,7 @@ export class ProjectPage extends PageObject {
     return responseJson.backgrounds;
   }
 
-  public getProjectNameForUser(projectName: string) : string {
+  public getProjectNameForUser(projectName: string): string {
     const userName = process.env.CZID_USERNAME.split("@")[0];
     // Replace + in userName with - as automatically done by CZ ID for project names
     // Users sometimes use email+1@domain as a way to create unique usernames
@@ -422,11 +432,11 @@ export class ProjectPage extends PageObject {
 
   // #region fill
   public async fillBackgroundDescriptionInput(value: string) {
-    await this.page.locator(CREATE_BACKGROUND_DESCRIPTION_INPUT).fill(value)
+    await this.page.locator(CREATE_BACKGROUND_DESCRIPTION_INPUT).fill(value);
   }
 
   public async fillBackgroundNameInput(value: string) {
-    await this.page.locator(CREATE_BACKGROUND_NAME_INPUT).fill(value)
+    await this.page.locator(CREATE_BACKGROUND_NAME_INPUT).fill(value);
   }
 
   public async fillTimeframeFilter(value: string) {
@@ -465,6 +475,8 @@ export class ProjectPage extends PageObject {
   public async fillHostFilter(values: Array<string>) {
     await this.pause(1);
     await this.page.locator(HOST_FILTER).waitFor();
+    await this.pause(1);
+
     await this.page.locator(HOST_FILTER).click();
     for (const value of values) {
       await this.page.locator(SELECT_HOST).fill(value);
@@ -514,9 +526,9 @@ export class ProjectPage extends PageObject {
 
   public async waitForTableLoad(timeout = 90_000) {
     // Wait for loading to complete
-    await this.page.waitForSelector(
-      TABLE_GRID,
-    );
+    await this.page.waitForSelector(TABLE_GRID).catch(async () => {
+      await this.reload();
+    });
     await this.pause(2);
     await expect(this.page.locator(LOADING)).toHaveCount(0, {
       timeout: timeout,
@@ -556,26 +568,34 @@ export class ProjectPage extends PageObject {
   }
 
   public async clickCorrectionMethodOption(option: string) {
-    await this.page.locator(CREATE_BACKGROUND_CORRECTION_OPTIONS).getByText(option).click();
+    await this.page
+      .locator(CREATE_BACKGROUND_CORRECTION_OPTIONS)
+      .getByText(option)
+      .click();
   }
 
   public async clickCorrectionMethodDropdown() {
     await this.page.locator(CREATE_BACKGROUND_CORRECTION_DROPDOWN).click();
-    await this.page.locator(CREATE_BACKGROUND_CORRECTION_OPTIONS).waitFor({timeout: 5_000}).catch(() => null);
+    await this.page
+      .locator(CREATE_BACKGROUND_CORRECTION_OPTIONS)
+      .waitFor({ timeout: 5_000 })
+      .catch(() => null);
   }
 
   public async clickVisualization(value: any) {
     let locator = null;
     if (typeof value === typeof String) {
-      locator = this.page.locator(VISUALIZATION_NAME_AND_STATUS).getByText(value);
+      locator = this.page
+        .locator(VISUALIZATION_NAME_AND_STATUS)
+        .getByText(value);
     } else if (typeof value === typeof Number) {
-      locator = this.page.locator(VISUALIZATION_NAME_AND_STATUS).nth(value)
+      locator = this.page.locator(VISUALIZATION_NAME_AND_STATUS).nth(value);
     } else {
-      locator = this.page.locator(VISUALIZATION_NAME_AND_STATUS).nth(0)
+      locator = this.page.locator(VISUALIZATION_NAME_AND_STATUS).nth(0);
     }
     await locator.waitFor();
 
-    await this.pause(1)
+    await this.pause(1);
     locator.click();
     const heatmapPage = new HeatmapPage(this.page);
 
@@ -602,7 +622,7 @@ export class ProjectPage extends PageObject {
 
   public async clickDownloadButtonForImmediateDownload(timeout = 90_000) {
     const [download] = await Promise.all([
-      this.page.waitForEvent("download", {timeout: timeout}),
+      this.page.waitForEvent("download", { timeout: timeout }),
       this.page.locator(START_GENERATING_DOWNLOAD_BUTTON).click(),
     ]).catch(() => [undefined]);
     expect(download).toBeDefined();
@@ -622,6 +642,8 @@ export class ProjectPage extends PageObject {
   }
 
   public async clickVisualizationsTab() {
+    await this.page.locator(VISUALIZATIONS_TAB).waitFor();
+    await this.pause(1);
     await this.page.locator(VISUALIZATIONS_TAB).click();
   }
 
@@ -640,6 +662,7 @@ export class ProjectPage extends PageObject {
 
   public async clickPublicHeaderLink() {
     await this.page.locator(PUBLIC_HEADER_LINK).click();
+    await this.waitForTableLoad(180_000);
   }
 
   public async clickUploadHeaderLink() {
@@ -743,7 +766,9 @@ export class ProjectPage extends PageObject {
       this.page.context().waitForEvent("page"),
       await this.page.locator(TAXON_HEATMAP).click(),
     ]);
-    await newPage.waitForLoadState("load", {timeout: 10_000}).catch(() => null);
+    await newPage
+      .waitForLoadState("load", { timeout: 10_000 })
+      .catch(() => null);
     const heatmapPage = new HeatmapPage(newPage);
 
     await this.pause(3);
@@ -751,7 +776,15 @@ export class ProjectPage extends PageObject {
   }
 
   public async clickSample(sampleName: string) {
-    await this.page.locator(SAMPLE_BY_SAMPLE_NAME(sampleName)).first().click();
+    const sampleLocator = this.page
+      .locator(SAMPLE_BY_SAMPLE_NAME(sampleName))
+      .first();
+    for (let i = 0; i <= 3; i++) {
+      await sampleLocator.click({ force: true });
+      if (!(await sampleLocator.isVisible())) {
+        break;
+      }
+    }
     return new SamplesPage(this.page);
   }
 
@@ -772,7 +805,9 @@ export class ProjectPage extends PageObject {
 
   public async clickNextcladeTreeButton() {
     const nextcladeTreeTooltip = await this.getNextcladeTreeTooltip();
-    expect(nextcladeTreeTooltip).not.toMatch("Nexclade is temporarily unavailable");
+    expect(nextcladeTreeTooltip).not.toMatch(
+      "Nexclade is temporarily unavailable",
+    );
     await this.page.locator(NEXTCLADE_TREE_BUTTON).click();
     await this.pause(1);
   }
@@ -855,7 +890,10 @@ export class ProjectPage extends PageObject {
   // #endregion Click
 
   // #region Get
-  public async getCountForTabName(tabSelector: string, tabName: string) : Promise<number> {
+  public async getCountForTabName(
+    tabSelector: string,
+    tabName: string,
+  ): Promise<number> {
     await this.page.locator(tabSelector).first().waitFor();
     const tabText = await this.page.locator(tabSelector).first().textContent();
     return parseInt(tabText.replace(tabName, ""));
@@ -870,12 +908,18 @@ export class ProjectPage extends PageObject {
   public async getAntimicrobialTabCount(): Promise<number> {
     // Removing await changes behavior, and this rule is deprecated in more recent verions of eslint
     // eslint-disable-next-line no-return-await
-    return await this.getCountForTabName(ANTIMICROBIAL_TAB, ANTIMICROBIAL_RESISTANCE_TAB_NAME);
+    return await this.getCountForTabName(
+      ANTIMICROBIAL_TAB,
+      ANTIMICROBIAL_RESISTANCE_TAB_NAME,
+    );
   }
 
   public async getCreateBackgroundNotification() {
     await this.page.locator(CREATE_BACKGROUND_NOTIFICATION).first().waitFor();
-    return this.page.locator(CREATE_BACKGROUND_NOTIFICATION).first().textContent();
+    return this.page
+      .locator(CREATE_BACKGROUND_NOTIFICATION)
+      .first()
+      .textContent();
   }
 
   public async getReadsLostTable(samples = 4) {
@@ -889,7 +933,9 @@ export class ProjectPage extends PageObject {
     for (let i = 0; i < readsLostBars.length; i++) {
       const rowIndex = i % samples;
       await this.page.locator(PLQC_READS_LOST_BARS).nth(i).hover();
-      const tooltipsForSample = Array.from(new Set(await this.getPLQCHoverTooltip()));
+      const tooltipsForSample = Array.from(
+        new Set(await this.getPLQCHoverTooltip()),
+      );
 
       const key = tooltipsForSample[0];
       const value = tooltipsForSample[1];
@@ -899,7 +945,8 @@ export class ProjectPage extends PageObject {
   }
 
   public async getSampleNames(timeout = 30000) {
-    await this.page.locator(SAMPLE_NAMES).first().waitFor({timeout: timeout});
+    await this.waitForTableLoad();
+    await this.page.locator(SAMPLE_NAMES).first().waitFor({ timeout: timeout });
     return this.page.locator(SAMPLE_NAMES).allTextContents();
   }
 
@@ -909,8 +956,11 @@ export class ProjectPage extends PageObject {
 
   public async getNextcladeTreeTooltip() {
     await this.page.locator(NEXTCLADE_TREE_BUTTON).focus();
-    await this.page.locator(NEXTCLADE_TREE_BUTTON).hover({force: true});
-    const popupTextElement = await this.page.locator(POPUPTEXT).waitFor({timeout: 1000}).catch(() => null);
+    await this.page.locator(NEXTCLADE_TREE_BUTTON).hover({ force: true });
+    const popupTextElement = await this.page
+      .locator(POPUPTEXT)
+      .waitFor({ timeout: 1000 })
+      .catch(() => null);
 
     let popupText = "";
     if (popupTextElement !== null) {
@@ -920,7 +970,9 @@ export class ProjectPage extends PageObject {
   }
 
   public async getDeleteSelectedSamplesCount() {
-    const deleteTitle = await this.page.locator(DELETE_MODAL_TITLE).textContent();
+    const deleteTitle = await this.page
+      .locator(DELETE_MODAL_TITLE)
+      .textContent();
     const selected = deleteTitle.replace(/[^0-9]/g, "");
     return parseInt(selected);
   }
@@ -990,7 +1042,9 @@ export class ProjectPage extends PageObject {
     const rows = await this.page.locator(COMPLETED_ROWS).all();
     const indexes = [];
     for (const row of rows) {
-      const rowIndex = await row.getAttribute(ARIA_ROWINDEX, {timeout: 4_000}).catch(() => null);
+      const rowIndex = await row
+        .getAttribute(ARIA_ROWINDEX, { timeout: 4_000 })
+        .catch(() => null);
       if (rowIndex !== null) {
         indexes.push(+rowIndex);
       }
@@ -1036,7 +1090,10 @@ export class ProjectPage extends PageObject {
   }
 
   public async getVisualizationTable(timeout = 30_000) {
-    await this.page.locator("[role='rowgroup'] [role='row']").first().waitFor({timeout: timeout});
+    await this.page
+      .locator("[role='rowgroup'] [role='row']")
+      .first()
+      .waitFor({ timeout: timeout });
     await expect(this.page.locator(LOADING).last()).toHaveCount(0, {
       timeout: timeout,
     });
@@ -1105,7 +1162,11 @@ export class ProjectPage extends PageObject {
   }
 
   // #region Macro
-  public async deleteSamplesOlderThanGivenMonths(project: any, workflow: string, months: number) {
+  public async deleteSamplesOlderThanGivenMonths(
+    project: any,
+    workflow: string,
+    months: number,
+  ) {
     await this.navigateToSamples(project.id, workflow);
     const sampleTable = await this.getSamplesTable();
     const currentDate = new Date();
@@ -1213,6 +1274,12 @@ export class ProjectPage extends PageObject {
     return selectedSampleNames;
   }
 
+  public async selectSamplesByName(sampleNames: Array<string>) {
+    for (const sampleName of sampleNames) {
+      await this.clickSampleCheckbox(sampleName);
+    }
+  }
+
   public async isPlusColumnOptionChecked(option: string) {
     const classAttribute = await this.page
       .locator(CHECKED_PLUS_OPTION(option))
@@ -1240,10 +1307,13 @@ export class ProjectPage extends PageObject {
     await this.clickBackgroundFilterDropdown();
 
     await this.page.locator(BACKGROUND_SEARCH_RESULTS).first().waitFor();
-    const backgroundsFE = await this.page.locator(BACKGROUND_SEARCH_RESULTS).allTextContents();
+    const backgroundsFE = await this.page
+      .locator(BACKGROUND_SEARCH_RESULTS)
+      .allTextContents();
     const backgrounds = await this.getBackgrounds();
     if (backgroundName === null) {
-      backgroundName = backgroundsFE[Math.floor(Math.random() * backgroundsFE.length)];
+      backgroundName =
+        backgroundsFE[Math.floor(Math.random() * backgroundsFE.length)];
     }
     background = backgrounds.filter(b => b.name === backgroundName)[0];
 

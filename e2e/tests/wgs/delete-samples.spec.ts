@@ -13,28 +13,38 @@ const WAIT_FOR_PIPELINE = false;
 
 const timeout = 60 * 1000 * 5;
 
-
 /*
  * WGS Delete samples
  */
 test.describe("WGS Delete samples: Functional: P-0", () => {
-
   test.beforeEach(async () => {
     test.setTimeout(timeout);
   });
 
-  test("SNo WGS - 47: Delete WGS sample from sample view list Bulk download removed", async ({ page }) => {
+  test("SNo WGS - 47: Delete WGS sample from sample view list Bulk download removed", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
-    const {project, projectPage} = await runTestSetup(page, `SNo-WGS-47`);
+    const { project, projectPage } = await runTestSetup(page, `SNo-WGS-47`);
     await projectPage.navigateToMyData();
     await projectPage.fillSearchMyDataInput(project.name);
-    const projectsTableBefore = await projectPage.getProjectsTableOrderedByName();
+    const projectsTableBefore =
+      await projectPage.getProjectsTableOrderedByName();
     expect(projectsTableBefore[project.name]["Counts"]).toBeDefined();
-    expect(projectsTableBefore[project.name]["Counts"].toString()).toMatch(/[0-9]+ Sample(s)?/);
+    expect(projectsTableBefore[project.name]["Counts"].toString()).toMatch(
+      /[0-9]+ Sample(s)?/,
+    );
 
-    let projectsTableSampleCountBefore = projectsTableBefore[project.name]["Counts"][0];
-    projectsTableSampleCountBefore = projectsTableSampleCountBefore.includes("Samples") ? projectsTableSampleCountBefore.replace("Samples", "") : projectsTableSampleCountBefore.replace("Sample", "");
-    const projectsTableSampleNumberCountBefore = parseInt(projectsTableSampleCountBefore);
+    let projectsTableSampleCountBefore =
+      projectsTableBefore[project.name]["Counts"][0];
+    projectsTableSampleCountBefore = projectsTableSampleCountBefore.includes(
+      "Samples",
+    )
+      ? projectsTableSampleCountBefore.replace("Samples", "")
+      : projectsTableSampleCountBefore.replace("Sample", "");
+    const projectsTableSampleNumberCountBefore = parseInt(
+      projectsTableSampleCountBefore,
+    );
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Open [floo WGS1] Project
@@ -51,7 +61,8 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     const samples = await projectPage.selectCompletedSamples(3);
     const sampleToBeDeleted = samples[2];
 
-    const consensusGenomesCountBefore = await projectPage.getConsensusGenomesCount();
+    const consensusGenomesCountBefore =
+      await projectPage.getConsensusGenomesCount();
     // #endregion 4. Select WGS samples - ""no_host_1"", ""no_host_2"", ""wgs_SARS_CoV2_no_host""
 
     // #region 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Intermediate Output Files
@@ -59,12 +70,14 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     await projectPage.clickDownloadType("Consensus Genome");
     await projectPage.clickFilterDropdown();
     await projectPage.clickFilterOption("Single file (Concatenated)");
-    const consensusGenomeDownloadId = await projectPage.clickStartGeneratingDownloadButton();
+    const consensusGenomeDownloadId =
+      await projectPage.clickStartGeneratingDownloadButton();
     await projectPage.clickDismissButton();
 
     await projectPage.clickDownloadButton();
     await projectPage.clickDownloadType("Intermediate Output Files");
-    const intermediateOutputFilesDownloadId = await projectPage.clickStartGeneratingDownloadButton();
+    const intermediateOutputFilesDownloadId =
+      await projectPage.clickStartGeneratingDownloadButton();
     // #endregion 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Intermediate Output Files
 
     // #region 6. Go to Download main user menu
@@ -74,7 +87,9 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 7. Verify created Bulk Downloads complete
     // Bulk Download files created with samples selected
     await downloadsPage.waitForDownloadComplete(consensusGenomeDownloadId);
-    await downloadsPage.waitForDownloadComplete(intermediateOutputFilesDownloadId);
+    await downloadsPage.waitForDownloadComplete(
+      intermediateOutputFilesDownloadId,
+    );
     // #endregion 7. Verify created Bulk Downloads complete
 
     // #region 8. Go back to [floo WGS1] Project
@@ -97,13 +112,18 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
 
     // #region 12. Verify Bulk Download files created in step 5 are removed
     // Bulk download file records removed when a sample is deleted
-    expect(await downloadsPage.isDownloadVisible(consensusGenomeDownloadId)).toBeFalsy();
-    expect(await downloadsPage.isDownloadVisible(intermediateOutputFilesDownloadId)).toBeFalsy();
+    expect(
+      await downloadsPage.isDownloadVisible(consensusGenomeDownloadId),
+    ).toBeFalsy();
+    expect(
+      await downloadsPage.isDownloadVisible(intermediateOutputFilesDownloadId),
+    ).toBeFalsy();
     // #endregion 12. Verify Bulk Download files created in step 5 are removed
 
     // #region 13. Verify Samples & Consensus Genomes tabs sample counts
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
-    const consensusGenomesCountAfter = await projectPage.getConsensusGenomesCount();
+    const consensusGenomesCountAfter =
+      await projectPage.getConsensusGenomesCount();
 
     // - Consensus Genomes tab count decreases by [X]
     expect(consensusGenomesCountAfter).toEqual(consensusGenomesCountBefore - 1);
@@ -116,30 +136,52 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 14. Verify Discovery View Project sample count
     await projectPage.navigateToMyData();
     await projectPage.fillSearchMyDataInput(project.name);
-    const projectsTableAfter = await projectPage.getProjectsTableOrderedByName();
+    const projectsTableAfter =
+      await projectPage.getProjectsTableOrderedByName();
 
     // - Discovery view project sample count total and CG count decreases by [X]
-    let projectsTableSampleCountAfter = projectsTableAfter[project.name]["Counts"][0];
-    projectsTableSampleCountAfter = projectsTableSampleCountAfter.includes("Samples") ? projectsTableSampleCountAfter.replace("Samples", "") : projectsTableSampleCountAfter.replace("Sample", "");
+    let projectsTableSampleCountAfter =
+      projectsTableAfter[project.name]["Counts"][0];
+    projectsTableSampleCountAfter = projectsTableSampleCountAfter.includes(
+      "Samples",
+    )
+      ? projectsTableSampleCountAfter.replace("Samples", "")
+      : projectsTableSampleCountAfter.replace("Sample", "");
 
-    const projectsTableSampleNumberCountAfter = parseInt(projectsTableSampleCountAfter);
-    expect(projectsTableSampleNumberCountAfter).toEqual(projectsTableSampleNumberCountBefore - 1);
+    const projectsTableSampleNumberCountAfter = parseInt(
+      projectsTableSampleCountAfter,
+    );
+    expect(projectsTableSampleNumberCountAfter).toEqual(
+      projectsTableSampleNumberCountBefore - 1,
+    );
     // #endregion 14. Verify Discovery View Project sample count
   });
 
-  test("SNo WGS - 48: Delete WGS sample from sample report Bulk download removed", async ({ page }) => {
+  test("SNo WGS - 48: Delete WGS sample from sample report Bulk download removed", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
-    const {project, projectPage} = await runTestSetup(page, `SNo-WGS-48`);
+    const { project, projectPage } = await runTestSetup(page, `SNo-WGS-48`);
     await projectPage.navigateToMyData();
     await projectPage.fillSearchMyDataInput(project.name);
 
-    const projectsTableBefore = await projectPage.getProjectsTableOrderedByName();
+    const projectsTableBefore =
+      await projectPage.getProjectsTableOrderedByName();
     expect(projectsTableBefore[project.name]["Counts"]).toBeDefined();
-    expect(projectsTableBefore[project.name]["Counts"].toString()).toMatch(/[0-9]+ Sample(s)?/);
+    expect(projectsTableBefore[project.name]["Counts"].toString()).toMatch(
+      /[0-9]+ Sample(s)?/,
+    );
 
-    let projectsTableSampleCountBefore = projectsTableBefore[project.name]["Counts"][0];
-    projectsTableSampleCountBefore = projectsTableSampleCountBefore.includes("Samples") ? projectsTableSampleCountBefore.replace("Samples", "") : projectsTableSampleCountBefore.replace("Sample", "");
-    const projectsTableSampleNumberCountBefore = parseInt(projectsTableSampleCountBefore);
+    let projectsTableSampleCountBefore =
+      projectsTableBefore[project.name]["Counts"][0];
+    projectsTableSampleCountBefore = projectsTableSampleCountBefore.includes(
+      "Samples",
+    )
+      ? projectsTableSampleCountBefore.replace("Samples", "")
+      : projectsTableSampleCountBefore.replace("Sample", "");
+    const projectsTableSampleNumberCountBefore = parseInt(
+      projectsTableSampleCountBefore,
+    );
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Open [floo WGS1] Project
@@ -156,7 +198,8 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     const samples = await projectPage.selectCompletedSamples(3);
     const sampleToBeDeleted = samples[2];
 
-    const consensusGenomesCountBefore = await projectPage.getConsensusGenomesCount();
+    const consensusGenomesCountBefore =
+      await projectPage.getConsensusGenomesCount();
     // #endregion 4. Select WGS samples - ""no_host_1"", ""no_host_2"", ""wgs_SARS_CoV2_no_host""
 
     // #region 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Intermediate Output Files
@@ -164,12 +207,14 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     await projectPage.clickDownloadType("Consensus Genome");
     await projectPage.clickFilterDropdown();
     await projectPage.clickFilterOption("Single file (Concatenated)");
-    const consensusGenomeDownloadId = await projectPage.clickStartGeneratingDownloadButton();
+    const consensusGenomeDownloadId =
+      await projectPage.clickStartGeneratingDownloadButton();
     await projectPage.clickDismissButton();
 
     await projectPage.clickDownloadButton();
     await projectPage.clickDownloadType("Intermediate Output Files");
-    const intermediateOutputFilesDownloadId = await projectPage.clickStartGeneratingDownloadButton();
+    const intermediateOutputFilesDownloadId =
+      await projectPage.clickStartGeneratingDownloadButton();
     // #endregion 5. Click on Download icon (cloud) and start the following downloads: Consensus Genome, Intermediate Output Files
 
     // #region 6. Go to Download main user menu
@@ -179,7 +224,9 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 7. Verify created Bulk Downloads complete
     // Bulk Download files created with samples selected
     await downloadsPage.waitForDownloadComplete(consensusGenomeDownloadId);
-    await downloadsPage.waitForDownloadComplete(intermediateOutputFilesDownloadId);
+    await downloadsPage.waitForDownloadComplete(
+      intermediateOutputFilesDownloadId,
+    );
     // #endregion 7. Verify created Bulk Downloads complete
 
     // #region 8. Go back to [floo WGS1] Project
@@ -206,13 +253,18 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
 
     // #region 13. Verify Bulk Download files created in step 5 are removed
     // Bulk download file records removed when a sample is deleted
-    expect(await downloadsPage.isDownloadVisible(consensusGenomeDownloadId)).toBeFalsy();
-    expect(await downloadsPage.isDownloadVisible(intermediateOutputFilesDownloadId)).toBeFalsy();
+    expect(
+      await downloadsPage.isDownloadVisible(consensusGenomeDownloadId),
+    ).toBeFalsy();
+    expect(
+      await downloadsPage.isDownloadVisible(intermediateOutputFilesDownloadId),
+    ).toBeFalsy();
     // #endregion 13. Verify Bulk Download files created in step 5 are removed
 
     // #region 14. Verify Samples & Consensus Genomes tabs sample counts
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
-    const consensusGenomesCountAfter = await projectPage.getConsensusGenomesCount();
+    const consensusGenomesCountAfter =
+      await projectPage.getConsensusGenomesCount();
 
     // - Consensus Genomes tab count decreases by [X]
     expect(consensusGenomesCountAfter).toEqual(consensusGenomesCountBefore - 1);
@@ -225,17 +277,26 @@ test.describe("WGS Delete samples: Functional: P-0", () => {
     // #region 15. Verify Discovery View Project sample count
     await projectPage.navigateToMyData();
     await projectPage.fillSearchMyDataInput(project.name);
-    const projectsTableAfter = await projectPage.getProjectsTableOrderedByName();
+    const projectsTableAfter =
+      await projectPage.getProjectsTableOrderedByName();
 
     // - Discovery view project sample count total and CG count decreases by [X]
-    let projectsTableSampleCountAfter = projectsTableAfter[project.name]["Counts"][0];
-    projectsTableSampleCountAfter = projectsTableSampleCountAfter.includes("Samples") ? projectsTableSampleCountAfter.replace("Samples", "") : projectsTableSampleCountAfter.replace("Sample", "");
+    let projectsTableSampleCountAfter =
+      projectsTableAfter[project.name]["Counts"][0];
+    projectsTableSampleCountAfter = projectsTableSampleCountAfter.includes(
+      "Samples",
+    )
+      ? projectsTableSampleCountAfter.replace("Samples", "")
+      : projectsTableSampleCountAfter.replace("Sample", "");
 
-    const projectsTableSampleNumberCountAfter = parseInt(projectsTableSampleCountAfter);
-    expect(projectsTableSampleNumberCountAfter).toEqual(projectsTableSampleNumberCountBefore - 1);
+    const projectsTableSampleNumberCountAfter = parseInt(
+      projectsTableSampleCountAfter,
+    );
+    expect(projectsTableSampleNumberCountAfter).toEqual(
+      projectsTableSampleNumberCountBefore - 1,
+    );
     // #endregion 15. Verify Discovery View Project sample count
   });
-
 });
 
 async function runTestSetup(page: any, projectName: string) {
@@ -249,7 +310,12 @@ async function runTestSetup(page: any, projectName: string) {
     WGS_SAMPLE_FILES,
     [`${SARS_CoV2_NO_HOST}_1`],
     WORKFLOWS.WGS,
-    {hostOrganism: "Human", taxon: "Unknown", runPipeline: false, waitForPipeline: WAIT_FOR_PIPELINE},
+    {
+      hostOrganism: "Human",
+      taxon: "Unknown",
+      runPipeline: false,
+      waitForPipeline: WAIT_FOR_PIPELINE,
+    },
   );
   // no host 2
   await setupSamples(
@@ -258,7 +324,12 @@ async function runTestSetup(page: any, projectName: string) {
     WGS_SAMPLE_FILES,
     [`${SARS_CoV2_NO_HOST}_2`],
     WORKFLOWS.WGS,
-    {hostOrganism: "Human", taxon: "Unknown", runPipeline: false, waitForPipeline: WAIT_FOR_PIPELINE},
+    {
+      hostOrganism: "Human",
+      taxon: "Unknown",
+      runPipeline: false,
+      waitForPipeline: WAIT_FOR_PIPELINE,
+    },
   );
   // sample to delete
   await setupSamples(
@@ -267,7 +338,12 @@ async function runTestSetup(page: any, projectName: string) {
     WGS_SAMPLE_FILES,
     SARS_CoV2_SAMPLE_NAMES,
     WORKFLOWS.WGS,
-    {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+    {
+      hostOrganism: "Human",
+      taxon: "Unknown",
+      runPipeline: RUN_PIPELINE,
+      waitForPipeline: WAIT_FOR_PIPELINE,
+    },
   );
-   return {projectPage, project};
-};
+  return { projectPage, project };
+}

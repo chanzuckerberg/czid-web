@@ -20,7 +20,8 @@ const WGS_SAMPLE_NAMES = [NO_HOST_1, NO_HOST_2];
 const CONSENSUS_GENOME = "Consensus Genome";
 const DATE_FORMAT = "YYYY-MM-DD";
 const CONSENSUS_GENOME_OVERVIEW = "Consensus Genome Overview";
-const UID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+const UID_REGEX =
+  "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
 const timeout = 60 * 1000 * 5;
 
@@ -56,7 +57,10 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
     );
     selectedSamples = selectedSamples.sort();
 
-    let samples = await new SamplesPage(page).getSamples(project.name, selectedSamples);
+    let samples = await new SamplesPage(page).getSamples(
+      project.name,
+      selectedSamples,
+    );
     samples = samples.sort((a, b) => a.id - b.id);
     // #endregion 3. Select 1 or more samples in Sample list view
 
@@ -119,7 +123,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
       expect(downloadFileName).toMatch(/\.tar\.gz$/);
       const downloadDirectory = path.dirname(downloadPath);
       const extractPath = path.join(downloadDirectory, `SNo12_${Date.now()}`);
-      await fs.mkdir(extractPath, {recursive: true});
+      await fs.mkdir(extractPath, { recursive: true });
 
       await tar.x({
         file: downloadPath,
@@ -127,7 +131,6 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
       });
       const extractedContents = await fs.readdir(extractPath);
       for (const contents of extractedContents) {
-
         const extractedDir = path.join(extractPath, contents);
 
         let files = await fs.readdir(extractedDir);
@@ -137,20 +140,27 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
         for (const i in files) {
           const samplesPage = new SamplesPage(page);
-          const samples = await samplesPage.getSamples(project.name, selectedSamples[i]);
+          const samples = await samplesPage.getSamples(
+            project.name,
+            selectedSamples[i],
+          );
 
           // ({Sample_Name}_{ID}_consensus.fa) files format:
-          expect(files[i]).toEqual(`${selectedSamples[i]}_${samples[0].id}_consensus.fa`);
+          expect(files[i]).toEqual(
+            `${selectedSamples[i]}_${samples[0].id}_consensus.fa`,
+          );
 
           const extractedFilePath = path.join(extractedDir, files[i]);
-          const fileContent = await fs.readFile(extractedFilePath, {encoding: "utf-8"});
+          const fileContent = await fs.readFile(extractedFilePath, {
+            encoding: "utf-8",
+          });
           const lines = fileContent.split(/\r?\n/);
 
           // - First row displays ""> - {Sample name} in text format
           const fistLine = lines.shift();
           expect(fistLine).toMatch(`>${samples[0].name}`);
 
-          const lastLine = lines[lines.length-1];
+          const lastLine = lines[lines.length - 1];
           if (lastLine.trim() === "") {
             lines.pop(); // Remove the last empty line
           }
@@ -177,7 +187,9 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
       for (const i in selectedSamples) {
         // ({Sample_Name}_{UID}_consensus.fa) files format:
-        expect(zippedFileNames[i]).toMatch(new RegExp(`${selectedSamples[i]}_${UID_REGEX}.fa`));
+        expect(zippedFileNames[i]).toMatch(
+          new RegExp(`${selectedSamples[i]}_${UID_REGEX}.fa`),
+        );
 
         const entry = zip.getEntry(zippedFileNames[i]);
         const lines = entry.getData().toString().split(/\r?\n/);
@@ -602,7 +614,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
       const downloadDirectory = path.dirname(downloadPath);
       const extractPath = path.join(downloadDirectory, `SNo17_${Date.now()}`);
-      await fs.mkdir(extractPath, {recursive: true});
+      await fs.mkdir(extractPath, { recursive: true });
       await tar.x({
         file: downloadPath,
         cwd: extractPath,
@@ -617,10 +629,15 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
 
         for (const i in directories) {
           const samplesPage = new SamplesPage(page);
-          const samples = await samplesPage.getSamples(project.name, selectedSamples[i]);
+          const samples = await samplesPage.getSamples(
+            project.name,
+            selectedSamples[i],
+          );
 
           // {Sample_Name}_{ID}_ files format:
-          expect(directories).toContain(`${selectedSamples[i]}_${samples[0].id}_`);
+          expect(directories).toContain(
+            `${selectedSamples[i]}_${samples[0].id}_`,
+          );
 
           const extractedDirPath = path.join(extractedDir, directories[i]);
           let extractedFiles = await fs.readdir(extractedDirPath);
@@ -654,9 +671,10 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
       expect(selectedSamples.length).toEqual(directories.length);
       const expectedEntries = [];
       for (const i in selectedSamples) {
-
         // {Sample_Name}_{UID} directory format
-        expect(directories[i]).toMatch(new RegExp(`${selectedSamples[i]}_${UID_REGEX}`));
+        expect(directories[i]).toMatch(
+          new RegExp(`${selectedSamples[i]}_${UID_REGEX}`),
+        );
 
         for (const expectedContent of expectedExtractedContents) {
           expectedEntries.push(`${directories[i]}/${expectedContent}`);
@@ -673,7 +691,11 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
   test("SNo 24: Download All - Sample report link", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("SNo_WGS-22");
-    await projectPage.deleteSamplesOlderThanGivenMonths(project, WORKFLOWS.WGS, 5);
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      project,
+      WORKFLOWS.WGS,
+      5,
+    );
 
     await setupSamples(
       page,
@@ -685,7 +707,7 @@ test.describe("WGS - Downloads | Functional: P-0", () => {
         hostOrganism: "Human",
         taxon: "Unknown",
         includeTrimPrimer: true,
-        waitForPipeline: true
+        waitForPipeline: true,
       },
     );
 

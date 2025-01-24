@@ -1,6 +1,9 @@
 import * as fs from "fs/promises";
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { ProjectPage } from "@e2e/page-objects/project-page";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { setupSamples } from "@e2e/page-objects/user-actions";
@@ -11,22 +14,24 @@ const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 const WGS_SAMPLE_NAMES = ["wgs_SARS_CoV2_no_host"];
 // #endregion Expected data
 
-
 /*
  * WGS - Sample report
  */
 test.describe("Data Validation: P-0", () => {
-
-  test("SNo 29: Customer Reference file download and format", async ({ page }) => {
+  test("SNo 29: Customer Reference file download and format", async ({
+    page,
+  }) => {
     const projectPage = new ProjectPage(page);
-    const project = await new ProjectPage(page).getOrCreateProject("Test_SNo_29");
+    const project = await new ProjectPage(page).getOrCreateProject(
+      "Test_SNo_29",
+    );
     const samples = await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      {runPipeline: false, waitForPipeline: false},
+      { runPipeline: false, waitForPipeline: false },
     );
 
     // #region 1. Login to CZ ID staging
@@ -55,14 +60,14 @@ test.describe("Data Validation: P-0", () => {
 
     // #region 6. Open the fasta file (notepad suggested) and observe data displayed
     const downloadPath = await download.path();
-    const fileContent = fs.readFile(downloadPath, {encoding: "utf-8"});
+    const fileContent = fs.readFile(downloadPath, { encoding: "utf-8" });
     const lines = (await fileContent).split(/\r?\n/);
 
     // - First row displays >{ID}_{Description} in text format
     const fistLine = lines.shift();
     expect(fistLine).toMatch(/^>[A-Za-z0-9]+_[\S ]+$/);
 
-    const lastLine = lines[lines.length-1];
+    const lastLine = lines[lines.length - 1];
     if (lastLine.trim() === "") {
       lines.pop(); // Remove the last empty line
     }
@@ -75,5 +80,4 @@ test.describe("Data Validation: P-0", () => {
     }
     // #endregion 6. Open the fasta file (notepad suggested) and observe data displayed
   });
-
 });

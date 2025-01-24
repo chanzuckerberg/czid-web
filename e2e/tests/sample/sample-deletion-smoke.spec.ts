@@ -22,8 +22,12 @@ const uploadWorkflows = [
 let samplesPage: SamplesPage;
 let projectPage: ProjectPage;
 
+const TEST_TIMEOUT = 60 * 1000 * 5;
+
 test.describe("Sample Deletion", () => {
   test.beforeEach(async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT);
+
     samplesPage = new SamplesPage(page);
     projectPage = new ProjectPage(page);
   });

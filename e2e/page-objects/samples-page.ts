@@ -40,26 +40,35 @@ import { PageObject } from "./page-object";
 import { PipelineVizPage } from "./pipeline_viz-page";
 import { ProjectPage } from "./project-page";
 const BACK_TO_PROJECT = (projectName: string) => `//a[text()='${projectName}']`;
-const TAXON_HOVER_ACTIONS = (taxonName: string) => `//span[text()='${taxonName}']/parent::div//span[@data-testid='hover-actions']//button`;
+const TAXON_HOVER_ACTIONS = (taxonName: string) =>
+  `//span[text()='${taxonName}']/parent::div//span[@data-testid='hover-actions']//button`;
 const SAMPLE_NAME = "[class*='sampleViewHeader'] [class*='sampleName']";
 const ACCESSION_LABEL = "[class*='accessionLabel']";
-const CONTIG_DOWNLOAD_ICON = "[class*='contigDownloader'] [class*='downloadIcon']";
-const NT_CONTIGS_BAR = "//*[contains(text(), 'NT Contigs')]/following-sibling::*/*/*[contains(@class, 'bar-container')]/*";
+const CONTIG_DOWNLOAD_ICON =
+  "[class*='contigDownloader'] [class*='downloadIcon']";
+const NT_CONTIGS_BAR =
+  "//*[contains(text(), 'NT Contigs')]/following-sibling::*/*/*[contains(@class, 'bar-container')]/*";
 const CLOSE_ICON = "[class*='closeIcon']";
 const METRIC_LINK = "[class*='metric'] [class*='value'] a";
 const CONTINUE_BUTTON = "//button[text()='Continue']";
-const BLAST_CONTINUE_BUTTON = "//*[contains(@class, 'blastRedirectionModal')]//button[text()='Continue']";
+const BLAST_CONTINUE_BUTTON =
+  "//*[contains(@class, 'blastRedirectionModal')]//button[text()='Continue']";
 const SAMPLE_MESSAGE = "[data-testid='sample-message']";
 const COVERAGE_VIZ_HISTOGRAM_LOCATOR = "[class*='coverageVizHistogram']";
-const BLAST_HOVER_ACTION = (genusTaxId: string) => `[data-testid*='hover-action-blast-${genusTaxId}']`;
+const BLAST_HOVER_ACTION = (genusTaxId: string) =>
+  `[data-testid*='hover-action-blast-${genusTaxId}']`;
 const ACTION_BUTTONS_LOCATOR = "[class*='actionIcons'] button";
-const BLAST_CONTIG_INPUTS = "[class*='blastContigsModal'] [role='rowgroup'] div[class*='checkbox']";
+const BLAST_CONTIG_INPUTS =
+  "[class*='blastContigsModal'] [role='rowgroup'] div[class*='checkbox']";
 const BLAST_SELECTION_MODAL_TESTID = "blast-selection-modal";
-const BLAST_SELECTION_OPTIONS = "[data-testid='blast-selection-modal'] [class*='optionText'] [class*='title']";
+const BLAST_SELECTION_OPTIONS =
+  "[data-testid='blast-selection-modal'] [class*='optionText'] [class*='title']";
 const BLAST_TYPES = ["blastn", "blastx"];
 const PIPELINE_VERSION = "[data-testid='pipeline-version-select']";
-const NCBI_INDEX_DATE = "//*[@data-testid='pipeline-version-select']/following-sibling::span";
-const REPORT_TABLE_ROWS = "[class*='reportTable'] [class*='__Table__row'][role='row']";
+const NCBI_INDEX_DATE =
+  "//*[@data-testid='pipeline-version-select']/following-sibling::span";
+const REPORT_TABLE_ROWS =
+  "[class*='reportTable'] [class*='__Table__row'][role='row']";
 const PIPELINES_TAB = "[data-testid='pipelines']";
 const VIEW_PIPELINE_VISUALIZATION_LINK = "[class*='vizLink'] a";
 const REPORT_IN_PROGRESS = "[class*='reportStatus'][class*='inProgress']";
@@ -72,97 +81,137 @@ const DOWNLOAD_ALL_BUTTON = "//button[text()='Download All']";
 const DISMISS_BUTTON = "//*[translate(text(), 'D','d') = 'dismiss']";
 const CONSENSUS_GENOME_TAB = "[data-testid='consensus-genome']";
 const SHARE_BUTTON = "//button[text()='Share']";
-const LEARN_MORE_ABOUT_CONSENSUS_GENOMES_LINK = "//a[contains(text(), 'Learn more about consensus genomes')]";
-const GENERATE_CONSENSUS_GENOME_DROPDOWN = "[data-testid='create-consensus-genome-modal'] [data-testid='filters']";
-const GENERATE_CONSENSUS_GENOME_OPTION = "//*[@data-testid='create-consensus-genome-modal']/parent::*/following-sibling::*//*[contains(@class, 'optionText')]";
-const GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS = "//*[@data-testid='create-consensus-genome-modal']/parent::*/following-sibling::*//*[not(contains(@class, 'disabledOption'))]/*[contains(@class, 'optionText')]";
-const CREATE_A_NEW_CONSENSUS_GENOME_BUTTON = "//button[text()='Create a New Consensus Genome']";
-const CREATE_CONSENSUS_GENOME_BUTTON = "//button[text()='Create Consensus Genome']";
+const LEARN_MORE_ABOUT_CONSENSUS_GENOMES_LINK =
+  "//a[contains(text(), 'Learn more about consensus genomes')]";
+const GENERATE_CONSENSUS_GENOME_DROPDOWN =
+  "[data-testid='create-consensus-genome-modal'] [data-testid='filters']";
+const GENERATE_CONSENSUS_GENOME_OPTION =
+  "//*[@data-testid='create-consensus-genome-modal']/parent::*/following-sibling::*//*[contains(@class, 'optionText')]";
+const GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS =
+  "//*[@data-testid='create-consensus-genome-modal']/parent::*/following-sibling::*//*[not(contains(@class, 'disabledOption'))]/*[contains(@class, 'optionText')]";
+const CREATE_A_NEW_CONSENSUS_GENOME_BUTTON =
+  "//button[text()='Create a New Consensus Genome']";
+const CREATE_CONSENSUS_GENOME_BUTTON =
+  "//button[text()='Create Consensus Genome']";
 const VIEW_CONSENSUS_GENOME_LINK = "[class*='consensusGenomeLink']";
-const SHOW_HIDE_COLUMNS = "[data-testid='amr-sample-report'] [class*='dropdownWrapper'] button svg";
-const SELECT_ALL_COLUMNS = (columCategory: string) => `//*[@role='tooltip']//div[text()='${columCategory}']/following-sibling::button`;
-const BACKGROUND_FILTER_VALUE = "[data-testid='background-filter'] [data-testid='filter-value']";
+const SHOW_HIDE_COLUMNS =
+  "[data-testid='amr-sample-report'] [class*='dropdownWrapper'] button svg";
+const SELECT_ALL_COLUMNS = (columCategory: string) =>
+  `//*[@role='tooltip']//div[text()='${columCategory}']/following-sibling::button`;
+const BACKGROUND_FILTER_VALUE =
+  "[data-testid='background-filter'] [data-testid='filter-value']";
 
 // Sample Details
 const SAMPLE_DETAILS_BUTTON = "[data-testid='sample-details']";
 const SAMPLE_DETAILS_HOST_VALUE = "[data-testid='host-value']";
-const SAMPLE_DETAILS_CLOSE_ICON = "[data-testid='details-sidebar'] [class*='closeIcon']";
+const SAMPLE_DETAILS_CLOSE_ICON =
+  "[data-testid='details-sidebar'] [class*='closeIcon']";
 
 const SAMPLE_DETAILS_ANALYSIS_TYPE = "[data-testid='analysis-type-value']";
-const SAMPLE_DETAILS_SEQUENCING_PLATFORM = "[data-testid='sequencing-platform-value']";
-const SAMPLE_DETAILS_PIPELINE_VERSION = "[data-testid='pipeline-version-value']";
-const SAMPLE_DETAILS_GUPPY_BASECALLER_VERSION = "[data-testid='guppy-basecaller-version-value']";
+const SAMPLE_DETAILS_SEQUENCING_PLATFORM =
+  "[data-testid='sequencing-platform-value']";
+const SAMPLE_DETAILS_PIPELINE_VERSION =
+  "[data-testid='pipeline-version-value']";
+const SAMPLE_DETAILS_GUPPY_BASECALLER_VERSION =
+  "[data-testid='guppy-basecaller-version-value']";
 const SAMPLE_DETAILS_NCBI_INDEX_DATE = "[data-testid='ncbi-index-date-value']";
 const SAMPLE_DETAILS_HOST_SUBTRACTED = "[data-testid='host-subtracted-value']";
 const SAMPLE_DETAILS_TOTAL_READS = "[data-testid='total-reads-value']";
 const SAMPLE_DETAILS_ERCC_READS = "[data-testid='ercc-reads-value']";
 const SAMPLE_DETAILS_PASSED_FILTERS = "[data-testid='passed-filters-value']";
 const SAMPLE_DETAILS_UNMAPPED_READS = "[data-testid='unmapped-reads-value']";
-const SAMPLE_DETAILS_PASSED_QUALITY_CONTROL = "[data-testid='passed-quality-control-value']";
-const SAMPLE_DETAILS_COMPRESSION_RATIO = "[data-testid='compression-ratio-value']";
-const SAMPLE_DETAILS_MEAN_INSERT_SIZE = "[data-testid='mean-insert-size-value']";
+const SAMPLE_DETAILS_PASSED_QUALITY_CONTROL =
+  "[data-testid='passed-quality-control-value']";
+const SAMPLE_DETAILS_COMPRESSION_RATIO =
+  "[data-testid='compression-ratio-value']";
+const SAMPLE_DETAILS_MEAN_INSERT_SIZE =
+  "[data-testid='mean-insert-size-value']";
 const SAMPLE_DETAILS_DATE_PROCESSED = "[data-testid='date-processed-value']";
-const BASES_REMAINING_TOGGLE = "//*[@data-testid='bases-remaining-header']/following-sibling::*[contains(@class, 'toggleContainer')]";
-const READS_REMAINING_TOGGLE = "//*[@data-testid='reads-remaining-header']/following-sibling::*[contains(@class, 'toggleContainer')]";
+const BASES_REMAINING_TOGGLE =
+  "//*[@data-testid='bases-remaining-header']/following-sibling::*[contains(@class, 'toggleContainer')]";
+const READS_REMAINING_TOGGLE =
+  "//*[@data-testid='reads-remaining-header']/following-sibling::*[contains(@class, 'toggleContainer')]";
 
 // Is my consensus genome complete?
 // TODO: Add const
 
 // How good is the coverage?
-const NCBI_REFERENCE_LENGTH = "//div[text()='NCBI Reference']/parent::div/following-sibling::div";
-const REFERENCE_LENGTH = "//div[text()='Reference Length']/parent::div/following-sibling::div";
-const COVERAGE_DEPTH = "//div[text()='Coverage Depth']/parent::div/following-sibling::div";
-const COVERAGE_BREADTH = "//div[text()='Coverage Breadth']/parent::div/following-sibling::div";
-const IS_MY_CONSENSUS_GENOME_COMPLETE_TOOLTIP = "//div[text()='Is my consensus genome complete?']//*[contains(@class, 'SvgIcon')]";
-const IS_MY_CONSENSUS_GENOME_COMPLETE_HEADERS = "[class*='metricsTable'] [class*='tableHeaderLabel']";
+const NCBI_REFERENCE_LENGTH =
+  "//div[text()='NCBI Reference']/parent::div/following-sibling::div";
+const REFERENCE_LENGTH =
+  "//div[text()='Reference Length']/parent::div/following-sibling::div";
+const COVERAGE_DEPTH =
+  "//div[text()='Coverage Depth']/parent::div/following-sibling::div";
+const COVERAGE_BREADTH =
+  "//div[text()='Coverage Breadth']/parent::div/following-sibling::div";
+const IS_MY_CONSENSUS_GENOME_COMPLETE_TOOLTIP =
+  "//div[text()='Is my consensus genome complete?']//*[contains(@class, 'SvgIcon')]";
+const IS_MY_CONSENSUS_GENOME_COMPLETE_HEADERS =
+  "[class*='metricsTable'] [class*='tableHeaderLabel']";
 const TOOLTIP_CONTAINER = "[class*='tooltip']";
-const TOOLTIP_LEARN_MORE_LINK = "//*[contains(@class, 'tooltip')]//*[text()='Learn more.']";
+const TOOLTIP_LEARN_MORE_LINK =
+  "//*[contains(@class, 'tooltip')]//*[text()='Learn more.']";
 
 // Coverage Viz Histogram Hover Elements
-const HOVER_BASE_PAIR_RANGE = "//div[text()='Base Pair Range']/following-sibling::div";
-const HOVER_COVERAGE_DEPTH = "//div[text()='Coverage Depth']/following-sibling::div";
-const HOVER_COVERAGE_BREADTH = "//div[text()='Coverage Breadth']/following-sibling::div";
+const HOVER_BASE_PAIR_RANGE =
+  "//div[text()='Base Pair Range']/following-sibling::div";
+const HOVER_COVERAGE_DEPTH =
+  "//div[text()='Coverage Depth']/following-sibling::div";
+const HOVER_COVERAGE_BREADTH =
+  "//div[text()='Coverage Breadth']/following-sibling::div";
 
 // How good is the coverage?
 const CUSTOM_REFERENCE_DOWNLOAD = "[class*='metric'] [class*='downloadLink']";
-const HOW_GOOD_IS_THE_COVERAGE_TOOLTIP = "//div[text()='How good is the coverage?']//*[contains(@class, 'MuiSvgIcon')]";
-const HOW_GOOD_IS_THE_COVERAGE_HEADERS = "[class*='coverageContainer'] [class*='metric'] [class*='label']";
+const HOW_GOOD_IS_THE_COVERAGE_TOOLTIP =
+  "//div[text()='How good is the coverage?']//*[contains(@class, 'MuiSvgIcon')]";
+const HOW_GOOD_IS_THE_COVERAGE_HEADERS =
+  "[class*='coverageContainer'] [class*='metric'] [class*='label']";
 const NONHEADER_TOOLTIP_CONTAINER = "[class='content']";
 
-
-type SampleDownloadTypes = "report_table" | "report_table_filters" | "non_host_reads" | "non_host_contigs" | "comprehensive_amr_metrics" | "intermediate_files";
-export const DOWNLOAD_TYPES_OPTIONS_MAP : Record<SampleDownloadTypes, string> = {
-  "report_table": "Download Report table (.csv)",
-  "report_table_filters": "Download Report Table with Applied Filters (.csv)",
-  "non_host_reads": "Download Non-Host Reads (.fasta)",
-  "non_host_contigs": "Download Non-Host Contigs (.fasta)",
-  "comprehensive_amr_metrics": "Download Comprehensive AMR Metrics File (.tsv)",
-  "intermediate_files": "Download Intermediate Files (.zip)",
+type SampleDownloadTypes =
+  | "report_table"
+  | "report_table_filters"
+  | "non_host_reads"
+  | "non_host_contigs"
+  | "comprehensive_amr_metrics"
+  | "intermediate_files";
+export const DOWNLOAD_TYPES_OPTIONS_MAP: Record<SampleDownloadTypes, string> = {
+  report_table: "Download Report table (.csv)",
+  report_table_filters: "Download Report Table with Applied Filters (.csv)",
+  non_host_reads: "Download Non-Host Reads (.fasta)",
+  non_host_contigs: "Download Non-Host Contigs (.fasta)",
+  comprehensive_amr_metrics: "Download Comprehensive AMR Metrics File (.tsv)",
+  intermediate_files: "Download Intermediate Files (.zip)",
 };
 
 type AmrGeneRowDownloadTypes = "contigs" | "reads";
-const AMR_GENE_ROW_DOWNLOAD_TYPES_TO_TEXT : Record<AmrGeneRowDownloadTypes, string> = {
-  "contigs": "Contigs (.fasta)",
-  "reads": "Reads (.fasta)",
+const AMR_GENE_ROW_DOWNLOAD_TYPES_TO_TEXT: Record<
+  AmrGeneRowDownloadTypes,
+  string
+> = {
+  contigs: "Contigs (.fasta)",
+  reads: "Reads (.fasta)",
 };
 
 export class SamplesPage extends PageObject {
   private CategoryDataIds = {
-    "Archaea": ARCHAEA_FILTER,
-    "Bacteria": BACTERIA_FILTER,
-    "Eukaryota": EUKARYOTA_FILTER,
-    "Viroids": VIROIDS_FILTER,
-    "Viruses": VIRUSES_FILTER,
-    "Phage": VIRUSES_PHAGE_FILTER,
-    "Uncategorized": UNCATEGORIZED_FILTER,
+    Archaea: ARCHAEA_FILTER,
+    Bacteria: BACTERIA_FILTER,
+    Eukaryota: EUKARYOTA_FILTER,
+    Viroids: VIROIDS_FILTER,
+    Viruses: VIRUSES_FILTER,
+    Phage: VIRUSES_PHAGE_FILTER,
+    Uncategorized: UNCATEGORIZED_FILTER,
   };
 
   // #region Navigate
   public async navigate(sampleId: number) {
     await this.pause(1);
-    await this.page.goto(
-      `${process.env.BASEURL}/samples/${sampleId}`, { timeout: 30 * 1000 },
-    ).catch(() => this.page.reload());
+    await this.page
+      .goto(`${process.env.BASEURL}/samples/${sampleId}`, {
+        timeout: 30 * 1000,
+      })
+      .catch(() => this.page.reload());
     await this.pause(1);
   }
   // #endregion Navigate
@@ -181,7 +230,9 @@ export class SamplesPage extends PageObject {
   }
 
   public async getSampleDetailsGuppyBasecallerVersion() {
-    return this.page.locator(SAMPLE_DETAILS_GUPPY_BASECALLER_VERSION).textContent();
+    return this.page
+      .locator(SAMPLE_DETAILS_GUPPY_BASECALLER_VERSION)
+      .textContent();
   }
 
   public async getSampleDetailsNcbiIndexDate() {
@@ -209,7 +260,9 @@ export class SamplesPage extends PageObject {
   }
 
   public async getSampleDetailsPassedQualityControl() {
-    return this.page.locator(SAMPLE_DETAILS_PASSED_QUALITY_CONTROL).textContent();
+    return this.page
+      .locator(SAMPLE_DETAILS_PASSED_QUALITY_CONTROL)
+      .textContent();
   }
 
   public async getSampleDetailsCompressionRatio() {
@@ -237,13 +290,18 @@ export class SamplesPage extends PageObject {
   }
 
   public async getSelectedReferenceAccessionOption() {
-    return this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).getByTestId("filter-value").textContent();
+    return this.page
+      .locator(GENERATE_CONSENSUS_GENOME_DROPDOWN)
+      .getByTestId("filter-value")
+      .textContent();
   }
 
   public async getReferenceAccessionOptions() {
     await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
     await this.pause(2);
-    const referenceAccession = this.page.locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS).allTextContents();
+    const referenceAccession = this.page
+      .locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS)
+      .allTextContents();
     await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).click();
     await this.pause(1);
     return referenceAccession;
@@ -256,7 +314,10 @@ export class SamplesPage extends PageObject {
       if (statusMessage.toLowerCase().includes(waitForMessage.toLowerCase())) {
         break;
       } else {
-        await this.page.locator(SAMPLE_MESSAGE).getByText("LoadingLoading report data.").waitFor({ state: "detached" });
+        await this.page
+          .locator(SAMPLE_MESSAGE)
+          .getByText("LoadingLoading report data.")
+          .waitFor({ state: "detached" });
       }
     }
     return this.page.locator(SAMPLE_MESSAGE).textContent();
@@ -308,13 +369,19 @@ export class SamplesPage extends PageObject {
   }
 
   public async getNCBIIndexDate() {
-    const ncbiIndexDateText = await this.page.locator(NCBI_INDEX_DATE).textContent();
-    const ncbiIndexDateTextParts = ncbiIndexDateText.split("|")
+    const ncbiIndexDateText = await this.page
+      .locator(NCBI_INDEX_DATE)
+      .textContent();
+    const ncbiIndexDateTextParts = ncbiIndexDateText.split("|");
     return ncbiIndexDateTextParts[1].replace("NCBI Index Date: ", "").trim();
   }
 
   public async getReportFilterTable() {
-    await this.page.locator(REPORT_TABLE_ROWS).first().waitFor({ timeout: 10_000 }).catch(() => null);
+    await this.page
+      .locator(REPORT_TABLE_ROWS)
+      .first()
+      .waitFor({ timeout: 10_000 })
+      .catch(() => null);
     await this.pause(1);
     return this.getTable(
       "[class*='Table__headerColumn']",
@@ -340,7 +407,10 @@ export class SamplesPage extends PageObject {
     );
   }
 
-  public async getAntimicrobialResistanceTable(widthMultiplier = 2, heightMultiplier = 2) {
+  public async getAntimicrobialResistanceTable(
+    widthMultiplier = 2,
+    heightMultiplier = 2,
+  ) {
     await this.maximizeWindow();
     await this.zoomOut(widthMultiplier, heightMultiplier);
     const table = await this.getTable(
@@ -356,7 +426,7 @@ export class SamplesPage extends PageObject {
     const startTime = Date.now();
     const timeout = 30000;
     let report = null;
-    while ((Date.now() - startTime) < timeout) {
+    while (Date.now() - startTime < timeout) {
       report = await this.getReportV2(sampleId);
       if (report.error !== undefined) {
         break;
@@ -372,10 +442,16 @@ export class SamplesPage extends PageObject {
     return response.json();
   }
 
-  private async getSamplesInArray(projectName: string, sampleNames: Array<string>) {
+  private async getSamplesInArray(
+    projectName: string,
+    sampleNames: Array<string>,
+  ) {
     const samples = [];
     for (const sampleName of sampleNames) {
-      const matchingSample = await this.getProjectSamples(projectName, sampleName);
+      const matchingSample = await this.getProjectSamples(
+        projectName,
+        sampleName,
+      );
       if (matchingSample.length > 0) {
         samples.push(matchingSample[0]);
       }
@@ -391,7 +467,54 @@ export class SamplesPage extends PageObject {
     }
   }
 
-  private async getProjectSamples(projectName = null, sampleName = null, limit = 10000) {
+  public async getSamplesMatchingCount(
+    projectName: string,
+    counts: any,
+    matchingSamples: number,
+  ) {
+    const allSamples = await this.getSamples(projectName, null);
+    const samples = [];
+    const allCounts = Object.keys(counts).length;
+    for (const sample of allSamples) {
+      if (matchingSamples === samples.length) {
+        break;
+      }
+      const matches = [];
+      const report = await this.getReportV2(sample.id);
+      if (report) {
+        for (const key of Object.keys(counts)) {
+          if (!report.counts) {
+            break;
+          }
+          for (const reportCountKey of Object.keys(report.counts)) {
+            const reportCountTaxons = report.counts[reportCountKey];
+            for (const taxon of Object.keys(reportCountTaxons)) {
+              if (reportCountTaxons[taxon]?.[key]?.count >= counts[key]) {
+                matches.push(true);
+              }
+              if (matches.length === allCounts) {
+                samples.push(sample);
+                break;
+              }
+            }
+            if (matches.length === allCounts) {
+              break;
+            }
+          }
+          if (matches.length === allCounts) {
+            break;
+          }
+        }
+      }
+    }
+    return samples;
+  }
+
+  private async getProjectSamples(
+    projectName = null,
+    sampleName = null,
+    limit = 10000,
+  ) {
     const urlParams = new URLSearchParams();
     let project = null;
     if (projectName !== null) {
@@ -406,7 +529,10 @@ export class SamplesPage extends PageObject {
     }
     urlParams.append("limit", `${limit}`);
 
-    const params = Array.from(urlParams.entries()).length > 0 ? `?${urlParams.toString()}` : "";
+    const params =
+      Array.from(urlParams.entries()).length > 0
+        ? `?${urlParams.toString()}`
+        : "";
     const requestUrl = `${process.env.BASEURL}/samples/index_v2.json${params}`;
     const response = await this.page.context().request.get(requestUrl);
     const responseJson = await response.json();
@@ -425,7 +551,10 @@ export class SamplesPage extends PageObject {
     const samples = await this.getSamples(projectName, sampleNames);
     const completedSamples = [];
     for (const sample of samples) {
-      if (sample.details.mngs_run_info && sample.details.mngs_run_info.result_status_description === "COMPLETE") {
+      if (
+        sample.details.mngs_run_info &&
+        sample.details.mngs_run_info.result_status_description === "COMPLETE"
+      ) {
         completedSamples.push(sample);
       }
     }
@@ -451,8 +580,8 @@ export class SamplesPage extends PageObject {
 
   public async getTaxonNamesFromReport(sampleReport: any) {
     const taxonNames = {
-      "Scientific": [],
-      "Common": [],
+      Scientific: [],
+      Common: [],
     };
     const taxons = await this.getTaxonsFromReport(sampleReport);
     for (const taxon of taxons) {
@@ -487,10 +616,16 @@ export class SamplesPage extends PageObject {
 
   public async getTaxonsByCategory(sampleReport: any, categories: string[]) {
     const taxons = await this.getTaxonsFromReport(sampleReport);
-    const lowerCaseCategories = categories.map(category => `${category}`.toLowerCase());
+    const lowerCaseCategories = categories.map(category =>
+      `${category}`.toLowerCase(),
+    );
 
-    return taxons.filter(taxon =>
-      taxon.category && lowerCaseCategories.some(category => `${taxon.category}`.toLowerCase() === category),
+    return taxons.filter(
+      taxon =>
+        taxon.category &&
+        lowerCaseCategories.some(
+          category => `${taxon.category}`.toLowerCase() === category,
+        ),
     );
   }
 
@@ -510,7 +645,10 @@ export class SamplesPage extends PageObject {
     return taxons.filter(taxon => taxon.category);
   }
 
-  public async getTaxonNamesFromReportByCategory(sampleReport: any, categories: string[]) {
+  public async getTaxonNamesFromReportByCategory(
+    sampleReport: any,
+    categories: string[],
+  ) {
     const taxons = await this.getTaxonsByCategory(sampleReport, categories);
     return taxons.map(taxon => taxon.name);
   }
@@ -529,12 +667,17 @@ export class SamplesPage extends PageObject {
   }
 
   public async getFilterTagElements(timeout = 30_000) {
-    await this.page.waitForSelector(FILTER_TAG, { state: "visible", timeout: timeout }).catch(() => null);
-    return this.page.locator(FILTER_TAG).all().catch(() => []);
+    await this.page
+      .waitForSelector(FILTER_TAG, { state: "visible", timeout: timeout })
+      .catch(() => null);
+    return this.page
+      .locator(FILTER_TAG)
+      .all()
+      .catch(() => []);
   }
 
   public async getFilterTagsText() {
-    const filterTagElements = await this.getFilterTagElements();;
+    const filterTagElements = await this.getFilterTagElements();
     const filterTags: string[] = [];
 
     for (const element of filterTagElements) {
@@ -570,7 +713,7 @@ export class SamplesPage extends PageObject {
 
   // #region AMR Table Click
   public async clickAmrTableGeneColumn() {
-    await this.page.getByTestId("amr-sample-report").getByText('Gene').click();
+    await this.page.getByTestId("amr-sample-report").getByText("Gene").click();
   }
 
   public async clickAmrTableContigsHeader() {
@@ -586,35 +729,42 @@ export class SamplesPage extends PageObject {
   }
 
   public async clickAmrTableColumnOption(option: string) {
-    await this.page.getByRole('option', { name: option }).click();
-  };
+    await this.page.getByRole("option", { name: option }).click();
+  }
 
   // Opens threshold filters on AMR sample report page
   public async clickAmrThresholdFilter() {
-    await this.page.getByRole('button', { name: 'Thresholds' }).click();
+    await this.page.getByRole("button", { name: "Thresholds" }).click();
   }
 
   public async clickAmrThresholdFilterMetricOption(option: string) {
     // Open threshold filter metric dropdown
-    await this.page.getByTestId('threshold-metric-dropdown').click();
+    await this.page.getByTestId("threshold-metric-dropdown").click();
     // Select given option as metric
     await this.page.getByText(option).click();
   }
 
-  public async clickAmrGeneDownloadButton(geneName: string, option: AmrGeneRowDownloadTypes) {
-    const geneCellSelector = await this.page.getByRole('cell', { name: geneName });
+  public async clickAmrGeneDownloadButton(
+    geneName: string,
+    option: AmrGeneRowDownloadTypes,
+  ) {
+    const geneCellSelector = await this.page.getByRole("cell", {
+      name: geneName,
+    });
     await geneCellSelector.hover();
 
     await this.pause(1);
 
-    const downloadDropdownButton = geneCellSelector.getByRole('button').nth(1);
+    const downloadDropdownButton = geneCellSelector.getByRole("button").nth(1);
     await downloadDropdownButton.click();
     await this.pause(1);
 
     // Click download option
     const optionText = AMR_GENE_ROW_DOWNLOAD_TYPES_TO_TEXT[option];
     const downloadPromise = this.page.waitForEvent("download");
-    const optionDownloadButton = this.page.getByText(optionText, { exact: true });
+    const optionDownloadButton = this.page.getByText(optionText, {
+      exact: true,
+    });
     await optionDownloadButton.click();
     return downloadPromise;
   }
@@ -731,7 +881,10 @@ export class SamplesPage extends PageObject {
   }
 
   public async clickDismissButton() {
-    await this.page.locator(DISMISS_BUTTON).waitFor({ timeout: 30000 }).catch(() => null);
+    await this.page
+      .locator(DISMISS_BUTTON)
+      .waitFor({ timeout: 30000 })
+      .catch(() => null);
     if (this.page.locator(DISMISS_BUTTON).isVisible()) {
       await this.page.locator(DISMISS_BUTTON).click();
     }
@@ -827,7 +980,10 @@ export class SamplesPage extends PageObject {
   }
 
   public async clickThresholdComparisonOperatorOption(option: string) {
-    await this.page.locator(`${FILTERS_DROPDOWN} [role="option"]`).getByText(option).click();
+    await this.page
+      .locator(`${FILTERS_DROPDOWN} [role="option"]`)
+      .getByText(option)
+      .click();
   }
 
   public async clickThresholdOption(option: string) {
@@ -851,7 +1007,11 @@ export class SamplesPage extends PageObject {
   }
 
   public async clickSearchResult(text: string) {
-    await this.page.locator(SEARCH_RESULT).getByText(text, { exact: true }).first().click();
+    await this.page
+      .locator(SEARCH_RESULT)
+      .getByText(text, { exact: true })
+      .first()
+      .click();
   }
 
   public async clickAnnotationFilter() {
@@ -867,11 +1027,17 @@ export class SamplesPage extends PageObject {
   }
 
   public async clickDrugClassFilterOption(option: string) {
-    await this.page.getByRole("option", { name: option }).locator("span").nth(1).click();
+    await this.page
+      .getByRole("option", { name: option })
+      .locator("span")
+      .nth(1)
+      .click();
   }
 
   public async clickFilterTagCloseIcon(text: string) {
-    await this.page.locator(`${FILTER_TAG}:text('${text}') ${X_CLOSE_ICON}`).click();
+    await this.page
+      .locator(`${FILTER_TAG}:text('${text}') ${X_CLOSE_ICON}`)
+      .click();
   }
 
   public async clickTableHeaderByIndex(index: number) {
@@ -904,18 +1070,22 @@ export class SamplesPage extends PageObject {
   }
 
   public async clickTaxonCoverageVisualisation(taxonName: string) {
-    await this.hoverOverTaxon(taxonName)
+    await this.hoverOverTaxon(taxonName);
 
-    const hoverElement = this.page.locator(TAXON_HOVER_ACTIONS(taxonName)).first();
+    const hoverElement = this.page
+      .locator(TAXON_HOVER_ACTIONS(taxonName))
+      .first();
 
     await hoverElement.hover();
     await hoverElement.click();
   }
 
   public async clickConsensusGenomeIcon(taxonName: string) {
-    await this.hoverOverTaxon(taxonName)
+    await this.hoverOverTaxon(taxonName);
 
-    const hoverElement = this.page.locator(TAXON_HOVER_ACTIONS(taxonName)).nth(3);
+    const hoverElement = this.page
+      .locator(TAXON_HOVER_ACTIONS(taxonName))
+      .nth(3);
 
     await hoverElement.hover();
     await hoverElement.click();
@@ -926,9 +1096,12 @@ export class SamplesPage extends PageObject {
   }
 
   public async clickBlastHoverButton(genusTaxId: string) {
-    await this.page.locator(BLAST_HOVER_ACTION(genusTaxId)).first().hover({ force: true })
+    await this.page
+      .locator(BLAST_HOVER_ACTION(genusTaxId))
+      .first()
+      .hover({ force: true });
     await this.pause(2);
-    await this.page.locator(BLAST_HOVER_ACTION(genusTaxId)).first().click()
+    await this.page.locator(BLAST_HOVER_ACTION(genusTaxId)).first().click();
   }
 
   public async clickBlastButton() {
@@ -939,13 +1112,16 @@ export class SamplesPage extends PageObject {
   public async clickContigFastaButton() {
     const [downloadPromise] = await Promise.all([
       this.page.waitForEvent("download"),
-      await this.page.locator(ACTION_BUTTONS_LOCATOR).nth(1).click()
+      await this.page.locator(ACTION_BUTTONS_LOCATOR).nth(1).click(),
     ]);
     return downloadPromise;
   }
-    
+
   public async clickReferenceAccessionDropdown() {
-    await this.page.getByTestId("create-consensus-genome-modal").getByTestId("filters").click(); // Element is not a <select> element
+    await this.page
+      .getByTestId("create-consensus-genome-modal")
+      .getByTestId("filters")
+      .click(); // Element is not a <select> element
   }
   // #endregion Click
 
@@ -984,8 +1160,10 @@ export class SamplesPage extends PageObject {
 
   // #region Macro
   public async expandGenerateConsensusGenomeDropdown() {
-    const consensusGenomeOptions = this.page.locator(GENERATE_CONSENSUS_GENOME_OPTION);
-    if (!await consensusGenomeOptions.first().isVisible()) {
+    const consensusGenomeOptions = this.page.locator(
+      GENERATE_CONSENSUS_GENOME_OPTION,
+    );
+    if (!(await consensusGenomeOptions.first().isVisible())) {
       await this.clickGenerateConsensusGenomeDropdown();
     }
   }
@@ -998,7 +1176,10 @@ export class SamplesPage extends PageObject {
     return samples;
   }
 
-  public async waitForAllReportsComplete(projectName: string, sampleNames: Array<string>) {
+  public async waitForAllReportsComplete(
+    projectName: string,
+    sampleNames: Array<string>,
+  ) {
     const samples = [];
     for (const sampleName of sampleNames) {
       samples.push((await this.getSamples(projectName, sampleName))[0]);
@@ -1040,7 +1221,10 @@ export class SamplesPage extends PageObject {
    * - Taxon / Mapped Reads / GC Content / SNPs / %id / Informative Nucleotides / %Genome Called / Missing Bases / Ambiguous Bases
    */
   public async getOverIsMyConsensusGenomeCompleteHeaderTooltip(index: number) {
-    await this.page.locator(IS_MY_CONSENSUS_GENOME_COMPLETE_HEADERS).nth(index).hover();
+    await this.page
+      .locator(IS_MY_CONSENSUS_GENOME_COMPLETE_HEADERS)
+      .nth(index)
+      .hover();
     await this.pause(1);
     return this.page.locator(TOOLTIP_CONTAINER).textContent();
   }
@@ -1050,7 +1234,10 @@ export class SamplesPage extends PageObject {
    * Custom Reference / Reference Length / Coverage Depth / Coverage Breadth
    */
   public async getHowGoodIsTheCoverageHeaders(index: number) {
-    await this.page.locator(HOW_GOOD_IS_THE_COVERAGE_HEADERS).nth(index).hover();
+    await this.page
+      .locator(HOW_GOOD_IS_THE_COVERAGE_HEADERS)
+      .nth(index)
+      .hover();
     await this.pause(1);
     return this.page.locator(NONHEADER_TOOLTIP_CONTAINER).textContent();
   }
@@ -1069,10 +1256,16 @@ export class SamplesPage extends PageObject {
       if (!taxonVisible) {
         await this.clickTableRowByIndex(0);
         await this.scrollUpToElement(
-          `${REPORT_TABLE_ROWS}[${reportTableRowIndexAttribute}="1"]`, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
+          `${REPORT_TABLE_ROWS}[${reportTableRowIndexAttribute}="1"]`,
+          REPORT_TABLE_ROWS,
+          reportTableRowIndexAttribute,
+        );
 
         await this.scrollDownToElement(
-          taxonLocatorString, REPORT_TABLE_ROWS, reportTableRowIndexAttribute);
+          taxonLocatorString,
+          REPORT_TABLE_ROWS,
+          reportTableRowIndexAttribute,
+        );
       }
       taxonVisible = await taxonElement.isVisible();
       if (taxonVisible) {
@@ -1098,7 +1291,11 @@ export class SamplesPage extends PageObject {
     }
   }
 
-  public async selectThresholdOptions(thresholdOption: string, comparisonOperator: string, thresholdValue: number) {
+  public async selectThresholdOptions(
+    thresholdOption: string,
+    comparisonOperator: string,
+    thresholdValue: number,
+  ) {
     await this.clickThresholdFilter();
 
     // #region Threshold Option
@@ -1118,7 +1315,10 @@ export class SamplesPage extends PageObject {
     await this.clickApplyThresholdFilter();
   }
 
-  public async selectAmrThresholdOption(metricOption: string, thresholdValue: number) {
+  public async selectAmrThresholdOption(
+    metricOption: string,
+    thresholdValue: number,
+  ) {
     await this.clickFilterPanelTrigger();
     await this.clickAmrThresholdFilter();
     await this.clickAmrThresholdFilterMetricOption(metricOption);
@@ -1146,7 +1346,8 @@ export class SamplesPage extends PageObject {
 
     // Get the checkbox element
     // So we don't select if it's already selected
-    const checkBox = this.page.locator(this.CategoryDataIds[option]) // option label
+    const checkBox = this.page
+      .locator(this.CategoryDataIds[option]) // option label
       .locator("..") // parent node
       .locator("[data-testid='checked']"); // Checkbox
     const checkBoxClass = await checkBox.getAttribute("class");
@@ -1167,7 +1368,9 @@ export class SamplesPage extends PageObject {
     await this.clickReferenceAccessionDropdown();
 
     // Randomly choose a Reference Accession option
-    const referenceAccessions = await this.page.locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS).all();
+    const referenceAccessions = await this.page
+      .locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS)
+      .all();
     const referenceAccession =
       referenceAccessions[
         Math.floor(Math.random() * referenceAccessions.length)
@@ -1182,16 +1385,26 @@ export class SamplesPage extends PageObject {
   public async selectReferenceAccession(option: string) {
     await this.clickReferenceAccessionDropdown();
     await this.pause(1);
-    await this.page.getByTestId("dropdown-menu").getByRole("option").getByText(option.trim()).click();
+    await this.page
+      .getByTestId("dropdown-menu")
+      .getByRole("option")
+      .getByText(option.trim())
+      .click();
 
-    const selectedValue = await this.page.locator(GENERATE_CONSENSUS_GENOME_DROPDOWN).getByTestId("filter-value").textContent();
+    const selectedValue = await this.page
+      .locator(GENERATE_CONSENSUS_GENOME_DROPDOWN)
+      .getByTestId("filter-value")
+      .textContent();
     expect(selectedValue).toEqual(option);
   }
   // #endregion Macro
 
   // #region Validation
   public async isCreateANewConsensusGenomeButtonVisible() {
-    await this.page.locator(CREATE_A_NEW_CONSENSUS_GENOME_BUTTON).waitFor({ state: "visible", timeout: 10 * 1000 }).catch(() => null);
+    await this.page
+      .locator(CREATE_A_NEW_CONSENSUS_GENOME_BUTTON)
+      .waitFor({ state: "visible", timeout: 10 * 1000 })
+      .catch(() => null);
     return this.page.locator(CREATE_A_NEW_CONSENSUS_GENOME_BUTTON).isVisible();
   }
 
@@ -1203,8 +1416,12 @@ export class SamplesPage extends PageObject {
   }
 
   public async validateBlastSelectionModalVisible() {
-    await expect(this.page.getByTestId(BLAST_SELECTION_MODAL_TESTID)).toBeVisible();
-    const blastSelectionOptions = await this.page.locator(BLAST_SELECTION_OPTIONS).allTextContents();
+    await expect(
+      this.page.getByTestId(BLAST_SELECTION_MODAL_TESTID),
+    ).toBeVisible();
+    const blastSelectionOptions = await this.page
+      .locator(BLAST_SELECTION_OPTIONS)
+      .allTextContents();
     expect(BLAST_TYPES).toEqual(blastSelectionOptions);
   }
 
@@ -1213,11 +1430,15 @@ export class SamplesPage extends PageObject {
 
     // A popup showing the coverage visualisation for that specific organism should be showed
     await expect(this.page.locator(`text=${taxonCoverageLabel}`)).toBeVisible();
-    await expect(this.page.locator(COVERAGE_VIZ_HISTOGRAM_LOCATOR)).toBeVisible();
+    await expect(
+      this.page.locator(COVERAGE_VIZ_HISTOGRAM_LOCATOR),
+    ).toBeVisible();
   }
 
   public async validateTotalReadPopupTest(expectedText: string) {
-    await expect(this.page.locator(TOTAL_READ_POPOUP_CONTENT)).toHaveText(expectedText);
+    await expect(this.page.locator(TOTAL_READ_POPOUP_CONTENT)).toHaveText(
+      expectedText,
+    );
   }
 
   public async validateColumnsVisible() {
@@ -1233,11 +1454,18 @@ export class SamplesPage extends PageObject {
   }
 
   public async validateCategoryFilterAvailable(categoryName: string) {
-    await expect(this.page.locator(this.CategoryDataIds[categoryName])).toBeVisible();
+    await expect(
+      this.page.locator(this.CategoryDataIds[categoryName]),
+    ).toBeVisible();
   }
 
-  public async validateFilterTagVisiblity(expectedTagName: string, toBeVisible = true) {
-    const tagLocator = this.page.locator(FILTER_TAG).locator(`text="${expectedTagName}"`);
+  public async validateFilterTagVisiblity(
+    expectedTagName: string,
+    toBeVisible = true,
+  ) {
+    const tagLocator = this.page
+      .locator(FILTER_TAG)
+      .locator(`text="${expectedTagName}"`);
     if (toBeVisible) {
       await expect(tagLocator).toBeVisible();
     } else {
@@ -1245,37 +1473,52 @@ export class SamplesPage extends PageObject {
     }
   }
 
-  public async validateReportFilteredThreshold(thresholdOption: string, comparisonOperator: string, thresholdValue: number) {
+  public async validateReportFilteredThreshold(
+    thresholdOption: string,
+    comparisonOperator: string,
+    thresholdValue: number,
+  ) {
     const reportFilterTable = await this.getReportFilterTable();
     for (const row of reportFilterTable) {
       // TODO: Expand to include sampleReport api for values like "NT Z Score"
       if (row[thresholdOption] !== undefined) {
-        const actualValue = row[thresholdOption] === "-" ? 0 : row[thresholdOption];
+        const actualValue =
+          row[thresholdOption] === "-" ? 0 : row[thresholdOption];
         if (comparisonOperator === "<=") {
           expect(actualValue).toBeLessThanOrEqual(thresholdValue);
         } else if (comparisonOperator === ">=") {
           expect(actualValue).toBeGreaterThanOrEqual(thresholdValue);
         } else {
-          throw new Error(`Unexpected comparisonOperator: ${comparisonOperator}`);
+          throw new Error(
+            `Unexpected comparisonOperator: ${comparisonOperator}`,
+          );
         }
       }
     }
   }
 
-  public async validateThresholdOptionFilterHasExpectedOptions(expectedThresholdOptions: any) {
+  public async validateThresholdOptionFilterHasExpectedOptions(
+    expectedThresholdOptions: any,
+  ) {
     await this.clickThresholdFilter(); // Open the filter dropdown
     await this.clickThresholdOptionFilter();
     for (const expectedOption of expectedThresholdOptions) {
-      expect(this.page.getByTestId("dropdown-menu").getByText(expectedOption.text).first()).toBeVisible();
+      expect(
+        this.page
+          .getByTestId("dropdown-menu")
+          .getByText(expectedOption.text)
+          .first(),
+      ).toBeVisible();
     }
     await this.clickThresholdFilter(); // Close the filter dropdown
   }
 
-  public async validateReportFilteredByNameType(nameTypeOption: string, expectedTaxonNames: []) {
+  public async validateReportFilteredByNameType(
+    nameTypeOption: string,
+    expectedTaxonNames: [],
+  ) {
     // Assert the filter section updated
-    expect(
-      (await this.getNameTypeFilterValue()).match(nameTypeOption),
-    );
+    expect((await this.getNameTypeFilterValue()).match(nameTypeOption));
     // Assert the taxon common_names are on the page
     for (const taxonName of expectedTaxonNames) {
       expect(await this.getTaxonElementByName(taxonName)).toBeTruthy();
@@ -1284,7 +1527,10 @@ export class SamplesPage extends PageObject {
 
   public async validateFilterTags(expectedfilterTags: string[]) {
     const foundTags = await this.getFilterTagsText();
-    expect(expectedfilterTags, `Expected: ${expectedfilterTags}, Got: ${foundTags}`).toEqual(foundTags);
+    expect(
+      expectedfilterTags,
+      `Expected: ${expectedfilterTags}, Got: ${foundTags}`,
+    ).toEqual(foundTags);
   }
 
   public async validateTaxonsFilteredByName(expectedTaxonName: string) {
@@ -1296,23 +1542,34 @@ export class SamplesPage extends PageObject {
     expect(taxonNames.join(",")).toContain(expectedTaxonName);
   }
 
-  public async validateAnnotationFiltersHasExpectedOptions(expectedAnnotationOptions: string[]) {
+  public async validateAnnotationFiltersHasExpectedOptions(
+    expectedAnnotationOptions: string[],
+  ) {
     await this.clickAnnotationFilter(); // Open the filter dropdown
     for (const expectedOption of expectedAnnotationOptions) {
-      expect(this.page.getByTestId(`dropdown-${kebabCase(expectedOption)}`)).toBeVisible();
+      expect(
+        this.page.getByTestId(`dropdown-${kebabCase(expectedOption)}`),
+      ).toBeVisible();
     }
     await this.clickAnnotationFilter(); // Close the filter dropdown
   }
 
-  public async validateReadSpecificityFiltersHasExpectedOptions(expectedReadSpecificityOptions: string[]) {
+  public async validateReadSpecificityFiltersHasExpectedOptions(
+    expectedReadSpecificityOptions: string[],
+  ) {
     await this.clickReadSpecificityFilter(); // Open the filter dropdown
     for (const expectedOption of expectedReadSpecificityOptions) {
-      expect(this.page.getByTestId(`dropdown-${kebabCase(expectedOption)}`)).toBeTruthy();
+      expect(
+        this.page.getByTestId(`dropdown-${kebabCase(expectedOption)}`),
+      ).toBeTruthy();
     }
     await this.clickReadSpecificityFilter(); // Close the filter dropdown
   }
 
-  public async validateReportFilteredByReadSpecificity(readSpecificityOption: string, expectedTaxonNames: []) {
+  public async validateReportFilteredByReadSpecificity(
+    readSpecificityOption: string,
+    expectedTaxonNames: [],
+  ) {
     // Assert the filter section updated
     expect(
       (await this.getReadSpecificityFilterValue()).match(readSpecificityOption),
@@ -1332,18 +1589,22 @@ export class SamplesPage extends PageObject {
       expect(await this.isTaxonVisible(name)).toBeTruthy();
     } catch (error) {
       const caughtErrorMsg = (error as Error).message;
-      throw new Error(`Failed to locate taxon "${name}": ${caughtErrorMsg}`)
+      throw new Error(`Failed to locate taxon "${name}": ${caughtErrorMsg}`);
     }
   }
 
   public async validateTaxonsAreVisible(taxonNames: string[]) {
     for (const taxonName of taxonNames) {
-      const taxonWithoutSpecies = taxonName.includes("(") ? taxonName.slice(0, taxonName.lastIndexOf("(")).trim() : taxonName;
+      const taxonWithoutSpecies = taxonName.includes("(")
+        ? taxonName.slice(0, taxonName.lastIndexOf("(")).trim()
+        : taxonName;
       await this.validateTaxonIsVisible(taxonWithoutSpecies);
     }
   }
 
-  public async validateReportFilteredByAnnotation(expectedAnnotationFilters: string[]) {
+  public async validateReportFilteredByAnnotation(
+    expectedAnnotationFilters: string[],
+  ) {
     for (const annotationFilter of expectedAnnotationFilters) {
       await this.selectAnnotationFilter(annotationFilter);
       await this.validateFilterTags([annotationFilter]);

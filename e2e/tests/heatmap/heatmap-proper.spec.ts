@@ -5,15 +5,15 @@ import { ProjectPage } from "../../page-objects/project-page";
 
 const TEST_TIMEOUT = 60 * 1000 * 40;
 
-
 test.describe("Heatmap Proper", () => {
-
   test("SNo 7: Filters", async ({ page }) => {
     test.setTimeout(TEST_TIMEOUT);
 
     // #region Setup
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.MNGS}_SNo_7`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.MNGS}_SNo_7`,
+    );
 
     // "H2002_HiSeq30X_Short
     // https://drive.google.com/drive/folders/13FsG7qEJgZfsvAL1CccIPxqTFvvqvNUh
@@ -61,7 +61,7 @@ test.describe("Heatmap Proper", () => {
     await heatmapPage.setCategoryOption("Bacteria");
 
     // Add a filter NT rPM >= 5000
-    await heatmapPage.setThresholdsOptions({value: "5000"});
+    await heatmapPage.setThresholdsOptions({ value: "5000" });
 
     // Known Patogens Only = on
     await heatmapPage.clickKnownPathogensOnlyCheckbox();
@@ -77,7 +77,7 @@ test.describe("Heatmap Proper", () => {
       await heatmapPage.hoverOverCell(i);
       taxonData.push(await heatmapPage.getTaxonInfo());
     }
-    taxonData = taxonData.sort((a,b) => b.Taxon.localeCompare(a.Taxon));
+    taxonData = taxonData.sort((a, b) => b.Taxon.localeCompare(a.Taxon));
     // INFO
     // Sample: RR004_water_2_S23A
     // Taxon: Escherichia coli
@@ -132,7 +132,9 @@ test.describe("Heatmap Proper", () => {
       const expectedRow = expectedTaxonInfo[i];
       for (const key of Object.keys(expectedRow)) {
         if (key === "Sample") {
-          expect(actualRow[key]).toMatch(new RegExp(`${RR004_water_2_S23A}[_0-9]*`));
+          expect(actualRow[key]).toMatch(
+            new RegExp(`${RR004_water_2_S23A}[_0-9]*`),
+          );
         } else {
           expect(actualRow[key]).toEqual(expectedRow[key]);
         }

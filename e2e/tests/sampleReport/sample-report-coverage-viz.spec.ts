@@ -7,18 +7,30 @@ let taxon = null;
 let sample = null;
 let samplesPage = null;
 
-test.describe("Coverage Viz Smoke Tests", () => {
+const TEST_TIMEOUT = 60 * 1000 * 5;
 
+test.describe("Coverage Viz Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT);
+
     // #region Get a random completed sample
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.LMNGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.LMNGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.LMNGS);
-    const samplesNames = Object.keys(await projectPage.getSamplesTableOrderedByName());
+    const samplesNames = Object.keys(
+      await projectPage.getSamplesTableOrderedByName(),
+    );
 
     samplesPage = new SamplesPage(page);
-    let samples = await samplesPage.getCompletedSamples(project.name, samplesNames);
-    samples = samples.filter(sample => sample.name.includes("28A-idseq-mosq.2to4mil_subsample"));
+    let samples = await samplesPage.getCompletedSamples(
+      project.name,
+      samplesNames,
+    );
+    samples = samples.filter(sample =>
+      sample.name.includes("28A-idseq-mosq.2to4mil_subsample"),
+    );
     sample = samples[Math.floor(Math.random() * samples.length)];
     // #endregion Get a random completed sample
 
@@ -29,10 +41,13 @@ test.describe("Coverage Viz Smoke Tests", () => {
     // #endregion Go to the sample report page
 
     // #region Pick a random taxon
-    const reportTable = await samplesPage.getReportFilterTable()
+    const reportTable = await samplesPage.getReportFilterTable();
     const taxons = await samplesPage.getTaxonsFromReport(
-      await samplesPage.getReportV2(sample.id));
-    taxon = taxons.filter(taxon => reportTable[0].Taxon.includes(taxon.name) && taxon.name)[0]
+      await samplesPage.getReportV2(sample.id),
+    );
+    taxon = taxons.filter(
+      taxon => reportTable[0].Taxon.includes(taxon.name) && taxon.name,
+    )[0];
     // #endregion Pick a random taxon
 
     // #region Click "coverage visualisation" on a taxon

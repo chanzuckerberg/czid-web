@@ -1,15 +1,13 @@
 import { ImpactPage } from "@e2e/page-objects/impact-page";
 import { test, expect } from "@playwright/test";
 
-
 /*
  * Smoke Test: Impact
  *
- * The test should ensure that the elements 
+ * The test should ensure that the elements
  * on the page render properly
  */
 test.describe("Smoke Test: impact page", () => {
-
   test("Ensure the elements on the page render properly", async ({ page }) => {
     const impactPage = new ImpactPage(page);
 
@@ -32,5 +30,4 @@ test.describe("Smoke Test: impact page", () => {
     await impactPage.isHeaderLoginVisible();
     // #endregion Validate the header login element is visible
   });
-
 });

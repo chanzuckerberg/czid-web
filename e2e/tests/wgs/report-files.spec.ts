@@ -1,5 +1,8 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { TRIM_PRIMER_FILENAME } from "@e2e/page-objects/upload-page";
 import { setupSamples } from "@e2e/page-objects/user-actions";
@@ -15,12 +18,10 @@ const WGS_SAMPLE_NAMES_WITHOUT_TRIM_PRIMER = [NO_HOST_WITHOUT_TRIM_PRIMER];
 const WGS_SAMPLE_NAMES = [NO_HOST];
 // #endregion Expected data
 
-
 /*
  * Viral CG (WGS) - Report files
  */
 test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
-
   /**
    * WGS - 28: Viral CG (WGS) - Report files
    */
@@ -34,7 +35,7 @@ test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      {includeTrimPrimer: true},
+      { includeTrimPrimer: true },
     );
     await setupSamples(
       page,
@@ -42,7 +43,7 @@ test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES_WITHOUT_TRIM_PRIMER,
       WORKFLOWS.WGS,
-      {includeTrimPrimer: false},
+      { includeTrimPrimer: false },
     );
     // #endregion 1. Upload the same sample with/without Trim Primers file
 
@@ -96,5 +97,4 @@ test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
 
     // #endregion 2. Download both (.fa) fasta output report files && 3. Open both fasta files and compare its format
   });
-
 });

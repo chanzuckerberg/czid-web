@@ -7,8 +7,9 @@ import { ProjectPage } from "../../page-objects/project-page";
  * Viral CG (WGS) - Sample upload (web) Nanopore unavailable
  */
 test.describe("Viral CG (WGS) - Sample upload (web): Nanopore unavailable: Functional: P-2", () => {
-
-  test("SNo 9: mNGS - Nanopore (fast) + Viral Consensus Genome", async ({ page }) => {
+  test("SNo 9: mNGS - Nanopore (fast) + Viral Consensus Genome", async ({
+    page,
+  }) => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
@@ -35,7 +36,8 @@ test.describe("Viral CG (WGS) - Sample upload (web): Nanopore unavailable: Funct
     // #endregion 5. Select ""fast"" guppy basecaller setting option
 
     // #region 6. Observe ""Viral Consensus Genome"" analysis type checkbox
-    let isViralConsensusGenomeDisabled = await uploadPage.isSequencingTechnologyDisabled(WORKFLOWS.WGS);
+    let isViralConsensusGenomeDisabled =
+      await uploadPage.isSequencingTechnologyDisabled(WORKFLOWS.WGS);
 
     // Viral Consensus Genome analysis type option should be disabled
     expect(isViralConsensusGenomeDisabled).toBeTruthy();
@@ -47,7 +49,8 @@ test.describe("Viral CG (WGS) - Sample upload (web): Nanopore unavailable: Funct
     // #endregion 7. Select ""hac"" guppy basecaller setting option
 
     // #region 8. Observe ""Viral Consensus Genome"" analysis type checkbox
-    isViralConsensusGenomeDisabled = await uploadPage.isSequencingTechnologyDisabled(WORKFLOWS.WGS);
+    isViralConsensusGenomeDisabled =
+      await uploadPage.isSequencingTechnologyDisabled(WORKFLOWS.WGS);
 
     // Viral Consensus Genome analysis type option should be disabled
     expect(isViralConsensusGenomeDisabled).toBeTruthy();
@@ -59,7 +62,8 @@ test.describe("Viral CG (WGS) - Sample upload (web): Nanopore unavailable: Funct
     // #endregion 9. Select ""super"" guppy basecaller setting option
 
     // #region 10. Observe ""Viral Consensus Genome"" analysis type checkbox
-    isViralConsensusGenomeDisabled = await uploadPage.isSequencingTechnologyDisabled(WORKFLOWS.WGS);
+    isViralConsensusGenomeDisabled =
+      await uploadPage.isSequencingTechnologyDisabled(WORKFLOWS.WGS);
 
     // Viral Consensus Genome analysis type option should be disabled
     expect(isViralConsensusGenomeDisabled).toBeTruthy();

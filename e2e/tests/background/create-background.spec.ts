@@ -9,7 +9,6 @@ const BASESPACE_PROJECT_NAME = "Mark Test Project";
 const TEST_TIMEOUT = 60 * 1000 * 30;
 
 test.describe("Functional: P-0: Create BG model", () => {
-  
   test.beforeEach(async () => {
     test.setTimeout(TEST_TIMEOUT);
   });
@@ -21,7 +20,9 @@ test.describe("Functional: P-0: Create BG model", () => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.MNGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.MNGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.MNGS);
     // #endregion 1. Login to CZ ID staging
 
@@ -34,10 +35,16 @@ test.describe("Functional: P-0: Create BG model", () => {
     // #endregion 3. Click on Backgroun Model icon
 
     // #region 4. Enter Name and Description
-    const randomBackgroundName = `auto-${getAlphaNumericString(7)}-${new Date()}`;
+    const randomBackgroundName = `auto-${getAlphaNumericString(
+      7,
+    )}-${new Date()}`;
     await projectPage.fillBackgroundNameInput(randomBackgroundName);
-    const randomBackgroundDescription = `auto-description-${getAlphaNumericString(7)}-${new Date()}`;
-    await projectPage.fillBackgroundDescriptionInput(randomBackgroundDescription);
+    const randomBackgroundDescription = `auto-description-${getAlphaNumericString(
+      7,
+    )}-${new Date()}`;
+    await projectPage.fillBackgroundDescriptionInput(
+      randomBackgroundDescription,
+    );
     // #endregion 4. Enter Name and Description
 
     // #region 5. Pick ""Standard"" option in Applied Correction Method and click Create
@@ -47,12 +54,14 @@ test.describe("Functional: P-0: Create BG model", () => {
     // #endregion 5. Pick ""Standard"" option in Applied Correction Method and click Create
 
     // #region 6. Observe bottom of BG Model window
-    const createBackgroundNotification = await projectPage.getCreateBackgroundNotification();
+    const createBackgroundNotification =
+      await projectPage.getCreateBackgroundNotification();
 
     // - Background successful message displayed at botom of BG Model window:
     // ""Your Background Model is being created and will be visible on the report page once statistics have been computed.""
     expect(createBackgroundNotification).toEqual(
-      "Your Background Model is being created and will be visible on the report page once statistics have been computed.");
+      "Your Background Model is being created and will be visible on the report page once statistics have been computed.",
+    );
     // #endregion 6. Observe bottom of BG Model window
 
     // #region 7. Close BG model windows and open a sample report
@@ -77,11 +86,21 @@ test.describe("Functional: P-0: Create BG model", () => {
     // #region 1. Login to CZ ID staging
     const projectPage = new ProjectPage(page);
     await projectPage.navigateToMyData();
-    const project = await projectPage.getOrCreateProject("SNo-14-normalized-bg");
+    const project = await projectPage.getOrCreateProject(
+      "SNo-14-normalized-bg",
+    );
 
     const uploadPage = new UploadPage(page);
-    await uploadPage.uploadBasespaceSample(project.name, BASESPACE_PROJECT_NAME, WORKFLOWS.MNGS)
-    await uploadPage.uploadBasespaceSample(project.name, BASESPACE_PROJECT_NAME, WORKFLOWS.MNGS)
+    await uploadPage.uploadBasespaceSample(
+      project.name,
+      BASESPACE_PROJECT_NAME,
+      WORKFLOWS.MNGS,
+    );
+    await uploadPage.uploadBasespaceSample(
+      project.name,
+      BASESPACE_PROJECT_NAME,
+      WORKFLOWS.MNGS,
+    );
 
     await projectPage.navigateToSamples(project.id, WORKFLOWS.MNGS);
     // #endregion 1. Login to CZ ID staging
@@ -95,10 +114,16 @@ test.describe("Functional: P-0: Create BG model", () => {
     // #endregion 3. Click on Backgroun Model icon
 
     // #region 4. Enter Name and Description
-    const randomBackgroundName = `auto-${getAlphaNumericString(7)}-${new Date()}`;
+    const randomBackgroundName = `auto-${getAlphaNumericString(
+      7,
+    )}-${new Date()}`;
     await projectPage.fillBackgroundNameInput(randomBackgroundName);
-    const randomBackgroundDescription = `auto-description-${getAlphaNumericString(7)}-${new Date()}`;
-    await projectPage.fillBackgroundDescriptionInput(randomBackgroundDescription);
+    const randomBackgroundDescription = `auto-description-${getAlphaNumericString(
+      7,
+    )}-${new Date()}`;
+    await projectPage.fillBackgroundDescriptionInput(
+      randomBackgroundDescription,
+    );
     // #endregion 4. Enter Name and Description
 
     // #region 5. Pick ""Normalized by Input Mass"" option in Applied Correction Method and click Create
@@ -108,12 +133,14 @@ test.describe("Functional: P-0: Create BG model", () => {
     // #endregion 5. Pick ""Normalized by Input Mass"" option in Applied Correction Method and click Create
 
     // #region 6. Observe bottom of BG Model window
-    const createBackgroundNotification = await projectPage.getCreateBackgroundNotification();
+    const createBackgroundNotification =
+      await projectPage.getCreateBackgroundNotification();
 
     // - Background successful message displayed at botom of BG Model window:
     // ""Your Background Model is being created and will be visible on the report page once statistics have been computed.""
     expect(createBackgroundNotification).toEqual(
-      "Your Background Model is being created and will be visible on the report page once statistics have been computed.");
+      "Your Background Model is being created and will be visible on the report page once statistics have been computed.",
+    );
     // #endregion 6. Observe bottom of BG Model window
 
     // #region 7. Close BG model windows and open a sample report
@@ -130,5 +157,4 @@ test.describe("Functional: P-0: Create BG model", () => {
     expect(selectedBackground).toEqual(randomBackgroundName);
     // #endregion 8. Click on Background dropdown filter and observe My Backgrounds section
   });
-
 });

@@ -1,5 +1,10 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2, SAMPLE_FILE_1_PAIRED_R1, SAMPLE_FILE_1_PAIRED_R2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+  SAMPLE_FILE_1_PAIRED_R1,
+  SAMPLE_FILE_1_PAIRED_R2,
+} from "@e2e/constants/sample";
 import { setupSamples } from "@e2e/page-objects/user-actions";
 import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
@@ -13,7 +18,9 @@ const CT20K_SAMPLE_FILES = [SAMPLE_FILE_1_PAIRED_R1, SAMPLE_FILE_1_PAIRED_R2];
 const SAMPLE_1_PAIRED = "Sample_1_Paired";
 const CT20K_SAMPLE_NAMES = [SAMPLE_1_PAIRED];
 
-const NEXTCLADE_REFERENCE_JSON_FILE = require.resolve("@e2e/fixtures/nextclade_trees/pawnee_fake_example.json");
+const NEXTCLADE_REFERENCE_JSON_FILE = require.resolve(
+  "@e2e/fixtures/nextclade_trees/pawnee_fake_example.json",
+);
 
 let projectPage = null;
 let timeout = 60 * 1000 * 30;
@@ -24,7 +31,6 @@ const WAIT_FOR_PIPELINE = true;
  * NextClade Tree
  */
 test.describe("NextClade Tree: Functional: P-0", () => {
-
   test.beforeEach(async ({ page }) => {
     test.setTimeout(timeout);
     projectPage = new ProjectPage(page);
@@ -35,15 +41,21 @@ test.describe("NextClade Tree: Functional: P-0", () => {
   });
 
   test("SNo 23: Create a Nextclade Tree", async ({ page }) => {
-    const sc2_project = await projectPage.getOrCreateProject(`SNo-23_NextClade_${WORKFLOWS.SC2}`);
+    const sc2_project = await projectPage.getOrCreateProject(
+      `SNo-23_NextClade_${WORKFLOWS.SC2}`,
+    );
     await projectPage.delete6MonthOldSamples(sc2_project, WORKFLOWS.SC2);
 
     const setupSampleNames = [];
     for (let i = 0; i < 4; i++) {
-      const sampleName = i > 0 ? `${SARS_CoV2_NO_HOST}_${i}` : SARS_CoV2_NO_HOST;
+      const sampleName =
+        i > 0 ? `${SARS_CoV2_NO_HOST}_${i}` : SARS_CoV2_NO_HOST;
       setupSampleNames.push(sampleName);
     }
-    const samples = await new SamplesPage(page).getSamples(sc2_project.name, setupSampleNames);
+    const samples = await new SamplesPage(page).getSamples(
+      sc2_project.name,
+      setupSampleNames,
+    );
     if (samples.length <= 0) {
       timeout = 60 * 1000 * 60;
       for (let i = 0; i < setupSampleNames.length; i++) {
@@ -53,7 +65,12 @@ test.describe("NextClade Tree: Functional: P-0", () => {
           WGS_SAMPLE_FILES,
           [setupSampleNames[i]],
           WORKFLOWS.SC2,
-          {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+          {
+            hostOrganism: "Human",
+            taxon: "Unknown",
+            runPipeline: RUN_PIPELINE,
+            waitForPipeline: WAIT_FOR_PIPELINE,
+          },
         );
       }
     }
@@ -68,7 +85,9 @@ test.describe("NextClade Tree: Functional: P-0", () => {
 
     // #region 3. Select only SC2 Sample(s)
     const samplesToSelect = Math.floor(Math.random() * 3) + 1;
-    const sampleNames = (await projectPage.selectCompletedSamples(samplesToSelect)).sort();
+    const sampleNames = (
+      await projectPage.selectCompletedSamples(samplesToSelect)
+    ).sort();
     // #endregion 3. Select only SC2 Sample(s)
 
     // #region 4. Click on Nextclade tree icon
@@ -95,9 +114,13 @@ test.describe("NextClade Tree: Functional: P-0", () => {
     expect(nextcladeSampleNames).toEqual(sampleNames);
   });
 
-  test("SNo 25: Create a Nextclade Tree with a mixture of samples with and without reference assension", async ({ page }) => {
+  test("SNo 25: Create a Nextclade Tree with a mixture of samples with and without reference assension", async ({
+    page,
+  }) => {
     // #region Setup
-    const sc2_project = await projectPage.getOrCreateProject(`SNo-25_NextClade_${WORKFLOWS.SC2}`);
+    const sc2_project = await projectPage.getOrCreateProject(
+      `SNo-25_NextClade_${WORKFLOWS.SC2}`,
+    );
     await projectPage.delete6MonthOldSamples(sc2_project, WORKFLOWS.SC2);
 
     const sc2_samples = await setupSamples(
@@ -106,7 +129,12 @@ test.describe("NextClade Tree: Functional: P-0", () => {
       WGS_SAMPLE_FILES,
       SARS_CoV2_SAMPLE_NAMES,
       WORKFLOWS.SC2,
-      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        hostOrganism: "Human",
+        taxon: "Unknown",
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
     const wgs_samples = await setupSamples(
       page,
@@ -114,7 +142,12 @@ test.describe("NextClade Tree: Functional: P-0", () => {
       WGS_SAMPLE_FILES,
       ["wgs_SARS_CoV2_no_host_1"],
       WORKFLOWS.WGS,
-      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        hostOrganism: "Human",
+        taxon: "Unknown",
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
     // #endregion Setup
 
@@ -139,7 +172,9 @@ test.describe("NextClade Tree: Functional: P-0", () => {
     // {sample_name_X1}
     // {sample_name_X2}
     const notificationMessages = await projectPage.getNotificationMessages();
-    let expectedNotification = `${wgs_samples.length} consensus genome${wgs_samples.length > 1 ? "s" : ""} won't be sent to Nextclade, because Nextclade only accepts SARS-CoV-2 genomes currently:`;
+    let expectedNotification = `${wgs_samples.length} consensus genome${
+      wgs_samples.length > 1 ? "s" : ""
+    } won't be sent to Nextclade, because Nextclade only accepts SARS-CoV-2 genomes currently:`;
     for (const wgs_sample of wgs_samples) {
       expectedNotification += wgs_sample.name;
     }
@@ -171,7 +206,9 @@ test.describe("NextClade Tree: Functional: P-0", () => {
    * Own Project / Default tree
    */
   test("SNo SC2-45: Nextclade using Default tree", async ({ page }) => {
-    const sc2_project = await projectPage.getOrCreateProject(`SC2-45_NextClade_CT20K_${WORKFLOWS.SC2}`);
+    const sc2_project = await projectPage.getOrCreateProject(
+      `SC2-45_NextClade_CT20K_${WORKFLOWS.SC2}`,
+    );
     await projectPage.delete6MonthOldSamples(sc2_project, WORKFLOWS.SC2);
 
     await setupSamples(
@@ -180,7 +217,12 @@ test.describe("NextClade Tree: Functional: P-0", () => {
       CT20K_SAMPLE_FILES,
       CT20K_SAMPLE_NAMES,
       WORKFLOWS.SC2,
-      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        hostOrganism: "Human",
+        taxon: "Unknown",
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
 
     // #region 1. Log in to Project
@@ -196,13 +238,15 @@ test.describe("NextClade Tree: Functional: P-0", () => {
     // #endregion 3. Navigate to Consensus Genome tab
 
     // #region 4. Select SC2 samples - ""Ct20K"", ""Sample_1_Paired""
-    const isNextcladeTreeButtonDisabledBefore = await projectPage.isNextcladeTreeButtonDisabled();
+    const isNextcladeTreeButtonDisabledBefore =
+      await projectPage.isNextcladeTreeButtonDisabled();
     expect(isNextcladeTreeButtonDisabledBefore).toEqual(true);
 
     await projectPage.clickSampleCheckbox(SAMPLE_1_PAIRED);
 
     // Nextclade phylo tree icon enables when selecting only SC2 samples
-    const isNextcladeTreeButtonDisabledAfter = await projectPage.isNextcladeTreeButtonDisabled();
+    const isNextcladeTreeButtonDisabledAfter =
+      await projectPage.isNextcladeTreeButtonDisabled();
     expect(isNextcladeTreeButtonDisabledAfter).toEqual(false);
     // #endregion 4. Select SC2 samples - ""Ct20K"", ""Sample_1_Paired""
 
@@ -234,8 +278,12 @@ test.describe("NextClade Tree: Functional: P-0", () => {
    * Nextclade - Create a tree
    * Own Poject / .json tree file
    */
-  test("SNo SC2-46: Nextclade uploading a reference .json tree file", async ({ page }) => {
-    const sc2_project = await projectPage.getOrCreateProject(`SC2-46_NextClade_CT20K_${WORKFLOWS.SC2}`);
+  test("SNo SC2-46: Nextclade uploading a reference .json tree file", async ({
+    page,
+  }) => {
+    const sc2_project = await projectPage.getOrCreateProject(
+      `SC2-46_NextClade_CT20K_${WORKFLOWS.SC2}`,
+    );
     await projectPage.delete6MonthOldSamples(sc2_project, WORKFLOWS.SC2);
 
     await setupSamples(
@@ -244,7 +292,12 @@ test.describe("NextClade Tree: Functional: P-0", () => {
       CT20K_SAMPLE_FILES,
       CT20K_SAMPLE_NAMES,
       WORKFLOWS.SC2,
-      {hostOrganism: "Human", taxon: "Unknown", runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        hostOrganism: "Human",
+        taxon: "Unknown",
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
 
     // #region 1. Login to CZ ID staging
@@ -260,13 +313,15 @@ test.describe("NextClade Tree: Functional: P-0", () => {
     // #endregion 3. Navigate to Consensus Genome tab
 
     // #region 4. Select SC2 samples - ""Ct20K"", ""Sample_1_Paired""
-    const isNextcladeTreeButtonDisabledBefore = await projectPage.isNextcladeTreeButtonDisabled();
+    const isNextcladeTreeButtonDisabledBefore =
+      await projectPage.isNextcladeTreeButtonDisabled();
     expect(isNextcladeTreeButtonDisabledBefore).toEqual(true);
 
     await projectPage.clickSampleCheckbox(SAMPLE_1_PAIRED);
 
     // Nextclade phylo tree icon enables when selecting only SC2 samples
-    const isNextcladeTreeButtonDisabledAfter = await projectPage.isNextcladeTreeButtonDisabled();
+    const isNextcladeTreeButtonDisabledAfter =
+      await projectPage.isNextcladeTreeButtonDisabled();
     expect(isNextcladeTreeButtonDisabledAfter).toEqual(false);
     // #endregion 4. Select SC2 samples - ""Ct20K"", ""Sample_1_Paired""
 
@@ -301,5 +356,4 @@ test.describe("NextClade Tree: Functional: P-0", () => {
     expect(nextcladeSampleNames).toEqual(CT20K_SAMPLE_NAMES);
     // #endregion 9. Click on ""Confirm"" button in Nextclade (beta) window
   });
-
 });

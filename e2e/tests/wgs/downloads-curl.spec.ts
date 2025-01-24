@@ -13,7 +13,6 @@ const timeout = 60 * 1000 * 5;
  * WGS - Downloads (CURL)
  */
 test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
-
   test.beforeEach(async () => {
     test.setTimeout(timeout);
   });
@@ -25,13 +24,17 @@ test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
     // #endregion 1. Login to CZ ID staging
 
     // #region 2. Pick a project with WGS samples
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     // #endregion 2. Pick a project with WGS samples
 
     // #region 3. Select 1 or more samples in Sample list view
     const oneOrMoreSamples = Math.floor(Math.random() * 3) + 1;
-    let selectedSamples = await projectPage.selectCompletedSamples(oneOrMoreSamples);
+    let selectedSamples = await projectPage.selectCompletedSamples(
+      oneOrMoreSamples,
+    );
     selectedSamples = selectedSamples.sort();
     // #endregion 3. Select 1 or more samples in Sample list view
 
@@ -131,7 +134,9 @@ test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
           const pathToExtractedDir = path.join(extractedDir, extractedContent);
 
           // {pathTo}/{downloadType}/{Sample_Name}/*
-          let contentsInExtractedDir = (await fs.readdir(pathToExtractedDir)).sort();
+          let contentsInExtractedDir = (
+            await fs.readdir(pathToExtractedDir)
+          ).sort();
 
           if (!isFFUser) {
             for (const content of contentsInExtractedDir) {
@@ -148,9 +153,8 @@ test.describe("WGS - Downloads (CURL) | Functional: P-0", () => {
           }
         }
       }
-
     } finally {
-      await fs.rm(tempDir, {recursive: true, force: true});
+      await fs.rm(tempDir, { recursive: true, force: true });
     }
     // #endregion 11. Open a CMD/Terminal session and execute command in clipboard
   });

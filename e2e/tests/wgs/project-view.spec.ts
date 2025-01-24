@@ -1,5 +1,8 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { Graphqlfed } from "@e2e/page-objects/graphqlfed";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { UploadPage } from "@e2e/page-objects/upload-page";
@@ -7,19 +10,20 @@ import { test, expect } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 import { setupSamples } from "../../page-objects/user-actions";
 
-const WGS_SARS_COV2_NO_HOST_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
+const WGS_SARS_COV2_NO_HOST_FILES = [
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+];
 const SARS_CoV2_NO_HOST = "wgs_SARS_CoV2_no_host";
 const SARS_CoV2_SAMPLE_NAMES = [SARS_CoV2_NO_HOST];
 const RUN_PIPELINE = true;
 const WAIT_FOR_PIPELINE = false;
 const timeout = 60 * 1000 * 5;
 
-
 /*
  * Project View: Functional: P-1
  */
 test.describe("Project View: Functional: P-1", () => {
-
   test.beforeEach(async () => {
     test.setTimeout(timeout);
   });
@@ -30,9 +34,18 @@ test.describe("Project View: Functional: P-1", () => {
   test("SNo WGS - 38: Filter Samples Through Taxon", async ({ page }) => {
     // #region 1. Log in to Project
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`SNo_WGS-38_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `SNo_WGS-38_${WORKFLOWS.WGS}`,
+    );
 
-    const taxons = (await projectPage.getSearchSuggestions("coronavirus", "taxon", "Viruses", "my_data")).Taxon.results;
+    const taxons = (
+      await projectPage.getSearchSuggestions(
+        "coronavirus",
+        "taxon",
+        "Viruses",
+        "my_data",
+      )
+    ).Taxon.results;
     const coronavirus = taxons[Math.floor(Math.random() * taxons.length)];
     await setupSamples(
       page,
@@ -40,7 +53,12 @@ test.describe("Project View: Functional: P-1", () => {
       WGS_SARS_COV2_NO_HOST_FILES,
       SARS_CoV2_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      {hostOrganism: "Human", taxon: coronavirus.title,runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        hostOrganism: "Human",
+        taxon: coronavirus.title,
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
     await projectPage.navigateToMyData();
     await projectPage.pause(1);
@@ -59,7 +77,10 @@ test.describe("Project View: Functional: P-1", () => {
 
     // Taxon Filters - Taxon filter applied and Consensus Genome sample list is filtered with filtering criteria
     const graphqlfed = new Graphqlfed(page);
-    const expectedSampleNames = await graphqlfed.projectSamplesByTaxon(project, coronavirus);
+    const expectedSampleNames = await graphqlfed.projectSamplesByTaxon(
+      project,
+      coronavirus,
+    );
 
     const samplesTable = await projectPage.getSamplesTable();
     for (const tableRow of samplesTable) {
@@ -75,7 +96,9 @@ test.describe("Project View: Functional: P-1", () => {
   test("SNo WGS - 39: Filter Samples Through Annotation", async ({ page }) => {
     // #region 1. Log in to Project
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     // #endregion 1. Log in to Project
 
     // #region 2. Navigate to Consensus Genome tab
@@ -83,7 +106,8 @@ test.describe("Project View: Functional: P-1", () => {
     // #endregion 2. Navigate to Consensus Genome tab
 
     // #region 3. Observe Annotation Taxon Filter
-    const isAnnotationFilterDisabled = await projectPage.isAnnotationFilterDisabled();
+    const isAnnotationFilterDisabled =
+      await projectPage.isAnnotationFilterDisabled();
 
     // Taxon Filters - Annotation filtering is greyed out and disabled
     expect(isAnnotationFilterDisabled).toBeTruthy();
@@ -100,12 +124,16 @@ test.describe("Project View: Functional: P-1", () => {
   test("SNo WGS - 40: Filter Samples Through Location", async ({ page }) => {
     // #region 1. Log in to Project
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`SNo_WGS-40_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `SNo_WGS-40_${WORKFLOWS.WGS}`,
+    );
 
     const chars = "abcdefghijklmnopqrstuvwxyz".split("");
     const randomLetter = chars[Math.floor(Math.random() * chars.length)];
 
-    const locations = await projectPage.getLocationsExternalSearch(randomLetter);
+    const locations = await projectPage.getLocationsExternalSearch(
+      randomLetter,
+    );
     const location = locations[Math.floor(Math.random() * locations.length)];
     await setupSamples(
       page,
@@ -113,7 +141,11 @@ test.describe("Project View: Functional: P-1", () => {
       WGS_SARS_COV2_NO_HOST_FILES,
       SARS_CoV2_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      {collectionLocation: location.name, runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        collectionLocation: location.name,
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
     // #endregion 1. Log in to Project
 
@@ -123,13 +155,18 @@ test.describe("Project View: Functional: P-1", () => {
 
     // #region 3. Select a Location option from list and observe
     const locationOptions = await projectPage.getLocationFilterOptions();
-    const locationName = locationOptions[Math.floor(Math.random() * locationOptions.length)];
+    const locationName =
+      locationOptions[Math.floor(Math.random() * locationOptions.length)];
     await projectPage.fillLocationFilter([locationName]);
 
     // Metadata Filters - LOCATION filter applied and Consensus Genome sample list is filtered with filtering criteria.
     // Sample count will reduce in the sample details panel. Location graph will reduce in the sample details panel.
     const graphqlfed = new Graphqlfed(page);
-    const expectedSampleNames = await graphqlfed.projectSamplesByCollectionLocation(project, locationName);
+    const expectedSampleNames =
+      await graphqlfed.projectSamplesByCollectionLocation(
+        project,
+        locationName,
+      );
 
     const consensusGenomesCount = await projectPage.getConsensusGenomesCount();
     expect(consensusGenomesCount).toEqual(expectedSampleNames.length);
@@ -148,7 +185,9 @@ test.describe("Project View: Functional: P-1", () => {
   test("SNo WGS - 41: Filter Samples Through TimeFrame", async ({ page }) => {
     // #region 1. Log in to Project
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`automation_project_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `automation_project_${WORKFLOWS.WGS}`,
+    );
     // #endregion 1. Log in to Project
 
     // #region 2. Navigate to Consensus Genome tab
@@ -176,13 +215,15 @@ test.describe("Project View: Functional: P-1", () => {
         expectedDate.setUTCFullYear(expectedDate.getUTCFullYear() - 1);
         break;
     }
-    expectedDate.setUTCHours(0,0,0,0);
+    expectedDate.setUTCHours(0, 0, 0, 0);
     await projectPage.fillTimeframeFilter(timeframe);
 
     // Metadata Filters - TIMEFRAME filter applied and Consensus Genome sample list is filtered with filtering criteria.
     // Sample count will reduce in the sample details panel.
     let expectedSamples = await new SamplesPage(page).getSamples(project.name);
-    expectedSamples = expectedSamples.filter(s => new Date(s.created_at) >= expectedDate);
+    expectedSamples = expectedSamples.filter(
+      s => new Date(s.created_at) >= expectedDate,
+    );
 
     const expectedSampleNames = expectedSamples.map(s => s.name);
     const samplesTable = await projectPage.getSamplesTable();
@@ -199,8 +240,14 @@ test.describe("Project View: Functional: P-1", () => {
   test("SNo WGS - 42: Filter Samples Through Visibility", async ({ page }) => {
     // #region 1. Log in to Project
     const projectPage = new ProjectPage(page);
-    const privateProject = await projectPage.getOrCreateProject(`private_SNo_WGS-42_${WORKFLOWS.WGS}`, 0);
-    const publicProject = await projectPage.getOrCreateProject(`public_SNo_WGS-42_${WORKFLOWS.WGS}`, 1);
+    const privateProject = await projectPage.getOrCreateProject(
+      `private_SNo_WGS-42_${WORKFLOWS.WGS}`,
+      0,
+    );
+    const publicProject = await projectPage.getOrCreateProject(
+      `public_SNo_WGS-42_${WORKFLOWS.WGS}`,
+      1,
+    );
     await setupSamples(
       page,
       privateProject,
@@ -218,7 +265,11 @@ test.describe("Project View: Functional: P-1", () => {
     // #endregion 1. Log in to Project
 
     // #region 2. Navigate to Consensus Genome tab
-    await projectPage.navigateToSamples(privateProject.id, WORKFLOWS.WGS, "my_data");
+    await projectPage.navigateToSamples(
+      privateProject.id,
+      WORKFLOWS.WGS,
+      "my_data",
+    );
     // #endregion 2. Navigate to Consensus Genome tab
 
     // #region 3. Select a Visibility option from list and observe
@@ -233,7 +284,11 @@ test.describe("Project View: Functional: P-1", () => {
     expect(publicCount).toEqual(0);
     expect(privateCount).toBeGreaterThanOrEqual(1);
 
-    await projectPage.navigateToSamples(publicProject.id, WORKFLOWS.WGS, "my_data");
+    await projectPage.navigateToSamples(
+      publicProject.id,
+      WORKFLOWS.WGS,
+      "my_data",
+    );
 
     await projectPage.fillVisibilityFilter("Private");
     privateCount = await projectPage.getConsensusGenomesCount();
@@ -252,7 +307,9 @@ test.describe("Project View: Functional: P-1", () => {
   test("SNo WGS - 43: Filter Samples Through Host", async ({ page }) => {
     // #region 1. Log in to Project
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`SNo_WGS-43_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `SNo_WGS-43_${WORKFLOWS.WGS}`,
+    );
 
     const hostOrganism = await new UploadPage(page).getRandomHostOrganism();
     await setupSamples(
@@ -261,7 +318,11 @@ test.describe("Project View: Functional: P-1", () => {
       WGS_SARS_COV2_NO_HOST_FILES,
       SARS_CoV2_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      {hostOrganism: hostOrganism, runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        hostOrganism: hostOrganism,
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
     // #endregion 1. Log in to Project
 
@@ -275,7 +336,10 @@ test.describe("Project View: Functional: P-1", () => {
     // Metadata Filters - HOST filter applied and Consensus Genome sample list is filtered with filtering criteria
     // Sample count will reduce in the sample details panel."
     const graphqlfed = new Graphqlfed(page);
-    const expectedSampleNames = await graphqlfed.projectSamplesByHostOrganism(project, hostOrganism);
+    const expectedSampleNames = await graphqlfed.projectSamplesByHostOrganism(
+      project,
+      hostOrganism,
+    );
 
     const consensusGenomesCount = await projectPage.getConsensusGenomesCount();
     expect(consensusGenomesCount).toEqual(expectedSampleNames.length);
@@ -294,13 +358,16 @@ test.describe("Project View: Functional: P-1", () => {
   test("SNo WGS - 44: Filter Samples Through Sample Type", async ({ page }) => {
     // #region 1. Log in to Project
     const projectPage = new ProjectPage(page);
-    const project = await projectPage.getOrCreateProject(`SNo_WGS-44_${WORKFLOWS.WGS}`);
+    const project = await projectPage.getOrCreateProject(
+      `SNo_WGS-44_${WORKFLOWS.WGS}`,
+    );
 
     // #region Get sample type counts
     const sampleType = await new UploadPage(page).getRandomSampleTissueType();
     await projectPage.navigateToSamples(project.id, WORKFLOWS.WGS);
     await projectPage.fillSampleTypeFilter([sampleType]);
-    const consensusGenomesCountBefore = await projectPage.getConsensusGenomesCount();
+    const consensusGenomesCountBefore =
+      await projectPage.getConsensusGenomesCount();
     const expectedSampleNames = await projectPage.getSampleNames();
     await projectPage.fillSampleTypeFilter([sampleType]);
     // #endregion Get sample type counts
@@ -311,7 +378,11 @@ test.describe("Project View: Functional: P-1", () => {
       WGS_SARS_COV2_NO_HOST_FILES,
       SARS_CoV2_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      {sampleTissueType: sampleType, runPipeline: RUN_PIPELINE, waitForPipeline: WAIT_FOR_PIPELINE},
+      {
+        sampleTissueType: sampleType,
+        runPipeline: RUN_PIPELINE,
+        waitForPipeline: WAIT_FOR_PIPELINE,
+      },
     );
     // Add the newly created samples to the expectedSampleNames
     for (const sample of samples) {
@@ -324,17 +395,23 @@ test.describe("Project View: Functional: P-1", () => {
     // #endregion 2. Navigate to Consensus Genome tab
 
     // #region 3. Select a Sample Type option from list and observe
-    const consensusGenomesCountNoFilter = await projectPage.getConsensusGenomesCount();
+    const consensusGenomesCountNoFilter =
+      await projectPage.getConsensusGenomesCount();
     await projectPage.selectPlusColumnOptions(["Sample Type"]);
     await projectPage.fillSampleTypeFilter([sampleType]);
 
     // Metadata Filters - SAMPLE TYPE filter applied and Consensus Genome sample list is filtered with filtering criteria.
     // Sample count will reduce in the sample details panel."
-    const consensusGenomesCountWithFilter = await projectPage.getConsensusGenomesCount();
-    expect(consensusGenomesCountWithFilter).toBeLessThan(consensusGenomesCountNoFilter);
+    const consensusGenomesCountWithFilter =
+      await projectPage.getConsensusGenomesCount();
+    expect(consensusGenomesCountWithFilter).toBeLessThan(
+      consensusGenomesCountNoFilter,
+    );
 
     // The current consensusGenomesCount is equal to the consensusGenomesCountBefore + samples.length
-    expect(consensusGenomesCountWithFilter).toEqual(consensusGenomesCountBefore + samples.length);
+    expect(consensusGenomesCountWithFilter).toEqual(
+      consensusGenomesCountBefore + samples.length,
+    );
 
     const samplesTable = await projectPage.getSamplesTable();
     for (const tableRow of samplesTable) {

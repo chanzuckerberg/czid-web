@@ -1,5 +1,13 @@
 import { WORKFLOWS } from "@e2e/constants/common";
-import { MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1, MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2, SAMPLE_FILE_R1, SAMPLE_FILE_R2, SAMPLE_FILE_NANOPORE, SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2 } from "@e2e/constants/sample";
+import {
+  MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1,
+  MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2,
+  SAMPLE_FILE_R1,
+  SAMPLE_FILE_R2,
+  SAMPLE_FILE_NANOPORE,
+  SAMPLE_FILE_NO_HOST_1,
+  SAMPLE_FILE_NO_HOST_2,
+} from "@e2e/constants/sample";
 import { test } from "@playwright/test";
 import { ProjectPage } from "../../page-objects/project-page";
 import { UploadPage } from "../../page-objects/upload-page";
@@ -10,13 +18,21 @@ let project = null;
 const createdBy = "automation";
 const SAMPLE_FILES = [SAMPLE_FILE_R1, SAMPLE_FILE_R2];
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
-const MNGS_SAMPLE_FILES = [MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1, MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2];
+const MNGS_SAMPLE_FILES = [
+  MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1,
+  MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2,
+];
 const LMNGS_SAMPLE_FILES = [SAMPLE_FILE_NANOPORE];
-const uploadWorkflows = [WORKFLOWS.MNGS, WORKFLOWS.LMNGS, WORKFLOWS.AMR, WORKFLOWS.WGS, WORKFLOWS.SC2];
-
+const uploadWorkflows = [
+  WORKFLOWS.MNGS,
+  WORKFLOWS.LMNGS,
+  WORKFLOWS.AMR,
+  WORKFLOWS.WGS,
+  WORKFLOWS.SC2,
+];
+const UPLOAD_TIMEOUT = 60 * 1000 * 5;
 
 test.describe("Upload Smoke Tests", () => {
-
   test.beforeEach(async ({ page }) => {
     uploadPage = new UploadPage(page);
     projectPage = new ProjectPage(page);
@@ -36,7 +52,7 @@ test.describe("Upload Smoke Tests", () => {
         sampleFiles = SAMPLE_FILES;
       }
 
-      let sampleNames: string[]
+      let sampleNames: string[];
       if (workflow === WORKFLOWS.LMNGS) {
         sampleNames = ["28A-idseq-mosq.2to4mil_subsample"];
       } else if (workflow === WORKFLOWS.MNGS) {
@@ -53,11 +69,15 @@ test.describe("Upload Smoke Tests", () => {
       await uploadPage.setWorkFlow(workflow);
 
       // Upload sample files
-      await uploadPage.uploadSampleFiles(sampleFiles);
+      await uploadPage.uploadSampleFiles(sampleFiles, true, UPLOAD_TIMEOUT);
 
       // Verify the expected confirmation text is shown
-      const expectedConfirmationText = `${sampleFiles.length} File${sampleFiles.length > 1 ? "s" : ""} Selected For Upload`;
-      await uploadPage.validateSampleUploadConfirmation(expectedConfirmationText);
+      const expectedConfirmationText = `${sampleFiles.length} File${
+        sampleFiles.length > 1 ? "s" : ""
+      } Selected For Upload`;
+      await uploadPage.validateSampleUploadConfirmation(
+        expectedConfirmationText,
+      );
 
       // Verify the attached files
       await uploadPage.validateAttachedInputFiles(sampleFiles);
@@ -65,7 +85,7 @@ test.describe("Upload Smoke Tests", () => {
       // Verify the sample names
       await uploadPage.validateSampleNames(sampleNames);
     });
-  };
+  }
   // #endregion Verify Upload Sample for Workflows
 
   // #region Verify Set Metadata for Samples Manually
@@ -84,14 +104,16 @@ test.describe("Upload Smoke Tests", () => {
       }
 
       // Choose project
-      project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      project = await projectPage.getOrCreateProject(
+        `automation_project_${workflow}`,
+      );
       await uploadPage.selectProject(project.name);
 
       // Set workflow
       await uploadPage.setWorkFlow(workflow);
 
       // Upload sample files
-      await uploadPage.uploadSampleFiles(sampleFiles);
+      await uploadPage.uploadSampleFiles(sampleFiles, true, UPLOAD_TIMEOUT);
 
       // TODO: Update to get all
       const sampleNames = await uploadPage.getSampleNames();
@@ -103,7 +125,10 @@ test.describe("Upload Smoke Tests", () => {
       await uploadPage.validateUploadMetaDataVisible();
 
       // Manual Input
-      const inputs = await uploadPage.getRandomizedSampleInputs(sampleFiles, sampleNames);
+      const inputs = await uploadPage.getRandomizedSampleInputs(
+        sampleFiles,
+        sampleNames,
+      );
       await uploadPage.setManualInputs(inputs);
 
       // Validate the expected values were set
@@ -127,7 +152,7 @@ test.describe("Upload Smoke Tests", () => {
         // No action required
       }
     });
-  };
+  }
   // #endregion Verify Set Metadata for Samples Manually
 
   // #region Verify Upload Metadata for Sample using CSV
@@ -146,19 +171,23 @@ test.describe("Upload Smoke Tests", () => {
       }
 
       // Choose project
-      project = await projectPage.getOrCreateProject(`automation_project_${workflow}`);
+      project = await projectPage.getOrCreateProject(
+        `automation_project_${workflow}`,
+      );
       await uploadPage.selectProject(project.name);
 
       // Set workflow
       await uploadPage.setWorkFlow(workflow);
 
-
       // Upload sample files
-      await uploadPage.uploadSampleFiles(sampleFiles);
+      await uploadPage.uploadSampleFiles(sampleFiles, true, UPLOAD_TIMEOUT);
 
       // Get the uploaded sample name and generate randomized inputs
       const sampleNames = await uploadPage.getSampleNames();
-      const inputs = await uploadPage.getRandomizedSampleInputs(sampleFiles, sampleNames);
+      const inputs = await uploadPage.getRandomizedSampleInputs(
+        sampleFiles,
+        sampleNames,
+      );
 
       // Continue
       await uploadPage.clickContinue();
@@ -187,6 +216,6 @@ test.describe("Upload Smoke Tests", () => {
         // No action required
       }
     });
-  };
+  }
   // #endregion Verify Upload Metadata for Sample using CSV
 });

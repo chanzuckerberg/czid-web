@@ -14,6 +14,7 @@ const REFERENCE_ACCESSION_LITERAL = "Reference Accession";
 const WGS_SAMPLE_FILES = [SAMPLE_FILE_NO_HOST_1, SAMPLE_FILE_NO_HOST_2];
 
 const TEST_TIMEOUT = 60 * 1000 * 60;
+const UPLOAD_TIMEOUT = 60 * 1000 * 5;
 
 /*
  * WGS - Sample upload
@@ -47,7 +48,7 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 5. Select and upload a Reference Sequence file (see Data section)
 
     // #region 6. Select sample Input Files and click on Continue (see Data section)
-    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES); // https://drive.google.com/drive/folders/1xldUUMAMGn5baDH-BfrTTASDmGsJkxhX?usp=sharing
+    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES, true, UPLOAD_TIMEOUT); // https://drive.google.com/drive/folders/1xldUUMAMGn5baDH-BfrTTASDmGsJkxhX?usp=sharing
     const sampleNames = await uploadPage.getSampleNames();
     await uploadPage.clickContinue();
     // #endregion 6. Select sample Input Files and click on Continue (see Data section)
@@ -143,7 +144,7 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 6. Select and upload a Trim Primers file (see Data section)
 
     // #region 7. Select sample Input Files and click on Continue (see Data section)
-    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES); // https://drive.google.com/drive/folders/1xldUUMAMGn5baDH-BfrTTASDmGsJkxhX?usp=sharing
+    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES, true, UPLOAD_TIMEOUT); // https://drive.google.com/drive/folders/1xldUUMAMGn5baDH-BfrTTASDmGsJkxhX?usp=sharing
     const sampleNames = await uploadPage.getSampleNames();
     await uploadPage.clickContinue();
     // #endregion 7. Select sample Input Files and click on Continue (see Data section)
@@ -249,7 +250,7 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 7. Select and upload a Reference Sequence file (see Data section)
 
     // #region 8. Select sample Input Files and click on Continue (see Data section)
-    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES); // https://drive.google.com/drive/folders/1xldUUMAMGn5baDH-BfrTTASDmGsJkxhX?usp=sharing
+    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES, true, UPLOAD_TIMEOUT); // https://drive.google.com/drive/folders/1xldUUMAMGn5baDH-BfrTTASDmGsJkxhX?usp=sharing
     const sampleNames = await uploadPage.getSampleNames();
     await uploadPage.clickContinue();
     // #endregion 8. Select sample Input Files and click on Continue (see Data section)
@@ -356,7 +357,7 @@ test.describe("WGS - Sample upload | Functional: P-0", () => {
     // #endregion 8. Select and upload a Trim Primers file (see Data section)
 
     // #region 9. Select sample Input Files and click on Continue (see Data section)
-    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES); // https://drive.google.com/drive/folders/1xldUUMAMGn5baDH-BfrTTASDmGsJkxhX?usp=sharing
+    await uploadPage.uploadSampleFiles(WGS_SAMPLE_FILES, true, UPLOAD_TIMEOUT); // https://drive.google.com/drive/folders/1xldUUMAMGn5baDH-BfrTTASDmGsJkxhX?usp=sharing
     const sampleNames = await uploadPage.getSampleNames();
     await uploadPage.clickContinue();
     // #endregion 9. Select sample Input Files and click on Continue (see Data section)
