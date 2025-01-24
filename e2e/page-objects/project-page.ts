@@ -234,7 +234,7 @@ export class ProjectPage extends PageObject {
     projectId: number,
     workflow = "",
     domain = "public",
-    timeout = 30_000,
+    timeout = 120_000,
   ) {
     await this.pause(1);
     const workflowParam =

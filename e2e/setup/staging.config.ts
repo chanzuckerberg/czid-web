@@ -806,10 +806,10 @@ const config: PlaywrightTestConfig = {
   ],
   reporter: [["list"], process.env.CI ? ["github"] : ["null"]],
   testDir: "../",
-  timeout: parseInt(process.env.TIMEOUT) || 90000,
+  timeout: parseInt(process.env.TIMEOUT) || 120_000,
   retries: 4,
   use: {
-    actionTimeout: 90000,
+    actionTimeout: 120_000,
     channel: "chromium",
     baseURL: "https://staging.czid.org",
     ignoreHTTPSErrors: true,

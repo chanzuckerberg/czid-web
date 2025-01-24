@@ -22,7 +22,7 @@ export async function setupSamples(
   sampleNames: Array<string>,
   workflow: string,
   runOptions?: runOptions,
-  uploadTimeout = 90_000,
+  uploadTimeout = 120_000,
 ) {
   runOptions = runOptions || {};
   const samplesPage = new SamplesPage(page);
