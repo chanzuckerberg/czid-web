@@ -1,7 +1,6 @@
 name: 'Run Automated Tests on Staging @12am PDT'
 # Runs automated tests on staging every weekday at 12am PDT (7am UTC) or 11pm PST during the winter.
 # Tests get executed in sequential order: smoke tests, smoke tests with feature flags, e2e tests, e2e tests with feature flags.
-# The reason the tests get executed sequentially is to prevent test failures due to resource constraints (limited SauceLabs Virtual Devices).
 
 on:
   schedule:

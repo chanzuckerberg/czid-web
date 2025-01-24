@@ -1266,7 +1266,7 @@ async function compareDataFilesWithTolerance(
     const contentPath = await content.path();
     const stats = await fs.stat(contentPath);
     if (stats.size >= 50_000) {
-      continue; // Skip. Diff on large files will timeout in saucelabs
+      continue; // Skip. Diff on large files takes too long
     }
     if (contentName.startsWith(sampleName)) {
       // This name is dynamic

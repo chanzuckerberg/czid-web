@@ -3662,7 +3662,10 @@ test.describe("mNGS E2E | Functional: P-1", () => {
  * lowerBound = 100 * (1 - 0.10) = 100 * 0.90 = 90
  * upperBound = 100 * (1 + 0.10) = 100 * 1.10 = 110
  */
-export async function getUpperAndLowerBounds(expectedValue: number, tollerance = 0.1) {
+export async function getUpperAndLowerBounds(
+  expectedValue: number,
+  tollerance = 0.1,
+) {
   if (expectedValue === 0) {
     return { lowerBound: -tollerance, upperBound: tollerance };
   } else {
@@ -3953,7 +3956,7 @@ async function compareDataFilesWithTolerance(
     const contentPath = await content.path();
     const stats = await fs.stat(contentPath);
     if (stats.size >= 50_000) {
-      continue; // Skip. Diff on large files will timeout in saucelabs
+      continue; // Skip. Diff on large files takes too long
     }
     if (contentName.startsWith(sampleName)) {
       // This name is dynamic

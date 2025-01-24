@@ -1,9 +1,0 @@
-# This file instructs saucectl to not package any files mentioned here.
-.git/
-.github/
-.DS_Store
-.vscode/
-.idea/
-.gitignore
-.npmrc
-*.gif
