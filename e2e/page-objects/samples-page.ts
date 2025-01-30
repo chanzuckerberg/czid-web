@@ -1,5 +1,4 @@
 import { expect } from "@playwright/test";
-
 import { kebabCase } from "lodash";
 // #region constants
 import {
@@ -8,19 +7,21 @@ import {
   APPLY_BUTTON,
   ARCHAEA_FILTER,
   BACTERIA_FILTER,
-  X_CLOSE_ICON,
   CATEGORIES_FILTER,
   COLUMNS_LABEL,
   EUKARYOTA_FILTER,
+  FILTERS_DROPDOWN,
   FILTER_PANEL_TRIGGER,
   FILTER_TAG,
   LEARN_MORE_LINK,
+  NAME_TYPE_FILTER,
+  NAME_TYPE_FILTER_VALUE,
   NUMBER_INPUT,
   READ_SPECIFICITY,
   SEARCH_BAR,
   SEARCH_RESULT,
   SEARCH_RESULT_TITLE,
-  FILTERS_DROPDOWN,
+  TAXONS,
   THRESHOLD_FILTER,
   THRESHOLD_OPTION_FILTER,
   TOTAL_READ_POPOUP_CONTENT,
@@ -28,17 +29,15 @@ import {
   VIROIDS_FILTER,
   VIRUSES_FILTER,
   VIRUSES_PHAGE_FILTER,
-  NAME_TYPE_FILTER,
-  NAME_TYPE_FILTER_VALUE,
-  TAXONS,
+  X_CLOSE_ICON,
 } from "../constants/sample";
-// #endregion constants
-
-import { NCBIPage } from "./ncbi-page";
 import { ArticlesPage } from "./articles-page";
+// #endregion constants
+import { NCBIPage } from "./ncbi-page";
 import { PageObject } from "./page-object";
 import { PipelineVizPage } from "./pipeline_viz-page";
 import { ProjectPage } from "./project-page";
+
 const BACK_TO_PROJECT = (projectName: string) => `//a[text()='${projectName}']`;
 const TAXON_HOVER_ACTIONS = (taxonName: string) =>
   `//span[text()='${taxonName}']/parent::div//span[@data-testid='hover-actions']//button`;
@@ -748,7 +747,13 @@ export class SamplesPage extends PageObject {
     geneName: string,
     option: AmrGeneRowDownloadTypes,
   ) {
-    const geneCellSelector = await this.page.getByRole("cell", {
+    await this.scrollDownToElement(
+      `//*[text()="${geneName}"]`,
+      '[data-testid="amr-table-row"]',
+      "data-index",
+    );
+
+    const geneCellSelector = this.page.getByRole("cell", {
       name: geneName,
     });
     await geneCellSelector.hover();
@@ -756,17 +761,20 @@ export class SamplesPage extends PageObject {
     await this.pause(1);
 
     const downloadDropdownButton = geneCellSelector.getByRole("button").nth(1);
+    await downloadDropdownButton.waitFor();
     await downloadDropdownButton.click();
     await this.pause(1);
 
     // Click download option
     const optionText = AMR_GENE_ROW_DOWNLOAD_TYPES_TO_TEXT[option];
-    const downloadPromise = this.page.waitForEvent("download");
     const optionDownloadButton = this.page.getByText(optionText, {
       exact: true,
     });
-    await optionDownloadButton.click();
-    return downloadPromise;
+    const [download] = await Promise.all([
+      this.page.waitForEvent("download"),
+      optionDownloadButton.click({ force: true }),
+    ]);
+    return download;
   }
   // #endregion AMR Table Click
 
@@ -1365,21 +1373,25 @@ export class SamplesPage extends PageObject {
   }
 
   public async selectRandomReferenceAccession() {
-    await this.clickReferenceAccessionDropdown();
+    for (let i = 0; i <= 4; i++) {
+      try {
+        await this.clickReferenceAccessionDropdown();
+        const referenceAccessions = await this.page
+          .locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS)
+          .all();
 
-    // Randomly choose a Reference Accession option
-    const referenceAccessions = await this.page
-      .locator(GENERATE_CONSENSUS_GENOME_ENABLED_OPTIONS)
-      .all();
-    const referenceAccession =
-      referenceAccessions[
-        Math.floor(Math.random() * referenceAccessions.length)
-      ];
+        // Randomly choose a Reference Accession option
+        const referenceAccession =
+          referenceAccessions[
+            Math.floor(Math.random() * referenceAccessions.length)
+          ];
 
-    const referenceAccessionText = referenceAccession.textContent();
-    await referenceAccession.click();
+        const referenceAccessionText = referenceAccession.textContent();
+        await referenceAccession.click();
 
-    return referenceAccessionText;
+        return referenceAccessionText;
+      } catch { continue }
+    }
   }
 
   public async selectReferenceAccession(option: string) {

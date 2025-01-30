@@ -127,3 +127,29 @@ export function getYearMonthInThePast(minYear = 5): string {
   d.setFullYear(d.getFullYear() - randomNumber);
   return d.toISOString().substring(0, 7);
 }
+
+/*
+ * Calculate an upper and lower bound for a given number (expectedValue)
+ * based on the given tollerance
+ *
+ * Example:
+ * expectedValue = 100
+ * tollerance = 0.10
+ *
+ * lowerBound = 100 * (1 - 0.10) = 100 * 0.90 = 90
+ * upperBound = 100 * (1 + 0.10) = 100 * 1.10 = 110
+ */
+export function getUpperAndLowerBounds(
+  expectedValue: number,
+  tollerance = 0.1,
+) {
+  if (expectedValue === 0) {
+    return { lowerBound: -tollerance, upperBound: tollerance };
+  } else {
+    const lowerBound = expectedValue * (1 - tollerance);
+    const upperBound = expectedValue * (1 + tollerance);
+    return expectedValue >= 0
+      ? { lowerBound, upperBound }
+      : { lowerBound: upperBound, upperBound: lowerBound };
+  }
+}

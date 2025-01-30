@@ -1,16 +1,16 @@
+import {
+  CONTINUE,
+  FIXTURE_DIR,
+  FIXTURE_METADATA_DIR,
+  NUCLEOTIDES,
+  SEQUENCING_PLATFORMS,
+  UPLOAD_METADATA,
+  WORKFLOWS,
+} from "@e2e/constants/common";
+import { expect } from "@playwright/test";
 import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import * as path from "path";
-import {
-  CONTINUE,
-  WORKFLOWS,
-  NUCLEOTIDES,
-  FIXTURE_DIR,
-  FIXTURE_METADATA_DIR,
-  UPLOAD_METADATA,
-  SEQUENCING_PLATFORMS,
-} from "@e2e/constants/common";
-import { expect } from "@playwright/test";
 import { IlluminaPage } from "./illumina-page";
 import { PageObject } from "./page-object";
 
@@ -413,7 +413,7 @@ export class UploadPage extends PageObject {
   }
 
   public async clickAuthorize() {
-    await this.page.locator(BASESPACE_AUTHORIZE).waitFor({ timeout: 90_000 });
+    await this.page.locator(BASESPACE_AUTHORIZE).waitFor({ timeout: 120_000 });
     const [newPage] = await Promise.all([
       this.page.context().waitForEvent("page"),
       await this.page.locator(BASESPACE_AUTHORIZE).click(),

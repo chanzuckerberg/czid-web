@@ -1,23 +1,24 @@
-import * as fs from "fs/promises";
-import { WORKFLOWS, SEQUENCING_PLATFORMS } from "@e2e/constants/common";
+import { SEQUENCING_PLATFORMS, WORKFLOWS } from "@e2e/constants/common";
 import {
-  IDSEQ_MOSQ_2TO4MIL_SUBSAMPLE_10P,
   HG002_LONG_READS_METAG,
-  MWGS_SE_SRR7002140_TA_252_DNA_BLAC_VANP_10P,
+  IDSEQ_MOSQ_2TO4MIL_SUBSAMPLE_10P,
   MWGS_PE_SRR7002140_TAP_R1,
   MWGS_PE_SRR7002140_TAP_R2,
-  MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1,
-  MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2,
   MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R1,
   MWGS_RNA_HUMAN_128_LUNG_RNA_10p_R2,
+  MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R1,
+  MWGS_RNA_MOSQUITO_1_AEDES_RNA_10p_R2,
+  MWGS_SE_SRR7002140_TA_252_DNA_BLAC_VANP_10P,
 } from "@e2e/constants/sample";
 import { SamplesPage } from "@e2e/page-objects/samples-page";
 import { setupSamples } from "@e2e/page-objects/user-actions";
 import { AssertionCollector } from "@e2e/utils/assertion-collector";
-import { test, expect, Download } from "@playwright/test";
+import { getUpperAndLowerBounds } from "@e2e/utils/common";
+import { Download, expect, test } from "@playwright/test";
 import { parse } from "csv-parse";
-import fastDiff = require("fast-diff");
+import * as fs from "fs/promises";
 import { ProjectPage } from "../../page-objects/project-page";
+import fastDiff = require("fast-diff");
 
 // #region Test consts
 const OUTPUT_PATH = (outputDir: string, filename: string) =>
@@ -3651,32 +3652,6 @@ test.describe("mNGS E2E | Functional: P-1", () => {
 });
 
 // #region Helpers
-/*
- * Calculate an upper and lower bound for a given number (expectedValue)
- * based on the given tollerance
- *
- * Example:
- * expectedValue = 100
- * tollerance = 0.10
- *
- * lowerBound = 100 * (1 - 0.10) = 100 * 0.90 = 90
- * upperBound = 100 * (1 + 0.10) = 100 * 1.10 = 110
- */
-export async function getUpperAndLowerBounds(
-  expectedValue: number,
-  tollerance = 0.1,
-) {
-  if (expectedValue === 0) {
-    return { lowerBound: -tollerance, upperBound: tollerance };
-  } else {
-    const lowerBound = expectedValue * (1 - tollerance);
-    const upperBound = expectedValue * (1 + tollerance);
-    return expectedValue >= 0
-      ? { lowerBound, upperBound }
-      : { lowerBound: upperBound, upperBound: lowerBound };
-  }
-}
-
 async function verifyPipelineUpperAndLowerBounds(
   actual: any,
   expected: any,
@@ -3897,7 +3872,7 @@ async function verifyUpperAndLowerBounds(
   expected: any,
   message = "",
 ) {
-  const expectedRange = await getUpperAndLowerBounds(expected);
+  const expectedRange = getUpperAndLowerBounds(expected);
   const msg = `${message} ${actual} vs ${expected}: Diff ${
     Math.abs((actual - expected) / ((actual + expected) / 2)) * 100
   }`;

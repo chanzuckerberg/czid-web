@@ -5,46 +5,46 @@ on:
     inputs:
       node-environment:
         type: string
-        description: 'Environment'
+        description: "Environment"
         required: true
-        default: 'staging'
+        default: "staging"
       test-category:
-          type: string
-          description: 'Test Category'
-          required: true
-          default: 'smoke'
+        type: string
+        description: "Test Category"
+        required: true
+        default: "smoke"
       should-run-with-feature-flags:
-          type: string
-          description: 'Run with feature flags?'
-          required: true
-          default: 'false'
+        type: string
+        description: "Run with feature flags?"
+        required: true
+        default: "false"
 
   workflow_dispatch:
     inputs:
       node-environment:
         type: choice
-        description: 'Environment'
+        description: "Environment"
         required: true
-        default: 'staging'
+        default: "staging"
         options:
-        - staging
-        - sandbox
+          - staging
+          - sandbox
       test-category:
         type: choice
-        description: 'Test Category'
+        description: "Test Category"
         required: true
-        default: 'smoke'
+        default: "smoke"
         options:
-        - smoke
-        - e2e
+          - smoke
+          - e2e
       should-run-with-feature-flags:
         type: choice
-        description: 'Run with feature flags?'
+        description: "Run with feature flags?"
         required: true
-        default: 'false'
+        default: "false"
         options:
-          - 'true'
-          - 'false'
+          - "true"
+          - "false"
 
 run-name: "Run ${{inputs.test-category}} tests on ${{inputs.node-environment}} environment (with feature flags: ${{inputs.should-run-with-feature-flags}})"
 
@@ -70,7 +70,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v4
         with:
-          node-version-file: './.node-version'
+          node-version-file: "./.node-version"
 
       - name: Install dependencies
         run: |
@@ -95,7 +95,7 @@ jobs:
         working-directory: ./e2e/
         id: run-playwright
         run: |
-          npx playwright test -c setup/${{inputs.node-environment}}.config.ts --project="${{inputs.test-category}} test: *"
+          xvfb-run --auto-servernum -- npx playwright test -c setup/${{inputs.node-environment}}.config.ts --project="${{inputs.test-category}} test: *"
 
       - name: Upload test result artifact
         uses: actions/upload-artifact@v4

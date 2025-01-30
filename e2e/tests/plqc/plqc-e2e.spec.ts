@@ -1,13 +1,13 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { getUpperAndLowerBounds } from "../mngs/mngs-e2e.spec";
-import { WORKFLOWS, SEQUENCING_PLATFORMS } from "@e2e/constants/common";
+import { SEQUENCING_PLATFORMS, WORKFLOWS } from "@e2e/constants/common";
 import { DownloadsPage } from "@e2e/page-objects/downloads-page";
 import { setupSamples } from "@e2e/page-objects/user-actions";
-import { test, expect } from "@playwright/test";
-import fastDiff = require("fast-diff");
+import { getUpperAndLowerBounds } from "@e2e/utils/common";
+import { expect, test } from "@playwright/test";
+import * as fs from "fs/promises";
+import * as path from "path";
 import * as tar from "tar";
 import { ProjectPage, SAMPLE_OVERVIEW } from "../../page-objects/project-page";
+import fastDiff = require("fast-diff");
 
 const OUTPUT_PATH = (outputDir: string, filename: string) =>
   `./fixtures/outputs/${outputDir}/${filename}`;

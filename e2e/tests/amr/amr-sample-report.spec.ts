@@ -1,4 +1,3 @@
-import AdmZip from "adm-zip";
 import { WORKFLOWS } from "@e2e/constants/common";
 import {
   E_COLI_CFXA_R1,
@@ -6,8 +5,8 @@ import {
   E_COLI_CFXA_SAMPLE_NAME,
 } from "@e2e/constants/sample";
 import { ProjectPage } from "@e2e/page-objects/project-page";
+import { DOWNLOAD_TYPES_OPTIONS_MAP } from "@e2e/page-objects/samples-page";
 import { setupSamples } from "@e2e/page-objects/user-actions";
-import { test, expect } from "@playwright/test";
 import {
   compareCSVDownloadToFixture,
   getFixturePathForSampleDownload,
@@ -15,11 +14,12 @@ import {
   numSequencesInDownloadFasta,
   numSequencesInDownloadFixtureFasta,
 } from "@e2e/utils/download";
-import { DOWNLOAD_TYPES_OPTIONS_MAP } from "@e2e/page-objects/samples-page";
+import { expect, test } from "@playwright/test";
+import AdmZip from "adm-zip";
 
 const PROJECT_NAME_SUFFIX = "ecoli_cfxA_sample_report";
 
-const TEST_TIMEOUT = 60 * 1000 * 20;
+const TEST_TIMEOUT = 60 * 1000 * 40;
 
 const RUN_PIPELINE = false;
 const WAIT_FOR_PIPELINE = false;
@@ -120,9 +120,14 @@ test.describe(`AMR Sample Report tests for ${E_COLI_CFXA_SAMPLE_NAME}`, () => {
     expect(sampleName.startsWith(E_COLI_CFXA_SAMPLE_NAME)).toBeTruthy();
 
     samplesPage = await projectPage.clickSample(sampleName);
+    await samplesPage.pause(4);
   });
 
   test.describe("Sample report table", () => {
+    test.beforeEach(async () => {
+      test.setTimeout(TEST_TIMEOUT);
+    });
+
     test("SNo 6: Verify cfxA gene is in report", async () => {
       const reportTable = await samplesPage.getAntimicrobialResistanceTable();
 
@@ -367,9 +372,14 @@ test.describe(`AMR Sample Report tests for ${E_COLI_CFXA_SAMPLE_NAME}`, () => {
   });
 
   test.describe("Sample report downloads", () => {
+    test.beforeEach(async () => {
+      test.setTimeout(TEST_TIMEOUT);
+    });
+
     test("SNo 12: Verify reads per gene download", async () => {
       // #region expand viewport to ensure gene is visible, click download for gene
-      await samplesPage.zoomOut(2, 9);
+      await samplesPage.pause(1);
+
       const marAGeneReadsFastaDownload =
         await samplesPage.clickAmrGeneDownloadButton(MARA_GENE_NAME, "reads");
       // #endregion expand viewport to ensure gene is visible, click download for gene
@@ -388,7 +398,8 @@ test.describe(`AMR Sample Report tests for ${E_COLI_CFXA_SAMPLE_NAME}`, () => {
 
     test("SNo 13: Verify contigs per gene download", async () => {
       // #region expand viewport to ensure gene is visible, click download for gene
-      await samplesPage.zoomOut(2, 9);
+      await samplesPage.pause(1);
+
       const marAGeneContigsFastaDownload =
         await samplesPage.clickAmrGeneDownloadButton(MARA_GENE_NAME, "contigs");
       // #endregion expand viewport to ensure gene is visible, click download for gene

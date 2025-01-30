@@ -1,15 +1,6 @@
 import { devices, PlaywrightTestConfig } from "@playwright/test";
 
 const DESKTOP_CHROME = "Desktop Chrome";
-const AMR_E2E_SPEC_PATH = "tests/amr/amr-e2e.spec.ts";
-const MNGS_E2E_SPEC_PATH = "tests/mngs/mngs-e2e.spec.ts";
-const MNGS_UPLOAD_SPEC_PATH = "tests/mngs/sample-upload.spec.ts";
-const SC2_UPLOAD_SPEC_PATH = "tests/sc2/sample-upload.spec.ts";
-const WGS_SAMPLE_REPORT_SPEC_PATH = "tests/wgs/sample-report.spec.ts";
-const WGS_SAMPLE_UPLOAD_BASESPACE_SPEC_PATH =
-  "tests/wgs/sample-upload-basespace.spec.ts";
-const WGS_SAMPLE_UPLOAD_SPEC_PATH = "tests/wgs/sample-upload.spec.ts";
-
 const VIDEO_CONFIG = "retain-on-failure";
 
 const config: PlaywrightTestConfig = {
@@ -48,139 +39,31 @@ const config: PlaywrightTestConfig = {
       grep: /SNo/,
     },
     {
-      name: "e2e test: Functional: P-1: SNo e13: AMR Paired Read RNA Human Sample Report & Download Data Validation",
-      testMatch: [AMR_E2E_SPEC_PATH],
+      name: "e2e test: Functional: P-1",
+      testMatch: ["tests/amr/amr-e2e.spec.ts"],
       use: {
         ...devices[DESKTOP_CHROME],
         video: VIDEO_CONFIG,
       },
-      grep: /SNo e13: AMR Paired Read RNA Human Sample Report & Download Data Validation/,
+      grep: /SNo e*/,
     },
     {
-      name: "e2e test: Functional: P-1: SNo e12: AMR Paired Read RNA Mosquito Sample Report & Download Data Validation",
-      testMatch: [AMR_E2E_SPEC_PATH],
+      name: "e2e test: Functional: P-1",
+      testMatch: ["tests/mngs/mngs-e2e.spec.ts"],
       use: {
         ...devices[DESKTOP_CHROME],
         video: VIDEO_CONFIG,
       },
-      grep: /SNo e12: AMR Paired Read RNA Mosquito Sample Report & Download Data Validation/,
+      grep: /SNo e*/,
     },
     {
-      name: "e2e test: Functional: P-1: SNo e11: AMR Paired Read Sample Report & Download Data Validation",
-      testMatch: [AMR_E2E_SPEC_PATH],
+      name: "e2e test: mNGS IP: Functional: P-0",
+      testMatch: ["tests/mngs/sample-upload.spec.ts"],
       use: {
         ...devices[DESKTOP_CHROME],
         video: VIDEO_CONFIG,
       },
-      grep: /SNo e11: AMR Paired Read Sample Report & Download Data Validation/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e10: AMR Single Read Sample Report & Data Validation",
-      testMatch: [AMR_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e10: AMR Single Read Sample Report & Data Validation/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e9: mNGS Illumina Paired Read RNA Human Sample Report & Download Data Validation",
-      testMatch: [MNGS_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e9: mNGS Illumina Paired Read RNA Human Sample Report & Download Data Validation/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e19: mNGS Illumina Paired Read RNA Human Sample Report & Download Data Validation - New database",
-      testMatch: [MNGS_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e19: mNGS Illumina Paired Read RNA Human Sample Report & Download Data Validation - New database/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e6: mNGS Illumina Single Read Sample Report & Download Data Validation",
-      testMatch: [MNGS_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e6: mNGS Illumina Single Read Sample Report & Download Data Validation/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e16: mNGS Illumina Single Read Sample Report & Download Data Validation - New database",
-      testMatch: [MNGS_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e16: mNGS Illumina Single Read Sample Report & Download Data Validation - New database/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e8: mNGS Illumina Paired Read RNA Mosquito Sample Report & Download Data Validation",
-      testMatch: [MNGS_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e8: mNGS Illumina Paired Read RNA Mosquito Sample Report & Download Data Validation/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e18: mNGS Illumina Paired Read RNA Mosquito Sample Report & Download Data Validation - New database",
-      testMatch: [MNGS_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e18: mNGS Illumina Paired Read RNA Mosquito Sample Report & Download Data Validation - New database/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e7: mNGS Illumina Paired Read Sample Report & Download Data Validation",
-      testMatch: [MNGS_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e7: mNGS Illumina Paired Read Sample Report & Download Data Validation/,
-    },
-    {
-      name: "e2e test: Functional: P-1: SNo e17: mNGS Illumina Paired Read Sample Report & Download Data Validation - New database",
-      testMatch: [MNGS_E2E_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e17: mNGS Illumina Paired Read Sample Report & Download Data Validation - New database/,
-    },
-    {
-      name: "e2e test: mNGS IP: Functional: P-0: mNGS-3: long mNGS Illumina sample Basespace upload",
-      testMatch: [MNGS_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /mNGS-3: long mNGS Illumina sample Basespace upload/,
-    },
-    {
-      name: "e2e test: mNGS IP: Functional: P-0: mNGS-2: short mNGS Illumina sample Basespace upload",
-      testMatch: [MNGS_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /mNGS-2: short mNGS Illumina sample Basespace upload/,
-    },
-    {
-      name: "e2e test: mNGS IP: Functional: P-0: mNGS-1: short mNGS Illumina sample web upload",
-      testMatch: [MNGS_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /mNGS-1: short mNGS Illumina sample web upload/,
+      grep: /mNGS-*/,
     },
     {
       name: "e2e test: Functional P-1: short mNGS - CG run: SNo 34: CG run kick off from short mNGS - OldIndex",
@@ -210,229 +93,40 @@ const config: PlaywrightTestConfig = {
       grep: /SNo SC2-42: Project count when CG running from mNGS/,
     },
     {
-      name: "e2e test: Functional: P-0: Sample upload - SC2 Nanopore Midnight",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
+      name: "e2e test: Functional: P-0",
+      testMatch: ["tests/sc2/sample-upload.spec.ts"],
       use: {
         ...devices[DESKTOP_CHROME],
         video: VIDEO_CONFIG,
       },
-      grep: /SNo SC2-4: SARS-CoV-2 Nanopore sample web upload/,
+      grep: /SNo */,
     },
     {
-      name: "e2e test: Functional: P-0: Sample upload - SC2 Nanopore Clear Labs",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
+      name: "e2e test: E2E: P-1",
+      testMatch: ["tests/wgs/sample-report.spec.ts"],
       use: {
         ...devices[DESKTOP_CHROME],
         video: VIDEO_CONFIG,
       },
-      grep: /SNo SC2-3: SARS-CoV-2 Nanopore sample web upload/,
+      grep: /SNo e*/,
     },
     {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab ARTIC v4/ARTIC v4.1",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
+      name: "e2e test: Functional: P-0: WGS - Sample upload (web) Basespace project",
+      testMatch: ["tests/wgs/sample-upload-basespace.spec.ts"],
       use: {
         ...devices[DESKTOP_CHROME],
         video: VIDEO_CONFIG,
       },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v4\/ARTIC v4.1/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab ARTIC v5.3.2",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v5.3.2/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab ARTIC v3",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v3$/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab ARTIC v3 - Short Amplicons",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab ARTIC v3 - Short Amplicons/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab MSSPE",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab MSSPE/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab Combined MSSPE & ARTIC v3",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab Combined MSSPE & ARTIC v3/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab SNAP",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab SNAP/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab AmpliSeq",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab AmpliSeq/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab COVIDseq",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab COVIDseq/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab VarSkip",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab VarSkip/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab Midnight",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab Midnight/,
-    },
-    {
-      name: "e2e test: Functional: P-0: Sample upload (web) with wetlab Easyseq",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo SC2-1: SARS-CoV-2 Illumina sample web upload with wetlab Easyseq/,
-    },
-    {
-      name: "e2e test: E2E: P-1: SNo e3: WGS SC2 Nanopore Sample Report & Download Data Validation",
-      testMatch: [WGS_SAMPLE_REPORT_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e3:/,
-    },
-    {
-      name: "e2e test: E2E: P-1: SNo e2: WGS SC2 Sample Report & Download Data Validation",
-      testMatch: [WGS_SAMPLE_REPORT_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e2:/,
-    },
-    {
-      name: "e2e test: E2E: P-1: SNo e1: WGS Sample Report & Download Data Validation",
-      testMatch: [WGS_SAMPLE_REPORT_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo e1:/,
-    },
-    {
-      name: "e2e test: Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 5: Basespace Viral Consensus Genome - No trim",
-      testMatch: [WGS_SAMPLE_UPLOAD_BASESPACE_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo 5:/,
-    },
-    {
-      name: "e2e test: Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 6: Basespace Viral Consensus Genome - with trim",
-      testMatch: [WGS_SAMPLE_UPLOAD_BASESPACE_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo 6:/,
-    },
-    {
-      name: "e2e test: Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 7: Basespace Viral Consensus Genome - No trim with mNGS - Ilumina",
-      testMatch: [WGS_SAMPLE_UPLOAD_BASESPACE_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo 7:/,
-    },
-    {
-      name: "e2e test: Functional: P-0: WGS - Sample upload (web) Basespace project: SNo 8: Basespace Viral Consensus Genome - with trim with mNGS - Ilumina",
-      testMatch: [WGS_SAMPLE_UPLOAD_BASESPACE_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo 8:/,
+      grep: /SNo */,
     },
     {
       name: "e2e test: Functional: P-0: WGS - Sample upload: SNo 1: Viral Consensus Genome - No trim",
-      testMatch: [WGS_SAMPLE_UPLOAD_SPEC_PATH],
+      testMatch: ["tests/wgs/sample-upload.spec.ts"],
       use: {
         ...devices[DESKTOP_CHROME],
         video: VIDEO_CONFIG,
       },
-      grep: /SNo 1:/,
-    },
-    {
-      name: "e2e test: Functional: P-0: WGS - Sample upload: SNo 2: Viral Consensus Genome - with trim",
-      testMatch: [WGS_SAMPLE_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo 2:/,
-    },
-    {
-      name: "e2e test: Functional: P-0: WGS - Sample upload: SNo 3: Viral Consensus Genome - No trim with mNGS - Ilumina",
-      testMatch: [WGS_SAMPLE_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo 3:/,
-    },
-    {
-      name: "e2e test: Functional: P-0: WGS - Sample upload: SNo 4: Viral Consensus Genome - with trim with mNGS - Ilumina",
-      testMatch: [WGS_SAMPLE_UPLOAD_SPEC_PATH],
-      use: {
-        ...devices[DESKTOP_CHROME],
-        video: VIDEO_CONFIG,
-      },
-      grep: /SNo 4:/,
+      grep: /SNo */,
     },
     {
       name: "smoke test: Functional: P-0: MHF NCBI Index",
@@ -562,7 +256,7 @@ const config: PlaywrightTestConfig = {
     },
     {
       name: "smoke test: SC2: Functional: P-1: Sample upload (web) Illumina",
-      testMatch: [SC2_UPLOAD_SPEC_PATH],
+      testMatch: ["tests/sc2/sample-upload-p1.spec.ts"],
       use: {
         ...devices[DESKTOP_CHROME],
         video: VIDEO_CONFIG,
@@ -818,6 +512,7 @@ const config: PlaywrightTestConfig = {
     trace: "on",
     viewport: { width: 1600, height: 900 },
     permissions: ["clipboard-read"],
+    headless: false,
   },
   workers: 5,
 };
