@@ -101,7 +101,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{inputs.test-category}}-${{ github.run_id }}
           path: /home/runner/work/czid-web-private/czid-web-private/e2e/playwright-report
           retention-days: 14
 
