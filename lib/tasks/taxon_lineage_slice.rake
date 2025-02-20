@@ -13,7 +13,7 @@ namespace :taxon_lineage_slice do
       abort("Taxon Lineage data for #{CURRENT_VERSION} already exists")
     end
 
-    s3 = Aws::S3::Client.new
+    s3 = Aws::S3::Client.new(unsigned_operations: [:get_object])
     response = s3.get_object(bucket: S3_BUCKET_NAME, key: TAXON_LINEAGE_FILE_KEY)
     print "Importing Taxon Lineage data from S3"
 

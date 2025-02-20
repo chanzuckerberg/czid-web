@@ -12,7 +12,13 @@ make local-start-db
 sleep 10
 
 echo "== Syncing DB =="
-if aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web bin/rails db:exists; then
+if [ "${OFFLINE:-0}" = "1" ]; then
+    DOCKER_CMD="docker compose"
+else
+    DOCKER_CMD="aws-oidc exec -- docker compose"
+fi
+
+if $DOCKER_CMD run --rm -e RAILS_ENV=development web bin/rails db:exists; then
     echo "=== development DB exists, running migrations ==="
     make local-migrate
 else
@@ -20,7 +26,7 @@ else
     make local-db-setup
     make local-import-taxon-lineage-slice
 fi
-if aws-oidc exec -- docker-compose run --rm web bin/rails db:exists RAILS_ENV=test; then
+if $DOCKER_CMD run --rm web bin/rails db:exists RAILS_ENV=test; then
     echo "=== test DB exists, running migrations ==="
     # No seeded / data migrations needed for test DB
     make local-migrate-without-data rails_env=test

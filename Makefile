@@ -2,13 +2,21 @@ SHELL := /bin/bash
 
 # This Makefile has several helpful shortcuts to make local development easier!
 
+OFFLINE?= 0
 ### Shortcuts for running docker compose with the necessary environment vars and flags
 ### Run containers with short-lived credentials
-export docker_compose:=export $$(cat .env.localdev); aws-oidc exec -- docker compose --env-file web.env
+export docker_compose:=$(if $(filter 1,$(OFFLINE)), \
+	OFFLINE=$(OFFLINE) docker compose --env-file web.env, \
+	export $$(cat .env.localdev); aws-oidc exec -- docker compose --env-file web.env)
+
 ### Run any commands (mostly docker-compose exec) that don't need aws creds, because running containers already have the creds they need.
-export docker_compose_simple:=export $$(cat .env.localdev); docker compose
+export docker_compose_simple:=$(if $(filter 1,$(OFFLINE)), \
+	docker compose, \
+	export $$(cat .env.localdev); docker compose)
 ### We need this one to run the webapp with long-lived credentials
-export docker_compose_long:=export $$(cat .env.localdev); aws-oidc exec --session-duration=12h exec -- docker compose --env-file web.env
+export docker_compose_long:=$(if $(filter 1,$(OFFLINE)), \
+	OFFLINE=$(OFFLINE) docker compose --env-file web.env, \
+	export $$(cat .env.localdev); aws-oidc exec --session-duration=12h exec -- docker compose --env-file web.env)
 
 ### Default AWS profile for working with local dev
 export AWS_DEV_PROFILE=idseq-dev
@@ -36,26 +44,38 @@ ifeq ($(wildcard server-domain.env),server-domain.env)
 endif
 
 .env.localdev: Makefile $(ENV_LOCALDEV_DEPS) # Write useful env vars to ".env.localdev" so we can use them later.
-	export AWS_ACCOUNT_ID=$$(aws sts get-caller-identity --profile $(AWS_DEV_PROFILE) | jq -r .Account); \
-	if [ -n "$${AWS_ACCOUNT_ID}" ]; then \
-		echo AWS_ACCOUNT_ID=$${AWS_ACCOUNT_ID} > .env.localdev; \
-		echo AWS_REGION=us-west-2 >> .env.localdev; \
-		echo AWS_PROFILE=$(AWS_DEV_PROFILE) >> .env.localdev; \
-		echo DEPLOYMENT_ENVIRONMENT=dev >> .env.localdev; \
+	@if [ "$(OFFLINE)" = "1" ]; then \
+		echo "Skipping .env.localdev generation in offline mode"; \
 	else \
-		false; \
-	fi; \
-	if [ -f server-domain.env ]; then \
-		cat server-domain.env >> .env.localdev; \
+		export AWS_ACCOUNT_ID=$$(aws sts get-caller-identity --profile $(AWS_DEV_PROFILE) | jq -r .Account); \
+		if [ -n "$${AWS_ACCOUNT_ID}" ]; then \
+			echo AWS_ACCOUNT_ID=$${AWS_ACCOUNT_ID} > .env.localdev; \
+			echo AWS_REGION=us-west-2 >> .env.localdev; \
+			echo AWS_PROFILE=$(AWS_DEV_PROFILE) >> .env.localdev; \
+			echo DEPLOYMENT_ENVIRONMENT=dev >> .env.localdev; \
+		else \
+			false; \
+		fi; \
+		if [ -f server-domain.env ]; then \
+			cat server-domain.env >> .env.localdev; \
+		fi \
 	fi
 
 .PHONY: local-init
-local-init: local-pull .env.localdev ## Set up a local dev environment
-	@export $$(cat .env.localdev); \
-	if [ "$$(uname -s)" == "Darwin" ]; then \
-		./bin/setup-macos; \
+local-init: .env.localdev ## Set up a local dev environment
+	if [ $(OFFLINE) == "1" ]; then \
+		$(MAKE) local-build; \
 	else \
-		./bin/setup-ubuntu; \
+		$(MAKE) local-pull; \
+		@export $$(cat .env.localdev); \
+	fi 
+	exit
+
+	
+	if [ "$$(uname -s)" == "Darwin" ]; then \
+		OFFLINE=$(OFFLINE) ./bin/setup-macos; \
+	else \
+		OFFLINE=$(OFFLINE) ./bin/setup-ubuntu; \
 	fi
 
 .PHONY: local-migrate
