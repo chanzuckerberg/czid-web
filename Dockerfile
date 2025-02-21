@@ -71,7 +71,7 @@ RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
 # will be cached unless changes to one of those two files
 # are made.
 COPY Gemfile Gemfile.lock ./
-RUN gem install bundler
+RUN gem install bundler -v '2.5.14'
 
 # allow nokogiri to install on arm64 / M1 Macs
 RUN bundle config set force_ruby_platform true

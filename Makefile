@@ -62,12 +62,13 @@ endif
 	fi
 
 .PHONY: local-init
-local-init: .env.localdev ## Set up a local dev environment
+local-init: ## Set up a local dev environment
 	if [ $(OFFLINE) == "1" ]; then \
 		$(MAKE) local-build; \
 	else \
+		$(MAKE) .env.localdev; \
 		$(MAKE) local-pull; \
-		@export $$(cat .env.localdev); \
+		. .env.localdev; \
 	fi 
 	exit
 

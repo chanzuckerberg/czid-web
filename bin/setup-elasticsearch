@@ -9,12 +9,12 @@ echo "== Creating Taxon Lineage ES indices for search =="
 make local-create-taxon-lineages-slice-elasticsearch-index
 
 echo "== Creating ES indices for heatmap =="
-aws-oidc exec -- docker-compose run --rm web curl --retry 6 --retry-delay 10 --retry-connrefused -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_index_template/scored_taxon_counts  --data-binary "@./docker/open_distro/scored_taxon_counts_template.json"
-aws-oidc exec -- docker-compose run --rm web curl -XPUT http://opensearch:9200/scored_taxon_counts-v1
-aws-oidc exec -- docker-compose run --rm web curl -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_index_template/pipeline_runs  --data-binary "@./docker/open_distro/pipeline_runs_template.json"
-aws-oidc exec -- docker-compose run --rm web curl -XPUT http://opensearch:9200/pipeline_runs-v1
+aws-oidc exec -- docker compose run --rm web curl --retry 6 --retry-delay 10 --retry-connrefused -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_index_template/scored_taxon_counts  --data-binary "@./docker/open_distro/scored_taxon_counts_template.json"
+aws-oidc exec -- docker compose run --rm web curl -XPUT http://opensearch:9200/scored_taxon_counts-v1
+aws-oidc exec -- docker compose run --rm web curl -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_index_template/pipeline_runs  --data-binary "@./docker/open_distro/pipeline_runs_template.json"
+aws-oidc exec -- docker compose run --rm web curl -XPUT http://opensearch:9200/pipeline_runs-v1
 
 echo "== Creating ES aliases =="
-aws-oidc exec -- docker-compose run --rm web curl -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_aliases  --data-binary "@./docker/open_distro/alias_update.json"
+aws-oidc exec -- docker compose run --rm web curl -H "Content-Type: application/x-ndjson" -POST http://opensearch:9200/_aliases  --data-binary "@./docker/open_distro/alias_update.json"
 
 make local-stop
