@@ -22,7 +22,7 @@ const PROJECT_NAME_SUFFIX = "ecoli_cfxA_sample_report";
 const TEST_TIMEOUT = 60 * 1000 * 40;
 
 const RUN_PIPELINE = false;
-const WAIT_FOR_PIPELINE = false;
+const WAIT_FOR_PIPELINE = true;
 
 const SAMPLE_NAMES_TO_WAIT_FOR = [E_COLI_CFXA_SAMPLE_NAME];
 const CFXA_GENE = "CfxA";

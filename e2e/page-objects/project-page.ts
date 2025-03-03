@@ -789,10 +789,14 @@ export class ProjectPage extends PageObject {
   }
 
   public async clickSampleCheckbox(sampleName: string) {
-    await this.page
-      .locator(SAMPLE_CHECKBOX_BY_SAMPLE_NAME(sampleName))
-      .first()
-      .click();
+    const matchingSamples = await this.page.locator(SAMPLE_CHECKBOX_BY_SAMPLE_NAME(sampleName)).all();
+    expect(matchingSamples.length).toBeGreaterThan(0);
+    for (const sampleLocator of matchingSamples) {
+      const isChecked = await sampleLocator.locator("input").isChecked();
+      if (!isChecked) {
+        await sampleLocator.click();
+      }
+    }
   }
 
   public async clickDownloadType(downloadType: string) {
