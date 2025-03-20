@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_19_001315) do
+ActiveRecord::Schema[7.0].define(version: 2025_03_14_221527) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -771,6 +771,23 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_19_001315) do
     t.float "stdev_mass_normalized"
     t.text "rel_abundance_list_mass_normalized"
     t.index ["background_id", "tax_id", "count_type", "tax_level"], name: "index_bg_tax_ct_level", unique: true
+  end
+
+  create_table "user_profiles", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "first_name"
+    t.string "last_name"
+    t.integer "profile_form_version"
+    t.string "ror_institution"
+    t.string "ror_id"
+    t.string "country"
+    t.string "world_bank_income"
+    t.string "expertise_level"
+    t.string "czid_usecase"
+    t.string "referral_source"
+    t.boolean "newsletter_consent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "user_settings", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|

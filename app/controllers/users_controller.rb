@@ -95,6 +95,10 @@ class UsersController < ApplicationController
 
   # POST /user/1/post_user_data_to_airtable
   def post_user_data_to_airtable
+    if get_app_config(AppConfig::LOCAL_USER_PROFILE) == "1"
+      UserProfile.create(user_id: @user.id, **profile_params.to_h.symbolize_keys)
+      render json: { message: "User data successfully saved locally" }, status: :ok
+    end
     if get_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1) != "1"
       render json: { message: "AUTO_ACCOUNT_CREATION_V1 is not enabled" }, status: :forbidden
       return
