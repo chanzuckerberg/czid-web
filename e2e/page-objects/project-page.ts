@@ -788,12 +788,13 @@ export class ProjectPage extends PageObject {
     return new SamplesPage(this.page);
   }
 
-  public async clickSampleCheckbox(sampleName: string) {
+  public async clickSampleCheckbox(sampleName: string, unselect = false) {
+    await this.waitForTableLoad();
     const matchingSamples = await this.page.locator(SAMPLE_CHECKBOX_BY_SAMPLE_NAME(sampleName)).all();
     expect(matchingSamples.length).toBeGreaterThan(0);
     for (const sampleLocator of matchingSamples) {
       const isChecked = await sampleLocator.locator("input").isChecked();
-      if (!isChecked) {
+      if (!isChecked || unselect) {
         await sampleLocator.click();
       }
     }

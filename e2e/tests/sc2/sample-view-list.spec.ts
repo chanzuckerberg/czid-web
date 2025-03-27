@@ -159,8 +159,9 @@ test.describe("SC2 Sample view list: Functional: P-0", () => {
     // #endregion Step 8 expected: (5) Selected
 
     // #region 9. Unselect SC2 samples - ""Ct20K"", ""Sample_1_Paired""
-    await projectPage.clickSampleCheckbox(CT20K);
-    await projectPage.clickSampleCheckbox(SAMPLE_1_PAIRED);
+    const unselect = true;
+    await projectPage.clickSampleCheckbox(CT20K, unselect);
+    await projectPage.clickSampleCheckbox(SAMPLE_1_PAIRED, unselect);
     // #endregion 9. Unselect SC2 samples - ""Ct20K"", ""Sample_1_Paired""
 
     // #region 10. Repeat steps 5-6
