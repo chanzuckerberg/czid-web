@@ -81,7 +81,8 @@ _get_latest_tag() {
     echo ""
     return 0
   fi
-  echo "$tags" | head -n 1
+  # Safely extract the first tag
+  echo "$tags" | { read -r line; echo "$line"; }
 }
 
 _bump_version_string() {
@@ -114,8 +115,9 @@ _assert_current_branch_is_not() {
 }
 
 _git_fetch_and_cleanup() {
-  # fetch from remote origin
-  git fetch origin
+  # Fetch all branches and tags from origin
+  _log "Fetching all branches and tags from origin..."
+  git fetch --all --tags --prune
 
   # remove any dangling version tags not present in remote origin
   # (this could happen if a previous run failed to push tags to remote)

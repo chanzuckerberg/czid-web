@@ -18,12 +18,18 @@ main() {
   # If no checklist exists, initialize variables for creating a new checklist
   if [ "$checklist_json" == "null" ]; then
     _log "No release checklist found. Preparing to create a new checklist."
-    checklist_body="### Release Checklist\n\nThis checklist is auto-generated.\n"
-  else
-    checklist_html_url=$(jq -er .html_url <<< "$checklist_json")
-    checklist_api_url=$(jq -er .url <<< "$checklist_json")
-    checklist_body=$(jq -er .body <<< "$checklist_json")
+    "$SCRIPT_DIR/make_release_checklist.sh"
+    checklist_json=$(_get_current_release_checklist_json)
+    if [ "$checklist_json" == "null" ]; then
+      _log "Failed to create a new release checklist."
+      exit 0
+    fi
   fi
+
+  checklist_html_url=$(jq -er .html_url <<< "$checklist_json")
+  checklist_api_url=$(jq -er .url <<< "$checklist_json")
+  checklist_body=$(jq -er .body <<< "$checklist_json")
+
 
   _log "Checking if updates are required in release checklist"
 

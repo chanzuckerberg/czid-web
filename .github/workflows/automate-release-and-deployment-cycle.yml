@@ -17,11 +17,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Ensure a full clone with all history and tags
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.4.1
         with:
           ssh-private-key: |
             ${{ secrets.GH_SSH_KEY }}
+      - name: Force prune and fetch tags
+        run: |
+          git tag -l | xargs -r git tag -d # Delete all local tags
+          git fetch --all --tags --prune
       - name: Update release fix checklist
         run:  ./bin/deploy_automation/update_release_checklist.sh
       - name: Automate release cycle

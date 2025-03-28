@@ -49,8 +49,18 @@ main() {
   declare staging_tag_version; staging_tag_version="$(_get_latest_version staging)"
   declare tag; tag="$(_format_version_tag "${staging_tag_version}" "${PROD_BRANCH}")"
   _log "Creating tag ${tag} to point ${PROD_BRANCH} to the head of ${STAGING_BRANCH} branch..."
-  git tag -a -m "Release $staging_tag_version" "${tag}" "origin/$STAGING_BRANCH"
-  sleep 5
+
+  # Check if the tag already exists
+  if git show-ref --tags "${tag}" > /dev/null 2>&1; then
+    _log "Tag ${tag} already exists. Skipping creation."
+  else
+    _log "Creating tag ${tag} to point ${PROD_BRANCH} to the head of ${STAGING_BRANCH} branch..."
+    git tag -a -m "Release $staging_tag_version" "${tag}" "origin/$STAGING_BRANCH" || {
+      _log "ERROR: Failed to create tag ${tag}. Exiting."
+      exit 1
+    }
+    sleep 5
+  fi
 
   # Validate the tag and commit hash
   declare sha; sha=$(_get_latest_commit "${tag}")
@@ -65,9 +75,13 @@ main() {
 
   # Ensure the prod branch exists locally before updating
   if ! git show-ref --quiet "refs/heads/${PROD_BRANCH}"; then
-    _log "ERROR: Local ${PROD_BRANCH} branch does not exist. Exiting to avoid branch issues."
-    exit 1
+    _log "Local ${PROD_BRANCH} branch does not exist. Creating it now and tracking origin/$PROD_BRANCH."
+    git branch --track "$PROD_BRANCH" "origin/$PROD_BRANCH" || {
+      _log "ERROR: Failed to create local ${PROD_BRANCH} branch. Exiting."
+      exit 1
+    }
   fi
+
 
   # Set HEAD of prod branch to this new tag
   _log "Pointing ${PROD_BRANCH} branch to tag ${tag} (${sha})."

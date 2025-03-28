@@ -27,6 +27,9 @@ main() {
   declare prod_tag_version; prod_tag_version="$(_get_latest_version "$PROD_BRANCH")"
 
   # Check if tag versions match for prod and staging
+  # Debug: Log the tag versions before comparison
+  _log "DEBUG: Staging tag version: $staging_tag_version"
+  _log "DEBUG: Prod tag version: $prod_tag_version"
   if [ "$staging_tag_version" != "$prod_tag_version" ]; then
     declare msg="ASSERTION ERROR - $STAGING_BRANCH and $PROD_BRANCH tag versions should match. "
     msg+="When the release cycle is closed, any fixes should have been applied to both enviroments (prod and staging), "
@@ -34,7 +37,13 @@ main() {
     _exit_with_err_msg "$msg"
   fi
 
-  # check if there is any commit in main
+  # Check if staging branch exists
+  if ! git show-ref --verify --quiet "refs/remotes/origin/$STAGING_BRANCH"; then
+    _log "No remote branch found for origin/$STAGING_BRANCH. Skipping release cycle."
+    exit 0
+  fi
+
+  # Check if there is any commit in main
   declare commit_count; commit_count=$(git rev-list "origin/$STAGING_BRANCH".."origin/$MAIN_BRANCH" | wc -l)
   if [ "$commit_count" -eq "0" ]; then
     _log "No new commits found from origin/${MAIN_BRANCH} to origin/${STAGING_BRANCH}. Skipping release cycle from main to staging."
