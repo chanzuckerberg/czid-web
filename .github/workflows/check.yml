@@ -114,18 +114,19 @@ jobs:
       #   offers literally no customization and we want to pin our
       #   rubocop version.
       run: bundle exec rubocop
-    - name: Brakeman
-      run: |
-        # No High Confidence warnings.
-        bundle exec brakeman --no-pager -w3
+    #  TODO: This should be re-enabled after ruby is upgraded to a more current version
+    # - name: Brakeman
+    #   run: |
+    #     # No High Confidence warnings.
+    #     bundle exec brakeman --no-pager -w3
 
-        # No new Medium Confidence warnings.
-        MAX_MEDIUM_WARNINGS=37
-        if [ $(bundle exec brakeman --no-pager -w2 -f json | jq '.scan_info.security_warnings') -gt $MAX_MEDIUM_WARNINGS ]
-        then
-          echo "No new Medium Confidence Brakeman warnings are allowed."
-          exit 1
-        fi
+    #     # No new Medium Confidence warnings.
+    #     MAX_MEDIUM_WARNINGS=37
+    #     if [ $(bundle exec brakeman --no-pager -w2 -f json | jq '.scan_info.security_warnings') -gt $MAX_MEDIUM_WARNINGS ]
+    #     then
+    #       echo "No new Medium Confidence Brakeman warnings are allowed."
+    #       exit 1
+    #     fi
 
   javascript:
     name: Javascript
