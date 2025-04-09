@@ -4,10 +4,10 @@
 
 class AddHostGenomeNeltumaPallidaKiawe < ActiveRecord::Migration[6.1]
   def up
-    return if HostGenome.find_by(name: "Neltuma pallida (kiawe)")
+    return if HostGenome.find_by(name: "Neltuma pallida - kiawe")
 
     hg = HostGenome.new
-    hg.name = "Neltuma pallida (kiawe)"
+    hg.name = "Neltuma pallida - kiawe"
     hg.s3_star_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/neltuma_pallida_kiawe/2025-03-31/host-genome-generation-1/neltuma_pallida_kiawe_STAR_genome.tar"
     hg.s3_bowtie2_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/neltuma_pallida_kiawe/2025-03-31/host-genome-generation-1/neltuma_pallida_kiawe.bowtie2.tar"
     hg.s3_minimap2_dna_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/neltuma_pallida_kiawe/2025-03-31/host-genome-generation-1/neltuma_pallida_kiawe_dna.mmi"
