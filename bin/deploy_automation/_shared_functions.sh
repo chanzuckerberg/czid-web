@@ -82,7 +82,8 @@ _get_latest_tag() {
     return 0
   fi
   # Safely extract the first tag
-  echo "$tags" | { read -r line; echo "$line"; }
+
+  echo "$tags" | head -n 1
 }
 
 _bump_version_string() {
