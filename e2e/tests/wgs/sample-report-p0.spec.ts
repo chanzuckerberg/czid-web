@@ -25,13 +25,18 @@ test.describe("Data Validation: P-0", () => {
     const project = await new ProjectPage(page).getOrCreateProject(
       "Test_SNo_29",
     );
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      project,
+      WORKFLOWS.WGS,
+      5,
+    );
     const samples = await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      { runPipeline: false, waitForPipeline: false },
+      { runPipeline: false, waitForPipeline: true },
     );
 
     // #region 1. Login to CZ ID staging

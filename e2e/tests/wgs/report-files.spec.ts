@@ -29,13 +29,18 @@ test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_30");
     // #region 1. Upload the same sample with/without Trim Primers file
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      project,
+      WORKFLOWS.WGS,
+      5,
+    );
     await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      { includeTrimPrimer: true },
+      { includeTrimPrimer: true, waitForPipeline: true },
     );
     await setupSamples(
       page,
@@ -43,7 +48,7 @@ test.describe("Viral CG (WGS) - Report files: Data Validation: P-0", () => {
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES_WITHOUT_TRIM_PRIMER,
       WORKFLOWS.WGS,
-      { includeTrimPrimer: false },
+      { includeTrimPrimer: false, waitForPipeline: true },
     );
     // #endregion 1. Upload the same sample with/without Trim Primers file
 
