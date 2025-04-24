@@ -51,13 +51,18 @@ test.describe("Data Validation: P-0", () => {
   test("SNo 28: Data report validation (Human) JAN", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_28");
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      project,
+      WORKFLOWS.WGS,
+      5,
+    );
     await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      { hostOrganism: "Human", taxon: "Unknown" },
+      { hostOrganism: "Human", taxon: "Unknown", waitForPipeline: true },
     );
 
     // #region 1. Login to CZ ID staging
@@ -154,13 +159,18 @@ test.describe("Data Validation: P-0", () => {
   }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_31");
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      project,
+      WORKFLOWS.WGS,
+      5,
+    );
     await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      { hostOrganism: "Human", taxon: "Unknown" },
+      { hostOrganism: "Human", taxon: "Unknown", waitForPipeline: true },
     );
 
     // #region 1. Login to CZ ID staging
@@ -246,13 +256,18 @@ test.describe("Data Validation: P-0", () => {
   test("SNo 34: Data report validation (ERCC Only) JAN", async ({ page }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_34");
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      project,
+      WORKFLOWS.WGS,
+      5,
+    );
     await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      { hostOrganism: "ERCC Only", taxon: "Unknown" },
+      { hostOrganism: "ERCC Only", taxon: "Unknown", waitForPipeline: true },
     );
 
     // #region 1. Login to CZ ID staging
@@ -349,13 +364,18 @@ test.describe("Data Validation: P-0", () => {
   }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_35");
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      project,
+      WORKFLOWS.WGS,
+      5,
+    );
     await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      { hostOrganism: "Human", taxon: CHIKUNGUNYA_VIRUS },
+      { hostOrganism: "Human", taxon: CHIKUNGUNYA_VIRUS, waitForPipeline: true },
     );
 
     // #region 1. Login to CZ ID staging
@@ -456,13 +476,18 @@ test.describe("Data Validation: P-0", () => {
   }) => {
     const projectPage = new ProjectPage(page);
     const project = await projectPage.getOrCreateProject("Test_SNo_36");
+    await projectPage.deleteSamplesOlderThanGivenMonths(
+      project,
+      WORKFLOWS.WGS,
+      5,
+    );
     await setupSamples(
       page,
       project,
       WGS_SAMPLE_FILES,
       WGS_SAMPLE_NAMES,
       WORKFLOWS.WGS,
-      { hostOrganism: "ERCC Only", taxon: CHIKUNGUNYA_VIRUS },
+      { hostOrganism: "ERCC Only", taxon: CHIKUNGUNYA_VIRUS, waitForPipeline: true },
     );
 
     // #region 1. Login to CZ ID staging
