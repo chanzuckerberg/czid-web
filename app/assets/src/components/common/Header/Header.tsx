@@ -79,18 +79,20 @@ const Header = ({
       />
 
       <AnnouncementBanner
-        id="low-support-2023"
+        id="czid-transfer"
         visible={announcementBannerEnabled}
         message={
           <>
-            <span className={cs.title}>Low-Support Mode:</span>
             {
-              " We will only be responding to highly urgent issues from 12/20/2024-1/6/2025. For now, check out our "
+              " UCSF’S INSTITUTE FOR GLOBAL HEALTH SCIENCES WILL MANAGE CZ ID TOWARD THE END OF 2025. CLICK "
             }
-            <ExternalLink className={cs.link} href="https://help.czid.org">
-              Help Center
+            <ExternalLink
+              className={cs.link}
+              href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/33940279703828-FAQs-CZ-ID-s-Transfer-to-the-University-of-California-San-Francisco"
+            >
+              HERE
             </ExternalLink>
-            . Happy Holidays!
+            {" FOR MORE INFORMATION. "}
           </>
         }
       />
