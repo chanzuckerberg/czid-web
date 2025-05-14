@@ -1,6 +1,7 @@
 import { isEmpty } from "lodash/fp";
 import React, { useState } from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import IconMobileNavClose from "~/components/ui/icons/IconMobileNavClose";
 import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./LandingHeader.scss";
@@ -12,6 +13,7 @@ interface LandingHeaderProps {
 }
 
 export const LandingHeader = ({
+  announcementBannerEnabled,
   emergencyBannerMessage,
   impactPage,
 }: LandingHeaderProps) => {
@@ -29,6 +31,25 @@ export const LandingHeader = ({
         id="emergency"
         visible={!isEmpty(emergencyBannerMessage)}
         message={emergencyBannerMessage}
+      />
+
+      <AnnouncementBanner
+        id="czid-transfer"
+        visible={announcementBannerEnabled}
+        message={
+          <>
+            {
+              " UCSF’S INSTITUTE FOR GLOBAL HEALTH SCIENCES WILL MANAGE CZ ID TOWARD THE END OF 2025. CLICK "
+            }
+            <ExternalLink
+              className={cs.link}
+              href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/33940279703828-FAQs-CZ-ID-s-Transfer-to-the-University-of-California-San-Francisco"
+            >
+              HERE
+            </ExternalLink>
+            {" FOR MORE INFORMATION. "}
+          </>
+        }
       />
 
       <div className={cs.header} data-testid="home-top-nav-bar">
