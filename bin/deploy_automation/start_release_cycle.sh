@@ -37,17 +37,18 @@ main() {
     _exit_with_err_msg "$msg"
   fi
 
-  # Check if staging branch exists
+  # Check if the remote staging branch exists.
   if ! git show-ref --verify --quiet "refs/remotes/origin/$STAGING_BRANCH"; then
-    _log "No remote branch found for origin/$STAGING_BRANCH. Skipping release cycle."
-    exit 0
-  fi
-
-  # Check if there is any commit in main
-  declare commit_count; commit_count=$(git rev-list "origin/$STAGING_BRANCH".."origin/$MAIN_BRANCH" | wc -l)
-  if [ "$commit_count" -eq "0" ]; then
-    _log "No new commits found from origin/${MAIN_BRANCH} to origin/${STAGING_BRANCH}. Skipping release cycle from main to staging."
-    exit 0 # Gracefully exit without error
+    _log "No remote branch found for origin/$STAGING_BRANCH. Creating it from origin/$MAIN_BRANCH."
+    # If staging does not exist, create it from the current main branch.
+    git branch "$STAGING_BRANCH" "origin/$MAIN_BRANCH"
+  else
+    # If staging exists, check if there are any new commits in main that are not in staging.
+    declare commit_count; commit_count=$(git rev-list "origin/$STAGING_BRANCH".."origin/$MAIN_BRANCH" | wc -l)
+    if [ "$commit_count" -eq "0" ]; then
+      _log "No new commits found from origin/${MAIN_BRANCH} to origin/${STAGING_BRANCH}. Staging branch will remain the same."
+      return 0
+    fi
   fi
 
   # Bump tag version
@@ -82,7 +83,7 @@ main() {
 
   # Push the changes to the remote
   _log "Pushing tag ${tag} and branch ${STAGING_BRANCH} to remote..."
-  git push --atomic -f origin "${tag}" "${STAGING_BRANCH}"
+  git push --atomic -f origin "${tag}" "${STAGING_BRANCH}:refs/heads/${STAGING_BRANCH}"
 
   if [ "$should_make_release_checklist" == true ]; then
     # make a new release checklist
