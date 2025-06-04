@@ -16,7 +16,7 @@ jobs:
     runs-on: [self-hosted, idseq-dev]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Ensure a full clone with all history and tags
       - name: Install SSH key
@@ -69,7 +69,7 @@ jobs:
     runs-on: [self-hosted, idseq-dev]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Number of commits to fetch. 0 indicates all history for all branches and tags.
           fetch-depth: '0'
