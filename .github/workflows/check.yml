@@ -45,7 +45,7 @@ jobs:
       run: |
         echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
     - name: Cache Ruby Dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: vendor/bundle
         # Include kernel version for under-the-hood gem changes:
@@ -58,7 +58,7 @@ jobs:
         bundle config path vendor/bundle
         bundle install --jobs 4 --retry 3
     - name: Cache Python Dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: /root/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -132,12 +132,12 @@ jobs:
     name: Javascript
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
         node-version: 16
     - name: Cache Node Dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -186,12 +186,12 @@ jobs:
     name: Python
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.8'
     - name: Cache Python Dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}

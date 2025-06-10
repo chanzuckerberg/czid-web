@@ -18,15 +18,15 @@ jobs:
         with:
           app_id: ${{ secrets.GH_ACTIONS_HELPER_APP_ID }}
           private_key: ${{ secrets.GH_ACTIONS_HELPER_PK }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ steps.generate_token.outputs.token }}
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
       - name: Cache Node Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
