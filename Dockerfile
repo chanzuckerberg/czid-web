@@ -1,4 +1,4 @@
-FROM ruby:3.1.3
+FROM ruby:3.1.6
 
 # Install apt based dependencies required to run Rails as
 # well as RubyGems. As the Ruby image itself is based on a
@@ -22,7 +22,7 @@ RUN apt-get install -y nodejs
 # Last version of NPM before legacy peer dependency issues
 RUN npm i -g npm@8.5.5
 
-# Install pip
+RUN pip3 config set global.break-system-packages true
 RUN pip3 install --upgrade pip
 
 # Install chamber, for pulling secrets into the container.
@@ -30,6 +30,8 @@ RUN curl -L https://github.com/segmentio/chamber/releases/download/v2.10.8/chamb
 RUN chmod +x /bin/chamber
 
 COPY requirements.txt ./
+RUN pip3 install "cython<3.0.0"
+RUN pip3 install "pyyaml==5.4.1" --no-build-isolation
 RUN pip3 install -r requirements.txt
 
 # Configure the main working directory. This is the base
