@@ -74,7 +74,7 @@ export const Hero = () => {
       <div className={cs.heroStatsContainer}>
         <div className={cs.heroStatsContainerItem}>
           <span>Countries</span>
-          <p>112+</p>
+          <p>156+</p>
         </div>
         <div className={cs.heroStatsContainerItem}>
           <span>Papers</span>
