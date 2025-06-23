@@ -20,7 +20,7 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install -y nodejs
 
 # Last version of NPM before legacy peer dependency issues
-RUN npm i -g npm@8.5.5
+RUN npm i -g npm@8.19.4
 
 # Install pip
 RUN pip3 install --upgrade pip
@@ -45,7 +45,7 @@ COPY package.json package-lock.json ./
 # Copy aws-sdk-js-v3 packages that are installed from file
 COPY vendor/aws-sdk-js-v3/* ./vendor/aws-sdk-js-v3/
 
-RUN npm ci --omit=optional
+RUN npm install --ci --legacy-peer-deps --omit=optional
 
 # This section is for the purpose of installing the non-MariaDB mysql-client /
 # mysqldump utility. The default-mysql-client package is actually
