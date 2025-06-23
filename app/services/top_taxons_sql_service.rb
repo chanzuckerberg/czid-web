@@ -254,7 +254,7 @@ class TopTaxonsSqlService
     "SELECT *
       FROM (
         SELECT
-          @rank := IF(@current_id = pipeline_run_id, @rank + 1, 1) AS rank,
+          @rank := IF(@current_id = pipeline_run_id, @rank + 1, 1) AS `rank`,
           @current_id := pipeline_run_id AS current_id,
           x.*
         FROM (
@@ -265,7 +265,7 @@ class TopTaxonsSqlService
           #{count_type_order_clause}
           #{sort_field} #{sort_direction == 'highest' ? 'DESC' : 'ASC'}
       ) y
-      WHERE rank <= #{num_results}
+      WHERE `rank` <= #{num_results}
     "
   end
 
