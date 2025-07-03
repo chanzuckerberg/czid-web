@@ -1433,6 +1433,7 @@ GEM
     babel-transpiler (0.7.0)
       babel-source (>= 4.0, < 6)
       execjs (~> 2.0)
+    base64 (0.2.0)
     bcrypt (3.1.18)
     bindex (0.8.1)
     brakeman (6.1.2)
@@ -1528,7 +1529,8 @@ GEM
     graphiql-rails (1.8.0)
       railties
       sprockets-rails
-    graphql (2.0.15)
+    graphql (2.0.32)
+      base64
     graphql-client (0.20.0)
       activesupport (>= 3.0)
       graphql (>= 1.13.0)
