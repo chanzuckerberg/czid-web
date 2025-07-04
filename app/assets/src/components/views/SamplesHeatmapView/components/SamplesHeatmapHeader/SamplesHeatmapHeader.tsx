@@ -8,16 +8,11 @@ import { ViewHeader } from "~/components/layout";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import {
-  SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
-  showAppcue,
-} from "~/components/utils/appcues";
-import {
   replaceSpecialCharacters,
   testForSpecialCharacters,
 } from "~/helpers/strings";
 import {
   DownloadButton,
-  HelpButton,
   PrimaryButton,
   SaveButton,
   ShareButton,
@@ -176,12 +171,6 @@ export const SamplesHeatmapHeader = ({
             className={cs.controlElement}
             onClick={onDownloadClick}
             disabled={loading}
-          />
-          <HelpButton
-            className={cs.controlElement}
-            onClick={showAppcue({
-              flowId: SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
-            })}
           />
         </ViewHeader.Controls>{" "}
       </ViewHeader>

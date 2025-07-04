@@ -19,11 +19,6 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import {
-  PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
-  PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR,
-  showAppcue,
-} from "~/components/utils/appcues";
-import {
   CONTACT_US_LINK,
   PHYLO_TREE_LINK,
 } from "~/components/utils/documentationLinks";
@@ -33,7 +28,7 @@ import {
   getURLParamString,
   parseUrlParams,
 } from "~/helpers/url";
-import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
+import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import Link from "~ui/controls/Link";
 import { IconAlert, IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
@@ -469,10 +464,6 @@ class PhyloTreeListViewCC extends React.Component<
   renderHeader = () => {
     const { currentTree, phyloTrees, selectedPhyloTreeNgId, treeContainer } =
       this.state;
-    const clustermapSvgUrl = currentTree
-      ? currentTree.clustermap_svg_url
-      : false;
-
     return (
       <NarrowContainer>
         <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
@@ -531,14 +522,6 @@ class PhyloTreeListViewCC extends React.Component<
                 treeContainer={treeContainer}
               />
             )}
-            <HelpButton
-              className={cs.controlElement}
-              onClick={showAppcue({
-                flowId: clustermapSvgUrl
-                  ? PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR
-                  : PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
-              })}
-            />
           </ViewHeader.Controls>
         </ViewHeader>
       </NarrowContainer>

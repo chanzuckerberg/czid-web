@@ -1,9 +1,5 @@
 import { useContext } from "react";
 import eventNames from "~/api/events";
-import {
-  trackAppcuesPageTransition,
-  trackEventForAppcues,
-} from "~/components/utils/appcues";
 import { GlobalContext } from "~/globalContext/reducer";
 
 type GlobalAnalyticsContextType = {
@@ -112,7 +108,6 @@ const withAnalytics = (
 
 export const trackPageTransition = () => {
   window.analytics && window.analytics.page();
-  trackAppcuesPageTransition();
 };
 
 const trackEvent = (
@@ -121,7 +116,6 @@ const trackEvent = (
   eventData: EventData = {},
 ) => {
   logAnalyticsEvent(globalAnalyticsContext, eventName, eventData);
-  trackEventForAppcues(eventName, eventData);
 };
 
 /* Hooks for getting helper functions that include globalContext */

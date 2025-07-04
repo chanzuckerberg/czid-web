@@ -98,7 +98,6 @@ test.describe("Heatmap top links", () => {
 
   test("SNo 5/6: Help button shows help center panel with links", async () => {
     // #region Click Help button and verify that help resources panel is visible
-    await heatmapPage.clickHelpButton();
     await heatmapPage.validateHelpResourcesPanelVisible();
     // #endregion Click Help button and verify that help resources panel is visible
 

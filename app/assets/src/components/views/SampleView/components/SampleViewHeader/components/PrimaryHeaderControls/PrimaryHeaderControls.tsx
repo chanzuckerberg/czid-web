@@ -5,7 +5,6 @@ import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
 import { SampleViewDownloadButton } from "./components/SampleViewDownloadButton";
-import { SampleViewHelpButton } from "./components/SampleViewHelpButton";
 import { SampleViewOverflowMenu } from "./components/SampleViewOverflowMenu";
 import { SampleViewSaveButton } from "./components/SampleViewSaveButton";
 import { ShareButtonPopUp } from "./components/ShareButtonPopUp";
@@ -58,11 +57,6 @@ export const PrimaryHeaderControls = ({
             reportMetadata={reportMetadata}
             sample={sample}
             view={view}
-            workflow={workflow}
-          />
-          <SampleViewHelpButton
-            className={cs.controlElement}
-            sample={sample}
             workflow={workflow}
           />
           <SampleViewOverflowMenu

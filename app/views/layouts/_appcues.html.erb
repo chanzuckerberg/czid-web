@@ -1,9 +1,0 @@
-<% if current_user %>
-  <!-- Install Appcues -->
-  <script src="//fast.appcues.com/74993.js"></script>
-
-  <%= javascript_tag do %>
-    window.USER_TRAITS_WITHOUT_PII = JSON.parse('<%=raw escape_json(current_user.traits_for_analytics(include_pii: false))%>')
-    Appcues.identify(<%=current_user.id%>, window.USER_TRAITS_WITHOUT_PII)
-  <% end %>
-<% end %>

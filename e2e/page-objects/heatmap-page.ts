@@ -26,7 +26,6 @@ const DOWNLOAD_MODAL_METRIC_OPTIONS =
 const DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT =
   "[role='alert'][class*='toast-body']";
 const CLOSE_MODAL_BUTTON = "[class*='modal'] [class*='closeIcon']";
-const HELP_RESOURCES_IFRAME = "appcues-container iframe";
 const HELP_RESOURCES_CONTENT = "cue";
 const HEADER_BUTTON_POPUP_CONTENT = "[class*='popup'] [class*='content']";
 const TINY_CONFIRMATION = "[class*='tiny basic']";
@@ -151,10 +150,6 @@ export class HeatmapPage extends PageObject {
 
   public async clickDownloadButton() {
     await this.page.locator(DOWNLOAD_BUTTON).click();
-  }
-
-  public async clickHelpButton() {
-    await this.page.locator(HELP_BUTTON).click();
   }
 
   public async clickDownloadMetric(option: string) {
@@ -425,11 +420,6 @@ export class HeatmapPage extends PageObject {
       .locator(DOWNLOAD_COMBINED_MICROBIOME_FILE_ALERT)
       .allTextContents();
   }
-
-  public async getHelpResourcesIframe() {
-    return this.page.frameLocator(HELP_RESOURCES_IFRAME);
-  }
-
   public async getTaxonInfo() {
     await this.pause(1);
     return (
