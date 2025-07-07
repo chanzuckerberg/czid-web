@@ -833,8 +833,9 @@ export class HeatmapPage extends PageObject {
   }
 
   public async validateHelpResourcesPanelVisible() {
+    const helpResourcesIframe = await this.getHelpResourcesIframe();
     await expect(
-      (await this.getHelpResourcesIframe()).locator(HELP_RESOURCES_CONTENT),
+      helpResourcesIframe.locator(HELP_RESOURCES_CONTENT),
     ).toBeVisible();
   }
   // #endregion Validation

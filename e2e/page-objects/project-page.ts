@@ -1280,6 +1280,7 @@ export class ProjectPage extends PageObject {
   }
 
   public async selectSamplesByName(sampleNames: Array<string>) {
+    await this.waitForTableLoad();
     for (const sampleName of sampleNames) {
       await this.clickSampleCheckbox(sampleName);
     }
