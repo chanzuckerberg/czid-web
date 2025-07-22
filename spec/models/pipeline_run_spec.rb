@@ -648,4 +648,130 @@ describe PipelineRun, type: :model do
       expect(JSON.parse(@pr.contigs[1].lineage_json)["NT"]).to be_nil
     end
   end
+
+  describe '#db_load_byteranges' do
+    let(:project) { create(:project) }
+    let(:sample) { create(:sample, project: project, name: "test_sample") }
+    let(:pipeline_run) { create(:pipeline_run, sample: sample) }
+    let(:fake_s3_path) { "s3://fake-bucket/fake-path/taxon_byteranges.json" }
+    let(:fake_local_json_path) { "/tmp/pipeline_run_#{pipeline_run.id}" }
+    let(:fake_downloaded_path) { "#{fake_local_json_path}/taxon_byteranges.json" }
+    let(:fake_json_data) do
+      [
+        { 'taxid' => 1234, 'hit_type' => 'NT', 'first_byte' => 0, 'last_byte' => 500 },
+        { 'taxid' => 5678, 'hit_type' => 'NR', 'first_byte' => 501, 'last_byte' => 1000 },
+        { 'taxid' => 9999, 'hit_type' => 'NT', 'first_byte' => 1001, 'last_byte' => 1500 },
+      ]
+    end
+
+    before do
+      # Stub S3 file path generation
+      allow(pipeline_run).to receive(:s3_file_for).with("taxon_byteranges").and_return(fake_s3_path)
+      # Stub local path generation
+      allow(pipeline_run).to receive(:local_json_path).and_return(fake_local_json_path)
+      # Stub file download
+      allow(PipelineRun).to receive(:download_file).with(fake_s3_path, fake_local_json_path).and_return(fake_downloaded_path)
+      # Stub JSON file reading
+      allow(File).to receive(:open).with(fake_downloaded_path).and_return(StringIO.new(fake_json_data.to_json))
+      # Stub file cleanup
+      allow(Syscall).to receive(:run).with("rm", "-f", fake_downloaded_path)
+    end
+
+    context "when successful" do
+      it "imports taxon byteranges correctly" do
+        expect { pipeline_run.db_load_byteranges }.to(change { TaxonByterange.count }.by(3))
+        # Verify the data was imported correctly
+        byterange1 = TaxonByterange.find_by(pipeline_run: pipeline_run, taxid: 1234, hit_type: "NT")
+        expect(byterange1.first_byte).to eq(0)
+        expect(byterange1.last_byte).to eq(500)
+        byterange2 = TaxonByterange.find_by(pipeline_run: pipeline_run, taxid: 5678, hit_type: "NR")
+        expect(byterange2.first_byte).to eq(501)
+        expect(byterange2.last_byte).to eq(1000)
+        byterange3 = TaxonByterange.find_by(pipeline_run: pipeline_run, taxid: 9999, hit_type: "NT")
+        expect(byterange3.first_byte).to eq(1001)
+        expect(byterange3.last_byte).to eq(1500)
+      end
+      it "sets correct timestamps automatically" do
+        pipeline_run.db_load_byteranges
+        byterange = TaxonByterange.find_by(pipeline_run: pipeline_run, taxid: 1234)
+        expect(byterange.created_at).to be_present
+        expect(byterange.updated_at).to be_present
+      end
+      it "logs successful import" do
+        expect(Rails.logger).to receive(:info).with("Successfully imported 3 taxon byteranges for pipeline run #{pipeline_run.id}")
+        pipeline_run.db_load_byteranges
+      end
+      it "cleans up temporary files" do
+        expect(Syscall).to receive(:run).with("rm", "-f", fake_downloaded_path)
+        pipeline_run.db_load_byteranges
+      end
+    end
+
+    context "when dealing with duplicates" do
+      it "updates existing records with on_duplicate_key_update" do
+        # Create existing record
+        existing = create(:taxon_byterange,
+                          pipeline_run: pipeline_run,
+                          taxid: 1234,
+                          hit_type: "NT",
+                          first_byte: 999,
+                          last_byte: 1999)
+        # Mock JSON to only return the duplicate record with new values
+        allow(File).to receive(:open).with(fake_downloaded_path).and_return(StringIO.new([{ 'taxid' => 1234, 'hit_type' => 'NT', 'first_byte' => 0, 'last_byte' => 500 }].to_json))
+        expect { pipeline_run.db_load_byteranges }.not_to(change { TaxonByterange.count })
+        # Verify the existing record was updated
+        existing.reload
+        expect(existing.first_byte).to eq(0)
+        expect(existing.last_byte).to eq(500)
+      end
+    end
+
+    context "when JSON parsing fails" do
+      before do
+        allow(File).to receive(:open).with(fake_downloaded_path).and_raise(StandardError.new("JSON parsing failed"))
+      end
+      it "logs error and handles exception" do
+        expect(LogUtil).to receive(:log_error).with(
+          "PipelineRun #{pipeline_run.id} failed db_load_byteranges import: JSON parsing failed",
+          pipeline_run_id: pipeline_run.id,
+          exception: instance_of(StandardError)
+        )
+        expect { pipeline_run.db_load_byteranges }.not_to raise_error
+      end
+      it "still cleans up files in ensure block" do
+        expect(Syscall).to receive(:run).with("rm", "-f", fake_downloaded_path)
+        pipeline_run.db_load_byteranges
+      end
+    end
+
+    context "when activerecord-import fails" do
+      before do
+        # Mock a failed import result
+        failed_result = double("import_result", failed_instances: [double("failed_instance")])
+        allow(TaxonByterange).to receive(:import).and_return(failed_result)
+      end
+      it "logs error when some records fail to import" do
+        expect(LogUtil).to receive(:log_error).with(
+          "PipelineRun #{pipeline_run.id} failed db_load_byteranges import: 1 failures",
+          pipeline_run_id: pipeline_run.id
+        )
+        pipeline_run.db_load_byteranges
+      end
+    end
+
+    context "when file download fails" do
+      before do
+        allow(PipelineRun).to receive(:download_file).and_raise(StandardError.new("S3 download failed"))
+      end
+      it "logs error and handles exception" do
+        expect(LogUtil).to receive(:log_error).with(
+          "PipelineRun #{pipeline_run.id} failed db_load_byteranges import: S3 download failed",
+          pipeline_run_id: pipeline_run.id,
+          exception: instance_of(StandardError)
+        )
+
+        expect { pipeline_run.db_load_byteranges }.not_to raise_error
+      end
+    end
+  end
 end

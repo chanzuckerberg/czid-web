@@ -906,14 +906,48 @@ class PipelineRun < ApplicationRecord
 
   def db_load_byteranges
     byteranges_json_s3_path = s3_file_for("taxon_byteranges")
-    downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
-    taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
-    hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
+    downloaded_byteranges_path = nil
 
-    Syscall.run_in_dir(local_json_path, "sed", "-e", "s/$/,#{id}/", "-i", "taxon_byteranges")
-    success = Syscall.run_in_dir(local_json_path, "mysqlimport --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --fields-terminated-by=',' --replace --local --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id idseq_#{Rails.env} taxon_byteranges")
-    LogUtil.log_error("PipelineRun #{id} failed db_load_byteranges import", pipeline_run_id: id) unless success
-    Syscall.run("rm", "-f", downloaded_byteranges_path)
+    # Use Rails bulk insert instead of mysqlimport for MySQL 8.0 compatibility
+    begin
+      downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
+
+      # Parse JSON directly and build import data in one step
+      # Use hash arrays instead of ActiveRecord objects for better memory efficiency
+      import_data = []
+      JSON.parse(File.open(downloaded_byteranges_path).read).each do |hash|
+        import_data << {
+          taxid: hash['taxid']&.to_i,
+          hit_type: hash['hit_type'],
+          first_byte: hash['first_byte']&.to_i,
+          last_byte: hash['last_byte']&.to_i,
+          pipeline_run_id: id,
+        }
+      end
+
+      # Use activerecord-import with on_duplicate_key_update to replicate --replace behavior
+      # This will update existing records with the same unique key (pipeline_run_id, taxid, hit_type)
+      result = TaxonByterange.import(
+        import_data,
+        on_duplicate_key_update: [:first_byte, :last_byte, :updated_at],
+        validate: false, # Skip validations for performance, data is already validated from pipeline
+        batch_size: 1000 # Let activerecord-import handle internal batching for large datasets
+      )
+
+      success = result.failed_instances.empty?
+      if success
+        Rails.logger.info("Successfully imported #{import_data.size} taxon byteranges for pipeline run #{id}")
+      else
+        LogUtil.log_error("PipelineRun #{id} failed db_load_byteranges import: #{result.failed_instances.size} failures", pipeline_run_id: id)
+      end
+    rescue StandardError => e
+      LogUtil.log_error("PipelineRun #{id} failed db_load_byteranges import: #{e.message}", pipeline_run_id: id, exception: e)
+      success = false
+    ensure
+      Syscall.run("rm", "-f", downloaded_byteranges_path) if downloaded_byteranges_path
+    end
+
+    success
   end
 
   def sfn_error
