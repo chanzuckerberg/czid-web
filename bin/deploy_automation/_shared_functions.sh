@@ -81,9 +81,9 @@ _get_latest_tag() {
     echo ""
     return 0
   fi
-  # Safely extract the first tag
-
-  echo "$tags" | head -n 1
+  # Safely extract the first tag using array to avoid pipe race condition
+  tags_array=($(echo "$tags"))
+  echo "${tags_array[0]}"
 }
 
 _bump_version_string() {
