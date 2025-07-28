@@ -96,7 +96,8 @@ test.describe("Heatmap top links", () => {
     // #endregion Validate threshold filters are propagated in saved heatmap
   });
 
-  test("SNo 5/6: Help button shows help center panel with links", async () => {
+  // The heatmap help center has been removed.
+  test.skip("SNo 5/6: Help button shows help center panel with links", async () => {
     // #region Click Help button and verify that help resources panel is visible
     await heatmapPage.validateHelpResourcesPanelVisible();
     // #endregion Click Help button and verify that help resources panel is visible

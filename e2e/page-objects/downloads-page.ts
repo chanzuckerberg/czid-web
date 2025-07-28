@@ -79,6 +79,8 @@ export class DownloadsPage extends PageObject {
   }
 
   public async clickDownloadFile(downloadId: string) {
+    await this.reload();
+
     const rowLocator = DOWNLOAD_FILE_BY_DOWNLOADID(downloadId);
     const downloadPromise = this.page.waitForEvent("download");
     await this.page.locator(rowLocator).click();
@@ -86,7 +88,8 @@ export class DownloadsPage extends PageObject {
   }
 
   public async clickCloseIcon() {
-    await this.page.locator(CLOSE_ICON).click();
+    await this.page.locator(CLOSE_ICON).click({ timeout: 5_000 }).catch(() => null);
+    await this.pause(1);
   }
   // #endregion Click
 

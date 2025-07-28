@@ -660,6 +660,7 @@ test.describe("Functional: P-0: Taxon heatmap", () => {
       project.name,
       counts,
       2,
+      "mWGS_RNA_human"
     );
     const sampleNames = samples.map(s => s.name);
 

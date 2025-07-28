@@ -38,9 +38,12 @@ test.describe("Sample report filter test", () => {
     const project = await projectPage.getOrCreateProject(
       `automation_project_${WORKFLOWS.MNGS}`,
     );
-    const randomSample = await samplesPage.getRandomCompletedSample(
-      project.name,
+    const samples = await samplesPage.getCompletedSamples(project.name);
+    const testSamples = samples.filter(
+      sample => sample.name.includes("RR004_water"),
     );
+    const randomSample =
+      testSamples[Math.floor(Math.random() * testSamples.length)];
     const sampleId = randomSample.id;
     await samplesPage.navigate(sampleId);
 

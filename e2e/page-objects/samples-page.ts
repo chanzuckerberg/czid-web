@@ -470,11 +470,18 @@ export class SamplesPage extends PageObject {
     projectName: string,
     counts: any,
     matchingSamples: number,
+    sampleNameContains: string = null,
   ) {
     const allSamples = await this.getSamples(projectName, null);
+    const filteredSamples = allSamples.filter(sample => {
+      if (sampleNameContains) {
+        return sample.name.includes(sampleNameContains);
+      }
+      return true;
+    });
     const samples = [];
     const allCounts = Object.keys(counts).length;
-    for (const sample of allSamples) {
+    for (const sample of filteredSamples) {
       if (matchingSamples === samples.length) {
         break;
       }

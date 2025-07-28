@@ -53,17 +53,17 @@ test.describe("Functional: P-1: short mNGS - Coverage Visualization", () => {
     await projectPage.navigateToSamples(project.id, WORKFLOWS.MNGS);
 
     const samplesTable = await projectPage.getSamplesTable();
-    const samleRow = samplesTable.filter(
+    const sampleRow = samplesTable.filter(
       sampleRow =>
         sampleRow.Sample[0].includes(NO_HOST) &&
         sampleRow.Sample[1] === "COMPLETE",
     )[0];
     test.skip(
-      !samleRow,
+      !sampleRow,
       "No completed short mNGS CG samples (waitForPipeline)",
     );
-    const samleName = samleRow.Sample[0];
-    const samplesPage = await projectPage.clickSample(samleName);
+    const sampleName = sampleRow.Sample[0];
+    const samplesPage = await projectPage.clickSample(sampleName);
 
     const ncbiIndexDate = await samplesPage.getNCBIIndexDate();
     test.skip(
@@ -76,7 +76,7 @@ test.describe("Functional: P-1: short mNGS - Coverage Visualization", () => {
     await samplesPage.clickExpandAll();
 
     const reportTable = await samplesPage.getReportFilterTable();
-    const sample = (await samplesPage.getSamples(project.name, [samleName]))[0];
+    const sample = (await samplesPage.getSamples(project.name, [sampleName]))[0];
     const taxons = await samplesPage.getTaxonsFromReport(
       await samplesPage.getReportV2(sample.id),
     );
@@ -148,7 +148,7 @@ test.describe("Functional: P-1: short mNGS - Coverage Visualization", () => {
 
     // Contigs and Reads (.fasta) files downloaded from row action
     expect(contigFastaDownload.suggestedFilename()).toEqual(
-      `${samleName}_tax_${taxon.id}_contigs.fasta`,
+      `${sampleName}_tax_${taxon.id}_contigs.fasta`,
     );
     // #endregion 14. Verify downloads of Contigs (.fasta) and Reads (.fasta) files
   });
@@ -191,17 +191,20 @@ test.describe("Functional: P-1: short mNGS - Coverage Visualization", () => {
     await projectPage.navigateToSamples(project.id, WORKFLOWS.MNGS);
 
     const samplesTable = await projectPage.getSamplesTable();
-    const samleRow = samplesTable.filter(
+    const sampleRow = samplesTable.filter(
       sampleRow =>
         sampleRow.Sample[0].includes(NO_HOST) &&
         sampleRow.Sample[1] === "COMPLETE",
     )[0];
     test.skip(
-      !samleRow,
+      !sampleRow,
       "No completed short mNGS CG samples (waitForPipeline)",
     );
-    const samleName = samleRow.Sample[0];
-    const samplesPage = await projectPage.clickSample(samleName);
+    const sampleName = sampleRow.Sample[0];
+    const samplesPage = await projectPage.clickSample(sampleName);
+
+    const sample = (await samplesPage.getSamples(project.name, [sampleName]))[0];
+    await samplesPage.navigate(sample.id);
 
     const ncbiIndexDate = await samplesPage.getNCBIIndexDate();
     const NotOldIndex = ncbiIndexDate !== "2021-01-22";
@@ -212,7 +215,6 @@ test.describe("Functional: P-1: short mNGS - Coverage Visualization", () => {
     await samplesPage.clickExpandAll();
 
     const reportTable = await samplesPage.getReportFilterTable();
-    const sample = (await samplesPage.getSamples(project.name, [samleName]))[0];
     const taxons = await samplesPage.getTaxonsFromReport(
       await samplesPage.getReportV2(sample.id),
     );
@@ -284,7 +286,7 @@ test.describe("Functional: P-1: short mNGS - Coverage Visualization", () => {
 
     // Contigs and Reads (.fasta) files downloaded from row action
     expect(contigFastaDownload.suggestedFilename()).toEqual(
-      `${samleName}_tax_${taxon.id}_contigs.fasta`,
+      `${sampleName}_tax_${taxon.id}_contigs.fasta`,
     );
     // #endregion 14. Verify downloads of Contigs (.fasta) and Reads (.fasta) files
   });

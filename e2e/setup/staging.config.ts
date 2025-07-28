@@ -512,9 +512,9 @@ const config: PlaywrightTestConfig = {
     trace: "on",
     viewport: { width: 1600, height: 900 },
     permissions: ["clipboard-read"],
-    headless: false,
+    headless: true,
   },
-  workers: 5,
+  workers: "100%",
 };
 
 export default config;
