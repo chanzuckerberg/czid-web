@@ -19,3 +19,9 @@ Check out our repositories:
 - [czid-bench](https://github.com/chanzuckerberg/czid-bench) - Pipeline benchmarking tools
 
 Check out our [wiki](https://github.com/chanzuckerberg/czid-web/wiki) for getting started with development in this repository and in CZ ID in general.
+
+## Code of Conduct
+
+This project adheres to the Contributor Covenant [code of conduct](https://github.com/chanzuckerberg/.github/blob/master/CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold this code. 
+Please report unacceptable behavior to [opensource@chanzuckerberg.com](mailto:opensource@chanzuckerberg.com).
