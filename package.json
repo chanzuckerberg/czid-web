@@ -30,7 +30,7 @@
     ]
   },
   "engines": {
-    "npm": "8.5.5"
+    "npm": "8.19.4"
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",
