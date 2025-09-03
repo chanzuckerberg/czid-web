@@ -145,7 +145,7 @@
     "mini-css-extract-plugin": "^0.4.1",
     "ml-matrix": "^6.8.0",
     "moment": "^2.29.4",
-    "nanoid": "^3.1.31",
+    "nanoid": "^3.3.11",
     "number-abbreviate": "^2.0.0",
     "papaparse": "^5.3.1",
     "query-string": "^6.14.1",
