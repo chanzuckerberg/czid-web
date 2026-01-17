@@ -34,7 +34,7 @@
     "playwright-chromium": "^1.49.0",
     "playwright-json-summary-reporter": "^1.0.0",
     "prettier": "^2.8.2",
-    "tar": "^6.2.0",
+    "tar": "^7.5.3",
     "ts-node": "^10.9.2",
     "yargs": "^17.7.2"
   },
