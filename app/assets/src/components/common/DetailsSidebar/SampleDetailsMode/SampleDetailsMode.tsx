@@ -1,5 +1,5 @@
 import { find, set, size } from "lodash/fp";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   graphql,
   useLazyLoadQuery,
@@ -14,7 +14,7 @@ import {
   generateUrlToSampleView,
   TempSelectedOptionsShape,
 } from "~/components/utils/urls";
-import { WorkflowType, WORKFLOW_TABS } from "~/components/utils/workflows";
+import { WORKFLOW_TABS, WorkflowType } from "~/components/utils/workflows";
 import { ConsensusGenomeDropdown } from "~/components/views/SampleView/components/ConsensusGenomeView/components/ConsensusGenomeHeader/components/ConsensusGenomeDropdown";
 import { usePrevious } from "~/helpers/customHooks/usePrevious";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -29,6 +29,11 @@ import {
   SnapshotShareId,
 } from "~/interface/shared";
 import { formatSendValue, processMetadataTypes } from "~utils/metadata";
+import { SampleDetailsModeSampleMetadataFieldsQuery } from "./__generated__/SampleDetailsModeSampleMetadataFieldsQuery.graphql";
+import { SampleDetailsModeSampleMetadataQuery } from "./__generated__/SampleDetailsModeSampleMetadataQuery.graphql";
+import { SampleDetailsModeUpdateMetadataMutation } from "./__generated__/SampleDetailsModeUpdateMetadataMutation.graphql";
+import { SampleDetailsModeUpdateSampleNameMutation } from "./__generated__/SampleDetailsModeUpdateSampleNameMutation.graphql";
+import { SampleDetailsModeUpdateSampleNotesMutation } from "./__generated__/SampleDetailsModeUpdateSampleNotesMutation.graphql";
 import { MetadataTab } from "./components/MetadataTab";
 import { NotesTab } from "./components/NotesTab";
 import { PipelineTab } from "./components/PipelineTab";
@@ -36,11 +41,6 @@ import { SIDEBAR_TABS } from "./constants";
 import cs from "./sample_details_mode.scss";
 import { AdditionalInfo, SidebarTabName } from "./types";
 import { processAdditionalInfo } from "./utils";
-import { SampleDetailsModeSampleMetadataFieldsQuery } from "./__generated__/SampleDetailsModeSampleMetadataFieldsQuery.graphql";
-import { SampleDetailsModeSampleMetadataQuery } from "./__generated__/SampleDetailsModeSampleMetadataQuery.graphql";
-import { SampleDetailsModeUpdateMetadataMutation } from "./__generated__/SampleDetailsModeUpdateMetadataMutation.graphql";
-import { SampleDetailsModeUpdateSampleNameMutation } from "./__generated__/SampleDetailsModeUpdateSampleNameMutation.graphql";
-import { SampleDetailsModeUpdateSampleNotesMutation } from "./__generated__/SampleDetailsModeUpdateSampleNotesMutation.graphql";
 
 export interface SampleDetailsModeProps {
   currentRun?: WorkflowRun | PipelineRun;
@@ -282,12 +282,10 @@ export const SampleDetailsMode = ({
     }
 
     const onMetadataSaveCompleted = data => {
-      if (data.UpdateMetadata?.status === "failed") {
-        _metadataErrors = set(
-          key,
-          data.UpdateMetadata.message,
-          _metadataErrors,
-        );
+      const mutationResult =
+        data.UpdateMetadata || data.UpdateSampleName || data.UpdateSampleNotes;
+      if (mutationResult?.status === "failed") {
+        _metadataErrors = set(key, mutationResult.message, _metadataErrors);
         setMetadataErrors(_metadataErrors);
       } else {
         loadMetadataQuery(

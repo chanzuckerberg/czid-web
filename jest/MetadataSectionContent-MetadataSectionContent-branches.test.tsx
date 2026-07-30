@@ -331,6 +331,15 @@ describe("MetadataSectionContent branch coverage", () => {
       expect(screen.getByText("Invalid sample type")).toBeTruthy();
     });
 
+    it("shows the error for sample name when it is present in metadataErrors", () => {
+      renderContent({
+        sectionEditing: { "Sample Info": true },
+        metadataErrors: { name: "Invalid sample name" },
+      });
+
+      expect(screen.getByText("Invalid sample name")).toBeTruthy();
+    });
+
     it("renders no error for a field whose error entry is null", () => {
       renderContent({
         sectionEditing: { "Sample Info": true },

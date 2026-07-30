@@ -390,6 +390,26 @@ describe("SampleDetailsMode", () => {
     await waitFor(() => expect(mockGetAllSampleTypes).toHaveBeenCalled());
   });
 
+  it("surfaces the server message when a sample-name save fails", async () => {
+    renderSidebar();
+    fireEvent.click(screen.getByTestId("change-name"));
+    fireEvent.click(screen.getByTestId("save-name"));
+
+    const { onCompleted } = mockCommitUpdateSampleName.mock.calls[0][0];
+    act(() =>
+      onCompleted({
+        UpdateSampleName: { status: "failed", message: "Invalid name" },
+      }),
+    );
+
+    expect(screen.getByTestId("metadata-errors").textContent).toBe(
+      JSON.stringify({ name: "Invalid name" }),
+    );
+    // A failed save must not trigger a refetch.
+    expect(mockLoadMetadataQuery).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockGetAllSampleTypes).toHaveBeenCalled());
+  });
+
   it("surfaces network errors from a save", async () => {
     renderSidebar();
     fireEvent.click(screen.getByTestId("change-sample-type"));

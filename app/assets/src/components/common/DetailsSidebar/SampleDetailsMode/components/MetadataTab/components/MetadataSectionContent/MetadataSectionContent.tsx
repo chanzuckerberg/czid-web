@@ -8,7 +8,7 @@ import { AdditionalInfo } from "~/components/common/DetailsSidebar/SampleDetails
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
 import { processMetadata } from "~/components/utils/metadata";
-import { WorkflowLabelType, WORKFLOW_TABS } from "~/components/utils/workflows";
+import { WORKFLOW_TABS, WorkflowLabelType } from "~/components/utils/workflows";
 import { usePrevious } from "~/helpers/customHooks/usePrevious";
 import {
   CreateMutable,
@@ -86,7 +86,7 @@ export const MetadataSectionContent = ({
     MetadataSectionContentFragment,
     metadataTabFragmentKey,
   );
-  const metadata: Metadata | null = processMetadata({
+  const metadata: Metadata = processMetadata({
     metadata: data?.metadata as unknown as RawMetadata[] | null,
     flatten: true,
   });
@@ -177,13 +177,18 @@ export const MetadataSectionContent = ({
     metadataFields.push({
       label: "Sample Name",
       value: (
-        <Input
-          onChange={val => onMetadataChangeWrapper("name", val)}
-          onBlur={() => onMetadataSave("name", { name: nameLocal })}
-          value={nameLocal}
-          type="text"
-          className={cs.sampleNameInput}
-        />
+        <div className={cs.inputWrapper}>
+          <Input
+            onChange={val => onMetadataChangeWrapper("name", val)}
+            onBlur={() => onMetadataSave("name", { name: nameLocal })}
+            value={nameLocal}
+            type="text"
+            className={cs.sampleNameInput}
+          />
+          {metadataErrors && metadataErrors["name"] && (
+            <div className={cs.error}>{metadataErrors["name"]}</div>
+          )}
+        </div>
       ),
     });
   }
