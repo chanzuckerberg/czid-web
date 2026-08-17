@@ -1229,11 +1229,19 @@ describe("DiscoveryView branch coverage", () => {
       instance.handleMapLevelChange("country");
       await waitFor(() => expect(instance.state.mapLevel).toBe("country"));
 
-      const clustered = instance.state.mapLocationData;
+      const clustered = Object.values(instance.state.mapLocationData);
       // The city is below the map level, so it is not given its own bubble...
-      expect(clustered[20]).toBeUndefined();
+      expect(clustered.length).toEqual(1);
+      expect(clustered.find(entry => entry.id === 20)).toBeUndefined();
       // ...its samples roll up into the country bubble instead.
-      expect(clustered[10].sample_ids).toEqual([1, 2]);
+      expect(clustered[0]).toMatchObject({
+        id: 10,
+        name: "Kenya",
+        geo_level: "country",
+        country_id: null,
+        state_id: null,
+        sample_ids: [1, 2],
+      });
     });
 
     it("drops ancestor bubbles that have no samples of their own", async () => {
@@ -1256,7 +1264,7 @@ describe("DiscoveryView branch coverage", () => {
       await waitFor(() => expect(instance.state.mapLevel).toBe("city"));
       // Country sits above the city map level and has no projects of its own,
       // so its now-empty bubble is removed.
-      expect(instance.state.mapLocationData[30]).toBeUndefined();
+      expect(Object.values(instance.state.mapLocationData).length).toEqual(0);
     });
   });
 
